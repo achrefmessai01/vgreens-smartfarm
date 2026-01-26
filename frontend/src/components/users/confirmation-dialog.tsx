@@ -1,0 +1,87 @@
+'use client'
+
+import * as React from 'react'
+import {
+  Dialog,
+  DialogTitle,
+  DialogHeader,
+  DialogFooter,
+  DialogContent,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+
+export interface ConfirmationDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title: string
+  description: string
+  confirmLabel?: string
+  cancelLabel?: string
+  variant?: 'default' | 'destructive'
+  onConfirm: () => void
+  onCancel?: () => void
+  isLoading?: boolean
+  children?: React.ReactNode
+}
+
+export function ConfirmationDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
+  variant = 'default',
+  onConfirm,
+  onCancel,
+  isLoading = false,
+  children,
+}: ConfirmationDialogProps) {
+  const handleCancel = () => {
+    onCancel?.()
+    onOpenChange(false)
+  }
+
+  const handleConfirm = () => {
+    onConfirm()
+    // Note: The parent component should handle closing the dialog
+    // after the confirmation action is complete
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent showCloseButton={false} className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-left dark:text-card-foreground">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-left dark:text-muted-foreground/90">
+            {description}
+          </DialogDescription>
+        </DialogHeader>
+
+        {children && <div className="py-4">{children}</div>}
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isLoading}
+            className="sm:flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
+          >
+            {cancelLabel}
+          </Button>
+          <Button
+            variant={variant === 'destructive' ? 'destructive' : 'default'}
+            onClick={handleConfirm}
+            disabled={isLoading}
+            className="sm:flex-1"
+          >
+            {isLoading ? '...' : confirmLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}

@@ -1,0 +1,63 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Build output
+.next
+out
+build
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker
+docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Documentation
+README.md
+*.md
+ARCHITECTURE.md
+BACKEND_SETUP.md
+MIRO_BOARD_GUIDE.md
+PROJECT_TIMELINE.md
+
+# Test files
+test
+*.spec.ts
+*.test.ts
+coverage
+
+# Logs
+*.log
+logs
+
+# Vercel
+.vercel
+
+# Netlify
+.netlify
+
+# Generated files
+generated
