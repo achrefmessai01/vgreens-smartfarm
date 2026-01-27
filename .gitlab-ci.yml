@@ -13,7 +13,17 @@ deploy_to_hetzner:
   before_script:
     - apk add --no-cache openssh git
     - mkdir -p ~/.ssh
-    - cp "$DEPLOY_SSH_KEY" ~/.ssh/id_ed25519
+    - |
+      if [ -z "$DEPLOY_SSH_KEY" ]; then
+        echo "DEPLOY_SSH_KEY is not set"; exit 1;
+      fi
+      if [ -f "$DEPLOY_SSH_KEY" ]; then
+        # GitLab File variable: value is a path to the temp file
+        cp "$DEPLOY_SSH_KEY" ~/.ssh/id_ed25519
+      else
+        # Normal variable: value is the key itself
+        printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+      fi
     - chmod 600 ~/.ssh/id_ed25519
     - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
   script:
