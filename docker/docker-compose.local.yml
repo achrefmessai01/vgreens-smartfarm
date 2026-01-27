@@ -1,0 +1,65 @@
+# vGreens Smart Farm - Local Development Setup
+services:
+  # Backend Service (NestJS)
+  backend:
+    build:
+      context: ../backend
+      dockerfile: docker/Dockerfile
+    container_name: vgreens-backend-local
+    restart: unless-stopped
+    ports:
+      - '3001:3001' # Expose directly for local access
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    env_file:
+      - ../backend/.env
+    networks:
+      - vgreens-network
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - ./logs/backend:/app/logs
+
+  # Frontend Service (Next.js)
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: docker/Dockerfile
+    container_name: vgreens-frontend-local
+    restart: unless-stopped
+    ports:
+      - '3000:3000' # Expose directly for local access
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    env_file:
+      - ../frontend/.env
+    networks:
+      - vgreens-network
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  vgreens-network:
+    driver: bridge
