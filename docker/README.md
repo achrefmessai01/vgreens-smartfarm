@@ -1,196 +1,142 @@
-# vGreens Smart Farm - Docker Setup
+# Server Setup Guide - Hetzner
 
-Unified Docker setup for frontend and backend with nginx reverse proxy.
+Complete guide to set up and run the vGreens Smart Farm project on your Hetzner server.
 
-## Architecture
+## Prerequisites
 
-```
-Internet → Nginx (80/443) → Frontend (3000) + Backend (3001)
-```
+1. **SSH access to your Hetzner server**
+2. **Project cloned** to the server
+3. **Root or sudo access**
 
-## Access URLs
-
-**Current Setup (IP-Based):**
-- Frontend: `http://46.225.15.85/`
-- Backend GraphQL: `http://46.225.15.85/graphql`
-- Backend Health: `http://46.225.15.85/health`
-- Backend API: `http://46.225.15.85/api/*`
-
-## Quick Start
-
-### 1. Setup Environment Files
-
-Create separate `.env` files for each service:
+## Step 1: Navigate to Project Directory
 
 ```bash
-# Backend
-cd ../backend
-cp .env.example .env
-# Edit backend/.env with your values
+# Navigate to project root
+cd /path/to/vgreens-smartfarm
 
-# Frontend
-cd ../frontend
-cp .env.example .env
-# Edit frontend/.env with your values
-```
-
-**Important:** Update `frontend/.env` with:
-```env
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://46.225.15.85/graphql
-NEXT_PUBLIC_API_URL=http://46.225.15.85
-```
-
-### 2. Create Directories
-
-```bash
+# Go to docker directory
 cd docker
+```
+
+## Step 2: Create Required Directories
+
+```bash
 mkdir -p ssl logs/backend logs/nginx
 ```
 
-### 3. Start Services
+## Step 3: Setup Environment Files
+
+### Backend Environment
 
 ```bash
-docker-compose up -d --build
+# Navigate to backend
+cd ../backend
+
+# Create .env file
+nano .env
 ```
 
-### 4. View Logs
+Add the following (update with your actual values):
+
+```env
+NODE_ENV=production
+PORT=3001
+
+# Database (Supabase)
+DATABASE_HOST=your-supabase-host.supabase.co
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=your-database-password
+DATABASE_NAME=postgres
+DATABASE_SSL=true
+
+# Clerk Authentication
+CLERK_SECRET_KEY=your_clerk_secret_key
+
+# InfluxDB
+INFLUXDB_URL=https://your-influxdb-url
+INFLUXDB_TOKEN=your-influxdb-token
+INFLUXDB_ORG=your-influxdb-org
+INFLUXDB_BUCKET=your-influxdb-bucket
+```
+
+### Frontend Environment
 
 ```bash
-# All services
-docker-compose logs -f
+# Navigate to frontend
+cd ../frontend
 
-# Specific service
-docker-compose logs -f backend
-docker-compose logs -f frontend
-docker-compose logs -f nginx
+# Create .env file
+nano .env
+```
+
+Add the following (update with your actual values):
+
+```env
+# GraphQL Endpoint (use your server IP)
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://46.225.15.85/graphql
+NEXT_PUBLIC_API_URL=http://46.225.15.85
+
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+```
+
+## Step 4: Build and Start Services
+
+```bash
+# Navigate back to docker directory
+cd /path/to/vgreens-smartfarm/docker
+
+# Build and start all services
+docker compose up -d --build
+
+# View logs
+docker compose logs -f
 ```
 
 ## Common Commands
 
 ```bash
-# Start services
-docker-compose up -d
+# View logs
+docker compose logs -f
+
+# View specific service logs
+docker compose logs -f backend
+docker compose logs -f frontend
+docker compose logs -f nginx
 
 # Stop services
-docker-compose down
+docker compose down
 
 # Restart services
-docker-compose restart
+docker compose restart
 
-# Rebuild and start
-docker-compose up -d --build
+# Rebuild and restart
+docker compose up -d --build
 
 # Check status
-docker-compose ps
-
-# Test nginx config
-docker-compose exec nginx nginx -t
-
-# Reload nginx
-docker-compose exec nginx nginx -s reload
+docker compose ps
 ```
 
-## Testing
+### Test nginx configuration
 
 ```bash
-# Frontend
-curl http://46.225.15.85/
-
-# Backend health
-curl http://46.225.15.85/health
-
-# GraphQL
-curl -X POST http://46.225.15.85/graphql \
-  -H "Content-Type: application/json" \
-  -d '{"query":"{ __typename }"}'
+docker compose exec nginx nginx -t
 ```
 
-## Troubleshooting
-
-### Check Logs
-```bash
-docker-compose logs backend
-docker-compose logs frontend
-docker-compose logs nginx
-```
-
-### Check Status
-```bash
-docker-compose ps
-```
-
-### Test Nginx Config
-```bash
-docker-compose exec nginx nginx -t
-```
-
-### View Nginx Logs
-```bash
-tail -f logs/nginx/access.log
-tail -f logs/nginx/error.log
-```
-
-### Rebuild Specific Service
-```bash
-docker-compose build backend
-docker-compose up -d --no-deps backend
-```
-
-## Directory Structure
-
-```
-docker/
-├── docker-compose.yml  # Main compose file
-├── nginx.conf          # Nginx configuration
-├── Makefile           # Optional convenience commands
-├── README.md          # This file
-├── ssl/               # SSL certificates (create this)
-└── logs/              # Application logs (auto-created)
-    ├── backend/
-    └── nginx/
-```
-
-## Environment Variables
-
-### Frontend (`frontend/.env`)
-```env
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://46.225.15.85/graphql
-NEXT_PUBLIC_API_URL=http://46.225.15.85
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_key
-CLERK_SECRET_KEY=your_secret
-```
-
-### Backend (`backend/.env`)
-```env
-NODE_ENV=production
-PORT=3001
-DATABASE_HOST=your-supabase-host.supabase.co
-DATABASE_PORT=5432
-DATABASE_USER=postgres
-DATABASE_PASSWORD=your_password
-DATABASE_NAME=postgres
-DATABASE_SSL=true
-CLERK_SECRET_KEY=your_secret
-INFLUXDB_URL=https://your-influxdb-url
-INFLUXDB_TOKEN=your_token
-INFLUXDB_ORG=your_org
-INFLUXDB_BUCKET=your_bucket
-```
-
-## Firewall Setup
+### Restart a specific service
 
 ```bash
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw allow 22/tcp
-sudo ufw enable
+docker compose restart backend
+docker compose restart frontend
+docker compose restart nginx
 ```
 
-## Production Checklist
+## Access URLs
 
-- [ ] Create and configure `.env` files
-- [ ] Update frontend GraphQL endpoint
-- [ ] Configure firewall
-- [ ] Test all endpoints
-- [ ] Setup SSL certificates (when using domains)
-- [ ] Configure monitoring (optional)
+Once running, access:
+
+- **Frontend**: `http://46.225.15.85/`
+- **Backend GraphQL**: `http://46.225.15.85/graphql`
+- **Backend Health**: `http://46.225.15.85/health`
