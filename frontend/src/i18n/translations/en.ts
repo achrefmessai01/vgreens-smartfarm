@@ -154,6 +154,8 @@ export const en = {
       lastIrrigation: 'Last Irrigation',
       tunnel: 'Tunnel',
       greenhouses: 'Greenhouses',
+      greenHouse1: 'Green House 1',
+      greenHouse2: 'Green House 2',
       status: 'Status',
       normal: 'Normal',
       warning: 'Warning',
@@ -162,6 +164,7 @@ export const en = {
       hoursAgo: 'hours ago',
       daysAgo: 'days ago',
       noData: 'No data',
+      noSensor: 'No sensor',
     },
     history: {
       title: 'History',

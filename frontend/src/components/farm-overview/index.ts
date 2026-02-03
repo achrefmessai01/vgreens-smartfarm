@@ -1,6 +1,12 @@
 export { BatchList } from './batch-list'
 export { ParameterSelector } from './parameter-selector'
 export { Farm3DView } from './farm-3d-view'
+export {
+  GreenhouseSensorView,
+  useMockGreenhouseSensors,
+  type SensorBlock,
+} from './greenhouse-sensor-view'
+export { SingleBayView } from './single-bay-view'
 export { HistoryDrawer } from './history-drawer'
 export { PlantSlot } from './plant-slot'
 export { FarmOverview } from './farm-overview'

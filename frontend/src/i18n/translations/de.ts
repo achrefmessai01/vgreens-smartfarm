@@ -155,6 +155,8 @@ export const de = {
       lastIrrigation: 'Letzte Bewässerung',
       tunnel: 'Tunnel',
       greenhouses: 'Gewächshäuser',
+      greenHouse1: 'Gewächshaus 1',
+      greenHouse2: 'Gewächshaus 2',
       status: 'Status',
       normal: 'Normal',
       warning: 'Warnung',
@@ -163,6 +165,7 @@ export const de = {
       hoursAgo: 'Stunden vor',
       daysAgo: 'Tage vor',
       noData: 'Keine Daten',
+      noSensor: 'Kein Sensor',
     },
     history: {
       title: 'Verlauf',
