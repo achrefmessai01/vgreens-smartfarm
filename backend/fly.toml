@@ -1,0 +1,62 @@
+# Fly.io configuration for vGreens Smart Farm Backend (NestJS)
+# App name must be globally unique on Fly.io
+app = "vgreens-backend"
+primary_region = "fra" # Frankfurt - change to your preferred region
+
+# Build configuration
+[build]
+  dockerfile = "docker/Dockerfile"
+
+# HTTP service
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  # Health checks
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "60s"
+    method = "GET"
+    path = "/health"
+    
+  # Auto-scaling configuration
+  [[services.tcp_checks]]
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "60s"
+
+# VM resources
+[vm]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+# Environment variables (non-sensitive)
+[env]
+  PORT = "8080"
+  NODE_ENV = "production"
+
+# Secrets to set via `flyctl secrets set`:
+# - DATABASE_HOST
+# - DATABASE_PORT
+# - DATABASE_NAME
+# - DATABASE_USER
+# - DATABASE_PASSWORD
+# - CLERK_SECRET_KEY
+# - CLERK_WEBHOOK_SECRET
+# - INFLUXDB_URL
+# - INFLUXDB_TOKEN
+# - INFLUXDB_ORG
+# - INFLUXDB_BUCKET
+# - FRONTEND_APP_URL
+# - FRONTEND_PROD_APP_URL

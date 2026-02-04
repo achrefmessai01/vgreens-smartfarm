@@ -8,15 +8,9 @@ import type {
   ParameterValue,
 } from './farm-types'
 
-// Generate random parameter values
+// Generate random parameter values (fallback when no live data) - empty; real data comes from bucket
 function generateParameterValue(): ParameterValue {
-  return {
-    fruitLoad: 11 + Math.random() * 2, // 11 to 13 (marginal difference)
-    canopyCover: 700 + Math.random() * 250, // 700 to 950 sq cm (bottom high top low)
-    energyBalance: (Math.random() - 0.5) * 200, // -100 to 100
-    temperature: 19 + Math.random() * 3, // 19-22°C
-    humidity: 60 + Math.random() * 10, // 60 to 70% (high to low)
-  }
+  return {}
 }
 
 // Generate a plant slot
@@ -145,9 +139,48 @@ export function generateFarm(): Farm {
   }
 }
 
-// Get parameter value for a plant slot
+// Get parameter value for a plant slot (parameter = _field name from bucket)
 export function getParameterValue(slot: PlantSlot, parameter: string): number {
-  return slot.values[parameter as keyof ParameterValue] || 0
+  return slot.values[parameter] ?? 0
+}
+
+// Get color for a parameter value (0–1 normalized for gradient)
+function valueToGradient(
+  value: number,
+  min: number,
+  max: number,
+  slotId?: string
+): string {
+  const n = Math.max(0, Math.min(1, (value - min) / (max - min || 1)))
+  const hue = (1 - n) * 240 // blue (low) to red (high)
+  const c = 1
+  const x = c * (1 - Math.abs(((hue / 60) % 2) - 1))
+  const m = 1 - c
+  let r = 0,
+    g = 0,
+    b = 0
+  if (hue >= 0 && hue < 60) {
+    r = c
+    g = x
+    b = 0
+  } else if (hue >= 60 && hue < 120) {
+    r = x
+    g = c
+    b = 0
+  } else if (hue >= 120 && hue < 180) {
+    r = 0
+    g = c
+    b = x
+  } else {
+    r = 0
+    g = x
+    b = c
+  }
+  const noise = slotId ? ((slotId.charCodeAt(0) % 10) - 5) * 2 : 0
+  r = Math.round((r + m) * 255) + noise
+  g = Math.round((g + m) * 255) + noise
+  b = Math.round((b + m) * 255) + noise
+  return `rgb(${Math.max(0, Math.min(255, r))}, ${Math.max(0, Math.min(255, g))}, ${Math.max(0, Math.min(255, b))})`
 }
 
 // Get color for a parameter value
@@ -155,104 +188,9 @@ export function getParameterColor(
   value: number,
   parameter: string,
   slotId?: string,
-  verticalPosition?: number // 0 (top) to 1 (bottom) for temperature gradient
+  verticalPosition?: number
 ): string {
   switch (parameter) {
-    case 'fruitLoad':
-      // Marginal difference: 11-13 range (green scale)
-      // Bottom high (13) = darker green, Top low (11) = lighter green
-      const normalizedFruit =
-        verticalPosition !== undefined
-          ? verticalPosition // bottom (1) = darker, top (0) = lighter
-          : Math.max(0, Math.min(1, (value - 11) / 2)) // Fallback to value-based
-      const green = Math.round(100 + normalizedFruit * 155)
-      // Add tiny bit of noise for texture
-      const fruitNoise = slotId
-        ? ((slotId.charCodeAt(0) % 10) - 5) * 2
-        : (((value * 100) % 10) - 5) * 2
-      const finalGreen = Math.max(100, Math.min(255, green + fruitNoise))
-      return `rgb(0, ${finalGreen}, 0)`
-    case 'canopyCover':
-      // Bottom high top low: 700-950 sq cm range (blue scale)
-      // Bottom (high, 950) = darker blue, Top (low, 700) = lighter blue
-      const normalizedCanopy =
-        verticalPosition !== undefined
-          ? verticalPosition // bottom (1) = darker, top (0) = lighter
-          : Math.max(0, Math.min(1, (value - 700) / 250)) // Fallback to value-based
-      // For vertical position: bottom (1) = darker, top (0) = lighter
-      // For value-based: higher values should be darker, so invert
-      const invertedCanopy =
-        verticalPosition !== undefined
-          ? normalizedCanopy // Already correct: 1 = dark, 0 = light
-          : 1 - normalizedCanopy // Invert for value-based
-      const canopyBlue = Math.round(100 + invertedCanopy * 155)
-      // Add tiny bit of noise for texture
-      const canopyNoise = slotId
-        ? ((slotId.charCodeAt(0) % 10) - 5) * 2
-        : (((value * 100) % 10) - 5) * 2
-      const finalBlue = Math.max(100, Math.min(255, canopyBlue + canopyNoise))
-      return `rgb(0, 0, ${finalBlue})`
-    case 'energyBalance': {
-      // 80% blue (bottom), 20% green (top)
-      // Use verticalPosition (0=top, 1=bottom) instead of energy balance value
-      const energyPositionNormalized =
-        verticalPosition !== undefined
-          ? verticalPosition // bottom (1) = blue, top (0) = green
-          : Math.max(0, Math.min(1, (value + 100) / 200)) // Fallback to value-based
-
-      let r_energy, g_energy, b_energy
-
-      // Smooth gradient: Green at top (0-0.2) transitioning to Blue at bottom (0.2-1.0)
-      // At position 0.0: Pure Green (0, 200, 0)
-      // At position 0.2: Transition point (mix of green and blue)
-      // At position 1.0: Pure Blue (0, 0, 200)
-
-      if (energyPositionNormalized <= 0.2) {
-        // Top 20%: Green transitioning to green-blue mix
-        // Position 0.0 = 100% green, Position 0.2 = 50% green, 50% blue
-        const greenRatio = 1 - (energyPositionNormalized / 0.2) * 0.5 // 1.0 to 0.5
-        const blueRatio = (energyPositionNormalized / 0.2) * 0.5 // 0.0 to 0.5
-        g_energy = Math.round(200 * greenRatio)
-        b_energy = Math.round(200 * blueRatio)
-        r_energy = 0
-      } else {
-        // Bottom 80%: Green-blue mix transitioning to pure blue
-        // Position 0.2 = 50% green, 50% blue
-        // Position 1.0 = 100% blue
-        const transitionProgress = (energyPositionNormalized - 0.2) / 0.8 // 0.0 to 1.0
-        const greenRatio = 0.5 * (1 - transitionProgress) // 0.5 to 0.0
-        const blueRatio = 0.5 + 0.5 * transitionProgress // 0.5 to 1.0
-        g_energy = Math.round(200 * greenRatio)
-        b_energy = Math.round(200 * blueRatio)
-        r_energy = 0
-      }
-
-      // Add tiny bit of deterministic noise for subtle texture
-      let energyNoise = 0
-      if (slotId) {
-        let hash = 0
-        for (let i = 0; i < slotId.length; i++) {
-          hash = (hash << 5) - hash + slotId.charCodeAt(i)
-          hash = hash | 0
-        }
-        const valueHash = (value * 100) % 100
-        energyNoise =
-          (Math.sin(hash * 0.01) +
-            Math.cos(hash * 0.007) +
-            Math.sin(valueHash)) *
-          3
-      } else {
-        const hash = (value * 1000) % 1000
-        energyNoise = (Math.sin(hash * 0.1) + Math.cos(hash * 0.07)) * 3
-      }
-
-      g_energy = Math.max(0, Math.min(255, g_energy + energyNoise))
-      b_energy = Math.max(0, Math.min(255, b_energy + energyNoise))
-
-      return `rgb(${Math.round(r_energy)}, ${Math.round(
-        g_energy
-      )}, ${Math.round(b_energy)})`
-    }
     case 'temperature':
       // Gradient from bottom (blue) to top (red) based on vertical position
       // Bottom = Blue (19°C), Top = Red (22°C), with green in between
@@ -349,28 +287,101 @@ export function getParameterColor(
         : (((value * 100) % 10) - 5) * 2
       const finalCyan = Math.max(100, Math.min(255, cyan + humidityNoise))
       return `rgb(0, ${finalCyan}, ${finalCyan})`
+    case 'co2':
+      return valueToGradient(value, 400, 1200, slotId)
+    case 'vpd':
+      return valueToGradient(value, 0, 2, slotId)
+    case 'par':
+      return valueToGradient(value, 0, 1000, slotId)
+    case 'soilMoisture':
+      return valueToGradient(value, 0, 100, slotId)
+    case 'soilEC':
+    case 'soil_conductivity':
+      return valueToGradient(value, 0, 3, slotId)
+    case 'par_estimated':
+      return valueToGradient(value, 0, 1000, slotId)
+    case 'soil_temp':
+      return valueToGradient(value, 15, 30, slotId)
+    case 'soil_moisture':
+      return valueToGradient(value, 0, 100, slotId)
+    case 'battery_v':
+    case 'voltage_v':
+      return valueToGradient(value, 0, 5, slotId)
+    case 'current_ma':
+      return valueToGradient(value, 0, 500, slotId)
+    case 'lux':
+      return valueToGradient(value, 0, 10000, slotId)
+    case 'pressure_mpa':
+      return valueToGradient(value, 0, 0.5, slotId)
+    case 'rssi':
+    case 'snr':
+      return valueToGradient(value, -120, 0, slotId)
     default:
-      return '#cccccc'
+      // Generic gradient for any other _field from bucket
+      return valueToGradient(value, 0, 100, slotId)
   }
 }
 
-// Normalize parameter value to 0-100 range for color mapping
+// Normalize parameter value to 0-100 range for color mapping (supports dynamic _field names)
 export function normalizeParameterValue(
   value: number,
   parameter: string
 ): number {
   switch (parameter) {
-    case 'energyBalance':
-      return (value + 100) / 2 // -100 to 100 -> 0 to 100
     case 'temperature':
-      return ((value - 19) / 3) * 100 // 19-22°C -> 0-100
+    case 'soil_temp':
+      return ((value - 15) / 15) * 100
     case 'humidity':
-      return value // Already 0-100
-    case 'fruitLoad':
-      return (value / 13) * 100 // 0-13 -> 0-100
-    case 'canopyCover':
-      return (value / 1000) * 100 // 0-1000 -> 0-100
+    case 'soil_moisture':
+      return Math.max(0, Math.min(100, value))
+    case 'co2':
+      return (value / 1200) * 100
+    case 'vpd':
+      return (value / 2) * 100
+    case 'par':
+    case 'par_estimated':
+      return (value / 1000) * 100
+    case 'soil_conductivity':
+    case 'soilEC':
+      return (value / 3) * 100
+    case 'battery_v':
+    case 'voltage_v':
+      return (value / 5) * 100
+    case 'lux':
+      return (value / 10000) * 100
+    case 'rssi':
+    case 'snr':
+      return ((value + 120) / 120) * 100
     default:
-      return value
+      return Math.max(0, Math.min(100, value))
   }
+}
+
+/** Format Influx _field name to display label (e.g. soil_conductivity -> Soil conductivity) */
+export function formatFieldToLabel(field: string): string {
+  const known: Record<string, string> = {
+    battery_v: 'Battery (V)',
+    co2: 'CO₂',
+    current_ma: 'Current (mA)',
+    exti_pin: 'EXTI pin',
+    exti_status: 'EXTI status',
+    humidity: 'Humidity',
+    in1_pin: 'In 1 pin',
+    in2_pin: 'In 2 pin',
+    lux: 'Lux',
+    par_estimated: 'PAR (estimated)',
+    pressure_mpa: 'Pressure (MPa)',
+    probe_type: 'Probe type',
+    soil_conductivity: 'Soil EC',
+    soil_moisture: 'Soil moisture',
+    soil_temp: 'Soil temp',
+    temperature: 'Temperature',
+    voltage_v: 'Voltage (V)',
+    rssi: 'RSSI',
+    snr: 'SNR',
+  }
+  if (known[field]) return known[field]
+  return field
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
 }

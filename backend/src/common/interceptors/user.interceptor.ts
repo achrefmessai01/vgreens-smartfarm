@@ -26,7 +26,7 @@ export class UserInterceptor implements NestInterceptor {
         const usersService = this.moduleRef.get(UsersService, {
           strict: false,
         });
-        let user = await usersService.findByClerkUserId(request.clerkUserId);
+        const user = await usersService.findByClerkUserId(request.clerkUserId);
 
         if (!user) {
           console.warn(

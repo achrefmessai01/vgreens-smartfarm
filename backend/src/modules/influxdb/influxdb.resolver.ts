@@ -1,10 +1,9 @@
-import { Resolver, Mutation, Query, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { ClerkAuthGuard, RolesGuard } from '@common/guards';
-import { CurrentUser, Public } from '@common/decorators';
-import { User } from '@modules/users/entities/user.entity';
+import { Public } from '@common/decorators';
+import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { InfluxDBService } from './influxdb.service';
-import { WriteDataInput, QueryDataInput, InfluxDBData } from './dto';
+import { ClerkAuthGuard, RolesGuard } from '@common/guards';
+import { InfluxDBData } from './dto/influxdb-data.object';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @Resolver()
@@ -21,26 +20,50 @@ export class InfluxDBResolver {
       : `Connection failed: ${result.message}`;
   }
 
-  @Mutation(() => Boolean, { name: 'writeInfluxDBData' })
+  @Query(() => [String])
   @Public()
-  //   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
-  async writeData(
-    @Args('input') input: WriteDataInput,
-    @CurrentUser() currentUser: User,
-  ): Promise<boolean> {
-    const tenantId = input.tenantId || currentUser.tenantId || '';
-    return this.influxDBService.writeData(input, tenantId);
+  async getBuckets(): Promise<string[]> {
+    return this.influxDBService.getBuckets();
   }
 
-  @Query(() => [InfluxDBData], { name: 'queryInfluxDBData' })
+  /**
+   * Query data from an InfluxDB bucket by name (e.g. tenant's influxBucketName).
+   * For testing in GraphQL playground.
+   */
+  @Query(() => [InfluxDBData], { name: 'getBucketData' })
   @Public()
-  //   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
-  async queryData(
-    @Args('input') input: QueryDataInput,
-    @CurrentUser() currentUser: User,
+  async getBucketData(
+    @Args('bucketName', { type: () => String }) bucketName: string,
+    @Args('start', { type: () => String, nullable: true })
+    start?: string,
+    @Args('stop', { type: () => String, nullable: true })
+    stop?: string,
+    @Args('limit', { type: () => Int, nullable: true })
+    limit?: number,
   ): Promise<InfluxDBData[]> {
-    const tenantId = input.tenantId || currentUser.tenantId || '';
-    const results = await this.influxDBService.queryData(input, tenantId);
-    return results.map((row) => ({ data: row }));
+    const rows = await this.influxDBService.getBucketData(bucketName, {
+      start: start ?? '-1h',
+      stop,
+      limit: limit ?? 100,
+    });
+    return rows.map((data) => ({ data }));
+  }
+
+  /**
+   * Returns all unique _field values from a bucket (e.g. "humidity", "co2", "temperature").
+   */
+  @Query(() => [String], { name: 'getBucketFields' })
+  @Public()
+  async getBucketFields(
+    @Args('bucketName', { type: () => String }) bucketName: string,
+    @Args('start', { type: () => String, nullable: true })
+    start?: string,
+    @Args('stop', { type: () => String, nullable: true })
+    stop?: string,
+  ): Promise<string[]> {
+    return this.influxDBService.getBucketFields(bucketName, {
+      start: start ?? '-1h',
+      stop,
+    });
   }
 }

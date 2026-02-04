@@ -1,0 +1,43 @@
+# Fly.io ignore file - speeds up deployment by excluding unnecessary files
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Development
+*.log
+.env
+.env.*
+!.env.example
+
+# Tests
+test
+coverage
+*.spec.ts
+*.test.ts
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Documentation
+README.md
+docs
+
+# Git
+.git
+.gitignore
+.gitlab-ci.yml
+
+# Build artifacts (will be created during Docker build)
+dist
+
+# Docker
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+docker
