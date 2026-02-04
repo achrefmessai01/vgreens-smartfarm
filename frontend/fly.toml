@@ -1,0 +1,60 @@
+# Fly.io configuration for vGreens Smart Farm Frontend (Next.js)
+# App name must be globally unique on Fly.io
+app = "vgreens-frontend"
+primary_region = "fra" # Frankfurt - change to your preferred region
+
+# Build configuration
+[build]
+  dockerfile = "docker/Dockerfile"
+
+# HTTP service
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  # Health checks
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "60s"
+    method = "GET"
+    path = "/"
+    
+  # Auto-scaling configuration
+  [[services.tcp_checks]]
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "60s"
+
+# VM resources
+[vm]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+# Environment variables (non-sensitive)
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+  NEXT_TELEMETRY_DISABLED = "1"
+  HOSTNAME = "0.0.0.0"
+
+# Build arguments
+[build.args]
+  NEXT_PUBLIC_GRAPHQL_ENDPOINT = "https://vgreens-backend.fly.dev/graphql"
+  NEXT_PUBLIC_API_URL = "https://vgreens-backend.fly.dev"
+
+# Secrets to set via `flyctl secrets set`:
+# - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+# - CLERK_SECRET_KEY
+# Note: Update NEXT_PUBLIC_GRAPHQL_ENDPOINT and NEXT_PUBLIC_API_URL above
+# with your actual backend Fly.io URL

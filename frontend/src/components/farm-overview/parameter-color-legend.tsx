@@ -3,167 +3,70 @@
 import * as React from 'react'
 import type { ParameterType } from '@/lib/farm-types'
 
+const gradientStyle = {
+  background:
+    'linear-gradient(to right, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))',
+}
+
 interface ParameterColorLegendProps {
   parameter: ParameterType
 }
 
+function GradientLegend({
+  lowLabel,
+  highLabel,
+}: {
+  lowLabel: string
+  highLabel: string
+}) {
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <span className="text-muted-foreground whitespace-nowrap">{lowLabel}</span>
+      <div className="flex items-center gap-1">
+        <div
+          className="w-4 h-4 rounded-full border border-gray-300 shrink-0"
+          style={{ backgroundColor: 'rgb(0, 0, 255)' }}
+        />
+        <div className="w-20 h-3 rounded-sm shrink-0" style={gradientStyle} />
+        <div
+          className="w-4 h-4 rounded-full border border-gray-300 shrink-0"
+          style={{ backgroundColor: 'rgb(255, 0, 0)' }}
+        />
+      </div>
+      <span className="text-muted-foreground whitespace-nowrap">{highLabel}</span>
+    </div>
+  )
+}
+
+const LEGEND_RANGES: Record<string, { low: string; high: string }> = {
+  temperature: { low: '15°C', high: '30°C' },
+  soil_temp: { low: '15°C', high: '30°C' },
+  humidity: { low: '0%', high: '100%' },
+  soil_moisture: { low: '0%', high: '100%' },
+  co2: { low: '400 ppm', high: '1200 ppm' },
+  vpd: { low: '0 kPa', high: '2 kPa' },
+  par: { low: '0', high: '1000 µmol/m²/s' },
+  par_estimated: { low: '0', high: '1000 µmol/m²/s' },
+  soil_conductivity: { low: '0 mS/cm', high: '3 mS/cm' },
+  soilEC: { low: '0 mS/cm', high: '3 mS/cm' },
+  battery_v: { low: '0 V', high: '5 V' },
+  voltage_v: { low: '0 V', high: '5 V' },
+  current_ma: { low: '0 mA', high: '500 mA' },
+  lux: { low: '0', high: '10000 lux' },
+  pressure_mpa: { low: '0 MPa', high: '0.5 MPa' },
+  rssi: { low: '-120 dBm', high: '0 dBm' },
+  snr: { low: '-120 dB', high: '0 dB' },
+}
+
 export function ParameterColorLegend({ parameter }: ParameterColorLegendProps) {
-  const renderLegend = () => {
-    switch (parameter) {
-      case 'temperature':
-        return (
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-muted-foreground">19°C</span>
-            <div className="flex items-center gap-1">
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(0, 0, 255)' }}
-                title="19°C = Blue"
-              />
-              <div
-                className="w-20 h-3 rounded-sm"
-                style={{
-                  background:
-                    'linear-gradient(to right, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))',
-                }}
-              />
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(255, 0, 0)' }}
-                title="22°C = Red"
-              />
-            </div>
-            <span className="text-muted-foreground">22°C</span>
-          </div>
-        )
-
-      case 'energyBalance':
-        return (
-          <div className="flex items-center gap-3 text-xs">
-            <div className="flex items-center gap-1.5">
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(0, 0, 200)' }}
-                title="Source limited (high) = Blue"
-              />
-              <span className="text-muted-foreground whitespace-nowrap">
-                Source limited
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(0, 200, 0)' }}
-                title="Balanced = Green"
-              />
-              <span className="text-muted-foreground whitespace-nowrap">
-                Balanced
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(200, 0, 0)' }}
-                title="Sink-limited (low) = Red"
-              />
-              <span className="text-muted-foreground whitespace-nowrap">
-                Sink-limited
-              </span>
-            </div>
-          </div>
-        )
-
-      case 'canopyCover':
-        return (
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-muted-foreground whitespace-nowrap">
-              0 sq cm
-            </span>
-            <div className="flex items-center gap-1">
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(0, 0, 100)' }}
-                title="0 sq cm = Light Blue"
-              />
-              <div
-                className="w-12 h-2 rounded-sm"
-                style={{
-                  background:
-                    'linear-gradient(to right, rgb(0, 0, 100), rgb(0, 0, 255))',
-                }}
-              />
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(0, 0, 255)' }}
-                title="1000 sq cm = Dark Blue"
-              />
-            </div>
-            <span className="text-muted-foreground whitespace-nowrap">
-              1000 sq cm
-            </span>
-          </div>
-        )
-
-      case 'fruitLoad':
-        return (
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-muted-foreground">0</span>
-            <div className="flex items-center gap-1">
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(0, 100, 0)' }}
-                title="0 = Light Green"
-              />
-              <div
-                className="w-12 h-2 rounded-sm"
-                style={{
-                  background:
-                    'linear-gradient(to right, rgb(0, 100, 0), rgb(0, 255, 0))',
-                }}
-              />
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(0, 255, 0)' }}
-                title="13 = Dark Green"
-              />
-            </div>
-            <span className="text-muted-foreground">13</span>
-          </div>
-        )
-
-      case 'humidity':
-        return (
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-muted-foreground">0%</span>
-            <div className="flex items-center gap-1">
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(0, 100, 100)' }}
-                title="0% = Light Cyan"
-              />
-              <div
-                className="w-12 h-2 rounded-sm"
-                style={{
-                  background:
-                    'linear-gradient(to right, rgb(0, 100, 100), rgb(0, 255, 255))',
-                }}
-              />
-              <div
-                className="w-4 h-4 rounded-full border border-gray-300"
-                style={{ backgroundColor: 'rgb(0, 255, 255)' }}
-                title="100% = Dark Cyan"
-              />
-            </div>
-            <span className="text-muted-foreground">100%</span>
-          </div>
-        )
-
-      default:
-        return null
-    }
-  }
+  const range = LEGEND_RANGES[parameter]
+  const legend = range ? (
+    <GradientLegend lowLabel={range.low} highLabel={range.high} />
+  ) : parameter ? (
+    <GradientLegend lowLabel="Low" highLabel="High" />
+  ) : null
 
   return (
-    <div className="flex items-center flex-wrap gap-2">{renderLegend()}</div>
+    <div className="flex items-center flex-wrap gap-2">{legend}</div>
   )
 }

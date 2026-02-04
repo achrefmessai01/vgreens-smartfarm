@@ -5,33 +5,58 @@ stages:
 
 variables:
   GIT_STRATEGY: fetch
+  # Fly.io CLI version
+  FLY_VERSION: '0.3.55'
 
-deploy_to_hetzner:
+.install_flyctl: &install_flyctl
+  - apk add --no-cache curl
+  - curl -L https://fly.io/install.sh | sh
+  - export FLYCTL_INSTALL="/root/.fly"
+  - export PATH="$FLYCTL_INSTALL/bin:$PATH"
+
+# Deploy Backend to Fly.io
+deploy_backend:
   stage: deploy
   only:
     - master
   before_script:
-    - apk add --no-cache openssh git
-    - mkdir -p ~/.ssh
-    - |
-      if [ -z "$DEPLOY_SSH_KEY" ]; then
-        echo "DEPLOY_SSH_KEY is not set"; exit 1;
-      fi
-      if [ -f "$DEPLOY_SSH_KEY" ]; then
-        # GitLab File variable: value is a path to the temp file
-        cp "$DEPLOY_SSH_KEY" ~/.ssh/id_ed25519
-      else
-        # Normal variable: value is the key itself
-        printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
-      fi
-    - chmod 600 ~/.ssh/id_ed25519
-    - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+    - *install_flyctl
   script:
-    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "
-      set -e &&
-      cd \"$DEPLOY_PATH\" &&
-      git fetch origin &&
-      git reset --hard origin/master &&
-      cd docker &&
-      docker compose up -d --build
-      "
+    - cd backend
+    - flyctl deploy --remote-only --config fly.toml
+  environment:
+    name: production/backend
+    url: https://vgreens-backend.fly.dev
+  variables:
+    FLY_API_TOKEN: $FLY_API_TOKEN
+
+# Deploy Frontend to Fly.io
+deploy_frontend:
+  stage: deploy
+  only:
+    - master
+  before_script:
+    - *install_flyctl
+  script:
+    - cd frontend
+    - flyctl deploy --remote-only --config fly.toml
+  environment:
+    name: production/frontend
+    url: https://vgreens-frontend.fly.dev
+  variables:
+    FLY_API_TOKEN: $FLY_API_TOKEN
+  needs:
+    - deploy_backend
+
+# Manual deployment job for staging/testing
+deploy_manual:
+  stage: deploy
+  when: manual
+  before_script:
+    - *install_flyctl
+  script:
+    - echo "Select which app to deploy"
+    - cd backend && flyctl deploy --remote-only --config fly.toml
+    - cd ../frontend && flyctl deploy --remote-only --config fly.toml
+  variables:
+    FLY_API_TOKEN: $FLY_API_TOKEN

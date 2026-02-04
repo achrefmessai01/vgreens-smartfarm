@@ -1,15 +1,24 @@
 import {
+  Logger,
   Injectable,
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-  Logger,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { Reflector, ModuleRef } from '@nestjs/core';
 import { clerkClient } from '@clerk/clerk-sdk-node';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { UsersService } from '@modules/users/users.service';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import type { User } from '@modules/users/entities/user.entity';
+
+export interface AuthRequest extends Request {
+  clerkSession?: Awaited<ReturnType<typeof clerkClient.verifyToken>>;
+  clerkUserId?: string;
+  user?: User;
+  tenantId?: string | null;
+}
 
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
@@ -31,7 +40,7 @@ export class ClerkAuthGuard implements CanActivate {
     }
 
     const gqlCtx = GqlExecutionContext.create(context);
-    const request = gqlCtx.getContext().req;
+    const request = gqlCtx.getContext<{ req: AuthRequest }>().req;
 
     const token = this.extractTokenFromHeader(request);
     if (!token) {
@@ -41,7 +50,8 @@ export class ClerkAuthGuard implements CanActivate {
     try {
       const session = await clerkClient.verifyToken(token);
       request.clerkSession = session;
-      request.clerkUserId = session.sub || session.userId;
+      const sub = session.sub ?? session.userId;
+      request.clerkUserId = typeof sub === 'string' ? sub : undefined;
 
       // Fetch user from database (must happen here before RolesGuard runs)
       if (request.clerkUserId) {
@@ -55,7 +65,7 @@ export class ClerkAuthGuard implements CanActivate {
     }
   }
 
-  private async fetchUserFromDatabase(request: any): Promise<void> {
+  private async fetchUserFromDatabase(request: AuthRequest): Promise<void> {
     try {
       const usersService = this.moduleRef.get(UsersService, {
         strict: false,
@@ -65,8 +75,10 @@ export class ClerkAuthGuard implements CanActivate {
         return;
       }
 
-      const user = await usersService.findByClerkUserId(request.clerkUserId);
-      this.logger.log(`User fetched from database: ${user?.email}`);
+      const clerkUserId = request.clerkUserId;
+      if (!clerkUserId) return;
+
+      const user = await usersService.findByClerkUserId(clerkUserId);
       if (user) {
         request.user = user;
         request.tenantId = user.tenantId;
@@ -79,8 +91,9 @@ export class ClerkAuthGuard implements CanActivate {
     }
   }
 
-  private extractTokenFromHeader(request: any): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const auth = request.headers.authorization;
+    const [type, token] = (typeof auth === 'string' ? auth : '').split(' ');
     return type === 'Bearer' ? token : undefined;
   }
 }

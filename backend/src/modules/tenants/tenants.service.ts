@@ -3,15 +3,17 @@ import { Tenant } from './entities/tenant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTenantInput, UpdateTenantInput } from './dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InfluxTenantService } from '@modules/influxdb/influx-tenant.service';
+import { InfluxDBService } from '@modules/influxdb/influxdb.service';
+
+const DEFAULT_BUCKET_RETENTION_SECONDS = 60 * 60 * 24 * 30;
 
 @Injectable()
 export class TenantsService {
   constructor(
     @InjectRepository(Tenant)
     private readonly tenantRepository: Repository<Tenant>,
-    private readonly influxTenantService: InfluxTenantService,
-  ) { }
+    private readonly influxDBService: InfluxDBService,
+  ) {}
 
   async findAll(): Promise<Tenant[]> {
     return this.tenantRepository.find({
@@ -33,18 +35,14 @@ export class TenantsService {
       isActive: createTenantInput.isActive ?? true,
     });
 
-    // First save the tenant to get a stable ID
     const savedTenant = await this.tenantRepository.save(tenant);
 
-    // Derive and persist a bucket name for this tenant
-    const bucketName = this.influxTenantService.buildBucketName(savedTenant);
+    const bucketName = this.buildBucketName(savedTenant);
     savedTenant.influxBucketName = bucketName;
 
-    // Fire-and-forget bucket creation in InfluxDB (no need to block tenant creation)
-    void this.influxTenantService.ensureBucketForTenant(
-      savedTenant,
-      bucketName,
-    );
+    void this.influxDBService.createBucket(bucketName, {
+      retentionSeconds: DEFAULT_BUCKET_RETENTION_SECONDS,
+    });
 
     return this.tenantRepository.save(savedTenant);
   }
@@ -70,5 +68,9 @@ export class TenantsService {
 
     await this.tenantRepository.remove(tenant);
     return true;
+  }
+
+  private buildBucketName(tenant: Pick<Tenant, 'id'>): string {
+    return `tenant_${tenant.id}`;
   }
 }
