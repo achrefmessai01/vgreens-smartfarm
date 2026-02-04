@@ -9,10 +9,7 @@ export const graphqlConfig: ApolloDriverConfig = {
   introspection: true,
   driver: ApolloDriver,
   context: ({ req }: { req: Request }) => ({ req }),
-  autoSchemaFile:
-    process.env.NODE_ENV === 'production'
-      ? path.join('/app', 'dist', 'graphql.schema.gql')
-      : path.join(process.cwd(), 'src', 'graphql.schema.gql'),
+  autoSchemaFile: path.join(process.cwd(), 'src/graphql.schema.gql'),
   plugins: [ApolloServerPluginLandingPageLocalDefault()],
   formatError(formattedError) {
     return {

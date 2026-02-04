@@ -4,6 +4,9 @@
 # Stage 1: Build stage
 FROM node:20-alpine AS builder
 
+# Cache buster - change this to force rebuild
+ARG CACHE_BUST=2026-02-05
+
 WORKDIR /app
 
 # Copy package files
