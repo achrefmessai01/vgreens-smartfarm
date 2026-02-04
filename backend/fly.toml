@@ -45,6 +45,7 @@ primary_region = "fra" # Frankfurt - change to your preferred region
 [env]
   PORT = "8080"
   NODE_ENV = "production"
+  HOSTNAME = "0.0.0.0"
 
 # Secrets to set via `flyctl secrets set`:
 # - DATABASE_HOST
