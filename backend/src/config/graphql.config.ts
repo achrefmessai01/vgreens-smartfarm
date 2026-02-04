@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
@@ -9,7 +8,7 @@ export const graphqlConfig: ApolloDriverConfig = {
   introspection: true,
   driver: ApolloDriver,
   context: ({ req }: { req: Request }) => ({ req }),
-  autoSchemaFile: path.join(process.cwd(), 'src/graphql.schema.gql'),
+  autoSchemaFile: true,
   plugins: [ApolloServerPluginLandingPageLocalDefault()],
   formatError(formattedError) {
     return {
