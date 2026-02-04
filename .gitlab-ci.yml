@@ -35,8 +35,8 @@ deploy_backend:
       fi
     - echo "FLY_API_TOKEN is set"
     - echo "Token length: ${#FLY_API_TOKEN} characters"
-    - echo "First 10 chars: ${FLY_API_TOKEN:0:10}..."
-    - echo "Last 10 chars: ...${FLY_API_TOKEN: -10}"
+    - 'echo "First 10 chars: ${FLY_API_TOKEN:0:10}..."'
+    - 'echo "Last 10 chars: ...${FLY_API_TOKEN: -10}"'
     - echo ""
     - echo "=== Testing Fly.io Authentication ==="
     - 'flyctl auth whoami || echo "Authentication failed - token may be invalid"'
