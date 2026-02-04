@@ -21,26 +21,25 @@ deploy_backend:
     - master
   before_script:
     - *install_flyctl
-    # Debug: Show environment and token info
     - echo "=== DEBUG - Environment Check ==="
     - echo "Checking for FLY_API_TOKEN..."
-    - env | grep -i fly || echo "⚠️  No FLY variables found in environment"
+    - 'env | grep -i fly || echo "No FLY variables found in environment"'
     - echo ""
     - echo "=== Checking FLY_API_TOKEN Variable ==="
     - |
       if [ -z "$FLY_API_TOKEN" ]; then
-        echo "❌ ERROR: FLY_API_TOKEN is NOT set"
-        echo "Please add FLY_API_TOKEN in GitLab: Settings → CI/CD → Variables"
+        echo "ERROR: FLY_API_TOKEN is NOT set"
+        echo "Please add FLY_API_TOKEN in GitLab: Settings -> CI/CD -> Variables"
         echo "Create token with: flyctl tokens create deploy"
         exit 1
       fi
-    - echo "✅ FLY_API_TOKEN is set"
+    - echo "FLY_API_TOKEN is set"
     - echo "Token length: ${#FLY_API_TOKEN} characters"
     - echo "First 10 chars: ${FLY_API_TOKEN:0:10}..."
     - echo "Last 10 chars: ...${FLY_API_TOKEN: -10}"
     - echo ""
     - echo "=== Testing Fly.io Authentication ==="
-    - flyctl auth whoami || echo "⚠️  Authentication failed - token may be invalid"
+    - 'flyctl auth whoami || echo "Authentication failed - token may be invalid"'
     - echo ""
   script:
     - cd backend
@@ -60,11 +59,11 @@ deploy_frontend:
     - echo "=== Frontend Deployment - Token Check ==="
     - |
       if [ -z "$FLY_API_TOKEN" ]; then
-        echo "❌ ERROR: FLY_API_TOKEN is NOT set"
+        echo "ERROR: FLY_API_TOKEN is NOT set"
         exit 1
       fi
-    - echo "✅ FLY_API_TOKEN is set (length: ${#FLY_API_TOKEN})"
-    - flyctl auth whoami || echo "⚠️  Authentication failed"
+    - echo "FLY_API_TOKEN is set (length: ${#FLY_API_TOKEN})"
+    - 'flyctl auth whoami || echo "Authentication failed"'
   script:
     - cd frontend
     - echo "=== Starting Frontend Deployment ==="
@@ -84,10 +83,10 @@ deploy_manual:
     - echo "=== Manual Deployment - Token Check ==="
     - |
       if [ -z "$FLY_API_TOKEN" ]; then
-        echo "❌ ERROR: FLY_API_TOKEN is NOT set"
+        echo "ERROR: FLY_API_TOKEN is NOT set"
         exit 1
       fi
-    - echo "✅ FLY_API_TOKEN is set"
+    - echo "FLY_API_TOKEN is set"
   script:
     - echo "=== Deploying Backend ==="
     - cd backend && flyctl deploy --remote-only --config fly.toml
