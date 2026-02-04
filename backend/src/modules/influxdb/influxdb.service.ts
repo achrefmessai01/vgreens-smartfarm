@@ -197,6 +197,125 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * Query data from a bucket by name. Uses Flux range + limit.
+   * @param bucketName - Bucket name (e.g. tenant's influxBucketName)
+   * @param options - start: Flux duration (e.g. -1h) or ISO date string; stop: optional ISO date string for date range; limit: max rows
+   */
+  async getBucketData(
+    bucketName: string,
+    options?: { start?: string; stop?: string; limit?: number },
+  ): Promise<Record<string, unknown>[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.error('InfluxDB client is not initialized');
+      throw new Error('InfluxDB client is not initialized');
+    }
+
+    const start = options?.start ?? '-1h';
+    const stop = options?.stop;
+    const limit = options?.limit ?? 100;
+    const escapedBucket = bucketName
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+
+    // Use time(v: "ISO") when start/stop look like ISO timestamps
+    const isIso = (s: string) =>
+      s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s);
+    const rangeStart = isIso(start)
+      ? `time(v: "${start.replace(/"/g, '\\"')}")`
+      : start;
+    const rangeStop =
+      stop && isIso(stop)
+        ? `, stop: time(v: "${stop.replace(/"/g, '\\"')}")`
+        : '';
+    const rangeClause = `range(start: ${rangeStart}${rangeStop})`;
+
+    const flux = `from(bucket: "${escapedBucket}")
+  |> ${rangeClause}
+  |> limit(n: ${limit})`;
+
+    const rows: Record<string, unknown>[] = [];
+    const queryApi = this.queryApi;
+
+    await new Promise<void>((resolve, reject) => {
+      queryApi.queryRows(flux, {
+        next: (row, tableMeta) => {
+          const o = tableMeta.toObject(row) as Record<string, unknown>;
+          rows.push(o);
+        },
+        error: (error) => {
+          reject(error);
+        },
+        complete: () => {
+          resolve();
+        },
+      });
+    });
+
+    this.logger.debug(
+      `getBucketData("${bucketName}"): returned ${rows.length} rows`,
+    );
+    return rows;
+  }
+
+  /**
+   * Returns all unique _field values from a bucket (e.g. "humidity", "co2", "temperature").
+   * @param bucketName - Bucket name (e.g. tenant's influxBucketName)
+   * @param options - start: Flux duration or ISO; stop: optional ISO for range
+   */
+  async getBucketFields(
+    bucketName: string,
+    options?: { start?: string; stop?: string },
+  ): Promise<string[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.error('InfluxDB client is not initialized');
+      throw new Error('InfluxDB client is not initialized');
+    }
+
+    const start = options?.start ?? '-1h';
+    const stop = options?.stop;
+    const escapedBucket = bucketName
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+
+    const isIso = (s: string) =>
+      s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s);
+    const rangeStart = isIso(start)
+      ? `time(v: "${start.replace(/"/g, '\\"')}")`
+      : start;
+    const rangeStop =
+      stop && isIso(stop)
+        ? `, stop: time(v: "${stop.replace(/"/g, '\\"')}")`
+        : '';
+    const rangeClause = `range(start: ${rangeStart}${rangeStop})`;
+
+    const flux = `from(bucket: "${escapedBucket}")
+  |> ${rangeClause}
+  |> keep(columns: ["_field"])
+  |> distinct(column: "_field")`;
+
+    const fields = new Set<string>();
+    const queryApi = this.queryApi;
+
+    await new Promise<void>((resolve, reject) => {
+      queryApi.queryRows(flux, {
+        next: (row, tableMeta) => {
+          const o = tableMeta.toObject(row) as Record<string, unknown>;
+          const field = o['_field'];
+          if (typeof field === 'string') fields.add(field);
+        },
+        error: (error) => reject(error),
+        complete: () => resolve(),
+      });
+    });
+
+    const result = Array.from(fields).sort();
+    this.logger.debug(
+      `getBucketFields("${bucketName}"): ${result.length} unique fields`,
+    );
+    return result;
+  }
+
+  /**
    * Resolves INFLUXDB_ORG (name or 16-byte hex ID) to organization ID for API calls.
    */
   private async resolveOrgID(): Promise<string> {

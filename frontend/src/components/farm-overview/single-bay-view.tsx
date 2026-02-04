@@ -3,16 +3,29 @@
 import * as React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Bay, PlantSlot, ParameterType } from '@/lib/farm-types'
+import { SensorHoverCard } from './sensor-hover-card'
 
 function getParameterUnit(parameter: ParameterType): string {
-  switch (parameter) {
-    case 'humidity':
-      return '%'
-    case 'temperature':
-      return '°C'
-    default:
-      return ''
+  const units: Record<string, string> = {
+    temperature: '°C',
+    soil_temp: '°C',
+    co2: 'ppm',
+    humidity: '%',
+    soil_moisture: '%',
+    vpd: 'kPa',
+    par: 'µmol/m²/s',
+    par_estimated: 'µmol/m²/s',
+    soil_conductivity: 'mS/cm',
+    soilEC: 'mS/cm',
+    battery_v: 'V',
+    voltage_v: 'V',
+    current_ma: 'mA',
+    lux: 'lux',
+    pressure_mpa: 'MPa',
+    rssi: 'dBm',
+    snr: 'dB',
   }
+  return units[parameter] ?? ''
 }
 import { getParameterValue, getParameterColor } from '@/lib/farm-data'
 import { cn } from '@/lib/utils'
@@ -22,9 +35,15 @@ const SENSOR_ROWS = 8
 
 function sampleSensorSlots(bay: Bay): PlantSlot[] {
   const slots: PlantSlot[] = []
-  const rowStep = Math.max(1, Math.floor((bay.rows.length - 1) / (SENSOR_ROWS - 1)))
+  const rowStep = Math.max(
+    1,
+    Math.floor((bay.rows.length - 1) / (SENSOR_ROWS - 1))
+  )
   const numCols = bay.rows[0]?.columns.length ?? 12
-  const colStep = Math.max(1, Math.floor((numCols - 1) / Math.max(1, SENSOR_COLS - 1)))
+  const colStep = Math.max(
+    1,
+    Math.floor((numCols - 1) / Math.max(1, SENSOR_COLS - 1))
+  )
 
   for (let ri = 0; ri < SENSOR_ROWS; ri++) {
     const rowIndex = Math.min(ri * rowStep, bay.rows.length - 1)
@@ -44,8 +63,12 @@ const NUM_VISIBLE_SENSORS = 4
 
 /** Pick 3–5 random indices (deterministic per bay) to show sensor values; rest stay white */
 function getVisibleSensorIndices(totalSlots: number): Set<number> {
-  const count = Math.min(NUM_VISIBLE_SENSORS, Math.max(3, Math.floor(totalSlots / 8)))
-  const step = totalSlots > count ? Math.floor((totalSlots - 1) / (count - 1)) : 0
+  const count = Math.min(
+    NUM_VISIBLE_SENSORS,
+    Math.max(3, Math.floor(totalSlots / 8))
+  )
+  const step =
+    totalSlots > count ? Math.floor((totalSlots - 1) / (count - 1)) : 0
   const indices = new Set<number>()
   for (let i = 0; i < count; i++) {
     indices.add(step > 0 ? i * step : i)
@@ -126,29 +149,35 @@ export function SingleBayView({
             }
 
             return (
-              <button
+              <SensorHoverCard
                 key={slot.id}
-                type="button"
-                onClick={() =>
-                  onSelectSlot(isSelected ? null : slot.id)
-                }
-                className={cn(
-                  'flex flex-col items-center justify-center gap-1 w-32 h-32 shrink-0 rounded-xl transition-all',
-                  'hover:ring-2 hover:ring-primary/50 hover:scale-[1.02]',
-                  isSelected && 'ring-2 ring-primary ring-offset-2'
-                )}
-                style={{
-                  backgroundColor: color,
-                  color: 'rgba(255,255,255,0.98)',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-                  textShadow: '0 0 2px rgba(0,0,0,0.25)',
-                }}
+                parameter={parameter}
+                value={value}
+                unit={unit}
+                slotId={slot.id}
+                meta={slot.meta}
               >
-                <span className="text-base font-semibold tabular-nums leading-tight">
-                  {value.toFixed(1)}
-                  {unit && <span className="ml-0.5 opacity-90">{unit}</span>}
-                </span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => onSelectSlot(isSelected ? null : slot.id)}
+                  className={cn(
+                    'flex flex-col items-center justify-center gap-1 w-32 h-32 shrink-0 rounded-xl transition-all',
+                    'hover:ring-2 hover:ring-primary/50 hover:scale-[1.02]',
+                    isSelected && 'ring-2 ring-primary ring-offset-2'
+                  )}
+                  style={{
+                    backgroundColor: color,
+                    color: 'rgba(255,255,255,0.98)',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+                    textShadow: '0 0 2px rgba(0,0,0,0.25)',
+                  }}
+                >
+                  <span className="text-base font-semibold tabular-nums leading-tight">
+                    {value.toFixed(1)}
+                    {unit && <span className="ml-0.5 opacity-90">{unit}</span>}
+                  </span>
+                </button>
+              </SensorHoverCard>
             )
           })}
         </div>

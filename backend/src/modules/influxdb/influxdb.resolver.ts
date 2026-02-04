@@ -1,8 +1,9 @@
 import { UseGuards } from '@nestjs/common';
 import { Public } from '@common/decorators';
-import { Resolver, Query } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { InfluxDBService } from './influxdb.service';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
+import { InfluxDBData } from './dto/influxdb-data.object';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @Resolver()
@@ -23,5 +24,46 @@ export class InfluxDBResolver {
   @Public()
   async getBuckets(): Promise<string[]> {
     return this.influxDBService.getBuckets();
+  }
+
+  /**
+   * Query data from an InfluxDB bucket by name (e.g. tenant's influxBucketName).
+   * For testing in GraphQL playground.
+   */
+  @Query(() => [InfluxDBData], { name: 'getBucketData' })
+  @Public()
+  async getBucketData(
+    @Args('bucketName', { type: () => String }) bucketName: string,
+    @Args('start', { type: () => String, nullable: true })
+    start?: string,
+    @Args('stop', { type: () => String, nullable: true })
+    stop?: string,
+    @Args('limit', { type: () => Int, nullable: true })
+    limit?: number,
+  ): Promise<InfluxDBData[]> {
+    const rows = await this.influxDBService.getBucketData(bucketName, {
+      start: start ?? '-1h',
+      stop,
+      limit: limit ?? 100,
+    });
+    return rows.map((data) => ({ data }));
+  }
+
+  /**
+   * Returns all unique _field values from a bucket (e.g. "humidity", "co2", "temperature").
+   */
+  @Query(() => [String], { name: 'getBucketFields' })
+  @Public()
+  async getBucketFields(
+    @Args('bucketName', { type: () => String }) bucketName: string,
+    @Args('start', { type: () => String, nullable: true })
+    start?: string,
+    @Args('stop', { type: () => String, nullable: true })
+    stop?: string,
+  ): Promise<string[]> {
+    return this.influxDBService.getBucketFields(bucketName, {
+      start: start ?? '-1h',
+      stop,
+    });
   }
 }

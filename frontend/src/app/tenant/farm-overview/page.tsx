@@ -7,26 +7,92 @@ import {
   ParameterSelector,
   SingleBayView,
 } from '@/components/farm-overview'
-import { generateFarm } from '@/lib/farm-data'
 import type { ParameterType } from '@/lib/farm-types'
+import { formatFieldToLabel } from '@/lib/farm-data'
 import { PageHeader } from '@/components/layout/page-header'
 import { FeatureGuard } from '@/components/features/feature-guard'
+import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { StyledSelect } from '@/components/ui/styled-select'
 
 type GreenhouseTab = 'greenhouse1' | 'greenhouse2'
 
+function getDaysInRange(from: string, to: string): string[] {
+  const days: string[] = []
+  const start = new Date(from)
+  const end = new Date(to)
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return days
+  }
+  const d = new Date(start)
+  d.setUTCHours(0, 0, 0, 0)
+  const e = new Date(end)
+  e.setUTCHours(0, 0, 0, 0)
+  while (d <= e) {
+    days.push(d.toISOString().slice(0, 10))
+    d.setUTCDate(d.getUTCDate() + 1)
+  }
+  return days
+}
+
 export default function FarmOverviewPage() {
   const { t } = useI18n()
-  const [farm] = React.useState(() => generateFarm())
+  const [dateFrom, setDateFrom] = React.useState('')
+  const [dateTo, setDateTo] = React.useState('')
+  const [appliedRange, setAppliedRange] = React.useState<{ dateFrom: string; dateTo: string } | null>(null)
+  const [selectedDay, setSelectedDay] = React.useState<string | null>(null)
+
+  const range = React.useMemo(() => {
+    if (selectedDay) return { selectedDay }
+    if (appliedRange) return { dateFrom: appliedRange.dateFrom, dateTo: appliedRange.dateTo }
+    return undefined
+  }, [appliedRange, selectedDay])
+
+  const { bays, bucketFields, loading } = useLiveFarmData(range)
   const [activeTab, setActiveTab] = React.useState<GreenhouseTab>('greenhouse1')
   const [selectedParameter, setSelectedParameter] =
-    React.useState<ParameterType>('humidity')
+    React.useState<ParameterType>('temperature')
+
+  const parameterOptions = React.useMemo(
+    () =>
+      bucketFields.length > 0
+        ? bucketFields.map((field) => ({
+            label: formatFieldToLabel(field),
+            value: field,
+          }))
+        : [{ label: t.pages.farmOverview.temperature, value: 'temperature' }],
+    [bucketFields, t.pages.farmOverview.temperature]
+  )
+
+  const effectiveParameter =
+    selectedParameter && bucketFields.includes(selectedParameter)
+      ? selectedParameter
+      : bucketFields[0] ?? 'temperature'
+
+  React.useEffect(() => {
+    if (bucketFields.length > 0 && !bucketFields.includes(selectedParameter)) {
+      setSelectedParameter(bucketFields[0])
+    }
+  }, [bucketFields, selectedParameter])
   const [selectedSlotId, setSelectedSlotId] = React.useState<string | null>(
     null
   )
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false)
 
-  const bay = activeTab === 'greenhouse1' ? farm.bays[0] : farm.bays[1]
+  const daysInRange = React.useMemo(() => {
+    if (!appliedRange) return []
+    return getDaysInRange(appliedRange.dateFrom, appliedRange.dateTo)
+  }, [appliedRange])
+
+  const handleApplyRange = () => {
+    if (dateFrom && dateTo) {
+      setAppliedRange({ dateFrom, dateTo })
+      setSelectedDay(null)
+    }
+  }
+
+  const bay = activeTab === 'greenhouse1' ? bays[0] : bays[1]
   const bayLabel =
     activeTab === 'greenhouse1'
       ? t.pages.farmOverview.greenHouse1
@@ -38,22 +104,8 @@ export default function FarmOverviewPage() {
     }
   }, [selectedSlotId])
 
-  const getParameterLabel = (param: ParameterType): string => {
-    switch (param) {
-      case 'fruitLoad':
-        return t.pages.farmOverview.fruitLoad
-      case 'canopyCover':
-        return t.pages.farmOverview.canopyCover
-      case 'energyBalance':
-        return t.pages.farmOverview.energyBalance
-      case 'temperature':
-        return t.pages.farmOverview.temperature
-      case 'humidity':
-        return t.pages.farmOverview.humidity
-      default:
-        return ''
-    }
-  }
+  const getParameterLabel = (param: ParameterType): string =>
+    formatFieldToLabel(param)
 
   const tabs: { id: GreenhouseTab; labelKey: 'greenHouse1' | 'greenHouse2' }[] =
     [
@@ -88,31 +140,86 @@ export default function FarmOverviewPage() {
           </div>
 
           <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-muted/30 rounded-lg p-3">
-            <div className="flex-shrink-0 mb-2">
+            <div className="flex-shrink-0 mb-2 space-y-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm font-medium whitespace-nowrap">
+                  {t.pages.farmOverview.dateRange}:
+                </span>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                  aria-label={t.pages.farmOverview.fromDate}
+                />
+                <span className="text-muted-foreground text-sm">–</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+                  aria-label={t.pages.farmOverview.toDate}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleApplyRange}
+                  disabled={!dateFrom || !dateTo}
+                >
+                  {t.pages.farmOverview.apply}
+                </Button>
+                {appliedRange && daysInRange.length > 0 && (
+                  <>
+                    <span className="text-sm font-medium whitespace-nowrap text-muted-foreground">
+                      {t.pages.farmOverview.viewByDay}:
+                    </span>
+                    <StyledSelect
+                      value={selectedDay ?? '__all__'}
+                      onValueChange={(val) =>
+                        setSelectedDay(val === '__all__' ? null : val)
+                      }
+                      options={[
+                        { label: t.pages.farmOverview.allDays, value: '__all__' },
+                        ...daysInRange.map((d) => ({
+                          label: d,
+                          value: d,
+                        })),
+                      ]}
+                      width="140px"
+                      triggerClassName="min-w-[140px]"
+                    />
+                  </>
+                )}
+              </div>
               <ParameterSelector
-                value={selectedParameter}
+                value={effectiveParameter}
                 onValueChange={setSelectedParameter}
-                fruitLoadLabel={t.pages.farmOverview.fruitLoad}
-                canopyCoverLabel={t.pages.farmOverview.canopyCover}
-                energyBalanceLabel={t.pages.farmOverview.energyBalance}
-                temperatureLabel={t.pages.farmOverview.temperature}
-                humidityLabel={t.pages.farmOverview.humidity}
+                options={parameterOptions}
                 selectParameterLabel={t.pages.farmOverview.selectParameter}
               />
             </div>
 
             <div className="flex-1 min-h-0 overflow-hidden">
-              {bay && (
+              {loading ? (
+                <div className="h-full flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
+                  {t.pages.farmOverview.loading}
+                </div>
+              ) : bay ? (
                 <SingleBayView
                   bay={bay}
-                  parameter={selectedParameter}
+                  parameter={effectiveParameter}
                   selectedSlotId={selectedSlotId}
                   onSelectSlot={setSelectedSlotId}
                   bayLabel={bayLabel}
-                  parameterLabel={getParameterLabel(selectedParameter)}
+                  parameterLabel={getParameterLabel(effectiveParameter)}
                   noSensorLabel={t.pages.farmOverview.noSensor}
                   className="h-full"
                 />
+              ) : (
+                <div className="h-full flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
+                  {t.pages.farmOverview.noData}
+                </div>
               )}
             </div>
           </div>
@@ -121,9 +228,9 @@ export default function FarmOverviewPage() {
         <HistoryDrawer
           open={historyDrawerOpen}
           onOpenChange={setHistoryDrawerOpen}
-          parameter={selectedParameter}
+          parameter={effectiveParameter}
           slotId={selectedSlotId}
-          parameterLabel={getParameterLabel(selectedParameter)}
+          parameterLabel={getParameterLabel(effectiveParameter)}
           timeRangeLabel={t.pages.farmOverview.timeRange}
           oneDayLabel={t.pages.farmOverview.oneDay}
           oneWeekLabel={t.pages.farmOverview.oneWeek}
