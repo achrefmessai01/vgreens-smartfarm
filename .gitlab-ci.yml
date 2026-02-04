@@ -33,7 +33,7 @@ deploy_backend:
       RETRY_COUNT=0
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy --remote-only --config fly.toml; then
+        if flyctl deploy --remote-only --no-cache --config fly.toml; then
           echo "Deployment successful!"
           exit 0
         else
@@ -73,7 +73,7 @@ deploy_frontend:
       RETRY_COUNT=0
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy --remote-only --config fly.toml; then
+        if flyctl deploy --remote-only --no-cache --config fly.toml; then
           echo "Deployment successful!"
           exit 0
         else
@@ -105,6 +105,6 @@ deploy_manual:
     - test -n "$FLY_API_TOKEN" && echo "Token OK" || (echo "ERROR - Token not set" && exit 1)
   script:
     - echo "=== Deploying Backend ==="
-    - cd backend && flyctl deploy --remote-only --config fly.toml
+    - cd backend && flyctl deploy --remote-only --no-cache --config fly.toml
     - echo "=== Deploying Frontend ==="
-    - cd ../frontend && flyctl deploy --remote-only --config fly.toml
+    - cd ../frontend && flyctl deploy --remote-only --no-cache --config fly.toml
