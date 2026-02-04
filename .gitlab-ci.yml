@@ -27,7 +27,26 @@ deploy_backend:
   script:
     - cd backend
     - echo "=== Starting Backend Deployment ==="
-    - flyctl deploy --remote-only --config fly.toml
+    - |
+      # Deploy with retry logic for lease conflicts
+      MAX_RETRIES=3
+      RETRY_COUNT=0
+      while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+        if flyctl deploy --remote-only --config fly.toml; then
+          echo "Deployment successful!"
+          exit 0
+        else
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+          if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "Deployment failed, waiting 30 seconds before retry..."
+            sleep 30
+          else
+            echo "All deployment attempts failed"
+            exit 1
+          fi
+        fi
+      done
   environment:
     name: production/backend
     url: https://vgreens-backend.fly.dev
@@ -48,7 +67,26 @@ deploy_frontend:
   script:
     - cd frontend
     - echo "=== Starting Frontend Deployment ==="
-    - flyctl deploy --remote-only --config fly.toml
+    - |
+      # Deploy with retry logic
+      MAX_RETRIES=3
+      RETRY_COUNT=0
+      while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+        if flyctl deploy --remote-only --config fly.toml; then
+          echo "Deployment successful!"
+          exit 0
+        else
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+          if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "Deployment failed, waiting 30 seconds before retry..."
+            sleep 30
+          else
+            echo "All deployment attempts failed"
+            exit 1
+          fi
+        fi
+      done
   environment:
     name: production/frontend
     url: https://vgreens-frontend.fly.dev
