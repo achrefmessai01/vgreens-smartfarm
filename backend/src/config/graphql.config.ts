@@ -11,7 +11,7 @@ export const graphqlConfig: ApolloDriverConfig = {
   context: ({ req }: { req: Request }) => ({ req }),
   autoSchemaFile:
     process.env.NODE_ENV === 'production'
-      ? path.join(process.cwd(), 'dist', 'graphql.schema.gql')
+      ? path.join('/app', 'dist', 'graphql.schema.gql')
       : path.join(process.cwd(), 'src', 'graphql.schema.gql'),
   plugins: [ApolloServerPluginLandingPageLocalDefault()],
   formatError(formattedError) {
