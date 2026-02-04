@@ -7,12 +7,6 @@ variables:
   GIT_STRATEGY: fetch
   FLY_VERSION: '0.3.55'
 
-.install_flyctl: &install_flyctl
-  - apk add --no-cache curl
-  - curl -L https://fly.io/install.sh | sh
-  - export FLYCTL_INSTALL="/root/.fly"
-  - export PATH="$FLYCTL_INSTALL/bin:$PATH"
-
 # Deploy Backend to Fly.io
 deploy_backend:
   stage: deploy
@@ -25,24 +19,11 @@ deploy_backend:
     - export PATH="$FLYCTL_INSTALL/bin:$PATH"
     - echo "=== DEBUG - Environment Check ==="
     - echo "Checking for FLY_API_TOKEN..."
-    - 'env | grep -i fly || echo "No FLY variables found in environment"'
-    - echo ""
-    - echo "=== Checking FLY_API_TOKEN Variable ==="
-    - |
-      if [ -z "$FLY_API_TOKEN" ]; then
-        echo "ERROR: FLY_API_TOKEN is NOT set"
-        echo "Please add FLY_API_TOKEN in GitLab: Settings -> CI/CD -> Variables"
-        echo "Create token with: flyctl tokens create deploy"
-        exit 1
-      fi
-    - echo "FLY_API_TOKEN is set"
-    - echo "Token length: ${#FLY_API_TOKEN} characters"
-    - 'echo "First 10 chars: ${FLY_API_TOKEN:0:10}..."'
-    - 'echo "Last 10 chars: ...${FLY_API_TOKEN: -10}"'
-    - echo ""
-    - echo "=== Testing Fly.io Authentication ==="
-    - 'flyctl auth whoami || echo "Authentication failed - token may be invalid"'
-    - echo ""
+    - env | grep -i fly || echo "No FLY variables found"
+    - echo "=== Checking Token ==="
+    - test -n "$FLY_API_TOKEN" && echo "Token is set (length ${#FLY_API_TOKEN})" || (echo "ERROR - Token not set" && exit 1)
+    - echo "Testing authentication..."
+    - flyctl auth whoami || echo "Auth failed"
   script:
     - cd backend
     - echo "=== Starting Backend Deployment ==="
@@ -61,14 +42,9 @@ deploy_frontend:
     - curl -L https://fly.io/install.sh | sh
     - export FLYCTL_INSTALL="/root/.fly"
     - export PATH="$FLYCTL_INSTALL/bin:$PATH"
-    - echo "=== Frontend Deployment - Token Check ==="
-    - |
-      if [ -z "$FLY_API_TOKEN" ]; then
-        echo "ERROR: FLY_API_TOKEN is NOT set"
-        exit 1
-      fi
-    - echo "FLY_API_TOKEN is set (length: ${#FLY_API_TOKEN})"
-    - 'flyctl auth whoami || echo "Authentication failed"'
+    - echo "=== Frontend Token Check ==="
+    - test -n "$FLY_API_TOKEN" && echo "Token OK" || (echo "ERROR - Token not set" && exit 1)
+    - flyctl auth whoami || echo "Auth failed"
   script:
     - cd frontend
     - echo "=== Starting Frontend Deployment ==="
@@ -79,7 +55,7 @@ deploy_frontend:
   needs:
     - deploy_backend
 
-# Manual deployment job for staging/testing
+# Manual deployment
 deploy_manual:
   stage: deploy
   when: manual
@@ -88,13 +64,7 @@ deploy_manual:
     - curl -L https://fly.io/install.sh | sh
     - export FLYCTL_INSTALL="/root/.fly"
     - export PATH="$FLYCTL_INSTALL/bin:$PATH"
-    - echo "=== Manual Deployment - Token Check ==="
-    - |
-      if [ -z "$FLY_API_TOKEN" ]; then
-        echo "ERROR: FLY_API_TOKEN is NOT set"
-        exit 1
-      fi
-    - echo "FLY_API_TOKEN is set"
+    - test -n "$FLY_API_TOKEN" && echo "Token OK" || (echo "ERROR - Token not set" && exit 1)
   script:
     - echo "=== Deploying Backend ==="
     - cd backend && flyctl deploy --remote-only --config fly.toml
