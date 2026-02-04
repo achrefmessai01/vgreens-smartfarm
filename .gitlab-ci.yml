@@ -21,14 +21,20 @@ deploy_backend:
     - master
   before_script:
     - *install_flyctl
+    # Verify token is set
+    - |
+      if [ -z "$FLY_API_TOKEN" ]; then
+        echo "ERROR: FLY_API_TOKEN is not set in GitLab CI/CD variables"
+        echo "Please add it in Settings → CI/CD → Variables"
+        exit 1
+      fi
+    - echo "✓ FLY_API_TOKEN is set (length: ${#FLY_API_TOKEN})"
   script:
     - cd backend
     - flyctl deploy --remote-only --config fly.toml
   environment:
     name: production/backend
     url: https://vgreens-backend.fly.dev
-  variables:
-    FLY_API_TOKEN: $FLY_API_TOKEN
 
 # Deploy Frontend to Fly.io
 deploy_frontend:
@@ -37,14 +43,17 @@ deploy_frontend:
     - master
   before_script:
     - *install_flyctl
+    - |
+      if [ -z "$FLY_API_TOKEN" ]; then
+        echo "ERROR: FLY_API_TOKEN is not set in GitLab CI/CD variables"
+        exit 1
+      fi
   script:
     - cd frontend
     - flyctl deploy --remote-only --config fly.toml
   environment:
     name: production/frontend
     url: https://vgreens-frontend.fly.dev
-  variables:
-    FLY_API_TOKEN: $FLY_API_TOKEN
   needs:
     - deploy_backend
 
@@ -54,9 +63,13 @@ deploy_manual:
   when: manual
   before_script:
     - *install_flyctl
+    - |
+      if [ -z "$FLY_API_TOKEN" ]; then
+        echo "ERROR: FLY_API_TOKEN is not set in GitLab CI/CD variables"
+        exit 1
+      fi
   script:
-    - echo "Select which app to deploy"
+    - echo "Deploying backend..."
     - cd backend && flyctl deploy --remote-only --config fly.toml
+    - echo "Deploying frontend..."
     - cd ../frontend && flyctl deploy --remote-only --config fly.toml
-  variables:
-    FLY_API_TOKEN: $FLY_API_TOKEN
