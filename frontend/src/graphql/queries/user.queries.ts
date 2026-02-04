@@ -14,6 +14,7 @@ export const ME_QUERY = gql`
       tenant {
         id
         name
+        influxBucketName
         createdAt
         isActive
         updatedAt

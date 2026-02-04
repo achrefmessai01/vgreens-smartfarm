@@ -8,22 +8,14 @@ import { ParameterColorLegend } from './parameter-color-legend'
 interface ParameterSelectorProps {
   value: ParameterType
   onValueChange: (value: ParameterType) => void
-  fruitLoadLabel: string
-  canopyCoverLabel: string
-  energyBalanceLabel: string
-  temperatureLabel: string
-  humidityLabel: string
+  options: { label: string; value: string }[]
   selectParameterLabel: string
 }
 
 export function ParameterSelector({
   value,
   onValueChange,
-  fruitLoadLabel,
-  canopyCoverLabel,
-  energyBalanceLabel,
-  temperatureLabel,
-  humidityLabel,
+  options,
   selectParameterLabel,
 }: ParameterSelectorProps) {
   return (
@@ -35,13 +27,7 @@ export function ParameterSelector({
         <StyledSelect
           value={value}
           onValueChange={(val) => onValueChange(val as ParameterType)}
-          options={[
-            { label: fruitLoadLabel, value: 'fruitLoad' },
-            { label: canopyCoverLabel, value: 'canopyCover' },
-            { label: energyBalanceLabel, value: 'energyBalance' },
-            { label: temperatureLabel, value: 'temperature' },
-            { label: humidityLabel, value: 'humidity' },
-          ]}
+          options={options}
           width="180px"
           triggerClassName="sm:w-[200px]"
         />

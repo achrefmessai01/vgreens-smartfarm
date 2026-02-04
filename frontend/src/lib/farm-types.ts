@@ -1,23 +1,16 @@
-export type ParameterType =
-  | 'fruitLoad'
-  | 'canopyCover'
-  | 'energyBalance'
-  | 'temperature'
-  | 'humidity'
+/** Dynamic: any _field name from InfluxDB getBucketFields (e.g. temperature, co2, soil_conductivity) */
+export type ParameterType = string
 
-export interface ParameterValue {
-  fruitLoad: number // 0-13
-  canopyCover: number // 0-1000 sq cm
-  energyBalance: number // -100 to 100
-  temperature: number // 19-22°C
-  humidity: number // 0-100
-}
+/** Dynamic: _field name -> latest numeric value from bucket data */
+export type ParameterValue = Record<string, number>
 
 export interface PlantSlot {
   id: string
   rowIndex: number
   columnIndex: number
   values: ParameterValue
+  /** Optional metadata from InfluxDB row(s) for this slot */
+  meta?: Record<string, unknown>
 }
 
 export interface Column {
