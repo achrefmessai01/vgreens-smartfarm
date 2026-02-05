@@ -65,11 +65,16 @@ export const createApolloClient = (getToken: () => Promise<string | null>) => {
     })
   })
 
+  const graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT
+
+  if (!graphqlEndpoint) {
+    throw new Error(
+      'NEXT_PUBLIC_GRAPHQL_ENDPOINT is not set. Configure it in your environment (Fly secrets or .env).'
+    )
+  }
+
   const httpLink = new HttpLink({
-    uri:
-      process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT ||
-      process.env.NEXT_PUBLIC_GRAPHQL_URL ||
-      'http://localhost:3001/graphql',
+    uri: graphqlEndpoint,
     credentials: 'include',
     headers: {
       'apollo-require-preflight': 'true',
