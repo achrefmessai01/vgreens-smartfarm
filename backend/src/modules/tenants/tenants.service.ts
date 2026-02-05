@@ -70,7 +70,17 @@ export class TenantsService {
     return true;
   }
 
-  private buildBucketName(tenant: Pick<Tenant, 'id'>): string {
-    return `tenant_${tenant.id}`;
+  private buildBucketName(
+    tenant: Pick<Tenant, 'id' | 'companyName' | 'name'>,
+  ): string {
+    const rawName = tenant.companyName || tenant.name || 'tenant';
+
+    const slug = rawName
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+
+    return `${slug}_${tenant.id}`;
   }
 }

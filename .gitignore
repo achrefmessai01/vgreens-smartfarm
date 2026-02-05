@@ -53,3 +53,4 @@ docker/logs/
 .git/
 
 DEPLOYMENT.md
+vgreens-influx/
