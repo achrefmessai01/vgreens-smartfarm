@@ -85,7 +85,7 @@ export default function FarmOverviewPage() {
               ))}
             </div>
             <div className="flex-shrink-0 mb-2 space-y-2 flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1 rounded-lg border border-border/60 p-0.5 bg-muted/40">
+              {/* <div className="flex items-center gap-1 rounded-lg border border-border/60 p-0.5 bg-muted/40">
                 <button
                   type="button"
                   onClick={() => setViewMode('grid')}
@@ -100,7 +100,7 @@ export default function FarmOverviewPage() {
                 >
                   {t.pages.farmOverview.viewMap}
                 </button>
-              </div>
+              </div> */}
               {/* <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm font-medium whitespace-nowrap">
                   {t.pages.farmOverview.dateRange}:
@@ -170,8 +170,8 @@ export default function FarmOverviewPage() {
                 </div>
               ) : activeGreenhouseTab === 1 ? (
                 <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
-                  {(t.pages.farmOverview as { emptyForNow?: string }).emptyForNow ??
-                    'Empty for now'}
+                  {(t.pages.farmOverview as { emptyForNow?: string })
+                    .emptyForNow ?? 'Empty for now'}
                 </div>
               ) : bays.length > 0 ? (
                 <div className="h-full min-h-0">
