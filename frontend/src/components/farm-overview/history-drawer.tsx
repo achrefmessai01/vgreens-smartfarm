@@ -18,8 +18,46 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import { useQuery } from '@apollo/client'
 import type { ParameterType } from '@/lib/farm-types'
-import { generateHistoryDataForParameter } from '@/lib/farm-history-data'
+import { GET_BUCKET_DATA_QUERY } from '@/graphql/queries/influxdb.queries'
+import { useMeQuery } from '@/generated/graphql'
+
+/** Parse slotId (e.g. "live_greenhouse_01|Air_09|unknown") into greenhouse, device, level for InfluxDB filters */
+function parseSlotId(slotId: string): {
+  greenhouse: string
+  device: string
+  level: string
+} {
+  const raw = slotId.replace(/^live_/, '')
+  const parts = raw.split('|')
+  return {
+    greenhouse: parts[0] ?? '',
+    device: parts[1] ?? '',
+    level: parts[2] ?? '',
+  }
+}
+
+function getStartStopForRange(timeRange: '1day' | '1week' | '1month'): {
+  start: string
+  stop: string
+} {
+  const now = new Date()
+  const stop = now.toISOString()
+  let start: Date
+  switch (timeRange) {
+    case '1day':
+      start = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+      break
+    case '1week':
+      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      break
+    case '1month':
+      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+      break
+  }
+  return { start: start.toISOString(), stop }
+}
 
 interface HistoryDrawerProps {
   open: boolean
@@ -53,16 +91,60 @@ export function HistoryDrawer({
     number | null
   >(null)
 
+  const { data: meData } = useMeQuery({ fetchPolicy: 'cache-first' })
+  const bucketName = meData?.me?.tenant?.influxBucketName ?? null
+  const slotFilters = React.useMemo(
+    () => (slotId ? parseSlotId(slotId) : null),
+    [slotId]
+  )
+  const startStop = React.useMemo(
+    () => getStartStopForRange(timeRange),
+    [timeRange]
+  )
+
+  const { data: bucketData, loading: historyLoading } = useQuery<{
+    getBucketData: Array<{ data: Record<string, unknown> }>
+  }>(GET_BUCKET_DATA_QUERY, {
+    variables: {
+      bucketName: bucketName ?? '',
+      start: startStop.start,
+      stop: startStop.stop,
+      limit: 2000,
+      field: parameter,
+      greenhouse: slotFilters?.greenhouse ?? undefined,
+      device: slotFilters?.device ?? undefined,
+      // Omit level when "unknown" so backend matches rows with or without level tag
+      level:
+        slotFilters?.level && slotFilters.level.toLowerCase() !== 'unknown'
+          ? slotFilters.level
+          : undefined,
+    },
+    skip: !bucketName || !slotId || !open,
+    fetchPolicy: 'cache-and-network',
+  })
+
   const historyData = React.useMemo(() => {
-    if (!slotId) return []
-    const data = generateHistoryDataForParameter(parameter, timeRange)
-    // Format data for Recharts with index for point selection
-    return data.map((point, index) => ({
-      timestamp: point.timestamp.getTime(),
-      value: point.value,
-      index,
-    }))
-  }, [parameter, timeRange, slotId])
+    if (!bucketData?.getBucketData?.length) return []
+    return bucketData.getBucketData
+      .map((item, index) => {
+        const d = item.data
+        const t = d._time as string | undefined
+        const v = d._value
+        if (t == null) return null
+        const num =
+          typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN
+        if (Number.isNaN(num)) return null
+        return {
+          timestamp: new Date(t).getTime(),
+          value: num,
+          index,
+        }
+      })
+      .filter((p): p is { timestamp: number; value: number; index: number } =>
+        Boolean(p)
+      )
+      .sort((a, b) => a.timestamp - b.timestamp)
+  }, [bucketData])
 
   // Reset selected point when slot or parameter changes
   React.useEffect(() => {
@@ -99,6 +181,15 @@ export function HistoryDrawer({
             />
           </div>
           <div className="h-[400px]">
+            {historyLoading ? (
+              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                Loading history…
+              </div>
+            ) : historyData.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                No history data for this sensor in the selected range.
+              </div>
+            ) : (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={historyData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -165,6 +256,7 @@ export function HistoryDrawer({
                 />
               </LineChart>
             </ResponsiveContainer>
+            )}
           </div>
         </div>
       </SheetContent>

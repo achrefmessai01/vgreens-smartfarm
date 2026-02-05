@@ -4,53 +4,21 @@ import * as React from 'react'
 import { useI18n } from '@/i18n'
 import {
   HistoryDrawer,
-  ParameterSelector,
   SingleBayView,
+  SensorMapView,
+  ParameterSelector,
 } from '@/components/farm-overview'
-import type { ParameterType } from '@/lib/farm-types'
 import { formatFieldToLabel } from '@/lib/farm-data'
+import type { ParameterType } from '@/lib/farm-types'
 import { PageHeader } from '@/components/layout/page-header'
-import { FeatureGuard } from '@/components/features/feature-guard'
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { StyledSelect } from '@/components/ui/styled-select'
+import { FeatureGuard } from '@/components/features/feature-guard'
 
-type GreenhouseTab = 'greenhouse1' | 'greenhouse2'
-
-function getDaysInRange(from: string, to: string): string[] {
-  const days: string[] = []
-  const start = new Date(from)
-  const end = new Date(to)
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    return days
-  }
-  const d = new Date(start)
-  d.setUTCHours(0, 0, 0, 0)
-  const e = new Date(end)
-  e.setUTCHours(0, 0, 0, 0)
-  while (d <= e) {
-    days.push(d.toISOString().slice(0, 10))
-    d.setUTCDate(d.getUTCDate() + 1)
-  }
-  return days
-}
+const GREENHOUSE_LABEL_KEYS = ['greenHouse1', 'greenHouse2'] as const
 
 export default function FarmOverviewPage() {
   const { t } = useI18n()
-  const [dateFrom, setDateFrom] = React.useState('')
-  const [dateTo, setDateTo] = React.useState('')
-  const [appliedRange, setAppliedRange] = React.useState<{ dateFrom: string; dateTo: string } | null>(null)
-  const [selectedDay, setSelectedDay] = React.useState<string | null>(null)
-
-  const range = React.useMemo(() => {
-    if (selectedDay) return { selectedDay }
-    if (appliedRange) return { dateFrom: appliedRange.dateFrom, dateTo: appliedRange.dateTo }
-    return undefined
-  }, [appliedRange, selectedDay])
-
-  const { bays, bucketFields, loading } = useLiveFarmData(range)
-  const [activeTab, setActiveTab] = React.useState<GreenhouseTab>('greenhouse1')
+  const { bays, bucketFields, loading } = useLiveFarmData()
   const [selectedParameter, setSelectedParameter] =
     React.useState<ParameterType>('temperature')
 
@@ -79,24 +47,8 @@ export default function FarmOverviewPage() {
     null
   )
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false)
-
-  const daysInRange = React.useMemo(() => {
-    if (!appliedRange) return []
-    return getDaysInRange(appliedRange.dateFrom, appliedRange.dateTo)
-  }, [appliedRange])
-
-  const handleApplyRange = () => {
-    if (dateFrom && dateTo) {
-      setAppliedRange({ dateFrom, dateTo })
-      setSelectedDay(null)
-    }
-  }
-
-  const bay = activeTab === 'greenhouse1' ? bays[0] : bays[1]
-  const bayLabel =
-    activeTab === 'greenhouse1'
-      ? t.pages.farmOverview.greenHouse1
-      : t.pages.farmOverview.greenHouse2
+  const [viewMode, setViewMode] = React.useState<'grid' | 'map'>('map')
+  const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0)
 
   React.useEffect(() => {
     if (selectedSlotId) {
@@ -107,12 +59,6 @@ export default function FarmOverviewPage() {
   const getParameterLabel = (param: ParameterType): string =>
     formatFieldToLabel(param)
 
-  const tabs: { id: GreenhouseTab; labelKey: 'greenHouse1' | 'greenHouse2' }[] =
-    [
-      { id: 'greenhouse1', labelKey: 'greenHouse1' },
-      { id: 'greenhouse2', labelKey: 'greenHouse2' },
-    ]
-
   return (
     <FeatureGuard featureKey="farm_overview">
       <div className="flex flex-col h-[calc(100vh-80px)] max-h-screen">
@@ -121,27 +67,41 @@ export default function FarmOverviewPage() {
         </div>
 
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          <div className="flex-shrink-0 flex border-b border-border mb-3">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px',
-                  activeTab === tab.id
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/40'
-                )}
-              >
-                {t.pages.farmOverview[tab.labelKey]}
-              </button>
-            ))}
-          </div>
-
           <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-muted/30 rounded-lg p-3">
-            <div className="flex-shrink-0 mb-2 space-y-2">
-              <div className="flex flex-wrap items-center gap-3">
+            <div className="flex-shrink-0 flex border-b border-border mb-3">
+              {GREENHOUSE_LABEL_KEYS.map((labelKey, index) => (
+                <button
+                  key={labelKey}
+                  type="button"
+                  onClick={() => setActiveGreenhouseTab(index)}
+                  className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                    activeGreenhouseTab === index
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/40'
+                  }`}
+                >
+                  {t.pages.farmOverview[labelKey]}
+                </button>
+              ))}
+            </div>
+            <div className="flex-shrink-0 mb-2 space-y-2 flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1 rounded-lg border border-border/60 p-0.5 bg-muted/40">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  {t.pages.farmOverview.viewGrid}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('map')}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'map' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  {t.pages.farmOverview.viewMap}
+                </button>
+              </div>
+              {/* <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm font-medium whitespace-nowrap">
                   {t.pages.farmOverview.dateRange}:
                 </span>
@@ -180,7 +140,10 @@ export default function FarmOverviewPage() {
                         setSelectedDay(val === '__all__' ? null : val)
                       }
                       options={[
-                        { label: t.pages.farmOverview.allDays, value: '__all__' },
+                        {
+                          label: t.pages.farmOverview.allDays,
+                          value: '__all__',
+                        },
                         ...daysInRange.map((d) => ({
                           label: d,
                           value: d,
@@ -191,7 +154,7 @@ export default function FarmOverviewPage() {
                     />
                   </>
                 )}
-              </div>
+              </div> */}
               <ParameterSelector
                 value={effectiveParameter}
                 onValueChange={setSelectedParameter}
@@ -200,24 +163,45 @@ export default function FarmOverviewPage() {
               />
             </div>
 
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-auto">
               {loading ? (
-                <div className="h-full flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
+                <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
                   {t.pages.farmOverview.loading}
                 </div>
-              ) : bay ? (
-                <SingleBayView
-                  bay={bay}
-                  parameter={effectiveParameter}
-                  selectedSlotId={selectedSlotId}
-                  onSelectSlot={setSelectedSlotId}
-                  bayLabel={bayLabel}
-                  parameterLabel={getParameterLabel(effectiveParameter)}
-                  noSensorLabel={t.pages.farmOverview.noSensor}
-                  className="h-full"
-                />
+              ) : activeGreenhouseTab === 1 ? (
+                <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
+                  {(t.pages.farmOverview as { emptyForNow?: string }).emptyForNow ??
+                    'Empty for now'}
+                </div>
+              ) : bays.length > 0 ? (
+                <div className="h-full min-h-0">
+                  {viewMode === 'map' ? (
+                    <SensorMapView
+                      key={bays[0].id}
+                      bay={bays[0]}
+                      parameter={effectiveParameter}
+                      selectedSlotId={selectedSlotId}
+                      onSelectSlot={setSelectedSlotId}
+                      bayLabel={t.pages.farmOverview.greenHouse1}
+                      className="min-h-0 h-full"
+                      showOnlyFilledPositions
+                    />
+                  ) : (
+                    <SingleBayView
+                      key={bays[0].id}
+                      bay={bays[0]}
+                      parameter={effectiveParameter}
+                      selectedSlotId={selectedSlotId}
+                      onSelectSlot={setSelectedSlotId}
+                      bayLabel={t.pages.farmOverview.greenHouse1}
+                      parameterLabel={getParameterLabel(effectiveParameter)}
+                      noSensorLabel={t.pages.farmOverview.noSensor}
+                      className="min-h-0 h-full"
+                    />
+                  )}
+                </div>
               ) : (
-                <div className="h-full flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
+                <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
                   {t.pages.farmOverview.noData}
                 </div>
               )}

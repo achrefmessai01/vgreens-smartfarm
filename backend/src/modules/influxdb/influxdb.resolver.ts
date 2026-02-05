@@ -36,11 +36,23 @@ export class InfluxDBResolver {
     stop?: string,
     @Args('limit', { type: () => Int, nullable: true })
     limit?: number,
+    @Args('field', { type: () => String, nullable: true })
+    field?: string,
+    @Args('greenhouse', { type: () => String, nullable: true })
+    greenhouse?: string,
+    @Args('device', { type: () => String, nullable: true })
+    device?: string,
+    @Args('level', { type: () => String, nullable: true })
+    level?: string,
   ): Promise<InfluxDBData[]> {
     const rows = await this.influxDBService.getBucketData(bucketName, {
       start: start ?? '-1h',
       stop,
       limit: limit ?? 100,
+      field,
+      greenhouse,
+      device,
+      level,
     });
     return rows.map((data) => ({ data }));
   }

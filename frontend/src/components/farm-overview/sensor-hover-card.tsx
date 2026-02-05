@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { formatFieldToLabel } from "@/lib/farm-data"
-import type { ParameterType } from "@/lib/farm-types"
-import { useI18n } from "@/i18n"
+import * as React from 'react'
+import { cn } from '@/lib/utils'
+import { formatFieldToLabel } from '@/lib/farm-data'
+import type { ParameterType } from '@/lib/farm-types'
+import { useI18n } from '@/i18n'
 
 interface SensorHoverCardProps {
   parameter: ParameterType
@@ -108,19 +108,19 @@ export function SensorHoverCard({
               )}
               {time && (
                 <div>
-                  {t.pages.farmOverview.timeLabel}:{" "}
+                  {t.pages.farmOverview.timeLabel}:{' '}
                   {new Date(time).toLocaleString()}
                 </div>
               )}
               {start && (
                 <div>
-                  {t.pages.farmOverview.startLabel}:{" "}
+                  {t.pages.farmOverview.startLabel}:{' '}
                   {new Date(start).toLocaleString()}
                 </div>
               )}
               {stop && (
                 <div>
-                  {t.pages.farmOverview.stopLabel}:{" "}
+                  {t.pages.farmOverview.stopLabel}:{' '}
                   {new Date(stop).toLocaleString()}
                 </div>
               )}

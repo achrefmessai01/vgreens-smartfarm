@@ -7,6 +7,7 @@ export {
   type SensorBlock,
 } from './greenhouse-sensor-view'
 export { SingleBayView } from './single-bay-view'
+export { SensorMapView } from './sensor-map-view'
 export { HistoryDrawer } from './history-drawer'
 export { PlantSlot } from './plant-slot'
 export { FarmOverview } from './farm-overview'

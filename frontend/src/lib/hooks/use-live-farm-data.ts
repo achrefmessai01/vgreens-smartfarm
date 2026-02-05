@@ -1,15 +1,16 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useQuery } from '@apollo/client/react'
 import type { Bay } from '@/lib/farm-types'
 import { generateFarm } from '@/lib/farm-data'
+import { useQuery } from '@apollo/client/react'
 import { influxRowsToBays } from '@/lib/farm-data-live'
 import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql'
 import { GET_BUCKET_FIELDS_QUERY } from '@/graphql/queries/influxdb.queries'
 
 const BUCKET_START_DEFAULT = '-1h'
 const BUCKET_LIMIT = 500
+const POLL_INTERVAL_MS = 2 * 60 * 1000 // 2 minutes
 
 function toISOStart(dateStr: string): string {
   return `${dateStr}T00:00:00.000Z`
@@ -79,6 +80,7 @@ export function useLiveFarmData(range?: LiveFarmDataRange): {
     skip: !bucketName,
     fetchPolicy: 'cache-and-network',
     nextFetchPolicy: 'cache-first',
+    pollInterval: POLL_INTERVAL_MS,
   })
 
   const { data: fieldsData } = useQuery<GetBucketFieldsResponse>(
