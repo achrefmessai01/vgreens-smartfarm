@@ -3,12 +3,13 @@ import {
   ApolloLink,
   ApolloClient,
   InMemoryCache,
+  Observable,
+  type FetchResult,
 } from '@apollo/client'
-import { Observable } from 'rxjs'
 
 export const createApolloClient = (getToken: () => Promise<string | null>) => {
   const errorLink = new ApolloLink((operation, forward) => {
-    return new Observable((observer) => {
+    return new Observable<FetchResult>((observer) => {
       const subscription = forward(operation).subscribe({
         next: (result) => {
           // Handle GraphQL errors
@@ -76,7 +77,7 @@ export const createApolloClient = (getToken: () => Promise<string | null>) => {
   })
 
   const authLink = new ApolloLink((operation, forward) => {
-    return new Observable((observer) => {
+    return new Observable<FetchResult>((observer) => {
       getToken()
         .then((token) => {
           operation.setContext(({ headers = {} }) => ({
