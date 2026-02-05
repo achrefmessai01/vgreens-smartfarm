@@ -1,7 +1,6 @@
 import { UseGuards } from '@nestjs/common';
-import { Public } from '@common/decorators';
-import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { InfluxDBService } from './influxdb.service';
+import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import { InfluxDBData } from './dto/influxdb-data.object';
 
@@ -12,7 +11,6 @@ export class InfluxDBResolver {
 
   @Query(() => String, { name: 'testInfluxDBConnection' })
   //   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
-  @Public()
   async testConnection(): Promise<string> {
     const result = await this.influxDBService.testConnection();
     return result.success
@@ -21,7 +19,6 @@ export class InfluxDBResolver {
   }
 
   @Query(() => [String])
-  @Public()
   async getBuckets(): Promise<string[]> {
     return this.influxDBService.getBuckets();
   }
@@ -31,7 +28,6 @@ export class InfluxDBResolver {
    * For testing in GraphQL playground.
    */
   @Query(() => [InfluxDBData], { name: 'getBucketData' })
-  @Public()
   async getBucketData(
     @Args('bucketName', { type: () => String }) bucketName: string,
     @Args('start', { type: () => String, nullable: true })
@@ -53,7 +49,6 @@ export class InfluxDBResolver {
    * Returns all unique _field values from a bucket (e.g. "humidity", "co2", "temperature").
    */
   @Query(() => [String], { name: 'getBucketFields' })
-  @Public()
   async getBucketFields(
     @Args('bucketName', { type: () => String }) bucketName: string,
     @Args('start', { type: () => String, nullable: true })
