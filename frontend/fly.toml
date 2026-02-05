@@ -4,8 +4,8 @@ app = "vgreens-frontend"
 primary_region = "fra" # Frankfurt - change to your preferred region
 
 # Build configuration
-[build]
-  dockerfile = "docker/Dockerfile"
+# [build]
+#   dockerfile = "docker/Dockerfile"
 
 # HTTP service
 [[services]]
