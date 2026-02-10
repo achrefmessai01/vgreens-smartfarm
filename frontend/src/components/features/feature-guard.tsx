@@ -3,6 +3,8 @@
 import * as React from 'react'
 import { Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { UserRole } from '@/generated/graphql'
+import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { ComingSoonCard } from '@/components/ui/coming-soon-card'
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features'
 
@@ -19,14 +21,22 @@ export function FeatureGuard({
   fallback,
   redirectTo,
 }: FeatureGuardProps) {
+  const { role } = useCurrentUser()
+  const isVGreensAdmin = role === UserRole.VgreensAdmin
   const { hasFeature, loading } = useTenantFeatures()
   const router = useRouter()
 
   React.useEffect(() => {
+    if (isVGreensAdmin) return
+
     if (!loading && !hasFeature(featureKey) && redirectTo) {
       router.push(redirectTo)
     }
-  }, [loading, hasFeature, featureKey, redirectTo, router])
+  }, [loading, hasFeature, featureKey, redirectTo, router, isVGreensAdmin])
+
+  if (isVGreensAdmin) {
+    return <>{children}</>
+  }
 
   if (loading) {
     return (

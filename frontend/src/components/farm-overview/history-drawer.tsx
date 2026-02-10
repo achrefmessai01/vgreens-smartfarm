@@ -18,10 +18,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { useQuery } from '@apollo/client'
 import type { ParameterType } from '@/lib/farm-types'
-import { GET_BUCKET_DATA_QUERY } from '@/graphql/queries/influxdb.queries'
-import { useMeQuery } from '@/generated/graphql'
+import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql'
 
 /** Parse slotId (e.g. "live_greenhouse_01|Air_09|unknown") into greenhouse, device, level for InfluxDB filters */
 function parseSlotId(slotId: string): {
@@ -102,9 +100,7 @@ export function HistoryDrawer({
     [timeRange]
   )
 
-  const { data: bucketData, loading: historyLoading } = useQuery<{
-    getBucketData: Array<{ data: Record<string, unknown> }>
-  }>(GET_BUCKET_DATA_QUERY, {
+  const { data: bucketData, loading: historyLoading } = useGetBucketDataQuery({
     variables: {
       bucketName: bucketName ?? '',
       start: startStop.start,

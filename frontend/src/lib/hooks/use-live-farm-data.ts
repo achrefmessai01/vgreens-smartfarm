@@ -1,12 +1,14 @@
 'use client'
 
+import {
+  useMeQuery,
+  useGetBucketDataQuery,
+  useGetBucketFieldsQuery,
+} from '@/generated/graphql'
 import { useMemo } from 'react'
 import type { Bay } from '@/lib/farm-types'
 import { generateFarm } from '@/lib/farm-data'
-import { useQuery } from '@apollo/client/react'
 import { influxRowsToBays } from '@/lib/farm-data-live'
-import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql'
-import { GET_BUCKET_FIELDS_QUERY } from '@/graphql/queries/influxdb.queries'
 
 const BUCKET_START_DEFAULT = '-1h'
 const BUCKET_LIMIT = 500
@@ -27,21 +29,35 @@ export interface LiveFarmDataRange {
   selectedDay?: string
 }
 
-interface GetBucketFieldsResponse {
-  getBucketFields: string[]
+export interface LiveFarmDataOptions {
+  range?: LiveFarmDataRange
+  tenantBucketName?: string | null
 }
 
-export function useLiveFarmData(range?: LiveFarmDataRange): {
+export function useLiveFarmData(
+  options?: LiveFarmDataRange | LiveFarmDataOptions
+): {
   bays: Bay[]
   bucketFields: string[]
   loading: boolean
   error: Error | null
   isLive: boolean
 } {
+  const range =
+    options && 'range' in options
+      ? options.range
+      : (options as LiveFarmDataRange | undefined)
+
+  const tenantBucketOverride =
+    options && 'tenantBucketName' in options
+      ? options.tenantBucketName
+      : undefined
+
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-first',
   })
-  const bucketName = meData?.me?.tenant?.influxBucketName ?? null
+  const bucketNameFromMe = meData?.me?.tenant?.influxBucketName ?? null
+  const bucketName = tenantBucketOverride ?? bucketNameFromMe
 
   const startStop = useMemo(() => {
     if (!range)
@@ -83,18 +99,15 @@ export function useLiveFarmData(range?: LiveFarmDataRange): {
     pollInterval: POLL_INTERVAL_MS,
   })
 
-  const { data: fieldsData } = useQuery<GetBucketFieldsResponse>(
-    GET_BUCKET_FIELDS_QUERY,
-    {
-      variables: {
-        bucketName: bucketName ?? '',
-        start: startStop.start,
-        ...(startStop.stop != null && { stop: startStop.stop }),
-      },
-      skip: !bucketName,
-      fetchPolicy: 'cache-first',
-    }
-  )
+  const { data: fieldsData } = useGetBucketFieldsQuery({
+    variables: {
+      bucketName: bucketName ?? '',
+      start: startStop.start,
+      ...(startStop.stop != null && { stop: startStop.stop }),
+    },
+    skip: !bucketName,
+    fetchPolicy: 'cache-first',
+  })
 
   const bucketFields = useMemo(
     () => (fieldsData?.getBucketFields ?? []).slice().sort(),

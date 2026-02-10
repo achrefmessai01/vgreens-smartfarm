@@ -249,6 +249,10 @@ export type QueryFeaturesWithTenantStatusArgs = {
 
 export type QueryGetBucketDataArgs = {
   bucketName: Scalars['String']['input'];
+  device?: InputMaybe<Scalars['String']['input']>;
+  field?: InputMaybe<Scalars['String']['input']>;
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  level?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   start?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['String']['input']>;
@@ -527,6 +531,10 @@ export type GetBucketDataQueryVariables = Exact<{
   start?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+  field?: InputMaybe<Scalars['String']['input']>;
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  device?: InputMaybe<Scalars['String']['input']>;
+  level?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -552,6 +560,13 @@ export type TenantQueryVariables = Exact<{
 
 
 export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
+
+export type GetTenantBucketQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetTenantBucketQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1468,12 +1483,16 @@ export type TenantFeaturesLazyQueryHookResult = ReturnType<typeof useTenantFeatu
 export type TenantFeaturesSuspenseQueryHookResult = ReturnType<typeof useTenantFeaturesSuspenseQuery>;
 export type TenantFeaturesQueryResult = Apollo.QueryResult<TenantFeaturesQuery, TenantFeaturesQueryVariables>;
 export const GetBucketDataDocument = gql`
-    query GetBucketData($bucketName: String!, $start: String, $stop: String, $limit: Int) {
+    query GetBucketData($bucketName: String!, $start: String, $stop: String, $limit: Int, $field: String, $greenhouse: String, $device: String, $level: String) {
   getBucketData(
     bucketName: $bucketName
     start: $start
     stop: $stop
     limit: $limit
+    field: $field
+    greenhouse: $greenhouse
+    device: $device
+    level: $level
   ) {
     data
   }
@@ -1496,6 +1515,10 @@ export const GetBucketDataDocument = gql`
  *      start: // value for 'start'
  *      stop: // value for 'stop'
  *      limit: // value for 'limit'
+ *      field: // value for 'field'
+ *      greenhouse: // value for 'greenhouse'
+ *      device: // value for 'device'
+ *      level: // value for 'level'
  *   },
  * });
  */
@@ -1667,6 +1690,51 @@ export type TenantQueryHookResult = ReturnType<typeof useTenantQuery>;
 export type TenantLazyQueryHookResult = ReturnType<typeof useTenantLazyQuery>;
 export type TenantSuspenseQueryHookResult = ReturnType<typeof useTenantSuspenseQuery>;
 export type TenantQueryResult = Apollo.QueryResult<TenantQuery, TenantQueryVariables>;
+export const GetTenantBucketDocument = gql`
+    query GetTenantBucket($id: ID!) {
+  tenant(id: $id) {
+    id
+    name
+    influxBucketName
+  }
+}
+    `;
+
+/**
+ * __useGetTenantBucketQuery__
+ *
+ * To run a query within a React component, call `useGetTenantBucketQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetTenantBucketQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetTenantBucketQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetTenantBucketQuery(baseOptions: Apollo.QueryHookOptions<GetTenantBucketQuery, GetTenantBucketQueryVariables> & ({ variables: GetTenantBucketQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetTenantBucketQuery, GetTenantBucketQueryVariables>(GetTenantBucketDocument, options);
+      }
+export function useGetTenantBucketLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTenantBucketQuery, GetTenantBucketQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetTenantBucketQuery, GetTenantBucketQueryVariables>(GetTenantBucketDocument, options);
+        }
+// @ts-ignore
+export function useGetTenantBucketSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetTenantBucketQuery, GetTenantBucketQueryVariables>): Apollo.UseSuspenseQueryResult<GetTenantBucketQuery, GetTenantBucketQueryVariables>;
+export function useGetTenantBucketSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTenantBucketQuery, GetTenantBucketQueryVariables>): Apollo.UseSuspenseQueryResult<GetTenantBucketQuery | undefined, GetTenantBucketQueryVariables>;
+export function useGetTenantBucketSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTenantBucketQuery, GetTenantBucketQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetTenantBucketQuery, GetTenantBucketQueryVariables>(GetTenantBucketDocument, options);
+        }
+export type GetTenantBucketQueryHookResult = ReturnType<typeof useGetTenantBucketQuery>;
+export type GetTenantBucketLazyQueryHookResult = ReturnType<typeof useGetTenantBucketLazyQuery>;
+export type GetTenantBucketSuspenseQueryHookResult = ReturnType<typeof useGetTenantBucketSuspenseQuery>;
+export type GetTenantBucketQueryResult = Apollo.QueryResult<GetTenantBucketQuery, GetTenantBucketQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {

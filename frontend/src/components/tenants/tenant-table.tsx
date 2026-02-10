@@ -16,6 +16,7 @@ interface TenantTableProps {
   onCreate: () => void
   onViewUsers?: (tenant: Tenant) => void
   onManageFeatures?: (tenant: Tenant) => void
+  onRowClick?: (tenant: Tenant) => void
 }
 
 export function TenantTable({
@@ -25,6 +26,7 @@ export function TenantTable({
   onCreate,
   onViewUsers,
   onManageFeatures,
+  onRowClick,
 }: TenantTableProps) {
   const { t } = useI18n()
   const paginationConfig = usePaginationConfig()
@@ -71,7 +73,10 @@ export function TenantTable({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onViewUsers(tenant)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onViewUsers(tenant)
+            }}
             className="h-6 px-2"
           >
             <Users className="h-4 w-4 mr-1" />
@@ -94,7 +99,10 @@ export function TenantTable({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onManageFeatures(tenant)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onManageFeatures(tenant)
+              }}
               className="h-8 w-8"
               title={t.pages.admin.tenants.manageFeatures}
             >
@@ -104,7 +112,10 @@ export function TenantTable({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onEdit(tenant)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onEdit(tenant)
+            }}
             className="h-8 w-8"
           >
             <Edit2 className="h-4 w-4" />
@@ -112,7 +123,10 @@ export function TenantTable({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onDelete(tenant)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete(tenant)
+            }}
             className="h-8 w-8 text-destructive hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
@@ -134,6 +148,7 @@ export function TenantTable({
         data={tenants}
         columns={columns}
         renderRow={renderRow}
+        onRowClick={onRowClick}
         defaultPageSize={paginationConfig.defaultPageSize}
         pageSizeOptions={paginationConfig.pageSizeOptions}
         paginationLabels={paginationConfig.paginationLabels}

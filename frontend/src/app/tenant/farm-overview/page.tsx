@@ -8,30 +8,101 @@ import {
   SensorMapView,
   ParameterSelector,
 } from '@/components/farm-overview'
+import { useSearchParams } from 'next/navigation'
 import { formatFieldToLabel } from '@/lib/farm-data'
 import type { ParameterType } from '@/lib/farm-types'
 import { PageHeader } from '@/components/layout/page-header'
+import { StyledSelect } from '@/components/ui/styled-select'
+import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data'
 import { FeatureGuard } from '@/components/features/feature-guard'
+import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket'
+import { useTenantsQuery, type Tenant, UserRole } from '@/generated/graphql'
 
 const GREENHOUSE_LABEL_KEYS = ['greenHouse1', 'greenHouse2'] as const
 
 export default function FarmOverviewPage() {
   const { t } = useI18n()
-  const { bays, bucketFields, loading } = useLiveFarmData()
+  const { role } = useCurrentUser()
+  const isVGreensAdmin = role === UserRole.VgreensAdmin
+  const searchParams = useSearchParams()
+  const initialTenantIdFromUrl = searchParams.get('tenantId') ?? ''
+
+  const { data: tenantsData } = useTenantsQuery({
+    skip: !isVGreensAdmin,
+    fetchPolicy: 'cache-first',
+  })
+  const tenants = React.useMemo(
+    () => (tenantsData?.tenants || []) as Tenant[],
+    [tenantsData?.tenants]
+  )
+
+  const [selectedTenantId, setSelectedTenantId] = React.useState<string>(
+    initialTenantIdFromUrl
+  )
+
+  React.useEffect(() => {
+    if (!isVGreensAdmin || tenants.length === 0) return
+
+    if (
+      initialTenantIdFromUrl &&
+      tenants.some((t) => t.id === initialTenantIdFromUrl)
+    ) {
+      setSelectedTenantId(initialTenantIdFromUrl)
+      return
+    }
+
+    if (!selectedTenantId || !tenants.some((t) => t.id === selectedTenantId)) {
+      setSelectedTenantId(tenants[0].id)
+    }
+  }, [isVGreensAdmin, tenants, selectedTenantId, initialTenantIdFromUrl])
+
+  const { bucketName: selectedTenantBucketName } = useTenantBucketName(
+    isVGreensAdmin ? selectedTenantId : undefined
+  )
+
+  const tenantBucketNameOverride = isVGreensAdmin
+    ? selectedTenantBucketName ?? null
+    : undefined
+
+  const { bays, bucketFields, loading } = useLiveFarmData({
+    tenantBucketName: tenantBucketNameOverride,
+  })
   const [selectedParameter, setSelectedParameter] =
     React.useState<ParameterType>('temperature')
 
-  const parameterOptions = React.useMemo(
-    () =>
-      bucketFields.length > 0
-        ? bucketFields.map((field) => ({
-            label: formatFieldToLabel(field),
-            value: field,
-          }))
-        : [{ label: t.pages.farmOverview.temperature, value: 'temperature' }],
-    [bucketFields, t.pages.farmOverview.temperature]
-  )
+  const parameterOptions = React.useMemo(() => {
+    if (bucketFields.length === 0) {
+      return [{ label: t.pages.farmOverview.temperature, value: 'temperature' }]
+    }
+
+    const hasPar = bucketFields.includes('par')
+    const hasParEstimated = bucketFields.includes('par_estimated')
+
+    const baseFields = bucketFields.filter(
+      (field) => field !== 'lux' && field !== 'par' && field !== 'par_estimated'
+    )
+
+    const options = baseFields.map((field) => ({
+      label: formatFieldToLabel(field),
+      value: field,
+    }))
+
+    const parField: ParameterType | null = hasParEstimated
+      ? 'par_estimated'
+      : hasPar
+      ? 'par'
+      : null
+
+    if (parField) {
+      options.push({
+        label: formatFieldToLabel('par'),
+        value: parField,
+      })
+    }
+
+    return options
+  }, [bucketFields, t.pages.farmOverview.temperature])
 
   const effectiveParameter =
     selectedParameter && bucketFields.includes(selectedParameter)
@@ -47,7 +118,7 @@ export default function FarmOverviewPage() {
     null
   )
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false)
-  const [viewMode, setViewMode] = React.useState<'grid' | 'map'>('map')
+  const [viewMode] = React.useState<'grid' | 'map'>('map')
   const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0)
 
   React.useEffect(() => {
@@ -64,6 +135,24 @@ export default function FarmOverviewPage() {
       <div className="flex flex-col h-[calc(100vh-80px)] max-h-screen">
         <div className="flex-shrink-0 mb-1">
           <PageHeader title={t.pages.farmOverview.title} />
+          {isVGreensAdmin && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="text-sm font-medium">
+                {t.pages.admin.users.selectTenant || 'Select tenant'}:
+              </span>
+              <StyledSelect
+                value={selectedTenantId}
+                onValueChange={setSelectedTenantId}
+                options={tenants.map((tenant) => ({
+                  label: tenant.name,
+                  value: tenant.id,
+                }))}
+                width="240px"
+                triggerClassName="sm:w-[260px]"
+                placeholder={t.pages.admin.users.selectTenant}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
