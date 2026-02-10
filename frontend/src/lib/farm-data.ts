@@ -144,6 +144,17 @@ export function getParameterValue(slot: PlantSlot, parameter: string): number {
   return slot.values[parameter] ?? 0
 }
 
+/** Format numeric value for display (e.g. 6812 → 6.8k). */
+export function formatParameterDisplayValue(value: number): string {
+  const abs = Math.abs(value)
+  if (abs >= 1000) {
+    const k = value / 1000
+    const decimals = abs >= 10000 ? 0 : 1
+    return `${k.toFixed(decimals)}k`
+  }
+  return value.toFixed(1)
+}
+
 /** Unit string for a parameter (e.g. temperature → °C, co2 → ppm) */
 export function getParameterUnit(parameter: string): string {
   const units: Record<string, string> = {
@@ -391,7 +402,8 @@ export function formatFieldToLabel(field: string): string {
     in1_pin: 'In 1 pin',
     in2_pin: 'In 2 pin',
     lux: 'Lux',
-    par_estimated: 'PAR (estimated)',
+    par: 'Par',
+    par_estimated: 'Par',
     pressure_mpa: 'Pressure (MPa)',
     probe_type: 'Probe type',
     soil_conductivity: 'Soil EC',

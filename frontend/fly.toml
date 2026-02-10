@@ -52,7 +52,6 @@ primary_region = "fra" # Frankfurt - change to your preferred region
 [build.args]
   NEXT_PUBLIC_GRAPHQL_ENDPOINT = "https://vgreens-backend.fly.dev/graphql"
   NEXT_PUBLIC_API_URL = "https://vgreens-backend.fly.dev"
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "${CLERK_PUBLISHABLE_KEY}"
 
 # Secrets to set via `flyctl secrets set`:
 # - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY

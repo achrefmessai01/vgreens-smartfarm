@@ -3,7 +3,11 @@
 import * as React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Bay, PlantSlot, ParameterType } from '@/lib/farm-types'
-import { getParameterValue, getParameterColor } from '@/lib/farm-data'
+import {
+  getParameterValue,
+  getParameterColor,
+  formatParameterDisplayValue,
+} from '@/lib/farm-data'
 import { cn } from '@/lib/utils'
 
 const SENSOR_COLS = 4
@@ -142,7 +146,7 @@ export function SingleBayView({
                 }}
               >
                 <span className="text-md font-medium tabular-nums leading-tight drop-shadow-sm">
-                  {value.toFixed(1)}
+                  {formatParameterDisplayValue(value)}
                 </span>
               </button>
               // </SensorHoverCard>

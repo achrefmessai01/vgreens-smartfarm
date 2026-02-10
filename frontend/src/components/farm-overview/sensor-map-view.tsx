@@ -1,44 +1,68 @@
 'use client'
 
+import {
+  getParameterUnit,
+  getParameterColor,
+  formatParameterDisplayValue,
+} from '@/lib/farm-data'
 import * as React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { Bay, PlantSlot, ParameterType } from '@/lib/farm-types'
-import { getParameterValue, getParameterColor, getParameterUnit } from '@/lib/farm-data'
 import {
   SENSOR_MAP_POSITIONS,
-  SENSOR_MAP_ASPECT_RATIO,
   getDeviceIdFromSlotId,
+  getMapDeviceId,
+  SENSOR_MAP_ASPECT_RATIO,
 } from '@/lib/sensor-map-positions'
+import { Card, CardContent } from '@/components/ui/card'
+import type { Bay, PlantSlot, ParameterType } from '@/lib/farm-types'
 
-function getAllSlotsFromBay(bay: Bay): PlantSlot[] {
-  const slots: PlantSlot[] = []
+/** Which sensor types support which parameters (so we don't show all at once). */
+function isParameterSupportedByType(
+  parameter: ParameterType,
+  type: 'air' | 'lux' | 'par' | 'soil'
+): boolean {
+  switch (parameter) {
+    // Air sensors
+    case 'temperature':
+    case 'humidity':
+    case 'co2':
+    case 'vpd':
+    case 'battery_v':
+    case 'voltage_v':
+    case 'current_ma':
+    case 'rssi':
+    case 'snr':
+      return type === 'air'
+    // Light / PAR sensors
+    case 'par':
+    case 'par_estimated':
+    case 'lux':
+      return type === 'lux'
+    // Soil sensors
+    case 'soil_moisture':
+    case 'soil_temp':
+    case 'soil_conductivity':
+    case 'soilEC':
+      return type === 'soil'
+    // Fallback: allow on any sensor type
+    default:
+      return true
+  }
+}
+
+/** One-time build: map canonical device id → slot (Light_XX → Lux_XX for map key) */
+function buildDeviceToSlotMap(bay: Bay): Map<string, PlantSlot> {
+  const map = new Map<string, PlantSlot>()
   for (const row of bay.rows) {
     for (const col of row.columns) {
       for (const slot of col.slots) {
-        if (slot) slots.push(slot)
+        if (!slot) continue
+        const device = getDeviceIdFromSlotId(slot.id)
+        if (device) map.set(getMapDeviceId(device), slot)
       }
     }
   }
-  return slots
-}
-
-/** Normalize device id for matching (e.g. Air_1 and Air_01 both match) */
-function normalizeDeviceId(id: string): string {
-  const match = id.match(/^(.+)_(\d+)$/i)
-  if (!match) return id
-  const num = parseInt(match[2], 10)
-  return `${match[1]}_${String(num).padStart(2, '0')}`
-}
-
-function findSlotByDevice(slots: PlantSlot[], deviceId: string): PlantSlot | null {
-  const normalized = normalizeDeviceId(deviceId)
-  for (const slot of slots) {
-    const slotDevice = getDeviceIdFromSlotId(slot.id)
-    if (slotDevice === deviceId || slotDevice === normalized) return slot
-    if (normalizeDeviceId(slotDevice) === normalized) return slot
-  }
-  return null
+  return map
 }
 
 interface SensorMapViewProps {
@@ -65,14 +89,29 @@ export function SensorMapView({
   className,
   showOnlyFilledPositions = false,
 }: SensorMapViewProps) {
-  const slots = React.useMemo(() => getAllSlotsFromBay(bay), [bay])
+  const deviceToSlot = React.useMemo(
+    () => (bay ? buildDeviceToSlotMap(bay) : new Map<string, PlantSlot>()),
+    [bay]
+  )
   const unit = getParameterUnit(parameter)
   const positionsToShow = React.useMemo(() => {
-    if (!showOnlyFilledPositions) return SENSOR_MAP_POSITIONS
-    return SENSOR_MAP_POSITIONS.filter((pos) =>
-      findSlotByDevice(slots, pos.deviceId)
-    )
-  }, [slots, showOnlyFilledPositions])
+    return SENSOR_MAP_POSITIONS.filter((pos) => {
+      // Only show sensor types that support the selected parameter
+      if (!isParameterSupportedByType(parameter, pos.type)) return false
+
+      const slot = deviceToSlot.get(getMapDeviceId(pos.deviceId))
+      if (!slot) {
+        // When only filled positions should be shown, hide placeholders
+        return !showOnlyFilledPositions
+      }
+
+      const value = slot.values?.[parameter]
+      // Hide sensors that don't have this parameter value at all
+      if (typeof value !== 'number' || Number.isNaN(value)) return false
+
+      return true
+    })
+  }, [deviceToSlot, parameter, showOnlyFilledPositions])
 
   return (
     <Card
@@ -102,22 +141,32 @@ export function SensorMapView({
             115m × 40m
           </span>
           {positionsToShow.map((pos) => {
-            const slot = findSlotByDevice(slots, pos.deviceId)
-            const value = slot ? getParameterValue(slot, parameter) : null
+            const slot =
+              deviceToSlot.get(getMapDeviceId(pos.deviceId)) ?? null
+            const value =
+              slot && typeof slot.values?.[parameter] === 'number'
+                ? (slot.values[parameter] as number)
+                : null
             const color = slot
               ? getParameterColor(value ?? 0, parameter, slot.id)
               : 'rgb(200, 200, 200)'
             const isSelected = slot ? selectedSlotId === slot.id : false
             const isAir = pos.type === 'air'
             const isPar = pos.type === 'par'
+            const isSoil = pos.type === 'soil'
+            // Slight offset for soil so it doesn't fully overlap Air_03 at same coords
+            const offset = isSoil
+              ? { transform: 'translate(calc(-50% + 20px), calc(-50% + 14px))' }
+              : { transform: 'translate(-50%, -50%)' }
 
             return (
               <div
                 key={pos.deviceId}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2"
+                className="absolute"
                 style={{
                   left: `${pos.leftPercent}%`,
                   top: `${pos.topPercent}%`,
+                  ...offset,
                 }}
               >
                 <button
@@ -140,21 +189,27 @@ export function SensorMapView({
                     boxShadow: slot
                       ? '0 1px 3px rgba(0,0,0,0.15)'
                       : '0 1px 2px rgba(0,0,0,0.08)',
-                    textShadow: slot
-                      ? '0 1px 2px rgba(0,0,0,0.4)'
-                      : 'none',
-                    borderRadius: isAir ? '8px' : '50%',
-                    width: isPar ? 52 : 44,
-                    height: isPar ? 52 : 44,
+                    textShadow: slot ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
+                    borderRadius: isAir || isSoil ? '8px' : '50%',
+                    width: isPar ? 52 : isSoil ? 40 : 44,
+                    height: isPar ? 52 : isSoil ? 40 : 44,
                   }}
-                  title={slot ? `${pos.deviceId}: ${(value ?? 0).toFixed(1)}${unit}` : pos.deviceId}
+                  title={
+                    slot && value != null
+                      ? `${pos.deviceId}: ${formatParameterDisplayValue(
+                          value
+                        )}${unit}`
+                      : pos.deviceId
+                  }
                 >
                   {value != null ? (
                     <span className="leading-tight text-sm font-bold px-0.5">
-                      {value.toFixed(1)}
+                      {formatParameterDisplayValue(value)}
                     </span>
                   ) : (
-                    <span className={slot ? 'opacity-90' : 'text-muted-foreground'}>
+                    <span
+                      className={slot ? 'opacity-90' : 'text-muted-foreground'}
+                    >
                       --
                     </span>
                   )}
