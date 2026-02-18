@@ -4,9 +4,9 @@ import { useI18n } from '@/i18n'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { TableCell } from '@/components/ui/table'
-import { Alert, AlertStatus } from '@/generated/graphql'
 import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
 import { DataTable, type Column } from '@/components/ui/data-table'
+import { Alert, AlertStatus, AlertSeverity } from '@/generated/graphql'
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config'
 
 interface AlertTableProps {
@@ -63,6 +63,8 @@ export function AlertTable({
     { key: 'status', header: t.pages.alerts.status },
     { key: 'severity', header: t.pages.alerts.severity },
     { key: 'timestamp', header: t.pages.alerts.timestamp },
+    { key: 'acknowledgedBy', header: 'Acknowledged By' },
+    { key: 'resolvedBy', header: 'Resolved By' },
     {
       key: 'actions',
       header: t.pages.alerts.actions,
@@ -76,16 +78,39 @@ export function AlertTable({
       alert.status === AlertStatus.Open ||
       alert.status === AlertStatus.Acknowledged
 
+    const isCriticalOpen =
+      alert.status === AlertStatus.Open &&
+      alert.severity === AlertSeverity.Critical
+    const rowClassName = isCriticalOpen ? 'bg-red-50/80 dark:bg-red-950/40' : ''
+
+    const formatUser = (user?: Alert['acknowledgedBy']) => {
+      if (!user) return '—'
+      const name = [user.firstName, user.lastName].filter(Boolean).join(' ')
+      return name || user.email || '—'
+    }
+
     return (
       <>
-        <TableCell className="font-medium">{alert.sensorName}</TableCell>
-        <TableCell>{alert.value}</TableCell>
-        <TableCell>{getStatusBadge(alert.status)}</TableCell>
-        <TableCell>
+        <TableCell className={`font-medium ${rowClassName}`}>
+          {alert.sensorName}
+        </TableCell>
+        <TableCell className={rowClassName}>{alert.value}</TableCell>
+        <TableCell className={rowClassName}>
+          {getStatusBadge(alert.status)}
+        </TableCell>
+        <TableCell className={rowClassName}>
           <Badge variant="destructive">{t.pages.alerts.critical}</Badge>
         </TableCell>
-        <TableCell>{new Date(alert.timestamp).toLocaleString()}</TableCell>
-        <TableCell className="text-right">
+        <TableCell className={rowClassName}>
+          {new Date(alert.timestamp).toLocaleString()}
+        </TableCell>
+        <TableCell className={rowClassName}>
+          {formatUser(alert.acknowledgedBy)}
+        </TableCell>
+        <TableCell className={rowClassName}>
+          {formatUser(alert.resolvedBy)}
+        </TableCell>
+        <TableCell className={`text-right ${rowClassName}`}>
           <div className="flex justify-end gap-2">
             {canAcknowledge && (
               <Button

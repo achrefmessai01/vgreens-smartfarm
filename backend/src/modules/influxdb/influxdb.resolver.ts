@@ -1,4 +1,5 @@
 import { UseGuards } from '@nestjs/common';
+import { Public } from '@/common/decorators';
 import { InfluxDBService } from './influxdb.service';
 import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';

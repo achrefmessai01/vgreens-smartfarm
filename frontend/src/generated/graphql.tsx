@@ -21,9 +21,23 @@ export type Scalars = {
 
 export type Alert = {
   __typename?: 'Alert';
+  acknowledgedBy?: Maybe<User>;
+  acknowledgedById?: Maybe<Scalars['ID']['output']>;
+  acknowledgedTime?: Maybe<Scalars['DateTime']['output']>;
+  city?: Maybe<Scalars['String']['output']>;
+  column?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   description?: Maybe<Scalars['String']['output']>;
+  device?: Maybe<Scalars['String']['output']>;
+  field?: Maybe<Scalars['String']['output']>;
+  greenhouse?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  measurement?: Maybe<Scalars['String']['output']>;
+  profile?: Maybe<Scalars['String']['output']>;
+  resolvedBy?: Maybe<User>;
+  resolvedById?: Maybe<Scalars['ID']['output']>;
+  resolvedTime?: Maybe<Scalars['DateTime']['output']>;
+  row?: Maybe<Scalars['String']['output']>;
   sensorName: Scalars['String']['output'];
   severity: AlertSeverity;
   status: AlertStatus;
@@ -48,10 +62,19 @@ export enum AlertStatus {
 }
 
 export type CreateAlertInput = {
+  city?: InputMaybe<Scalars['String']['input']>;
+  column?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  device?: InputMaybe<Scalars['String']['input']>;
+  field?: InputMaybe<Scalars['String']['input']>;
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  measurement?: InputMaybe<Scalars['String']['input']>;
+  profile?: InputMaybe<Scalars['String']['input']>;
+  row?: InputMaybe<Scalars['String']['input']>;
   sensorName: Scalars['String']['input'];
   severity?: InputMaybe<AlertSeverity>;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
+  timestamp?: InputMaybe<Scalars['String']['input']>;
   tunnelId?: InputMaybe<Scalars['ID']['input']>;
   value: Scalars['String']['input'];
 };
@@ -125,6 +148,7 @@ export type Mutation = {
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   resolveAlert: Alert;
+  runThresholdCheck: Scalars['Boolean']['output'];
   toggleTenantFeature: TenantFeature;
   updateAlert: Alert;
   updateFeature: Feature;
@@ -180,6 +204,12 @@ export type MutationDeleteUserArgs = {
 
 export type MutationResolveAlertArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationRunThresholdCheckArgs = {
+  bucketName: Scalars['String']['input'];
+  tenantId: Scalars['ID']['input'];
 };
 
 
@@ -314,7 +344,15 @@ export type ToggleTenantFeatureInput = {
 };
 
 export type UpdateAlertInput = {
+  city?: InputMaybe<Scalars['String']['input']>;
+  column?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  device?: InputMaybe<Scalars['String']['input']>;
+  field?: InputMaybe<Scalars['String']['input']>;
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  measurement?: InputMaybe<Scalars['String']['input']>;
+  profile?: InputMaybe<Scalars['String']['input']>;
+  row?: InputMaybe<Scalars['String']['input']>;
   sensorName?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<AlertStatus>;
   value?: InputMaybe<Scalars['String']['input']>;
@@ -455,21 +493,21 @@ export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean 
 export type AlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AlertsQuery = { __typename?: 'Query', alerts: Array<{ __typename?: 'Alert', id: string, tenantId: string, tunnelId?: string | null, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, description?: string | null, timestamp?: any | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string } | null }> };
+export type AlertsQuery = { __typename?: 'Query', alerts: Array<{ __typename?: 'Alert', id: string, tenantId: string, tunnelId?: string | null, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, description?: string | null, timestamp?: any | null, field?: string | null, measurement?: string | null, device?: string | null, greenhouse?: string | null, city?: string | null, column?: string | null, row?: string | null, profile?: string | null, acknowledgedById?: string | null, acknowledgedTime?: any | null, resolvedById?: string | null, resolvedTime?: any | null, createdAt: any, updatedAt: any, acknowledgedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null, resolvedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null, tenant?: { __typename?: 'Tenant', id: string, name: string } | null }> };
 
 export type AlertQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type AlertQuery = { __typename?: 'Query', alert?: { __typename?: 'Alert', id: string, tenantId: string, tunnelId?: string | null, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, description?: string | null, timestamp?: any | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string } | null } | null };
+export type AlertQuery = { __typename?: 'Query', alert?: { __typename?: 'Alert', id: string, tenantId: string, tunnelId?: string | null, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, description?: string | null, timestamp?: any | null, field?: string | null, measurement?: string | null, device?: string | null, greenhouse?: string | null, city?: string | null, column?: string | null, row?: string | null, profile?: string | null, acknowledgedById?: string | null, acknowledgedTime?: any | null, resolvedById?: string | null, resolvedTime?: any | null, createdAt: any, updatedAt: any, acknowledgedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null, resolvedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null, tenant?: { __typename?: 'Tenant', id: string, name: string } | null } | null };
 
 export type CreateAlertMutationVariables = Exact<{
   input: CreateAlertInput;
 }>;
 
 
-export type CreateAlertMutation = { __typename?: 'Mutation', createAlert: { __typename?: 'Alert', id: string, tenantId: string, tunnelId?: string | null, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, description?: string | null, timestamp?: any | null, createdAt: any, updatedAt: any } };
+export type CreateAlertMutation = { __typename?: 'Mutation', createAlert: { __typename?: 'Alert', id: string, tenantId: string, tunnelId?: string | null, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, description?: string | null, timestamp?: any | null, field?: string | null, measurement?: string | null, device?: string | null, greenhouse?: string | null, city?: string | null, column?: string | null, row?: string | null, profile?: string | null, createdAt: any, updatedAt: any } };
 
 export type UpdateAlertMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -477,7 +515,7 @@ export type UpdateAlertMutationVariables = Exact<{
 }>;
 
 
-export type UpdateAlertMutation = { __typename?: 'Mutation', updateAlert: { __typename?: 'Alert', id: string, tenantId: string, tunnelId?: string | null, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, timestamp?: any | null, description?: string | null, createdAt: any, updatedAt: any } };
+export type UpdateAlertMutation = { __typename?: 'Mutation', updateAlert: { __typename?: 'Alert', id: string, tenantId: string, tunnelId?: string | null, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, timestamp?: any | null, description?: string | null, field?: string | null, measurement?: string | null, device?: string | null, greenhouse?: string | null, city?: string | null, column?: string | null, row?: string | null, profile?: string | null, createdAt: any, updatedAt: any } };
 
 export type AcknowledgeAlertMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -987,6 +1025,30 @@ export const AlertsDocument = gql`
     severity
     description
     timestamp
+    field
+    measurement
+    device
+    greenhouse
+    city
+    column
+    row
+    profile
+    acknowledgedById
+    acknowledgedTime
+    acknowledgedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    resolvedById
+    resolvedTime
+    resolvedBy {
+      id
+      firstName
+      lastName
+      email
+    }
     createdAt
     updatedAt
     tenant {
@@ -1043,6 +1105,30 @@ export const AlertDocument = gql`
     severity
     description
     timestamp
+    field
+    measurement
+    device
+    greenhouse
+    city
+    column
+    row
+    profile
+    acknowledgedById
+    acknowledgedTime
+    acknowledgedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    resolvedById
+    resolvedTime
+    resolvedBy {
+      id
+      firstName
+      lastName
+      email
+    }
     createdAt
     updatedAt
     tenant {
@@ -1100,6 +1186,14 @@ export const CreateAlertDocument = gql`
     severity
     description
     timestamp
+    field
+    measurement
+    device
+    greenhouse
+    city
+    column
+    row
+    profile
     createdAt
     updatedAt
   }
@@ -1143,6 +1237,14 @@ export const UpdateAlertDocument = gql`
     severity
     timestamp
     description
+    field
+    measurement
+    device
+    greenhouse
+    city
+    column
+    row
+    profile
     createdAt
     updatedAt
   }

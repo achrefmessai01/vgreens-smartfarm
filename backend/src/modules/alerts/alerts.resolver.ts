@@ -6,6 +6,7 @@ import { CreateAlertInput, UpdateAlertInput } from './dto';
 import { User } from '@modules/users/entities/user.entity';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
+import { AlertThresholdService } from './alert-threshold.service';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
 
@@ -13,7 +14,10 @@ import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
 @UseInterceptors(UserInterceptor, TenantInterceptor)
 @Resolver(() => Alert)
 export class AlertsResolver {
-  constructor(private readonly alertsService: AlertsService) {}
+  constructor(
+    private readonly alertsService: AlertsService,
+    private readonly alertThresholdService: AlertThresholdService,
+  ) {}
 
   @Query(() => [Alert], { name: 'alerts' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
@@ -84,7 +88,7 @@ export class AlertsResolver {
         ? undefined
         : currentUser.tenantId;
 
-    return this.alertsService.acknowledgeAlert(id, tenantId);
+    return this.alertsService.acknowledgeAlert(id, currentUser.id, tenantId);
   }
 
   @Mutation(() => Alert)
@@ -98,7 +102,20 @@ export class AlertsResolver {
         ? undefined
         : currentUser.tenantId;
 
-    return this.alertsService.resolveAlert(id, tenantId);
+    return this.alertsService.resolveAlert(id, currentUser.id, tenantId);
+  }
+
+  @Mutation(() => Boolean, { name: 'runThresholdCheck' })
+  // @Roles(UserRole.VGREENS_ADMIN)
+  async runThresholdCheck(
+    @Args('tenantId', { type: () => ID }) tenantId: string,
+    @Args('bucketName', { type: () => String }) bucketName: string,
+  ): Promise<boolean> {
+    await this.alertThresholdService.runThresholdCheckForBucket(
+      tenantId,
+      bucketName,
+    );
+    return true;
   }
 
   @Mutation(() => Boolean)
