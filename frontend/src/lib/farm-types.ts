@@ -9,7 +9,6 @@ export interface PlantSlot {
   rowIndex: number
   columnIndex: number
   values: ParameterValue
-  /** Optional metadata from InfluxDB row(s) for this slot */
   meta?: Record<string, unknown>
 }
 

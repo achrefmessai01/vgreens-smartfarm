@@ -4,6 +4,9 @@
 # Stage 1: Build stage
 FROM node:20-alpine AS builder
 
+# Cache buster - change this to force rebuild
+ARG CACHE_BUST=2026-02-05
+
 WORKDIR /app
 
 # Copy package files
@@ -49,12 +52,12 @@ RUN chown -R nestjs:nodejs /app/dist
 # Switch to non-root user
 USER nestjs
 
-# Expose port
-EXPOSE 3001
+# Expose port (Fly.io uses 8080, local dev uses 3001)
+EXPOSE 8080
 
-# Health check
+# Health check (use PORT env var or default to 8080)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "const port = process.env.PORT || 8080; require('http').get('http://localhost:' + port + '/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]

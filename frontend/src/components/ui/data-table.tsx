@@ -27,6 +27,7 @@ export interface DataTableProps<T> {
   data: T[]
   columns: Column<T>[]
   renderRow: (item: T) => React.ReactNode
+  onRowClick?: (item: T) => void
   searchConfig?: {
     placeholder: string
     onSearch: (query: string, item: T) => boolean
@@ -59,6 +60,7 @@ export function DataTable<T extends { id: string | number }>({
   data,
   columns,
   renderRow,
+  onRowClick,
   searchConfig,
   filterConfig,
   headerActions,
@@ -185,7 +187,11 @@ export function DataTable<T extends { id: string | number }>({
                   {paginatedData.map((item) => (
                     <TableRow
                       key={item.id}
-                      className="dark:border-border/30 dark:hover:bg-muted/50"
+                    className={cn(
+                      'dark:border-border/30 dark:hover:bg-muted/50',
+                      onRowClick && 'cursor-pointer'
+                    )}
+                    onClick={onRowClick ? () => onRowClick(item) : undefined}
                     >
                       {renderRow(item)}
                     </TableRow>

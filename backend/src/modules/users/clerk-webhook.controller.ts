@@ -3,8 +3,6 @@ import { Request, Response } from 'express';
 import { Public } from '@common/decorators/public.decorator';
 import { ClerkSyncService } from './clerk-sync.service';
 
-// local development: http://localhost:3001/webhooks/clerk
-// production: https://nondestructively-carditic-bruna.ngrok-free.dev/webhooks/clerk
 @Public()
 @Controller('webhooks/clerk')
 export class ClerkWebhookController {

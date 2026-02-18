@@ -144,6 +144,41 @@ export function getParameterValue(slot: PlantSlot, parameter: string): number {
   return slot.values[parameter] ?? 0
 }
 
+/** Format numeric value for display (e.g. 6812 → 6.8k). */
+export function formatParameterDisplayValue(value: number): string {
+  const abs = Math.abs(value)
+  if (abs >= 1000) {
+    const k = value / 1000
+    const decimals = abs >= 10000 ? 0 : 1
+    return `${k.toFixed(decimals)}k`
+  }
+  return value.toFixed(1)
+}
+
+/** Unit string for a parameter (e.g. temperature → °C, co2 → ppm) */
+export function getParameterUnit(parameter: string): string {
+  const units: Record<string, string> = {
+    temperature: '°C',
+    soil_temp: '°C',
+    co2: 'ppm',
+    humidity: '%',
+    soil_moisture: '%',
+    vpd: 'kPa',
+    par: 'µmol/m²/s',
+    par_estimated: 'µmol/m²/s',
+    soil_conductivity: 'mS/cm',
+    soilEC: 'mS/cm',
+    battery_v: 'V',
+    voltage_v: 'V',
+    current_ma: 'mA',
+    lux: 'lux',
+    pressure_mpa: 'MPa',
+    rssi: 'dBm',
+    snr: 'dB',
+  }
+  return units[parameter] ?? ''
+}
+
 // Get color for a parameter value (0–1 normalized for gradient)
 function valueToGradient(
   value: number,
@@ -192,13 +227,11 @@ export function getParameterColor(
 ): string {
   switch (parameter) {
     case 'temperature':
-      // Gradient from bottom (blue) to top (red) based on vertical position
-      // Bottom = Blue (19°C), Top = Red (22°C), with green in between
-      // Use verticalPosition (0=top, 1=bottom) instead of temperature value
+      // Legend: 15°C = blue (cold), 30°C = red (hot). Value-based gradient.
       const positionNormalized =
         verticalPosition !== undefined
           ? verticalPosition // bottom (1) = blue, top (0) = red
-          : Math.max(0, Math.min(1, (value - 19) / 3)) // Fallback to value-based
+          : Math.max(0, Math.min(1, (30 - value) / 15)) // 15°C→1 (blue), 30°C→0 (red)
       let r, g, b
 
       // Smooth continuous gradient through the full spectrum
@@ -369,7 +402,8 @@ export function formatFieldToLabel(field: string): string {
     in1_pin: 'In 1 pin',
     in2_pin: 'In 2 pin',
     lux: 'Lux',
-    par_estimated: 'PAR (estimated)',
+    par: 'Par',
+    par_estimated: 'Par',
     pressure_mpa: 'Pressure (MPa)',
     probe_type: 'Probe type',
     soil_conductivity: 'Soil EC',

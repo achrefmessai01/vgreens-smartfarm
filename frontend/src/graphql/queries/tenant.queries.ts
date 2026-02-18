@@ -36,3 +36,13 @@ export const TENANT_QUERY = gql`
     }
   }
 `
+
+export const GET_TENANT_BUCKET_QUERY = gql`
+  query GetTenantBucket($id: ID!) {
+    tenant(id: $id) {
+      id
+      name
+      influxBucketName
+    }
+  }
+`

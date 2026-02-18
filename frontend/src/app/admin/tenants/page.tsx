@@ -64,6 +64,10 @@ export default function TenantsPage() {
     router.push(`/admin/tenants/${tenant.id}/features`)
   }
 
+  const handleRowClick = (tenant: Tenant) => {
+    router.push(`/tenant/farm-overview?tenantId=${tenant.id}`)
+  }
+
   const confirmDelete = async () => {
     if (deleteConfirmation.tenant) {
       setIsLoading(true)
@@ -134,6 +138,7 @@ export default function TenantsPage() {
         onDelete={handleDelete}
         onCreate={handleCreate}
         onManageFeatures={handleManageFeatures}
+        onRowClick={handleRowClick}
       />
 
       {/* Create/Edit Sheet */}

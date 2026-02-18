@@ -198,12 +198,21 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * Query data from a bucket by name. Uses Flux range + limit.
+   * Optional filters (field, greenhouse, device, level) restrict to a single series for history charts.
    * @param bucketName - Bucket name (e.g. tenant's influxBucketName)
-   * @param options - start: Flux duration (e.g. -1h) or ISO date string; stop: optional ISO date string for date range; limit: max rows
+   * @param options - start, stop, limit; optional field, greenhouse, device, level for filtering
    */
   async getBucketData(
     bucketName: string,
-    options?: { start?: string; stop?: string; limit?: number },
+    options?: {
+      start?: string;
+      stop?: string;
+      limit?: number;
+      field?: string;
+      greenhouse?: string;
+      device?: string;
+      level?: string;
+    },
   ): Promise<Record<string, unknown>[]> {
     if (!this.client || !this.queryApi) {
       this.logger.error('InfluxDB client is not initialized');
@@ -229,8 +238,36 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
         : '';
     const rangeClause = `range(start: ${rangeStart}${rangeStop})`;
 
+    const escapeFluxString = (v: string) =>
+      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const filterParts: string[] = [];
+    if (options?.field) {
+      filterParts.push(`r["_field"] == "${escapeFluxString(options.field)}"`);
+    }
+    if (options?.greenhouse != null && options.greenhouse !== '') {
+      filterParts.push(
+        `r["greenhouse"] == "${escapeFluxString(options.greenhouse)}"`,
+      );
+    }
+    if (options?.device != null && options.device !== '') {
+      filterParts.push(`r["device"] == "${escapeFluxString(options.device)}"`);
+    }
+    // Skip level filter when "unknown" so we match rows that may not have a level tag
+    if (
+      options?.level != null &&
+      options.level !== '' &&
+      options.level.toLowerCase() !== 'unknown'
+    ) {
+      filterParts.push(`r["level"] == "${escapeFluxString(options.level)}"`);
+    }
+    const filterClause =
+      filterParts.length > 0
+        ? `|> filter(fn: (r) => ${filterParts.join(' and ')})\n  `
+        : '';
+
     const flux = `from(bucket: "${escapedBucket}")
   |> ${rangeClause}
+  ${filterClause}|> sort(columns: ["_time"])
   |> limit(n: ${limit})`;
 
     const rows: Record<string, unknown>[] = [];

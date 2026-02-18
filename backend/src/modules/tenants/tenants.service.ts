@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTenantInput, UpdateTenantInput } from './dto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InfluxDBService } from '@modules/influxdb/influxdb.service';
+import { OrderDirection } from '@/common/enums/order-direction.enum';
 
 const DEFAULT_BUCKET_RETENTION_SECONDS = 60 * 60 * 24 * 30;
 
@@ -18,7 +19,7 @@ export class TenantsService {
   async findAll(): Promise<Tenant[]> {
     return this.tenantRepository.find({
       relations: ['users'],
-      order: { createdAt: 'DESC' },
+      order: { createdAt: OrderDirection.DESC },
     });
   }
 
@@ -70,7 +71,17 @@ export class TenantsService {
     return true;
   }
 
-  private buildBucketName(tenant: Pick<Tenant, 'id'>): string {
-    return `tenant_${tenant.id}`;
+  private buildBucketName(
+    tenant: Pick<Tenant, 'id' | 'companyName' | 'name'>,
+  ): string {
+    const rawName = tenant.companyName || tenant.name || 'tenant';
+
+    const slug = rawName
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+
+    return `${slug}_${tenant.id}`;
   }
 }
