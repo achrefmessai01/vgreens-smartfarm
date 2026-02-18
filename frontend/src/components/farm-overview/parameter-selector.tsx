@@ -14,36 +14,31 @@ export function ParameterSelector({
   options,
 }: ParameterSelectorProps) {
   return (
-    <div className="w-full">
-      {/* Parameter Navigation Tabs */}
-      <div className="flex-shrink-0 border-b border-border/50 dark:border-border/20 bg-muted/20 dark:bg-muted/10 -mx-6 -mt-4 mb-4">
-        <div className="flex overflow-x-auto scrollbar-hide">
-          {options.map((option) => {
-            const isActive = value === option.value
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => onValueChange(option.value as ParameterType)}
-                className={`
-                  relative px-5 py-3 text-sm font-semibold transition-all duration-200 whitespace-nowrap
-                  border-b-2 -mb-px min-w-[120px] sm:min-w-[140px]
-                  ${
-                    isActive
-                      ? 'border-primary text-primary dark:text-primary bg-background/60 dark:bg-background/40'
-                      : 'border-transparent text-muted-foreground dark:text-muted-foreground/80 hover:text-foreground dark:hover:text-foreground hover:bg-muted/30 dark:hover:bg-muted/20'
-                  }
-                `}
-              >
-                {option.label}
-                {isActive && (
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-primary/20 dark:bg-primary/30" />
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+    <div className="flex overflow-x-auto scrollbar-hide">
+      {options.map((option) => {
+        const isActive = value === option.value
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onValueChange(option.value as ParameterType)}
+            className={`
+              relative px-6 py-3.5 text-sm font-semibold transition-all duration-200 whitespace-nowrap
+              border-b-2 -mb-px min-w-[120px] sm:min-w-[140px]
+              ${
+                isActive
+                  ? 'border-primary text-primary dark:text-primary bg-background/60 dark:bg-background/40'
+                  : 'border-transparent text-muted-foreground dark:text-muted-foreground/80 hover:text-foreground dark:hover:text-foreground hover:bg-muted/30 dark:hover:bg-muted/20'
+              }
+            `}
+          >
+            {option.label}
+            {isActive && (
+              <div className="absolute inset-x-0 bottom-0 h-0.5 bg-primary/20 dark:bg-primary/30" />
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }

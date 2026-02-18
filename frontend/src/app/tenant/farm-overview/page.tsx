@@ -1,23 +1,24 @@
 'use client'
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
 import {
+  GreenhouseSelector,
   HistoryDrawer,
-  SingleBayView,
-  SensorMapView,
   ParameterSelector,
+  SensorMapView,
+  SingleBayView,
 } from '@/components/farm-overview'
-import { useSearchParams } from 'next/navigation'
-import { formatFieldToLabel } from '@/lib/farm-data'
-import type { ParameterType } from '@/lib/farm-types'
+import { FeatureGuard } from '@/components/features/feature-guard'
 import { PageHeader } from '@/components/layout/page-header'
 import { StyledSelect } from '@/components/ui/styled-select'
+import { UserRole, useTenantsQuery, type Tenant } from '@/generated/graphql'
+import { useI18n } from '@/i18n'
+import { formatFieldToLabel } from '@/lib/farm-data'
+import type { ParameterType } from '@/lib/farm-types'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data'
-import { FeatureGuard } from '@/components/features/feature-guard'
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket'
-import { useTenantsQuery, type Tenant, UserRole } from '@/generated/graphql'
+import { useSearchParams } from 'next/navigation'
+import * as React from 'react'
 
 const GREENHOUSE_LABEL_KEYS = ['greenHouse1', 'greenHouse2'] as const
 
@@ -71,9 +72,27 @@ export default function FarmOverviewPage() {
   const [selectedParameter, setSelectedParameter] =
     React.useState<ParameterType>('temperature')
 
+  // Create greenhouse options for the selector
+  const greenhouseOptions = React.useMemo(
+    () =>
+      GREENHOUSE_LABEL_KEYS.map((key) => ({
+        key,
+        label: t.pages.farmOverview[key],
+      })),
+    [t.pages.farmOverview]
+  )
+
   const parameterOptions = React.useMemo(() => {
     if (bucketFields.length === 0) {
-      return [{ label: t.pages.farmOverview.temperature, value: 'temperature' }]
+      return [
+        { label: t.pages.farmOverview.temperature, value: 'temperature' },
+        { label: t.pages.farmOverview.humidity, value: 'humidity' },
+        { label: t.pages.farmOverview.co2, value: 'co2' },
+        { label: t.pages.farmOverview.soilEC, value: 'soil_ec' },
+        { label: t.pages.farmOverview.soilMoisture, value: 'soil_moisture' },
+        { label: t.pages.farmOverview.vpd, value: 'vpd' },
+        { label: t.pages.farmOverview.par, value: 'par' },
+      ]
     }
 
     const hasPar = bucketFields.includes('par')
@@ -102,7 +121,7 @@ export default function FarmOverviewPage() {
     }
 
     return options
-  }, [bucketFields, t.pages.farmOverview.temperature])
+  }, [bucketFields, t.pages.farmOverview.temperature, t.pages.farmOverview.humidity, t.pages.farmOverview.co2, t.pages.farmOverview.soilEC, t.pages.farmOverview.soilMoisture, t.pages.farmOverview.vpd, t.pages.farmOverview.par])
 
   const effectiveParameter =
     selectedParameter && bucketFields.includes(selectedParameter)
@@ -132,138 +151,105 @@ export default function FarmOverviewPage() {
 
   return (
     <FeatureGuard featureKey="farm_overview">
-      <div className="flex flex-col h-[calc(100vh-80px)] max-h-screen">
-        <div className="flex-shrink-0 mb-1">
-          <PageHeader title={t.pages.farmOverview.title} />
+      {/* Root Container - Full viewport height with proper overflow handling */}
+      <div className="flex flex-col h-[calc(100vh-80px)] max-h-screen bg-background">
+        {/* Page Header Section - Contains title and admin controls */}
+        <div className="flex-shrink-0 px-4 sm:px-6 lg:px-8 pt-4 pb-3 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          {/* Page Title Component */}
+          <div className="mb-4">
+            <PageHeader title={t.pages.farmOverview.title} />
+          </div>
+
+          {/* Admin Tenant Selector - Only visible for VGreens Admins */}
           {isVGreensAdmin && (
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg bg-muted/30 dark:bg-muted/20 border border-border/40 dark:border-border/10">
+              <span className="text-sm font-medium text-foreground dark:text-foreground whitespace-nowrap">
                 {t.pages.admin.users.selectTenant || 'Select tenant'}:
               </span>
-              <StyledSelect
-                value={selectedTenantId}
-                onValueChange={setSelectedTenantId}
-                options={tenants.map((tenant) => ({
-                  label: tenant.name,
-                  value: tenant.id,
-                }))}
-                width="240px"
-                triggerClassName="sm:w-[260px]"
-                placeholder={t.pages.admin.users.selectTenant}
-              />
+              <div className="flex-1 sm:flex-initial">
+                <StyledSelect
+                  value={selectedTenantId}
+                  onValueChange={setSelectedTenantId}
+                  options={tenants.map((tenant) => ({
+                    label: tenant.name,
+                    value: tenant.id,
+                  }))}
+                  width="100%"
+                  triggerClassName="w-full sm:w-[280px]"
+                  placeholder={t.pages.admin.users.selectTenant}
+                />
+              </div>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-muted/30 rounded-lg p-3">
-            <div className="flex-shrink-0 flex border-b border-border mb-3">
-              {GREENHOUSE_LABEL_KEYS.map((labelKey, index) => (
-                <button
-                  key={labelKey}
-                  type="button"
-                  onClick={() => setActiveGreenhouseTab(index)}
-                  className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                    activeGreenhouseTab === index
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/40'
-                  }`}
-                >
-                  {t.pages.farmOverview[labelKey]}
-                </button>
-              ))}
-            </div>
-            <div className="flex-shrink-0 mb-2 space-y-2 flex flex-wrap items-center gap-3">
-              {/* <div className="flex items-center gap-1 rounded-lg border border-border/60 p-0.5 bg-muted/40">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('grid')}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  {t.pages.farmOverview.viewGrid}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('map')}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'map' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  {t.pages.farmOverview.viewMap}
-                </button>
-              </div> */}
-              {/* <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm font-medium whitespace-nowrap">
-                  {t.pages.farmOverview.dateRange}:
-                </span>
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
-                  aria-label={t.pages.farmOverview.fromDate}
+        {/* Main Content Wrapper - Flexible height container with scroll */}
+        <div className="flex-1 min-h-0 overflow-hidden px-4 sm:px-6 lg:px-8 py-4">
+          {/* Content Card - Primary container for all farm data */}
+          <div className="h-full flex flex-col bg-card dark:bg-card border border-border/50 dark:border-border/20 rounded-xl shadow-sm dark:shadow-lg overflow-hidden">
+            
+            {/* Navigation Section - Contains both Greenhouse and Parameter selectors */}
+            <div className="flex-shrink-0 border-b border-border/50 dark:border-border/20 bg-muted/20 dark:bg-muted/10">
+              {/* Greenhouse Navigation Tabs - Switch between different greenhouses */}
+              <div className="border-b border-border/50 dark:border-border/20">
+                <GreenhouseSelector
+                  value={activeGreenhouseTab}
+                  onValueChange={setActiveGreenhouseTab}
+                  options={greenhouseOptions}
                 />
-                <span className="text-muted-foreground text-sm">–</span>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
-                  aria-label={t.pages.farmOverview.toDate}
+              </div>
+              
+              {/* Parameter Selection Tabs - Choose which metric to display */}
+              <div>
+                <ParameterSelector
+                  value={effectiveParameter}
+                  onValueChange={setSelectedParameter}
+                  options={parameterOptions}
                 />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleApplyRange}
-                  disabled={!dateFrom || !dateTo}
-                >
-                  {t.pages.farmOverview.apply}
-                </Button>
-                {appliedRange && daysInRange.length > 0 && (
-                  <>
-                    <span className="text-sm font-medium whitespace-nowrap text-muted-foreground">
-                      {t.pages.farmOverview.viewByDay}:
-                    </span>
-                    <StyledSelect
-                      value={selectedDay ?? '__all__'}
-                      onValueChange={(val) =>
-                        setSelectedDay(val === '__all__' ? null : val)
-                      }
-                      options={[
-                        {
-                          label: t.pages.farmOverview.allDays,
-                          value: '__all__',
-                        },
-                        ...daysInRange.map((d) => ({
-                          label: d,
-                          value: d,
-                        })),
-                      ]}
-                      width="140px"
-                      triggerClassName="min-w-[140px]"
-                    />
-                  </>
-                )}
-              </div> */}
-              <ParameterSelector
-                value={effectiveParameter}
-                onValueChange={setSelectedParameter}
-                options={parameterOptions}
-                selectParameterLabel={t.pages.farmOverview.selectParameter}
-              />
+              </div>
             </div>
 
-            <div className="flex-1 min-h-0 overflow-auto">
+            {/* Main Display Area - Scrollable content showing sensor data visualization */}
+            <div className="flex-1 min-h-0 overflow-auto bg-background dark:bg-background/50">
+              {/* Loading State Component - Displayed while fetching sensor data from API */}
               {loading ? (
-                <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
-                  {t.pages.farmOverview.loading}
+                <div className="h-full min-h-[300px] flex items-center justify-center p-8">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    <span className="text-sm font-medium text-muted-foreground dark:text-muted-foreground/80">
+                      {t.pages.farmOverview.loading}
+                    </span>
+                  </div>
                 </div>
-              ) : activeGreenhouseTab === 1 ? (
-                <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
-                  {(t.pages.farmOverview as { emptyForNow?: string })
-                    .emptyForNow ?? 'Empty for now'}
+              ) : /* Empty State - Greenhouse 2 (not yet implemented) */ activeGreenhouseTab ===
+                1 ? (
+                <div className="h-full min-h-[300px] flex items-center justify-center p-8">
+                  <div className="text-center max-w-md">
+                    <div className="mb-3 text-muted-foreground/60 dark:text-muted-foreground/50">
+                      <svg
+                        className="w-16 h-16 mx-auto"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground/80">
+                      {(t.pages.farmOverview as { emptyForNow?: string })
+                        .emptyForNow ?? 'Empty for now'}
+                    </p>
+                  </div>
                 </div>
-              ) : bays.length > 0 ? (
-                <div className="h-full min-h-0">
+              ) : /* Main Content Area - Sensor data visualization with map or grid view */ bays.length >
+                0 ? (
+                <div className="h-full p-4 sm:p-6">
+                  {/* Sensor Visualization Component - Shows heatmap or grid view of sensor data */}
                   {viewMode === 'map' ? (
                     <SensorMapView
                       key={bays[0].id}
@@ -272,7 +258,7 @@ export default function FarmOverviewPage() {
                       selectedSlotId={selectedSlotId}
                       onSelectSlot={setSelectedSlotId}
                       bayLabel={t.pages.farmOverview.greenHouse1}
-                      className="min-h-0 h-full"
+                      className="h-full rounded-lg"
                       showOnlyFilledPositions
                     />
                   ) : (
@@ -285,19 +271,40 @@ export default function FarmOverviewPage() {
                       bayLabel={t.pages.farmOverview.greenHouse1}
                       parameterLabel={getParameterLabel(effectiveParameter)}
                       noSensorLabel={t.pages.farmOverview.noSensor}
-                      className="min-h-0 h-full"
+                      className="h-full rounded-lg"
                     />
                   )}
                 </div>
               ) : (
-                <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
-                  {t.pages.farmOverview.noData}
+                /* No Data State - Displayed when no sensor data is available */
+                <div className="h-full min-h-[300px] flex items-center justify-center p-8">
+                  <div className="text-center max-w-md">
+                    <div className="mb-3 text-muted-foreground/60 dark:text-muted-foreground/50">
+                      <svg
+                        className="w-16 h-16 mx-auto"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground/80">
+                      {t.pages.farmOverview.noData}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
 
+        {/* History Drawer Component - Side panel showing historical sensor data for selected slot */}
         <HistoryDrawer
           open={historyDrawerOpen}
           onOpenChange={setHistoryDrawerOpen}
