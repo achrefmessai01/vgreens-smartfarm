@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { useI18n } from '@/i18n'
 import { UserMenu } from './user-menu'
 
@@ -31,7 +30,7 @@ export function Navbar({ user, welcomeMessage, dateInfo }: NavbarProps) {
   })
 
   return (
-    <nav className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 lg:px-6">
+    <nav className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background dark:bg-background px-4 lg:px-6">
       <div className="flex flex-1 items-center gap-4">
         {/* Welcome Section */}
         <div className="hidden md:block">
