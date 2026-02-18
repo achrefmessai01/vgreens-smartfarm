@@ -1,39 +1,48 @@
 'use client'
 
-import * as React from 'react'
-import { StyledSelect } from '@/components/ui/styled-select'
 import type { ParameterType } from '@/lib/farm-types'
-import { ParameterColorLegend } from './parameter-color-legend'
 
 interface ParameterSelectorProps {
   value: ParameterType
   onValueChange: (value: ParameterType) => void
   options: { label: string; value: string }[]
-  selectParameterLabel: string
 }
 
 export function ParameterSelector({
   value,
   onValueChange,
   options,
-  selectParameterLabel,
 }: ParameterSelectorProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-      <div className="flex items-center gap-2">
-        <label className="text-sm font-medium whitespace-nowrap">
-          {selectParameterLabel}:
-        </label>
-        <StyledSelect
-          value={value}
-          onValueChange={(val) => onValueChange(val as ParameterType)}
-          options={options}
-          width="180px"
-          triggerClassName="sm:w-[200px]"
-        />
-      </div>
-      <div className="overflow-x-auto w-full sm:w-auto">
-        <ParameterColorLegend parameter={value} />
+    <div className="w-full">
+      {/* Parameter Navigation Tabs */}
+      <div className="flex-shrink-0 border-b border-border/50 dark:border-border/20 bg-muted/20 dark:bg-muted/10 -mx-6 -mt-4 mb-4">
+        <div className="flex overflow-x-auto scrollbar-hide">
+          {options.map((option) => {
+            const isActive = value === option.value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => onValueChange(option.value as ParameterType)}
+                className={`
+                  relative px-5 py-3 text-sm font-semibold transition-all duration-200 whitespace-nowrap
+                  border-b-2 -mb-px min-w-[120px] sm:min-w-[140px]
+                  ${
+                    isActive
+                      ? 'border-primary text-primary dark:text-primary bg-background/60 dark:bg-background/40'
+                      : 'border-transparent text-muted-foreground dark:text-muted-foreground/80 hover:text-foreground dark:hover:text-foreground hover:bg-muted/30 dark:hover:bg-muted/20'
+                  }
+                `}
+              >
+                {option.label}
+                {isActive && (
+                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-primary/20 dark:bg-primary/30" />
+                )}
+              </button>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
