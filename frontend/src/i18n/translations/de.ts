@@ -124,6 +124,7 @@ export const de = {
     },
     farmOverview: {
       title: 'Farm-Übersicht',
+      subtitle: 'Echtzeit-Einblicke in Ihre Betriebsabläufe',
       batches: 'Chargen',
       onTime: 'Pünktlich',
       delayed: 'Verspätet',

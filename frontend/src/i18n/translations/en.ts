@@ -123,6 +123,7 @@ export const en = {
     },
     farmOverview: {
       title: 'Farm Overview',
+      subtitle: 'Real-time insights into your farm operations',
       batches: 'Batches',
       onTime: 'On time',
       delayed: 'Delayed',

@@ -151,14 +151,8 @@ export default function FarmOverviewPage() {
 
   return (
     <FeatureGuard featureKey="farm_overview">
-      {/* Root Container - Full viewport height with proper overflow handling */}
-      <div className="flex flex-col h-[calc(100vh-80px)] max-h-screen bg-background">
-        {/* Page Header Section - Contains title and admin controls */}
-        <div className="flex-shrink-0 px-4 sm:px-6 lg:px-8 pt-4 pb-3 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          {/* Page Title Component */}
-          <div className="mb-4">
-            <PageHeader title={t.pages.farmOverview.title} />
-          </div>
+      <div className="space-y-6 bg-background">
+          <PageHeader title={t.pages.farmOverview.title} subtitle={t.pages.farmOverview.subtitle} />
 
           {/* Admin Tenant Selector - Only visible for VGreens Admins */}
           {isVGreensAdmin && (
@@ -184,7 +178,7 @@ export default function FarmOverviewPage() {
         </div>
 
         {/* Main Content Wrapper - Flexible height container with scroll */}
-        <div className="flex-1 min-h-0 overflow-hidden px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex-1 min-h-0 overflow-hidden py-4">
           {/* Content Card - Primary container for all farm data */}
           <div className="h-full flex flex-col bg-card dark:bg-card border border-border/50 dark:border-border/20 rounded-xl shadow-sm dark:shadow-lg overflow-hidden">
             
@@ -317,7 +311,6 @@ export default function FarmOverviewPage() {
           oneMonthLabel={t.pages.farmOverview.oneMonth}
           historyLabel={t.pages.farmOverview.history}
         />
-      </div>
     </FeatureGuard>
   )
 }
