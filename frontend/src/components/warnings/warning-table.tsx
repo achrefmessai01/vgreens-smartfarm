@@ -14,6 +14,7 @@ interface WarningTableProps {
   warnings: Warning[]
   onAcknowledge: (warning: Warning) => void
   onResolve: (warning: Warning) => void
+  onRowClick?: (warning: Warning) => void
   isAlert?: boolean
 }
 
@@ -21,6 +22,7 @@ export function WarningTable({
   warnings,
   onAcknowledge,
   onResolve,
+  onRowClick,
   isAlert = false,
 }: WarningTableProps) {
   const { t } = useI18n()
@@ -112,6 +114,7 @@ export function WarningTable({
     },
   ]
 
+
   const renderRow = (warning: Warning) => (
     <>
       <TableCell className="font-medium dark:text-white">
@@ -131,7 +134,7 @@ export function WarningTable({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onAcknowledge(warning)}
+              onClick={(e) =>  { e.stopPropagation(); onAcknowledge(warning); }}
               className="h-8 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
             >
               {translations.acknowledge}
@@ -141,7 +144,7 @@ export function WarningTable({
             <Button
               variant="default"
               size="sm"
-              onClick={() => onResolve(warning)}
+              onClick={(e) => { e.stopPropagation(); onResolve(warning); }}
               className="h-8"
             >
               {translations.resolve}
@@ -157,6 +160,7 @@ export function WarningTable({
       data={filteredWarnings}
       columns={columns}
       renderRow={renderRow}
+      onRowClick={onRowClick}
       filterConfig={{
         label: translations.filterByStatus,
         value: statusFilter,

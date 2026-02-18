@@ -6,6 +6,7 @@ import {
   AlertPageHeader,
   AlertActionDialog,
   AlertDeleteDialog,
+  AlertSidebar,
 } from '@/components/alerts'
 import * as React from 'react'
 import { useI18n } from '@/i18n'
@@ -29,6 +30,7 @@ export default function AlertsPage() {
 
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
   const [editingAlert, setEditingAlert] = React.useState<Alert | null>(null)
+  const [selectedAlert, setSelectedAlert] = React.useState<Alert | null>(null)
   const [deleteConfirmation, setDeleteConfirmation] = React.useState<{
     alert: Alert | null
     isOpen: boolean
@@ -40,11 +42,13 @@ export default function AlertsPage() {
   }>({ isOpen: false, alert: null, action: null })
 
   const onCreate = () => {
+    setSelectedAlert(null)
     setEditingAlert(null)
     setIsSheetOpen(true)
   }
 
   const onEdit = (alert: Alert) => {
+    setSelectedAlert(null)
     setEditingAlert(alert)
     setIsSheetOpen(true)
   }
@@ -59,6 +63,26 @@ export default function AlertsPage() {
 
   const onResolve = (alert: Alert) => {
     setActionDialog({ isOpen: true, alert, action: 'resolve' })
+  }
+
+  const handleAlertRowClick = (alert: Alert) => {
+    setSelectedAlert(alert)
+  }
+
+  const handleSidebarOpenChange = (open: boolean) => {
+    if (!open) {
+      setSelectedAlert(null)
+    }
+  }
+
+  const handleSidebarAcknowledge = (alert: Alert) => {
+    setSelectedAlert(null)
+    onAcknowledge(alert)
+  }
+
+  const handleSidebarResolve = (alert: Alert) => {
+    setSelectedAlert(null)
+    onResolve(alert)
   }
 
   const confirmDelete = async () => {
@@ -124,6 +148,16 @@ export default function AlertsPage() {
           onResolve={onResolve}
           onEdit={onEdit}
           onDelete={onDelete}
+          onRowClick={handleAlertRowClick}
+          isLoading={isLoading}
+        />
+
+        <AlertSidebar
+          open={selectedAlert !== null}
+          onOpenChange={handleSidebarOpenChange}
+          alert={selectedAlert}
+          onAcknowledge={handleSidebarAcknowledge}
+          onResolve={handleSidebarResolve}
           isLoading={isLoading}
         />
 

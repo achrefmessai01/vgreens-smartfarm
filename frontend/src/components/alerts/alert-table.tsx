@@ -15,6 +15,7 @@ interface AlertTableProps {
   onResolve: (alert: Alert) => void
   onEdit?: (alert: Alert) => void
   onDelete?: (alert: Alert) => void
+  onRowClick?: (alert: Alert) => void
   isLoading?: boolean
 }
 
@@ -24,6 +25,7 @@ export function AlertTable({
   onResolve,
   onEdit,
   onDelete,
+  onRowClick,
   isLoading = false,
 }: AlertTableProps) {
   const { t } = useI18n()
@@ -116,7 +118,10 @@ export function AlertTable({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onAcknowledge(alert)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onAcknowledge(alert)
+                }}
                 disabled={isLoading}
               >
                 {t.pages.alerts.acknowledge}
@@ -126,7 +131,10 @@ export function AlertTable({
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => onResolve(alert)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onResolve(alert)
+                }}
                 disabled={isLoading}
               >
                 {t.pages.alerts.resolve}
@@ -136,7 +144,10 @@ export function AlertTable({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onEdit(alert)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit(alert)
+                }}
                 disabled={isLoading}
                 className="h-8 w-8"
               >
@@ -147,7 +158,10 @@ export function AlertTable({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onDelete(alert)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(alert)
+                }}
                 disabled={isLoading}
                 className="h-8 w-8 text-destructive hover:text-destructive"
               >
@@ -165,6 +179,7 @@ export function AlertTable({
       data={alerts}
       columns={columns}
       renderRow={renderRow}
+      onRowClick={onRowClick}
       defaultPageSize={paginationConfig.defaultPageSize}
       pageSizeOptions={paginationConfig.pageSizeOptions}
       paginationLabels={paginationConfig.paginationLabels}
