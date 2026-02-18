@@ -1,15 +1,17 @@
 "use client";
 
 import {
+  EmptyState,
+  FarmDataDisplay,
   GreenhouseSelector,
   HistoryDrawer,
+  LoadingState,
   ParameterSelector,
-  SensorMapView,
-  SingleBayView,
 } from "@/components/farm-overview";
 import { FeatureGuard } from "@/components/features/feature-guard";
 import { PageHeader } from "@/components/layout/page-header";
 import { TenantSelector } from "@/components/tenants";
+import { Card } from "@/components/ui/card";
 import { UserRole, useTenantsQuery, type Tenant } from "@/generated/graphql";
 import { useI18n } from "@/i18n";
 import { formatFieldToLabel } from "@/lib/farm-data";
@@ -179,7 +181,7 @@ export default function FarmOverviewPage() {
         )}
 
         {/* Content Card - Primary container for all farm data */}
-        <div className="h-full flex flex-col bg-card dark:bg-card border border-border/50 dark:border-border/20 rounded-xl shadow-sm dark:shadow-lg overflow-hidden">
+        <Card className="h-full gap-0 py-0 overflow-hidden dark:shadow-lg">
           {/* Navigation Section - Contains both Greenhouse and Parameter selectors */}
           <div className="shrink-0 border-b border-border/50 dark:border-border/20 bg-muted/20 dark:bg-muted/10">
             {/* Greenhouse Navigation Tabs - Switch between different greenhouses */}
@@ -203,97 +205,31 @@ export default function FarmOverviewPage() {
 
           {/* Main Display Area - Scrollable content showing sensor data visualization */}
           <div className="flex-1 min-h-0 overflow-auto bg-background dark:bg-background/50">
-            {/* Loading State Component - Displayed while fetching sensor data from API */}
             {loading ? (
-              <div className="h-full min-h-[300px] flex items-center justify-center p-8">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-                  <span className="text-sm font-medium text-muted-foreground dark:text-muted-foreground/80">
-                    {t.pages.farmOverview.loading}
-                  </span>
-                </div>
-              </div>
-            ) : /* Empty State - Greenhouse 2 (not yet implemented) */ activeGreenhouseTab ===
-              1 ? (
-              <div className="h-full min-h-[300px] flex items-center justify-center p-8">
-                <div className="text-center max-w-md">
-                  <div className="mb-3 text-muted-foreground/60 dark:text-muted-foreground/50">
-                    <svg
-                      className="w-16 h-16 mx-auto"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground/80">
-                    {(t.pages.farmOverview as { emptyForNow?: string })
-                      .emptyForNow ?? "Empty for now"}
-                  </p>
-                </div>
-              </div>
-            ) : /* Main Content Area - Sensor data visualization with map or grid view */ bays.length >
-              0 ? (
-              <div className="h-full p-4 sm:p-6">
-                {/* Sensor Visualization Component - Shows heatmap or grid view of sensor data */}
-                {viewMode === "map" ? (
-                  <SensorMapView
-                    key={bays[0].id}
-                    bay={bays[0]}
-                    parameter={effectiveParameter}
-                    selectedSlotId={selectedSlotId}
-                    onSelectSlot={setSelectedSlotId}
-                    bayLabel={t.pages.farmOverview.greenHouse1}
-                    className="h-full rounded-lg"
-                    showOnlyFilledPositions
-                  />
-                ) : (
-                  <SingleBayView
-                    key={bays[0].id}
-                    bay={bays[0]}
-                    parameter={effectiveParameter}
-                    selectedSlotId={selectedSlotId}
-                    onSelectSlot={setSelectedSlotId}
-                    bayLabel={t.pages.farmOverview.greenHouse1}
-                    parameterLabel={getParameterLabel(effectiveParameter)}
-                    noSensorLabel={t.pages.farmOverview.noSensor}
-                    className="h-full rounded-lg"
-                  />
-                )}
-              </div>
+              <LoadingState message={t.pages.farmOverview.loading} />
+            ) : activeGreenhouseTab === 1 ? (
+              <EmptyState
+                message={
+                  (t.pages.farmOverview as { emptyForNow?: string })
+                    .emptyForNow ?? "Empty for now"
+                }
+                icon={<EmptyState.GreenhouseIcon />}
+              />
             ) : (
-              /* No Data State - Displayed when no sensor data is available */
-              <div className="h-full min-h-[300px] flex items-center justify-center p-8">
-                <div className="text-center max-w-md">
-                  <div className="mb-3 text-muted-foreground/60 dark:text-muted-foreground/50">
-                    <svg
-                      className="w-16 h-16 mx-auto"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground dark:text-muted-foreground/80">
-                    {t.pages.farmOverview.noData}
-                  </p>
-                </div>
-              </div>
+              <FarmDataDisplay
+                bays={bays}
+                viewMode={viewMode}
+                parameter={effectiveParameter}
+                selectedSlotId={selectedSlotId}
+                onSelectSlot={setSelectedSlotId}
+                bayLabel={t.pages.farmOverview.greenHouse1}
+                parameterLabel={getParameterLabel(effectiveParameter)}
+                noSensorLabel={t.pages.farmOverview.noSensor}
+                noDataMessage={t.pages.farmOverview.noData}
+              />
             )}
           </div>
-        </div>
+        </Card>
 
         {/* History Drawer Component - Side panel showing historical sensor data for selected slot */}
         <HistoryDrawer
