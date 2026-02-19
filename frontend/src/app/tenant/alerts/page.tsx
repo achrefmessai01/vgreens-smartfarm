@@ -12,6 +12,8 @@ import * as React from 'react'
 import { useI18n } from '@/i18n'
 import type { Alert } from '@/generated/graphql'
 import { FeatureGuard } from '@/components/features/feature-guard'
+import { ContentSkeleton } from '@/components/ui/content-skeleton'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { useAlertManagement } from '@/lib/hooks/use-alert-management'
 
 export default function AlertsPage() {
@@ -127,8 +129,9 @@ export default function AlertsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">{t.common.loading}</p>
+      <div className="space-y-6">
+        <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
+        <TableSkeleton columnCount={7} rowCount={8} />
       </div>
     )
   }

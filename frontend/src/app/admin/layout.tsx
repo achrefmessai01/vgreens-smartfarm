@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { UserRole } from '@/generated/graphql'
 import { AppLayout } from '@/components/layout'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
 
 export default function AdminLayout({
   children,
@@ -49,11 +50,7 @@ export default function AdminLayout({
 
   // Show loading while Clerk or user data is loading
   if (!isLoaded || !isSignedIn || loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   // If not admin, don't render (redirect will happen)

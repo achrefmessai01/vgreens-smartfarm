@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { SidebarSkeleton } from '@/components/ui/sidebar-skeleton'
 import { User, UserRole } from '@/generated/graphql'
 import { useI18n } from '@/i18n'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
@@ -174,11 +175,7 @@ export function Sidebar({ user: propUser, onLogout }: SidebarProps) {
 
   // Show loading state while fetching user or features
   if (userLoading || (!isVGreensAdmin && featuresLoading)) {
-    return (
-      <div className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-64 z-40 border-r dark:border-sidebar-border/70 items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    )
+    return <SidebarSkeleton />
   }
 
   return (

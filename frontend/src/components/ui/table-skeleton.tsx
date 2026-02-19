@@ -1,0 +1,95 @@
+'use client'
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
+
+interface TableSkeletonProps {
+  /** Number of columns (default 5) */
+  columnCount?: number
+  /** Number of body rows (default 8) */
+  rowCount?: number
+  /** Optional wrapper class (e.g. for Card) */
+  className?: string
+  /** Show header row with skeleton cells (default true) */
+  showHeader?: boolean
+}
+
+export function TableSkeleton({
+  columnCount = 5,
+  rowCount = 8,
+  className,
+  showHeader = true,
+}: TableSkeletonProps) {
+  const headerWidths = [
+    'w-24',
+    'w-32',
+    'w-28',
+    'w-36',
+    'w-20',
+    'w-24',
+    'w-28',
+  ]
+  const cellWidths = [
+    'w-32',
+    'w-40',
+    'w-24',
+    'w-48',
+    'w-20',
+    'w-24',
+    'w-28',
+  ]
+
+  return (
+    <div
+      className={cn('overflow-hidden rounded-md border border-border', className)}
+      aria-label="Loading table"
+    >
+      <Table>
+        {showHeader && (
+          <TableHeader>
+            <TableRow className="border-border hover:bg-transparent">
+              {Array.from({ length: columnCount }).map((_, i) => (
+                <TableHead key={i} className={cn(headerWidths[i] || 'w-24')}>
+                  <Skeleton className="h-4 w-full max-w-[theme(spacing.24)]" />
+                </TableHead>
+              ))}
+              <TableHead className="text-right w-24">
+                <Skeleton className="h-4 w-20 ml-auto" />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+        )}
+        <TableBody>
+          {Array.from({ length: rowCount }).map((_, rowIndex) => (
+            <TableRow key={rowIndex} className="border-border/50">
+              {Array.from({ length: columnCount }).map((_, colIndex) => (
+                <TableCell key={colIndex} className={cn(cellWidths[colIndex] || '')}>
+                  <Skeleton
+                    className="h-4 w-full"
+                    style={{
+                      maxWidth: colIndex === 0 ? '8rem' : colIndex === columnCount - 1 ? '4rem' : undefined,
+                    }}
+                  />
+                </TableCell>
+              ))}
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Skeleton className="h-8 w-8 shrink-0 rounded-md" />
+                  <Skeleton className="h-8 w-8 shrink-0 rounded-md" />
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
