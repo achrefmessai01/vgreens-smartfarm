@@ -21,7 +21,6 @@ export function FarmDataDisplay({
   parameter,
   selectedSlotId,
   onSelectSlot,
-  bayLabel,
   parameterLabel,
   noSensorLabel,
   noDataMessage,
@@ -31,7 +30,7 @@ export function FarmDataDisplay({
   }
 
   return (
-    <div className="h-full p-4 sm:p-6">
+    <div className="h-full p-2 sm:p-4">
       {viewMode === "map" ? (
         <SensorMapView
           key={bays[0].id}
@@ -39,8 +38,7 @@ export function FarmDataDisplay({
           parameter={parameter}
           selectedSlotId={selectedSlotId}
           onSelectSlot={onSelectSlot}
-          bayLabel={bayLabel}
-          className="h-full rounded-lg"
+          className="h-full"
           showOnlyFilledPositions
         />
       ) : (
@@ -50,10 +48,9 @@ export function FarmDataDisplay({
           parameter={parameter}
           selectedSlotId={selectedSlotId}
           onSelectSlot={onSelectSlot}
-          bayLabel={bayLabel}
           parameterLabel={parameterLabel}
           noSensorLabel={noSensorLabel}
-          className="h-full rounded-lg"
+          className="h-full"
         />
       )}
     </div>

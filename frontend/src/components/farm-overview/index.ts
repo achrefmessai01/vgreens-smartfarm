@@ -18,3 +18,4 @@ export { SensorTile } from "./sensor-tile";
 export { SingleBayView } from "./single-bay-view";
 export { SystemOverview } from "./system-overview";
 export { TunnelCard } from "./tunnel-card";
+export { ViewModeSelector } from "./view-mode-selector";

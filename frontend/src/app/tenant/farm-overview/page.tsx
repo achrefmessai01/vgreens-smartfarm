@@ -7,6 +7,7 @@ import {
   HistoryDrawer,
   LoadingState,
   ParameterSelector,
+  ViewModeSelector,
 } from "@/components/farm-overview";
 import { FeatureGuard } from "@/components/features/feature-guard";
 import { PageHeader } from "@/components/layout/page-header";
@@ -149,7 +150,7 @@ export default function FarmOverviewPage() {
     null,
   );
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false);
-  const [viewMode] = React.useState<"grid" | "map">("map");
+  const [viewMode, setViewMode] = React.useState<"grid" | "map">("map");
   const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0);
 
   React.useEffect(() => {
@@ -184,19 +185,32 @@ export default function FarmOverviewPage() {
         <Card className="h-full gap-0 py-0 overflow-hidden dark:shadow-lg">
           {/* Navigation Section */}
           <div className="shrink-0 flex flex-col bg-muted/10">
-            {/* Greenhouse Level */}
-            <GreenhouseSelector
-              value={activeGreenhouseTab}
-              onValueChange={setActiveGreenhouseTab}
-              options={greenhouseOptions}
-            />
+            {/* Greenhouse Level (Primary Folders) */}
+            <div className="px-4">
+              <GreenhouseSelector
+                value={activeGreenhouseTab}
+                onValueChange={setActiveGreenhouseTab}
+                options={greenhouseOptions}
+              />
+            </div>
 
-            {/* Parameter Level */}
-            <ParameterSelector
-              value={effectiveParameter}
-              onValueChange={setSelectedParameter}
-              options={parameterOptions}
-            />
+            {/* Parameter & View Mode Level (Secondary Minimalist) */}
+            <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-1 border-b border-border/40 bg-background">
+              {/* Left: Metric selection */}
+              <ParameterSelector
+                value={effectiveParameter}
+                onValueChange={setSelectedParameter}
+                options={parameterOptions}
+              />
+
+              {/* Right: View toggle */}
+              <ViewModeSelector
+                value={viewMode}
+                onValueChange={setViewMode}
+                gridLabel={t.pages.farmOverview.viewGrid}
+                mapLabel={t.pages.farmOverview.viewMap}
+              />
+            </div>
           </div>
 
           {/* Main Display Area - Scrollable content showing sensor data visualization */}
