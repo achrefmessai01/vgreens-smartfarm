@@ -68,7 +68,7 @@ export class AlertsService extends BaseService<Alert> {
     try {
       const alertTime: Date =
         typeof input.timestamp === 'string'
-          ? new Date(input.timestamp as string)
+          ? new Date(input.timestamp)
           : new Date();
       const alert = this.alertRepository.create({
         ...input,

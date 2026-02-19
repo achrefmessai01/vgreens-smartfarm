@@ -34,11 +34,11 @@ export default function FarmOverviewPage() {
   })
   const tenants = React.useMemo(
     () => (tenantsData?.tenants || []) as Tenant[],
-    [tenantsData?.tenants]
+    [tenantsData?.tenants],
   )
 
   const [selectedTenantId, setSelectedTenantId] = React.useState<string>(
-    initialTenantIdFromUrl
+    initialTenantIdFromUrl,
   )
 
   React.useEffect(() => {
@@ -52,17 +52,28 @@ export default function FarmOverviewPage() {
       return
     }
 
-    if (!selectedTenantId || !tenants.some((t) => t.id === selectedTenantId)) {
+    const currentIsValid =
+      selectedTenantId && tenants.some((t) => t.id === selectedTenantId)
+    if (!currentIsValid) {
       setSelectedTenantId(tenants[0].id)
     }
   }, [isVGreensAdmin, tenants, selectedTenantId, initialTenantIdFromUrl])
 
+  const handleTenantChange = React.useCallback((value: string) => {
+    setSelectedTenantId(value)
+    if (typeof window !== 'undefined' && value) {
+      const url = new URL(window.location.href)
+      url.searchParams.set('tenantId', value)
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [])
+
   const { bucketName: selectedTenantBucketName } = useTenantBucketName(
-    isVGreensAdmin ? selectedTenantId : undefined
+    isVGreensAdmin ? selectedTenantId : undefined,
   )
 
   const tenantBucketNameOverride = isVGreensAdmin
-    ? selectedTenantBucketName ?? null
+    ? (selectedTenantBucketName ?? null)
     : undefined
 
   const { bays, bucketFields, loading } = useLiveFarmData({
@@ -80,7 +91,8 @@ export default function FarmOverviewPage() {
     const hasParEstimated = bucketFields.includes('par_estimated')
 
     const baseFields = bucketFields.filter(
-      (field) => field !== 'lux' && field !== 'par' && field !== 'par_estimated'
+      (field) =>
+        field !== 'lux' && field !== 'par' && field !== 'par_estimated',
     )
 
     const options = baseFields.map((field) => ({
@@ -91,8 +103,8 @@ export default function FarmOverviewPage() {
     const parField: ParameterType | null = hasParEstimated
       ? 'par_estimated'
       : hasPar
-      ? 'par'
-      : null
+        ? 'par'
+        : null
 
     if (parField) {
       options.push({
@@ -107,7 +119,7 @@ export default function FarmOverviewPage() {
   const effectiveParameter =
     selectedParameter && bucketFields.includes(selectedParameter)
       ? selectedParameter
-      : bucketFields[0] ?? 'temperature'
+      : (bucketFields[0] ?? 'temperature')
 
   React.useEffect(() => {
     if (bucketFields.length > 0 && !bucketFields.includes(selectedParameter)) {
@@ -115,7 +127,7 @@ export default function FarmOverviewPage() {
     }
   }, [bucketFields, selectedParameter])
   const [selectedSlotId, setSelectedSlotId] = React.useState<string | null>(
-    null
+    null,
   )
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false)
   const [viewMode] = React.useState<'grid' | 'map'>('map')
@@ -141,8 +153,13 @@ export default function FarmOverviewPage() {
                 {t.pages.admin.users.selectTenant || 'Select tenant'}:
               </span>
               <StyledSelect
-                value={selectedTenantId}
-                onValueChange={setSelectedTenantId}
+                value={
+                  selectedTenantId &&
+                  tenants.some((t) => t.id === selectedTenantId)
+                    ? selectedTenantId
+                    : (tenants[0]?.id ?? '')
+                }
+                onValueChange={handleTenantChange}
                 options={tenants.map((tenant) => ({
                   label: tenant.name,
                   value: tenant.id,
@@ -309,6 +326,7 @@ export default function FarmOverviewPage() {
           oneWeekLabel={t.pages.farmOverview.oneWeek}
           oneMonthLabel={t.pages.farmOverview.oneMonth}
           historyLabel={t.pages.farmOverview.history}
+          bucketName={tenantBucketNameOverride ?? undefined}
         />
       </div>
     </FeatureGuard>
