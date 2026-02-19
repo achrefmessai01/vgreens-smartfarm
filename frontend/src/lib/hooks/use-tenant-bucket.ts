@@ -6,7 +6,7 @@ export function useTenantBucketName(tenantId?: string | null) {
   const { data, loading, error } = useGetTenantBucketQuery({
     variables: { id: tenantId as string },
     skip: !tenantId,
-    fetchPolicy: 'cache-first',
+    fetchPolicy: 'cache-and-network',
   })
 
   const bucketName = data?.tenant?.influxBucketName ?? null
