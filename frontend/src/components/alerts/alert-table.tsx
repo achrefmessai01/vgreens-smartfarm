@@ -147,6 +147,8 @@ export function AlertTable({
     return sortedAlerts.filter((alert) => alert.status === statusFilter)
   }, [sortedAlerts, statusFilter])
 
+  const hideEditButton = true
+
   const renderRow = (alert: Alert) => {
     const canAcknowledge =
       alert.status === AlertStatus.Open && alert.acknowledgedBy == null
@@ -217,7 +219,7 @@ export function AlertTable({
                 {t.pages.alerts.resolve}
               </Button>
             )}
-            {onEdit && (
+            {onEdit && !hideEditButton && (
               <Button
                 variant="ghost"
                 size="icon"
