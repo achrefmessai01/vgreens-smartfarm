@@ -93,7 +93,7 @@ export function useAlertManagement() {
     setIsLoading(true)
     try {
       await acknowledgeAlert({ variables: { id } })
-      refetch()
+      await refetch()
       return true
     } catch (error) {
       console.error('Error acknowledging alert:', error)
@@ -107,7 +107,7 @@ export function useAlertManagement() {
     setIsLoading(true)
     try {
       await resolveAlert({ variables: { id } })
-      refetch()
+      await refetch()
       return true
     } catch (error) {
       console.error('Error resolving alert:', error)
