@@ -5,7 +5,7 @@ import { ViewSingleBay } from "./views/view-single-bay";
 
 interface FarmDataDisplayProps {
   bays: Bay[];
-  viewMode: "grid" | "discrete";
+  viewMode: "heatmap" | "discrete";
   parameter: ParameterType;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
