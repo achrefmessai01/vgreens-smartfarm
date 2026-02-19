@@ -42,11 +42,11 @@ export function AlertSidebar({
 }: AlertSidebarProps) {
   const { t } = useI18n()
 
-  const canAcknowledge = alert?.status === AlertStatus.Open
-  const canResolve =
-    alert?.status === AlertStatus.Open ||
-    alert?.status === AlertStatus.Acknowledged
-
+  const canAcknowledge = alert?.status === AlertStatus.Open && alert?.acknowledgedBy == null
+    const canResolve =
+      (alert?.status === AlertStatus.Open ||
+      alert?.status === AlertStatus.Acknowledged ) && alert?.resolvedBy == null && alert?.acknowledgedBy != null
+  
   const getStatusLabel = (status?: AlertStatus | null) => {
     switch (status) {
       case AlertStatus.Open:

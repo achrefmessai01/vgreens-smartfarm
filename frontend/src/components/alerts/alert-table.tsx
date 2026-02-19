@@ -75,10 +75,10 @@ export function AlertTable({
   ]
 
   const renderRow = (alert: Alert) => {
-    const canAcknowledge = alert.status === AlertStatus.Open
+    const canAcknowledge = alert.status === AlertStatus.Open && alert.acknowledgedBy == null
     const canResolve =
-      alert.status === AlertStatus.Open ||
-      alert.status === AlertStatus.Acknowledged
+      (alert.status === AlertStatus.Open ||
+      alert.status === AlertStatus.Acknowledged ) && alert.resolvedBy == null && alert.acknowledgedBy != null
 
     const isCriticalOpen =
       alert.status === AlertStatus.Open &&
@@ -90,6 +90,9 @@ export function AlertTable({
       const name = [user.firstName, user.lastName].filter(Boolean).join(' ')
       return name || user.email || '—'
     }
+
+    // this is just a safety measure to hide the edit button for now
+    const hideButton = true;
 
     return (
       <>
@@ -140,7 +143,7 @@ export function AlertTable({
                 {t.pages.alerts.resolve}
               </Button>
             )}
-            {onEdit && (
+            {onEdit && !hideButton && (
               <Button
                 variant="ghost"
                 size="icon"
