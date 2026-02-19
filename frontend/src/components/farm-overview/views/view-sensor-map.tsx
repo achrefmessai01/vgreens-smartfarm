@@ -64,7 +64,7 @@ function buildDeviceToSlotMap(bay: Bay): Map<string, PlantSlot> {
   return map;
 }
 
-interface SensorMapViewProps {
+interface ViewSensorMapProps {
   bay: Bay;
   parameter: ParameterType;
   selectedSlotId: string | null;
@@ -79,13 +79,13 @@ interface SensorMapViewProps {
  * Schematic map view (115m x 40m) with sensor values at fixed positions.
  * Air = squares, Lux = circles, PAR = circle (pink).
  */
-export function SensorMapView({
+export function ViewSensorMap({
   bay,
   parameter,
   selectedSlotId,
   onSelectSlot,
   showOnlyFilledPositions = false,
-}: SensorMapViewProps) {
+}: ViewSensorMapProps) {
   const deviceToSlot = React.useMemo(
     () => (bay ? buildDeviceToSlotMap(bay) : new Map<string, PlantSlot>()),
     [bay],

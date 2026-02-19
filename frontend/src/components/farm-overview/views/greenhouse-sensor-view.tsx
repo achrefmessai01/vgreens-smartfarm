@@ -1,24 +1,24 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { SensorTile } from './sensor-tile'
-import type { TunnelStatus } from '@/lib/tunnel-types'
-import { cn } from '@/lib/utils'
+import { Card, CardContent } from "@/components/ui/card";
+import type { TunnelStatus } from "@/lib/tunnel-types";
+import { cn } from "@/lib/utils";
+import * as React from "react";
+import { SensorTile } from "../sensor-tile";
 
 export interface SensorBlock {
-  id: string
-  label: string
-  value: string | number
-  unit?: string
-  status: TunnelStatus
+  id: string;
+  label: string;
+  value: string | number;
+  unit?: string;
+  status: TunnelStatus;
 }
 
 interface GreenhouseSensorViewProps {
-  sensorBlocks: SensorBlock[]
-  onBlockClick?: (blockId: string) => void
-  selectedBlockId?: string | null
-  className?: string
+  sensorBlocks: SensorBlock[];
+  onBlockClick?: (blockId: string) => void;
+  selectedBlockId?: string | null;
+  className?: string;
 }
 
 /** One big greenhouse area with a grid of sensor value blocks */
@@ -31,8 +31,8 @@ export function GreenhouseSensorView({
   return (
     <Card
       className={cn(
-        'h-full w-full border-2 border-border/60 bg-card/80 rounded-xl overflow-hidden',
-        className
+        "h-full w-full border-2 border-border/60 bg-card/80 rounded-xl overflow-hidden",
+        className,
       )}
     >
       <CardContent className="p-4 h-full">
@@ -43,9 +43,9 @@ export function GreenhouseSensorView({
               type="button"
               onClick={() => onBlockClick?.(block.id)}
               className={cn(
-                'text-left rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 min-h-[100px]',
+                "text-left rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 min-h-[100px]",
                 selectedBlockId === block.id &&
-                  'ring-2 ring-primary ring-offset-2'
+                  "ring-2 ring-primary ring-offset-2",
               )}
             >
               <SensorTile
@@ -60,57 +60,55 @@ export function GreenhouseSensorView({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 /** Mock sensor data per greenhouse (replace with API later) */
-export function useMockGreenhouseSensors(
-  greenhouseId: string
-): SensorBlock[] {
+export function useMockGreenhouseSensors(greenhouseId: string): SensorBlock[] {
   return React.useMemo(() => {
-    const base = greenhouseId === 'greenhouse1' ? 0 : 2
+    const base = greenhouseId === "greenhouse1" ? 0 : 2;
     return [
       {
         id: `${greenhouseId}-temp`,
-        label: 'Temperature',
+        label: "Temperature",
         value: (21.2 + base * 0.5).toFixed(1),
-        unit: '°C',
-        status: 'normal',
+        unit: "°C",
+        status: "normal",
       },
       {
         id: `${greenhouseId}-humidity`,
-        label: 'Humidity',
+        label: "Humidity",
         value: 68 + base,
-        unit: '%',
-        status: 'normal',
+        unit: "%",
+        status: "normal",
       },
       {
         id: `${greenhouseId}-light`,
-        label: 'Light',
+        label: "Light",
         value: 420 + base * 20,
-        unit: 'µmol/m²/s',
-        status: 'normal',
+        unit: "µmol/m²/s",
+        status: "normal",
       },
       {
         id: `${greenhouseId}-co2`,
-        label: 'CO₂',
+        label: "CO₂",
         value: 820 + base * 30,
-        unit: 'ppm',
-        status: base ? 'warning' : 'normal',
+        unit: "ppm",
+        status: base ? "warning" : "normal",
       },
       {
         id: `${greenhouseId}-soil-moisture`,
-        label: 'Soil Moisture',
+        label: "Soil Moisture",
         value: 45 + base * 5,
-        unit: '%',
-        status: 'normal',
+        unit: "%",
+        status: "normal",
       },
       {
         id: `${greenhouseId}-ph`,
-        label: 'pH',
+        label: "pH",
         value: (6.2 + base * 0.1).toFixed(1),
-        status: 'normal',
+        status: "normal",
       },
-    ]
-  }, [greenhouseId])
+    ];
+  }, [greenhouseId]);
 }

@@ -214,30 +214,32 @@ export default function FarmOverviewPage() {
           </div>
 
           {/* Main Display Area - Scrollable content showing sensor data visualization */}
-          <div className="flex-1 min-h-0 overflow-auto bg-background dark:bg-background/50">
-            {loading ? (
-              <LoadingState message={t.pages.farmOverview.loading} />
-            ) : activeGreenhouseTab === 1 ? (
-              <EmptyState
-                message={
-                  (t.pages.farmOverview as { emptyForNow?: string })
-                    .emptyForNow ?? "Empty for now"
-                }
-                icon={<EmptyState.GreenhouseIcon />}
-              />
-            ) : (
-              <FarmDataDisplay
-                bays={bays}
-                viewMode={viewMode}
-                parameter={effectiveParameter}
-                selectedSlotId={selectedSlotId}
-                onSelectSlot={setSelectedSlotId}
-                bayLabel={t.pages.farmOverview.greenHouse1}
-                parameterLabel={getParameterLabel(effectiveParameter)}
-                noSensorLabel={t.pages.farmOverview.noSensor}
-                noDataMessage={t.pages.farmOverview.noData}
-              />
-            )}
+          <div className="flex-1 min-h-0 flex bg-background dark:bg-background/50">
+            <div className="flex-1 overflow-auto">
+              {loading ? (
+                <LoadingState message={t.pages.farmOverview.loading} />
+              ) : activeGreenhouseTab === 1 ? (
+                <EmptyState
+                  message={
+                    (t.pages.farmOverview as { emptyForNow?: string })
+                      .emptyForNow ?? "Empty for now"
+                  }
+                  icon={<EmptyState.GreenhouseIcon />}
+                />
+              ) : (
+                <FarmDataDisplay
+                  bays={bays}
+                  viewMode={viewMode}
+                  parameter={effectiveParameter}
+                  selectedSlotId={selectedSlotId}
+                  onSelectSlot={setSelectedSlotId}
+                  bayLabel={t.pages.farmOverview.greenHouse1}
+                  parameterLabel={getParameterLabel(effectiveParameter)}
+                  noSensorLabel={t.pages.farmOverview.noSensor}
+                  noDataMessage={t.pages.farmOverview.noData}
+                />
+              )}
+            </div>
           </div>
         </Card>
 

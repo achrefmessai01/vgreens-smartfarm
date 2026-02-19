@@ -48,7 +48,7 @@ function getAllVisibleIndices(totalSlots: number): Set<number> {
   return indices;
 }
 
-interface SingleBayViewProps {
+interface ViewSingleBayProps {
   bay: Bay;
   parameter: ParameterType;
   selectedSlotId: string | null;
@@ -60,13 +60,13 @@ interface SingleBayViewProps {
 }
 
 /** Mostly white backdrop with color-coded sensor dots/fields and visible readings */
-export function SingleBayView({
+export function ViewSingleBay({
   bay,
   parameter,
   selectedSlotId,
   onSelectSlot,
   className,
-}: SingleBayViewProps) {
+}: ViewSingleBayProps) {
   const sensorSlots = React.useMemo(() => sampleSensorSlots(bay), [bay]);
   const visibleIndices = React.useMemo(
     () => getAllVisibleIndices(sensorSlots.length),

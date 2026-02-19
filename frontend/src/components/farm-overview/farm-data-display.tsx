@@ -1,7 +1,7 @@
 import type { Bay, ParameterType } from "@/lib/farm-types";
 import { EmptyState } from "./empty-state";
-import { SensorMapView } from "./sensor-map-view";
-import { SingleBayView } from "./single-bay-view";
+import { ViewSensorMap } from "./views/view-sensor-map";
+import { ViewSingleBay } from "./views/view-single-bay";
 
 interface FarmDataDisplayProps {
   bays: Bay[];
@@ -32,17 +32,17 @@ export function FarmDataDisplay({
   return (
     <div className="h-full p-2 sm:p-4">
       {viewMode === "map" ? (
-        <SensorMapView
+        <ViewSensorMap
           key={bays[0].id}
           bay={bays[0]}
           parameter={parameter}
           selectedSlotId={selectedSlotId}
           onSelectSlot={onSelectSlot}
           className="h-full"
-          showOnlyFilledPositions
+          showOnlyFilledPositions={false}
         />
       ) : (
-        <SingleBayView
+        <ViewSingleBay
           key={bays[0].id}
           bay={bays[0]}
           parameter={parameter}
