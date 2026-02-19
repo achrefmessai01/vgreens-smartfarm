@@ -182,25 +182,21 @@ export default function FarmOverviewPage() {
 
         {/* Content Card - Primary container for all farm data */}
         <Card className="h-full gap-0 py-0 overflow-hidden dark:shadow-lg">
-          {/* Navigation Section - Contains both Greenhouse and Parameter selectors */}
-          <div className="shrink-0 border-b border-border/50 dark:border-border/20 bg-muted/20 dark:bg-muted/10">
-            {/* Greenhouse Navigation Tabs - Switch between different greenhouses */}
-            <div className="border-b border-border/50 dark:border-border/20">
-              <GreenhouseSelector
-                value={activeGreenhouseTab}
-                onValueChange={setActiveGreenhouseTab}
-                options={greenhouseOptions}
-              />
-            </div>
+          {/* Navigation Section */}
+          <div className="shrink-0 flex flex-col bg-muted/10">
+            {/* Greenhouse Level */}
+            <GreenhouseSelector
+              value={activeGreenhouseTab}
+              onValueChange={setActiveGreenhouseTab}
+              options={greenhouseOptions}
+            />
 
-            {/* Parameter Selection Tabs - Choose which metric to display */}
-            <div>
-              <ParameterSelector
-                value={effectiveParameter}
-                onValueChange={setSelectedParameter}
-                options={parameterOptions}
-              />
-            </div>
+            {/* Parameter Level */}
+            <ParameterSelector
+              value={effectiveParameter}
+              onValueChange={setSelectedParameter}
+              options={parameterOptions}
+            />
           </div>
 
           {/* Main Display Area - Scrollable content showing sensor data visualization */}
