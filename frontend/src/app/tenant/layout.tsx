@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs'
 import { AppLayout } from '@/components/layout'
 import { useRouter, usePathname } from 'next/navigation'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
 
 export default function TenantLayout({
   children,
@@ -36,11 +37,7 @@ export default function TenantLayout({
   }, [isSignedIn, isLoaded, router, pathname, loading])
 
   if (!isLoaded || !isSignedIn || loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   return <AppLayout user={user || undefined}>{children}</AppLayout>

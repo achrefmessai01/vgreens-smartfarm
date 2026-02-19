@@ -271,8 +271,9 @@ export default function FarmOverviewPage() {
 
             <div className="flex-1 min-h-0 overflow-auto">
               {loading ? (
-                <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
-                  {t.pages.farmOverview.loading}
+                <div className="h-full min-h-[200px] flex flex-col items-center justify-center gap-4 rounded-lg bg-muted/20 p-6">
+                  <div className="h-10 w-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                  <div className="h-4 w-32 animate-pulse rounded-full bg-muted" />
                 </div>
               ) : activeGreenhouseTab === 1 ? (
                 <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
