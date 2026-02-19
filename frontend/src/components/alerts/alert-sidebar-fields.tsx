@@ -94,9 +94,10 @@ export function DescriptionField({
 export function AcknowledgedByField({
   acknowledgedBy,
 }: AcknowledgedByFieldProps) {
+  const { t } = useI18n()
   return (
     <Field>
-      <FieldLabel htmlFor="alert-acknowledged-by">Acknowledged By</FieldLabel>
+      <FieldLabel htmlFor="alert-acknowledged-by">{t.pages.alerts.acknowledgedBy}</FieldLabel>
       <FieldContent>
         <Input
           id="alert-acknowledged-by"
@@ -112,9 +113,10 @@ export function AcknowledgedByField({
 export function ResolvedByField({
   resolvedBy,
 }: ResolvedByFieldProps) {
+  const { t } = useI18n()
   return (
     <Field>
-      <FieldLabel htmlFor="alert-resolved-by">Resolved By</FieldLabel>
+      <FieldLabel htmlFor="alert-resolved-by">{t.pages.alerts.resolvedBy}</FieldLabel>
       <FieldContent>
         <Input id="alert-resolved-by" type="text" value={resolvedBy} disabled />
       </FieldContent>

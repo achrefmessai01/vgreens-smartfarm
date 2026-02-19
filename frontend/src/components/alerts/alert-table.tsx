@@ -65,8 +65,8 @@ export function AlertTable({
     { key: 'status', header: t.pages.alerts.status },
     { key: 'severity', header: t.pages.alerts.severity },
     { key: 'timestamp', header: t.pages.alerts.timestamp },
-    { key: 'acknowledgedBy', header: 'Acknowledged By' },
-    { key: 'resolvedBy', header: 'Resolved By' },
+    { key: 'acknowledgedBy', header: t.pages.alerts.acknowledgedBy },
+    { key: 'resolvedBy', header: t.pages.alerts.resolvedBy },
     {
       key: 'actions',
       header: t.pages.alerts.actions,
