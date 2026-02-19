@@ -5,7 +5,7 @@ import { ViewSingleBay } from "./views/view-single-bay";
 
 interface FarmDataDisplayProps {
   bays: Bay[];
-  viewMode: "grid" | "map";
+  viewMode: "grid" | "discrete";
   parameter: ParameterType;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
@@ -31,14 +31,14 @@ export function FarmDataDisplay({
 
   return (
     <div className="h-full p-2 sm:p-4">
-      {viewMode === "map" ? (
+      {viewMode === "discrete" ? (
         <ViewSensorMap
           key={bays[0].id}
           bay={bays[0]}
           parameter={parameter}
           selectedSlotId={selectedSlotId}
           onSelectSlot={onSelectSlot}
-          className="h-full"
+          className=""
           showOnlyFilledPositions={false}
         />
       ) : (

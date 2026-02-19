@@ -1,6 +1,6 @@
 export { BatchList } from "./batch-list";
 export { EmptyState } from "./empty-state";
-export { FarmDataDisplay } from "./farm-data-display";
+export { FarmDataDisplay } from "./farm-view-container";
 export { FarmOverview } from "./farm-overview";
 export { GreenhouseSelector } from "./greenhouse-selector";
 export { HistoryDrawer } from "./history-drawer";

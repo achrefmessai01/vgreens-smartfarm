@@ -150,7 +150,9 @@ export default function FarmOverviewPage() {
     null,
   );
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<"grid" | "map">("map");
+  const [viewMode, setViewMode] = React.useState<"heatmap" | "discrete">(
+    "discrete",
+  );
   const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0);
 
   React.useEffect(() => {
@@ -207,8 +209,8 @@ export default function FarmOverviewPage() {
               <ViewModeSelector
                 value={viewMode}
                 onValueChange={setViewMode}
-                gridLabel={t.pages.farmOverview.viewGrid}
-                mapLabel={t.pages.farmOverview.viewMap}
+                heatmapLabel={t.pages.farmOverview.viewHeatmap}
+                discreteLabel={t.pages.farmOverview.viewDiscrete}
               />
             </div>
           </div>
