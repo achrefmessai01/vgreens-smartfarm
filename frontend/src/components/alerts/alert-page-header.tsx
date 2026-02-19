@@ -19,6 +19,9 @@ export function AlertPageHeader({
 }: AlertPageHeaderProps) {
   const { t } = useI18n()
 
+  // this is just a safety measure to hide the create alert button for now
+  const hideCreateAlertButton = true;
+
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <PageHeader
@@ -32,9 +35,10 @@ export function AlertPageHeader({
             {openAlertsCount} {t.pages.alerts.critical}
           </Badge>
         )}
+        {!hideCreateAlertButton && 
         <Button onClick={onCreate} disabled={isLoading}>
           {t.pages.alerts.createAlert}
-        </Button>
+        </Button>}
       </div>
     </div>
   )

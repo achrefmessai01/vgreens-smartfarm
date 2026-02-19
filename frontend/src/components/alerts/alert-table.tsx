@@ -91,6 +91,9 @@ export function AlertTable({
       return name || user.email || '—'
     }
 
+    // this is just a safety measure to hide the edit button for now
+    const hideButton = true;
+
     return (
       <>
         <TableCell className={`font-medium ${rowClassName}`}>
@@ -140,7 +143,7 @@ export function AlertTable({
                 {t.pages.alerts.resolve}
               </Button>
             )}
-            {onEdit && (
+            {onEdit && !hideButton && (
               <Button
                 variant="ghost"
                 size="icon"
