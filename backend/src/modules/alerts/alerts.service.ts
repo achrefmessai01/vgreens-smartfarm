@@ -49,7 +49,7 @@ export class AlertsService extends BaseService<Alert> {
 
   async findOneById(id: string, tenantId?: string): Promise<Alert> {
     try {
-      const alert = await this.findOne(id);
+      const alert = await this.findOne(id, tenantId);
       if (!alert) {
         throw new NotFoundException(`Alert with ID ${id} not found`);
       }
