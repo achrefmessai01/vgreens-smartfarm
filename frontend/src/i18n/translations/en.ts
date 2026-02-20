@@ -123,6 +123,7 @@ export const en = {
     },
     farmOverview: {
       title: 'Farm Overview',
+      subtitle: 'Real-time insights into your farm operations',
       batches: 'Batches',
       onTime: 'On time',
       delayed: 'Delayed',
@@ -168,7 +169,8 @@ export const en = {
       noSensor: 'No sensor',
       loading: 'Loading live data…',
       viewGrid: 'Grid',
-      viewMap: 'Map',
+      viewDiscrete: 'Discrete',
+      viewHeatmap: 'Heatmap',
       dateRange: 'Date range',
       fromDate: 'From',
       toDate: 'To',

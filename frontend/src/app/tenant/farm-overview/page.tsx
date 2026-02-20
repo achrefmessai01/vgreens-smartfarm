@@ -3,21 +3,25 @@
 import * as React from 'react'
 import { useI18n } from '@/i18n'
 import {
+  EmptyState,
+  FarmDataDisplay,
+  FarmOverviewPageSkeleton,
   HistoryDrawer,
-  SingleBayView,
-  SensorMapView,
   ParameterSelector,
+  GreenhouseSelector,
+  ViewModeSelector,
 } from '@/components/farm-overview'
+import { Card } from '@/components/ui/card'
 import { useSearchParams } from 'next/navigation'
 import { formatFieldToLabel } from '@/lib/farm-data'
+import { TenantSelector } from '@/components/tenants'
 import type { ParameterType } from '@/lib/farm-types'
 import { PageHeader } from '@/components/layout/page-header'
-import { StyledSelect } from '@/components/ui/styled-select'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data'
 import { FeatureGuard } from '@/components/features/feature-guard'
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket'
-import { useTenantsQuery, type Tenant, UserRole } from '@/generated/graphql'
+import { UserRole, useTenantsQuery, type Tenant } from '@/generated/graphql'
 
 const GREENHOUSE_LABEL_KEYS = ['greenHouse1', 'greenHouse2'] as const
 
@@ -46,24 +50,24 @@ export default function FarmOverviewPage() {
 
     if (
       initialTenantIdFromUrl &&
-      tenants.some((t) => t.id === initialTenantIdFromUrl)
+      tenants.some((tn) => tn.id === initialTenantIdFromUrl)
     ) {
       setSelectedTenantId(initialTenantIdFromUrl)
       return
     }
 
     const currentIsValid =
-      selectedTenantId && tenants.some((t) => t.id === selectedTenantId)
+      selectedTenantId && tenants.some((tn) => tn.id === selectedTenantId)
     if (!currentIsValid) {
       setSelectedTenantId(tenants[0].id)
     }
   }, [isVGreensAdmin, tenants, selectedTenantId, initialTenantIdFromUrl])
 
-  const handleTenantChange = React.useCallback((value: string) => {
-    setSelectedTenantId(value)
-    if (typeof window !== 'undefined' && value) {
+  const handleTenantChange = React.useCallback((tenantId: string) => {
+    setSelectedTenantId(tenantId)
+    if (typeof window !== 'undefined' && tenantId) {
       const url = new URL(window.location.href)
-      url.searchParams.set('tenantId', value)
+      url.searchParams.set('tenantId', tenantId)
       window.history.replaceState({}, '', url.toString())
     }
   }, [])
@@ -82,9 +86,27 @@ export default function FarmOverviewPage() {
   const [selectedParameter, setSelectedParameter] =
     React.useState<ParameterType>('temperature')
 
+  // Create greenhouse options for the selector
+  const greenhouseOptions = React.useMemo(
+    () =>
+      GREENHOUSE_LABEL_KEYS.map((key) => ({
+        key,
+        label: t.pages.farmOverview[key],
+      })),
+    [t.pages.farmOverview],
+  )
+
   const parameterOptions = React.useMemo(() => {
     if (bucketFields.length === 0) {
-      return [{ label: t.pages.farmOverview.temperature, value: 'temperature' }]
+      return [
+        { label: t.pages.farmOverview.temperature, value: 'temperature' },
+        { label: t.pages.farmOverview.humidity, value: 'humidity' },
+        { label: t.pages.farmOverview.co2, value: 'co2' },
+        { label: t.pages.farmOverview.soilEC, value: 'soil_ec' },
+        { label: t.pages.farmOverview.soilMoisture, value: 'soil_moisture' },
+        { label: t.pages.farmOverview.vpd, value: 'vpd' },
+        { label: t.pages.farmOverview.par, value: 'par' },
+      ]
     }
 
     const hasPar = bucketFields.includes('par')
@@ -114,7 +136,16 @@ export default function FarmOverviewPage() {
     }
 
     return options
-  }, [bucketFields, t.pages.farmOverview.temperature])
+  }, [
+    bucketFields,
+    t.pages.farmOverview.temperature,
+    t.pages.farmOverview.humidity,
+    t.pages.farmOverview.co2,
+    t.pages.farmOverview.soilEC,
+    t.pages.farmOverview.soilMoisture,
+    t.pages.farmOverview.vpd,
+    t.pages.farmOverview.par,
+  ])
 
   const effectiveParameter =
     selectedParameter && bucketFields.includes(selectedParameter)
@@ -130,7 +161,9 @@ export default function FarmOverviewPage() {
     null,
   )
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false)
-  const [viewMode] = React.useState<'grid' | 'map'>('map')
+  const [viewMode, setViewMode] = React.useState<'heatmap' | 'discrete'>(
+    'discrete',
+  )
   const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0)
 
   React.useEffect(() => {
@@ -142,180 +175,99 @@ export default function FarmOverviewPage() {
   const getParameterLabel = (param: ParameterType): string =>
     formatFieldToLabel(param)
 
+  if (loading) {
+    return (
+      <FeatureGuard featureKey="farm_overview">
+        <FarmOverviewPageSkeleton showTenantSelector={isVGreensAdmin} />
+      </FeatureGuard>
+    )
+  }
+
   return (
     <FeatureGuard featureKey="farm_overview">
-      <div className="flex flex-col h-[calc(100vh-80px)] max-h-screen">
-        <div className="flex-shrink-0 mb-1">
-          <PageHeader title={t.pages.farmOverview.title} />
-          {isVGreensAdmin && (
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium">
-                {t.pages.admin.users.selectTenant || 'Select tenant'}:
-              </span>
-              <StyledSelect
-                value={
-                  selectedTenantId &&
-                  tenants.some((t) => t.id === selectedTenantId)
-                    ? selectedTenantId
-                    : (tenants[0]?.id ?? '')
-                }
-                onValueChange={handleTenantChange}
-                options={tenants.map((tenant) => ({
-                  label: tenant.name,
-                  value: tenant.id,
-                }))}
-                width="240px"
-                triggerClassName="sm:w-[260px]"
-                placeholder={t.pages.admin.users.selectTenant}
+      <div className="space-y-6 bg-background">
+        <PageHeader
+          title={t.pages.farmOverview.title}
+          subtitle={t.pages.farmOverview.subtitle}
+        />
+
+        {/* Admin Tenant Selector - Only visible for VGreens Admins */}
+        {isVGreensAdmin && (
+          <TenantSelector
+            tenants={tenants}
+            selectedTenantId={
+              selectedTenantId &&
+              tenants.some((tn) => tn.id === selectedTenantId)
+                ? selectedTenantId
+                : (tenants[0]?.id ?? '')
+            }
+            onTenantChange={handleTenantChange}
+            label={t.pages.admin.users.selectTenant || 'Select tenant'}
+            placeholder={t.pages.admin.users.selectTenant}
+          />
+        )}
+
+        {/* Content Card - Primary container for all farm data */}
+        <Card className="h-full gap-0 py-0 overflow-hidden dark:shadow-lg">
+          {/* Navigation Section */}
+          <div className="shrink-0 flex flex-col bg-muted/10">
+            {/* Greenhouse Level (Primary Folders) */}
+            <div className="px-4">
+              <GreenhouseSelector
+                value={activeGreenhouseTab}
+                onValueChange={setActiveGreenhouseTab}
+                options={greenhouseOptions}
               />
             </div>
-          )}
-        </div>
 
-        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-muted/30 rounded-lg p-3">
-            <div className="flex-shrink-0 flex border-b border-border mb-3">
-              {GREENHOUSE_LABEL_KEYS.map((labelKey, index) => (
-                <button
-                  key={labelKey}
-                  type="button"
-                  onClick={() => setActiveGreenhouseTab(index)}
-                  className={`px-5 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                    activeGreenhouseTab === index
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/40'
-                  }`}
-                >
-                  {t.pages.farmOverview[labelKey]}
-                </button>
-              ))}
-            </div>
-            <div className="flex-shrink-0 mb-2 space-y-2 flex flex-wrap items-center gap-3">
-              {/* <div className="flex items-center gap-1 rounded-lg border border-border/60 p-0.5 bg-muted/40">
-                <button
-                  type="button"
-                  onClick={() => setViewMode('grid')}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  {t.pages.farmOverview.viewGrid}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('map')}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'map' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  {t.pages.farmOverview.viewMap}
-                </button>
-              </div> */}
-              {/* <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm font-medium whitespace-nowrap">
-                  {t.pages.farmOverview.dateRange}:
-                </span>
-                <input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
-                  aria-label={t.pages.farmOverview.fromDate}
-                />
-                <span className="text-muted-foreground text-sm">–</span>
-                <input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
-                  aria-label={t.pages.farmOverview.toDate}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleApplyRange}
-                  disabled={!dateFrom || !dateTo}
-                >
-                  {t.pages.farmOverview.apply}
-                </Button>
-                {appliedRange && daysInRange.length > 0 && (
-                  <>
-                    <span className="text-sm font-medium whitespace-nowrap text-muted-foreground">
-                      {t.pages.farmOverview.viewByDay}:
-                    </span>
-                    <StyledSelect
-                      value={selectedDay ?? '__all__'}
-                      onValueChange={(val) =>
-                        setSelectedDay(val === '__all__' ? null : val)
-                      }
-                      options={[
-                        {
-                          label: t.pages.farmOverview.allDays,
-                          value: '__all__',
-                        },
-                        ...daysInRange.map((d) => ({
-                          label: d,
-                          value: d,
-                        })),
-                      ]}
-                      width="140px"
-                      triggerClassName="min-w-[140px]"
-                    />
-                  </>
-                )}
-              </div> */}
+            {/* Parameter & View Mode Level (Secondary Minimalist) */}
+            <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-1 border-b border-border/40 bg-background">
+              {/* Left: Metric selection */}
               <ParameterSelector
                 value={effectiveParameter}
                 onValueChange={setSelectedParameter}
                 options={parameterOptions}
-                selectParameterLabel={t.pages.farmOverview.selectParameter}
+              />
+
+              {/* Right: View toggle */}
+              <ViewModeSelector
+                value={viewMode}
+                onValueChange={setViewMode}
+                heatmapLabel={t.pages.farmOverview.viewHeatmap}
+                discreteLabel={t.pages.farmOverview.viewDiscrete}
               />
             </div>
+          </div>
 
-            <div className="flex-1 min-h-0 overflow-auto">
-              {loading ? (
-                <div className="h-full min-h-[200px] flex flex-col items-center justify-center gap-4 rounded-lg bg-muted/20 p-6">
-                  <div className="h-10 w-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-                  <div className="h-4 w-32 animate-pulse rounded-full bg-muted" />
-                </div>
-              ) : activeGreenhouseTab === 1 ? (
-                <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
-                  {(t.pages.farmOverview as { emptyForNow?: string })
-                    .emptyForNow ?? 'Empty for now'}
-                </div>
-              ) : bays.length > 0 ? (
-                <div className="h-full min-h-0">
-                  {viewMode === 'map' ? (
-                    <SensorMapView
-                      key={bays[0].id}
-                      bay={bays[0]}
-                      parameter={effectiveParameter}
-                      selectedSlotId={selectedSlotId}
-                      onSelectSlot={setSelectedSlotId}
-                      bayLabel={t.pages.farmOverview.greenHouse1}
-                      className="min-h-0 h-full"
-                      showOnlyFilledPositions
-                    />
-                  ) : (
-                    <SingleBayView
-                      key={bays[0].id}
-                      bay={bays[0]}
-                      parameter={effectiveParameter}
-                      selectedSlotId={selectedSlotId}
-                      onSelectSlot={setSelectedSlotId}
-                      bayLabel={t.pages.farmOverview.greenHouse1}
-                      parameterLabel={getParameterLabel(effectiveParameter)}
-                      noSensorLabel={t.pages.farmOverview.noSensor}
-                      className="min-h-0 h-full"
-                    />
-                  )}
-                </div>
+          {/* Main Display Area - Scrollable content showing sensor data visualization */}
+          <div className="flex-1 min-h-0 flex bg-background dark:bg-background/50">
+            <div className="flex-1 overflow-auto">
+              {activeGreenhouseTab === 1 ? (
+                <EmptyState
+                  message={
+                    (t.pages.farmOverview as { emptyForNow?: string })
+                      .emptyForNow ?? 'Empty for now'
+                  }
+                  icon={<EmptyState.GreenhouseIcon />}
+                />
               ) : (
-                <div className="h-full min-h-[200px] flex items-center justify-center rounded-lg bg-muted/20 text-muted-foreground text-sm">
-                  {t.pages.farmOverview.noData}
-                </div>
+                <FarmDataDisplay
+                  bays={bays}
+                  viewMode={viewMode}
+                  parameter={effectiveParameter}
+                  selectedSlotId={selectedSlotId}
+                  onSelectSlot={setSelectedSlotId}
+                  bayLabel={t.pages.farmOverview.greenHouse1}
+                  parameterLabel={getParameterLabel(effectiveParameter)}
+                  noSensorLabel={t.pages.farmOverview.noSensor}
+                  noDataMessage={t.pages.farmOverview.noData}
+                />
               )}
             </div>
           </div>
-        </div>
+        </Card>
 
+        {/* History Drawer Component - Side panel showing historical sensor data for selected slot */}
         <HistoryDrawer
           open={historyDrawerOpen}
           onOpenChange={setHistoryDrawerOpen}

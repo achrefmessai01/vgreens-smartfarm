@@ -150,33 +150,6 @@ export function HistoryDrawer({
     setSelectedPointIndex(null)
   }, [slotId, parameter, timeRange])
 
-  const xAxisTickFormatter = React.useCallback(
-    (value: number) => {
-      const date = new Date(value)
-      switch (timeRange) {
-        case '1day':
-          return date.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-          })
-        case '1week':
-          return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-          })
-        case '1month':
-        default:
-          return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          })
-      }
-    },
-    [timeRange]
-  )
-
   if (!slotId) return null
 
   return (
@@ -221,9 +194,13 @@ export function HistoryDrawer({
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="timestamp"
-                    tickFormatter={xAxisTickFormatter}
-                    tickCount={6}
-                    interval="preserveStartEnd"
+                    tickFormatter={(value) => {
+                      const date = new Date(value)
+                      return date.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    }}
                   />
                   <YAxis />
                   <Tooltip

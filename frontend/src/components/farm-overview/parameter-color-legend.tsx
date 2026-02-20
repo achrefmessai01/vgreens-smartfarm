@@ -1,72 +1,65 @@
-'use client'
-
-import * as React from 'react'
-import type { ParameterType } from '@/lib/farm-types'
+import type { ParameterType } from "@/lib/farm-types";
 
 const gradientStyle = {
   background:
-    'linear-gradient(to right, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))',
-}
+    "linear-gradient(to top, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))",
+};
+
+const LEGEND_RANGES: Record<
+  string,
+  { min: number; max: number; unit: string; steps: number }
+> = {
+  temperature: { min: 15, max: 30, unit: "°C", steps: 5 },
+  soil_temp: { min: 15, max: 30, unit: "°C", steps: 5 },
+  humidity: { min: 0, max: 100, unit: "%", steps: 5 },
+  soil_moisture: { min: 0, max: 100, unit: "%", steps: 5 },
+  co2: { min: 400, max: 1200, unit: " ppm", steps: 4 },
+  vpd: { min: 0, max: 2, unit: " kPa", steps: 4 },
+  par: { min: 0, max: 1000, unit: " µmol/m²/s", steps: 5 },
+  par_estimated: { min: 0, max: 1000, unit: " µmol/m²/s", steps: 5 },
+  soil_conductivity: { min: 0, max: 3, unit: " mS/cm", steps: 3 },
+  soilEC: { min: 0, max: 3, unit: " mS/cm", steps: 3 },
+  battery_v: { min: 0, max: 5, unit: " V", steps: 5 },
+  voltage_v: { min: 0, max: 5, unit: " V", steps: 5 },
+  current_ma: { min: 0, max: 500, unit: " mA", steps: 5 },
+  lux: { min: 0, max: 10000, unit: " lux", steps: 5 },
+  pressure_mpa: { min: 0, max: 0.5, unit: " MPa", steps: 5 },
+  rssi: { min: -120, max: 0, unit: " dBm", steps: 6 },
+  snr: { min: -120, max: 0, unit: " dB", steps: 6 },
+};
 
 interface ParameterColorLegendProps {
-  parameter: ParameterType
+  parameter: ParameterType;
+  className?: string;
 }
 
-function GradientLegend({
-  lowLabel,
-  highLabel,
-}: {
-  lowLabel: string
-  highLabel: string
-}) {
+export function ParameterColorLegend({
+  parameter,
+  className,
+}: ParameterColorLegendProps) {
+  const range = LEGEND_RANGES[parameter];
+
+  if (!range) {
+    return null;
+  }
+
+  const labels = Array.from({ length: range.steps + 1 }, (_, i) => {
+    const value = range.min + (i * (range.max - range.min)) / range.steps;
+    return Math.round(value);
+  }).reverse();
+
   return (
-    <div className="flex items-center gap-2 text-xs">
-      <span className="text-muted-foreground whitespace-nowrap">{lowLabel}</span>
-      <div className="flex items-center gap-1">
-        <div
-          className="w-4 h-4 rounded-full border border-gray-300 shrink-0"
-          style={{ backgroundColor: 'rgb(0, 0, 255)' }}
-        />
-        <div className="w-20 h-3 rounded-sm shrink-0" style={gradientStyle} />
-        <div
-          className="w-4 h-4 rounded-full border border-gray-300 shrink-0"
-          style={{ backgroundColor: 'rgb(255, 0, 0)' }}
-        />
+    <div className={`flex flex-col items-center ${className}`}>
+      <div className="flex h-full">
+        <div className="w-4 h-full rounded-sm shrink-0" style={gradientStyle} />
+        <div className="flex flex-col justify-between h-full ml-1 text-xs text-muted-foreground">
+          {labels.map((label, i) => (
+            <div key={i} className="relative">
+              <span className="absolute -top-1.5">{label}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <span className="text-muted-foreground whitespace-nowrap">{highLabel}</span>
     </div>
-  )
-}
-
-const LEGEND_RANGES: Record<string, { low: string; high: string }> = {
-  temperature: { low: '15°C', high: '30°C' },
-  soil_temp: { low: '15°C', high: '30°C' },
-  humidity: { low: '0%', high: '100%' },
-  soil_moisture: { low: '0%', high: '100%' },
-  co2: { low: '400 ppm', high: '1200 ppm' },
-  vpd: { low: '0 kPa', high: '2 kPa' },
-  par: { low: '0', high: '1000 µmol/m²/s' },
-  par_estimated: { low: '0', high: '1000 µmol/m²/s' },
-  soil_conductivity: { low: '0 mS/cm', high: '3 mS/cm' },
-  soilEC: { low: '0 mS/cm', high: '3 mS/cm' },
-  battery_v: { low: '0 V', high: '5 V' },
-  voltage_v: { low: '0 V', high: '5 V' },
-  current_ma: { low: '0 mA', high: '500 mA' },
-  lux: { low: '0', high: '10000 lux' },
-  pressure_mpa: { low: '0 MPa', high: '0.5 MPa' },
-  rssi: { low: '-120 dBm', high: '0 dBm' },
-  snr: { low: '-120 dB', high: '0 dB' },
-}
-
-export function ParameterColorLegend({ parameter }: ParameterColorLegendProps) {
-  const range = LEGEND_RANGES[parameter]
-  const legend = range ? (
-    <GradientLegend lowLabel={range.low} highLabel={range.high} />
-  ) : parameter ? (
-    <GradientLegend lowLabel="Low" highLabel="High" />
-  ) : null
-
-  return (
-    <div className="flex items-center flex-wrap gap-2">{legend}</div>
-  )
+  );
 }

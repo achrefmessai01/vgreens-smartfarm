@@ -124,6 +124,7 @@ export const de = {
     },
     farmOverview: {
       title: 'Farm-Übersicht',
+      subtitle: 'Echtzeit-Einblicke in Ihre Betriebsabläufe',
       batches: 'Chargen',
       onTime: 'Pünktlich',
       delayed: 'Verspätet',
@@ -169,7 +170,8 @@ export const de = {
       noSensor: 'Kein Sensor',
       loading: 'Live-Daten werden geladen…',
       viewGrid: 'Raster',
-      viewMap: 'Karte',
+      viewDiscrete: 'Diskret',
+      viewHeatmap: 'Wärmekarte',
       dateRange: 'Datumsbereich',
       fromDate: 'Von',
       toDate: 'Bis',
