@@ -17,6 +17,8 @@ import {
   SheetContent,
 } from '@/components/ui/sheet'
 import { useI18n } from '@/i18n'
+import { ContentSkeleton } from '@/components/ui/content-skeleton'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import {
   UserManagementForm,
   type UserFormData,
@@ -148,8 +150,9 @@ export default function AdminUsersPage() {
 
   if (usersLoading || tenantsLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">{t.pages.admin.users.loading}</p>
+      <div className="space-y-6">
+        <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
+        <TableSkeleton columnCount={5} rowCount={8} />
       </div>
     )
   }

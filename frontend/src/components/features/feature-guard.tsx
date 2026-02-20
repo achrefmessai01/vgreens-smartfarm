@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { UserRole } from '@/generated/graphql'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { ComingSoonCard } from '@/components/ui/coming-soon-card'
+import { ContentSkeleton } from '@/components/ui/content-skeleton'
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features'
 
 interface FeatureGuardProps {
@@ -39,11 +40,7 @@ export function FeatureGuard({
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    )
+    return <ContentSkeleton showHeader={false} lines={5} />
   }
 
   if (!hasFeature(featureKey)) {
