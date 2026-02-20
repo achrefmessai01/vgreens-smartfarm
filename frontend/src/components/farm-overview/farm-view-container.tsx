@@ -30,7 +30,7 @@ export function FarmDataDisplay({
   }
 
   return (
-    <div className="h-full p-2 sm:p-4">
+    <div className="flex flex-col h-full min-h-0 p-2 sm:p-4">
       {viewMode === "discrete" ? (
         <ViewSensorMap
           key={bays[0].id}
@@ -38,7 +38,7 @@ export function FarmDataDisplay({
           parameter={parameter}
           selectedSlotId={selectedSlotId}
           onSelectSlot={onSelectSlot}
-          className=""
+          className="flex-1 min-h-0"
           showOnlyFilledPositions={false}
         />
       ) : (
