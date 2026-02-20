@@ -1,79 +1,90 @@
-"use client";
+'use client'
 
+import * as React from 'react'
+import { useI18n } from '@/i18n'
 import {
   EmptyState,
   FarmDataDisplay,
-  GreenhouseSelector,
+  FarmOverviewPageSkeleton,
   HistoryDrawer,
-  LoadingState,
   ParameterSelector,
+  GreenhouseSelector,
   ViewModeSelector,
-} from "@/components/farm-overview";
-import { FeatureGuard } from "@/components/features/feature-guard";
-import { PageHeader } from "@/components/layout/page-header";
-import { TenantSelector } from "@/components/tenants";
-import { Card } from "@/components/ui/card";
-import { UserRole, useTenantsQuery, type Tenant } from "@/generated/graphql";
-import { useI18n } from "@/i18n";
-import { formatFieldToLabel } from "@/lib/farm-data";
-import type { ParameterType } from "@/lib/farm-types";
-import { useCurrentUser } from "@/lib/hooks/use-current-user";
-import { useLiveFarmData } from "@/lib/hooks/use-live-farm-data";
-import { useTenantBucketName } from "@/lib/hooks/use-tenant-bucket";
-import { useSearchParams } from "next/navigation";
-import * as React from "react";
+} from '@/components/farm-overview'
+import { Card } from '@/components/ui/card'
+import { useSearchParams } from 'next/navigation'
+import { formatFieldToLabel } from '@/lib/farm-data'
+import { TenantSelector } from '@/components/tenants'
+import type { ParameterType } from '@/lib/farm-types'
+import { PageHeader } from '@/components/layout/page-header'
+import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data'
+import { FeatureGuard } from '@/components/features/feature-guard'
+import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket'
+import { UserRole, useTenantsQuery, type Tenant } from '@/generated/graphql'
 
-const GREENHOUSE_LABEL_KEYS = ["greenHouse1", "greenHouse2"] as const;
+const GREENHOUSE_LABEL_KEYS = ['greenHouse1', 'greenHouse2'] as const
 
 export default function FarmOverviewPage() {
-  const { t } = useI18n();
-  const { role } = useCurrentUser();
-  const isVGreensAdmin = role === UserRole.VgreensAdmin;
-  const searchParams = useSearchParams();
-  const initialTenantIdFromUrl = searchParams.get("tenantId") ?? "";
+  const { t } = useI18n()
+  const { role } = useCurrentUser()
+  const isVGreensAdmin = role === UserRole.VgreensAdmin
+  const searchParams = useSearchParams()
+  const initialTenantIdFromUrl = searchParams.get('tenantId') ?? ''
 
   const { data: tenantsData } = useTenantsQuery({
     skip: !isVGreensAdmin,
-    fetchPolicy: "cache-first",
-  });
+    fetchPolicy: 'cache-first',
+  })
   const tenants = React.useMemo(
     () => (tenantsData?.tenants || []) as Tenant[],
     [tenantsData?.tenants],
-  );
+  )
 
   const [selectedTenantId, setSelectedTenantId] = React.useState<string>(
     initialTenantIdFromUrl,
-  );
+  )
 
   React.useEffect(() => {
-    if (!isVGreensAdmin || tenants.length === 0) return;
+    if (!isVGreensAdmin || tenants.length === 0) return
 
     if (
       initialTenantIdFromUrl &&
-      tenants.some((t) => t.id === initialTenantIdFromUrl)
+      tenants.some((tn) => tn.id === initialTenantIdFromUrl)
     ) {
-      setSelectedTenantId(initialTenantIdFromUrl);
-      return;
+      setSelectedTenantId(initialTenantIdFromUrl)
+      return
     }
 
-    if (!selectedTenantId || !tenants.some((t) => t.id === selectedTenantId)) {
-      setSelectedTenantId(tenants[0].id);
+    const currentIsValid =
+      selectedTenantId && tenants.some((tn) => tn.id === selectedTenantId)
+    if (!currentIsValid) {
+      setSelectedTenantId(tenants[0].id)
     }
-  }, [isVGreensAdmin, tenants, selectedTenantId, initialTenantIdFromUrl]);
+  }, [isVGreensAdmin, tenants, selectedTenantId, initialTenantIdFromUrl])
+
+  const handleTenantChange = React.useCallback((tenantId: string) => {
+    setSelectedTenantId(tenantId)
+    if (typeof window !== 'undefined' && tenantId) {
+      const url = new URL(window.location.href)
+      url.searchParams.set('tenantId', tenantId)
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [])
 
   const { bucketName: selectedTenantBucketName } = useTenantBucketName(
     isVGreensAdmin ? selectedTenantId : undefined,
-  );
+  )
 
   const tenantBucketNameOverride = isVGreensAdmin
     ? (selectedTenantBucketName ?? null)
-    : undefined;
+    : undefined
 
   const { bays, bucketFields, loading } = useLiveFarmData({
     tenantBucketName: tenantBucketNameOverride,
-  });
+  })
   const [selectedParameter, setSelectedParameter] =
-    React.useState<ParameterType>("temperature");
+    React.useState<ParameterType>('temperature')
 
   // Create greenhouse options for the selector
   const greenhouseOptions = React.useMemo(
@@ -83,48 +94,48 @@ export default function FarmOverviewPage() {
         label: t.pages.farmOverview[key],
       })),
     [t.pages.farmOverview],
-  );
+  )
 
   const parameterOptions = React.useMemo(() => {
     if (bucketFields.length === 0) {
       return [
-        { label: t.pages.farmOverview.temperature, value: "temperature" },
-        { label: t.pages.farmOverview.humidity, value: "humidity" },
-        { label: t.pages.farmOverview.co2, value: "co2" },
-        { label: t.pages.farmOverview.soilEC, value: "soil_ec" },
-        { label: t.pages.farmOverview.soilMoisture, value: "soil_moisture" },
-        { label: t.pages.farmOverview.vpd, value: "vpd" },
-        { label: t.pages.farmOverview.par, value: "par" },
-      ];
+        { label: t.pages.farmOverview.temperature, value: 'temperature' },
+        { label: t.pages.farmOverview.humidity, value: 'humidity' },
+        { label: t.pages.farmOverview.co2, value: 'co2' },
+        { label: t.pages.farmOverview.soilEC, value: 'soil_ec' },
+        { label: t.pages.farmOverview.soilMoisture, value: 'soil_moisture' },
+        { label: t.pages.farmOverview.vpd, value: 'vpd' },
+        { label: t.pages.farmOverview.par, value: 'par' },
+      ]
     }
 
-    const hasPar = bucketFields.includes("par");
-    const hasParEstimated = bucketFields.includes("par_estimated");
+    const hasPar = bucketFields.includes('par')
+    const hasParEstimated = bucketFields.includes('par_estimated')
 
     const baseFields = bucketFields.filter(
       (field) =>
-        field !== "lux" && field !== "par" && field !== "par_estimated",
-    );
+        field !== 'lux' && field !== 'par' && field !== 'par_estimated',
+    )
 
     const options = baseFields.map((field) => ({
       label: formatFieldToLabel(field),
       value: field,
-    }));
+    }))
 
     const parField: ParameterType | null = hasParEstimated
-      ? "par_estimated"
+      ? 'par_estimated'
       : hasPar
-        ? "par"
-        : null;
+        ? 'par'
+        : null
 
     if (parField) {
       options.push({
-        label: formatFieldToLabel("par"),
+        label: formatFieldToLabel('par'),
         value: parField,
-      });
+      })
     }
 
-    return options;
+    return options
   }, [
     bucketFields,
     t.pages.farmOverview.temperature,
@@ -134,35 +145,43 @@ export default function FarmOverviewPage() {
     t.pages.farmOverview.soilMoisture,
     t.pages.farmOverview.vpd,
     t.pages.farmOverview.par,
-  ]);
+  ])
 
   const effectiveParameter =
     selectedParameter && bucketFields.includes(selectedParameter)
       ? selectedParameter
-      : (bucketFields[0] ?? "temperature");
+      : (bucketFields[0] ?? 'temperature')
 
   React.useEffect(() => {
     if (bucketFields.length > 0 && !bucketFields.includes(selectedParameter)) {
-      setSelectedParameter(bucketFields[0]);
+      setSelectedParameter(bucketFields[0])
     }
-  }, [bucketFields, selectedParameter]);
+  }, [bucketFields, selectedParameter])
   const [selectedSlotId, setSelectedSlotId] = React.useState<string | null>(
     null,
-  );
-  const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<"heatmap" | "discrete">(
-    "discrete",
-  );
-  const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0);
+  )
+  const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false)
+  const [viewMode, setViewMode] = React.useState<'heatmap' | 'discrete'>(
+    'discrete',
+  )
+  const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0)
 
   React.useEffect(() => {
     if (selectedSlotId) {
-      setHistoryDrawerOpen(true);
+      setHistoryDrawerOpen(true)
     }
-  }, [selectedSlotId]);
+  }, [selectedSlotId])
 
   const getParameterLabel = (param: ParameterType): string =>
-    formatFieldToLabel(param);
+    formatFieldToLabel(param)
+
+  if (loading) {
+    return (
+      <FeatureGuard featureKey="farm_overview">
+        <FarmOverviewPageSkeleton showTenantSelector={isVGreensAdmin} />
+      </FeatureGuard>
+    )
+  }
 
   return (
     <FeatureGuard featureKey="farm_overview">
@@ -176,9 +195,14 @@ export default function FarmOverviewPage() {
         {isVGreensAdmin && (
           <TenantSelector
             tenants={tenants}
-            selectedTenantId={selectedTenantId}
-            onTenantChange={setSelectedTenantId}
-            label={t.pages.admin.users.selectTenant || "Select tenant"}
+            selectedTenantId={
+              selectedTenantId &&
+              tenants.some((tn) => tn.id === selectedTenantId)
+                ? selectedTenantId
+                : (tenants[0]?.id ?? '')
+            }
+            onTenantChange={handleTenantChange}
+            label={t.pages.admin.users.selectTenant || 'Select tenant'}
             placeholder={t.pages.admin.users.selectTenant}
           />
         )}
@@ -218,13 +242,11 @@ export default function FarmOverviewPage() {
           {/* Main Display Area - Scrollable content showing sensor data visualization */}
           <div className="flex-1 min-h-0 flex bg-background dark:bg-background/50">
             <div className="flex-1 overflow-auto">
-              {loading ? (
-                <LoadingState message={t.pages.farmOverview.loading} />
-              ) : activeGreenhouseTab === 1 ? (
+              {activeGreenhouseTab === 1 ? (
                 <EmptyState
                   message={
                     (t.pages.farmOverview as { emptyForNow?: string })
-                      .emptyForNow ?? "Empty for now"
+                      .emptyForNow ?? 'Empty for now'
                   }
                   icon={<EmptyState.GreenhouseIcon />}
                 />
@@ -257,8 +279,9 @@ export default function FarmOverviewPage() {
           oneWeekLabel={t.pages.farmOverview.oneWeek}
           oneMonthLabel={t.pages.farmOverview.oneMonth}
           historyLabel={t.pages.farmOverview.history}
+          bucketName={tenantBucketNameOverride ?? undefined}
         />
       </div>
     </FeatureGuard>
-  );
+  )
 }
