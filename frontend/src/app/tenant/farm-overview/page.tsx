@@ -46,23 +46,23 @@ export default function FarmOverviewPage() {
 
         <div className="flex flex-1 flex-col min-h-0">
           <FarmOverviewCard
-          greenhouseOptions={state.greenhouseOptions}
-          activeGreenhouseTab={state.activeGreenhouseTab}
-          onGreenhouseChange={state.setActiveGreenhouseTab}
-          parameterOptions={state.parameterOptions}
-          effectiveParameter={state.effectiveParameter}
-          onParameterChange={state.setSelectedParameter}
-          viewMode={state.viewMode}
-          onViewModeChange={state.setViewMode}
-          viewHeatmapLabel={state.labels.viewHeatmap}
-          viewDiscreteLabel={state.labels.viewDiscrete}
-          bays={state.bays}
-          selectedSlotId={state.selectedSlotId}
-          onSelectSlot={state.setSelectedSlotId}
-          parameterLabel={state.getParameterLabel(state.effectiveParameter)}
-          noSensorLabel={state.labels.noSensor}
-          noDataMessage={state.labels.noData}
-          emptyForNowMessage={state.labels.emptyForNow}
+            greenhouseOptions={state.greenhouseOptions}
+            activeGreenhouseTab={state.activeGreenhouseTab}
+            onGreenhouseChange={state.setActiveGreenhouseTab}
+            parameterOptions={state.parameterOptions}
+            effectiveParameter={state.effectiveParameter}
+            onParameterChange={state.setSelectedParameter}
+            viewMode={state.viewMode}
+            onViewModeChange={state.setViewMode}
+            viewHeatmapLabel={state.labels.viewHeatmap}
+            viewDiscreteLabel={state.labels.viewDiscrete}
+            bays={state.bays}
+            selectedSlotId={state.selectedSlotId}
+            onSelectSlot={state.setSelectedSlotId}
+            parameterLabel={state.getParameterLabel(state.effectiveParameter)}
+            noSensorLabel={state.labels.noSensor}
+            noDataMessage={state.labels.noData}
+            emptyForNowMessage={state.labels.emptyForNow}
           />
         </div>
 

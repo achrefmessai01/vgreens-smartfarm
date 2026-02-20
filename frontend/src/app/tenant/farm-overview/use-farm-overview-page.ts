@@ -83,7 +83,9 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
 
   const [selectedParameter, setSelectedParameter] =
     React.useState<ParameterType>('temperature')
-  const [selectedSlotId, setSelectedSlotId] = React.useState<string | null>(null)
+  const [selectedSlotId, setSelectedSlotId] = React.useState<string | null>(
+    null,
+  )
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false)
   const [viewMode, setViewMode] = React.useState<'heatmap' | 'discrete'>(
     'discrete',
@@ -91,8 +93,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0)
 
   const greenhouseOptions = React.useMemo(
-    () =>
-      GREENHOUSE_LABEL_KEYS.map((key) => ({ key, label: t[key] })),
+    () => GREENHOUSE_LABEL_KEYS.map((key) => ({ key, label: t[key] })),
     [t],
   )
 
@@ -143,7 +144,10 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     if (selectedSlotId) setHistoryDrawerOpen(true)
   }, [selectedSlotId])
 
-  const getParameterLabel = React.useCallback((param: ParameterType) => formatFieldToLabel(param), [])
+  const getParameterLabel = React.useCallback(
+    (param: ParameterType) => formatFieldToLabel(param),
+    [],
+  )
 
   const tenantSelectorValue =
     selectedTenantId && tenants.some((tn) => tn.id === selectedTenantId)

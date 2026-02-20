@@ -7,6 +7,7 @@ import { ViewModeSelector } from './view-mode-selector'
 import { ParameterSelector } from './parameter-selector'
 import type { Bay, ParameterType } from '@/lib/farm-types'
 import { GreenhouseSelector } from './greenhouse-selector'
+import { ParameterColorLegendBar } from './parameter-color-legend'
 
 export interface FarmOverviewCardProps {
   greenhouseOptions: { key: string; label: string }[]
@@ -74,6 +75,9 @@ export function FarmOverviewCard({
             discreteLabel={viewDiscreteLabel}
           />
         </div>
+        {!showEmpty && (
+          <ParameterColorLegendBar parameter={effectiveParameter} />
+        )}
       </div>
 
       <div className="flex-1 min-h-0 flex bg-background dark:bg-background/50">
