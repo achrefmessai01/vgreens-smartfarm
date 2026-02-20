@@ -20,6 +20,7 @@ import {
 } from 'recharts'
 import type { ParameterType } from '@/lib/farm-types'
 import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql'
+import { HistoryChartSkeleton } from './history-chart-skeleton'
 
 /** Parse slotId (e.g. "live_greenhouse_01|Air_09|unknown") into greenhouse, device, level for InfluxDB filters */
 function parseSlotId(slotId: string): {
@@ -181,9 +182,7 @@ export function HistoryDrawer({
           </div>
           <div className="h-[400px]">
             {historyLoading ? (
-              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-                Loading history…
-              </div>
+              <HistoryChartSkeleton className="h-full w-full" />
             ) : historyData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
                 No history data for this sensor in the selected range.

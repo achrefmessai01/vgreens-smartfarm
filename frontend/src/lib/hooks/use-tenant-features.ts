@@ -23,9 +23,12 @@ export function useTenantFeatures() {
     })
   }
 
+  const dataLoaded = Boolean(tenantId) && !loading && data !== undefined
+
   return {
     enabledFeatures,
     loading,
+    dataLoaded,
     hasFeature: (featureKey: string) => enabledFeatures.has(featureKey),
   }
 }
