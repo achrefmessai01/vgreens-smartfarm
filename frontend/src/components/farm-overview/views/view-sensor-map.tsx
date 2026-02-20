@@ -90,9 +90,12 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
               >
                 {items.map(({ slot, deviceId, value }) => {
                   const isSelected = slot ? selectedSlotId === slot.id : false
-                  const backgroundColor = slot
+                  const glowColor = slot
                     ? getParameterColor(value ?? 0, parameter, slot.id)
                     : 'rgb(200, 200, 200)'
+                  const textGlow = slot
+                    ? `0 0 8px ${glowColor}, 0 0 16px ${glowColor}, 0 0 24px ${glowColor}`
+                    : 'none'
                   return (
                     <button
                       key={deviceId}
@@ -109,33 +112,27 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                           : deviceId
                       }
                       className={cn(
-                        'flex flex-col items-center justify-center rounded-full transition-all tabular-nums',
-                        'w-14 h-14 shrink-0',
-                        'shadow-md ring-1 ring-black/10',
-                        'hover:ring-2 hover:ring-primary hover:scale-105',
-                        isSelected &&
-                          'ring-2 ring-primary ring-offset-2 ring-offset-background',
+                        'flex flex-col items-center justify-center transition-all tabular-nums bg-transparent border-0 min-w-0 py-1 px-2',
+                        'hover:scale-105',
+                        isSelected && 'ring-2 ring-primary ring-offset-2 ring-offset-background rounded-md',
                         !slot && 'cursor-not-allowed opacity-60',
                       )}
                       style={{
-                        backgroundColor,
-                        color: slot
-                          ? 'rgba(255,255,255,0.98)'
-                          : 'var(--muted-foreground)',
-                        textShadow: slot ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
+                        color: slot ? '#000' : 'var(--muted-foreground)',
+                        textShadow: textGlow,
                       }}
                     >
                       {value != null ? (
                         <>
-                          <span className="text-sm font-bold leading-tight">
+                          <span className="text-base font-bold leading-tight tracking-tight">
                             {formatParameterDisplayValue(value)}
                           </span>
-                          <span className="text-[10px] font-medium opacity-90">
+                          <span className="text-[11px] font-medium opacity-95 -mt-0.5">
                             {unit}
                           </span>
                         </>
                       ) : (
-                        <span className="text-xs">--</span>
+                        <span className="text-sm">--</span>
                       )}
                     </button>
                   )
