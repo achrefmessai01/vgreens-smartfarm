@@ -1,0 +1,88 @@
+@import './logo-spin.css';
+
+.page-skeleton .perspective-scene {
+  perspective: 1200px;
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-skeleton .premium-3d-object {
+  width: 80px;
+  height: 100px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: logo-spin-3d 4s linear infinite;
+}
+
+.page-skeleton .face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: visible;
+  transform-style: preserve-3d;
+}
+
+.page-skeleton .front-face {
+  transform: translateZ(4px);
+  filter: drop-shadow(0 0 20px rgba(1, 111, 124, 0.2));
+}
+
+.page-skeleton .back-face {
+  transform: translateZ(-4px) rotateY(180deg);
+  filter: brightness(0.6);
+}
+
+.page-skeleton .surface-sheen {
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 60%
+  );
+  mix-blend-mode: overlay;
+  animation: page-skeleton-sheen-move 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.page-skeleton .ambient-aura {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(
+    circle,
+    rgba(1, 111, 124, 0.1) 0%,
+    transparent 70%
+  );
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateZ(-10px);
+  border-radius: 100%;
+  filter: blur(10px);
+}
+
+.page-skeleton .logo-glow {
+  animation: page-skeleton-pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes page-skeleton-sheen-move {
+  0% {
+    transform: translateX(-50%) translateY(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateX(50%) translateY(50%) rotate(20deg);
+  }
+}
+
+@keyframes page-skeleton-pulse-glow {
+  0%,
+  100% {
+    filter: brightness(100%) blur(0px);
+  }
+  50% {
+    filter: brightness(130%) blur(1px);
+  }
+}
