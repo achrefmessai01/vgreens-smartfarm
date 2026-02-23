@@ -317,6 +317,49 @@ export class AlertsService extends BaseService<Alert> {
     });
   }
 
+  async findOpenAlertForSensorAndRuleKey(
+    tenantId: string,
+    sensorName: string,
+    ruleKey: string,
+  ): Promise<Alert | null> {
+    return this.alertRepository.findOne({
+      where: {
+        tenantId,
+        sensorName,
+        ruleKey,
+        status: AlertStatus.OPEN,
+      },
+      order: { createdAt: OrderDirection.DESC },
+    });
+  }
+
+  async resolveAlertBySystem(id: string, tenantId?: string): Promise<Alert> {
+    try {
+      const alert = await this.findOneById(id, tenantId);
+      alert.status = AlertStatus.RESOLVED;
+      alert.resolvedById = undefined;
+      alert.resolvedTime = new Date();
+      const saved = await this.alertRepository.save(alert);
+      const result = await this.alertRepository.findOne({
+        where: { id: saved.id },
+        relations: [...this.alertRelations],
+      });
+      if (!result) {
+        throw new NotFoundException(
+          `Failed to reload alert with ID ${saved.id}`,
+        );
+      }
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      this.logger.error(
+        `resolveAlertBySystem failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw new InternalServerErrorException('Failed to resolve alert');
+    }
+  }
+
   async deleteAlert(id: string, tenantId?: string): Promise<void> {
     try {
       await this.findOneById(id, tenantId);

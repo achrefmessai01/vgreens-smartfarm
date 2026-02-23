@@ -60,6 +60,10 @@ export class Alert extends BaseEntity {
   description?: string;
 
   @Field({ nullable: true })
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  ruleKey?: string;
+
+  @Field({ nullable: true })
   @Column({ type: 'timestamp', nullable: true })
   timestamp?: Date;
 

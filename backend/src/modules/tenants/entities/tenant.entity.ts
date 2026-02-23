@@ -42,6 +42,10 @@ export class Tenant extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   influxBucketName?: string;
 
+  @Field({ nullable: true })
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  timezone?: string;
+
   @Field(() => ID, { nullable: true })
   tenantId?: string;
 

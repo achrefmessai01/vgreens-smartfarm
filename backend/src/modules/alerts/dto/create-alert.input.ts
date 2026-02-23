@@ -43,6 +43,11 @@ export class CreateAlertInput {
 
   @Field({ nullable: true })
   @IsOptional()
+  @IsString()
+  ruleKey?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
   @IsDateString()
   timestamp?: string;
 
