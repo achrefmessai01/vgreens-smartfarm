@@ -51,7 +51,7 @@ export function FarmOverviewCard({
   const showEmpty = false;
 
   return (
-    <Card className="h-full min-h-0 flex flex-col gap-0 py-0 overflow-hidden dark:shadow-lg">
+    <Card className="h-full min-h-0 flex flex-col gap-0 py-0 overflow-hidden dark:shadow-lg rounded-sm">
       <div className="shrink-0 flex flex-col bg-muted/10">
         <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-b border-border/40 bg-background">
           <ParameterSelector
