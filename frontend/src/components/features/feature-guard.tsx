@@ -24,22 +24,20 @@ export function FeatureGuard({
 }: FeatureGuardProps) {
   const { role } = useCurrentUser()
   const isVGreensAdmin = role === UserRole.VgreensAdmin
-  const { hasFeature, loading } = useTenantFeatures()
+  const { hasFeature, loading, dataLoaded } = useTenantFeatures()
   const router = useRouter()
 
   React.useEffect(() => {
     if (isVGreensAdmin) return
-
-    if (!loading && !hasFeature(featureKey) && redirectTo) {
-      router.push(redirectTo)
-    }
-  }, [loading, hasFeature, featureKey, redirectTo, router, isVGreensAdmin])
+    if (!dataLoaded || hasFeature(featureKey) || !redirectTo) return
+    router.push(redirectTo)
+  }, [dataLoaded, hasFeature, featureKey, redirectTo, router, isVGreensAdmin])
 
   if (isVGreensAdmin) {
     return <>{children}</>
   }
 
-  if (loading) {
+  if (!dataLoaded || loading) {
     return <ContentSkeleton showHeader={false} lines={5} />
   }
 

@@ -11,13 +11,22 @@ import {
 import * as React from 'react'
 import { useI18n } from '@/i18n'
 import type { Alert } from '@/generated/graphql'
+import { useUsersQuery } from '@/generated/graphql'
 import { FeatureGuard } from '@/components/features/feature-guard'
 import { ContentSkeleton } from '@/components/ui/content-skeleton'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { useAlertManagement } from '@/lib/hooks/use-alert-management'
+import type { AlertsFilterInput } from '@/lib/types/alerts-filter'
+
+const defaultFilter: AlertsFilterInput = {}
 
 export default function AlertsPage() {
   const { t } = useI18n()
+  const [filter, setFilter] = React.useState<AlertsFilterInput>(defaultFilter)
+
+  const { data: usersData } = useUsersQuery()
+  const users = usersData?.users ?? []
+
   const {
     alerts,
     loading,
@@ -28,7 +37,11 @@ export default function AlertsPage() {
     handleDelete,
     handleAcknowledge,
     handleResolve,
-  } = useAlertManagement()
+  } = useAlertManagement(filter)
+
+  const onFilterChange = React.useCallback((updates: Partial<AlertsFilterInput>) => {
+    setFilter((prev) => ({ ...prev, ...updates }))
+  }, [])
 
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
   const [editingAlert, setEditingAlert] = React.useState<Alert | null>(null)
@@ -127,7 +140,8 @@ export default function AlertsPage() {
     setEditingAlert(null)
   }
 
-  if (loading) {
+  const isInitialLoad = loading && alerts.length === 0
+  if (isInitialLoad) {
     return (
       <div className="space-y-6">
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
@@ -147,12 +161,16 @@ export default function AlertsPage() {
 
         <AlertTable
           alerts={alerts}
+          filter={filter}
+          onFilterChange={onFilterChange}
+          users={users}
           onAcknowledge={onAcknowledge}
           onResolve={onResolve}
           onEdit={onEdit}
           onDelete={onDelete}
           onRowClick={handleAlertRowClick}
           isLoading={isLoading}
+          tableLoading={loading}
         />
 
         <AlertSidebar

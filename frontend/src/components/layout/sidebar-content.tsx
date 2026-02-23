@@ -1,12 +1,13 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { useI18n } from '@/i18n'
-import { cn } from '@/lib/utils'
-import { ChevronRight, LogOut, Moon, Sun, X } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import * as React from 'react'
+import { cn } from '@/lib/utils'
+import { useI18n } from '@/i18n'
+import '@/components/ui/logo-spin.css'
+import { Button } from '@/components/ui/button'
+import { LogoSVG } from '@/components/ui/logo-svg'
+import { Separator } from '@/components/ui/separator'
+import { ChevronRight, LogOut, Moon, Sun, X } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface NavItem {
   label: string
@@ -46,14 +47,15 @@ export function SidebarContent({
       {/* Header */}
       <div className="flex h-16 items-center justify-between border-b border-border dark:border-sidebar-border/70 px-4">
         <div className="flex items-center gap-2">
-          <div className="relative flex h-8 w-8 items-center justify-center shrink-0">
-            <Image
-              src="/vGreens.svg"
-              alt="vGreens Lab"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
+          <div className="sidebar-logo-spin h-8 w-8 shrink-0" aria-hidden>
+            <div className="sidebar-spin-3d">
+              <div className="sidebar-face sidebar-front">
+                <LogoSVG color="#016F7C" className="object-contain" />
+              </div>
+              <div className="sidebar-face sidebar-back">
+                <LogoSVG color="#004D56" className="object-contain" />
+              </div>
+            </div>
           </div>
           {(!isCollapsed || mobile) && (
             <span className="font-semibold text-foreground dark:text-sidebar-foreground">
@@ -71,7 +73,7 @@ export function SidebarContent({
             <ChevronRight
               className={cn(
                 'h-4 w-4 transition-transform',
-                isCollapsed && 'rotate-180'
+                isCollapsed && 'rotate-180',
               )}
             />
           </Button>
@@ -103,7 +105,7 @@ export function SidebarContent({
                 isActive
                   ? 'bg-primary text-primary-foreground dark:bg-sidebar-accent dark:text-sidebar-accent-foreground dark:shadow-sm'
                   : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:text-sidebar-foreground/90 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground',
-                isCollapsed && !mobile && 'justify-center px-2'
+                isCollapsed && !mobile && 'justify-center px-2',
               )}
             >
               <Icon className="h-5 w-5 shrink-0" />
@@ -158,7 +160,7 @@ export function SidebarContent({
         <div
           className={cn(
             'flex items-center gap-3',
-            isCollapsed && !mobile && 'justify-center'
+            isCollapsed && !mobile && 'justify-center',
           )}
         >
           <Avatar className="h-10 w-10">

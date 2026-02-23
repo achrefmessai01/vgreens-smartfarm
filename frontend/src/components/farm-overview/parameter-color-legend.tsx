@@ -1,52 +1,52 @@
-import type { ParameterType } from "@/lib/farm-types";
+import type { ParameterType } from '@/lib/farm-types'
 
 const gradientStyle = {
   background:
-    "linear-gradient(to top, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))",
-};
+    'linear-gradient(to top, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))',
+}
 
 const LEGEND_RANGES: Record<
   string,
   { min: number; max: number; unit: string; steps: number }
 > = {
-  temperature: { min: 15, max: 30, unit: "°C", steps: 5 },
-  soil_temp: { min: 15, max: 30, unit: "°C", steps: 5 },
-  humidity: { min: 0, max: 100, unit: "%", steps: 5 },
-  soil_moisture: { min: 0, max: 100, unit: "%", steps: 5 },
-  co2: { min: 400, max: 1200, unit: " ppm", steps: 4 },
-  vpd: { min: 0, max: 2, unit: " kPa", steps: 4 },
-  par: { min: 0, max: 1000, unit: " µmol/m²/s", steps: 5 },
-  par_estimated: { min: 0, max: 1000, unit: " µmol/m²/s", steps: 5 },
-  soil_conductivity: { min: 0, max: 3, unit: " mS/cm", steps: 3 },
-  soilEC: { min: 0, max: 3, unit: " mS/cm", steps: 3 },
-  battery_v: { min: 0, max: 5, unit: " V", steps: 5 },
-  voltage_v: { min: 0, max: 5, unit: " V", steps: 5 },
-  current_ma: { min: 0, max: 500, unit: " mA", steps: 5 },
-  lux: { min: 0, max: 10000, unit: " lux", steps: 5 },
-  pressure_mpa: { min: 0, max: 0.5, unit: " MPa", steps: 5 },
-  rssi: { min: -120, max: 0, unit: " dBm", steps: 6 },
-  snr: { min: -120, max: 0, unit: " dB", steps: 6 },
-};
+  temperature: { min: 15, max: 30, unit: '°C', steps: 5 },
+  soil_temp: { min: 15, max: 30, unit: '°C', steps: 5 },
+  humidity: { min: 0, max: 100, unit: '%', steps: 5 },
+  soil_moisture: { min: 0, max: 100, unit: '%', steps: 5 },
+  co2: { min: 400, max: 1200, unit: ' ppm', steps: 4 },
+  vpd: { min: 0, max: 2, unit: ' kPa', steps: 4 },
+  par: { min: 0, max: 1000, unit: ' µmol/m²/s', steps: 5 },
+  par_estimated: { min: 0, max: 1000, unit: ' µmol/m²/s', steps: 5 },
+  soil_conductivity: { min: 0, max: 3, unit: ' mS/cm', steps: 3 },
+  soilEC: { min: 0, max: 3, unit: ' mS/cm', steps: 3 },
+  battery_v: { min: 0, max: 5, unit: ' V', steps: 5 },
+  voltage_v: { min: 0, max: 5, unit: ' V', steps: 5 },
+  current_ma: { min: 0, max: 500, unit: ' mA', steps: 5 },
+  lux: { min: 0, max: 10000, unit: ' lux', steps: 5 },
+  pressure_mpa: { min: 0, max: 0.5, unit: ' MPa', steps: 5 },
+  rssi: { min: -120, max: 0, unit: ' dBm', steps: 6 },
+  snr: { min: -120, max: 0, unit: ' dB', steps: 6 },
+}
 
 interface ParameterColorLegendProps {
-  parameter: ParameterType;
-  className?: string;
+  parameter: ParameterType
+  className?: string
 }
 
 export function ParameterColorLegend({
   parameter,
   className,
 }: ParameterColorLegendProps) {
-  const range = LEGEND_RANGES[parameter];
+  const range = LEGEND_RANGES[parameter]
 
   if (!range) {
-    return null;
+    return null
   }
 
   const labels = Array.from({ length: range.steps + 1 }, (_, i) => {
-    const value = range.min + (i * (range.max - range.min)) / range.steps;
-    return Math.round(value);
-  }).reverse();
+    const value = range.min + (i * (range.max - range.min)) / range.steps
+    return Math.round(value)
+  }).reverse()
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
@@ -61,5 +61,41 @@ export function ParameterColorLegend({
         </div>
       </div>
     </div>
-  );
+  )
+}
+
+/** Horizontal color bar for the top of the map: gradient with min/max labels (same scale as sensor colors). */
+export function ParameterColorLegendBar({
+  parameter,
+  className,
+}: ParameterColorLegendProps) {
+  const range = LEGEND_RANGES[parameter]
+
+  if (!range) {
+    return null
+  }
+
+  const horizontalGradient = {
+    background:
+      'linear-gradient(to right, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))',
+  }
+
+  return (
+    <div
+      className={`flex items-center gap-2 w-full px-2 py-1.5 border-b border-border/40 bg-muted/20 ${className ?? ''}`}
+    >
+      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+        {range.min}
+        {range.unit}
+      </span>
+      <div
+        className="flex-1 h-3 rounded-sm shrink min-w-0"
+        style={horizontalGradient}
+      />
+      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+        {range.max}
+        {range.unit}
+      </span>
+    </div>
+  )
 }

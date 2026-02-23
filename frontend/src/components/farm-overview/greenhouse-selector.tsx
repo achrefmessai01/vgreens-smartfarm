@@ -25,8 +25,8 @@ export function GreenhouseSelector({
               rounded-t-lg border-t border-x border-transparent
               ${
                 isActive
-                  ? "bg-background border-border/50 text-primary dark:text-primary shadow-[0_-1px_3px_rgba(0,0,0,0.1)]"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                  ? "bg-primary text-primary-foreground border-primary/50 shadow-[0_-1px_3px_rgba(0,0,0,0.1)]"
+                  : "bg-background dark:bg-muted/20 text-muted-foreground hover:text-foreground hover:bg-muted/30"
               }
             `}
           >

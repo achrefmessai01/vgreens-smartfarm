@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
 export const ALERTS_QUERY = gql`
-  query Alerts {
-    alerts {
+  query Alerts($filter: AlertsFilterInput) {
+    alerts(filter: $filter) {
       id
       tenantId
       tunnelId

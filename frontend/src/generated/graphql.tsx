@@ -61,6 +61,27 @@ export enum AlertStatus {
   Resolved = 'RESOLVED'
 }
 
+export type AlertsFilterInput = {
+  acknowledgedById?: InputMaybe<Scalars['ID']['input']>;
+  /** Filter by any of these user IDs (OR) */
+  acknowledgedByIdIn?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Filter alerts from this date (timestamp or createdAt) */
+  dateFrom?: InputMaybe<Scalars['String']['input']>;
+  /** Filter alerts until this date (timestamp or createdAt) */
+  dateTo?: InputMaybe<Scalars['String']['input']>;
+  resolvedById?: InputMaybe<Scalars['ID']['input']>;
+  /** Filter by any of these user IDs (OR) */
+  resolvedByIdIn?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** Generic search: sensor name, acknowledged by, resolved by, value */
+  search?: InputMaybe<Scalars['String']['input']>;
+  severity?: InputMaybe<AlertSeverity>;
+  /** Filter by multiple severities (OR) */
+  severityIn?: InputMaybe<Array<AlertSeverity>>;
+  status?: InputMaybe<AlertStatus>;
+  /** Filter by multiple statuses (OR) */
+  statusIn?: InputMaybe<Array<AlertStatus>>;
+};
+
 export type CreateAlertInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   column?: InputMaybe<Scalars['String']['input']>;
@@ -264,6 +285,11 @@ export type Query = {
 
 export type QueryAlertArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryAlertsArgs = {
+  filter?: InputMaybe<AlertsFilterInput>;
 };
 
 
@@ -490,7 +516,9 @@ export type DeleteUserMutationVariables = Exact<{
 
 export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean };
 
-export type AlertsQueryVariables = Exact<{ [key: string]: never; }>;
+export type AlertsQueryVariables = Exact<{
+  filter?: InputMaybe<AlertsFilterInput>;
+}>;
 
 
 export type AlertsQuery = { __typename?: 'Query', alerts: Array<{ __typename?: 'Alert', id: string, tenantId: string, tunnelId?: string | null, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, description?: string | null, timestamp?: any | null, field?: string | null, measurement?: string | null, device?: string | null, greenhouse?: string | null, city?: string | null, column?: string | null, row?: string | null, profile?: string | null, acknowledgedById?: string | null, acknowledgedTime?: any | null, resolvedById?: string | null, resolvedTime?: any | null, createdAt: any, updatedAt: any, acknowledgedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null, resolvedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null, tenant?: { __typename?: 'Tenant', id: string, name: string } | null }> };
@@ -1014,8 +1042,8 @@ export type DeleteUserMutationHookResult = ReturnType<typeof useDeleteUserMutati
 export type DeleteUserMutationResult = Apollo.MutationResult<DeleteUserMutation>;
 export type DeleteUserMutationOptions = Apollo.BaseMutationOptions<DeleteUserMutation, DeleteUserMutationVariables>;
 export const AlertsDocument = gql`
-    query Alerts {
-  alerts {
+    query Alerts($filter: AlertsFilterInput) {
+  alerts(filter: $filter) {
     id
     tenantId
     tunnelId
@@ -1071,6 +1099,7 @@ export const AlertsDocument = gql`
  * @example
  * const { data, loading, error } = useAlertsQuery({
  *   variables: {
+ *      filter: // value for 'filter'
  *   },
  * });
  */

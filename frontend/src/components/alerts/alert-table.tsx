@@ -12,34 +12,158 @@ import {
   Pencil,
   Trash2,
 } from 'lucide-react'
-import { DataTable, type Column } from '@/components/ui/data-table'
-import { Alert, AlertStatus, AlertSeverity } from '@/generated/graphql'
+import {
+  DataTable,
+  type Column,
+  type FilterConfigOption,
+} from '@/components/ui/data-table'
+import { Alert, AlertStatus, AlertSeverity, User } from '@/generated/graphql'
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config'
+import type { AlertsFilterInput } from '@/lib/types/alerts-filter'
+
+export type AlertTableUser = Pick<
+  User,
+  'id' | 'firstName' | 'lastName' | 'email'
+>
 
 interface AlertTableProps {
   alerts: Alert[]
+  filter: AlertsFilterInput
+  onFilterChange: (updates: Partial<AlertsFilterInput>) => void
+  users: AlertTableUser[]
   onAcknowledge: (alert: Alert) => void
   onResolve: (alert: Alert) => void
   onEdit?: (alert: Alert) => void
   onDelete?: (alert: Alert) => void
   onRowClick?: (alert: Alert) => void
   isLoading?: boolean
+  tableLoading?: boolean
 }
-
-type StatusFilter = AlertStatus | 'all'
 
 export function AlertTable({
   alerts,
+  filter,
+  onFilterChange,
+  users,
   onAcknowledge,
   onResolve,
   onEdit,
   onDelete,
   onRowClick,
   isLoading = false,
+  tableLoading = false,
 }: AlertTableProps) {
   const { t } = useI18n()
   const paginationConfig = usePaginationConfig()
-  const [statusFilter, setStatusFilter] = React.useState<StatusFilter>('all')
+
+  const alertsT = t.pages.alerts as typeof t.pages.alerts & {
+    searchPlaceholder?: string
+    filterBySeverity?: string
+    allSeverities?: string
+    filterByAcknowledgedBy?: string
+    filterByResolvedBy?: string
+    dateRangePlaceholder?: string
+    allUsers?: string
+  }
+
+  const userOptionsForMulti = React.useMemo(
+    () =>
+      users.map((u) => {
+        const name =
+          [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email || u.id
+        return { label: name, value: u.id }
+      }),
+    [users],
+  )
+
+  const filterConfigs: FilterConfigOption[] = React.useMemo(
+    () => [
+      {
+        label: alertsT.filterByStatus,
+        value: filter.statusIn?.length ? filter.statusIn.join(',') : '',
+        options: [
+          { label: alertsT.statusOpen, value: AlertStatus.Open },
+          {
+            label: alertsT.statusAcknowledged,
+            value: AlertStatus.Acknowledged,
+          },
+          { label: alertsT.statusResolved, value: AlertStatus.Resolved },
+        ],
+        multiSelect: true,
+        onFilterChange: (value) =>
+          onFilterChange({
+            status: undefined,
+            statusIn: value
+              ? (value
+                  .split(',')
+                  .map((v) => v.trim())
+                  .filter(Boolean) as AlertStatus[])
+              : undefined,
+          }),
+      },
+      {
+        label: alertsT.filterBySeverity ?? 'Severity',
+        value: filter.severityIn?.length ? filter.severityIn.join(',') : '',
+        options: [{ label: alertsT.critical, value: AlertSeverity.Critical }],
+        multiSelect: true,
+        onFilterChange: (value) =>
+          onFilterChange({
+            severity: undefined,
+            severityIn: value
+              ? (value
+                  .split(',')
+                  .map((v) => v.trim())
+                  .filter(Boolean) as AlertSeverity[])
+              : undefined,
+          }),
+      },
+      {
+        label: alertsT.filterByAcknowledgedBy ?? 'Acknowledged by',
+        value: filter.acknowledgedByIdIn?.length
+          ? filter.acknowledgedByIdIn.join(',')
+          : '',
+        options: userOptionsForMulti,
+        multiSelect: true,
+        onFilterChange: (value) =>
+          onFilterChange({
+            acknowledgedById: undefined,
+            acknowledgedByIdIn: value
+              ? value
+                  .split(',')
+                  .map((v) => v.trim())
+                  .filter(Boolean)
+              : undefined,
+          }),
+      },
+      {
+        label: alertsT.filterByResolvedBy ?? 'Resolved by',
+        value: filter.resolvedByIdIn?.length
+          ? filter.resolvedByIdIn.join(',')
+          : '',
+        options: userOptionsForMulti,
+        multiSelect: true,
+        onFilterChange: (value) =>
+          onFilterChange({
+            resolvedById: undefined,
+            resolvedByIdIn: value
+              ? value
+                  .split(',')
+                  .map((v) => v.trim())
+                  .filter(Boolean)
+              : undefined,
+          }),
+      },
+    ],
+    [
+      filter.statusIn,
+      filter.severityIn,
+      filter.acknowledgedByIdIn,
+      filter.resolvedByIdIn,
+      userOptionsForMulti,
+      onFilterChange,
+      alertsT,
+    ],
+  )
 
   const getStatusBadge = (status: AlertStatus) => {
     switch (status) {
@@ -134,18 +258,10 @@ export function AlertTable({
   const sortedAlerts = React.useMemo(
     () =>
       [...alerts].sort(
-        (a, b) => getTimestampMs(b.timestamp) - getTimestampMs(a.timestamp)
+        (a, b) => getTimestampMs(b.timestamp) - getTimestampMs(a.timestamp),
       ),
-    [alerts]
+    [alerts],
   )
-
-  const filteredAlerts = React.useMemo(() => {
-    if (statusFilter === 'all') {
-      return sortedAlerts
-    }
-
-    return sortedAlerts.filter((alert) => alert.status === statusFilter)
-  }, [sortedAlerts, statusFilter])
 
   const hideEditButton = true
 
@@ -255,28 +371,33 @@ export function AlertTable({
 
   return (
     <DataTable
-      data={filteredAlerts}
+      data={sortedAlerts}
       columns={columns}
       renderRow={renderRow}
       onRowClick={onRowClick}
-      filterConfig={{
-        label: t.pages.alerts.filterByStatus,
-        value: statusFilter,
-        options: [
-          { label: t.pages.alerts.allStatuses, value: 'all' },
-          { label: t.pages.alerts.statusOpen, value: AlertStatus.Open },
-          {
-            label: t.pages.alerts.statusAcknowledged,
-            value: AlertStatus.Acknowledged,
-          },
-          { label: t.pages.alerts.statusResolved, value: AlertStatus.Resolved },
-        ],
-        onFilterChange: (value) => setStatusFilter(value as StatusFilter),
+      searchConfig={{
+        placeholder:
+          alertsT.searchPlaceholder ??
+          'Search by sensor name, acknowledged by, resolved by...',
+      }}
+      searchValue={filter.search ?? ''}
+      onSearchChange={(value) => onFilterChange({ search: value || undefined })}
+      filterConfigs={filterConfigs}
+      dateRangeConfig={{
+        dateFrom: filter.dateFrom ? new Date(filter.dateFrom) : null,
+        dateTo: filter.dateTo ? new Date(filter.dateTo) : null,
+        onRangeChange: (from, to) =>
+          onFilterChange({
+            dateFrom: from?.toISOString().slice(0, 10) ?? undefined,
+            dateTo: to?.toISOString().slice(0, 10) ?? undefined,
+          }),
+        placeholder: alertsT.dateRangePlaceholder ?? 'Select date range',
       }}
       emptyState={{
         title: t.pages.alerts.noAlerts,
         description: t.pages.alerts.noAlertsDescription,
       }}
+      isLoading={tableLoading}
       defaultPageSize={paginationConfig.defaultPageSize}
       pageSizeOptions={paginationConfig.pageSizeOptions}
       paginationLabels={paginationConfig.paginationLabels}

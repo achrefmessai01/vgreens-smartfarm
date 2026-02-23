@@ -25,6 +25,9 @@ export const en = {
     system: 'System',
     otherMenu: 'Other menu',
     admin: 'Admin',
+    exportCsv: 'Export CSV',
+    exportPdf: 'Export PDF',
+    selectDateRange: 'Select date range',
   },
   login: {
     title: 'Welcome back',
@@ -187,6 +190,8 @@ export const en = {
       timeLabel: 'Time',
       startLabel: 'Start',
       stopLabel: 'Stop',
+      entranceLabel: '↓ Entrance',
+      emptyHistoryDrawerPlaceholder: 'No history data for this sensor in the selected range.'
     },
     history: {
       title: 'History',
@@ -263,6 +268,16 @@ export const en = {
         activeFeatures: 'Active Features',
         systemStatus: 'System Status',
         viewingDataFor: 'Viewing data for',
+        topPerformingZonesComponentTitle: 'Top Performing Zones',
+        maintenanceComponentTitle: 'Upcoming Maintenance',
+        liveMapComponentTitle: 'Live Map',
+        liveMapComponentPlaceholder:
+          'Live map placeholder — integrate Leaflet/Mapbox to show zones & sensors',
+        liveMapComponentHint:
+          'Click zones to drill into sensor lists and historical charts.',
+        deviceHealthAndWeatherComponentTitle: 'Device Health & Weather',
+        lastUpdated: 'Last updated: 2 minutes ago',
+        refresh: 'Refresh',
       },
       users: {
         title: 'User Management',
@@ -442,8 +457,16 @@ export const en = {
       resolvedBy: 'Resolved by',
       noAlerts: 'No alerts found',
       noAlertsDescription: 'No critical issues detected',
-      filterByStatus: 'Filter by Status',
+      searchPlaceholder:
+        'Search by sensor name, acknowledged by, resolved by...',
+      filterByStatus: 'Status',
+      filterBySeverity: 'Severity',
+      filterByAcknowledgedBy: 'Acknowledged by',
+      filterByResolvedBy: 'Resolved by',
+      dateRangePlaceholder: 'Select date range',
       allStatuses: 'All Statuses',
+      allSeverities: 'All Severities',
+      allUsers: 'All',
       acknowledge: 'Acknowledge',
       resolve: 'Resolve',
       acknowledgeAlert: 'Acknowledge Alert',
@@ -463,4 +486,4 @@ export const en = {
       delete: 'Delete',
     },
   },
-} as const
+} as const;

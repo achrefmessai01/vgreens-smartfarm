@@ -48,7 +48,22 @@ export const SENSOR_MAP_POSITIONS: SensorMapPosition[] = [
 /** Aspect ratio of map: width / height = 115 / 40 */
 export const SENSOR_MAP_ASPECT_RATIO = 115 / 40
 
-/** Get device id from slot id (e.g. "live_greenhouse_01|Air_01|unknown" -> "Air_01") */
+export const BAY_COUNT = 13
+
+export const ROWS_PER_BAY = 3
+
+export function getBayRowFromPosition(pos: SensorMapPosition): {
+  bayIndex: number
+  rowIndex: number
+} {
+  const bayIndex = Math.min(
+    BAY_COUNT - 1,
+    Math.floor((pos.leftPercent / 100) * BAY_COUNT),
+  )
+  const rowIndex = pos.topPercent < 25 ? 0 : pos.topPercent < 55 ? 1 : 2
+  return { bayIndex, rowIndex }
+}
+
 export function getDeviceIdFromSlotId(slotId: string): string {
   const parts = slotId.replace(/^live_/, '').split('|')
   return parts[1] ?? ''

@@ -25,6 +25,9 @@ export const de = {
     system: 'System',
     otherMenu: 'Anderes Menü',
     admin: 'Administrator',
+    exportCsv: 'CSV exportieren',
+    exportPdf: 'PDF exportieren',
+    selectDateRange: 'Zeitraum auswählen',
   },
   login: {
     title: 'Willkommen zurück',
@@ -188,6 +191,9 @@ export const de = {
       timeLabel: 'Zeit',
       startLabel: 'Start',
       stopLabel: 'Ende',
+      entranceLabel: '↓ Eingang',
+      emptyHistoryDrawerPlaceholder:
+        'Keine Verlaufsdaten für diesen Sensor im ausgewählten Zeitraum.',
     },
     history: {
       title: 'Verlauf',
@@ -269,6 +275,15 @@ export const de = {
         activeFeatures: 'Aktive Funktionen',
         systemStatus: 'Systemstatus',
         viewingDataFor: 'Daten anzeigen für',
+        topPerformingZonesComponentTitle: 'Top-Performing-Zonen',
+        maintenanceComponentTitle: 'Bevorstehende Wartung',
+        liveMapComponentTitle: 'Live-Karte',
+        liveMapComponentPlaceholder: 'Live-Karte wird bald verfügbar sein',
+        liveMapComponentHint:
+          'Klicken Sie auf Zonen, um in Sensorlisten und historische Diagramme zu gelangen.',
+        deviceHealthAndWeatherComponentTitle: 'Gerätegesundheit & Wetter',
+        lastUpdated: 'Zuletzt aktualisiert: vor 2 Minuten',
+        refresh: 'Aktualisieren',
       },
       users: {
         title: 'Benutzerverwaltung',
@@ -453,8 +468,15 @@ export const de = {
       resolvedBy: 'Gelöst von',
       noAlerts: 'Keine Alarme gefunden',
       noAlertsDescription: 'Keine kritischen Probleme erkannt',
-      filterByStatus: 'Nach Status filtern',
+      searchPlaceholder: 'Suche nach Sensor, bestätigt von, gelöst von...',
+      filterByStatus: 'Status',
+      filterBySeverity: 'Schweregrad',
+      filterByAcknowledgedBy: 'Bestätigt von',
+      filterByResolvedBy: 'Gelöst von',
+      dateRangePlaceholder: 'Datumsbereich wählen',
       allStatuses: 'Alle Status',
+      allSeverities: 'Alle Schweregrade',
+      allUsers: 'Alle',
       acknowledge: 'Bestätigen',
       resolve: 'Lösen',
       acknowledgeAlert: 'Alarm bestätigen',
@@ -474,4 +496,4 @@ export const de = {
       delete: 'Löschen',
     },
   },
-} as const
+} as const;

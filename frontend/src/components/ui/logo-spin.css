@@ -1,0 +1,40 @@
+@keyframes logo-spin-3d {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.sidebar-logo-spin {
+  perspective: 400px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-logo-spin .sidebar-spin-3d {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: logo-spin-3d 4s linear infinite;
+}
+
+.sidebar-logo-spin .sidebar-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.sidebar-logo-spin .sidebar-front {
+  transform: translateZ(1px);
+}
+
+.sidebar-logo-spin .sidebar-back {
+  transform: translateZ(-1px) rotateY(180deg);
+}
