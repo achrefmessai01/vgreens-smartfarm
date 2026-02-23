@@ -1,9 +1,9 @@
-import type { ParameterType } from '@/lib/farm-types'
+import type { ParameterType } from '@/lib/farm-types';
 
 const gradientStyle = {
   background:
     'linear-gradient(to top, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))',
-}
+};
 
 const LEGEND_RANGES: Record<
   string,
@@ -26,27 +26,27 @@ const LEGEND_RANGES: Record<
   pressure_mpa: { min: 0, max: 0.5, unit: ' MPa', steps: 5 },
   rssi: { min: -120, max: 0, unit: ' dBm', steps: 6 },
   snr: { min: -120, max: 0, unit: ' dB', steps: 6 },
-}
+};
 
 interface ParameterColorLegendProps {
-  parameter: ParameterType
-  className?: string
+  parameter: ParameterType;
+  className?: string;
 }
 
 export function ParameterColorLegend({
   parameter,
   className,
 }: ParameterColorLegendProps) {
-  const range = LEGEND_RANGES[parameter]
+  const range = LEGEND_RANGES[parameter];
 
   if (!range) {
-    return null
+    return null;
   }
 
   const labels = Array.from({ length: range.steps + 1 }, (_, i) => {
-    const value = range.min + (i * (range.max - range.min)) / range.steps
-    return Math.round(value)
-  }).reverse()
+    const value = range.min + (i * (range.max - range.min)) / range.steps;
+    return Math.round(value);
+  }).reverse();
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
@@ -61,7 +61,7 @@ export function ParameterColorLegend({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 /** Horizontal color bar for the top of the map: gradient with min/max labels (same scale as sensor colors). */
@@ -69,20 +69,20 @@ export function ParameterColorLegendBar({
   parameter,
   className,
 }: ParameterColorLegendProps) {
-  const range = LEGEND_RANGES[parameter]
+  const range = LEGEND_RANGES[parameter];
 
   if (!range) {
-    return null
+    return null;
   }
 
   const horizontalGradient = {
     background:
       'linear-gradient(to right, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))',
-  }
+  };
 
   return (
     <div
-      className={`flex items-center gap-2 w-full px-2 py-1.5 border-b border-border/40 bg-muted/20 ${className ?? ''}`}
+      className={`flex items-center gap-2 w-full px-8 py-1.5 border-b border-border/40 bg-muted/20 ${className ?? ''}`}
     >
       <span className="text-xs text-muted-foreground tabular-nums shrink-0">
         {range.min}
@@ -97,5 +97,5 @@ export function ParameterColorLegendBar({
         {range.unit}
       </span>
     </div>
-  )
+  );
 }
