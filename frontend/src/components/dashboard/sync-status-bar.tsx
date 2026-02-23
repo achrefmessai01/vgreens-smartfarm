@@ -1,36 +1,42 @@
-'use client'
+'use client';
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n/context';
+import { cn } from '@/lib/utils';
 
 export interface StatusDot {
-  label: string
-  variant?: 'success' | 'warning' | 'muted'
+  label: string;
+  variant?: 'success' | 'warning' | 'muted';
 }
 
 export interface SyncStatusBarProps {
-  statusDots?: StatusDot[]
-  exportCsvLabel?: string
-  exportPdfLabel?: string
-  onExportCsv?: () => void
-  onExportPdf?: () => void
-  className?: string
+  statusDots?: StatusDot[];
+  exportCsvLabel?: string;
+  exportPdfLabel?: string;
+  onExportCsv?: () => void;
+  onExportPdf?: () => void;
+  className?: string;
 }
 
 const dotClass = {
   success: 'bg-emerald-400',
   warning: 'bg-amber-400',
   muted: 'bg-muted-foreground',
-}
+};
 
 export function SyncStatusBar({
   statusDots = [],
-  exportCsvLabel = 'Export CSV',
-  exportPdfLabel = 'Export PDF',
+  exportCsvLabel,
+  exportPdfLabel,
   onExportCsv,
   onExportPdf,
   className,
 }: SyncStatusBarProps) {
+  const { t } = useI18n();
+
+  exportCsvLabel = exportCsvLabel ?? t.common.exportCsv;
+  exportPdfLabel = exportPdfLabel ?? t.common.exportPdf;
+
   return (
     <div
       className={cn(
@@ -70,5 +76,5 @@ export function SyncStatusBar({
         </Button>
       </div>
     </div>
-  )
+  );
 }

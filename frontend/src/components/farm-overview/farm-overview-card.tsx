@@ -1,13 +1,14 @@
 'use client'
 
-import { EmptyState } from './empty-state'
 import { Card } from '@/components/ui/card'
-import { FarmDataDisplay } from './farm-view-container'
-import { ViewModeSelector } from './view-mode-selector'
-import { ParameterSelector } from './parameter-selector'
+import { useI18n } from '@/i18n/context'
 import type { Bay, ParameterType } from '@/lib/farm-types'
+import { EmptyState } from './empty-state'
+import { FarmDataDisplay } from './farm-view-container'
 import { GreenhouseSelector } from './greenhouse-selector'
 import { ParameterColorLegendBar } from './parameter-color-legend'
+import { ParameterSelector } from './parameter-selector'
+import { ViewModeSelector } from './view-mode-selector'
 
 export interface FarmOverviewCardProps {
   greenhouseOptions: { key: string; label: string }[]
@@ -48,8 +49,12 @@ export function FarmOverviewCard({
   noSensorLabel,
   noDataMessage,
   emptyForNowMessage,
-  entranceLabel = '↓ Entrance',
+  entranceLabel,
 }: FarmOverviewCardProps) {
+  const { t } = useI18n();
+  
+  entranceLabel = entranceLabel ?? t.pages.farmOverview.entranceLabel;
+
   const showEmpty = activeGreenhouseTab === 1
 
   return (

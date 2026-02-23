@@ -25,6 +25,9 @@ export const de = {
     system: 'System',
     otherMenu: 'Anderes Menü',
     admin: 'Administrator',
+    exportCsv: 'CSV exportieren',
+    exportPdf: 'PDF exportieren',
+    selectDateRange: 'Zeitraum auswählen',
   },
   login: {
     title: 'Willkommen zurück',
@@ -188,6 +191,9 @@ export const de = {
       timeLabel: 'Zeit',
       startLabel: 'Start',
       stopLabel: 'Ende',
+      entranceLabel: '↓ Eingang',
+      emptyHistoryDrawerPlaceholder:
+        'Keine Verlaufsdaten für diesen Sensor im ausgewählten Zeitraum.',
     },
     history: {
       title: 'Verlauf',
@@ -269,6 +275,15 @@ export const de = {
         activeFeatures: 'Aktive Funktionen',
         systemStatus: 'Systemstatus',
         viewingDataFor: 'Daten anzeigen für',
+        topPerformingZonesComponentTitle: 'Top-Performing-Zonen',
+        maintenanceComponentTitle: 'Bevorstehende Wartung',
+        liveMapComponentTitle: 'Live-Karte',
+        liveMapComponentPlaceholder: 'Live-Karte wird bald verfügbar sein',
+        liveMapComponentHint:
+          'Klicken Sie auf Zonen, um in Sensorlisten und historische Diagramme zu gelangen.',
+        deviceHealthAndWeatherComponentTitle: 'Gerätegesundheit & Wetter',
+        lastUpdated: 'Zuletzt aktualisiert: vor 2 Minuten',
+        refresh: 'Aktualisieren',
       },
       users: {
         title: 'Benutzerverwaltung',
@@ -481,4 +496,4 @@ export const de = {
       delete: 'Löschen',
     },
   },
-} as const
+} as const;

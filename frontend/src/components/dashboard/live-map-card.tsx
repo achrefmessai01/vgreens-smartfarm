@@ -1,21 +1,29 @@
-'use client'
+'use client';
 
-import { Card, CardContent } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { Card, CardContent } from '@/components/ui/card';
+import { useI18n } from '@/i18n/context';
+import { cn } from '@/lib/utils';
 
 export interface LiveMapCardProps {
-  title?: string
-  placeholderText?: string
-  hintText?: string
-  className?: string
+  title?: string;
+  placeholderText?: string;
+  hintText?: string;
+  className?: string;
 }
 
 export function LiveMapCard({
-  title = 'Live Map',
-  placeholderText = 'Live map placeholder — integrate Leaflet/Mapbox to show zones & sensors',
-  hintText = 'Click zones to drill into sensor lists and historical charts.',
+  title,
+  placeholderText,
+  hintText,
   className,
 }: LiveMapCardProps) {
+  const { t } = useI18n();
+
+  title = title ?? t.pages.admin.dashboard.liveMapComponentTitle;
+  placeholderText =
+    placeholderText ?? t.pages.admin.dashboard.liveMapComponentPlaceholder;
+  hintText = hintText ?? t.pages.admin.dashboard.liveMapComponentHint;
+
   return (
     <Card className={cn('col-span-2 rounded-lg border bg-card p-6', className)}>
       <h3 className="text-lg font-semibold">{title}</h3>
@@ -28,5 +36,5 @@ export function LiveMapCard({
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

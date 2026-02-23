@@ -1,24 +1,28 @@
-'use client'
+'use client';
 
-import { cn } from '@/lib/utils'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card';
+import { useI18n } from '@/i18n';
+import { cn } from '@/lib/utils';
 
 export interface MaintenanceItem {
-  title: string
-  due: string
+  title: string;
+  due: string;
 }
 
 export interface MaintenanceCardProps {
-  title?: string
-  items: MaintenanceItem[]
-  className?: string
+  title?: string;
+  items: MaintenanceItem[];
+  className?: string;
 }
 
 export function MaintenanceCard({
-  title = 'Upcoming Maintenance',
+  title,
   items,
   className,
 }: MaintenanceCardProps) {
+  const { t } = useI18n();
+
+  title = title ?? t.pages.admin.dashboard.maintenanceComponentTitle;
   return (
     <Card className={cn('rounded-lg border bg-card p-6', className)}>
       <h3 className="text-lg font-semibold">{title}</h3>
@@ -33,5 +37,5 @@ export function MaintenanceCard({
         </ul>
       </CardContent>
     </Card>
-  )
+  );
 }

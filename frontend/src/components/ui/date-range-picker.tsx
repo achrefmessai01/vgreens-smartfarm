@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/i18n'
 
 export interface DateRangePickerProps {
   dateFrom: Date | null
@@ -30,9 +31,13 @@ export function DateRangePicker({
   dateFrom,
   dateTo,
   onRangeChange,
-  placeholder = 'Select date range',
+  placeholder,
   className,
 }: DateRangePickerProps) {
+  const { t } = useI18n();
+
+  placeholder = placeholder ?? t.common.selectDateRange;
+
   const [open, setOpen] = React.useState(false)
   const [fromInput, setFromInput] = React.useState(
     dateFrom ? dateFrom.toISOString().slice(0, 10) : ''

@@ -1,25 +1,31 @@
-'use client'
+"use client";
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/i18n/context";
+import { cn } from "@/lib/utils";
 
 export interface DashboardFooterProps {
-  lastUpdated?: string
-  refreshLabel?: string
-  onRefresh?: () => void
-  className?: string
+  lastUpdated?: string;
+  refreshLabel?: string;
+  onRefresh?: () => void;
+  className?: string;
 }
 
 export function DashboardFooter({
-  lastUpdated = 'Last updated: 2 minutes ago',
-  refreshLabel = 'Refresh',
+  lastUpdated,
+  refreshLabel,
   onRefresh,
   className,
 }: DashboardFooterProps) {
+  const { t } = useI18n();
+
+  lastUpdated = lastUpdated ?? t.pages.admin.dashboard.lastUpdated;
+  refreshLabel = refreshLabel ?? t.pages.admin.dashboard.refresh;
+
   return (
     <div
       className={cn(
-        'flex items-center justify-between text-sm text-muted-foreground',
+        "flex items-center justify-between text-sm text-muted-foreground",
         className,
       )}
     >
@@ -33,5 +39,5 @@ export function DashboardFooter({
         {refreshLabel}
       </Button>
     </div>
-  )
+  );
 }

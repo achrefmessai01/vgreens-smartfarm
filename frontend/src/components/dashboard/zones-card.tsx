@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
+import { useI18n } from '@/i18n'
 
 export interface ZoneItem {
   name: string
@@ -16,10 +17,13 @@ export interface ZonesCardProps {
 }
 
 export function ZonesCard({
-  title = 'Top Performing Zones',
+  title,
   zones,
   className,
 }: ZonesCardProps) {
+  const {t} = useI18n();
+
+  title = title ?? t.pages.admin.dashboard.topPerformingZonesComponentTitle;
   return (
     <Card className={cn('rounded-lg border bg-card p-6', className)}>
       <h3 className="text-lg font-semibold">{title}</h3>

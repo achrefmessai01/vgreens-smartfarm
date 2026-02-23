@@ -1,22 +1,26 @@
-'use client'
+'use client';
 
-import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input';
+import { useI18n } from '@/i18n';
+import { cn } from '@/lib/utils';
+import { Search } from 'lucide-react';
 
 export interface TableSearchProps {
-  placeholder?: string
-  value: string
-  onChange: (value: string) => void
-  className?: string
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
 }
 
 export function TableSearch({
-  placeholder = 'Search...',
+  placeholder,
   value,
   onChange,
   className,
 }: TableSearchProps) {
+  const { t } = useI18n();
+
+  placeholder = placeholder ?? t.common.searchPlaceholder;
   return (
     <div className={cn('relative flex-1 min-w-0 max-w-md', className)}>
       <Search
@@ -31,5 +35,5 @@ export function TableSearch({
         className="pl-9 h-9 rounded-lg border-border/60 bg-background focus-visible:ring-2 focus-visible:ring-primary/20"
       />
     </div>
-  )
+  );
 }

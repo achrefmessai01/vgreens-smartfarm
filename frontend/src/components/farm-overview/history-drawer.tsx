@@ -21,6 +21,7 @@ import {
 import type { ParameterType } from '@/lib/farm-types'
 import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql'
 import { HistoryChartSkeleton } from './history-chart-skeleton'
+import { useI18n } from '@/i18n'
 
 /** Parse slotId (e.g. "live_greenhouse_01|Air_09|unknown") into greenhouse, device, level for InfluxDB filters */
 function parseSlotId(slotId: string): {
@@ -85,6 +86,8 @@ export function HistoryDrawer({
   historyLabel,
   bucketName: bucketNameOverride,
 }: HistoryDrawerProps) {
+  const { t } = useI18n();
+
   const [timeRange, setTimeRange] = React.useState<'1day' | '1week' | '1month'>(
     '1month',
   )
@@ -185,7 +188,7 @@ export function HistoryDrawer({
               <HistoryChartSkeleton className="h-full w-full" />
             ) : historyData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-                No history data for this sensor in the selected range.
+                {t.pages.farmOverview.emptyHistoryDrawerPlaceholder}
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
