@@ -8,7 +8,7 @@ import { BaseService } from '@common/services';
 import { Alert } from './entities/alert.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual } from 'typeorm';
-import { CreateAlertInput, UpdateAlertInput } from './dto';
+import { CreateAlertInput, UpdateAlertInput, AlertsFilterInput } from './dto';
 import { AlertStatus } from '@/common/enums/alert-status.enum';
 import { AlertSeverity } from '@/common/enums/alert-severity.enum';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
@@ -33,7 +33,7 @@ export class AlertsService extends BaseService<Alert> {
   async findAllByTenant(tenantId: string): Promise<Alert[]> {
     try {
       return await this.alertRepository.find({
-        where: { tenantId: 'd734c818-ae58-404a-95c9-14fcf907a9ac' },
+        where: { tenantId },
         order: { timestamp: OrderDirection.DESC },
         relations: [...this.alertRelations],
       });
@@ -41,6 +41,95 @@ export class AlertsService extends BaseService<Alert> {
       if (error instanceof NotFoundException) throw error;
       this.logger.error(
         `findAllByTenant failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw new InternalServerErrorException('Failed to fetch alerts');
+    }
+  }
+
+  async findAllFiltered(
+    tenantId: string | undefined,
+    filter?: AlertsFilterInput | null,
+  ): Promise<Alert[]> {
+    try {
+      const qb = this.alertRepository
+        .createQueryBuilder('alert')
+        .leftJoinAndSelect('alert.tenant', 'tenant')
+        .leftJoinAndSelect('alert.acknowledgedBy', 'acknowledgedBy')
+        .leftJoinAndSelect('alert.resolvedBy', 'resolvedBy')
+        .orderBy('alert.timestamp', 'DESC');
+
+      if (tenantId !== undefined) {
+        qb.andWhere('alert.tenantId = :tenantId', { tenantId });
+      }
+
+      if (!filter) {
+        return qb.getMany();
+      }
+
+      if (filter.search?.trim()) {
+        const term = `%${filter.search.trim()}%`;
+        qb.andWhere(
+          '(alert.sensorName ILIKE :term OR alert.value ILIKE :term OR ' +
+            'acknowledgedBy.firstName ILIKE :term OR acknowledgedBy.lastName ILIKE :term OR acknowledgedBy.email ILIKE :term OR ' +
+            'resolvedBy.firstName ILIKE :term OR resolvedBy.lastName ILIKE :term OR resolvedBy.email ILIKE :term)',
+          { term },
+        );
+      }
+
+      if (filter.dateFrom) {
+        qb.andWhere(
+          '(alert.timestamp >= :dateFrom OR (alert.timestamp IS NULL AND alert.createdAt >= :dateFrom))',
+          { dateFrom: filter.dateFrom },
+        );
+      }
+      if (filter.dateTo) {
+        qb.andWhere(
+          '(alert.timestamp <= :dateTo OR (alert.timestamp IS NULL AND alert.createdAt <= :dateTo))',
+          { dateTo: filter.dateTo },
+        );
+      }
+
+      if (filter.statusIn?.length) {
+        qb.andWhere('alert.status IN (:...statusIn)', {
+          statusIn: filter.statusIn,
+        });
+      } else if (filter.status) {
+        qb.andWhere('alert.status = :status', { status: filter.status });
+      }
+      if (filter.severityIn?.length) {
+        qb.andWhere('alert.severity IN (:...severityIn)', {
+          severityIn: filter.severityIn,
+        });
+      } else if (filter.severity) {
+        qb.andWhere('alert.severity = :severity', {
+          severity: filter.severity,
+        });
+      }
+      if (filter.acknowledgedByIdIn?.length) {
+        qb.andWhere('alert.acknowledgedById IN (:...acknowledgedByIdIn)', {
+          acknowledgedByIdIn: filter.acknowledgedByIdIn,
+        });
+      } else if (filter.acknowledgedById) {
+        qb.andWhere('alert.acknowledgedById = :acknowledgedById', {
+          acknowledgedById: filter.acknowledgedById,
+        });
+      }
+      if (filter.resolvedByIdIn?.length) {
+        qb.andWhere('alert.resolvedById IN (:...resolvedByIdIn)', {
+          resolvedByIdIn: filter.resolvedByIdIn,
+        });
+      } else if (filter.resolvedById) {
+        qb.andWhere('alert.resolvedById = :resolvedById', {
+          resolvedById: filter.resolvedById,
+        });
+      }
+
+      return qb.getMany();
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      this.logger.error(
+        `findAllFiltered failed: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
       );
       throw new InternalServerErrorException('Failed to fetch alerts');
