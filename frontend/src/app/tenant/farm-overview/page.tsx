@@ -1,29 +1,30 @@
-'use client'
+'use client';
 
-import { useI18n } from '@/i18n'
 import {
-  HistoryDrawer,
   FarmOverviewCard,
   FarmOverviewPageSkeleton,
-} from '@/components/farm-overview'
-import { TenantSelector } from '@/components/tenants'
-import { PageHeader } from '@/components/layout/page-header'
-import { useFarmOverviewPage } from './use-farm-overview-page'
-import { FeatureGuard } from '@/components/features/feature-guard'
+  GreenhouseSelector,
+  HistoryDrawer,
+} from '@/components/farm-overview';
+import { FeatureGuard } from '@/components/features/feature-guard';
+import { PageHeader } from '@/components/layout/page-header';
+import { TenantSelector } from '@/components/tenants';
+import { useI18n } from '@/i18n';
+import { useFarmOverviewPage } from './use-farm-overview-page';
 
 export default function FarmOverviewPage() {
-  const { t } = useI18n()
+  const { t } = useI18n();
   const farmOverviewT = t.pages.farmOverview as Parameters<
     typeof useFarmOverviewPage
-  >[0]
-  const state = useFarmOverviewPage(farmOverviewT)
+  >[0];
+  const state = useFarmOverviewPage(farmOverviewT);
 
   if (state.loading) {
     return (
       <FeatureGuard featureKey="farm_overview">
         <FarmOverviewPageSkeleton showTenantSelector={state.isVGreensAdmin} />
       </FeatureGuard>
-    )
+    );
   }
 
   return (
@@ -44,11 +45,14 @@ export default function FarmOverviewPage() {
           />
         )}
 
+        <GreenhouseSelector
+          value={state.activeGreenhouseTab}
+          onValueChange={state.setActiveGreenhouseTab}
+          options={state.greenhouseOptions}
+        />
+
         <div className="flex flex-1 flex-col min-h-0">
           <FarmOverviewCard
-            greenhouseOptions={state.greenhouseOptions}
-            activeGreenhouseTab={state.activeGreenhouseTab}
-            onGreenhouseChange={state.setActiveGreenhouseTab}
             parameterOptions={state.parameterOptions}
             effectiveParameter={state.effectiveParameter}
             onParameterChange={state.setSelectedParameter}
@@ -81,5 +85,5 @@ export default function FarmOverviewPage() {
         />
       </div>
     </FeatureGuard>
-  )
+  );
 }

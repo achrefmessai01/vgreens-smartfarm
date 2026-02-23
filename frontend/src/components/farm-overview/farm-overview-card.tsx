@@ -1,40 +1,33 @@
-'use client'
+'use client';
 
-import { Card } from '@/components/ui/card'
-import { useI18n } from '@/i18n/context'
-import type { Bay, ParameterType } from '@/lib/farm-types'
-import { EmptyState } from './empty-state'
-import { FarmDataDisplay } from './farm-view-container'
-import { GreenhouseSelector } from './greenhouse-selector'
-import { ParameterColorLegendBar } from './parameter-color-legend'
-import { ParameterSelector } from './parameter-selector'
-import { ViewModeSelector } from './view-mode-selector'
+import { Card } from '@/components/ui/card';
+import { useI18n } from '@/i18n/context';
+import type { Bay, ParameterType } from '@/lib/farm-types';
+import { EmptyState } from './empty-state';
+import { FarmDataDisplay } from './farm-view-container';
+import { ParameterColorLegendBar } from './parameter-color-legend';
+import { ParameterSelector } from './parameter-selector';
+import { ViewModeSelector } from './view-mode-selector';
 
 export interface FarmOverviewCardProps {
-  greenhouseOptions: { key: string; label: string }[]
-  activeGreenhouseTab: number
-  onGreenhouseChange: (index: number) => void
-  parameterOptions: { label: string; value: string }[]
-  effectiveParameter: ParameterType
-  onParameterChange: (value: ParameterType) => void
-  viewMode: 'heatmap' | 'discrete'
-  onViewModeChange: (value: 'heatmap' | 'discrete') => void
-  viewHeatmapLabel: string
-  viewDiscreteLabel: string
-  bays: Bay[]
-  selectedSlotId: string | null
-  onSelectSlot: (slotId: string | null) => void
-  parameterLabel: string
-  noSensorLabel: string
-  noDataMessage: string
-  emptyForNowMessage: string
-  entranceLabel?: string
+  parameterOptions: { label: string; value: string }[];
+  effectiveParameter: ParameterType;
+  onParameterChange: (value: ParameterType) => void;
+  viewMode: 'heatmap' | 'discrete';
+  onViewModeChange: (value: 'heatmap' | 'discrete') => void;
+  viewHeatmapLabel: string;
+  viewDiscreteLabel: string;
+  bays: Bay[];
+  selectedSlotId: string | null;
+  onSelectSlot: (slotId: string | null) => void;
+  parameterLabel: string;
+  noSensorLabel: string;
+  noDataMessage: string;
+  emptyForNowMessage: string;
+  entranceLabel?: string;
 }
 
 export function FarmOverviewCard({
-  greenhouseOptions,
-  activeGreenhouseTab,
-  onGreenhouseChange,
   parameterOptions,
   effectiveParameter,
   onParameterChange,
@@ -52,22 +45,15 @@ export function FarmOverviewCard({
   entranceLabel,
 }: FarmOverviewCardProps) {
   const { t } = useI18n();
-  
+
   entranceLabel = entranceLabel ?? t.pages.farmOverview.entranceLabel;
 
-  const showEmpty = activeGreenhouseTab === 1
+  const showEmpty = false;
 
   return (
     <Card className="h-full min-h-0 flex flex-col gap-0 py-0 overflow-hidden dark:shadow-lg">
       <div className="shrink-0 flex flex-col bg-muted/10">
-        <div className="px-4">
-          <GreenhouseSelector
-            value={activeGreenhouseTab}
-            onValueChange={onGreenhouseChange}
-            options={greenhouseOptions}
-          />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-1 border-b border-border/40 bg-background">
+        <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-b border-border/40 bg-background">
           <ParameterSelector
             value={effectiveParameter}
             onValueChange={onParameterChange}
@@ -124,5 +110,5 @@ export function FarmOverviewCard({
         </div>
       </div>
     </Card>
-  )
+  );
 }

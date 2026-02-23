@@ -22,7 +22,7 @@ export function GreenhouseSelector({
             onClick={() => onValueChange(index)}
             className={`
               relative px-8 py-3 text-xs font-bold uppercase tracking-wider transition-all duration-300
-              rounded-t-lg border-t border-x border-transparent
+               border-t border-x border-transparent
               ${
                 isActive
                   ? 'bg-primary text-primary-foreground border-primary/50 shadow-[0_-1px_3px_rgba(0,0,0,0.1)]'
