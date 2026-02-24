@@ -240,8 +240,24 @@ export function AlertTable({
     return Number.isNaN(time) ? 0 : time
   }
 
+  const formatFieldLabel = (field?: string | null) => {
+    if (!field) return '-'
+    const labels: Record<string, string> = {
+      temperature: 'Temperature',
+      humidity: 'Humidity',
+      vpd: 'VPD',
+      soil_moisture: 'Soil moisture',
+      soil_ec: 'Soil EC',
+      soil_temp: 'Soil temp',
+      par: 'PAR',
+      co2: 'CO2',
+    }
+    return labels[field] ?? field.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  }
+
   const columns: Column<Alert>[] = [
     { key: 'sensorName', header: t.pages.alerts.sensorName },
+    { key: 'field', header: t.pages.alerts.field ?? 'Parameter' },
     { key: 'value', header: t.pages.alerts.value },
     { key: 'status', header: t.pages.alerts.status },
     { key: 'severity', header: t.pages.alerts.severity },
@@ -289,6 +305,9 @@ export function AlertTable({
       <>
         <TableCell className={`font-medium ${cellClassName}`.trim()}>
           {alert.sensorName}
+        </TableCell>
+        <TableCell className={cellClassName}>
+          {formatFieldLabel(alert.field)}
         </TableCell>
         <TableCell className={cellClassName}>{alert.value}</TableCell>
         <TableCell className={cellClassName}>
