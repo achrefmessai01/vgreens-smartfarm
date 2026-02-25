@@ -48,13 +48,11 @@ primary_region = "fra" # Frankfurt - change to your preferred region
   NEXT_TELEMETRY_DISABLED = "1"
   HOSTNAME = "0.0.0.0"
 
-# Build arguments
+# Build arguments (NEXT_PUBLIC_* can be overridden by CI via fly deploy --build-arg)
 [build.args]
   NEXT_PUBLIC_GRAPHQL_ENDPOINT = "https://vgreens-backend.fly.dev/graphql"
   NEXT_PUBLIC_API_URL = "https://vgreens-backend.fly.dev"
 
-# Secrets to set via `flyctl secrets set`:
-# - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-# - CLERK_SECRET_KEY
+# From GitLab CI: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY (build arg), CLERK_SECRET_KEY (flyctl secrets set)
 # Note: Update NEXT_PUBLIC_GRAPHQL_ENDPOINT and NEXT_PUBLIC_API_URL above
 # with your actual backend Fly.io URL
