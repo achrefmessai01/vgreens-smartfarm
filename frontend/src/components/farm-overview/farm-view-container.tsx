@@ -1,11 +1,11 @@
-import type { Bay, ParameterType } from "@/lib/farm-types";
-import { EmptyState } from "./empty-state";
-import { ViewSensorMap } from "./views/view-sensor-map";
-import { ViewSingleBay } from "./views/view-single-bay";
+import type { Bay, ParameterType } from '@/lib/farm-types';
+import { EmptyState } from './empty-state';
+import { ViewSensorMap } from './views/view-sensor-map';
+import { ViewSingleBay } from './views/view-single-bay';
 
 interface FarmDataDisplayProps {
   bays: Bay[];
-  viewMode: "heatmap" | "discrete";
+  viewMode: 'heatmap' | 'discrete';
   parameter: ParameterType;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
@@ -31,7 +31,7 @@ export function FarmDataDisplay({
 
   return (
     <div className="flex flex-col h-full min-h-0 p-2 sm:p-4">
-      {viewMode === "discrete" ? (
+      {viewMode === 'discrete' ? (
         <ViewSensorMap
           key={bays[0].id}
           bay={bays[0]}
