@@ -28,7 +28,7 @@ export function GreenhouseSelector({
               flex-1 justify-center border-x border-border/20 first:border-l-0
               text-xs font-semibold tracking-wider uppercase shadow-none cursor-pointer
               h-10 px-6
-              ${index === 0 ? 'rounded-l-md rounded-r-none' : 'rounded-r-md rounded-l-none'}
+              ${index === 0 ? 'rounded-l-md rounded-r-none' : index === options.length - 1 ? 'rounded-r-md rounded-l-none' : 'rounded-none'}
               ${
                 isActive
                   ? 'bg-emerald-400 text-white'
