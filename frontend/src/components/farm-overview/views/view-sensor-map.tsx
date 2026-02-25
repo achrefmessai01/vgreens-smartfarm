@@ -68,7 +68,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
   return (
     <div
       className={cn(
-        'flex flex-1 min-h-0 w-full h-full rounded-lg border border-border/40 bg-background overflow-hidden',
+        'flex flex-1 min-h-0 w-full h-full rounded-xl border border-border/40 bg-card shadow-sm overflow-hidden',
         className,
       )}
     >
@@ -76,7 +76,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
         <div
           key={bayIndex}
           className={cn(
-            'flex flex-1 flex-col min-w-0 border-r border-border/60 last:border-r-0',
+            'flex flex-1 flex-col min-w-0 border-r border-border/40 last:border-r-0',
           )}
         >
           {Array.from({ length: ROWS_PER_BAY }, (_, rowIndex) => {
@@ -85,19 +85,16 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
             return (
               <div
                 key={rowIndex}
-                className="flex flex-1 min-h-[72px] items-center justify-center gap-1 p-1 flex-wrap"
+                className="flex flex-1 min-h-[80px] items-center justify-center gap-2 p-2 flex-wrap"
               >
                 {items.map(({ slot, deviceId, value }) => {
                   const isSelected = slot ? selectedSlotId === slot.id : false;
                   const glowColor = slot
                     ? getParameterColor(value ?? 0, parameter, slot.id)
                     : 'rgb(200, 200, 200)';
-                  const textGlow = slot
-                    ? `0 0 6px ${glowColor}, 0 0 12px ${glowColor}, 0 0 20px ${glowColor}`
+                  const circleGlow = slot
+                    ? `0 0 14px ${glowColor}, 0 0 24px ${glowColor}`
                     : 'none';
-                  const textColor = slot
-                    ? 'hsl(var(--foreground))'
-                    : 'hsl(var(--muted-foreground))';
                   return (
                     <button
                       key={deviceId}
@@ -114,29 +111,38 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                           : deviceId
                       }
                       className={cn(
-                        'flex flex-col items-center justify-center transition-all duration-200 tabular-nums bg-transparent border-0 min-w-0 py-1 px-2',
-                        'hover:scale-110 hover:brightness-110',
-                        isSelected &&
-                          'ring-2 ring-primary ring-offset-2 ring-offset-background rounded-md scale-105',
-                        !slot && 'cursor-not-allowed opacity-60',
+                        'relative flex items-center justify-center min-w-0 transition-transform duration-150',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                        'disabled:cursor-not-allowed',
+                        'hover:scale-105',
+                        isSelected && 'scale-110',
+                        !slot && 'opacity-50',
                       )}
-                      style={{
-                        color: textColor,
-                        textShadow: textGlow,
-                      }}
                     >
-                      {value != null ? (
-                        <>
-                          <span className="text-base font-bold leading-tight tracking-tight">
-                            {formatParameterDisplayValue(value)}
-                          </span>
-                          <span className="text-[11px] font-medium opacity-95 -mt-0.5">
-                            {unit}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-sm">--</span>
-                      )}
+                      <div
+                        className={cn(
+                          'flex flex-col items-center justify-center w-12 h-12 rounded-full px-1 tabular-nums',
+                          slot
+                            ? 'bg-cyan-300/90 text-slate-900'
+                            : 'bg-muted text-muted-foreground',
+                        )}
+                        style={{
+                          boxShadow: circleGlow,
+                        }}
+                      >
+                        {value != null ? (
+                          <>
+                            <span className="text-[13px] font-semibold leading-tight tracking-tight">
+                              {formatParameterDisplayValue(value)}
+                            </span>
+                            <span className="text-[10px] font-medium -mt-0.5">
+                              {unit}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-[11px]">--</span>
+                        )}
+                      </div>
                     </button>
                   );
                 })}

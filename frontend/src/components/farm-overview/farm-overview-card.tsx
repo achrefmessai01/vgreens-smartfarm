@@ -51,7 +51,7 @@ export function FarmOverviewCard({
   const showEmpty = false;
 
   return (
-    <Card className="h-full min-h-0 flex flex-col gap-0 py-0 overflow-hidden dark:shadow-lg rounded-sm">
+    <Card className="h-full min-h-0 flex flex-col gap-0 py-0 overflow-hidden dark:shadow-lg rounded-none">
       <div className="shrink-0 flex flex-col bg-muted/10">
         <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-b border-border/40 bg-background">
           <ParameterSelector
@@ -92,11 +92,11 @@ export function FarmOverviewCard({
                 noDataMessage={noDataMessage}
               />
               <div
-                className="absolute bottom-0 left-0 w-10 h-[5.5rem] flex items-center justify-center bg-secondary text-secondary-foreground border-r border-t border-border rounded-tr-md"
+                className="absolute bottom-0 left-0 w-10 h-[15.5rem] flex items-center justify-center bg-secondary text-secondary-foreground border"
                 aria-label={entranceLabel}
               >
                 <span
-                  className="text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap"
+                  className="text-[15px] font-semibold uppercase tracking-wider whitespace-nowrap"
                   style={{
                     writingMode: 'vertical-rl',
                     transform: 'rotate(180deg)',
