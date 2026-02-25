@@ -303,10 +303,13 @@ export function ParGraphSection({
                 />
               </YAxis>
               <Tooltip
-                formatter={(value: number | null, name: string) => [
-                  formatTooltipValue(value),
-                  name,
-                ]}
+                formatter={(value: unknown, name: string) => {
+                  const num =
+                    typeof value === 'number' && !Number.isNaN(value)
+                      ? value
+                      : null
+                  return [formatTooltipValue(num), name]
+                }}
                 labelFormatter={formatTooltipHourLabel}
                 contentStyle={TOOLTIP_CONTENT_STYLE}
                 labelStyle={TOOLTIP_LABEL_STYLE}
