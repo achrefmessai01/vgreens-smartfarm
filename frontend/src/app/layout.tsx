@@ -42,7 +42,7 @@ export default function RootLayout({
             <I18nProvider defaultLocale="en">
               <ThemeProvider
                 attribute="class"
-                defaultTheme="light"
+                defaultTheme="system"
                 enableSystem
                 disableTransitionOnChange
               >
