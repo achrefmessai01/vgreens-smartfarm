@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  CombinedGreenhouseView,
   FarmOverviewCard,
   FarmOverviewPageSkeleton,
   GreenhouseSelector,
@@ -52,37 +53,48 @@ export default function FarmOverviewPage() {
         />
 
         <div className="flex flex-1 flex-col min-h-0">
-          <FarmOverviewCard
-            parameterOptions={state.parameterOptions}
-            effectiveParameter={state.effectiveParameter}
-            onParameterChange={state.setSelectedParameter}
-            viewMode={state.viewMode}
-            onViewModeChange={state.setViewMode}
-            viewHeatmapLabel={state.labels.viewHeatmap}
-            viewDiscreteLabel={state.labels.viewDiscrete}
-            bays={state.bays}
-            selectedSlotId={state.selectedSlotId}
-            onSelectSlot={state.setSelectedSlotId}
-            parameterLabel={state.getParameterLabel(state.effectiveParameter)}
-            noSensorLabel={state.labels.noSensor}
-            noDataMessage={state.labels.noData}
-            emptyForNowMessage={state.labels.emptyForNow}
-          />
+          {state.isCombinedView ? (
+            <CombinedGreenhouseView
+              greenhouses={state.combinedGreenhouses}
+              parameters={state.parameterOptions}
+              noDataMessage={state.labels.noData}
+            />
+          ) : (
+            <FarmOverviewCard
+              parameterOptions={state.parameterOptions}
+              effectiveParameter={state.effectiveParameter}
+              onParameterChange={state.setSelectedParameter}
+              viewMode={state.viewMode}
+              onViewModeChange={state.setViewMode}
+              viewHeatmapLabel={state.labels.viewHeatmap}
+              viewDiscreteLabel={state.labels.viewDiscrete}
+              viewGraphLabel={state.labels.viewGraph}
+              bays={state.bays}
+              selectedSlotId={state.selectedSlotId}
+              onSelectSlot={state.setSelectedSlotId}
+              parameterLabel={state.getParameterLabel(state.effectiveParameter)}
+              noSensorLabel={state.labels.noSensor}
+              noDataMessage={state.labels.noData}
+              emptyForNowMessage={state.labels.emptyForNow}
+            />
+          )}
         </div>
 
-        <HistoryDrawer
-          open={state.historyDrawerOpen}
-          onOpenChange={state.setHistoryDrawerOpen}
-          parameter={state.effectiveParameter}
-          slotId={state.selectedSlotId}
-          parameterLabel={state.getParameterLabel(state.effectiveParameter)}
-          timeRangeLabel={t.pages.farmOverview.timeRange}
-          oneDayLabel={t.pages.farmOverview.oneDay}
-          oneWeekLabel={t.pages.farmOverview.oneWeek}
-          oneMonthLabel={t.pages.farmOverview.oneMonth}
-          historyLabel={t.pages.farmOverview.history}
-          bucketName={state.tenantBucketNameOverride ?? undefined}
-        />
+        {!state.isCombinedView && (
+          <HistoryDrawer
+            open={state.historyDrawerOpen}
+            onOpenChange={state.setHistoryDrawerOpen}
+            parameter={state.effectiveParameter}
+            slotId={state.selectedSlotId}
+            parameterLabel={state.getParameterLabel(state.effectiveParameter)}
+            timeRangeLabel={t.pages.farmOverview.timeRange}
+            oneDayLabel={t.pages.farmOverview.oneDay}
+            oneWeekLabel={t.pages.farmOverview.oneWeek}
+            oneMonthLabel={t.pages.farmOverview.oneMonth}
+            historyLabel={t.pages.farmOverview.history}
+            bucketName={state.tenantBucketNameOverride ?? undefined}
+          />
+        )}
       </div>
     </FeatureGuard>
   );
