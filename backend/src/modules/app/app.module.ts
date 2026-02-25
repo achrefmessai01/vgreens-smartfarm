@@ -4,6 +4,7 @@ import { UsersModule } from '@modules/users';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DateTimeScalar } from '@common/scalar';
+import { ScheduleModule } from '@nestjs/schedule';
 import { graphqlConfig } from '@config/graphql.config';
 import { typeOrmConfig } from '@config/typeorm.config';
 import { AlertsModule } from '../alerts/alerts.module';
@@ -18,6 +19,7 @@ import { TenantInterceptor, UserInterceptor } from '@common/interceptors';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

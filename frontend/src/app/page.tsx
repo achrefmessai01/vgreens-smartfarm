@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { UserRole } from '@/generated/graphql'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import { PageSkeleton } from '@/components/ui/page-skeleton'
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useAuth()
@@ -32,11 +33,5 @@ export default function Home() {
     }
   }, [isSignedIn, isLoaded, router, role, userLoading])
 
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    </div>
-  )
+  return <PageSkeleton />
 }

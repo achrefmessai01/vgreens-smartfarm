@@ -6,15 +6,27 @@ import {
   AlertPageHeader,
   AlertActionDialog,
   AlertDeleteDialog,
+  AlertSidebar,
 } from '@/components/alerts'
 import * as React from 'react'
 import { useI18n } from '@/i18n'
 import type { Alert } from '@/generated/graphql'
+import { useUsersQuery } from '@/generated/graphql'
 import { FeatureGuard } from '@/components/features/feature-guard'
+import { ContentSkeleton } from '@/components/ui/content-skeleton'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { useAlertManagement } from '@/lib/hooks/use-alert-management'
+import type { AlertsFilterInput } from '@/lib/types/alerts-filter'
+
+const defaultFilter: AlertsFilterInput = {}
 
 export default function AlertsPage() {
   const { t } = useI18n()
+  const [filter, setFilter] = React.useState<AlertsFilterInput>(defaultFilter)
+
+  const { data: usersData } = useUsersQuery()
+  const users = usersData?.users ?? []
+
   const {
     alerts,
     loading,
@@ -25,10 +37,15 @@ export default function AlertsPage() {
     handleDelete,
     handleAcknowledge,
     handleResolve,
-  } = useAlertManagement()
+  } = useAlertManagement(filter)
+
+  const onFilterChange = React.useCallback((updates: Partial<AlertsFilterInput>) => {
+    setFilter((prev) => ({ ...prev, ...updates }))
+  }, [])
 
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
   const [editingAlert, setEditingAlert] = React.useState<Alert | null>(null)
+  const [selectedAlert, setSelectedAlert] = React.useState<Alert | null>(null)
   const [deleteConfirmation, setDeleteConfirmation] = React.useState<{
     alert: Alert | null
     isOpen: boolean
@@ -40,11 +57,13 @@ export default function AlertsPage() {
   }>({ isOpen: false, alert: null, action: null })
 
   const onCreate = () => {
+    setSelectedAlert(null)
     setEditingAlert(null)
     setIsSheetOpen(true)
   }
 
   const onEdit = (alert: Alert) => {
+    setSelectedAlert(null)
     setEditingAlert(alert)
     setIsSheetOpen(true)
   }
@@ -59,6 +78,26 @@ export default function AlertsPage() {
 
   const onResolve = (alert: Alert) => {
     setActionDialog({ isOpen: true, alert, action: 'resolve' })
+  }
+
+  const handleAlertRowClick = (alert: Alert) => {
+    setSelectedAlert(alert)
+  }
+
+  const handleSidebarOpenChange = (open: boolean) => {
+    if (!open) {
+      setSelectedAlert(null)
+    }
+  }
+
+  const handleSidebarAcknowledge = (alert: Alert) => {
+    setSelectedAlert(null)
+    onAcknowledge(alert)
+  }
+
+  const handleSidebarResolve = (alert: Alert) => {
+    setSelectedAlert(null)
+    onResolve(alert)
   }
 
   const confirmDelete = async () => {
@@ -101,10 +140,12 @@ export default function AlertsPage() {
     setEditingAlert(null)
   }
 
-  if (loading) {
+  const isInitialLoad = loading && alerts.length === 0
+  if (isInitialLoad) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">{t.common.loading}</p>
+      <div className="space-y-6">
+        <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
+        <TableSkeleton columnCount={7} rowCount={8} />
       </div>
     )
   }
@@ -120,10 +161,24 @@ export default function AlertsPage() {
 
         <AlertTable
           alerts={alerts}
+          filter={filter}
+          onFilterChange={onFilterChange}
+          users={users}
           onAcknowledge={onAcknowledge}
           onResolve={onResolve}
           onEdit={onEdit}
           onDelete={onDelete}
+          onRowClick={handleAlertRowClick}
+          isLoading={isLoading}
+          tableLoading={loading}
+        />
+
+        <AlertSidebar
+          open={selectedAlert !== null}
+          onOpenChange={handleSidebarOpenChange}
+          alert={selectedAlert}
+          onAcknowledge={handleSidebarAcknowledge}
+          onResolve={handleSidebarResolve}
           isLoading={isLoading}
         />
 

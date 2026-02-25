@@ -1,19 +1,20 @@
 import {
+  CreateFeatureInput,
+  UpdateFeatureInput,
+  ToggleTenantFeatureInput,
+} from './dto';
+import {
   Injectable,
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { BaseService } from '@common/services';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Feature } from './entities/feature.entity';
 import { TenantFeature } from './entities/tenant-feature.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
-import { BaseService } from '@common/services';
-import {
-  CreateFeatureInput,
-  UpdateFeatureInput,
-  ToggleTenantFeatureInput,
-} from './dto';
+import { OrderDirection } from '@/common/enums/order-direction.enum';
 
 @Injectable()
 export class FeaturesService extends BaseService<Feature> {
@@ -94,7 +95,7 @@ export class FeaturesService extends BaseService<Feature> {
     return this.tenantFeatureRepository.find({
       where: { tenantId },
       relations: ['feature'],
-      order: { createdAt: 'DESC' },
+      order: { createdAt: OrderDirection.DESC },
     });
   }
 

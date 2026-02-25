@@ -4,3 +4,4 @@ export {
   type TenantFormData,
 } from './tenant-form'
 export { TenantTable } from './tenant-table'
+export { TenantSelector } from './tenant-selector'

@@ -8,12 +8,12 @@ import {
   TableHead,
   TableHeader,
 } from '@/components/ui/table'
-import { StyledSelect } from '@/components/ui/styled-select'
 import { cn } from '@/lib/utils'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { TableToolbar } from '@/components/ui/table-toolbar'
+import { TablePagination } from '@/components/ui/table-pagination'
+import { TableEmptyState } from '@/components/ui/table-empty-state'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 export interface Column<T> {
   key: string
@@ -23,6 +23,22 @@ export interface Column<T> {
   headerClassName?: string
 }
 
+export interface DateRangeConfig {
+  dateFrom: Date | null
+  dateTo: Date | null
+  onRangeChange: (from: Date | null, to: Date | null) => void
+  placeholder?: string
+}
+
+export interface FilterConfigOption {
+  label: string
+  value: string
+  options: { label: string; value: string }[]
+  onFilterChange: (value: string) => void
+  /** When true, value is comma-separated and category shows checkboxes for multi-select */
+  multiSelect?: boolean
+}
+
 export interface DataTableProps<T> {
   data: T[]
   columns: Column<T>[]
@@ -30,14 +46,13 @@ export interface DataTableProps<T> {
   onRowClick?: (item: T) => void
   searchConfig?: {
     placeholder: string
-    onSearch: (query: string, item: T) => boolean
+    onSearch?: (query: string, item: T) => boolean
   }
-  filterConfig?: {
-    label: string
-    value: string
-    options: { label: string; value: string }[]
-    onFilterChange: (value: string) => void
-  }
+  searchValue?: string
+  onSearchChange?: (value: string) => void
+  filterConfig?: FilterConfigOption
+  filterConfigs?: FilterConfigOption[]
+  dateRangeConfig?: DateRangeConfig
   headerActions?: React.ReactNode
   emptyState?: {
     title: string
@@ -54,6 +69,7 @@ export interface DataTableProps<T> {
   }
   defaultPageSize?: number
   pageSizeOptions?: number[]
+  isLoading?: boolean
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -62,34 +78,40 @@ export function DataTable<T extends { id: string | number }>({
   renderRow,
   onRowClick,
   searchConfig,
+  searchValue,
+  onSearchChange,
   filterConfig,
+  filterConfigs,
+  dateRangeConfig,
   headerActions,
   emptyState,
   paginationLabels,
   defaultPageSize = 10,
   pageSizeOptions = [5, 10, 20, 50],
+  isLoading = false,
 }: DataTableProps<T>) {
-  const [searchQuery, setSearchQuery] = React.useState('')
+  const [internalSearch, setInternalSearch] = React.useState('')
   const [currentPage, setCurrentPage] = React.useState(1)
   const [pageSize, setPageSize] = React.useState(defaultPageSize)
 
-  // Apply search filter
-  const searchedData = React.useMemo(() => {
-    if (!searchConfig || !searchQuery.trim()) {
-      return data
-    }
-    return data.filter((item) => searchConfig.onSearch(searchQuery, item))
-  }, [data, searchQuery, searchConfig])
+  const isSearchControlled =
+    searchValue !== undefined && onSearchChange !== undefined
+  const searchQuery = isSearchControlled ? (searchValue ?? '') : internalSearch
+  const setSearchQuery = isSearchControlled ? onSearchChange : setInternalSearch
 
-  // Filtered data (parent component handles custom filtering logic)
+  const searchedData = React.useMemo(() => {
+    if (!searchConfig) return data
+    if (!searchQuery.trim()) return data
+    if (isSearchControlled || !searchConfig.onSearch) return data
+    return data.filter((item) => searchConfig.onSearch!(searchQuery, item))
+  }, [data, searchQuery, searchConfig, isSearchControlled])
+
   const filteredData = searchedData
 
-  // Reset to page 1 when search or filter changes
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, filterConfig?.value])
+  }, [searchQuery, filterConfig?.value, filterConfigs])
 
-  // Calculate pagination
   const totalPages = Math.ceil(filteredData.length / pageSize)
   const startIndex = (currentPage - 1) * pageSize
   const endIndex = startIndex + pageSize
@@ -99,199 +121,146 @@ export function DataTable<T extends { id: string | number }>({
     setCurrentPage(Math.max(1, Math.min(page, totalPages)))
   }
 
-  const handlePageSizeChange = (newPageSize: string) => {
-    setPageSize(Number(newPageSize))
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
     setCurrentPage(1)
   }
 
-  const showingLabel = paginationLabels?.showing || 'Showing'
-  const ofLabel = paginationLabels?.of || 'of'
-  const resultsLabel = paginationLabels?.results || 'results'
-  const perPageLabel = paginationLabels?.perPage || 'per page'
-  const previousLabel = paginationLabels?.previous || 'Previous'
-  const nextLabel = paginationLabels?.next || 'Next'
+  const hasToolbar =
+    searchConfig ||
+    filterConfig ||
+    (filterConfigs && filterConfigs.length > 0) ||
+    dateRangeConfig ||
+    headerActions
+  const firstOpt = filterConfig?.options[0]?.value ?? ''
+  const hasActiveFilter =
+    filterConfig && filterConfig.value !== '' && filterConfig.value !== firstOpt
+  const clearFilter = () => filterConfig?.onFilterChange(firstOpt)
+
+  const filterChips = React.useMemo(() => {
+    const configs = filterConfigs ?? (filterConfig ? [filterConfig] : [])
+    return configs
+      .filter((fc) => {
+        if (fc.multiSelect) return fc.value !== ''
+        const first = fc.options[0]?.value ?? ''
+        return fc.value !== '' && fc.value !== first
+      })
+      .map((fc) => {
+        const valueLabel =
+          fc.multiSelect && fc.value
+            ? fc.value
+                .split(',')
+                .map((v) => fc.options.find((o) => o.value === v)?.label ?? v)
+                .filter(Boolean)
+                .join(', ')
+            : (fc.options.find((o) => o.value === fc.value)?.label ?? fc.value)
+        return {
+          id: fc.label,
+          label: fc.label,
+          valueLabel,
+          onRemove: () =>
+            fc.onFilterChange(
+              fc.multiSelect ? '' : (fc.options[0]?.value ?? ''),
+            ),
+        }
+      })
+  }, [filterConfig, filterConfigs])
+
+  const clearAllFilters = () => {
+    ;(filterConfigs ?? (filterConfig ? [filterConfig] : [])).forEach((fc) => {
+      fc.onFilterChange(fc.multiSelect ? '' : (fc.options[0]?.value ?? ''))
+    })
+  }
 
   return (
-    <Card className="bg-gradient-to-br from-card to-card/50 dark:border-border/50">
-      <CardContent className="pt-6">
-        {/* Header with Search, Filter, and Actions */}
-        {(searchConfig || filterConfig || headerActions) && (
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            {searchConfig && (
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground dark:text-white" />
-                <Input
-                  type="text"
-                  placeholder={searchConfig.placeholder}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 dark:border-border/50  dark:text-white dark:placeholder:text-white"
-                />
-              </div>
-            )}
+    <div className="w-full overflow-auto">
+      {hasToolbar && (
+        <TableToolbar
+          searchConfig={
+            searchConfig ? { placeholder: searchConfig.placeholder } : undefined
+          }
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterConfig={filterConfig}
+          filterConfigs={filterConfigs}
+          dateRangeConfig={dateRangeConfig}
+          clearFilter={clearFilter}
+          clearAllFilters={filterChips.length > 0 ? clearAllFilters : undefined}
+          hasActiveFilter={!!hasActiveFilter}
+          filterChips={filterChips}
+          headerActions={headerActions}
+        />
+      )}
 
-            {filterConfig && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground dark:text-white whitespace-nowrap">
-                  {filterConfig.label}:
-                </span>
-                <StyledSelect
-                  value={filterConfig.value}
-                  onValueChange={filterConfig.onFilterChange}
-                  options={filterConfig.options}
-                  width="180px"
-                />
-              </div>
-            )}
-
-            {headerActions && <div className="sm:w-auto">{headerActions}</div>}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {filteredData.length === 0 ? (
-          emptyState ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground dark:text-gray-300 font-medium mb-2">
-                {emptyState.title}
-              </p>
-              {emptyState.description && (
-                <p className="text-sm text-muted-foreground dark:text-gray-400 mb-4">
-                  {emptyState.description}
-                </p>
-              )}
-              {emptyState.action && <div>{emptyState.action}</div>}
-            </div>
-          ) : null
-        ) : (
-          <>
-            {/* Table */}
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="dark:border-border/50 dark:hover:bg-transparent">
-                    {columns.map((column) => (
-                      <TableHead
-                        key={column.key}
-                        className={cn(
-                          'dark:text-white dark:font-semibold',
-                          column.headerClassName
-                        )}
-                      >
-                        {column.header}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedData.map((item) => (
-                    <TableRow
-                      key={item.id}
-                    className={cn(
-                      'dark:border-border/30 dark:hover:bg-muted/50',
-                      onRowClick && 'cursor-pointer'
-                    )}
-                    onClick={onRowClick ? () => onRowClick(item) : undefined}
-                    >
-                      {renderRow(item)}
+      <Card className="overflow-hidden rounded-xl border border-border/60 shadow-sm">
+        <CardContent className="p-0">
+          {isLoading ? (
+            <TableSkeleton
+              columnCount={columns.length}
+              rowCount={8}
+              showHeader
+              className="rounded-none border-0"
+            />
+          ) : filteredData.length === 0 && emptyState ? (
+            <TableEmptyState
+              title={emptyState.title}
+              description={emptyState.description}
+              action={emptyState.action}
+            />
+          ) : filteredData.length > 0 ? (
+            <>
+              <div className="overflow-x-auto">
+                <Table className="[&_td]:px-4 [&_td]:py-3">
+                  <TableHeader>
+                    <TableRow className="border-b border-border/60 hover:bg-transparent bg-muted/20">
+                      {columns.map((col) => (
+                        <TableHead
+                          key={col.key}
+                          className={cn(
+                            'h-11 px-4 font-semibold text-foreground tracking-tight',
+                            col.headerClassName,
+                          )}
+                        >
+                          {col.header}
+                        </TableHead>
+                      ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination Controls */}
-            {filteredData.length > 0 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t dark:border-border/50 mt-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-400">
-                  <span>
-                    {showingLabel} {startIndex + 1}-
-                    {Math.min(endIndex, filteredData.length)} {ofLabel}{' '}
-                    {filteredData.length} {resultsLabel}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground dark:text-gray-400 whitespace-nowrap">
-                      {perPageLabel}:
-                    </span>
-                    <StyledSelect
-                      value={pageSize.toString()}
-                      onValueChange={handlePageSizeChange}
-                      options={pageSizeOptions.map((size) => ({
-                        label: size.toString(),
-                        value: size.toString(),
-                      }))}
-                      width="70px"
-                      triggerClassName="h-8"
-                    />
-                  </div>
-
-                  {totalPages > 1 && (
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="h-8 w-8 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedData.map((item) => (
+                      <TableRow
+                        key={item.id}
+                        className={cn(
+                          'border-b border-border/40 transition-colors',
+                          onRowClick &&
+                            'cursor-pointer hover:bg-muted/40 active:bg-muted/50',
+                        )}
+                        onClick={
+                          onRowClick ? () => onRowClick(item) : undefined
+                        }
                       >
-                        <ChevronLeft className="h-4 w-4" />
-                        <span className="sr-only">{previousLabel}</span>
-                      </Button>
-
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1)
-                          .filter((page) => {
-                            if (totalPages <= 7) return true
-                            if (page === 1 || page === totalPages) return true
-                            if (Math.abs(page - currentPage) <= 1) return true
-                            return false
-                          })
-                          .map((page, index, array) => {
-                            const showEllipsisBefore =
-                              index > 0 && array[index - 1] !== page - 1
-                            return (
-                              <React.Fragment key={page}>
-                                {showEllipsisBefore && (
-                                  <span className="px-2 text-muted-foreground dark:text-gray-500">
-                                    ...
-                                  </span>
-                                )}
-                                <Button
-                                  variant={
-                                    currentPage === page ? 'default' : 'outline'
-                                  }
-                                  size="icon"
-                                  onClick={() => handlePageChange(page)}
-                                  className="h-8 w-8 dark:border-border/50 dark:text-white dark:hover:bg-muted/70 dark:data-[state=on]:bg-primary dark:data-[state=on]:text-primary-foreground"
-                                >
-                                  {page}
-                                </Button>
-                              </React.Fragment>
-                            )
-                          })}
-                      </div>
-
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="h-8 w-8 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                        <span className="sr-only">{nextLabel}</span>
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                        {renderRow(item)}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+              <TablePagination
+                startIndex={startIndex}
+                endIndex={endIndex}
+                totalItems={filteredData.length}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                pageSizeOptions={pageSizeOptions}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                labels={paginationLabels}
+              />
+            </>
+          ) : null}
+        </CardContent>
+      </Card>
+    </div>
   )
 }

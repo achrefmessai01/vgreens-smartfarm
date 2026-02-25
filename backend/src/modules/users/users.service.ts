@@ -5,12 +5,12 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { UserRole } from '@common/enums';
 import { User } from './entities/user.entity';
 import { BaseService } from '@common/services';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClerkSyncService } from './clerk-sync.service';
 import { CreateUserInput, UpdateUserInput } from './dto';
+import { OrderDirection, UserRole } from '@common/enums';
 import { UserStatus } from '@common/enums/user-status.enum';
 
 @Injectable()
@@ -214,7 +214,7 @@ export class UsersService extends BaseService<User> {
   async findAllWithTenant(): Promise<User[]> {
     return this.userRepository.find({
       relations: ['tenant'],
-      order: { createdAt: 'DESC' },
+      order: { createdAt: OrderDirection.DESC },
     });
   }
 
@@ -222,7 +222,7 @@ export class UsersService extends BaseService<User> {
     return this.userRepository.find({
       where: { tenantId },
       relations: ['tenant'],
-      order: { createdAt: 'DESC' },
+      order: { createdAt: OrderDirection.DESC },
     });
   }
 

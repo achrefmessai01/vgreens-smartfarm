@@ -2,10 +2,11 @@ import { UserRole } from '@common/enums';
 import { Alert } from './entities/alert.entity';
 import { AlertsService } from './alerts.service';
 import { Roles, CurrentUser } from '@common/decorators';
-import { CreateAlertInput, UpdateAlertInput } from './dto';
+import { CreateAlertInput, UpdateAlertInput, AlertsFilterInput } from './dto';
 import { User } from '@modules/users/entities/user.entity';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
+import { AlertThresholdService } from './alert-threshold.service';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
 
@@ -13,20 +14,28 @@ import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
 @UseInterceptors(UserInterceptor, TenantInterceptor)
 @Resolver(() => Alert)
 export class AlertsResolver {
-  constructor(private readonly alertsService: AlertsService) {}
+  constructor(
+    private readonly alertsService: AlertsService,
+    private readonly alertThresholdService: AlertThresholdService,
+  ) {}
 
   @Query(() => [Alert], { name: 'alerts' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
-  async findAll(@CurrentUser() currentUser: User): Promise<Alert[]> {
-    if (currentUser.role === UserRole.VGREENS_ADMIN) {
-      return this.alertsService.findAll();
-    }
+  async findAll(
+    @CurrentUser() currentUser: User,
+    @Args('filter', { type: () => AlertsFilterInput, nullable: true })
+    filter?: AlertsFilterInput | null,
+  ): Promise<Alert[]> {
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? undefined
+        : currentUser.tenantId;
 
-    if (!currentUser.tenantId) {
+    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
       throw new Error('Tenant ID is required');
     }
 
-    return this.alertsService.findAllByTenant(currentUser.tenantId);
+    return this.alertsService.findAllFiltered(tenantId, filter);
   }
 
   @Query(() => Alert, { name: 'alert', nullable: true })
@@ -84,7 +93,7 @@ export class AlertsResolver {
         ? undefined
         : currentUser.tenantId;
 
-    return this.alertsService.acknowledgeAlert(id, tenantId);
+    return this.alertsService.acknowledgeAlert(id, currentUser.id, tenantId);
   }
 
   @Mutation(() => Alert)
@@ -98,7 +107,20 @@ export class AlertsResolver {
         ? undefined
         : currentUser.tenantId;
 
-    return this.alertsService.resolveAlert(id, tenantId);
+    return this.alertsService.resolveAlert(id, currentUser.id, tenantId);
+  }
+
+  @Mutation(() => Boolean, { name: 'runThresholdCheck' })
+  // @Roles(UserRole.VGREENS_ADMIN)
+  async runThresholdCheck(
+    @Args('tenantId', { type: () => ID }) tenantId: string,
+    @Args('bucketName', { type: () => String }) bucketName: string,
+  ): Promise<boolean> {
+    await this.alertThresholdService.runThresholdCheckForBucket(
+      tenantId,
+      bucketName,
+    );
+    return true;
   }
 
   @Mutation(() => Boolean)

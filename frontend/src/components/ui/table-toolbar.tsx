@@ -1,0 +1,116 @@
+'use client'
+
+import { TableSearch } from '@/components/ui/table-search'
+import { TableFilterPopover } from '@/components/ui/table-filter-popover'
+import { TableFiltersPopover } from '@/components/ui/table-filters-popover'
+import { TableFilterChips } from '@/components/ui/table-filter-chips'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
+import type { TableFilterConfig } from '@/components/ui/table-filter-popover'
+import type { FilterChip } from '@/components/ui/table-filter-chips'
+import { X } from 'lucide-react'
+
+export interface DateRangeConfig {
+  dateFrom: Date | null
+  dateTo: Date | null
+  onRangeChange: (from: Date | null, to: Date | null) => void
+  placeholder?: string
+}
+
+export interface TableToolbarProps {
+  searchConfig?: { placeholder: string }
+  searchQuery: string
+  onSearchChange: (value: string) => void
+  filterConfig?: TableFilterConfig
+  filterConfigs?: TableFilterConfig[]
+  dateRangeConfig?: DateRangeConfig
+  clearFilter: () => void
+  clearAllFilters?: () => void
+  hasActiveFilter: boolean
+  filterChips: FilterChip[]
+  headerActions?: React.ReactNode
+}
+
+export function TableToolbar({
+  searchConfig,
+  searchQuery,
+  onSearchChange,
+  filterConfig,
+  filterConfigs,
+  dateRangeConfig,
+  clearFilter,
+  clearAllFilters,
+  hasActiveFilter,
+  filterChips,
+  headerActions,
+}: TableToolbarProps) {
+  const hasMultipleFilters = filterConfigs && filterConfigs.length > 0
+  const hasSingleFilter = filterConfig && !hasMultipleFilters
+  const showClear =
+    (hasSingleFilter && hasActiveFilter) ||
+    (hasMultipleFilters && filterChips.length > 0 && clearAllFilters)
+
+  return (
+    <div className="py-4 px-1">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {searchConfig && (
+            <TableSearch
+              placeholder={searchConfig.placeholder}
+              value={searchQuery}
+              onChange={onSearchChange}
+            />
+          )}
+          {hasMultipleFilters ? (
+            <>
+              <TableFiltersPopover
+                categories={filterConfigs}
+                onClearAll={clearAllFilters}
+              />
+              {showClear && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Clear
+                </button>
+              )}
+            </>
+          ) : hasSingleFilter ? (
+            <>
+              <TableFilterPopover
+                filterConfig={filterConfig}
+                onClear={clearFilter}
+              />
+              {showClear && (
+                <button
+                  type="button"
+                  onClick={clearFilter}
+                  className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Clear
+                </button>
+              )}
+            </>
+          ) : null}
+          {dateRangeConfig && (
+            <DateRangePicker
+              dateFrom={dateRangeConfig.dateFrom}
+              dateTo={dateRangeConfig.dateTo}
+              onRangeChange={dateRangeConfig.onRangeChange}
+              placeholder={dateRangeConfig.placeholder}
+            />
+          )}
+        </div>
+        {headerActions && (
+          <div className="sm:ml-auto shrink-0">{headerActions}</div>
+        )}
+      </div>
+      {filterChips.length > 0 && (
+        <TableFilterChips chips={filterChips} className="mt-3" />
+      )}
+    </div>
+  )
+}

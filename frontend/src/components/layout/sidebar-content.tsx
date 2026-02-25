@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import * as React from 'react'
-import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/i18n'
+import '@/components/ui/logo-spin.css'
 import { Button } from '@/components/ui/button'
+import { LogoSVG } from '@/components/ui/logo-svg'
 import { Separator } from '@/components/ui/separator'
-import { ChevronRight, Sun, Moon, LogOut, X } from 'lucide-react'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { ChevronRight, LogOut, Moon, Sun, X } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface NavItem {
   label: string
@@ -42,21 +43,22 @@ export function SidebarContent({
   onCloseMobile,
 }: SidebarContentProps) {
   return (
-    <div className="flex h-full flex-col bg-muted/30 dark:bg-primary/95 dark:backdrop-blur-sm text-foreground dark:text-primary-foreground">
+    <div className="flex h-full flex-col bg-muted/30 dark:bg-background text-foreground dark:text-sidebar-foreground">
       {/* Header */}
-      <div className="flex h-16 items-center justify-between border-b border-border dark:border-primary-foreground/30 px-4">
+      <div className="flex h-16 items-center justify-between border-b border-border dark:border-sidebar-border/70 px-4">
         <div className="flex items-center gap-2">
-          <div className="relative flex h-8 w-8 items-center justify-center shrink-0">
-            <Image
-              src="/vGreens.svg"
-              alt="vGreens Lab"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
+          <div className="sidebar-logo-spin h-8 w-8 shrink-0" aria-hidden>
+            <div className="sidebar-spin-3d">
+              <div className="sidebar-face sidebar-front">
+                <LogoSVG color="#016F7C" className="object-contain" />
+              </div>
+              <div className="sidebar-face sidebar-back">
+                <LogoSVG color="#004D56" className="object-contain" />
+              </div>
+            </div>
           </div>
           {(!isCollapsed || mobile) && (
-            <span className="font-semibold text-foreground dark:text-white">
+            <span className="font-semibold text-foreground dark:text-sidebar-foreground">
               vGreens Lab
             </span>
           )}
@@ -65,13 +67,13 @@ export function SidebarContent({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-foreground dark:text-primary-foreground hover:bg-accent dark:hover:bg-primary-foreground/15"
+            className="h-8 w-8 text-foreground dark:text-sidebar-foreground hover:bg-accent dark:hover:bg-sidebar-accent"
             onClick={onToggleCollapse}
           >
             <ChevronRight
               className={cn(
                 'h-4 w-4 transition-transform',
-                isCollapsed && 'rotate-180'
+                isCollapsed && 'rotate-180',
               )}
             />
           </Button>
@@ -80,7 +82,7 @@ export function SidebarContent({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-foreground dark:text-primary-foreground hover:bg-accent dark:hover:bg-primary-foreground/15"
+            className="h-8 w-8 text-foreground dark:text-sidebar-foreground hover:bg-accent dark:hover:bg-sidebar-accent"
             onClick={onCloseMobile}
           >
             <X className="h-4 w-4" />
@@ -101,9 +103,9 @@ export function SidebarContent({
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-primary text-primary-foreground dark:bg-primary-foreground/30 dark:text-primary-foreground dark:shadow-sm'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:text-primary-foreground/90 dark:hover:bg-primary-foreground/15 dark:hover:text-primary-foreground',
-                isCollapsed && !mobile && 'justify-center px-2'
+                  ? 'bg-primary text-primary-foreground dark:bg-sidebar-accent dark:text-sidebar-accent-foreground dark:shadow-sm'
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:text-sidebar-foreground/90 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground',
+                isCollapsed && !mobile && 'justify-center px-2',
               )}
             >
               <Icon className="h-5 w-5 shrink-0" />
@@ -111,7 +113,7 @@ export function SidebarContent({
                 <span className="truncate">{item.label}</span>
               )}
               {isActive && !isCollapsed && !mobile && (
-                <div className="ml-auto h-6 w-1 rounded-full bg-primary-foreground/90 dark:bg-primary-foreground shadow-sm" />
+                <div className="ml-auto h-6 w-1 rounded-full bg-primary-foreground/90 dark:bg-primary shadow-sm" />
               )}
             </Link>
           )
@@ -121,16 +123,16 @@ export function SidebarContent({
       {/* Other Menu */}
       {(!isCollapsed || mobile) && (
         <>
-          <Separator className="bg-border dark:bg-primary-foreground/30" />
+          <Separator className="bg-border dark:bg-sidebar-border/70" />
           <div className="px-4 py-2">
-            <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-primary-foreground/70">
+            <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-sidebar-foreground/70">
               {t.common.otherMenu}
             </p>
             <div className="space-y-1">
               <Button
                 variant="ghost"
                 size="sm"
-                className="relative w-full justify-start gap-3 text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:text-primary-foreground/90 dark:hover:bg-primary-foreground/15 dark:hover:text-primary-foreground"
+                className="relative w-full justify-start gap-3 text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:text-sidebar-foreground/90 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground"
                 onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               >
                 <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -142,7 +144,7 @@ export function SidebarContent({
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 dark:text-primary-foreground/90 dark:hover:bg-destructive/25 dark:hover:text-primary-foreground"
+                className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 dark:text-sidebar-foreground/90 dark:hover:bg-destructive/25 dark:hover:text-sidebar-foreground"
                 onClick={onLogout}
               >
                 <LogOut className="h-4 w-4" />
@@ -154,28 +156,28 @@ export function SidebarContent({
       )}
 
       {/* User Profile */}
-      <div className="border-t border-border dark:border-primary-foreground/30 p-4">
+      <div className="border-t border-border dark:border-sidebar-border/70 p-4">
         <div
           className={cn(
             'flex items-center gap-3',
-            isCollapsed && !mobile && 'justify-center'
+            isCollapsed && !mobile && 'justify-center',
           )}
         >
           <Avatar className="h-10 w-10">
             {defaultUser.avatar ? (
               <AvatarImage src={defaultUser.avatar} alt={defaultUser.name} />
             ) : (
-              <AvatarFallback className="bg-primary text-primary-foreground dark:bg-primary-foreground/30 dark:text-primary-foreground dark:border dark:border-primary-foreground/20">
+              <AvatarFallback className="bg-primary text-primary-foreground dark:bg-sidebar-accent dark:text-sidebar-accent-foreground dark:border dark:border-sidebar-border/70">
                 {defaultUser.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             )}
           </Avatar>
           {(!isCollapsed || mobile) && (
             <div className="flex-1 overflow-hidden">
-              <p className="truncate text-sm font-medium text-foreground dark:text-primary-foreground">
+              <p className="truncate text-sm font-medium text-foreground dark:text-sidebar-foreground">
                 {defaultUser.name}
               </p>
-              <p className="truncate text-xs text-muted-foreground dark:text-primary-foreground/70">
+              <p className="truncate text-xs text-muted-foreground dark:text-sidebar-foreground/70">
                 {defaultUser.role}
               </p>
             </div>

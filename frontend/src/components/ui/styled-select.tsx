@@ -9,6 +9,16 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 
+const EMPTY_VALUE_SENTINEL = '__empty__'
+
+function toSelectValue(v: string): string {
+  return v === '' ? EMPTY_VALUE_SENTINEL : v
+}
+
+function fromSelectValue(v: string): string {
+  return v === EMPTY_VALUE_SENTINEL ? '' : v
+}
+
 export interface StyledSelectOption {
   label: string
   value: string
@@ -38,12 +48,18 @@ export function StyledSelect({
   disabled,
   width = 'auto',
 }: StyledSelectProps) {
+  const selectValue = toSelectValue(value)
+
   return (
-    <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+    <Select
+      value={selectValue}
+      onValueChange={(v) => onValueChange(fromSelectValue(v))}
+      disabled={disabled}
+    >
       <SelectTrigger
         className={cn(
           'dark:border-border/50 dark:text-white dark:bg-card',
-          triggerClassName
+          triggerClassName,
         )}
         style={width !== 'auto' ? { width } : undefined}
       >
@@ -52,18 +68,21 @@ export function StyledSelect({
       <SelectContent
         className={cn('dark:bg-card dark:border-border/50', contentClassName)}
       >
-        {options.map((option) => (
-          <SelectItem
-            key={option.value}
-            value={option.value}
-            className={cn(
-              'dark:text-white dark:hover:bg-muted/70',
-              itemClassName
-            )}
-          >
-            {option.label}
-          </SelectItem>
-        ))}
+        {options.map((option) => {
+          const itemValue = toSelectValue(option.value)
+          return (
+            <SelectItem
+              key={itemValue}
+              value={itemValue}
+              className={cn(
+                'dark:text-white dark:hover:bg-muted/70',
+                itemClassName,
+              )}
+            >
+              {option.label}
+            </SelectItem>
+          )
+        })}
       </SelectContent>
     </Select>
   )

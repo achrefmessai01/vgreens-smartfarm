@@ -1,8 +1,10 @@
 import { UseGuards } from '@nestjs/common';
+import { Public } from '@/common/decorators';
 import { InfluxDBService } from './influxdb.service';
-import { Resolver, Query, Args, Int } from '@nestjs/graphql';
-import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import { InfluxDBData } from './dto/influxdb-data.object';
+import { ClerkAuthGuard, RolesGuard } from '@common/guards';
+import { FieldMeanMetric, GetFieldMeansInput } from './dto';
+import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @Resolver()
@@ -55,6 +57,22 @@ export class InfluxDBResolver {
       level,
     });
     return rows.map((data) => ({ data }));
+  }
+
+  /**
+   * Returns a single mean value per field (and greenhouse) over the last N minutes.
+   * This is ideal for dashboard tiles like temperature/humidity/CO₂ per greenhouse.
+   */
+  @Public()
+  @Query(() => [FieldMeanMetric], { name: 'getBucketFieldMeansLastMinutes' })
+  async getBucketFieldMeansLastMinutes(
+    @Args('input') input: GetFieldMeansInput,
+  ): Promise<FieldMeanMetric[]> {
+    const { bucketName, windowMinutes, greenhouse } = input;
+    return this.influxDBService.getBucketFieldMeansLastMinutes(bucketName, {
+      greenhouse,
+      windowMinutes,
+    });
   }
 
   /**

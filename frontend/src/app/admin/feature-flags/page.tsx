@@ -1,14 +1,13 @@
 'use client'
 
-import { useI18n } from '@/i18n'
-import { Flag } from 'lucide-react'
-import { PageHeader } from '@/components/layout'
 import { FeatureTable } from '@/components/features'
-import { Card, CardContent } from '@/components/ui/card'
-import { useFeatureManagement } from '@/lib/hooks/use-feature-management'
-import { FeatureFormSheet } from '@/components/features/feature-form-sheet'
 import { FeatureDeleteDialog } from '@/components/features/feature-delete-dialog'
 import { FeatureFlagsPageSkeleton } from '@/components/features/feature-flags-page-skeleton'
+import { FeatureFormSheet } from '@/components/features/feature-form-sheet'
+import { PageHeader } from '@/components/layout'
+import { useI18n } from '@/i18n'
+import { useFeatureManagement } from '@/lib/hooks/use-feature-management'
+import { Flag } from 'lucide-react'
 
 export default function FeatureFlagsPage() {
   const { t } = useI18n()
@@ -44,17 +43,13 @@ export default function FeatureFlagsPage() {
         />
       </div>
 
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-6">
-          <FeatureTable
-            features={features}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onCreate={handleCreate}
-            isLoading={isLoading}
-          />
-        </CardContent>
-      </Card>
+      <FeatureTable
+        features={features}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onCreate={handleCreate}
+        isLoading={isLoading}
+      />
 
       <FeatureFormSheet
         open={isSheetOpen}
