@@ -13,10 +13,11 @@ export interface FarmOverviewCardProps {
   parameterOptions: { label: string; value: string }[];
   effectiveParameter: ParameterType;
   onParameterChange: (value: ParameterType) => void;
-  viewMode: 'heatmap' | 'discrete';
-  onViewModeChange: (value: 'heatmap' | 'discrete') => void;
+  viewMode: 'heatmap' | 'discrete' | 'graph';
+  onViewModeChange: (value: 'heatmap' | 'discrete' | 'graph') => void;
   viewHeatmapLabel: string;
   viewDiscreteLabel: string;
+  viewGraphLabel: string;
   bays: Bay[];
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
@@ -35,6 +36,7 @@ export function FarmOverviewCard({
   onViewModeChange,
   viewHeatmapLabel,
   viewDiscreteLabel,
+  viewGraphLabel,
   bays,
   selectedSlotId,
   onSelectSlot,
@@ -49,6 +51,8 @@ export function FarmOverviewCard({
   entranceLabel = entranceLabel ?? t.pages.farmOverview.entranceLabel;
 
   const showEmpty = false;
+  const showGraphOption =
+    effectiveParameter === 'par' || effectiveParameter === 'par_estimated';
 
   return (
     <Card className="h-full min-h-0 flex flex-col gap-0 py-0 overflow-hidden dark:shadow-lg rounded-none">
@@ -64,9 +68,11 @@ export function FarmOverviewCard({
             onValueChange={onViewModeChange}
             heatmapLabel={viewHeatmapLabel}
             discreteLabel={viewDiscreteLabel}
+            graphLabel={viewGraphLabel}
+            showGraphOption={showGraphOption}
           />
         </div>
-        {!showEmpty && (
+        {!showEmpty && viewMode !== 'graph' && (
           <ParameterColorLegendBar parameter={effectiveParameter} />
         )}
       </div>
@@ -91,20 +97,22 @@ export function FarmOverviewCard({
                 noSensorLabel={noSensorLabel}
                 noDataMessage={noDataMessage}
               />
-              <div
-                className="absolute bottom-0 left-0 w-10 h-[15.5rem] flex items-center justify-center bg-secondary text-secondary-foreground border"
-                aria-label={entranceLabel}
-              >
-                <span
-                  className="text-[15px] font-semibold uppercase tracking-wider whitespace-nowrap"
-                  style={{
-                    writingMode: 'vertical-rl',
-                    transform: 'rotate(180deg)',
-                  }}
+              {viewMode !== 'graph' && (
+                <div
+                  className="absolute bottom-0 left-0 w-10 h-[15.5rem] flex items-center justify-center bg-secondary text-secondary-foreground border"
+                  aria-label={entranceLabel}
                 >
-                  {entranceLabel}
-                </span>
-              </div>
+                  <span
+                    className="text-[15px] font-semibold uppercase tracking-wider whitespace-nowrap"
+                    style={{
+                      writingMode: 'vertical-rl',
+                      transform: 'rotate(180deg)',
+                    }}
+                  >
+                    {entranceLabel}
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
