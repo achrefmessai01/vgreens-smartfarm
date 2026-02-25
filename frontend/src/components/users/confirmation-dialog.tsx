@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 
 export interface ConfirmationDialogProps {
   open: boolean
@@ -78,7 +79,14 @@ export function ConfirmationDialog({
             disabled={isLoading}
             className="sm:flex-1"
           >
-            {isLoading ? '...' : confirmLabel}
+            {isLoading ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner />
+                {confirmLabel}
+              </span>
+            ) : (
+              confirmLabel
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

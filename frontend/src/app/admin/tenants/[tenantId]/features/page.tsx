@@ -11,6 +11,8 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/layout'
 import { FeatureList } from '@/components/features'
+import { ContentSkeleton } from '@/components/ui/content-skeleton'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { useParams, useRouter } from 'next/navigation'
 
 export default function TenantFeaturesPage() {
@@ -59,10 +61,9 @@ export default function TenantFeaturesPage() {
 
   if (tenantLoading || featuresLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">
-          {t.pages.admin.features.loading || 'Loading...'}
-        </p>
+      <div className="space-y-6">
+        <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
+        <TableSkeleton columnCount={4} rowCount={6} />
       </div>
     )
   }

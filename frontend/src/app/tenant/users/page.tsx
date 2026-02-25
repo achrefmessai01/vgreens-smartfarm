@@ -2,6 +2,8 @@
 
 import * as React from 'react'
 import { PageHeader } from '@/components/layout'
+import { ContentSkeleton } from '@/components/ui/content-skeleton'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import {
   UserManagementTable,
   UserManagementForm,
@@ -142,8 +144,9 @@ export default function TenantUsersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Loading users...</p>
+      <div className="space-y-6">
+        <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
+        <TableSkeleton columnCount={5} rowCount={8} />
       </div>
     )
   }

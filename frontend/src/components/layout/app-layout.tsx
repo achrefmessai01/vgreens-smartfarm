@@ -1,26 +1,26 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Navbar } from './navbar'
-import { Sidebar } from './sidebar'
-import { User } from '@/generated/graphql'
+import * as React from 'react';
+import { Navbar } from './navbar';
+import { Sidebar } from './sidebar';
+import { User } from '@/generated/graphql';
 
 interface AppLayoutProps {
-  children: React.ReactNode
-  user?: User
-  onLogout?: () => void
+  children: React.ReactNode;
+  user?: User;
+  onLogout?: () => void;
 }
 
 export function AppLayout({ children, user, onLogout }: AppLayoutProps) {
   const handleLogout = () => {
-    onLogout?.()
+    onLogout?.();
     // Add logout logic here (e.g., clear auth token, redirect to login)
-  }
+  };
 
   const handleSettingsClick = () => {
     // Add settings logic here
-    console.log('Settings clicked')
-  }
+    console.log('Settings clicked');
+  };
 
   // Transform user for Navbar
   const navbarUser = user
@@ -31,7 +31,7 @@ export function AppLayout({ children, user, onLogout }: AppLayoutProps) {
             : user.email || 'Unknown User',
         avatar: user.imageUrl || undefined,
       }
-    : undefined
+    : undefined;
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -43,5 +43,5 @@ export function AppLayout({ children, user, onLogout }: AppLayoutProps) {
         </main>
       </div>
     </div>
-  )
+  );
 }

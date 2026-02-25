@@ -35,16 +35,17 @@ primary_region = "fra" # Frankfurt - change to your preferred region
     timeout = "10s"
     grace_period = "60s"
 
-# VM resources
+# VM resources - Dedicated CPU Performance tier
 [vm]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
+  memory = '4gb'
+  cpu_kind = 'performance'
+  cpus = 2
 
 # Environment variables (non-sensitive)
 [env]
   PORT = "8080"
   NODE_ENV = "production"
+  HOSTNAME = "0.0.0.0"
 
 # Secrets to set via `flyctl secrets set`:
 # - DATABASE_HOST

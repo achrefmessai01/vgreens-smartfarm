@@ -6,6 +6,7 @@ export type InfluxDBRow = Record<string, unknown> & {
   _value?: number
   _time?: string
   chamber?: string
+  greenhouse?: string
   device?: string
   level?: string
   area?: string
@@ -36,10 +37,11 @@ function buildSlotsFromRows(rows: InfluxDBRow[]): PlantSlot[] {
   const metaBySlot = new Map<SlotKey, SlotMeta>()
 
   for (const row of rows) {
-    const chamber = (row.chamber as string) ?? ''
+    const chamberOrGreenhouse =
+      (row.greenhouse as string) ?? (row.chamber as string) ?? ''
     const device = (row.device as string) ?? ''
     const level = (row.level as string) ?? ''
-    const key: SlotKey = `${chamber}|${device}|${level}`
+    const key: SlotKey = `${chamberOrGreenhouse}|${device}|${level}`
     const field = (row._field as string) ?? ''
     if (!field) continue
     const value = typeof row._value === 'number' ? row._value : Number(row._value) || 0
@@ -70,10 +72,10 @@ function buildSlotsFromRows(rows: InfluxDBRow[]): PlantSlot[] {
     for (const [fieldName, v] of Object.entries(fieldValues)) {
       if (v && typeof v.value === 'number') values[fieldName] = v.value
     }
-    const [chamber, device, level] = key.split('|')
+    const [chamberPart, devicePart, levelPart] = key.split('|')
     const meta = metaBySlot.get(key)
     // id encodes chamber|device|level so chamber = id.split('|')[0].replace('live_','')
-    const id = `live_${chamber}|${device}|${level}`.replace(/\s/g, '_')
+    const id = `live_${chamberPart}|${devicePart}|${levelPart}`.replace(/\s/g, '_')
     slots.push({
       id,
       rowIndex: 0,

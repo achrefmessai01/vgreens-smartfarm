@@ -1,31 +1,31 @@
 'use client'
 
-import * as React from 'react'
-import { cn } from '@/lib/utils'
-import { useI18n } from '@/i18n'
-import { useTheme } from 'next-themes'
-import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { SidebarContent } from './sidebar-content'
-import {
-  Sprout,
-  Clock,
-  Menu,
-  Users,
-  Video,
-  AlertTriangle,
-  Bell,
-  LayoutDashboard,
-  Building2,
-  Flag,
-  Settings,
-} from 'lucide-react'
-import { User, UserRole } from '@/generated/graphql'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { SidebarSkeleton } from '@/components/ui/sidebar-skeleton'
+import { User, UserRole } from '@/generated/graphql'
+import { useI18n } from '@/i18n'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features'
+import { cn } from '@/lib/utils'
 import { useClerk } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
+import {
+  AlertTriangle,
+  Bell,
+  Building2,
+  Clock,
+  Flag,
+  LayoutDashboard,
+  Menu,
+  Settings,
+  Sprout,
+  Users,
+  Video,
+} from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { usePathname, useRouter } from 'next/navigation'
+import * as React from 'react'
+import { SidebarContent } from './sidebar-content'
 
 interface NavItem {
   label: string
@@ -175,11 +175,7 @@ export function Sidebar({ user: propUser, onLogout }: SidebarProps) {
 
   // Show loading state while fetching user or features
   if (userLoading || (!isVGreensAdmin && featuresLoading)) {
-    return (
-      <div className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-64 z-40 border-r dark:border-primary-foreground/30 items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    )
+    return <SidebarSkeleton />
   }
 
   return (
@@ -216,7 +212,7 @@ export function Sidebar({ user: propUser, onLogout }: SidebarProps) {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col fixed left-0 top-0 h-screen z-40 transition-all duration-300 border-r dark:border-primary-foreground/30',
+          'hidden lg:flex flex-col fixed left-0 top-0 h-screen z-40 transition-all duration-300 border-r dark:border-sidebar-border/70',
           isCollapsed ? 'w-16' : 'w-64'
         )}
       >

@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useI18n } from '@/i18n'
 import { WarningTable } from '@/components/warnings'
+import { WarningSidebar } from '@/components/warnings/warning-sidebar'
 import { ConfirmationDialog } from '@/components/users'
 import { PageHeader } from '@/components/layout/page-header'
 import type { Warning, WarningStatus } from '@/lib/warning-types'
@@ -12,13 +13,15 @@ import { getAllWarnings, updateWarningStatus } from '@/lib/warning-data'
 export default function WarningsPage() {
   const { t } = useI18n()
   const [warnings, setWarnings] = React.useState<Warning[]>([])
+  const [selectedWarning, setSelectedWarning] = React.useState<Warning | null>(
+    null
+  )
   const [actionDialog, setActionDialog] = React.useState<{
     isOpen: boolean
     warning: Warning | null
     action: 'acknowledge' | 'resolve' | null
   }>({ isOpen: false, warning: null, action: null })
 
-  // Load warnings on mount
   React.useEffect(() => {
     setWarnings(getAllWarnings())
   }, [])
@@ -31,13 +34,35 @@ export default function WarningsPage() {
     setActionDialog({ isOpen: true, warning, action: 'resolve' })
   }
 
+  const handleSidebarAcknowledge = (warning: Warning) => {
+    setSelectedWarning(null)
+    handleAcknowledge(warning)
+  }
+
+  const handleSidebarResolve = (warning: Warning) => {
+    setSelectedWarning(null)
+    handleResolve(warning)
+  }
+
+  const handleWarningRowClick = (warning: Warning) => {
+    setSelectedWarning(warning)
+  }
+
+  const handleSidebarOpenChange = (open: boolean) => {
+    if (!open) {
+      setSelectedWarning(null)
+    }
+  }
+
   const confirmAction = () => {
     if (actionDialog.warning && actionDialog.action) {
       const newStatus: WarningStatus =
         actionDialog.action === 'acknowledge' ? 'acknowledged' : 'resolved'
       const updated = updateWarningStatus(actionDialog.warning.id, newStatus)
+
       if (updated) {
         setWarnings(getAllWarnings())
+        setSelectedWarning((prev) => (prev?.id === updated.id ? updated : prev))
         setActionDialog({ isOpen: false, warning: null, action: null })
       }
     }
@@ -69,9 +94,17 @@ export default function WarningsPage() {
           warnings={warnings}
           onAcknowledge={handleAcknowledge}
           onResolve={handleResolve}
+          onRowClick={handleWarningRowClick}
         />
 
-        {/* Action Confirmation Dialog */}
+        <WarningSidebar
+          open={selectedWarning !== null}
+          onOpenChange={handleSidebarOpenChange}
+          warning={selectedWarning}
+          onAcknowledge={handleSidebarAcknowledge}
+          onResolve={handleSidebarResolve}
+        />
+
         <ConfirmationDialog
           open={actionDialog.isOpen}
           onOpenChange={(open) =>

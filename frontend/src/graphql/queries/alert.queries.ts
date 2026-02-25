@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
 export const ALERTS_QUERY = gql`
-  query Alerts {
-    alerts {
+  query Alerts($filter: AlertsFilterInput) {
+    alerts(filter: $filter) {
       id
       tenantId
       tunnelId
@@ -12,6 +12,30 @@ export const ALERTS_QUERY = gql`
       severity
       description
       timestamp
+      field
+      measurement
+      device
+      greenhouse
+      city
+      column
+      row
+      profile
+      acknowledgedById
+      acknowledgedTime
+      acknowledgedBy {
+        id
+        firstName
+        lastName
+        email
+      }
+      resolvedById
+      resolvedTime
+      resolvedBy {
+        id
+        firstName
+        lastName
+        email
+      }
       createdAt
       updatedAt
       tenant {
@@ -34,6 +58,30 @@ export const ALERT_QUERY = gql`
       severity
       description
       timestamp
+      field
+      measurement
+      device
+      greenhouse
+      city
+      column
+      row
+      profile
+      acknowledgedById
+      acknowledgedTime
+      acknowledgedBy {
+        id
+        firstName
+        lastName
+        email
+      }
+      resolvedById
+      resolvedTime
+      resolvedBy {
+        id
+        firstName
+        lastName
+        email
+      }
       createdAt
       updatedAt
       tenant {
@@ -56,6 +104,14 @@ export const CREATE_ALERT_MUTATION = gql`
       severity
       description
       timestamp
+      field
+      measurement
+      device
+      greenhouse
+      city
+      column
+      row
+      profile
       createdAt
       updatedAt
     }
@@ -74,6 +130,14 @@ export const UPDATE_ALERT_MUTATION = gql`
       severity
       timestamp
       description
+      field
+      measurement
+      device
+      greenhouse
+      city
+      column
+      row
+      profile
       createdAt
       updatedAt
     }

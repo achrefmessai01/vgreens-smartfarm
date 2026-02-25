@@ -5,14 +5,7 @@ stages:
 
 variables:
   GIT_STRATEGY: fetch
-  # Fly.io CLI version
   FLY_VERSION: '0.3.55'
-
-.install_flyctl: &install_flyctl
-  - apk add --no-cache curl
-  - curl -L https://fly.io/install.sh | sh
-  - export FLYCTL_INSTALL="/root/.fly"
-  - export PATH="$FLYCTL_INSTALL/bin:$PATH"
 
 # Deploy Backend to Fly.io
 deploy_backend:
@@ -20,15 +13,43 @@ deploy_backend:
   only:
     - master
   before_script:
-    - *install_flyctl
+    - apk add --no-cache curl
+    - curl -L https://fly.io/install.sh | sh
+    - export FLYCTL_INSTALL="/root/.fly"
+    - export PATH="$FLYCTL_INSTALL/bin:$PATH"
+    - echo "=== DEBUG - Environment Check ==="
+    - echo "Checking for FLY_API_TOKEN..."
+    - env | grep -i fly || echo "No FLY variables found"
+    - echo "=== Checking Token ==="
+    - test -n "$FLY_API_TOKEN" && echo "Token is set (length ${#FLY_API_TOKEN})" || (echo "ERROR - Token not set" && exit 1)
+    - echo "Testing authentication..."
+    - flyctl auth whoami || echo "Auth failed"
   script:
     - cd backend
-    - flyctl deploy --remote-only --config fly.toml
+    - echo "=== Starting Backend Deployment ==="
+    - |
+      # Deploy with retry logic for lease conflicts
+      MAX_RETRIES=3
+      RETRY_COUNT=0
+      while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+        if flyctl deploy --remote-only --no-cache --config fly.toml; then
+          echo "Deployment successful!"
+          exit 0
+        else
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+          if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "Deployment failed, waiting 30 seconds before retry..."
+            sleep 30
+          else
+            echo "All deployment attempts failed"
+            exit 1
+          fi
+        fi
+      done
   environment:
     name: production/backend
     url: https://vgreens-backend.fly.dev
-  variables:
-    FLY_API_TOKEN: $FLY_API_TOKEN
 
 # Deploy Frontend to Fly.io
 deploy_frontend:
@@ -36,27 +57,54 @@ deploy_frontend:
   only:
     - master
   before_script:
-    - *install_flyctl
+    - apk add --no-cache curl
+    - curl -L https://fly.io/install.sh | sh
+    - export FLYCTL_INSTALL="/root/.fly"
+    - export PATH="$FLYCTL_INSTALL/bin:$PATH"
+    - echo "=== Frontend Token Check ==="
+    - test -n "$FLY_API_TOKEN" && echo "Token OK" || (echo "ERROR - Token not set" && exit 1)
+    - flyctl auth whoami || echo "Auth failed"
   script:
     - cd frontend
-    - flyctl deploy --remote-only --config fly.toml
+    - echo "=== Starting Frontend Deployment ==="
+    - |
+      # Deploy with retry logic
+      MAX_RETRIES=3
+      RETRY_COUNT=0
+      while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+        if flyctl deploy --remote-only --no-cache --config fly.toml; then
+          echo "Deployment successful!"
+          exit 0
+        else
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+          if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "Deployment failed, waiting 30 seconds before retry..."
+            sleep 30
+          else
+            echo "All deployment attempts failed"
+            exit 1
+          fi
+        fi
+      done
   environment:
     name: production/frontend
     url: https://vgreens-frontend.fly.dev
-  variables:
-    FLY_API_TOKEN: $FLY_API_TOKEN
   needs:
     - deploy_backend
 
-# Manual deployment job for staging/testing
+# Manual deployment
 deploy_manual:
   stage: deploy
   when: manual
   before_script:
-    - *install_flyctl
+    - apk add --no-cache curl
+    - curl -L https://fly.io/install.sh | sh
+    - export FLYCTL_INSTALL="/root/.fly"
+    - export PATH="$FLYCTL_INSTALL/bin:$PATH"
+    - test -n "$FLY_API_TOKEN" && echo "Token OK" || (echo "ERROR - Token not set" && exit 1)
   script:
-    - echo "Select which app to deploy"
-    - cd backend && flyctl deploy --remote-only --config fly.toml
-    - cd ../frontend && flyctl deploy --remote-only --config fly.toml
-  variables:
-    FLY_API_TOKEN: $FLY_API_TOKEN
+    - echo "=== Deploying Backend ==="
+    - cd backend && flyctl deploy --remote-only --no-cache --config fly.toml
+    - echo "=== Deploying Frontend ==="
+    - cd ../frontend && flyctl deploy --remote-only --no-cache --config fly.toml
