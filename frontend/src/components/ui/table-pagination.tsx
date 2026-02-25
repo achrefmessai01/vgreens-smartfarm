@@ -16,14 +16,14 @@ export interface TablePaginationProps {
   pageSizeOptions: number[]
   onPageChange: (page: number) => void
   onPageSizeChange: (size: number) => void
-  labels?: {
+  labels?: Partial<{
     showing: string
     of: string
     results: string
     perPage: string
     previous: string
     next: string
-  }
+  }>
   className?: string
 }
 

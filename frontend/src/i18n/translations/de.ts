@@ -465,6 +465,7 @@ export const de = {
       statusResolved: 'Gelöst',
       severity: 'Schweregrad',
       open: 'Offen',
+      acknowledged: 'Bestätigt',
       acknowledgedBy: 'Bestätigt von',
       resolved: 'Gelöst',
       resolvedBy: 'Gelöst von',
