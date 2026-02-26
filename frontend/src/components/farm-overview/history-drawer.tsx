@@ -172,15 +172,18 @@ export function HistoryDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[60vh]">
+      <SheetContent
+        side="bottom"
+        className="h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] flex flex-col"
+      >
         <SheetHeader>
           <SheetTitle>
             {historyLabel} - {parameterLabel}
           </SheetTitle>
           <SheetDescription>{slotId}</SheetDescription>
         </SheetHeader>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:gap-4 flex-1 min-h-0">
+          <div className="flex items-center gap-2 shrink-0">
             <label className="text-sm font-medium ml-5">
               {timeRangeLabel}:
             </label>
@@ -197,7 +200,7 @@ export function HistoryDrawer({
               width="180px"
             />
           </div>
-          <div className="h-[400px]">
+          <div className="flex-1 min-h-0 pb-2 sm:pb-6 pr-2 sm:pr-6 pl-2">
             {historyLoading ? (
               <HistoryChartSkeleton className="h-full w-full" />
             ) : historyData.length === 0 ? (
@@ -209,7 +212,7 @@ export function HistoryDrawer({
                 <LineChart data={historyData}>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    className="stroke-border opacity-50"
+                    className="stroke-border opacity-100"
                   />
                   <XAxis
                     dataKey="timestamp"
@@ -270,7 +273,7 @@ export function HistoryDrawer({
                     wrapperClassName="shadow-lg"
                     contentStyle={{
                       backgroundColor: 'hsl(var(--popover))',
-                      border: '1px solid hsl(var(--border))',
+                      border: '2px solid hsl(var(--border))',
                       borderRadius: '0.5rem',
                       color: 'hsl(var(--foreground))',
                     }}
