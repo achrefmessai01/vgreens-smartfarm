@@ -1,15 +1,36 @@
 'use client'
 
 import * as React from 'react'
+import { useQuery } from '@apollo/client'
 import { useSearchParams } from 'next/navigation'
 import { formatFieldToLabel } from '@/lib/farm-data'
 import type { ParameterType } from '@/lib/farm-types'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data'
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket'
+import { GET_BUCKET_FIELD_MEANS_LAST_MINUTES_QUERY } from '@/graphql/queries'
 import { UserRole, useTenantsQuery, type Tenant } from '@/generated/graphql'
 
 const GREENHOUSE_LABEL_KEYS = ['combined', 'greenHouse1', 'greenHouse2'] as const
+const FIELD_MEANS_POLL_INTERVAL_MS = 2 * 60 * 1000
+const UNASSIGNED_GREENHOUSE_KEY = '__all__'
+
+interface FieldMeanMetric {
+  field: string
+  greenhouse?: string | null
+  value: number
+}
+
+interface GetBucketFieldMeansLastMinutesResponse {
+  getBucketFieldMeansLastMinutes: FieldMeanMetric[]
+}
+
+interface GetBucketFieldMeansLastMinutesVariables {
+  input: {
+    bucketName: string
+    windowMinutes: number
+  }
+}
 
 export interface FarmOverviewTranslations {
   combined: string
@@ -31,7 +52,7 @@ export interface FarmOverviewTranslations {
 }
 
 export function useFarmOverviewPage(t: FarmOverviewTranslations) {
-  const { role } = useCurrentUser()
+  const { role, user } = useCurrentUser()
   const isVGreensAdmin = role === UserRole.VgreensAdmin
   const searchParams = useSearchParams()
   const initialTenantIdFromUrl = searchParams.get('tenantId') ?? ''
@@ -78,10 +99,55 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const tenantBucketNameOverride = isVGreensAdmin
     ? (selectedTenantBucketName ?? null)
     : undefined
+  const activeBucketName =
+    isVGreensAdmin
+      ? (selectedTenantBucketName ?? null)
+      : (user?.tenant?.influxBucketName ?? null)
 
-  const { bays, bucketFields, loading } = useLiveFarmData({
+  const { bays, bucketFields, loading: liveDataLoading } = useLiveFarmData({
     tenantBucketName: tenantBucketNameOverride,
   })
+  const { data: fieldMeansData, loading: fieldMeansLoading } = useQuery<
+    GetBucketFieldMeansLastMinutesResponse,
+    GetBucketFieldMeansLastMinutesVariables
+  >(GET_BUCKET_FIELD_MEANS_LAST_MINUTES_QUERY, {
+    variables: {
+      input: {
+        bucketName: activeBucketName ?? '',
+        windowMinutes: 5,
+      },
+    },
+    skip: !activeBucketName,
+    fetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-first',
+    pollInterval: FIELD_MEANS_POLL_INTERVAL_MS,
+  })
+
+  const fieldMeansByGreenhouse = React.useMemo(() => {
+    const grouped = new Map<string, Record<string, number>>()
+
+    for (const metric of fieldMeansData?.getBucketFieldMeansLastMinutes ?? []) {
+      const field = metric.field?.trim()
+      if (!field) continue
+
+      const greenhouseKey =
+        metric.greenhouse?.trim() || UNASSIGNED_GREENHOUSE_KEY
+
+      const byField = grouped.get(greenhouseKey) ?? {}
+      byField[field] = metric.value
+      grouped.set(greenhouseKey, byField)
+    }
+
+    return grouped
+  }, [fieldMeansData?.getBucketFieldMeansLastMinutes])
+
+  const greenhouseKeysForFallback = React.useMemo(
+    () =>
+      Array.from(fieldMeansByGreenhouse.keys())
+        .filter((key) => key !== UNASSIGNED_GREENHOUSE_KEY)
+        .sort(),
+    [fieldMeansByGreenhouse],
+  )
 
   const [selectedParameter, setSelectedParameter] =
     React.useState<ParameterType>('temperature')
@@ -182,21 +248,42 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     () => {
       const first = bays[0] ?? null
       const second = bays[1] ?? null
+      const resolveMeanValues = (
+        greenhouseName: string | undefined,
+        fallbackIndex: number,
+      ): Record<string, number> => {
+        if (greenhouseName && fieldMeansByGreenhouse.has(greenhouseName)) {
+          return fieldMeansByGreenhouse.get(greenhouseName) ?? {}
+        }
+
+        const fallbackGreenhouseKey = greenhouseKeysForFallback[fallbackIndex]
+        if (fallbackGreenhouseKey) {
+          return fieldMeansByGreenhouse.get(fallbackGreenhouseKey) ?? {}
+        }
+
+        return fieldMeansByGreenhouse.get(UNASSIGNED_GREENHOUSE_KEY) ?? {}
+      }
 
       return [
         {
           key: first?.id ?? 'greenHouse1',
           label: t.greenHouse1,
-          bay: first,
+          meanValues: resolveMeanValues(first?.name, 0),
         },
         {
           key: second?.id ?? 'greenHouse2',
           label: t.greenHouse2,
-          bay: second,
+          meanValues: resolveMeanValues(second?.name, 1),
         },
       ]
     },
-    [bays, t.greenHouse1, t.greenHouse2],
+    [
+      bays,
+      t.greenHouse1,
+      t.greenHouse2,
+      fieldMeansByGreenhouse,
+      greenhouseKeysForFallback,
+    ],
   )
 
   const getParameterLabel = React.useCallback(
@@ -208,6 +295,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     selectedTenantId && tenants.some((tn) => tn.id === selectedTenantId)
       ? selectedTenantId
       : (tenants[0]?.id ?? '')
+  const loading = liveDataLoading || (!!activeBucketName && fieldMeansLoading)
 
   return {
     isVGreensAdmin,

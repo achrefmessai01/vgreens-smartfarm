@@ -3,7 +3,6 @@
 import * as React from 'react'
 import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { getParameterUnit } from '@/lib/farm-data'
-import type { Bay } from '@/lib/farm-types'
 import { cn } from '@/lib/utils'
 import {
   Activity,
@@ -28,7 +27,7 @@ interface ParameterOption {
 interface CombinedGreenhouse {
   key: string
   label: string
-  bay: Bay | null
+  meanValues: Record<string, number>
 }
 
 interface CombinedGreenhouseViewProps {
@@ -38,9 +37,6 @@ interface CombinedGreenhouseViewProps {
 }
 
 type ParameterStatus = 'normal' | 'warning' | 'critical' | 'no-data'
-
-const USE_DUMMY_DATA = true
-const PREVIEW_NO_DATA_GREENHOUSE_INDEXES = new Set([1])
 
 const PARAMETER_PRIORITY: string[] = [
   'temperature',
@@ -55,37 +51,6 @@ const PARAMETER_PRIORITY: string[] = [
   'par_estimated',
   'par',
   'lux',
-]
-
-const DUMMY_GREENHOUSE_VALUES: Array<Record<string, number>> = [
-  {
-    temperature: 18.4,
-    humidity: 89,
-    co2: 490,
-    soil_conductivity: 3.2,
-    soil_ec: 3.2,
-    soilEC: 3.2,
-    soil_moisture: 65,
-    soil_temp: 19,
-    vpd: 1.9,
-    par: 350,
-    par_estimated: 350,
-    lux: 21000,
-  },
-  {
-    temperature: 18.1,
-    humidity: 79,
-    co2: 430,
-    soil_conductivity: 1.1,
-    soil_ec: 1.1,
-    soilEC: 1.1,
-    soil_moisture: 62,
-    soil_temp: 19.2,
-    vpd: 1.8,
-    par: 340,
-    par_estimated: 340,
-    lux: 20500,
-  },
 ]
 
 function normalizeParameterKey(parameter: string): string {
@@ -210,38 +175,12 @@ function formatValue(value: number | null): string {
   return value.toFixed(precision).replace(/\.0$/, '')
 }
 
-function getAverageValue(bay: Bay | null, parameter: string): number | null {
-  if (!bay) return null
-  const aliases = getParameterAliases(parameter)
-  const values: number[] = []
-
-  for (const row of bay.rows) {
-    for (const column of row.columns) {
-      for (const slot of column.slots) {
-        for (const field of aliases) {
-          const value = slot.values[field]
-          if (typeof value === 'number' && Number.isFinite(value)) {
-            values.push(value)
-            break
-          }
-        }
-      }
-    }
-  }
-
-  if (values.length === 0) return null
-  return values.reduce((sum, current) => sum + current, 0) / values.length
-}
-
-function getDummyValue(
-  greenhouseIndex: number,
+function getMeanValue(
+  meanValues: Record<string, number>,
   parameter: string,
 ): number | null {
-  const values = DUMMY_GREENHOUSE_VALUES[greenhouseIndex]
-  if (!values) return null
-
   for (const field of getParameterAliases(parameter)) {
-    const value = values[field]
+    const value = meanValues[field]
     if (typeof value === 'number' && Number.isFinite(value)) {
       return value
     }
@@ -293,78 +232,64 @@ export function CombinedGreenhouseView({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:[grid-template-columns:repeat(auto-fit,minmax(10.75rem,1fr))] gap-1 sm:gap-2 pb-1 items-stretch content-start">
-      {greenhouses.map((greenhouse, greenhouseIndex) => {
-        const forceNoData =
-          USE_DUMMY_DATA && PREVIEW_NO_DATA_GREENHOUSE_INDEXES.has(greenhouseIndex)
+      {greenhouses.map((greenhouse) => (
+        <Card
+          key={greenhouse.key}
+          className="w-full gap-0 py-0 overflow-hidden rounded-sm transition-shadow duration-700 ease-out hover:shadow-md"
+        >
+          <div className="border-b border-border/50 bg-muted/20 px-3 py-1.5 sm:px-2 sm:py-1.5 lg:py-2">
+            <CardTitle className="text-sm sm:text-[10px] md:text-[11px] lg:text-xs xl:text-sm font-semibold uppercase tracking-wider text-foreground/90">
+              {greenhouse.label}
+            </CardTitle>
+          </div>
 
-        return (
-          <Card
-            key={greenhouse.key}
-            className="w-full gap-0 py-0 overflow-hidden rounded-sm transition-shadow duration-700 ease-out hover:shadow-md"
-          >
-            <div className="border-b border-border/50 bg-muted/20 px-3 py-1.5 sm:px-2 sm:py-1.5 lg:py-2">
-              <CardTitle className="text-sm sm:text-[10px] md:text-[11px] lg:text-xs xl:text-sm font-semibold uppercase tracking-wider text-foreground/90">
-                {greenhouse.label}
-              </CardTitle>
-            </div>
+          <CardContent className="p-0">
+            {orderedParameters.map((parameter, index) => {
+              const parameterValue = getMeanValue(
+                greenhouse.meanValues,
+                parameter.value,
+              )
+              const parameterStatus = getStatus(parameter.value, parameterValue)
+              const unit = getDisplayUnit(parameter.value)
+              const Icon = getParameterIcon(parameter.value)
 
-            {!USE_DUMMY_DATA && !greenhouse.bay && (
-              <p className="px-6 py-3 text-xs text-muted-foreground border-b border-border/40">
-                {noDataMessage}
-              </p>
-            )}
+              return (
+                <div
+                  key={`${greenhouse.key}-${parameter.value}`}
+                  className={cn(
+                    'flex items-center gap-2.5 sm:gap-1.5 md:gap-2 lg:gap-2.5 px-3 sm:px-2 md:px-2.5 lg:px-3 py-1.5 sm:py-1 lg:py-1.5 transition-colors duration-700 ease-out',
+                    index < orderedParameters.length - 1 &&
+                      'border-b border-border/35',
+                    parameterStatus === 'normal' &&
+                      'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300',
+                    parameterStatus === 'warning' &&
+                      'bg-amber-500/20 text-amber-800 dark:text-amber-300',
+                    parameterStatus === 'critical' &&
+                      'bg-destructive/20 text-destructive',
+                    parameterStatus === 'no-data' &&
+                      'bg-muted/30 text-muted-foreground',
+                  )}
+                >
+                  <Icon className="h-5 w-5 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 shrink-0" aria-hidden />
 
-            <CardContent className="p-0">
-              {orderedParameters.map((parameter, index) => {
-                const liveValue = getAverageValue(greenhouse.bay, parameter.value)
-                const dummyValue = getDummyValue(greenhouseIndex, parameter.value)
-                const parameterValue = forceNoData
-                  ? null
-                  : USE_DUMMY_DATA
-                    ? dummyValue
-                    : (liveValue ?? dummyValue)
-                const parameterStatus = getStatus(parameter.value, parameterValue)
-                const unit = getDisplayUnit(parameter.value)
-                const Icon = getParameterIcon(parameter.value)
-
-                return (
-                  <div
-                    key={`${greenhouse.key}-${parameter.value}`}
-                    className={cn(
-                      'flex items-center gap-2.5 sm:gap-1.5 md:gap-2 lg:gap-2.5 px-3 sm:px-2 md:px-2.5 lg:px-3 py-1.5 sm:py-1 lg:py-1.5 transition-colors duration-700 ease-out',
-                      index < orderedParameters.length - 1 &&
-                        'border-b border-border/35',
-                      parameterStatus === 'normal' &&
-                        'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300',
-                      parameterStatus === 'warning' &&
-                        'bg-amber-500/20 text-amber-800 dark:text-amber-300',
-                      parameterStatus === 'critical' &&
-                        'bg-destructive/20 text-destructive',
-                      parameterStatus === 'no-data' &&
-                        'bg-muted/30 text-muted-foreground',
-                    )}
-                  >
-                    <Icon className="h-5 w-5 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 shrink-0" aria-hidden />
-
-                    <div className="flex flex-wrap items-baseline justify-start text-left gap-x-1 sm:gap-x-1.5 gap-y-0.5 tabular-nums min-w-0">
-                      <span className="text-2xl sm:text-sm md:text-base lg:text-xl xl:text-2xl leading-none">
-                        {formatValue(parameterValue)}
+                  <div className="flex flex-wrap items-baseline justify-start text-left gap-x-1 sm:gap-x-1.5 gap-y-0.5 tabular-nums min-w-0">
+                    <span className="text-2xl sm:text-sm md:text-base lg:text-xl xl:text-2xl leading-none">
+                      {formatValue(parameterValue)}
+                    </span>
+                    {unit && (
+                      <span className="text-sm sm:text-[9px] md:text-[10px] lg:text-[11px] xl:text-xs/none opacity-85 break-all">
+                        {unit}
                       </span>
-                      {unit && (
-                        <span className="text-sm sm:text-[9px] md:text-[10px] lg:text-[11px] xl:text-xs/none opacity-85 break-all">
-                          {unit}
-                        </span>
-                      )}
-                    </div>
-
-                    <span className="sr-only">{parameter.label}</span>
+                    )}
                   </div>
-                )
-              })}
-            </CardContent>
-          </Card>
-        )
-      })}
+
+                  <span className="sr-only">{parameter.label}</span>
+                </div>
+              )
+            })}
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }
