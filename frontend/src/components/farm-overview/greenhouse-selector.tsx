@@ -1,5 +1,7 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+
 interface GreenhouseSelectorProps {
   value: number;
   onValueChange: (index: number) => void;
@@ -12,30 +14,30 @@ export function GreenhouseSelector({
   options,
 }: GreenhouseSelectorProps) {
   return (
-    <div className="flex bg-muted/20 dark:bg-muted/5 pt-2">
+    <div className="flex w-full bg-muted/10 border-b border-border/40">
       {options.map((option, index) => {
         const isActive = value === index;
         return (
-          <button
+          <Button
             key={option.key}
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => onValueChange(index)}
             className={`
-              relative px-8 py-3 text-xs font-bold uppercase tracking-wider transition-all duration-300
-               border-t border-x border-transparent rounded-sm
+              flex-1 justify-center border-x border-border/20 first:border-l-0
+              text-xs font-semibold tracking-wider uppercase shadow-none cursor-pointer
+              h-10 px-6
+              ${index === 0 ? 'rounded-l-md rounded-r-none' : index === options.length - 1 ? 'rounded-r-md rounded-l-none' : 'rounded-none'}
               ${
                 isActive
-                  ? 'bg-primary text-primary-foreground border-primary/50 shadow-[0_-1px_3px_rgba(0,0,0,0.1)]'
-                  : 'bg-background dark:bg-muted/20 text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-muted-foreground/30 hover:shadow-[0_-2px_8px_rgba(0,0,0,0.15)] hover:scale-[1.02] hover:-translate-y-0.5'
+                  ? 'bg-emerald-400 text-white'
+                  : 'bg-muted/10 text-muted-foreground hover:bg-primary hover:text-primary-foreground'
               }
             `}
           >
             {option.label}
-            {/* This hides the bottom border of the container when active to create the "Folder" look */}
-            {isActive && (
-              <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-background z-10" />
-            )}
-          </button>
+          </Button>
         );
       })}
     </div>

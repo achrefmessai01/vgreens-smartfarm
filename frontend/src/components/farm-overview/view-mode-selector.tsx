@@ -1,12 +1,11 @@
 "use client";
-
-import { LayoutGrid, Map as MapIcon } from "lucide-react";
-
 interface ViewModeSelectorProps {
-  value: "heatmap" | "discrete";
-  onValueChange: (value: "heatmap" | "discrete") => void;
+  value: "heatmap" | "discrete" | "graph";
+  onValueChange: (value: "heatmap" | "discrete" | "graph") => void;
   heatmapLabel: string;
   discreteLabel: string;
+  graphLabel?: string;
+  showGraphOption?: boolean;
 }
 
 export function ViewModeSelector({
@@ -14,22 +13,23 @@ export function ViewModeSelector({
   onValueChange,
   heatmapLabel,
   discreteLabel,
+  graphLabel = "Graph",
+  showGraphOption = false,
 }: ViewModeSelectorProps) {
   return (
-    <div className="flex items-center gap-1 p-1 bg-muted/40 dark:bg-muted/20 border border-border/40 rounded-lg shadow-inner">
+    <div className="inline-flex items-center rounded-full bg-muted/40 dark:bg-muted/20 p-0.5">
       <button
         type="button"
         onClick={() => onValueChange("heatmap")}
         className={`
-          flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
+          px-3 py-1 text-xs font-semibold rounded-full transition-colors duration-150
           ${
             value === "heatmap"
-              ? "bg-primary text-primary-foreground"
-              : "bg-background dark:bg-muted/20 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }
         `}
       >
-        <MapIcon size={14} className="shrink-0" />
         {heatmapLabel}
       </button>
 
@@ -37,17 +37,33 @@ export function ViewModeSelector({
         type="button"
         onClick={() => onValueChange("discrete")}
         className={`
-          flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
+          px-3 py-1 text-xs font-semibold rounded-full transition-colors duration-150
           ${
             value === "discrete"
-              ? "bg-primary text-primary-foreground"
-              : "bg-background dark:bg-muted/20 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              ? "bg-emerald-400 text-black shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }
         `}
       >
-        <LayoutGrid size={14} className="shrink-0" />
         {discreteLabel}
       </button>
+
+      {showGraphOption && (
+        <button
+          type="button"
+          onClick={() => onValueChange("graph")}
+          className={`
+            px-3 py-1 text-xs font-semibold rounded-full transition-colors duration-150
+            ${
+              value === "graph"
+                ? "bg-sky-500 text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }
+          `}
+        >
+          {graphLabel}
+        </button>
+      )}
     </div>
   );
 }

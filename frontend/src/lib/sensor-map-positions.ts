@@ -38,11 +38,11 @@ export const SENSOR_MAP_POSITIONS: SensorMapPosition[] = [
   { deviceId: 'Air_12', leftPercent: 37, topPercent: 10, type: 'air' },
   // 6 lights: center line (same height as A_03, A_01), spanning left to right across greenhouse
   { deviceId: 'Lux_01', leftPercent: 9, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_02', leftPercent: 17, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_03', leftPercent: 25, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_04', leftPercent: 33, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_05', leftPercent: 41, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_06', leftPercent: 49, topPercent: 40, type: 'lux' },
+  { deviceId: 'Lux_02', leftPercent: 27, topPercent: 40, type: 'lux' },
+  { deviceId: 'Lux_03', leftPercent: 45, topPercent: 40, type: 'lux' },
+  { deviceId: 'Lux_04', leftPercent: 61, topPercent: 40, type: 'lux' },
+  { deviceId: 'Lux_05', leftPercent: 70, topPercent: 40, type: 'lux' },
+  { deviceId: 'Lux_06', leftPercent: 90, topPercent: 40, type: 'lux' },
 ];
 
 /** Aspect ratio of map: width / height = 115 / 40 */

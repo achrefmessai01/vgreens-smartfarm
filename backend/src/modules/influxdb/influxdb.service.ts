@@ -4,9 +4,10 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
+import { FieldMeanMetric } from './dto';
 import { ConfigService } from '@nestjs/config';
-import { InfluxDB, QueryApi, WriteApi } from '@influxdata/influxdb-client';
 import { BucketsAPI, OrgsAPI } from '@influxdata/influxdb-client-apis';
+import { InfluxDB, QueryApi, WriteApi } from '@influxdata/influxdb-client';
 
 @Injectable()
 export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
@@ -290,6 +291,92 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
 
     this.logger.debug(
       `getBucketData("${bucketName}"): returned ${rows.length} rows`,
+    );
+    return rows;
+  }
+
+  /**
+   * Returns one mean value per field (and greenhouse) over the last N minutes.
+   * This aggregates across all devices/sensors, so you get a single mean per
+   * parameter (temperature, humidity, etc.) for the requested greenhouse/bucket.
+   */
+  async getBucketFieldMeansLastMinutes(
+    bucketName: string,
+    options: { greenhouse?: string; windowMinutes?: number },
+  ): Promise<FieldMeanMetric[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.error('InfluxDB client is not initialized');
+      throw new Error('InfluxDB client is not initialized');
+    }
+
+    const escapedBucket = bucketName
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+
+    const escapeFluxString = (v: string) =>
+      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+    const filterParts: string[] = [];
+    if (options.greenhouse != null && options.greenhouse !== '') {
+      filterParts.push(
+        `r["greenhouse"] == "${escapeFluxString(options.greenhouse)}"`,
+      );
+    }
+
+    const filterClause =
+      filterParts.length > 0
+        ? `|> filter(fn: (r) => ${filterParts.join(' and ')})\n  `
+        : '';
+
+    const windowMinutes = options.windowMinutes ?? 5;
+    const flux = `from(bucket: "${escapedBucket}")
+  |> range(start: -${windowMinutes}m)
+  ${filterClause}|> group(columns: ["_field", "greenhouse"])
+  |> mean()
+  |> keep(columns: ["_time", "_value", "_field", "greenhouse"])`;
+
+    const rows: FieldMeanMetric[] = [];
+    const queryApi = this.queryApi;
+
+    await new Promise<void>((resolve, reject) => {
+      queryApi.queryRows(flux, {
+        next: (row, tableMeta) => {
+          const o = tableMeta.toObject(row) as Record<string, unknown>;
+          const value = Number(o._value);
+          if (Number.isNaN(value)) {
+            return;
+          }
+
+          const time =
+            o._time instanceof Date
+              ? o._time
+              : new Date(String((o as { _time?: string })._time ?? ''));
+          const field = typeof o._field === 'string' ? o._field : undefined;
+          if (!field) {
+            return;
+          }
+
+          const greenhouse =
+            typeof o.greenhouse === 'string' ? o.greenhouse : undefined;
+
+          rows.push({
+            field,
+            greenhouse,
+            time,
+            value,
+          });
+        },
+        error: (error) => {
+          reject(error);
+        },
+        complete: () => {
+          resolve();
+        },
+      });
+    });
+
+    this.logger.debug(
+      `getBucketFieldMeansLastMinutes("${bucketName}", greenhouse="${options.greenhouse ?? ''}", windowMinutes=${windowMinutes}): returned ${rows.length} rows`,
     );
     return rows;
   }

@@ -9,9 +9,10 @@ import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data'
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket'
 import { UserRole, useTenantsQuery, type Tenant } from '@/generated/graphql'
 
-const GREENHOUSE_LABEL_KEYS = ['greenHouse1', 'greenHouse2'] as const
+const GREENHOUSE_LABEL_KEYS = ['combined', 'greenHouse1', 'greenHouse2'] as const
 
 export interface FarmOverviewTranslations {
+  combined: string
   greenHouse1: string
   greenHouse2: string
   temperature: string
@@ -23,6 +24,7 @@ export interface FarmOverviewTranslations {
   par: string
   viewHeatmap: string
   viewDiscrete: string
+  viewGraph: string
   emptyForNow?: string
   noSensor: string
   noData: string
@@ -87,7 +89,9 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     null,
   )
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false)
-  const [viewMode, setViewMode] = React.useState<'heatmap' | 'discrete'>(
+  const [viewMode, setViewMode] = React.useState<
+    'heatmap' | 'discrete' | 'graph'
+  >(
     'discrete',
   )
   const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0)
@@ -144,6 +148,57 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     if (selectedSlotId) setHistoryDrawerOpen(true)
   }, [selectedSlotId])
 
+  React.useEffect(() => {
+    const isParParameter =
+      effectiveParameter === 'par' || effectiveParameter === 'par_estimated'
+    if (isParParameter) {
+      setViewMode((current) => (current === 'graph' ? current : 'graph'))
+      return
+    }
+    setViewMode((current) => (current === 'graph' ? 'discrete' : current))
+  }, [effectiveParameter])
+
+  React.useEffect(() => {
+    setSelectedSlotId(null)
+    setHistoryDrawerOpen(false)
+  }, [activeGreenhouseTab])
+
+  const greenhouseBays = React.useMemo(
+    () => [bays[0] ?? null, bays[1] ?? null] as const,
+    [bays],
+  )
+
+  const selectedBays = React.useMemo(() => {
+    if (activeGreenhouseTab === 1) {
+      return greenhouseBays[0] ? [greenhouseBays[0]] : []
+    }
+    if (activeGreenhouseTab === 2) {
+      return greenhouseBays[1] ? [greenhouseBays[1]] : []
+    }
+    return bays
+  }, [activeGreenhouseTab, greenhouseBays, bays])
+
+  const combinedGreenhouses = React.useMemo(
+    () => {
+      const first = bays[0] ?? null
+      const second = bays[1] ?? null
+
+      return [
+        {
+          key: first?.id ?? 'greenHouse1',
+          label: t.greenHouse1,
+          bay: first,
+        },
+        {
+          key: second?.id ?? 'greenHouse2',
+          label: t.greenHouse2,
+          bay: second,
+        },
+      ]
+    },
+    [bays, t.greenHouse1, t.greenHouse2],
+  )
+
   const getParameterLabel = React.useCallback(
     (param: ParameterType) => formatFieldToLabel(param),
     [],
@@ -167,22 +222,27 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     setSelectedParameter,
     activeGreenhouseTab,
     setActiveGreenhouseTab,
+    isCombinedView: activeGreenhouseTab === 0,
     viewMode,
     setViewMode,
     selectedSlotId,
     setSelectedSlotId,
     historyDrawerOpen,
     setHistoryDrawerOpen,
-    bays,
+    bays: selectedBays,
+    combinedGreenhouses,
     getParameterLabel,
     tenantBucketNameOverride,
     labels: {
       viewHeatmap: t.viewHeatmap,
       viewDiscrete: t.viewDiscrete,
+      viewGraph: t.viewGraph,
       emptyForNow: t.emptyForNow ?? 'Empty for now',
       noSensor: t.noSensor,
       noData: t.noData,
+      combined: t.combined,
       greenHouse1: t.greenHouse1,
+      greenHouse2: t.greenHouse2,
     },
   }
 }
