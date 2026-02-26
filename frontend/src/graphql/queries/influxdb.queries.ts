@@ -31,3 +31,13 @@ export const GET_BUCKET_FIELDS_QUERY = gql`
     getBucketFields(bucketName: $bucketName, start: $start, stop: $stop)
   }
 `
+
+export const GET_BUCKET_FIELD_MEANS_LAST_MINUTES_QUERY = gql`
+  query GetBucketFieldMeansLastMinutes($input: GetFieldMeansInput!) {
+    getBucketFieldMeansLastMinutes(input: $input) {
+      field
+      greenhouse
+      value
+    }
+  }
+`
