@@ -4,7 +4,7 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { FieldMeanMetric } from './dto';
+import { FieldMeanMetric, ParDliPoint } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { BucketsAPI, OrgsAPI } from '@influxdata/influxdb-client-apis';
 import { InfluxDB, QueryApi, WriteApi } from '@influxdata/influxdb-client';
@@ -377,6 +377,84 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
 
     this.logger.debug(
       `getBucketFieldMeansLastMinutes("${bucketName}", greenhouse="${options.greenhouse ?? ''}", windowMinutes=${windowMinutes}): returned ${rows.length} rows`,
+    );
+    return rows;
+  }
+
+  /**
+   * Returns a time series for today's cumulative DLI curve for PAR/PPFD.
+   * Assumes measurement "par" and field "ppfd" in µmol m-2 s-1, and
+   * aggregates to 1-minute means before converting to mol m-2 and
+   * applying a cumulative sum over the day.
+   */
+  async getTodayParCumulativeDli(
+    bucketName: string,
+    options: { greenhouse: string },
+  ): Promise<ParDliPoint[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.error('InfluxDB client is not initialized');
+      throw new Error('InfluxDB client is not initialized');
+    }
+
+    const escapedBucket = bucketName
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+    const escapeFluxString = (v: string) =>
+      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+    const flux = `
+import "date"
+
+from(bucket: "${escapedBucket}")
+  |> range(start: date.truncate(t: now(), unit: 1d))
+  |> filter(fn: (r) =>
+    r["_measurement"] == "light_intensity" and
+    r["_field"] == "par" and
+    r["greenhouse"] == "${escapeFluxString(options.greenhouse)}"
+  )
+  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+  |> map(fn: (r) => ({
+      r with
+      _value: float(v: r._value) * 60.0 / 1000000.0
+    })
+  )
+  |> cumulativeSum(columns: ["_value"])
+  |> keep(columns: ["_time", "_value"])
+`;
+
+    const rows: ParDliPoint[] = [];
+    const queryApi = this.queryApi;
+
+    await new Promise<void>((resolve, reject) => {
+      queryApi.queryRows(flux, {
+        next: (row, tableMeta) => {
+          const o = tableMeta.toObject(row) as Record<string, unknown>;
+          const value = Number(o._value);
+          if (Number.isNaN(value)) {
+            return;
+          }
+
+          const time =
+            o._time instanceof Date
+              ? o._time
+              : new Date(String((o as { _time?: string })._time ?? ''));
+
+          rows.push({
+            time,
+            dli: value,
+          });
+        },
+        error: (error) => {
+          reject(error);
+        },
+        complete: () => {
+          resolve();
+        },
+      });
+    });
+
+    this.logger.debug(
+      `getTodayParCumulativeDli("${bucketName}", greenhouse="${options.greenhouse}"): returned ${rows.length} points`,
     );
     return rows;
   }

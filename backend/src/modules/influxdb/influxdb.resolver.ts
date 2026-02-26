@@ -3,7 +3,12 @@ import { Public } from '@/common/decorators';
 import { InfluxDBService } from './influxdb.service';
 import { InfluxDBData } from './dto/influxdb-data.object';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
-import { FieldMeanMetric, GetFieldMeansInput } from './dto';
+import {
+  FieldMeanMetric,
+  GetFieldMeansInput,
+  GetParDliTodayInput,
+  ParDliPoint,
+} from './dto';
 import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
@@ -72,6 +77,21 @@ export class InfluxDBResolver {
     return this.influxDBService.getBucketFieldMeansLastMinutes(bucketName, {
       greenhouse,
       windowMinutes,
+    });
+  }
+
+  /**
+   * Returns today's cumulative DLI curve for PAR/PPFD for a single greenhouse.
+   * This is used for the PAR tab graph in the frontend.
+   */
+  @Public()
+  @Query(() => [ParDliPoint], { name: 'getParDliToday' })
+  async getParDliToday(
+    @Args('input') input: GetParDliTodayInput,
+  ): Promise<ParDliPoint[]> {
+    const { bucketName, greenhouse } = input;
+    return this.influxDBService.getTodayParCumulativeDli(bucketName, {
+      greenhouse,
     });
   }
 

@@ -34,3 +34,25 @@ export class FieldMeanMetric {
   @Field()
   value: number;
 }
+
+@InputType()
+export class GetParDliTodayInput {
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  bucketName: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty()
+  greenhouse: string;
+}
+
+@ObjectType()
+export class ParDliPoint {
+  @Field(() => Date)
+  time: Date;
+
+  @Field()
+  dli: number;
+}
