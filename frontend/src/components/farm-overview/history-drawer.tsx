@@ -1,76 +1,76 @@
-'use client'
+'use client';
 
-import * as React from 'react'
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet'
-import { StyledSelect } from '@/components/ui/styled-select'
+} from '@/components/ui/sheet';
+import { StyledSelect } from '@/components/ui/styled-select';
+import { useGetBucketDataQuery, useMeQuery } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import type { ParameterType } from '@/lib/farm-types';
+import * as React from 'react';
 import {
-  LineChart,
+  CartesianGrid,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
-import type { ParameterType } from '@/lib/farm-types'
-import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql'
-import { HistoryChartSkeleton } from './history-chart-skeleton'
-import { useI18n } from '@/i18n'
+} from 'recharts';
+import { HistoryChartSkeleton } from './history-chart-skeleton';
 
 /** Parse slotId (e.g. "live_greenhouse_01|Air_09|unknown") into greenhouse, device, level for InfluxDB filters */
 function parseSlotId(slotId: string): {
-  greenhouse: string
-  device: string
-  level: string
+  greenhouse: string;
+  device: string;
+  level: string;
 } {
-  const raw = slotId.replace(/^live_/, '')
-  const parts = raw.split('|')
+  const raw = slotId.replace(/^live_/, '');
+  const parts = raw.split('|');
   return {
     greenhouse: parts[0] ?? '',
     device: parts[1] ?? '',
     level: parts[2] ?? '',
-  }
+  };
 }
 
 function getStartStopForRange(timeRange: '1day' | '1week' | '1month'): {
-  start: string
-  stop: string
+  start: string;
+  stop: string;
 } {
-  const now = new Date()
-  const stop = now.toISOString()
-  let start: Date
+  const now = new Date();
+  const stop = now.toISOString();
+  let start: Date;
   switch (timeRange) {
     case '1day':
-      start = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-      break
+      start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      break;
     case '1week':
-      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-      break
+      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
     case '1month':
-      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-      break
+      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
   }
-  return { start: start.toISOString(), stop }
+  return { start: start.toISOString(), stop };
 }
 
 interface HistoryDrawerProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  parameter: ParameterType
-  slotId: string | null
-  parameterLabel: string
-  timeRangeLabel: string
-  oneDayLabel: string
-  oneWeekLabel: string
-  oneMonthLabel: string
-  historyLabel: string
-  bucketName?: string | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  parameter: ParameterType;
+  slotId: string | null;
+  parameterLabel: string;
+  timeRangeLabel: string;
+  oneDayLabel: string;
+  oneWeekLabel: string;
+  oneMonthLabel: string;
+  historyLabel: string;
+  bucketName?: string | null;
 }
 
 export function HistoryDrawer({
@@ -90,22 +90,22 @@ export function HistoryDrawer({
 
   const [timeRange, setTimeRange] = React.useState<'1day' | '1week' | '1month'>(
     '1month',
-  )
+  );
   const [selectedPointIndex, setSelectedPointIndex] = React.useState<
     number | null
-  >(null)
+  >(null);
 
-  const { data: meData } = useMeQuery({ fetchPolicy: 'cache-first' })
+  const { data: meData } = useMeQuery({ fetchPolicy: 'cache-first' });
   const bucketName =
-    bucketNameOverride ?? meData?.me?.tenant?.influxBucketName ?? null
+    bucketNameOverride ?? meData?.me?.tenant?.influxBucketName ?? null;
   const slotFilters = React.useMemo(
     () => (slotId ? parseSlotId(slotId) : null),
     [slotId],
-  )
+  );
   const startStop = React.useMemo(
     () => getStartStopForRange(timeRange),
     [timeRange],
-  )
+  );
 
   const { data: bucketData, loading: historyLoading } = useGetBucketDataQuery({
     variables: {
@@ -124,49 +124,66 @@ export function HistoryDrawer({
     },
     skip: !bucketName || !slotId || !open,
     fetchPolicy: 'cache-and-network',
-  })
+  });
 
   const historyData = React.useMemo(() => {
-    if (!bucketData?.getBucketData?.length) return []
+    if (!bucketData?.getBucketData?.length) return [];
     return bucketData.getBucketData
       .map((item, index) => {
-        const d = item.data
-        const t = d._time as string | undefined
-        const v = d._value
-        if (t == null) return null
+        const d = item.data;
+        const t = d._time as string | undefined;
+        const v = d._value;
+        if (t == null) return null;
         const num =
-          typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN
-        if (Number.isNaN(num)) return null
+          typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN;
+        if (Number.isNaN(num)) return null;
         return {
           timestamp: new Date(t).getTime(),
           value: num,
           index,
-        }
+        };
       })
       .filter((p): p is { timestamp: number; value: number; index: number } =>
         Boolean(p),
       )
-      .sort((a, b) => a.timestamp - b.timestamp)
-  }, [bucketData])
+      .sort((a, b) => a.timestamp - b.timestamp);
+  }, [bucketData]);
 
   // Reset selected point when slot or parameter changes
   React.useEffect(() => {
-    setSelectedPointIndex(null)
-  }, [slotId, parameter, timeRange])
+    setSelectedPointIndex(null);
+  }, [slotId, parameter, timeRange]);
 
-  if (!slotId) return null
+  // Calculate exactly 8 ticks for the X-axis
+  const xAxisTicks = React.useMemo(() => {
+    if (historyData.length === 0) return [];
+    const tickCount = 16;
+    const step = Math.floor((historyData.length - 1) / (tickCount - 1));
+    const ticks = [];
+    for (let i = 0; i < tickCount - 1; i++) {
+      ticks.push(historyData[i * step].timestamp);
+    }
+    // Always include the last data point
+    ticks.push(historyData[historyData.length - 1].timestamp);
+    return ticks;
+  }, [historyData]);
+
+  if (!slotId) return null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[60vh]">
+      <SheetContent
+        side="bottom"
+        className="h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] flex flex-col"
+      >
         <SheetHeader>
           <SheetTitle>
             {historyLabel} - {parameterLabel}
           </SheetTitle>
           <SheetDescription>{slotId}</SheetDescription>
         </SheetHeader>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:gap-4 flex-1 min-h-0">
+          <div className="flex items-center gap-2 shrink-0">
             <label className="text-sm font-medium ml-5">
               {timeRangeLabel}:
             </label>
@@ -183,7 +200,7 @@ export function HistoryDrawer({
               width="180px"
             />
           </div>
-          <div className="h-[400px]">
+          <div className="flex-1 min-h-0 pb-2 sm:pb-6 pr-2 sm:pr-6 pl-2">
             {historyLoading ? (
               <HistoryChartSkeleton className="h-full w-full" />
             ) : historyData.length === 0 ? (
@@ -193,68 +210,121 @@ export function HistoryDrawer({
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={historyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border opacity-100"
+                  />
                   <XAxis
                     dataKey="timestamp"
+                    className="stroke-muted-foreground"
+                    height={60}
+                    ticks={xAxisTicks}
+                    tick={{
+                      className: 'fill-muted-foreground',
+                      fontSize: 14,
+                      dy: 10,
+                    }}
                     tickFormatter={(value) => {
-                      const date = new Date(value)
-                      return date.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      })
+                      const date = new Date(value);
+                      if (timeRange === '1day') {
+                        // For 1 day: show date and time
+                        const day = date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        });
+                        const time = date.toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        });
+                        return `${day} ${time}`;
+                      } else if (timeRange === '1week') {
+                        // For 1 week: show day and time
+                        const day = date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        });
+                        const time = date.toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        });
+                        return `${day} ${time}`;
+                      } else {
+                        // For 1 month: show day and time
+                        const day = date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        });
+                        const time = date.toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        });
+                        return `${day} ${time}`;
+                      }
                     }}
                   />
-                  <YAxis />
+                  <YAxis
+                    className="stroke-muted-foreground"
+                    tick={{ className: 'fill-muted-foreground' }}
+                  />
                   <Tooltip
+                    wrapperClassName="shadow-lg"
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--popover))',
+                      border: '2px solid hsl(var(--border))',
+                      borderRadius: '0.5rem',
+                      color: 'hsl(var(--foreground))',
+                    }}
+                    labelStyle={{ fontWeight: 500 }}
                     labelFormatter={(value) => {
-                      const date = new Date(value)
-                      return date.toLocaleString()
+                      const date = new Date(value);
+                      return date.toLocaleString();
                     }}
                   />
                   <Line
                     type="monotone"
                     dataKey="value"
-                    stroke="#016F7C"
-                    strokeWidth={2}
+                    className="stroke-primary"
+                    strokeWidth={2.5}
                     dot={(props: {
-                      cx?: number
-                      cy?: number
+                      cx?: number;
+                      cy?: number;
                       payload?: {
-                        timestamp: number
-                        value: number
-                        index: number
-                      }
-                      index?: number
+                        timestamp: number;
+                        value: number;
+                        index: number;
+                      };
+                      index?: number;
                     }) => {
                       if (!props.cx || !props.cy || !props.payload) {
-                        return <g />
+                        return <g />;
                       }
                       const pointIndex =
-                        props.payload.index ?? props.index ?? -1
-                      if (pointIndex === -1) return <g />
-                      const isSelected = selectedPointIndex === pointIndex
+                        props.payload.index ?? props.index ?? -1;
+                      if (pointIndex === -1) return <g />;
+                      const isSelected = selectedPointIndex === pointIndex;
                       return (
                         <circle
                           cx={props.cx}
                           cy={props.cy}
                           r={isSelected ? 6 : 4}
-                          fill="#016F7C"
-                          stroke="white"
-                          strokeWidth={isSelected ? 3 : 1.5}
-                          className="cursor-pointer transition-all hover:scale-110"
+                          className="cursor-pointer transition-all hover:scale-110 fill-primary stroke-card"
+                          strokeWidth={isSelected ? 3 : 2}
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             setSelectedPointIndex(
                               isSelected ? null : pointIndex,
-                            )
+                            );
                           }}
                           style={{
                             filter: isSelected
-                              ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))'
-                              : 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))',
+                              ? 'drop-shadow(0 3px 8px rgba(1, 111, 124, 0.4))'
+                              : 'drop-shadow(0 1px 3px rgba(1, 111, 124, 0.25))',
                           }}
                         />
-                      )
+                      );
                     }}
                     activeDot={false}
                   />
@@ -265,5 +335,5 @@ export function HistoryDrawer({
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }
