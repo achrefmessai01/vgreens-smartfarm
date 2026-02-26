@@ -154,6 +154,20 @@ export function HistoryDrawer({
     setSelectedPointIndex(null);
   }, [slotId, parameter, timeRange]);
 
+  // Calculate exactly 8 ticks for the X-axis
+  const xAxisTicks = React.useMemo(() => {
+    if (historyData.length === 0) return [];
+    const tickCount = 16;
+    const step = Math.floor((historyData.length - 1) / (tickCount - 1));
+    const ticks = [];
+    for (let i = 0; i < tickCount - 1; i++) {
+      ticks.push(historyData[i * step].timestamp);
+    }
+    // Always include the last data point
+    ticks.push(historyData[historyData.length - 1].timestamp);
+    return ticks;
+  }, [historyData]);
+
   if (!slotId) return null;
 
   return (
@@ -200,13 +214,52 @@ export function HistoryDrawer({
                   <XAxis
                     dataKey="timestamp"
                     className="stroke-muted-foreground"
-                    tick={{ className: 'fill-muted-foreground' }}
+                    height={60}
+                    ticks={xAxisTicks}
+                    tick={{
+                      className: 'fill-muted-foreground',
+                      fontSize: 14,
+                      dy: 10,
+                    }}
                     tickFormatter={(value) => {
                       const date = new Date(value);
-                      return date.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      });
+                      if (timeRange === '1day') {
+                        // For 1 day: show date and time
+                        const day = date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        });
+                        const time = date.toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        });
+                        return `${day} ${time}`;
+                      } else if (timeRange === '1week') {
+                        // For 1 week: show day and time
+                        const day = date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        });
+                        const time = date.toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        });
+                        return `${day} ${time}`;
+                      } else {
+                        // For 1 month: show day and time
+                        const day = date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        });
+                        const time = date.toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        });
+                        return `${day} ${time}`;
+                      }
                     }}
                   />
                   <YAxis
