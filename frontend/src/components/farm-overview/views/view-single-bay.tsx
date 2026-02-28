@@ -1,24 +1,22 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
 import {
-  formatParameterDisplayValue,
-  getParameterUnit,
   valueToHotColor,
+  getParameterUnit,
+  formatParameterDisplayValue,
 } from '@/lib/farm-data';
-import type { Bay, ParameterType, PlantSlot } from '@/lib/farm-types';
-import { isParameterSupportedByType } from '@/lib/sensor-map-parameter';
-import {
-  SENSOR_MAP_POSITIONS,
-  getBayRowFromPosition,
-  getMapDeviceId,
-} from '@/lib/sensor-map-positions';
-import { buildDeviceToSlotMap } from '@/lib/sensor-map-utils';
-import { getLegendScale } from '@/components/farm-overview/parameter-color-legend';
-import { idwInterpolate, type HeatmapPoint } from '@/lib/heatmap-utils';
+import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/i18n';
-import * as React from 'react';
+import {
+  bayHasDynamicPositions,
+  getSlotPositionsFromBay,
+} from '@/lib/sensor-map-positions';
+import { Card, CardContent } from '@/components/ui/card';
+import type { Bay, ParameterType, PlantSlot } from '@/lib/farm-types';
+import { isParameterSupportedByType } from '@/lib/sensor-map-parameter';
+import { idwInterpolate, type HeatmapPoint } from '@/lib/heatmap-utils';
+import { getLegendScale } from '@/components/farm-overview/parameter-color-legend';
 
 const HEATMAP_GRID_COLS = 80;
 const HEATMAP_GRID_ROWS = 40;
@@ -62,51 +60,41 @@ function useFullMapData(
     let globalMin = Infinity;
     let globalMax = -Infinity;
 
-    const singleBay = bays.length === 1 ? bays[0] ?? null : null;
-    const singleBayDeviceToSlot =
-      singleBay !== null ? buildDeviceToSlotMap(singleBay) : null;
-    const deviceToSlotByBay = new Map<number, Map<string, PlantSlot>>();
-    const getDeviceToSlot = (bayIndex: number) => {
-      let map = deviceToSlotByBay.get(bayIndex);
-      if (!map) {
-        const bay = bays[bayIndex] ?? null;
-        map = bay ? buildDeviceToSlotMap(bay) : new Map();
-        deviceToSlotByBay.set(bayIndex, map);
-      }
-      return map;
-    };
+    const useDynamic =
+      bays.length > 0 && bays.some((b) => bayHasDynamicPositions(b));
 
-    for (const pos of SENSOR_MAP_POSITIONS) {
-      if (!isParameterSupportedByType(parameter, pos.type)) continue;
-      const { bayIndex } = getBayRowFromPosition(pos);
-      const deviceToSlot =
-        singleBayDeviceToSlot !== null
-          ? singleBayDeviceToSlot
-          : getDeviceToSlot(bayIndex);
-      const slot = deviceToSlot.get(getMapDeviceId(pos.deviceId)) ?? null;
-      if (!slot && showOnlyFilledPositions) continue;
-      const value =
-        slot && typeof slot.values?.[parameter] === 'number'
-          ? (slot.values[parameter] as number)
-          : null;
-      const numValue = value != null && !Number.isNaN(value) ? value : null;
+    if (useDynamic) {
+      for (const bay of bays) {
+        const positions = getSlotPositionsFromBay(bay);
+        for (const p of positions) {
+          if (!isParameterSupportedByType(parameter, p.type)) continue;
+          const value =
+            typeof p.slot.values?.[parameter] === 'number'
+              ? (p.slot.values[parameter] as number)
+              : null;
+          const numValue = value != null && !Number.isNaN(value) ? value : null;
+          if (!p.slot && showOnlyFilledPositions) continue;
+          if (showOnlyFilledPositions && numValue == null) continue;
 
-      sensors.push({
-        slot,
-        deviceId: pos.deviceId,
-        value: numValue,
-        leftPercent: pos.leftPercent,
-        topPercent: pos.topPercent,
-        positionKey: `${bayIndex}-${pos.leftPercent}-${pos.topPercent}-${pos.deviceId}`,
-      });
-      if (numValue != null) {
-        heatmapPoints.push({
-          x: pos.leftPercent,
-          y: pos.topPercent,
-          value: numValue,
-        });
-        globalMin = Math.min(globalMin, numValue);
-        globalMax = Math.max(globalMax, numValue);
+          const positionKey = `${p.slot.id}-${p.leftPercent}-${p.topPercent}`;
+          sensors.push({
+            slot: p.slot,
+            deviceId: p.deviceId,
+            value: numValue,
+            leftPercent: p.leftPercent,
+            topPercent: p.topPercent,
+            positionKey,
+          });
+          if (numValue != null) {
+            heatmapPoints.push({
+              x: p.leftPercent,
+              y: p.topPercent,
+              value: numValue,
+            });
+            globalMin = Math.min(globalMin, numValue);
+            globalMax = Math.max(globalMax, numValue);
+          }
+        }
       }
     }
 
@@ -138,16 +126,12 @@ export function ViewSingleBay({
 }: ViewSingleBayProps) {
   const { t } = useI18n();
   const unit = getParameterUnit(parameter);
-  const {
-    sensors,
-    heatmapPoints,
-    globalMin,
-    globalMax,
-    hasAnyData,
-  } = useFullMapData(bays, parameter, showOnlyFilledPositions);
+  const { sensors, heatmapPoints, globalMin, globalMax, hasAnyData } =
+    useFullMapData(bays, parameter, showOnlyFilledPositions);
 
   const heatmapGrid = React.useMemo(
-    () => idwInterpolate(HEATMAP_GRID_COLS, HEATMAP_GRID_ROWS, heatmapPoints, 2),
+    () =>
+      idwInterpolate(HEATMAP_GRID_COLS, HEATMAP_GRID_ROWS, heatmapPoints, 2),
     [heatmapPoints],
   );
 
@@ -192,48 +176,58 @@ export function ViewSingleBay({
                   )),
                 )}
               </div>
-              {sensors.map(({ slot, deviceId, value, leftPercent, topPercent, positionKey }) => {
-                const isSelected = slot && selectedSlotId === slot.id;
-                const displayValue =
-                  value != null ? formatParameterDisplayValue(value) : '--';
-                return (
-                  <button
-                    key={positionKey}
-                    type="button"
-                    onClick={() =>
-                      onSelectSlot(
-                        slot ? (isSelected ? null : slot.id) : null,
-                      )
-                    }
-                    disabled={!slot}
-                    title={
-                      slot && value != null
-                        ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
-                        : deviceId
-                    }
-                    className={cn(
-                      'absolute text-xs font-medium tabular-nums text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
-                      slot && 'cursor-pointer',
-                      isSelected && 'ring-2 ring-primary ring-offset-1 rounded',
-                    )}
-                    style={{
-                      left: `${leftPercent}%`,
-                      top: `${topPercent}%`,
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                    aria-label={
-                      slot && value != null
-                        ? `${displayValue} ${unit}`
-                        : t.pages.farmOverview.noSensor
-                    }
-                  >
-                    {value != null
-                      ? `${displayValue}${unit ? ` ${unit}` : ''}`
-                      : '--'}
-                  </button>
-                );
-              })}
+              {sensors.map(
+                ({
+                  slot,
+                  deviceId,
+                  value,
+                  leftPercent,
+                  topPercent,
+                  positionKey,
+                }) => {
+                  const isSelected = slot && selectedSlotId === slot.id;
+                  const displayValue =
+                    value != null ? formatParameterDisplayValue(value) : '--';
+                  return (
+                    <button
+                      key={positionKey}
+                      type="button"
+                      onClick={() =>
+                        onSelectSlot(
+                          slot ? (isSelected ? null : slot.id) : null,
+                        )
+                      }
+                      disabled={!slot}
+                      title={
+                        slot && value != null
+                          ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
+                          : deviceId
+                      }
+                      className={cn(
+                        'absolute text-xs font-medium tabular-nums text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                        slot && 'cursor-pointer',
+                        isSelected &&
+                          'ring-2 ring-primary ring-offset-1 rounded',
+                      )}
+                      style={{
+                        left: `${leftPercent}%`,
+                        top: `${topPercent}%`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                      aria-label={
+                        slot && value != null
+                          ? `${displayValue} ${unit}`
+                          : t.pages.farmOverview.noSensor
+                      }
+                    >
+                      {value != null
+                        ? `${displayValue}${unit ? ` ${unit}` : ''}`
+                        : '--'}
+                    </button>
+                  );
+                },
+              )}
             </div>
           )}
         </div>

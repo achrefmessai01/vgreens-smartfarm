@@ -10,11 +10,9 @@ import { isParameterSupportedByType } from '@/lib/sensor-map-parameter';
 import {
   BAY_COUNT,
   ROWS_PER_BAY,
-  SENSOR_MAP_POSITIONS,
-  getBayRowFromPosition,
-  getMapDeviceId,
+  getSlotPositionsFromBay,
+  bayHasDynamicPositions,
 } from '@/lib/sensor-map-positions';
-import { buildDeviceToSlotMap } from '@/lib/sensor-map-utils';
 import { cn } from '@/lib/utils';
 import type { ViewSensorMapProps } from '@/types/sensor-map';
 import * as React from 'react';
@@ -30,24 +28,23 @@ function buildBayRowToSlots(
   parameter: ParameterType,
   showOnlyFilledPositions: boolean,
 ): Map<string, CellItem[]> {
-  const deviceToSlot = bay ? buildDeviceToSlotMap(bay) : new Map();
   const map = new Map<string, CellItem[]>();
 
-  for (const pos of SENSOR_MAP_POSITIONS) {
-    if (!isParameterSupportedByType(parameter, pos.type)) continue;
-    const slot = deviceToSlot.get(getMapDeviceId(pos.deviceId)) ?? null;
-    if (!slot && showOnlyFilledPositions) continue;
-    const value =
-      slot && typeof slot.values?.[parameter] === 'number'
-        ? (slot.values[parameter] as number)
-        : null;
-    if (slot && (typeof value !== 'number' || Number.isNaN(value))) continue;
-
-    const { bayIndex, rowIndex } = getBayRowFromPosition(pos);
-    const key = `${bayIndex}-${rowIndex}`;
-    const list = map.get(key) ?? [];
-    list.push({ slot, deviceId: pos.deviceId, value });
-    map.set(key, list);
+  if (bay && bayHasDynamicPositions(bay)) {
+    const positions = getSlotPositionsFromBay(bay);
+    for (const p of positions) {
+      if (!isParameterSupportedByType(parameter, p.type)) continue;
+      const value =
+        typeof p.slot.values?.[parameter] === 'number'
+          ? (p.slot.values[parameter] as number)
+          : null;
+      const numValue = value != null && !Number.isNaN(value) ? value : null;
+      if (showOnlyFilledPositions && numValue == null) continue;
+      const key = `${p.bayIndex}-${p.rowIndex}`;
+      const list = map.get(key) ?? [];
+      list.push({ slot: p.slot, deviceId: p.deviceId, value: numValue });
+      map.set(key, list);
+    }
   }
   return map;
 }
@@ -85,7 +82,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
             return (
               <div
                 key={rowIndex}
-                className="flex flex-1 min-h-[80px] items-center justify-center gap-2 p-2 flex-wrap"
+                className="flex flex-1 min-h-0 items-center justify-center gap-1 sm:gap-2 p-1 sm:p-2 flex-wrap"
               >
                 {items.map(({ slot, deviceId, value }) => {
                   const isSelected = slot ? selectedSlotId === slot.id : false;
@@ -121,7 +118,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                     >
                       <div
                         className={cn(
-                          'flex flex-col items-center justify-center w-12 h-12 rounded-full px-1 tabular-nums',
+                          'flex flex-col items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full px-0.5 sm:px-1 tabular-nums shrink-0',
                           slot
                             ? 'bg-cyan-300/90 text-slate-900'
                             : 'bg-muted text-muted-foreground',

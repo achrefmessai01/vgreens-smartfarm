@@ -11,7 +11,6 @@ import { generateFarm } from '@/lib/farm-data'
 import { influxRowsToBays } from '@/lib/farm-data-live'
 
 const BUCKET_START_DEFAULT = '-1h'
-const BUCKET_LIMIT = 500
 const POLL_INTERVAL_MS = 2 * 60 * 1000 // 2 minutes
 
 function toISOStart(dateStr: string): string {
@@ -89,9 +88,12 @@ export function useLiveFarmData(
     error: bucketError,
   } = useGetBucketDataQuery({
     variables: {
-      bucketName: bucketName ?? '',
-      start: startStop.start,
-      limit: BUCKET_LIMIT,
+      input: {
+        bucketName: bucketName ?? '',
+        start: startStop.start,
+        stop: startStop.stop ?? undefined,
+        useLastPerSeries: true,
+      },
     },
     skip: !bucketName,
     fetchPolicy: 'cache-and-network',

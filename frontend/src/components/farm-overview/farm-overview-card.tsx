@@ -78,7 +78,7 @@ export function FarmOverviewCard({
       </div>
 
       <div className="flex-1 min-h-0 flex bg-background dark:bg-background/50">
-        <div className="flex flex-1 min-w-0 overflow-auto">
+        <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">
           {showEmpty ? (
             <EmptyState
               message={emptyForNowMessage}

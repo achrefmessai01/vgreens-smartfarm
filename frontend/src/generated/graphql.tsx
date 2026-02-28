@@ -162,6 +162,18 @@ export type FieldMeanMetric = {
   value: Scalars['Float']['output'];
 };
 
+export type GetBucketDataInput = {
+  bucketName: Scalars['String']['input'];
+  device?: InputMaybe<Scalars['String']['input']>;
+  field?: InputMaybe<Scalars['String']['input']>;
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  level?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  start?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['String']['input']>;
+  useLastPerSeries?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type GetFieldMeansInput = {
   bucketName: Scalars['String']['input'];
   greenhouse?: InputMaybe<Scalars['String']['input']>;
@@ -333,14 +345,7 @@ export type QueryFeaturesWithTenantStatusArgs = {
 
 
 export type QueryGetBucketDataArgs = {
-  bucketName: Scalars['String']['input'];
-  device?: InputMaybe<Scalars['String']['input']>;
-  field?: InputMaybe<Scalars['String']['input']>;
-  greenhouse?: InputMaybe<Scalars['String']['input']>;
-  level?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  start?: InputMaybe<Scalars['String']['input']>;
-  stop?: InputMaybe<Scalars['String']['input']>;
+  input: GetBucketDataInput;
 };
 
 
@@ -633,14 +638,7 @@ export type TenantFeaturesQueryVariables = Exact<{
 export type TenantFeaturesQuery = { __typename?: 'Query', tenantFeatures: Array<{ __typename?: 'TenantFeature', id: string, tenantId: string, featureId: string, enabled: boolean, createdAt: any, updatedAt: any, feature?: { __typename?: 'Feature', id: string, key: string, name: string, description?: string | null, category?: string | null, isActive: boolean } | null }> };
 
 export type GetBucketDataQueryVariables = Exact<{
-  bucketName: Scalars['String']['input'];
-  start?: InputMaybe<Scalars['String']['input']>;
-  stop?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  field?: InputMaybe<Scalars['String']['input']>;
-  greenhouse?: InputMaybe<Scalars['String']['input']>;
-  device?: InputMaybe<Scalars['String']['input']>;
-  level?: InputMaybe<Scalars['String']['input']>;
+  input: GetBucketDataInput;
 }>;
 
 
@@ -1668,17 +1666,8 @@ export type TenantFeaturesLazyQueryHookResult = ReturnType<typeof useTenantFeatu
 export type TenantFeaturesSuspenseQueryHookResult = ReturnType<typeof useTenantFeaturesSuspenseQuery>;
 export type TenantFeaturesQueryResult = Apollo.QueryResult<TenantFeaturesQuery, TenantFeaturesQueryVariables>;
 export const GetBucketDataDocument = gql`
-    query GetBucketData($bucketName: String!, $start: String, $stop: String, $limit: Int, $field: String, $greenhouse: String, $device: String, $level: String) {
-  getBucketData(
-    bucketName: $bucketName
-    start: $start
-    stop: $stop
-    limit: $limit
-    field: $field
-    greenhouse: $greenhouse
-    device: $device
-    level: $level
-  ) {
+    query GetBucketData($input: GetBucketDataInput!) {
+  getBucketData(input: $input) {
     data
   }
 }
@@ -1696,14 +1685,7 @@ export const GetBucketDataDocument = gql`
  * @example
  * const { data, loading, error } = useGetBucketDataQuery({
  *   variables: {
- *      bucketName: // value for 'bucketName'
- *      start: // value for 'start'
- *      stop: // value for 'stop'
- *      limit: // value for 'limit'
- *      field: // value for 'field'
- *      greenhouse: // value for 'greenhouse'
- *      device: // value for 'device'
- *      level: // value for 'level'
+ *      input: // value for 'input'
  *   },
  * });
  */

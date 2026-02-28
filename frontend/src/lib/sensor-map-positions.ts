@@ -1,68 +1,137 @@
 /**
- * Schematic map layout: 115m (width) x 40m (height).
- * Positions as percentage of width (left) and height (top).
- * topPercent: 0 = top of map, 100 = bottom (so higher % = lower on screen = bottom of greenhouse).
+ * Sensor map layout: positions as percentage of width (left) and height (top).
+ * topPercent: 0 = top of map, 100 = bottom.
  *
- * Field temperature devices A_01–A_12: 5 horizontal rows FROM BOTTOM TO TOP.
- * Row 1 = bottom, Row 5 = top. 3 columns: left, center, right. Empty cells have no entry.
+ * Layout uses bay (1–13) and pole (1–10) from InfluxDB slot meta.
+ * - bay = column (horizontal position)
+ * - pole = row (vertical position); 10 rows total.
+ * Device IDs vary per greenhouse (e.g. A_01–A_12, A_13–A_24).
  */
+
+import type { Bay, PlantSlot } from '@/lib/farm-types';
 
 export type SensorMapType = 'air' | 'lux' | 'par' | 'soil';
 
-export interface SensorMapPosition {
+// --- Dynamic layout: bay (column) + pole (row) only ---
+
+/** Max bays per greenhouse (1–13). */
+export const BAY_COUNT = 13;
+
+/** Total pole rows (vertical). Pole = which row to show. */
+export const POLES_MAX = 10;
+
+/** Rows per bay for discrete grid (same as pole count). */
+export const ROWS_PER_BAY = POLES_MAX;
+
+/**
+ * Compute map position from bay and pole only.
+ * bay = column (1–13), pole = row (1–10).
+ */
+export function getPositionFromBayPole(
+  bay: number,
+  pole: number,
+): { leftPercent: number; topPercent: number } {
+  const bay1 = Math.max(1, Math.min(BAY_COUNT, Math.round(bay)));
+  const pole1 = Math.max(1, Math.min(POLES_MAX, Math.round(pole)));
+
+  const leftPercent = ((bay1 - 0.5) / BAY_COUNT) * 100;
+  const topPercent = ((pole1 - 0.5) / POLES_MAX) * 100;
+
+  return { leftPercent, topPercent };
+}
+
+/**
+ * Derive sensor type from device id (e.g. Air_02 -> air, Soil_01 -> soil, Lux_01 -> lux).
+ * Works for any greenhouse (A_13, A_14, etc.).
+ */
+export function getSensorTypeFromDeviceId(deviceId: string): SensorMapType {
+  const normalized = getMapDeviceId(deviceId);
+  if (/^Lux_/i.test(normalized) || /^Light_/i.test(deviceId)) return 'lux';
+  if (/^Soil_/i.test(normalized)) return 'soil';
+  if (/^Air_/i.test(normalized) || /^A_\d+/i.test(deviceId)) return 'air';
+  return 'air';
+}
+
+/** Slot with computed position (from meta.bay, meta.pole). */
+export interface SlotWithPosition {
+  slot: PlantSlot;
   deviceId: string;
   leftPercent: number;
   topPercent: number;
   type: SensorMapType;
-}
-
-/** Air A_01–A_12. From bottom to top: Row 1 (bottom) → Row 2 → Row 3 → Row 4 → Row 5 (top). */
-export const SENSOR_MAP_POSITIONS: SensorMapPosition[] = [
-  // Row 1 (bottom): A_02, A_03, A_04; soil sensor at same location as Air_03
-  { deviceId: 'Air_02', leftPercent: 5, topPercent: 70, type: 'air' },
-  { deviceId: 'Air_03', leftPercent: 5, topPercent: 40, type: 'air' },
-  { deviceId: 'Soil_01', leftPercent: 5, topPercent: 40, type: 'soil' },
-  { deviceId: 'Air_04', leftPercent: 5, topPercent: 10, type: 'air' },
-  // Row 2: A_05, Empty, A_06
-  { deviceId: 'Air_05', leftPercent: 13, topPercent: 70, type: 'air' },
-  { deviceId: 'Air_06', leftPercent: 13, topPercent: 10, type: 'air' },
-  // Row 3: A_07, Empty, A_08
-  { deviceId: 'Air_07', leftPercent: 21, topPercent: 70, type: 'air' },
-  { deviceId: 'Air_08', leftPercent: 21, topPercent: 10, type: 'air' },
-  // // Row 4: A_09, Empty, A_10
-  { deviceId: 'Air_09', leftPercent: 29, topPercent: 70, type: 'air' },
-  { deviceId: 'Air_10', leftPercent: 29, topPercent: 10, type: 'air' },
-  // Row 5 (top): A_11, A_01, A_12
-  { deviceId: 'Air_11', leftPercent: 37, topPercent: 70, type: 'air' },
-  { deviceId: 'Air_01', leftPercent: 37, topPercent: 40, type: 'air' },
-  { deviceId: 'Air_12', leftPercent: 37, topPercent: 10, type: 'air' },
-  // 6 lights: center line (same height as A_03, A_01), spanning left to right across greenhouse
-  { deviceId: 'Lux_01', leftPercent: 9, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_02', leftPercent: 27, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_03', leftPercent: 45, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_04', leftPercent: 61, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_05', leftPercent: 70, topPercent: 40, type: 'lux' },
-  { deviceId: 'Lux_06', leftPercent: 90, topPercent: 40, type: 'lux' },
-];
-
-/** Aspect ratio of map: width / height = 115 / 40 */
-export const SENSOR_MAP_ASPECT_RATIO = 115 / 40;
-
-export const BAY_COUNT = 13;
-
-export const ROWS_PER_BAY = 3;
-
-export function getBayRowFromPosition(pos: SensorMapPosition): {
+  /** bay index 0-based for grid key */
   bayIndex: number;
+  /** row index (pole) 0-based for grid key */
   rowIndex: number;
-} {
-  const bayIndex = Math.min(
-    BAY_COUNT - 1,
-    Math.floor((pos.leftPercent / 100) * BAY_COUNT),
-  );
-  const rowIndex = pos.topPercent < 25 ? 0 : pos.topPercent < 55 ? 1 : 2;
-  return { bayIndex, rowIndex };
 }
+
+/**
+ * Build list of slot positions from bay data using bay and pole in slot.meta.
+ * Use this for dynamic layout when InfluxDB provides bay/pole.
+ * Returns only slots that have valid meta.bay and meta.pole.
+ */
+export function getSlotPositionsFromBay(bay: Bay): SlotWithPosition[] {
+  const out: SlotWithPosition[] = [];
+  for (const row of bay.rows) {
+    for (const col of row.columns) {
+      for (const slot of col.slots) {
+        if (!slot?.meta) continue;
+        const rawBay = slot.meta.bay as number | undefined;
+        const rawPole = slot.meta.pole as number | undefined;
+        if (!Number.isFinite(rawBay) || !Number.isFinite(rawPole)) {
+          continue;
+        }
+        const bayNum = Number(rawBay);
+        const poleNum = Number(rawPole);
+        const deviceId = getDeviceIdFromSlotId(slot.id);
+        if (!deviceId) continue;
+        const { leftPercent, topPercent } = getPositionFromBayPole(
+          bayNum,
+          poleNum,
+        );
+        const type = getSensorTypeFromDeviceId(deviceId);
+        const bayIndex = Math.min(
+          BAY_COUNT - 1,
+          Math.max(0, Math.floor(bayNum) - 1),
+        );
+        const rowIndex = Math.min(
+          POLES_MAX - 1,
+          Math.max(0, Math.round(poleNum) - 1),
+        );
+        out.push({
+          slot,
+          deviceId,
+          leftPercent,
+          topPercent,
+          type,
+          bayIndex,
+          rowIndex,
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/** Check if a bay has any slots with dynamic position meta (bay, pole). */
+export function bayHasDynamicPositions(bay: Bay): boolean {
+  for (const r of bay.rows) {
+    for (const c of r.columns) {
+      for (const slot of c.slots) {
+        if (
+          slot?.meta &&
+          Number.isFinite(slot.meta.bay) &&
+          Number.isFinite(slot.meta.pole)
+        ) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+export const SENSOR_MAP_ASPECT_RATIO = 115 / 40;
 
 export function getDeviceIdFromSlotId(slotId: string): string {
   const parts = slotId.replace(/^live_/, '').split('|');
