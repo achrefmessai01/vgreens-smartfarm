@@ -240,15 +240,18 @@ function ParGraphChart({
 
 export function ParGraphSection({
   bay,
+  greenhouseId,
   greenhouseLabel,
   embedded = false,
   className,
 }: ParGraphSectionProps) {
   void bay;
 
+  const { t } = useI18n();
   const { curveData, currentHour, currentDli, currentPpfd, timeLabel, yMax } =
-    useParGraphData(greenhouseLabel);
+    useParGraphData(greenhouseId);
 
+  const hasData = curveData.length > 0;
   const content = (
     <>
       <ParGraphHeader
@@ -257,12 +260,18 @@ export function ParGraphSection({
         currentPpfd={currentPpfd}
         currentDli={currentDli}
       />
-      <ParGraphChart
-        curveData={curveData}
-        currentHour={currentHour}
-        currentDli={currentDli}
-        yMax={yMax}
-      />
+      {hasData ? (
+        <ParGraphChart
+          curveData={curveData}
+          currentHour={currentHour}
+          currentDli={currentDli}
+          yMax={yMax}
+        />
+      ) : (
+        <div className="flex flex-1 min-h-0 items-center justify-center p-6 text-sm text-muted-foreground">
+          {t.pages.farmOverview.noData}
+        </div>
+      )}
     </>
   );
 

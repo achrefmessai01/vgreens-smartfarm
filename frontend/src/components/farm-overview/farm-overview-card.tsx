@@ -19,6 +19,8 @@ export interface FarmOverviewCardProps {
   viewDiscreteLabel: string;
   viewGraphLabel: string;
   bays: Bay[];
+  greenhouseId: string;
+  greenhouseLabel: string;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
   parameterLabel: string;
@@ -38,6 +40,8 @@ export function FarmOverviewCard({
   viewDiscreteLabel,
   viewGraphLabel,
   bays,
+  greenhouseId,
+  greenhouseLabel,
   selectedSlotId,
   onSelectSlot,
   parameterLabel,
@@ -90,9 +94,10 @@ export function FarmOverviewCard({
                 bays={bays}
                 viewMode={viewMode}
                 parameter={effectiveParameter}
+                greenhouseId={greenhouseId}
+                greenhouseLabel={greenhouseLabel}
                 selectedSlotId={selectedSlotId}
                 onSelectSlot={onSelectSlot}
-                bayLabel={parameterLabel}
                 parameterLabel={parameterLabel}
                 noSensorLabel={noSensorLabel}
                 noDataMessage={noDataMessage}

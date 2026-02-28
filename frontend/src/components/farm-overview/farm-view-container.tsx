@@ -8,9 +8,10 @@ interface FarmDataDisplayProps {
   bays: Bay[];
   viewMode: 'heatmap' | 'discrete' | 'graph';
   parameter: ParameterType;
+  greenhouseId: string;
+  greenhouseLabel: string;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
-  bayLabel: string;
   parameterLabel: string;
   noSensorLabel: string;
   noDataMessage: string;
@@ -20,14 +21,16 @@ export function FarmDataDisplay({
   bays,
   viewMode,
   parameter,
+  greenhouseId,
+  greenhouseLabel,
   selectedSlotId,
   onSelectSlot,
-  bayLabel,
   parameterLabel,
   noSensorLabel,
   noDataMessage,
 }: FarmDataDisplayProps) {
-  if (bays.length === 0) {
+  const showEmpty = bays.length === 0 && viewMode !== 'graph';
+  if (showEmpty) {
     return <EmptyState message={noDataMessage} />;
   }
 
@@ -42,7 +45,8 @@ export function FarmDataDisplay({
       {viewMode === 'graph' ? (
         <ParGraphSection
           bay={bays[0] ?? null}
-          greenhouseLabel={bays[0]?.name ?? bayLabel}
+          greenhouseId={greenhouseId}
+          greenhouseLabel={greenhouseLabel}
           embedded
           className="h-full w-full"
         />

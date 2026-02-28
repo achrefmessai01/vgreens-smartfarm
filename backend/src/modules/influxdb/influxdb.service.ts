@@ -465,9 +465,8 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * Returns a time series for today's cumulative DLI curve for PAR/PPFD.
-   * Assumes measurement "par" and field "ppfd" in µmol m-2 s-1, and
-   * aggregates to 1-minute means before converting to mol m-2 and
-   * applying a cumulative sum over the day.
+   * Uses _field "par" or "par_estimated" (µmol m-2 s-1), any measurement.
+   * Aggregates to 1-minute means, converts to mol m-2, then cumulative sum for the day.
    */
   async getTodayParCumulativeDli(
     bucketName: string,
@@ -490,8 +489,7 @@ import "date"
 from(bucket: "${escapedBucket}")
   |> range(start: date.truncate(t: now(), unit: 1d))
   |> filter(fn: (r) =>
-    r["_measurement"] == "light_intensity" and
-    r["_field"] == "par" and
+    (r["_field"] == "par" or r["_field"] == "par_estimated") and
     r["greenhouse"] == "${escapeFluxString(options.greenhouse)}"
   )
   |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
