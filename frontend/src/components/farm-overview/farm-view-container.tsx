@@ -58,8 +58,8 @@ export function FarmDataDisplay({
         />
       ) : (
         <ViewSingleBay
-          key={bays[0].id}
-          bay={bays[0]}
+          key={bays.map((b) => b.id).join('-')}
+          bays={bays}
           parameter={parameter}
           selectedSlotId={selectedSlotId}
           onSelectSlot={onSelectSlot}
