@@ -196,6 +196,16 @@ export const de = {
       entranceLabel: '↓ Eingang',
       emptyHistoryDrawerPlaceholder:
         'Keine Verlaufsdaten für diesen Sensor im ausgewählten Zeitraum.',
+      parGraph: {
+        title: 'PAR-Grafik',
+        currentPpfd: 'Aktuelle PPFD',
+        dli: 'DLI',
+        legendAverage: '7-Tage-Durchschnitt',
+        legendYesterday: 'gestern',
+        legendToday: 'heute',
+        axisLabel: 'Kumulative Photonen (mol m^-2)',
+        timeOfDayLabel: 'Tageszeit (hh:mm)',
+      },
     },
     history: {
       title: 'Verlauf',

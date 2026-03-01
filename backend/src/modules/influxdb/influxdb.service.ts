@@ -4,7 +4,7 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { FieldMeanMetric } from './dto';
+import { FieldMeanMetric, ParDliPoint } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { BucketsAPI, OrgsAPI } from '@influxdata/influxdb-client-apis';
 import { InfluxDB, QueryApi, WriteApi } from '@influxdata/influxdb-client';
@@ -295,11 +295,93 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
     return rows;
   }
 
-  /**
-   * Returns one mean value per field (and greenhouse) over the last N minutes.
-   * This aggregates across all devices/sensors, so you get a single mean per
-   * parameter (temperature, humidity, etc.) for the requested greenhouse/bucket.
-   */
+  async getBucketDataLastPerSeries(
+    bucketName: string,
+    options?: {
+      start?: string;
+      stop?: string;
+      field?: string;
+      greenhouse?: string;
+      device?: string;
+      level?: string;
+    },
+  ): Promise<Record<string, unknown>[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.error('InfluxDB client is not initialized');
+      throw new Error('InfluxDB client is not initialized');
+    }
+
+    const start = options?.start ?? '-1h';
+    const stop = options?.stop;
+    const escapedBucket = bucketName
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+
+    const isIso = (s: string) =>
+      s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s);
+    const rangeStart = isIso(start)
+      ? `time(v: "${start.replace(/"/g, '\\"')}")`
+      : start;
+    const rangeStop =
+      stop && isIso(stop)
+        ? `, stop: time(v: "${stop.replace(/"/g, '\\"')}")`
+        : '';
+    const rangeClause = `range(start: ${rangeStart}${rangeStop})`;
+
+    const escapeFluxString = (v: string) =>
+      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const filterParts: string[] = [];
+    if (options?.field) {
+      filterParts.push(`r["_field"] == "${escapeFluxString(options.field)}"`);
+    }
+    if (options?.greenhouse != null && options.greenhouse !== '') {
+      filterParts.push(
+        `r["greenhouse"] == "${escapeFluxString(options.greenhouse)}"`,
+      );
+    }
+    if (options?.device != null && options.device !== '') {
+      filterParts.push(`r["device"] == "${escapeFluxString(options.device)}"`);
+    }
+    if (
+      options?.level != null &&
+      options.level !== '' &&
+      options.level.toLowerCase() !== 'unknown'
+    ) {
+      filterParts.push(`r["level"] == "${escapeFluxString(options.level)}"`);
+    }
+    const filterClause =
+      filterParts.length > 0
+        ? `|> filter(fn: (r) => ${filterParts.join(' and ')})\n  `
+        : '';
+
+    const flux = `from(bucket: "${escapedBucket}")
+  |> ${rangeClause}
+  ${filterClause}|> last()`;
+
+    const rows: Record<string, unknown>[] = [];
+    const queryApi = this.queryApi;
+
+    await new Promise<void>((resolve, reject) => {
+      queryApi.queryRows(flux, {
+        next: (row, tableMeta) => {
+          const o = tableMeta.toObject(row) as Record<string, unknown>;
+          rows.push(o);
+        },
+        error: (error) => {
+          reject(error);
+        },
+        complete: () => {
+          resolve();
+        },
+      });
+    });
+
+    this.logger.debug(
+      `getBucketDataLastPerSeries("${bucketName}"): returned ${rows.length} rows`,
+    );
+    return rows;
+  }
+
   async getBucketFieldMeansLastMinutes(
     bucketName: string,
     options: { greenhouse?: string; windowMinutes?: number },
@@ -377,6 +459,82 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
 
     this.logger.debug(
       `getBucketFieldMeansLastMinutes("${bucketName}", greenhouse="${options.greenhouse ?? ''}", windowMinutes=${windowMinutes}): returned ${rows.length} rows`,
+    );
+    return rows;
+  }
+
+  /**
+   * Returns a time series for today's cumulative DLI curve for PAR/PPFD.
+   * Uses _field "par" or "par_estimated" (µmol m-2 s-1), any measurement.
+   * Aggregates to 1-minute means, converts to mol m-2, then cumulative sum for the day.
+   */
+  async getTodayParCumulativeDli(
+    bucketName: string,
+    options: { greenhouse: string },
+  ): Promise<ParDliPoint[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.error('InfluxDB client is not initialized');
+      throw new Error('InfluxDB client is not initialized');
+    }
+
+    const escapedBucket = bucketName
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"');
+    const escapeFluxString = (v: string) =>
+      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+    const flux = `
+import "date"
+
+from(bucket: "${escapedBucket}")
+  |> range(start: date.truncate(t: now(), unit: 1d))
+  |> filter(fn: (r) =>
+    (r["_field"] == "par" or r["_field"] == "par_estimated") and
+    r["greenhouse"] == "${escapeFluxString(options.greenhouse)}"
+  )
+  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+  |> map(fn: (r) => ({
+      r with
+      _value: float(v: r._value) * 60.0 / 1000000.0
+    })
+  )
+  |> cumulativeSum(columns: ["_value"])
+  |> keep(columns: ["_time", "_value"])
+`;
+
+    const rows: ParDliPoint[] = [];
+    const queryApi = this.queryApi;
+
+    await new Promise<void>((resolve, reject) => {
+      queryApi.queryRows(flux, {
+        next: (row, tableMeta) => {
+          const o = tableMeta.toObject(row) as Record<string, unknown>;
+          const value = Number(o._value);
+          if (Number.isNaN(value)) {
+            return;
+          }
+
+          const time =
+            o._time instanceof Date
+              ? o._time
+              : new Date(String((o as { _time?: string })._time ?? ''));
+
+          rows.push({
+            time,
+            dli: value,
+          });
+        },
+        error: (error) => {
+          reject(error);
+        },
+        complete: () => {
+          resolve();
+        },
+      });
+    });
+
+    this.logger.debug(
+      `getTodayParCumulativeDli("${bucketName}", greenhouse="${options.greenhouse}"): returned ${rows.length} points`,
     );
     return rows;
   }

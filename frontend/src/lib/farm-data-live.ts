@@ -1,6 +1,6 @@
 import type { Bay, PlantSlot, ParameterValue, Row, Column } from '@/lib/farm-types'
 
-/** One row from getBucketData (each item has a "data" object) */
+/** One row from getBucketData (each item has a "data" object). */
 export type InfluxDBRow = Record<string, unknown> & {
   _field?: string
   _value?: number
@@ -10,6 +10,12 @@ export type InfluxDBRow = Record<string, unknown> & {
   device?: string
   level?: string
   area?: string
+  /** Bay number (1–13). Used for dynamic map positioning. */
+  bay?: string | number
+  /** Pole = row (vertical position). Used for dynamic map positioning. */
+  pole?: string | number
+  /** Row = column (horizontal position within bay). Used for dynamic map positioning. */
+  row?: string | number
 }
 
 const SENSOR_COLS = 4
@@ -31,6 +37,12 @@ function buildSlotsFromRows(rows: InfluxDBRow[]): PlantSlot[] {
     area?: string
     profile?: string
     side?: string
+    /** Bay number (1–13) for dynamic map positioning */
+    bay?: number
+    /** Pole = row (vertical) for dynamic map positioning */
+    pole?: number
+    /** Row = column within bay for dynamic map positioning */
+    row?: number
   }
 
   const bySlot = new Map<SlotKey, FieldValues>()
@@ -55,6 +67,28 @@ function buildSlotsFromRows(rows: InfluxDBRow[]): PlantSlot[] {
     }
 
     // Store latest metadata for this slot (independent of field)
+    const rawBay = row.bay
+    const rawPole = row.pole
+    const rawRow = row.row
+    const bayNum =
+      typeof rawBay === 'number'
+        ? rawBay
+        : typeof rawBay === 'string'
+          ? parseInt(rawBay, 10)
+          : undefined
+    const poleNum =
+      typeof rawPole === 'number'
+        ? rawPole
+        : typeof rawPole === 'string'
+          ? parseInt(rawPole, 10)
+          : undefined
+    const rowNum =
+      typeof rawRow === 'number'
+        ? rawRow
+        : typeof rawRow === 'string'
+          ? parseInt(rawRow, 10)
+          : undefined
+
     metaBySlot.set(key, {
       _start: (row._start as string) ?? undefined,
       _stop: (row._stop as string) ?? undefined,
@@ -63,6 +97,9 @@ function buildSlotsFromRows(rows: InfluxDBRow[]): PlantSlot[] {
       area: (row.area as string) ?? undefined,
       profile: (row.profile as string) ?? undefined,
       side: (row.side as string) ?? undefined,
+      ...(Number.isFinite(bayNum) && { bay: bayNum }),
+      ...(Number.isFinite(poleNum) && { pole: poleNum }),
+      ...(Number.isFinite(rowNum) && { row: rowNum }),
     })
   }
 

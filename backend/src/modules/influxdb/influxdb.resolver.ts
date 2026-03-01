@@ -3,8 +3,14 @@ import { Public } from '@/common/decorators';
 import { InfluxDBService } from './influxdb.service';
 import { InfluxDBData } from './dto/influxdb-data.object';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
-import { FieldMeanMetric, GetFieldMeansInput } from './dto';
-import { Resolver, Query, Args, Int } from '@nestjs/graphql';
+import { GetBucketDataInput } from './dto/get-bucket-data.dto';
+import {
+  FieldMeanMetric,
+  GetFieldMeansInput,
+  GetParDliTodayInput,
+  ParDliPoint,
+} from './dto';
+import { Resolver, Query, Args } from '@nestjs/graphql';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @Resolver()
@@ -25,44 +31,42 @@ export class InfluxDBResolver {
     return this.influxDBService.getBuckets();
   }
 
-  /**
-   * Query data from an InfluxDB bucket by name (e.g. tenant's influxBucketName).
-   * For testing in GraphQL playground.
-   */
   @Query(() => [InfluxDBData], { name: 'getBucketData' })
   async getBucketData(
-    @Args('bucketName', { type: () => String }) bucketName: string,
-    @Args('start', { type: () => String, nullable: true })
-    start?: string,
-    @Args('stop', { type: () => String, nullable: true })
-    stop?: string,
-    @Args('limit', { type: () => Int, nullable: true })
-    limit?: number,
-    @Args('field', { type: () => String, nullable: true })
-    field?: string,
-    @Args('greenhouse', { type: () => String, nullable: true })
-    greenhouse?: string,
-    @Args('device', { type: () => String, nullable: true })
-    device?: string,
-    @Args('level', { type: () => String, nullable: true })
-    level?: string,
+    @Args('input') input: GetBucketDataInput,
   ): Promise<InfluxDBData[]> {
-    const rows = await this.influxDBService.getBucketData(bucketName, {
-      start: start ?? '-1h',
+    const {
+      bucketName,
+      start,
       stop,
-      limit: limit ?? 100,
+      limit,
       field,
       greenhouse,
       device,
       level,
-    });
+      useLastPerSeries,
+    } = input;
+    const rows = useLastPerSeries
+      ? await this.influxDBService.getBucketDataLastPerSeries(bucketName, {
+          start: start ?? '-1h',
+          stop,
+          field,
+          greenhouse,
+          device,
+          level,
+        })
+      : await this.influxDBService.getBucketData(bucketName, {
+          start: start ?? '-1h',
+          stop,
+          limit: limit ?? 100,
+          field,
+          greenhouse,
+          device,
+          level,
+        });
     return rows.map((data) => ({ data }));
   }
 
-  /**
-   * Returns a single mean value per field (and greenhouse) over the last N minutes.
-   * This is ideal for dashboard tiles like temperature/humidity/CO₂ per greenhouse.
-   */
   @Public()
   @Query(() => [FieldMeanMetric], { name: 'getBucketFieldMeansLastMinutes' })
   async getBucketFieldMeansLastMinutes(
@@ -75,9 +79,17 @@ export class InfluxDBResolver {
     });
   }
 
-  /**
-   * Returns all unique _field values from a bucket (e.g. "humidity", "co2", "temperature").
-   */
+  @Public()
+  @Query(() => [ParDliPoint], { name: 'getParDliToday' })
+  async getParDliToday(
+    @Args('input') input: GetParDliTodayInput,
+  ): Promise<ParDliPoint[]> {
+    const { bucketName, greenhouse } = input;
+    return this.influxDBService.getTodayParCumulativeDli(bucketName, {
+      greenhouse,
+    });
+  }
+
   @Query(() => [String], { name: 'getBucketFields' })
   async getBucketFields(
     @Args('bucketName', { type: () => String }) bucketName: string,
