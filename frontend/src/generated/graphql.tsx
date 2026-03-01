@@ -38,6 +38,7 @@ export type Alert = {
   resolvedById?: Maybe<Scalars['ID']['output']>;
   resolvedTime?: Maybe<Scalars['DateTime']['output']>;
   row?: Maybe<Scalars['String']['output']>;
+  ruleKey?: Maybe<Scalars['String']['output']>;
   sensorName: Scalars['String']['output'];
   severity: AlertSeverity;
   status: AlertStatus;
@@ -92,6 +93,7 @@ export type CreateAlertInput = {
   measurement?: InputMaybe<Scalars['String']['input']>;
   profile?: InputMaybe<Scalars['String']['input']>;
   row?: InputMaybe<Scalars['String']['input']>;
+  ruleKey?: InputMaybe<Scalars['String']['input']>;
   sensorName: Scalars['String']['input'];
   severity?: InputMaybe<AlertSeverity>;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -150,6 +152,37 @@ export type FeatureWithTenantStatus = {
   key: Scalars['String']['output'];
   name: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type FieldMeanMetric = {
+  __typename?: 'FieldMeanMetric';
+  field: Scalars['String']['output'];
+  greenhouse?: Maybe<Scalars['String']['output']>;
+  time: Scalars['DateTime']['output'];
+  value: Scalars['Float']['output'];
+};
+
+export type GetBucketDataInput = {
+  bucketName: Scalars['String']['input'];
+  device?: InputMaybe<Scalars['String']['input']>;
+  field?: InputMaybe<Scalars['String']['input']>;
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  level?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  start?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['String']['input']>;
+  useLastPerSeries?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type GetFieldMeansInput = {
+  bucketName: Scalars['String']['input'];
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  windowMinutes?: Scalars['Int']['input'];
+};
+
+export type GetParDliTodayInput = {
+  bucketName: Scalars['String']['input'];
+  greenhouse: Scalars['String']['input'];
 };
 
 export type InfluxDbData = {
@@ -262,6 +295,12 @@ export type MutationUpdateUserArgs = {
   input: UpdateUserInput;
 };
 
+export type ParDliPoint = {
+  __typename?: 'ParDliPoint';
+  dli: Scalars['Float']['output'];
+  time: Scalars['DateTime']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
   alert?: Maybe<Alert>;
@@ -270,8 +309,10 @@ export type Query = {
   features: Array<Feature>;
   featuresWithTenantStatus: Array<FeatureWithTenantStatus>;
   getBucketData: Array<InfluxDbData>;
+  getBucketFieldMeansLastMinutes: Array<FieldMeanMetric>;
   getBucketFields: Array<Scalars['String']['output']>;
   getBuckets: Array<Scalars['String']['output']>;
+  getParDliToday: Array<ParDliPoint>;
   health: Scalars['String']['output'];
   me?: Maybe<User>;
   tenant?: Maybe<Tenant>;
@@ -304,14 +345,12 @@ export type QueryFeaturesWithTenantStatusArgs = {
 
 
 export type QueryGetBucketDataArgs = {
-  bucketName: Scalars['String']['input'];
-  device?: InputMaybe<Scalars['String']['input']>;
-  field?: InputMaybe<Scalars['String']['input']>;
-  greenhouse?: InputMaybe<Scalars['String']['input']>;
-  level?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  start?: InputMaybe<Scalars['String']['input']>;
-  stop?: InputMaybe<Scalars['String']['input']>;
+  input: GetBucketDataInput;
+};
+
+
+export type QueryGetBucketFieldMeansLastMinutesArgs = {
+  input: GetFieldMeansInput;
 };
 
 
@@ -319,6 +358,11 @@ export type QueryGetBucketFieldsArgs = {
   bucketName: Scalars['String']['input'];
   start?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryGetParDliTodayArgs = {
+  input: GetParDliTodayInput;
 };
 
 
@@ -348,6 +392,7 @@ export type Tenant = {
   phone?: Maybe<Scalars['String']['output']>;
   tenantFeatures?: Maybe<Array<TenantFeature>>;
   tenantId?: Maybe<Scalars['ID']['output']>;
+  timezone?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   users?: Maybe<Array<User>>;
 };
@@ -593,14 +638,7 @@ export type TenantFeaturesQueryVariables = Exact<{
 export type TenantFeaturesQuery = { __typename?: 'Query', tenantFeatures: Array<{ __typename?: 'TenantFeature', id: string, tenantId: string, featureId: string, enabled: boolean, createdAt: any, updatedAt: any, feature?: { __typename?: 'Feature', id: string, key: string, name: string, description?: string | null, category?: string | null, isActive: boolean } | null }> };
 
 export type GetBucketDataQueryVariables = Exact<{
-  bucketName: Scalars['String']['input'];
-  start?: InputMaybe<Scalars['String']['input']>;
-  stop?: InputMaybe<Scalars['String']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  field?: InputMaybe<Scalars['String']['input']>;
-  greenhouse?: InputMaybe<Scalars['String']['input']>;
-  device?: InputMaybe<Scalars['String']['input']>;
-  level?: InputMaybe<Scalars['String']['input']>;
+  input: GetBucketDataInput;
 }>;
 
 
@@ -614,6 +652,20 @@ export type GetBucketFieldsQueryVariables = Exact<{
 
 
 export type GetBucketFieldsQuery = { __typename?: 'Query', getBucketFields: Array<string> };
+
+export type GetBucketFieldMeansLastMinutesQueryVariables = Exact<{
+  input: GetFieldMeansInput;
+}>;
+
+
+export type GetBucketFieldMeansLastMinutesQuery = { __typename?: 'Query', getBucketFieldMeansLastMinutes: Array<{ __typename?: 'FieldMeanMetric', field: string, greenhouse?: string | null, value: number }> };
+
+export type GetParDliTodayQueryVariables = Exact<{
+  input: GetParDliTodayInput;
+}>;
+
+
+export type GetParDliTodayQuery = { __typename?: 'Query', getParDliToday: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }> };
 
 export type TenantsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1614,17 +1666,8 @@ export type TenantFeaturesLazyQueryHookResult = ReturnType<typeof useTenantFeatu
 export type TenantFeaturesSuspenseQueryHookResult = ReturnType<typeof useTenantFeaturesSuspenseQuery>;
 export type TenantFeaturesQueryResult = Apollo.QueryResult<TenantFeaturesQuery, TenantFeaturesQueryVariables>;
 export const GetBucketDataDocument = gql`
-    query GetBucketData($bucketName: String!, $start: String, $stop: String, $limit: Int, $field: String, $greenhouse: String, $device: String, $level: String) {
-  getBucketData(
-    bucketName: $bucketName
-    start: $start
-    stop: $stop
-    limit: $limit
-    field: $field
-    greenhouse: $greenhouse
-    device: $device
-    level: $level
-  ) {
+    query GetBucketData($input: GetBucketDataInput!) {
+  getBucketData(input: $input) {
     data
   }
 }
@@ -1642,14 +1685,7 @@ export const GetBucketDataDocument = gql`
  * @example
  * const { data, loading, error } = useGetBucketDataQuery({
  *   variables: {
- *      bucketName: // value for 'bucketName'
- *      start: // value for 'start'
- *      stop: // value for 'stop'
- *      limit: // value for 'limit'
- *      field: // value for 'field'
- *      greenhouse: // value for 'greenhouse'
- *      device: // value for 'device'
- *      level: // value for 'level'
+ *      input: // value for 'input'
  *   },
  * });
  */
@@ -1715,6 +1751,95 @@ export type GetBucketFieldsQueryHookResult = ReturnType<typeof useGetBucketField
 export type GetBucketFieldsLazyQueryHookResult = ReturnType<typeof useGetBucketFieldsLazyQuery>;
 export type GetBucketFieldsSuspenseQueryHookResult = ReturnType<typeof useGetBucketFieldsSuspenseQuery>;
 export type GetBucketFieldsQueryResult = Apollo.QueryResult<GetBucketFieldsQuery, GetBucketFieldsQueryVariables>;
+export const GetBucketFieldMeansLastMinutesDocument = gql`
+    query GetBucketFieldMeansLastMinutes($input: GetFieldMeansInput!) {
+  getBucketFieldMeansLastMinutes(input: $input) {
+    field
+    greenhouse
+    value
+  }
+}
+    `;
+
+/**
+ * __useGetBucketFieldMeansLastMinutesQuery__
+ *
+ * To run a query within a React component, call `useGetBucketFieldMeansLastMinutesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBucketFieldMeansLastMinutesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBucketFieldMeansLastMinutesQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useGetBucketFieldMeansLastMinutesQuery(baseOptions: Apollo.QueryHookOptions<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables> & ({ variables: GetBucketFieldMeansLastMinutesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>(GetBucketFieldMeansLastMinutesDocument, options);
+      }
+export function useGetBucketFieldMeansLastMinutesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>(GetBucketFieldMeansLastMinutesDocument, options);
+        }
+// @ts-ignore
+export function useGetBucketFieldMeansLastMinutesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>): Apollo.UseSuspenseQueryResult<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>;
+export function useGetBucketFieldMeansLastMinutesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>): Apollo.UseSuspenseQueryResult<GetBucketFieldMeansLastMinutesQuery | undefined, GetBucketFieldMeansLastMinutesQueryVariables>;
+export function useGetBucketFieldMeansLastMinutesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>(GetBucketFieldMeansLastMinutesDocument, options);
+        }
+export type GetBucketFieldMeansLastMinutesQueryHookResult = ReturnType<typeof useGetBucketFieldMeansLastMinutesQuery>;
+export type GetBucketFieldMeansLastMinutesLazyQueryHookResult = ReturnType<typeof useGetBucketFieldMeansLastMinutesLazyQuery>;
+export type GetBucketFieldMeansLastMinutesSuspenseQueryHookResult = ReturnType<typeof useGetBucketFieldMeansLastMinutesSuspenseQuery>;
+export type GetBucketFieldMeansLastMinutesQueryResult = Apollo.QueryResult<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>;
+export const GetParDliTodayDocument = gql`
+    query GetParDliToday($input: GetParDliTodayInput!) {
+  getParDliToday(input: $input) {
+    time
+    dli
+  }
+}
+    `;
+
+/**
+ * __useGetParDliTodayQuery__
+ *
+ * To run a query within a React component, call `useGetParDliTodayQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetParDliTodayQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetParDliTodayQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useGetParDliTodayQuery(baseOptions: Apollo.QueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables> & ({ variables: GetParDliTodayQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetParDliTodayQuery, GetParDliTodayQueryVariables>(GetParDliTodayDocument, options);
+      }
+export function useGetParDliTodayLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetParDliTodayQuery, GetParDliTodayQueryVariables>(GetParDliTodayDocument, options);
+        }
+// @ts-ignore
+export function useGetParDliTodaySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables>): Apollo.UseSuspenseQueryResult<GetParDliTodayQuery, GetParDliTodayQueryVariables>;
+export function useGetParDliTodaySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables>): Apollo.UseSuspenseQueryResult<GetParDliTodayQuery | undefined, GetParDliTodayQueryVariables>;
+export function useGetParDliTodaySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetParDliTodayQuery, GetParDliTodayQueryVariables>(GetParDliTodayDocument, options);
+        }
+export type GetParDliTodayQueryHookResult = ReturnType<typeof useGetParDliTodayQuery>;
+export type GetParDliTodayLazyQueryHookResult = ReturnType<typeof useGetParDliTodayLazyQuery>;
+export type GetParDliTodaySuspenseQueryHookResult = ReturnType<typeof useGetParDliTodaySuspenseQuery>;
+export type GetParDliTodayQueryResult = Apollo.QueryResult<GetParDliTodayQuery, GetParDliTodayQueryVariables>;
 export const TenantsDocument = gql`
     query Tenants {
   tenants {

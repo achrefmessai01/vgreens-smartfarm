@@ -5,7 +5,7 @@ const gradientStyle = {
     'linear-gradient(to top, rgb(0, 0, 255), rgb(0, 255, 255), rgb(0, 255, 0), rgb(255, 255, 0), rgb(255, 127, 0), rgb(255, 0, 0))',
 };
 
-const LEGEND_RANGES: Record<
+export const LEGEND_RANGES: Record<
   string,
   { min: number; max: number; unit: string; steps: number }
 > = {
@@ -27,6 +27,12 @@ const LEGEND_RANGES: Record<
   rssi: { min: -120, max: 0, unit: ' dBm', steps: 6 },
   snr: { min: -120, max: 0, unit: ' dB', steps: 6 },
 };
+
+/** Min/max scale for the top legend bar; use this to align heatmap colors with the bar. */
+export function getLegendScale(parameter: ParameterType): { min: number; max: number } | null {
+  const range = LEGEND_RANGES[parameter];
+  return range ? { min: range.min, max: range.max } : null;
+}
 
 interface ParameterColorLegendProps {
   parameter: ParameterType;

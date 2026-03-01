@@ -19,6 +19,8 @@ export interface FarmOverviewCardProps {
   viewDiscreteLabel: string;
   viewGraphLabel: string;
   bays: Bay[];
+  greenhouseId: string;
+  greenhouseLabel: string;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
   parameterLabel: string;
@@ -38,6 +40,8 @@ export function FarmOverviewCard({
   viewDiscreteLabel,
   viewGraphLabel,
   bays,
+  greenhouseId,
+  greenhouseLabel,
   selectedSlotId,
   onSelectSlot,
   parameterLabel,
@@ -78,7 +82,7 @@ export function FarmOverviewCard({
       </div>
 
       <div className="flex-1 min-h-0 flex bg-background dark:bg-background/50">
-        <div className="flex flex-1 min-w-0 overflow-auto">
+        <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">
           {showEmpty ? (
             <EmptyState
               message={emptyForNowMessage}
@@ -90,9 +94,10 @@ export function FarmOverviewCard({
                 bays={bays}
                 viewMode={viewMode}
                 parameter={effectiveParameter}
+                greenhouseId={greenhouseId}
+                greenhouseLabel={greenhouseLabel}
                 selectedSlotId={selectedSlotId}
                 onSelectSlot={onSelectSlot}
-                bayLabel={parameterLabel}
                 parameterLabel={parameterLabel}
                 noSensorLabel={noSensorLabel}
                 noDataMessage={noDataMessage}

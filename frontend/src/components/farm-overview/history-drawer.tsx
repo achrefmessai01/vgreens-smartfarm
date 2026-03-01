@@ -1,27 +1,27 @@
 'use client';
 
+import * as React from 'react';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
 } from '@/components/ui/sheet';
 import { StyledSelect } from '@/components/ui/styled-select';
-import { useGetBucketDataQuery, useMeQuery } from '@/generated/graphql';
-import { useI18n } from '@/i18n';
-import type { ParameterType } from '@/lib/farm-types';
-import * as React from 'react';
 import {
-  CartesianGrid,
-  Line,
   LineChart,
-  ResponsiveContainer,
-  Tooltip,
+  Line,
   XAxis,
   YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
 } from 'recharts';
+import type { ParameterType } from '@/lib/farm-types';
+import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql';
 import { HistoryChartSkeleton } from './history-chart-skeleton';
+import { useI18n } from '@/i18n';
 
 /** Parse slotId (e.g. "live_greenhouse_01|Air_09|unknown") into greenhouse, device, level for InfluxDB filters */
 function parseSlotId(slotId: string): {
@@ -109,18 +109,20 @@ export function HistoryDrawer({
 
   const { data: bucketData, loading: historyLoading } = useGetBucketDataQuery({
     variables: {
-      bucketName: bucketName ?? '',
-      start: startStop.start,
-      stop: startStop.stop,
-      limit: 2000,
-      field: parameter,
-      greenhouse: slotFilters?.greenhouse ?? undefined,
-      device: slotFilters?.device ?? undefined,
-      // Omit level when "unknown" so backend matches rows with or without level tag
-      level:
-        slotFilters?.level && slotFilters.level.toLowerCase() !== 'unknown'
-          ? slotFilters.level
-          : undefined,
+      input: {
+        bucketName: bucketName ?? '',
+        start: startStop.start,
+        stop: startStop.stop ?? undefined,
+        limit: 2000,
+        field: parameter,
+        greenhouse: slotFilters?.greenhouse ?? undefined,
+        device: slotFilters?.device ?? undefined,
+        level:
+          slotFilters?.level && slotFilters.level.toLowerCase() !== 'unknown'
+            ? slotFilters.level
+            : undefined,
+        useLastPerSeries: false,
+      },
     },
     skip: !bucketName || !slotId || !open,
     fetchPolicy: 'cache-and-network',
@@ -154,36 +156,19 @@ export function HistoryDrawer({
     setSelectedPointIndex(null);
   }, [slotId, parameter, timeRange]);
 
-  // Calculate exactly 8 ticks for the X-axis
-  const xAxisTicks = React.useMemo(() => {
-    if (historyData.length === 0) return [];
-    const tickCount = 16;
-    const step = Math.floor((historyData.length - 1) / (tickCount - 1));
-    const ticks = [];
-    for (let i = 0; i < tickCount - 1; i++) {
-      ticks.push(historyData[i * step].timestamp);
-    }
-    // Always include the last data point
-    ticks.push(historyData[historyData.length - 1].timestamp);
-    return ticks;
-  }, [historyData]);
-
   if (!slotId) return null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="bottom"
-        className="h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] flex flex-col"
-      >
+      <SheetContent side="bottom" className="h-[60vh]">
         <SheetHeader>
           <SheetTitle>
             {historyLabel} - {parameterLabel}
           </SheetTitle>
           <SheetDescription>{slotId}</SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col gap-2 sm:gap-4 flex-1 min-h-0">
-          <div className="flex items-center gap-2 shrink-0">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
             <label className="text-sm font-medium ml-5">
               {timeRangeLabel}:
             </label>
@@ -200,7 +185,7 @@ export function HistoryDrawer({
               width="180px"
             />
           </div>
-          <div className="flex-1 min-h-0 pb-2 sm:pb-6 pr-2 sm:pr-6 pl-2">
+          <div className="h-[400px]">
             {historyLoading ? (
               <HistoryChartSkeleton className="h-full w-full" />
             ) : historyData.length === 0 ? (
@@ -210,74 +195,19 @@ export function HistoryDrawer({
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={historyData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    className="stroke-border opacity-100"
-                  />
+                  <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="timestamp"
-                    className="stroke-muted-foreground"
-                    height={60}
-                    ticks={xAxisTicks}
-                    tick={{
-                      className: 'fill-muted-foreground',
-                      fontSize: 14,
-                      dy: 10,
-                    }}
                     tickFormatter={(value) => {
                       const date = new Date(value);
-                      if (timeRange === '1day') {
-                        // For 1 day: show date and time
-                        const day = date.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        });
-                        const time = date.toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false,
-                        });
-                        return `${day} ${time}`;
-                      } else if (timeRange === '1week') {
-                        // For 1 week: show day and time
-                        const day = date.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        });
-                        const time = date.toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false,
-                        });
-                        return `${day} ${time}`;
-                      } else {
-                        // For 1 month: show day and time
-                        const day = date.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        });
-                        const time = date.toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false,
-                        });
-                        return `${day} ${time}`;
-                      }
+                      return date.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      });
                     }}
                   />
-                  <YAxis
-                    className="stroke-muted-foreground"
-                    tick={{ className: 'fill-muted-foreground' }}
-                  />
+                  <YAxis />
                   <Tooltip
-                    wrapperClassName="shadow-lg"
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--popover))',
-                      border: '2px solid hsl(var(--border))',
-                      borderRadius: '0.5rem',
-                      color: 'hsl(var(--foreground))',
-                    }}
-                    labelStyle={{ fontWeight: 500 }}
                     labelFormatter={(value) => {
                       const date = new Date(value);
                       return date.toLocaleString();
@@ -286,8 +216,8 @@ export function HistoryDrawer({
                   <Line
                     type="monotone"
                     dataKey="value"
-                    className="stroke-primary"
-                    strokeWidth={2.5}
+                    stroke="#016F7C"
+                    strokeWidth={2}
                     dot={(props: {
                       cx?: number;
                       cy?: number;
@@ -310,8 +240,10 @@ export function HistoryDrawer({
                           cx={props.cx}
                           cy={props.cy}
                           r={isSelected ? 6 : 4}
-                          className="cursor-pointer transition-all hover:scale-110 fill-primary stroke-card"
-                          strokeWidth={isSelected ? 3 : 2}
+                          fill="#016F7C"
+                          stroke="white"
+                          strokeWidth={isSelected ? 3 : 1.5}
+                          className="cursor-pointer transition-all hover:scale-110"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedPointIndex(
@@ -320,8 +252,8 @@ export function HistoryDrawer({
                           }}
                           style={{
                             filter: isSelected
-                              ? 'drop-shadow(0 3px 8px rgba(1, 111, 124, 0.4))'
-                              : 'drop-shadow(0 1px 3px rgba(1, 111, 124, 0.25))',
+                              ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))'
+                              : 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))',
                           }}
                         />
                       );

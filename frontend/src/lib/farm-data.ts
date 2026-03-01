@@ -390,6 +390,43 @@ export function normalizeParameterValue(
   }
 }
 
+/**
+ * Multicolor colormap for heatmap: blue (low) → red (high), matching the top legend bar.
+ * value in [minV, maxV].
+ */
+export function valueToHotColor(value: number, minV: number, maxV: number): string {
+  const n = Math.max(0, Math.min(1, (value - minV) / (maxV - minV || 1)));
+
+  const stops = [
+    { t: 0, r: 0, g: 0, b: 255 }, // blue
+    { t: 0.2, r: 0, g: 255, b: 255 }, // cyan
+    { t: 0.4, r: 0, g: 255, b: 0 }, // green
+    { t: 0.6, r: 255, g: 255, b: 0 }, // yellow
+    { t: 0.8, r: 255, g: 127, b: 0 }, // orange
+    { t: 1, r: 255, g: 0, b: 0 }, // red
+  ];
+
+  let start = stops[0];
+  let end = stops[stops.length - 1];
+
+  for (let i = 1; i < stops.length; i++) {
+    if (n <= stops[i].t) {
+      start = stops[i - 1];
+      end = stops[i];
+      break;
+    }
+  }
+
+  const span = end.t - start.t || 1;
+  const localT = (n - start.t) / span;
+
+  const r = Math.round(start.r + (end.r - start.r) * localT);
+  const g = Math.round(start.g + (end.g - start.g) * localT);
+  const b = Math.round(start.b + (end.b - start.b) * localT);
+
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 /** Format Influx _field name to display label (e.g. soil_conductivity -> Soil conductivity) */
 export function formatFieldToLabel(field: string): string {
   const known: Record<string, string> = {
