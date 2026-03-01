@@ -1,0 +1,120 @@
+import * as React from 'react';
+import { useGetParDliTodayQuery, useMeQuery } from '@/generated/graphql';
+import type { ParGraphData, ParCurvePoint } from '@/types/par-graph';
+import { getHourOfDay } from '@/lib/utils/par-graph';
+
+export function useParGraphData(greenhouseId: string): ParGraphData {
+  const { data: meData } = useMeQuery({
+    fetchPolicy: 'cache-first',
+  });
+  const bucketName = meData?.me?.tenant?.influxBucketName ?? null;
+
+  const { data: parDliData } = useGetParDliTodayQuery({
+    variables: {
+      input: {
+        bucketName: bucketName ?? '',
+        greenhouse: greenhouseId,
+      },
+    },
+    skip: !bucketName || !greenhouseId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const apiPoints = React.useMemo(() => {
+    const raw = parDliData?.getParDliToday ?? [];
+    if (!raw.length) return [];
+
+    const points = raw
+      .map((p) => {
+        const date = new Date(p.time as unknown as string);
+        return {
+          hour: getHourOfDay(date),
+          dli: typeof p.dli === 'number' ? p.dli : Number(p.dli ?? 0),
+        };
+      })
+      .filter((p) => !Number.isNaN(p.hour) && !Number.isNaN(p.dli))
+      .sort((a, b) => a.hour - b.hour);
+
+    const first = points[0];
+    if (first && first.hour > 0) {
+      points.unshift({ hour: 0, dli: 0 });
+    }
+
+    return points;
+  }, [parDliData]);
+
+  const curveData: ParCurvePoint[] = React.useMemo(() => {
+    if (!apiPoints.length) return [];
+
+    return apiPoints.map((p) => {
+      const today = p.dli;
+      const avg = today * 0.97;
+      const yesterday = today * 0.92;
+      const lowerBand = avg * 0.85;
+      const upperBand = avg * 1.08;
+
+      return {
+        hour: p.hour,
+        avg,
+        yesterday,
+        today,
+        lowerBand,
+        band: Math.max(0, upperBand - lowerBand),
+      };
+    });
+  }, [apiPoints]);
+
+  const currentHour = React.useMemo(() => getHourOfDay(new Date()), []);
+
+  const currentDli = React.useMemo(() => {
+    if (!apiPoints.length) return 0;
+    let last = apiPoints[0].dli;
+    for (const p of apiPoints) {
+      if (p.hour <= currentHour) {
+        last = p.dli;
+      } else {
+        break;
+      }
+    }
+    return last;
+  }, [apiPoints, currentHour]);
+
+  const currentPpfd = React.useMemo(() => {
+    if (apiPoints.length < 2) return null;
+    const last = apiPoints[apiPoints.length - 1];
+    const prev = apiPoints[apiPoints.length - 2];
+    const deltaDli = last.dli - prev.dli;
+    const deltaSeconds = (last.hour - prev.hour) * 3600;
+    if (deltaDli <= 0 || deltaSeconds <= 0) return null;
+    const ppfd = (deltaDli * 1_000_000) / deltaSeconds;
+    return Math.round(ppfd);
+  }, [apiPoints]);
+
+  const yMax = React.useMemo(() => {
+    if (!curveData.length) return 5;
+    const maxSeries = Math.max(
+      ...curveData.map((d) =>
+        Math.max(d.avg, d.yesterday, d.today ?? 0, d.lowerBand + d.band),
+      ),
+    );
+    return Math.ceil((maxSeries + 1) / 5) * 5;
+  }, [curveData]);
+
+  const timeLabel = React.useMemo(
+    () =>
+      new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    [],
+  );
+
+  return {
+    curveData,
+    currentHour,
+    currentDli,
+    currentPpfd,
+    timeLabel,
+    yMax,
+  };
+}

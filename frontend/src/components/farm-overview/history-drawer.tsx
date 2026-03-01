@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from '@/components/ui/sheet'
-import { StyledSelect } from '@/components/ui/styled-select'
+} from '@/components/ui/sheet';
+import { StyledSelect } from '@/components/ui/styled-select';
 import {
   LineChart,
   Line,
@@ -17,60 +17,60 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from 'recharts'
-import type { ParameterType } from '@/lib/farm-types'
-import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql'
-import { HistoryChartSkeleton } from './history-chart-skeleton'
-import { useI18n } from '@/i18n'
+} from 'recharts';
+import type { ParameterType } from '@/lib/farm-types';
+import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql';
+import { HistoryChartSkeleton } from './history-chart-skeleton';
+import { useI18n } from '@/i18n';
 
 /** Parse slotId (e.g. "live_greenhouse_01|Air_09|unknown") into greenhouse, device, level for InfluxDB filters */
 function parseSlotId(slotId: string): {
-  greenhouse: string
-  device: string
-  level: string
+  greenhouse: string;
+  device: string;
+  level: string;
 } {
-  const raw = slotId.replace(/^live_/, '')
-  const parts = raw.split('|')
+  const raw = slotId.replace(/^live_/, '');
+  const parts = raw.split('|');
   return {
     greenhouse: parts[0] ?? '',
     device: parts[1] ?? '',
     level: parts[2] ?? '',
-  }
+  };
 }
 
 function getStartStopForRange(timeRange: '1day' | '1week' | '1month'): {
-  start: string
-  stop: string
+  start: string;
+  stop: string;
 } {
-  const now = new Date()
-  const stop = now.toISOString()
-  let start: Date
+  const now = new Date();
+  const stop = now.toISOString();
+  let start: Date;
   switch (timeRange) {
     case '1day':
-      start = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-      break
+      start = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      break;
     case '1week':
-      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-      break
+      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
     case '1month':
-      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-      break
+      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
   }
-  return { start: start.toISOString(), stop }
+  return { start: start.toISOString(), stop };
 }
 
 interface HistoryDrawerProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  parameter: ParameterType
-  slotId: string | null
-  parameterLabel: string
-  timeRangeLabel: string
-  oneDayLabel: string
-  oneWeekLabel: string
-  oneMonthLabel: string
-  historyLabel: string
-  bucketName?: string | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  parameter: ParameterType;
+  slotId: string | null;
+  parameterLabel: string;
+  timeRangeLabel: string;
+  oneDayLabel: string;
+  oneWeekLabel: string;
+  oneMonthLabel: string;
+  historyLabel: string;
+  bucketName?: string | null;
 }
 
 export function HistoryDrawer({
@@ -90,71 +90,73 @@ export function HistoryDrawer({
 
   const [timeRange, setTimeRange] = React.useState<'1day' | '1week' | '1month'>(
     '1month',
-  )
+  );
   const [selectedPointIndex, setSelectedPointIndex] = React.useState<
     number | null
-  >(null)
+  >(null);
 
-  const { data: meData } = useMeQuery({ fetchPolicy: 'cache-first' })
+  const { data: meData } = useMeQuery({ fetchPolicy: 'cache-first' });
   const bucketName =
-    bucketNameOverride ?? meData?.me?.tenant?.influxBucketName ?? null
+    bucketNameOverride ?? meData?.me?.tenant?.influxBucketName ?? null;
   const slotFilters = React.useMemo(
     () => (slotId ? parseSlotId(slotId) : null),
     [slotId],
-  )
+  );
   const startStop = React.useMemo(
     () => getStartStopForRange(timeRange),
     [timeRange],
-  )
+  );
 
   const { data: bucketData, loading: historyLoading } = useGetBucketDataQuery({
     variables: {
-      bucketName: bucketName ?? '',
-      start: startStop.start,
-      stop: startStop.stop,
-      limit: 2000,
-      field: parameter,
-      greenhouse: slotFilters?.greenhouse ?? undefined,
-      device: slotFilters?.device ?? undefined,
-      // Omit level when "unknown" so backend matches rows with or without level tag
-      level:
-        slotFilters?.level && slotFilters.level.toLowerCase() !== 'unknown'
-          ? slotFilters.level
-          : undefined,
+      input: {
+        bucketName: bucketName ?? '',
+        start: startStop.start,
+        stop: startStop.stop ?? undefined,
+        limit: 2000,
+        field: parameter,
+        greenhouse: slotFilters?.greenhouse ?? undefined,
+        device: slotFilters?.device ?? undefined,
+        level:
+          slotFilters?.level && slotFilters.level.toLowerCase() !== 'unknown'
+            ? slotFilters.level
+            : undefined,
+        useLastPerSeries: false,
+      },
     },
     skip: !bucketName || !slotId || !open,
     fetchPolicy: 'cache-and-network',
-  })
+  });
 
   const historyData = React.useMemo(() => {
-    if (!bucketData?.getBucketData?.length) return []
+    if (!bucketData?.getBucketData?.length) return [];
     return bucketData.getBucketData
       .map((item, index) => {
-        const d = item.data
-        const t = d._time as string | undefined
-        const v = d._value
-        if (t == null) return null
+        const d = item.data;
+        const t = d._time as string | undefined;
+        const v = d._value;
+        if (t == null) return null;
         const num =
-          typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN
-        if (Number.isNaN(num)) return null
+          typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN;
+        if (Number.isNaN(num)) return null;
         return {
           timestamp: new Date(t).getTime(),
           value: num,
           index,
-        }
+        };
       })
       .filter((p): p is { timestamp: number; value: number; index: number } =>
         Boolean(p),
       )
-      .sort((a, b) => a.timestamp - b.timestamp)
-  }, [bucketData])
+      .sort((a, b) => a.timestamp - b.timestamp);
+  }, [bucketData]);
 
   // Reset selected point when slot or parameter changes
   React.useEffect(() => {
-    setSelectedPointIndex(null)
-  }, [slotId, parameter, timeRange])
+    setSelectedPointIndex(null);
+  }, [slotId, parameter, timeRange]);
 
-  if (!slotId) return null
+  if (!slotId) return null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -197,18 +199,18 @@ export function HistoryDrawer({
                   <XAxis
                     dataKey="timestamp"
                     tickFormatter={(value) => {
-                      const date = new Date(value)
+                      const date = new Date(value);
                       return date.toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
-                      })
+                      });
                     }}
                   />
                   <YAxis />
                   <Tooltip
                     labelFormatter={(value) => {
-                      const date = new Date(value)
-                      return date.toLocaleString()
+                      const date = new Date(value);
+                      return date.toLocaleString();
                     }}
                   />
                   <Line
@@ -217,22 +219,22 @@ export function HistoryDrawer({
                     stroke="#016F7C"
                     strokeWidth={2}
                     dot={(props: {
-                      cx?: number
-                      cy?: number
+                      cx?: number;
+                      cy?: number;
                       payload?: {
-                        timestamp: number
-                        value: number
-                        index: number
-                      }
-                      index?: number
+                        timestamp: number;
+                        value: number;
+                        index: number;
+                      };
+                      index?: number;
                     }) => {
                       if (!props.cx || !props.cy || !props.payload) {
-                        return <g />
+                        return <g />;
                       }
                       const pointIndex =
-                        props.payload.index ?? props.index ?? -1
-                      if (pointIndex === -1) return <g />
-                      const isSelected = selectedPointIndex === pointIndex
+                        props.payload.index ?? props.index ?? -1;
+                      if (pointIndex === -1) return <g />;
+                      const isSelected = selectedPointIndex === pointIndex;
                       return (
                         <circle
                           cx={props.cx}
@@ -243,10 +245,10 @@ export function HistoryDrawer({
                           strokeWidth={isSelected ? 3 : 1.5}
                           className="cursor-pointer transition-all hover:scale-110"
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             setSelectedPointIndex(
                               isSelected ? null : pointIndex,
-                            )
+                            );
                           }}
                           style={{
                             filter: isSelected
@@ -254,7 +256,7 @@ export function HistoryDrawer({
                               : 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))',
                           }}
                         />
-                      )
+                      );
                     }}
                     activeDot={false}
                   />
@@ -265,5 +267,5 @@ export function HistoryDrawer({
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

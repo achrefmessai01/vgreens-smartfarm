@@ -193,7 +193,17 @@ export const en = {
       startLabel: 'Start',
       stopLabel: 'Stop',
       entranceLabel: '↓ Entrance',
-      emptyHistoryDrawerPlaceholder: 'No history data for this sensor in the selected range.'
+      emptyHistoryDrawerPlaceholder: 'No history data for this sensor in the selected range.',
+      parGraph: {
+        title: 'PAR Graph',
+        currentPpfd: 'Current PPFD',
+        dli: 'DLI',
+        legendAverage: '7 day average',
+        legendYesterday: 'yesterday',
+        legendToday: 'today',
+        axisLabel: 'Cumulative photons (mol m^-2)',
+        timeOfDayLabel: 'Time of day (hh:mm)',
+      },
     },
     history: {
       title: 'History',

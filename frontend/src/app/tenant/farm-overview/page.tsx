@@ -70,6 +70,8 @@ export default function FarmOverviewPage() {
               viewDiscreteLabel={state.labels.viewDiscrete}
               viewGraphLabel={state.labels.viewGraph}
               bays={state.bays}
+              greenhouseId={state.greenhouseId}
+              greenhouseLabel={state.greenhouseLabel}
               selectedSlotId={state.selectedSlotId}
               onSelectSlot={state.setSelectedSlotId}
               parameterLabel={state.getParameterLabel(state.effectiveParameter)}
