@@ -26,7 +26,7 @@ export function GreenhouseSummaryCard({
   return (
     <Card className="w-full gap-0 py-0 overflow-hidden rounded-sm transition-shadow duration-700 ease-out hover:shadow-md">
       <div className="border-b border-border/50 bg-muted/20 px-3 py-1.5 sm:px-2 sm:py-1.5 lg:py-2">
-        <CardTitle className="text-sm sm:text-[10px] md:text-[11px] lg:text-xs xl:text-sm font-semibold uppercase tracking-wider text-foreground/90">
+        <CardTitle className="break-words text-xs font-semibold uppercase tracking-[0.12em] text-foreground/90 sm:text-[10px] md:text-[11px] lg:text-xs xl:text-sm">
           {title}
         </CardTitle>
       </div>

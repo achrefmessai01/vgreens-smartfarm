@@ -12,7 +12,7 @@ import {
   bayHasDynamicPositions,
   getSlotPositionsFromBay,
 } from '@/lib/sensor-map-positions';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import type { Bay, ParameterType, PlantSlot } from '@/lib/farm-types';
 import { isParameterSupportedByType } from '@/lib/sensor-map-parameter';
 import { idwInterpolate, type HeatmapPoint } from '@/lib/heatmap-utils';
@@ -142,96 +142,97 @@ export function ViewSingleBay({
   return (
     <Card
       className={cn(
-        'h-full w-full border border-border/40',
+        'flex h-full min-h-0 w-full gap-0 overflow-hidden border border-border/40 py-0',
         'bg-white dark:bg-background',
         className,
       )}
     >
-      <CardContent className="p-3 h-full flex flex-col min-h-0">
-        <div className="flex-1 min-h-0 rounded-lg flex overflow-hidden">
-          {!hasAnyData ? (
-            <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground w-full">
-              {t.pages.farmOverview.noData}
-            </div>
-          ) : (
-            <div className="flex-1 min-w-0 min-h-0 relative rounded-xl border border-border/40 bg-card shadow-sm overflow-hidden h-full">
-              <div
-                className="absolute inset-0 grid w-full h-full"
-                style={{
-                  gridTemplateColumns: `repeat(${HEATMAP_GRID_COLS}, 1fr)`,
-                  gridTemplateRows: `repeat(${HEATMAP_GRID_ROWS}, 1fr)`,
-                }}
-              >
-                {heatmapGrid.map((row, i) =>
-                  row.map((val, j) => (
-                    <div
-                      key={`${i}-${j}`}
-                      className="min-w-0 min-h-0"
-                      style={{
-                        backgroundColor: Number.isNaN(val)
-                          ? 'rgb(240,240,240)'
-                          : valueToHotColor(val, scaleMin, scaleMax),
-                      }}
-                    />
-                  )),
-                )}
-              </div>
-              {sensors.map(
-                ({
-                  slot,
-                  deviceId,
-                  value,
-                  leftPercent,
-                  topPercent,
-                  positionKey,
-                }) => {
-                  const isSelected = slot && selectedSlotId === slot.id;
-                  const displayValue =
-                    value != null ? formatParameterDisplayValue(value) : '--';
-                  return (
-                    <button
-                      key={positionKey}
-                      type="button"
-                      onClick={() =>
-                        onSelectSlot(
-                          slot ? (isSelected ? null : slot.id) : null,
-                        )
-                      }
-                      disabled={!slot}
-                      title={
-                        slot && value != null
-                          ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
-                          : deviceId
-                      }
-                      className={cn(
-                        'absolute text-xs font-medium tabular-nums text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
-                        slot && 'cursor-pointer',
-                        isSelected &&
-                          'ring-2 ring-primary ring-offset-1 rounded',
-                      )}
-                      style={{
-                        left: `${leftPercent}%`,
-                        top: `${topPercent}%`,
-                        transform: 'translate(-50%, -50%)',
-                      }}
-                      aria-label={
-                        slot && value != null
-                          ? `${displayValue} ${unit}`
-                          : t.pages.farmOverview.noSensor
-                      }
-                    >
-                      {value != null
-                        ? `${displayValue}${unit ? ` ${unit}` : ''}`
-                        : '--'}
-                    </button>
-                  );
-                },
-              )}
-            </div>
+      {!hasAnyData ? (
+        <div className="flex flex-1 items-center justify-center p-4 text-sm text-muted-foreground">
+          {t.pages.farmOverview.noData}
+        </div>
+      ) : (
+        <div className="relative flex-1 min-h-0 min-w-0 overflow-hidden">
+          <div
+            className="absolute inset-0 grid h-full w-full"
+            style={{
+              gridTemplateColumns: `repeat(${HEATMAP_GRID_COLS}, 1fr)`,
+              gridTemplateRows: `repeat(${HEATMAP_GRID_ROWS}, 1fr)`,
+            }}
+          >
+            {heatmapGrid.map((row, i) =>
+              row.map((val, j) => (
+                <div
+                  key={`${i}-${j}`}
+                  className="min-w-0 min-h-0"
+                  style={{
+                    backgroundColor: Number.isNaN(val)
+                      ? 'rgb(240,240,240)'
+                      : valueToHotColor(val, scaleMin, scaleMax),
+                  }}
+                />
+              )),
+            )}
+          </div>
+          {sensors.map(
+            ({
+              slot,
+              deviceId,
+              value,
+              leftPercent,
+              topPercent,
+              positionKey,
+            }) => {
+              const isSelected = slot && selectedSlotId === slot.id;
+              const displayValue =
+                value != null ? formatParameterDisplayValue(value) : '--';
+              return (
+                <button
+                  key={positionKey}
+                  type="button"
+                  onClick={() =>
+                    onSelectSlot(
+                      slot ? (isSelected ? null : slot.id) : null,
+                    )
+                  }
+                  disabled={!slot}
+                  title={
+                    slot && value != null
+                      ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
+                      : deviceId
+                  }
+                  className={cn(
+                    'absolute max-w-[4rem] truncate text-[9px] font-medium tabular-nums text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:max-w-[5.5rem] sm:text-[11px] lg:max-w-none lg:text-xs',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                    slot && 'cursor-pointer',
+                    isSelected &&
+                      'ring-2 ring-primary ring-offset-1 rounded',
+                  )}
+                  style={{
+                    left: `${leftPercent}%`,
+                    top: `${topPercent}%`,
+                    transform: 'translate(-50%, -58%)',
+                  }}
+                  aria-label={
+                    slot && value != null
+                      ? `${displayValue} ${unit}`
+                      : t.pages.farmOverview.noSensor
+                  }
+                >
+                  {value != null ? (
+                    <>
+                      <span>{displayValue}</span>
+                      {unit ? <span className="hidden sm:inline">{` ${unit}`}</span> : null}
+                    </>
+                  ) : (
+                    '--'
+                  )}
+                </button>
+              );
+            },
           )}
         </div>
-      </CardContent>
+      )}
     </Card>
   );
 }

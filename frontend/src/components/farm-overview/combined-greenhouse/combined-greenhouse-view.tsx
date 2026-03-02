@@ -65,7 +65,7 @@ export function CombinedGreenhouseView({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:[grid-template-columns:repeat(auto-fit,minmax(10.75rem,1fr))] gap-1 sm:gap-2 pb-1 items-stretch content-start">
+    <div className="grid grid-cols-1 gap-1 pb-1 content-start items-stretch sm:grid-cols-2 sm:gap-2 xl:[grid-template-columns:repeat(auto-fit,minmax(10.75rem,1fr))]">
       {greenhouses.map((greenhouse) => (
         <GreenhouseSummaryCard
           key={greenhouse.key}

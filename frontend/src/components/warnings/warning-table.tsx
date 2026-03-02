@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useI18n } from '@/i18n'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { TableCell } from '@/components/ui/table'
 import type { Warning, WarningStatus } from '@/lib/warning-types'
 import { DataTable, type Column } from '@/components/ui/data-table'
@@ -114,7 +115,6 @@ export function WarningTable({
     },
   ]
 
-
   const renderRow = (warning: Warning) => (
     <>
       <TableCell className="font-medium dark:text-white">
@@ -155,11 +155,78 @@ export function WarningTable({
     </>
   )
 
+  const renderCard = (warning: Warning) => (
+    <Card className="gap-0 overflow-hidden border border-border/60 py-0 shadow-none">
+      <CardContent className="space-y-4 px-4 py-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-base font-semibold dark:text-white">
+              {warning.sensorName}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {warning.value}
+            </p>
+          </div>
+          <div>{getStatusBadge(warning.status)}</div>
+        </div>
+
+        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border border-border/50 bg-background/80 px-3 py-2">
+            <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              {translations.timestamp}
+            </dt>
+            <dd className="mt-1 text-sm dark:text-gray-300">
+              {formatTimestamp(warning.timestamp)}
+            </dd>
+          </div>
+          <div className="rounded-lg border border-border/50 bg-background/80 px-3 py-2">
+            <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              {translations.tunnel}
+            </dt>
+            <dd className="mt-1 text-sm dark:text-gray-300">
+              {warning.tunnel || '-'}
+            </dd>
+          </div>
+        </dl>
+      </CardContent>
+
+      {warning.status !== 'resolved' ? (
+        <CardFooter className="flex-col items-stretch gap-2 border-t border-border/50 px-4 py-4 sm:flex-row sm:justify-end">
+          {warning.status === 'open' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(event) => {
+                event.stopPropagation()
+                onAcknowledge(warning)
+              }}
+              className="h-8 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
+            >
+              {translations.acknowledge}
+            </Button>
+          )}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={(event) => {
+              event.stopPropagation()
+              onResolve(warning)
+            }}
+            className="h-8"
+          >
+            {translations.resolve}
+          </Button>
+        </CardFooter>
+      ) : null}
+    </Card>
+  )
+
   return (
     <DataTable
       data={filteredWarnings}
       columns={columns}
       renderRow={renderRow}
+      renderCard={renderCard}
       onRowClick={onRowClick}
       filterConfig={{
         label: translations.filterByStatus,
@@ -179,9 +246,11 @@ export function WarningTable({
           ? t.pages.alerts.noAlertsDescription
           : t.pages.warnings.noWarningsDescription,
       }}
+      paginationVariant="compact"
       defaultPageSize={paginationConfig.defaultPageSize}
       pageSizeOptions={paginationConfig.pageSizeOptions}
       paginationLabels={paginationConfig.paginationLabels}
+      responsiveBreakpoint="xl"
     />
   )
 }

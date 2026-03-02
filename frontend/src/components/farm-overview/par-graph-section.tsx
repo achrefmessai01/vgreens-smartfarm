@@ -43,7 +43,7 @@ function ParGraphHeader({
 
   return (
     <div className="border-b border-border/50 bg-muted/15 px-3 py-2">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-foreground/90">
             {labels.title} - {greenhouseLabel}
@@ -51,15 +51,15 @@ function ParGraphHeader({
           <p className="text-[11px] text-muted-foreground">{timeLabel} h</p>
         </div>
 
-        <div className="grid grid-cols-2 overflow-hidden rounded-sm border border-border/60 bg-background text-[10px]">
-          <div className="min-w-24 border-r border-border/60 px-2 py-1.5">
+        <div className="grid w-full min-w-0 grid-cols-2 overflow-hidden rounded-sm border border-border/60 bg-background text-[10px] sm:w-auto">
+          <div className="min-w-0 border-r border-border/60 px-2 py-1.5">
             <p className="text-muted-foreground">{labels.currentPpfd}</p>
             <p className="text-lg font-semibold leading-none tabular-nums">
               {currentPpfd ?? '--'}
             </p>
             <p className="text-[9px] text-muted-foreground">umol m^-2 s^-1</p>
           </div>
-          <div className="min-w-20 px-2 py-1.5">
+          <div className="min-w-0 px-2 py-1.5">
             <p className="text-muted-foreground">{labels.dli}</p>
             <p className="text-lg font-semibold leading-none tabular-nums">
               {currentDli.toFixed(1)}
@@ -89,7 +89,7 @@ function ParGraphChart({
   const labels = t.pages.farmOverview.parGraph;
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col p-2 sm:p-3">
+    <div className="flex flex-1 min-h-0 flex-col p-1.5 sm:p-3">
       <div className="mb-2 shrink-0 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
         <span className="inline-flex items-center gap-1">
           <span className="inline-block w-4 border-t border-dashed border-slate-400" />
@@ -109,7 +109,7 @@ function ParGraphChart({
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={curveData}
-            margin={{ top: 8, right: 8, left: 10, bottom: 20 }}
+            margin={{ top: 6, right: 6, left: 2, bottom: 14 }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
@@ -120,8 +120,8 @@ function ParGraphChart({
               tickFormatter={formatHourTick}
               tickLine={false}
               axisLine={false}
-              height={34}
-              tick={{ fontSize: 10 }}
+              height={28}
+              tick={{ fontSize: 9 }}
             >
               <Label
                 value={labels.timeOfDayLabel}
@@ -134,8 +134,8 @@ function ParGraphChart({
               domain={[0, yMax]}
               tickLine={false}
               axisLine={false}
-              width={54}
-              tick={{ fontSize: 10 }}
+              width={40}
+              tick={{ fontSize: 9 }}
             >
               <Label
                 value={labels.axisLabel}
