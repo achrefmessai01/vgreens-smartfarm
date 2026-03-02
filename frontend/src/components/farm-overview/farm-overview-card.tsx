@@ -108,11 +108,11 @@ export function FarmOverviewCard({
               />
               {viewMode !== 'graph' && (
                 <div
-                  className="absolute bottom-0 left-0 flex h-[8.5rem] w-6 items-center justify-center border bg-secondary text-secondary-foreground shadow-sm sm:h-[12.5rem] sm:w-8"
+                  className="absolute bottom-0 left-0 flex h-[5.75rem] w-4 items-center justify-center border bg-secondary text-secondary-foreground shadow-sm sm:h-[12.5rem] sm:w-8"
                   aria-label={entranceLabel}
                 >
                   <span
-                    className="whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] sm:text-[12px] sm:tracking-[0.18em]"
+                    className="whitespace-nowrap text-[7px] font-semibold uppercase tracking-[0.08em] sm:text-[12px] sm:tracking-[0.18em]"
                     style={{
                       writingMode: 'vertical-rl',
                       transform: 'rotate(180deg)',
