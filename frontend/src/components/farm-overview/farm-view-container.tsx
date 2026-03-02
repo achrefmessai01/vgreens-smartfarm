@@ -38,8 +38,8 @@ export function FarmDataDisplay({
     <div
       className={
         viewMode === 'graph'
-          ? 'flex flex-col h-full min-h-0'
-          : 'flex flex-col h-full min-h-0 p-2 sm:p-4'
+          ? 'flex h-full min-h-0 w-full min-w-0 flex-col overflow-x-clip'
+          : 'flex h-full min-h-0 w-full min-w-0 flex-col overflow-x-clip p-0.5 sm:p-2'
       }
     >
       {viewMode === 'graph' ? (

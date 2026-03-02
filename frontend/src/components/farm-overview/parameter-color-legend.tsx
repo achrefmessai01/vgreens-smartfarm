@@ -88,20 +88,22 @@ export function ParameterColorLegendBar({
 
   return (
     <div
-      className={`flex items-center gap-2 w-full px-8 py-1.5 border-b border-border/40 bg-muted/20 ${className ?? ''}`}
+      className={`flex w-full flex-col gap-1 border-b border-border/40 bg-muted/20 px-3 py-2 sm:px-8 sm:py-1.5 ${className ?? ''}`}
     >
-      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-        {range.min}
-        {range.unit}
-      </span>
       <div
-        className="flex-1 h-3 rounded-sm shrink min-w-0"
+        className="h-3 w-full rounded-sm"
         style={horizontalGradient}
       />
-      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-        {range.max}
-        {range.unit}
-      </span>
+      <div className="flex w-full items-center justify-between text-[10px] text-muted-foreground tabular-nums sm:text-xs">
+        <span>
+          {range.min}
+          {range.unit}
+        </span>
+        <span>
+          {range.max}
+          {range.unit}
+        </span>
+      </div>
     </div>
   );
 }

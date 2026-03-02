@@ -14,7 +14,7 @@ export function GreenhouseSelector({
   options,
 }: GreenhouseSelectorProps) {
   return (
-    <div className="flex w-full bg-muted/10 border-b border-border/40">
+    <div className="grid w-full min-w-0 grid-cols-3 border-b border-border/40 bg-muted/10 sm:flex">
       {options.map((option, index) => {
         const isActive = value === index;
         return (
@@ -25,9 +25,9 @@ export function GreenhouseSelector({
             size="sm"
             onClick={() => onValueChange(index)}
             className={`
-              flex-1 justify-center border-x border-border/20 first:border-l-0
-              text-xs font-semibold tracking-wider uppercase shadow-none cursor-pointer
-              h-10 px-6
+              min-w-0 justify-center border-x border-border/20 text-center shadow-none cursor-pointer
+              h-auto px-2 py-2 text-[10px] font-semibold leading-tight tracking-[0.14em] uppercase whitespace-normal
+              sm:flex-1 sm:h-10 sm:px-6 sm:text-xs sm:tracking-wider sm:whitespace-nowrap
               ${index === 0 ? 'rounded-l-md rounded-r-none' : index === options.length - 1 ? 'rounded-r-md rounded-l-none' : 'rounded-none'}
               ${
                 isActive
