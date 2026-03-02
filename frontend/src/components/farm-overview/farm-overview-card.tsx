@@ -61,20 +61,24 @@ export function FarmOverviewCard({
   return (
     <Card className="h-full min-h-0 flex flex-col gap-0 py-0 overflow-hidden dark:shadow-lg rounded-none">
       <div className="shrink-0 flex flex-col bg-muted/10">
-        <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 border-b border-border/40 bg-background">
-          <ParameterSelector
-            value={effectiveParameter}
-            onValueChange={onParameterChange}
-            options={parameterOptions}
-          />
-          <ViewModeSelector
-            value={viewMode}
-            onValueChange={onViewModeChange}
-            heatmapLabel={viewHeatmapLabel}
-            discreteLabel={viewDiscreteLabel}
-            graphLabel={viewGraphLabel}
-            showGraphOption={showGraphOption}
-          />
+        <div className="flex flex-col gap-3 border-b border-border/40 bg-background px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
+          <div className="w-full min-w-0 sm:w-auto sm:flex-1">
+            <ParameterSelector
+              value={effectiveParameter}
+              onValueChange={onParameterChange}
+              options={parameterOptions}
+            />
+          </div>
+          <div className="w-full min-w-0 sm:w-auto sm:flex-none">
+            <ViewModeSelector
+              value={viewMode}
+              onValueChange={onViewModeChange}
+              heatmapLabel={viewHeatmapLabel}
+              discreteLabel={viewDiscreteLabel}
+              graphLabel={viewGraphLabel}
+              showGraphOption={showGraphOption}
+            />
+          </div>
         </div>
         {!showEmpty && viewMode !== 'graph' && (
           <ParameterColorLegendBar parameter={effectiveParameter} />
@@ -104,11 +108,11 @@ export function FarmOverviewCard({
               />
               {viewMode !== 'graph' && (
                 <div
-                  className="absolute bottom-0 left-0 w-10 h-[15.5rem] flex items-center justify-center bg-secondary text-secondary-foreground border"
+                  className="absolute bottom-0 left-0 flex h-[8.5rem] w-6 items-center justify-center border bg-secondary text-secondary-foreground shadow-sm sm:h-[12.5rem] sm:w-8"
                   aria-label={entranceLabel}
                 >
                   <span
-                    className="text-[15px] font-semibold uppercase tracking-wider whitespace-nowrap"
+                    className="whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] sm:text-[12px] sm:tracking-[0.18em]"
                     style={{
                       writingMode: 'vertical-rl',
                       transform: 'rotate(180deg)',

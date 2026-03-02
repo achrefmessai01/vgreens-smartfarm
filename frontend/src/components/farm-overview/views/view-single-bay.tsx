@@ -147,7 +147,7 @@ export function ViewSingleBay({
         className,
       )}
     >
-      <CardContent className="p-3 h-full flex flex-col min-h-0">
+      <CardContent className="flex h-full min-h-0 flex-col p-2 sm:p-3">
         <div className="flex-1 min-h-0 rounded-lg flex overflow-hidden">
           {!hasAnyData ? (
             <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground w-full">
@@ -204,7 +204,7 @@ export function ViewSingleBay({
                           : deviceId
                       }
                       className={cn(
-                        'absolute text-xs font-medium tabular-nums text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]',
+                        'absolute max-w-[5.5rem] truncate text-[10px] font-medium tabular-nums text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:max-w-none sm:text-xs',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
                         slot && 'cursor-pointer',
                         isSelected &&
@@ -221,9 +221,14 @@ export function ViewSingleBay({
                           : t.pages.farmOverview.noSensor
                       }
                     >
-                      {value != null
-                        ? `${displayValue}${unit ? ` ${unit}` : ''}`
-                        : '--'}
+                      {value != null ? (
+                        <>
+                          <span>{displayValue}</span>
+                          {unit ? <span className="hidden sm:inline">{` ${unit}`}</span> : null}
+                        </>
+                      ) : (
+                        '--'
+                      )}
                     </button>
                   );
                 },

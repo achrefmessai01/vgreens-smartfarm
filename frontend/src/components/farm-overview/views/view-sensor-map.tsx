@@ -82,7 +82,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
             return (
               <div
                 key={rowIndex}
-                className="flex flex-1 min-h-0 items-center justify-center gap-1 sm:gap-2 p-1 sm:p-2 flex-wrap"
+                className="flex flex-1 min-h-0 flex-wrap items-center justify-center gap-0.5 p-0.5 sm:gap-2 sm:p-2"
               >
                 {items.map(({ slot, deviceId, value }) => {
                   const isSelected = slot ? selectedSlotId === slot.id : false;
@@ -118,7 +118,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                     >
                       <div
                         className={cn(
-                          'flex flex-col items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full px-0.5 sm:px-1 tabular-nums shrink-0',
+                          'flex h-7 w-7 shrink-0 flex-col items-center justify-center rounded-full px-0.5 tabular-nums sm:h-12 sm:w-12 sm:px-1',
                           slot
                             ? 'bg-cyan-300/90 text-slate-900'
                             : 'bg-muted text-muted-foreground',
@@ -129,15 +129,15 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                       >
                         {value != null ? (
                           <>
-                            <span className="text-[13px] font-semibold leading-tight tracking-tight">
+                            <span className="text-[10px] font-semibold leading-tight tracking-tight sm:text-[13px]">
                               {formatParameterDisplayValue(value)}
                             </span>
-                            <span className="text-[10px] font-medium -mt-0.5">
+                            <span className="hidden text-[10px] font-medium -mt-0.5 sm:inline">
                               {unit}
                             </span>
                           </>
                         ) : (
-                          <span className="text-[11px]">--</span>
+                          <span className="text-[9px] sm:text-[11px]">--</span>
                         )}
                       </div>
                     </button>

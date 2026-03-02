@@ -160,32 +160,35 @@ export function HistoryDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[60vh]">
+      <SheetContent side="bottom" className="h-[70svh] sm:h-[60vh]">
         <SheetHeader>
           <SheetTitle>
             {historyLabel} - {parameterLabel}
           </SheetTitle>
           <SheetDescription>{slotId}</SheetDescription>
         </SheetHeader>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium ml-5">
+        <div className="space-y-4 overflow-x-hidden px-4 pb-4 sm:px-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <label className="text-sm font-medium">
               {timeRangeLabel}:
             </label>
-            <StyledSelect
-              value={timeRange}
-              onValueChange={(value) =>
-                setTimeRange(value as '1day' | '1week' | '1month')
-              }
-              options={[
-                { label: oneDayLabel, value: '1day' },
-                { label: oneWeekLabel, value: '1week' },
-                { label: oneMonthLabel, value: '1month' },
-              ]}
-              width="180px"
-            />
+            <div className="w-full sm:w-auto">
+              <StyledSelect
+                value={timeRange}
+                onValueChange={(value) =>
+                  setTimeRange(value as '1day' | '1week' | '1month')
+                }
+                options={[
+                  { label: oneDayLabel, value: '1day' },
+                  { label: oneWeekLabel, value: '1week' },
+                  { label: oneMonthLabel, value: '1month' },
+                ]}
+                width="100%"
+                triggerClassName="w-full sm:w-[180px]"
+              />
+            </div>
           </div>
-          <div className="h-[400px]">
+          <div className="h-[280px] sm:h-[400px]">
             {historyLoading ? (
               <HistoryChartSkeleton className="h-full w-full" />
             ) : historyData.length === 0 ? (
