@@ -8,12 +8,12 @@ import {
   TableHead,
   TableHeader,
 } from '@/components/ui/table'
-import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
-import { TableToolbar } from '@/components/ui/table-toolbar'
-import { TablePagination } from '@/components/ui/table-pagination'
 import { TableEmptyState } from '@/components/ui/table-empty-state'
+import { TablePagination } from '@/components/ui/table-pagination'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
+import { TableToolbar } from '@/components/ui/table-toolbar'
+import { cn } from '@/lib/utils'
 
 export interface Column<T> {
   key: string
@@ -35,7 +35,6 @@ export interface FilterConfigOption {
   value: string
   options: { label: string; value: string }[]
   onFilterChange: (value: string) => void
-  /** When true, value is comma-separated and category shows checkboxes for multi-select */
   multiSelect?: boolean
 }
 
@@ -43,6 +42,7 @@ export interface DataTableProps<T> {
   data: T[]
   columns: Column<T>[]
   renderRow: (item: T) => React.ReactNode
+  renderCard?: (item: T) => React.ReactNode
   onRowClick?: (item: T) => void
   searchConfig?: {
     placeholder: string
@@ -67,15 +67,33 @@ export interface DataTableProps<T> {
     previous: string
     next: string
   }
+  paginationVariant?: 'default' | 'compact'
   defaultPageSize?: number
   pageSizeOptions?: number[]
   isLoading?: boolean
+  responsiveBreakpoint?: 'md' | 'lg' | 'xl'
 }
+
+const responsiveBreakpointClasses = {
+  md: {
+    mobile: 'md:hidden',
+    desktop: 'hidden md:block',
+  },
+  lg: {
+    mobile: 'lg:hidden',
+    desktop: 'hidden lg:block',
+  },
+  xl: {
+    mobile: 'xl:hidden',
+    desktop: 'hidden xl:block',
+  },
+} as const
 
 export function DataTable<T extends { id: string | number }>({
   data,
   columns,
   renderRow,
+  renderCard,
   onRowClick,
   searchConfig,
   searchValue,
@@ -86,9 +104,11 @@ export function DataTable<T extends { id: string | number }>({
   headerActions,
   emptyState,
   paginationLabels,
+  paginationVariant = 'default',
   defaultPageSize = 10,
   pageSizeOptions = [5, 10, 20, 50],
   isLoading = false,
+  responsiveBreakpoint = 'md',
 }: DataTableProps<T>) {
   const [internalSearch, setInternalSearch] = React.useState('')
   const [currentPage, setCurrentPage] = React.useState(1)
@@ -104,18 +124,28 @@ export function DataTable<T extends { id: string | number }>({
     if (!searchQuery.trim()) return data
     if (isSearchControlled || !searchConfig.onSearch) return data
     return data.filter((item) => searchConfig.onSearch!(searchQuery, item))
-  }, [data, searchQuery, searchConfig, isSearchControlled])
+  }, [data, isSearchControlled, searchConfig, searchQuery])
 
   const filteredData = searchedData
 
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, filterConfig?.value, filterConfigs])
+  }, [filterConfig?.value, filterConfigs, searchQuery])
 
   const totalPages = Math.ceil(filteredData.length / pageSize)
+
+  React.useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
+
   const startIndex = (currentPage - 1) * pageSize
   const endIndex = startIndex + pageSize
   const paginatedData = filteredData.slice(startIndex, endIndex)
+  const responsiveClasses = renderCard
+    ? responsiveBreakpointClasses[responsiveBreakpoint]
+    : null
 
   const handlePageChange = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)))
@@ -132,6 +162,7 @@ export function DataTable<T extends { id: string | number }>({
     (filterConfigs && filterConfigs.length > 0) ||
     dateRangeConfig ||
     headerActions
+
   const firstOpt = filterConfig?.options[0]?.value ?? ''
   const hasActiveFilter =
     filterConfig && filterConfig.value !== '' && filterConfig.value !== firstOpt
@@ -139,6 +170,7 @@ export function DataTable<T extends { id: string | number }>({
 
   const filterChips = React.useMemo(() => {
     const configs = filterConfigs ?? (filterConfig ? [filterConfig] : [])
+
     return configs
       .filter((fc) => {
         if (fc.multiSelect) return fc.value !== ''
@@ -150,10 +182,14 @@ export function DataTable<T extends { id: string | number }>({
           fc.multiSelect && fc.value
             ? fc.value
                 .split(',')
-                .map((v) => fc.options.find((o) => o.value === v)?.label ?? v)
+                .map((value) => {
+                  return fc.options.find((option) => option.value === value)?.label ?? value
+                })
                 .filter(Boolean)
                 .join(', ')
-            : (fc.options.find((o) => o.value === fc.value)?.label ?? fc.value)
+            : (fc.options.find((option) => option.value === fc.value)?.label ??
+              fc.value)
+
         return {
           id: fc.label,
           label: fc.label,
@@ -173,7 +209,7 @@ export function DataTable<T extends { id: string | number }>({
   }
 
   return (
-    <div className="w-full overflow-auto">
+    <div className="w-full min-w-0">
       {hasToolbar && (
         <TableToolbar
           searchConfig={
@@ -209,15 +245,32 @@ export function DataTable<T extends { id: string | number }>({
             />
           ) : filteredData.length > 0 ? (
             <>
-              <div className="overflow-x-auto">
+              {renderCard && responsiveClasses ? (
+                <div className={cn('space-y-3 p-3', responsiveClasses.mobile)}>
+                  {paginatedData.map((item) => (
+                    <div
+                      key={item.id}
+                      className={cn(
+                        onRowClick &&
+                          'cursor-pointer transition-transform active:scale-[0.995]',
+                      )}
+                      onClick={onRowClick ? () => onRowClick(item) : undefined}
+                    >
+                      {renderCard(item)}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              <div className={responsiveClasses?.desktop}>
                 <Table className="[&_td]:px-4 [&_td]:py-3">
                   <TableHeader>
-                    <TableRow className="border-b border-border/60 hover:bg-transparent bg-muted/20">
+                    <TableRow className="border-b border-border/60 bg-muted/20 hover:bg-transparent">
                       {columns.map((col) => (
                         <TableHead
                           key={col.key}
                           className={cn(
-                            'h-11 px-4 font-semibold text-foreground tracking-tight',
+                            'h-11 px-4 font-semibold tracking-tight text-foreground',
                             col.headerClassName,
                           )}
                         >
@@ -245,6 +298,7 @@ export function DataTable<T extends { id: string | number }>({
                   </TableBody>
                 </Table>
               </div>
+
               <TablePagination
                 startIndex={startIndex}
                 endIndex={endIndex}
@@ -256,6 +310,7 @@ export function DataTable<T extends { id: string | number }>({
                 onPageChange={handlePageChange}
                 onPageSizeChange={handlePageSizeChange}
                 labels={paginationLabels}
+                variant={paginationVariant}
               />
             </>
           ) : null}

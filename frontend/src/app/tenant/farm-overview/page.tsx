@@ -30,7 +30,7 @@ export default function FarmOverviewPage() {
 
   return (
     <FeatureGuard featureKey="farm_overview">
-      <div className="flex flex-col h-full min-h-0 gap-6 bg-background">
+      <div className="flex h-full min-h-0 w-full min-w-0 flex-col gap-6 overflow-x-clip bg-background">
         <PageHeader
           title={t.pages.farmOverview.title}
           subtitle={t.pages.farmOverview.subtitle}
@@ -52,7 +52,7 @@ export default function FarmOverviewPage() {
           options={state.greenhouseOptions}
         />
 
-        <div className="flex flex-1 flex-col min-h-0">
+        <div className="flex flex-1 min-h-0 min-w-0 flex-col">
           {state.isCombinedView ? (
             <CombinedGreenhouseView
               greenhouses={state.combinedGreenhouses}
