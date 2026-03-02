@@ -1,25 +1,21 @@
 'use client'
 
 import * as React from 'react'
-import { useI18n } from '@/i18n'
+import { AlertTriangle, CheckCircle, CheckCircle2, Pencil, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { TableCell } from '@/components/ui/table'
-import {
-  CheckCircle2,
-  CheckCircle,
-  AlertTriangle,
-  Pencil,
-  Trash2,
-} from 'lucide-react'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import {
   DataTable,
   type Column,
   type FilterConfigOption,
 } from '@/components/ui/data-table'
-import { Alert, AlertStatus, AlertSeverity, User } from '@/generated/graphql'
+import { TableCell } from '@/components/ui/table'
+import { Alert, AlertSeverity, AlertStatus, User } from '@/generated/graphql'
+import { useI18n } from '@/i18n'
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config'
 import type { AlertsFilterInput } from '@/lib/types/alerts-filter'
+import { cn } from '@/lib/utils'
 
 export type AlertTableUser = Pick<
   User,
@@ -68,10 +64,13 @@ export function AlertTable({
 
   const userOptionsForMulti = React.useMemo(
     () =>
-      users.map((u) => {
+      users.map((user) => {
         const name =
-          [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email || u.id
-        return { label: name, value: u.id }
+          [user.firstName, user.lastName].filter(Boolean).join(' ') ||
+          user.email ||
+          user.id
+
+        return { label: name, value: user.id }
       }),
     [users],
   )
@@ -96,7 +95,7 @@ export function AlertTable({
             statusIn: value
               ? (value
                   .split(',')
-                  .map((v) => v.trim())
+                  .map((item) => item.trim())
                   .filter(Boolean) as AlertStatus[])
               : undefined,
           }),
@@ -112,7 +111,7 @@ export function AlertTable({
             severityIn: value
               ? (value
                   .split(',')
-                  .map((v) => v.trim())
+                  .map((item) => item.trim())
                   .filter(Boolean) as AlertSeverity[])
               : undefined,
           }),
@@ -130,7 +129,7 @@ export function AlertTable({
             acknowledgedByIdIn: value
               ? value
                   .split(',')
-                  .map((v) => v.trim())
+                  .map((item) => item.trim())
                   .filter(Boolean)
               : undefined,
           }),
@@ -148,20 +147,20 @@ export function AlertTable({
             resolvedByIdIn: value
               ? value
                   .split(',')
-                  .map((v) => v.trim())
+                  .map((item) => item.trim())
                   .filter(Boolean)
               : undefined,
           }),
       },
     ],
     [
-      filter.statusIn,
-      filter.severityIn,
+      alertsT,
       filter.acknowledgedByIdIn,
       filter.resolvedByIdIn,
-      userOptionsForMulti,
+      filter.severityIn,
+      filter.statusIn,
       onFilterChange,
-      alertsT,
+      userOptionsForMulti,
     ],
   )
 
@@ -242,6 +241,7 @@ export function AlertTable({
 
   const formatFieldLabel = (field?: string | null) => {
     if (!field) return '-'
+
     const labels: Record<string, string> = {
       temperature: 'Temperature',
       humidity: 'Humidity',
@@ -252,8 +252,28 @@ export function AlertTable({
       par: 'PAR',
       co2: 'CO2',
     }
-    return labels[field] ?? field.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+
+    return (
+      labels[field] ??
+      field.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
+    )
   }
+
+  const formatUser = (user?: Alert['acknowledgedBy']) => {
+    if (!user) return '-'
+    const name = [user.firstName, user.lastName].filter(Boolean).join(' ')
+    return name || user.email || '-'
+  }
+
+  const getActionState = (alert: Alert) => ({
+    canAcknowledge:
+      alert.status === AlertStatus.Open && alert.acknowledgedBy == null,
+    canResolve:
+      (alert.status === AlertStatus.Open ||
+        alert.status === AlertStatus.Acknowledged) &&
+      alert.resolvedBy == null &&
+      alert.acknowledgedBy != null,
+  })
 
   const columns: Column<Alert>[] = [
     { key: 'sensorName', header: t.pages.alerts.sensorName },
@@ -274,32 +294,101 @@ export function AlertTable({
   const sortedAlerts = React.useMemo(
     () =>
       [...alerts].sort(
-        (a, b) => getTimestampMs(b.timestamp) - getTimestampMs(a.timestamp),
+        (left, right) => getTimestampMs(right.timestamp) - getTimestampMs(left.timestamp),
       ),
     [alerts],
   )
 
   const hideEditButton = true
+  const hasSecondaryActions = Boolean((onEdit && !hideEditButton) || onDelete)
+
+  const renderPrimaryActions = (alert: Alert, stacked = false) => {
+    const { canAcknowledge, canResolve } = getActionState(alert)
+
+    if (!canAcknowledge && !canResolve) return null
+
+    return (
+      <div
+        className={cn(
+          'flex gap-2',
+          stacked ? 'flex-col sm:flex-row' : 'justify-end',
+        )}
+      >
+        {canAcknowledge && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(event) => {
+              event.stopPropagation()
+              onAcknowledge(alert)
+            }}
+            disabled={isLoading}
+            className={cn('gap-1.5', stacked && 'w-full sm:w-auto')}
+          >
+            {t.pages.alerts.acknowledge}
+          </Button>
+        )}
+        {canResolve && (
+          <Button
+            variant="default"
+            size="sm"
+            onClick={(event) => {
+              event.stopPropagation()
+              onResolve(alert)
+            }}
+            disabled={isLoading}
+            className={stacked ? 'w-full sm:w-auto' : undefined}
+          >
+            {t.pages.alerts.resolve}
+          </Button>
+        )}
+      </div>
+    )
+  }
+
+  const renderSecondaryActions = (alert: Alert) => (
+    <>
+      {onEdit && !hideEditButton && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(event) => {
+            event.stopPropagation()
+            onEdit(alert)
+          }}
+          disabled={isLoading}
+          className="h-8 w-8 rounded-full border border-sky-200/80 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/70 dark:text-sky-300 dark:hover:bg-sky-950/40"
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+      )}
+      {onDelete && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(event) => {
+            event.stopPropagation()
+            onDelete(alert)
+          }}
+          disabled={isLoading}
+          className="h-8 w-8 rounded-full border border-rose-200/80 text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-900/70 dark:text-rose-300 dark:hover:bg-rose-950/40"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
+    </>
+  )
+
+  const hasAnyActions = (alert: Alert) => {
+    const { canAcknowledge, canResolve } = getActionState(alert)
+    return canAcknowledge || canResolve || hasSecondaryActions
+  }
 
   const renderRow = (alert: Alert) => {
-    const canAcknowledge =
-      alert.status === AlertStatus.Open && alert.acknowledgedBy == null
-    const canResolve =
-      (alert.status === AlertStatus.Open ||
-        alert.status === AlertStatus.Acknowledged) &&
-      alert.resolvedBy == null &&
-      alert.acknowledgedBy != null
-
     const rowClassName = getRowClassName(alert)
     const isResolved = alert.status === AlertStatus.Resolved
     const textClassName = isResolved ? 'text-muted-foreground' : ''
     const cellClassName = `${rowClassName} ${textClassName}`.trim()
-
-    const formatUser = (user?: Alert['acknowledgedBy']) => {
-      if (!user) return '-'
-      const name = [user.firstName, user.lastName].filter(Boolean).join(' ')
-      return name || user.email || '-'
-    }
 
     return (
       <>
@@ -326,65 +415,95 @@ export function AlertTable({
           {formatUser(alert.resolvedBy)}
         </TableCell>
         <TableCell className={`text-right ${cellClassName}`.trim()}>
-          <div className="flex justify-end gap-2">
-            {canAcknowledge && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onAcknowledge(alert)
-                }}
-                disabled={isLoading}
-                className="gap-1.5"
-              >
-                {t.pages.alerts.acknowledge}
-              </Button>
-            )}
-            {canResolve && (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onResolve(alert)
-                }}
-                disabled={isLoading}
-              >
-                {t.pages.alerts.resolve}
-              </Button>
-            )}
-            {onEdit && !hideEditButton && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onEdit(alert)
-                }}
-                disabled={isLoading}
-                className="h-8 w-8 rounded-full border border-sky-200/80 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/70 dark:text-sky-300 dark:hover:bg-sky-950/40"
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onDelete(alert)
-                }}
-                disabled={isLoading}
-                className="h-8 w-8 rounded-full border border-rose-200/80 text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-900/70 dark:text-rose-300 dark:hover:bg-rose-950/40"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+          <div className="flex items-center justify-end gap-2">
+            {renderPrimaryActions(alert)}
+            {hasSecondaryActions ? renderSecondaryActions(alert) : null}
           </div>
         </TableCell>
       </>
+    )
+  }
+
+  const renderCard = (alert: Alert) => {
+    const rowClassName = getRowClassName(alert)
+    const isResolved = alert.status === AlertStatus.Resolved
+    const textClassName = isResolved ? 'text-muted-foreground' : ''
+    const details = [
+      {
+        label: t.pages.alerts.field ?? 'Parameter',
+        value: formatFieldLabel(alert.field),
+      },
+      {
+        label: t.pages.alerts.value,
+        value: alert.value,
+      },
+      {
+        label: t.pages.alerts.timestamp,
+        value: formatTimestamp(alert.timestamp),
+      },
+      {
+        label: t.pages.alerts.acknowledgedBy,
+        value: formatUser(alert.acknowledgedBy),
+      },
+      {
+        label: t.pages.alerts.resolvedBy,
+        value: formatUser(alert.resolvedBy),
+      },
+    ]
+
+    return (
+      <Card
+        className={cn(
+          'gap-0 overflow-hidden border border-border/60 py-0 shadow-none',
+          rowClassName,
+        )}
+      >
+        <CardContent className="px-4 py-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className={cn('min-w-0', textClassName)}>
+                <p className="break-words text-base font-semibold">
+                  {alert.sensorName}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {formatFieldLabel(alert.field)}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {getStatusBadge(alert.status)}
+                {getSeverityBadge(alert.severity)}
+              </div>
+            </div>
+
+            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {details.map((detail) => (
+                <div
+                  key={detail.label}
+                  className="rounded-lg border border-border/50 bg-background/80 px-3 py-2"
+                >
+                  <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    {detail.label}
+                  </dt>
+                  <dd className={cn('mt-1 break-words text-sm', textClassName)}>
+                    {detail.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </CardContent>
+
+        {hasAnyActions(alert) ? (
+          <CardFooter className="flex-col items-stretch gap-3 border-t border-border/50 px-4 py-4">
+            {renderPrimaryActions(alert, true)}
+            {hasSecondaryActions ? (
+              <div className="flex items-center justify-end gap-2">
+                {renderSecondaryActions(alert)}
+              </div>
+            ) : null}
+          </CardFooter>
+        ) : null}
+      </Card>
     )
   }
 
@@ -393,6 +512,7 @@ export function AlertTable({
       data={sortedAlerts}
       columns={columns}
       renderRow={renderRow}
+      renderCard={renderCard}
       onRowClick={onRowClick}
       searchConfig={{
         placeholder:
@@ -417,9 +537,11 @@ export function AlertTable({
         description: t.pages.alerts.noAlertsDescription,
       }}
       isLoading={tableLoading}
+      paginationVariant="compact"
       defaultPageSize={paginationConfig.defaultPageSize}
       pageSizeOptions={paginationConfig.pageSizeOptions}
       paginationLabels={paginationConfig.paginationLabels}
+      responsiveBreakpoint="xl"
     />
   )
 }
