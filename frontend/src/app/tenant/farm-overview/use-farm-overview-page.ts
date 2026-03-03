@@ -104,8 +104,11 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   );
 
   const parameterOptions = React.useMemo(() => {
+    // Base options: all available fields
+    let allOptions: { label: string; value: string }[];
+
     if (bucketFields.length === 0) {
-      return [
+      allOptions = [
         { label: t.temperature, value: 'temperature' },
         { label: t.humidity, value: 'humidity' },
         { label: t.co2, value: 'co2' },
@@ -114,26 +117,41 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         { label: t.vpd, value: 'vpd' },
         { label: t.par, value: 'par' },
       ];
+    } else {
+      const hasPar = bucketFields.includes('par');
+      const hasParEstimated = bucketFields.includes('par_estimated');
+      const baseFields = bucketFields.filter(
+        (f) => f !== 'lux' && f !== 'par' && f !== 'par_estimated',
+      );
+      allOptions = baseFields.map((field) => ({
+        label: formatFieldToLabel(field),
+        value: field,
+      }));
+      const parField: ParameterType | null = hasParEstimated
+        ? 'par_estimated'
+        : hasPar
+          ? 'par'
+          : null;
+      if (parField) {
+        allOptions.push({ label: formatFieldToLabel('par'), value: parField });
+      }
     }
-    const hasPar = bucketFields.includes('par');
-    const hasParEstimated = bucketFields.includes('par_estimated');
-    const baseFields = bucketFields.filter(
-      (f) => f !== 'lux' && f !== 'par' && f !== 'par_estimated',
+
+    // In combined view show all fields; in single greenhouse views, restrict to key climate sensors
+    if (activeGreenhouseTab === 0) {
+      return allOptions;
+    }
+    const allowedSingle: ParameterType[] = [
+      'temperature',
+      'humidity',
+      'vpd',
+      'par',
+      'par_estimated',
+    ];
+    return allOptions.filter((opt) =>
+      allowedSingle.includes(opt.value as ParameterType),
     );
-    const options = baseFields.map((field) => ({
-      label: formatFieldToLabel(field),
-      value: field,
-    }));
-    const parField: ParameterType | null = hasParEstimated
-      ? 'par_estimated'
-      : hasPar
-        ? 'par'
-        : null;
-    if (parField) {
-      options.push({ label: formatFieldToLabel('par'), value: parField });
-    }
-    return options;
-  }, [bucketFields, t]);
+  }, [bucketFields, t, activeGreenhouseTab]);
 
   const effectiveParameter =
     selectedParameter && bucketFields.includes(selectedParameter)
@@ -145,6 +163,15 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       setSelectedParameter(bucketFields[0]);
     }
   }, [bucketFields, selectedParameter]);
+
+  // Ensure selectedParameter is one of the visible options for the current tab
+  React.useEffect(() => {
+    const visibleKeys = new Set(parameterOptions.map((o) => o.value));
+    if (!visibleKeys.has(selectedParameter)) {
+      const fallback = (parameterOptions[0]?.value as ParameterType) ?? 'temperature';
+      setSelectedParameter(fallback);
+    }
+  }, [parameterOptions, selectedParameter]);
 
   React.useEffect(() => {
     if (selectedSlotId) setHistoryDrawerOpen(true);
@@ -180,9 +207,11 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     return bays;
   }, [activeGreenhouseTab, greenhouseBays, bays]);
 
+  // For now PAR data is only available for greenhouse_01 and light is shared,
+  // so use the same greenhouse id for both Green House 1 and 2 graphs.
   const greenhouseId = React.useMemo(
-    () => (activeGreenhouseTab === 1 ? 'greenhouse_01' : 'greenhouse_02'),
-    [activeGreenhouseTab],
+    () => 'greenhouse_01',
+    [],
   );
 
   const greenhouseLabel = React.useMemo(

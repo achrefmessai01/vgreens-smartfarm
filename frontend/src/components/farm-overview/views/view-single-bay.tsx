@@ -8,113 +8,15 @@ import {
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/i18n';
-import {
-  bayHasDynamicPositions,
-  getSlotPositionsFromBay,
-} from '@/lib/sensor-map-positions';
 import { Card } from '@/components/ui/card';
-import type { Bay, ParameterType, PlantSlot } from '@/lib/farm-types';
-import { isParameterSupportedByType } from '@/lib/sensor-map-parameter';
-import { idwInterpolate, type HeatmapPoint } from '@/lib/heatmap-utils';
+import { Button } from '@/components/ui/button';
+import { idwInterpolate } from '@/lib/heatmap-utils';
+import { useFullMapData } from './view-single-bay.hooks';
+import type { ViewSingleBayProps } from './view-single-bay.types';
 import { getLegendScale } from '@/components/farm-overview/parameter-color-legend';
 
 const HEATMAP_GRID_COLS = 80;
 const HEATMAP_GRID_ROWS = 40;
-
-interface SensorWithPosition {
-  slot: PlantSlot | null;
-  deviceId: string;
-  value: number | null;
-  leftPercent: number;
-  topPercent: number;
-  /** Unique key for this map position (same device can appear in multiple bays) */
-  positionKey: string;
-}
-
-interface ViewSingleBayProps {
-  bays: Bay[];
-  parameter: ParameterType;
-  selectedSlotId: string | null;
-  onSelectSlot: (slotId: string | null) => void;
-  bayLabel?: string;
-  parameterLabel?: string;
-  noSensorLabel?: string;
-  className?: string;
-  showOnlyFilledPositions?: boolean;
-}
-
-function useFullMapData(
-  bays: Bay[],
-  parameter: ParameterType,
-  showOnlyFilledPositions: boolean,
-): {
-  sensors: SensorWithPosition[];
-  heatmapPoints: HeatmapPoint[];
-  globalMin: number;
-  globalMax: number;
-  hasAnyData: boolean;
-} {
-  return React.useMemo(() => {
-    const sensors: SensorWithPosition[] = [];
-    const heatmapPoints: HeatmapPoint[] = [];
-    let globalMin = Infinity;
-    let globalMax = -Infinity;
-
-    const useDynamic =
-      bays.length > 0 && bays.some((b) => bayHasDynamicPositions(b));
-
-    if (useDynamic) {
-      for (const bay of bays) {
-        const positions = getSlotPositionsFromBay(bay);
-        for (const p of positions) {
-          if (!isParameterSupportedByType(parameter, p.type)) continue;
-          const value =
-            typeof p.slot.values?.[parameter] === 'number'
-              ? (p.slot.values[parameter] as number)
-              : null;
-          const numValue = value != null && !Number.isNaN(value) ? value : null;
-          if (!p.slot && showOnlyFilledPositions) continue;
-          if (showOnlyFilledPositions && numValue == null) continue;
-
-          const positionKey = `${p.slot.id}-${p.leftPercent}-${p.topPercent}`;
-          sensors.push({
-            slot: p.slot,
-            deviceId: p.deviceId,
-            value: numValue,
-            leftPercent: p.leftPercent,
-            topPercent: p.topPercent,
-            positionKey,
-          });
-          if (numValue != null) {
-            heatmapPoints.push({
-              x: p.leftPercent,
-              y: p.topPercent,
-              value: numValue,
-            });
-            globalMin = Math.min(globalMin, numValue);
-            globalMax = Math.max(globalMax, numValue);
-          }
-        }
-      }
-    }
-
-    if (globalMin === Infinity) globalMin = 0;
-    if (globalMax === -Infinity) globalMax = 1;
-    if (globalMin === globalMax) {
-      globalMin = globalMin - 1;
-      globalMax = globalMax + 1;
-    }
-    const hasAnyData = heatmapPoints.length > 0;
-
-    return {
-      sensors,
-      heatmapPoints,
-      globalMin,
-      globalMax,
-      hasAnyData,
-    };
-  }, [bays, parameter, showOnlyFilledPositions]);
-}
 
 export function ViewSingleBay({
   bays,
@@ -187,13 +89,12 @@ export function ViewSingleBay({
               const displayValue =
                 value != null ? formatParameterDisplayValue(value) : '--';
               return (
-                <button
+                <Button
                   key={positionKey}
                   type="button"
+                  variant="ghost"
                   onClick={() =>
-                    onSelectSlot(
-                      slot ? (isSelected ? null : slot.id) : null,
-                    )
+                    onSelectSlot(slot ? (isSelected ? null : slot.id) : null)
                   }
                   disabled={!slot}
                   title={
@@ -202,11 +103,13 @@ export function ViewSingleBay({
                       : deviceId
                   }
                   className={cn(
-                    'absolute max-w-[4rem] truncate text-[9px] font-medium tabular-nums text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] sm:max-w-[5.5rem] sm:text-[11px] lg:max-w-none lg:text-xs',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                    'absolute inline-flex flex-col items-center justify-center px-0.5',
+                    'h-auto border-none bg-transparent hover:bg-transparent',
+                    'text-[10px] sm:text-[14px] font-bold tabular-nums text-black',
+                    'drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]',
+                    'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
                     slot && 'cursor-pointer',
-                    isSelected &&
-                      'ring-2 ring-primary ring-offset-1 rounded',
+                    isSelected && 'ring-2 ring-primary ring-offset-1 rounded',
                   )}
                   style={{
                     left: `${leftPercent}%`,
@@ -221,13 +124,19 @@ export function ViewSingleBay({
                 >
                   {value != null ? (
                     <>
-                      <span>{displayValue}</span>
-                      {unit ? <span className="hidden sm:inline">{` ${unit}`}</span> : null}
+                      <span className="leading-tight tracking-tight">
+                        {displayValue}
+                      </span>
+                      {unit ? (
+                        <span className="text-[10px] font-medium opacity-85 leading-tight">
+                          {unit}
+                        </span>
+                      ) : null}
                     </>
                   ) : (
-                    '--'
+                    <span>--</span>
                   )}
-                </button>
+                </Button>
               );
             },
           )}
