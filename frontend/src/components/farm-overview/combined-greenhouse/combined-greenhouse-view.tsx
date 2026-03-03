@@ -23,6 +23,7 @@ export interface CombinedGreenhouseViewProps {
   noDataMessage: string;
   parGraphGreenhouseId: string;
   parGraphLabel: string;
+  onParameterClick?: (greenhouseIndex: number, parameterKey: string) => void;
 }
 
 function orderParameters(parameters: ParameterOption[]): ParameterOption[] {
@@ -48,6 +49,7 @@ export function CombinedGreenhouseView({
   noDataMessage,
   parGraphGreenhouseId,
   parGraphLabel,
+  onParameterClick,
 }: CombinedGreenhouseViewProps) {
   const orderedParameters = React.useMemo(
     () => orderParameters(parameters),
@@ -86,7 +88,7 @@ export function CombinedGreenhouseView({
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="grid grid-cols-1 gap-1 pb-1 content-start items-stretch sm:grid-cols-2 sm:gap-2 xl:[grid-template-columns:repeat(auto-fit,minmax(10.75rem,1fr))]">
-        {greenhouses.map((greenhouse) => (
+        {greenhouses.map((greenhouse, index) => (
           <GreenhouseSummaryCard
             key={greenhouse.key}
             title={greenhouse.label}
@@ -94,6 +96,7 @@ export function CombinedGreenhouseView({
             parameters={orderedParameters}
             noDataMessage={noDataMessage}
             valueOverride={valueOverride}
+            onParameterClick={onParameterClick ? (parameterKey) => onParameterClick(index, parameterKey) : undefined}
           />
         ))}
       </div>
