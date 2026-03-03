@@ -15,6 +15,7 @@ export interface GreenhouseSummaryCardProps {
   bay: Bay | null;
   parameters: ParameterOption[];
   noDataMessage: string;
+  valueOverride?: (parameterKey: string) => number | null | undefined;
 }
 
 export function GreenhouseSummaryCard({
@@ -22,6 +23,7 @@ export function GreenhouseSummaryCard({
   bay,
   parameters,
   noDataMessage,
+  valueOverride,
 }: GreenhouseSummaryCardProps) {
   return (
     <Card className="w-full gap-0 py-0 overflow-hidden rounded-sm transition-shadow duration-700 ease-out hover:shadow-md">
@@ -36,13 +38,15 @@ export function GreenhouseSummaryCard({
         </p>
       )}
       <CardContent className="p-0">
-        {parameters.map((parameter, index) => (
+        {parameters.map((parameter) => (
           <ParameterRow
             key={parameter.value}
             parameterKey={parameter.value}
             parameterLabel={parameter.label}
-            value={getAverageParameterValue(bay, parameter.value)}
-            isLast={index === parameters.length - 1}
+            value={
+              valueOverride?.(parameter.value) ??
+              getAverageParameterValue(bay, parameter.value)
+            }
           />
         ))}
       </CardContent>
