@@ -20,8 +20,23 @@ export const BAY_COUNT = 13;
 /** Total pole rows (vertical). Pole = which row to show. */
 export const POLES_MAX = 10;
 
-/** Rows per bay for discrete grid (same as pole count). */
-export const ROWS_PER_BAY = POLES_MAX;
+/** Pole rows hidden from the UI. Values are 1-based to match InfluxDB metadata. */
+export const HIDDEN_POLE_ROWS = [5] as const;
+
+const HIDDEN_POLE_ROW_SET = new Set<number>(HIDDEN_POLE_ROWS);
+
+/** Pole rows that remain visible after filtering hidden rows. */
+export const VISIBLE_POLE_ROWS = Array.from(
+  { length: POLES_MAX },
+  (_, index) => index + 1,
+).filter((pole) => !HIDDEN_POLE_ROW_SET.has(pole));
+
+/** Rows per bay for discrete grid after hidden pole rows are removed. */
+export const ROWS_PER_BAY = VISIBLE_POLE_ROWS.length;
+
+export function isPoleRowHidden(pole: number): boolean {
+  return HIDDEN_POLE_ROW_SET.has(Math.round(pole));
+}
 
 /**
  * Compute map position from bay and pole only.
@@ -33,9 +48,13 @@ export function getPositionFromBayPole(
 ): { leftPercent: number; topPercent: number } {
   const bay1 = Math.max(1, Math.min(BAY_COUNT, Math.round(bay)));
   const pole1 = Math.max(1, Math.min(POLES_MAX, Math.round(pole)));
+  const visiblePoleIndex = VISIBLE_POLE_ROWS.indexOf(pole1);
 
   const leftPercent = ((bay1 - 0.5) / BAY_COUNT) * 100;
-  const topPercent = ((pole1 - 0.5) / POLES_MAX) * 100;
+  const topPercent =
+    visiblePoleIndex >= 0
+      ? ((visiblePoleIndex + 0.5) / ROWS_PER_BAY) * 100
+      : ((pole1 - 0.5) / POLES_MAX) * 100;
 
   return { leftPercent, topPercent };
 }
@@ -83,6 +102,12 @@ export function getSlotPositionsFromBay(bay: Bay): SlotWithPosition[] {
         }
         const bayNum = Number(rawBay);
         const poleNum = Number(rawPole);
+        if (isPoleRowHidden(poleNum)) continue;
+
+        const visiblePole = Math.max(1, Math.min(POLES_MAX, Math.round(poleNum)));
+        const rowIndex = VISIBLE_POLE_ROWS.indexOf(visiblePole);
+        if (rowIndex < 0) continue;
+
         const deviceId = getDeviceIdFromSlotId(slot.id);
         if (!deviceId) continue;
         const { leftPercent, topPercent } = getPositionFromBayPole(
@@ -93,10 +118,6 @@ export function getSlotPositionsFromBay(bay: Bay): SlotWithPosition[] {
         const bayIndex = Math.min(
           BAY_COUNT - 1,
           Math.max(0, Math.floor(bayNum) - 1),
-        );
-        const rowIndex = Math.min(
-          POLES_MAX - 1,
-          Math.max(0, Math.round(poleNum) - 1),
         );
         out.push({
           slot,

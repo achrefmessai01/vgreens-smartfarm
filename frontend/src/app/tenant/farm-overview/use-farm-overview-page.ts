@@ -8,31 +8,22 @@ import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data';
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
 import { UserRole, useTenantsQuery, type Tenant } from '@/generated/graphql';
+import {
+  ALLOWED_SINGLE_GREENHOUSE_PARAMETERS,
+  GREENHOUSE_LABEL_KEYS,
+  PARAM_GREENHOUSE,
+  PARAM_PARAMETER,
+  PARAM_VIEW_MODE,
+} from './farm-overview.constants';
+import type { FarmOverviewTranslations } from './farm-overview.types';
+import {
+  parseGreenhouseTab,
+  parseParameter,
+  parseViewMode,
+  syncFarmOverviewStateToUrl,
+} from './farm-overview.utils';
 
-const GREENHOUSE_LABEL_KEYS = [
-  'combined',
-  'greenHouse1',
-  'greenHouse2',
-] as const;
-
-export interface FarmOverviewTranslations {
-  combined: string;
-  greenHouse1: string;
-  greenHouse2: string;
-  temperature: string;
-  humidity: string;
-  co2: string;
-  soilEC: string;
-  soilMoisture: string;
-  vpd: string;
-  par: string;
-  viewHeatmap: string;
-  viewDiscrete: string;
-  viewGraph: string;
-  emptyForNow?: string;
-  noSensor: string;
-  noData: string;
-}
+export type { FarmOverviewTranslations } from './farm-overview.types';
 
 export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const { role } = useCurrentUser();
@@ -87,16 +78,25 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     tenantBucketName: tenantBucketNameOverride,
   });
 
+  const tabFromUrl = parseGreenhouseTab(searchParams.get(PARAM_GREENHOUSE));
+  const paramFromUrl = parseParameter(searchParams.get(PARAM_PARAMETER));
+  const modeFromUrl = parseViewMode(searchParams.get(PARAM_VIEW_MODE));
+
   const [selectedParameter, setSelectedParameter] =
-    React.useState<ParameterType>('temperature');
+    React.useState<ParameterType>(paramFromUrl);
   const [selectedSlotId, setSelectedSlotId] = React.useState<string | null>(
     null,
   );
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false);
   const [viewMode, setViewMode] = React.useState<
     'heatmap' | 'discrete' | 'graph'
-  >('discrete');
-  const [activeGreenhouseTab, setActiveGreenhouseTab] = React.useState(0);
+  >(modeFromUrl);
+  const [activeGreenhouseTab, setActiveGreenhouseTab] =
+    React.useState(tabFromUrl);
+
+  React.useEffect(() => {
+    syncFarmOverviewStateToUrl(activeGreenhouseTab, selectedParameter, viewMode);
+  }, [activeGreenhouseTab, selectedParameter, viewMode]);
 
   const greenhouseOptions = React.useMemo(
     () => GREENHOUSE_LABEL_KEYS.map((key) => ({ key, label: t[key] })),
@@ -141,15 +141,8 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     if (activeGreenhouseTab === 0) {
       return allOptions;
     }
-    const allowedSingle: ParameterType[] = [
-      'temperature',
-      'humidity',
-      'vpd',
-      'par',
-      'par_estimated',
-    ];
     return allOptions.filter((opt) =>
-      allowedSingle.includes(opt.value as ParameterType),
+      ALLOWED_SINGLE_GREENHOUSE_PARAMETERS.includes(opt.value as ParameterType),
     );
   }, [bucketFields, t, activeGreenhouseTab]);
 
