@@ -12,6 +12,7 @@ import { PageHeader } from '@/components/layout/page-header';
 import { TenantSelector } from '@/components/tenants';
 import { useI18n } from '@/i18n';
 import { useFarmOverviewPage } from './use-farm-overview-page';
+import { ParameterType } from '@/lib/farm-types';
 
 export default function FarmOverviewPage() {
   const { t } = useI18n();
@@ -62,7 +63,7 @@ export default function FarmOverviewPage() {
               parGraphLabel={state.labels.combined}
               onParameterClick={(greenhouseIndex, parameterKey) => {
                 state.setActiveGreenhouseTab(greenhouseIndex + 1);
-                state.setSelectedParameter(parameterKey as any);
+                state.setSelectedParameter(parameterKey as ParameterType);
               }}
             />
           ) : (
