@@ -1,7 +1,13 @@
-"use client";
+'use client';
+
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+
+type ViewMode = 'heatmap' | 'discrete' | 'graph';
+
 interface ViewModeSelectorProps {
-  value: "heatmap" | "discrete" | "graph";
-  onValueChange: (value: "heatmap" | "discrete" | "graph") => void;
+  value: ViewMode;
+  onValueChange: (value: ViewMode) => void;
   heatmapLabel: string;
   discreteLabel: string;
   graphLabel?: string;
@@ -13,66 +19,40 @@ export function ViewModeSelector({
   onValueChange,
   heatmapLabel,
   discreteLabel,
-  graphLabel = "Graph",
+  graphLabel = 'Graph',
   showGraphOption = false,
 }: ViewModeSelectorProps) {
+  const modes: { key: ViewMode; label: string; visible: boolean }[] = [
+    { key: 'heatmap', label: heatmapLabel, visible: true },
+    { key: 'discrete', label: discreteLabel, visible: true },
+    { key: 'graph', label: graphLabel, visible: showGraphOption },
+  ];
+
+  const visibleModes = modes.filter((m) => m.visible);
+
   return (
     <div
-      className={`
-        grid w-full min-w-0 rounded-2xl bg-muted/40 p-1 dark:bg-muted/20
-        ${showGraphOption ? 'grid-cols-3' : 'grid-cols-2'}
-        sm:inline-flex sm:w-auto sm:grid-cols-none sm:items-center sm:rounded-full sm:p-0.5
-      `}
-    >
-      <button
-        type="button"
-        onClick={() => onValueChange("heatmap")}
-        className={`
-          min-w-0 rounded-xl px-2.5 py-2 text-[11px] font-semibold leading-tight text-center transition-colors duration-150
-          sm:rounded-full sm:px-3 sm:py-1 sm:text-xs
-          ${
-            value === "heatmap"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }
-        `}
-      >
-        {heatmapLabel}
-      </button>
-
-      <button
-        type="button"
-        onClick={() => onValueChange("discrete")}
-        className={`
-          min-w-0 rounded-xl px-2.5 py-2 text-[11px] font-semibold leading-tight text-center transition-colors duration-150
-          sm:rounded-full sm:px-3 sm:py-1 sm:text-xs
-          ${
-            value === "discrete"
-              ? "bg-emerald-400 text-black shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }
-        `}
-      >
-        {discreteLabel}
-      </button>
-
-      {showGraphOption && (
-        <button
-          type="button"
-          onClick={() => onValueChange("graph")}
-          className={`
-            min-w-0 rounded-xl px-2.5 py-2 text-[11px] font-semibold leading-tight text-center transition-colors duration-150
-            sm:rounded-full sm:px-3 sm:py-1 sm:text-xs
-            ${
-              value === "graph"
-                ? "bg-sky-500 text-white shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }
-          `}
-        >
-          {graphLabel}
-        </button>
+      className={cn(
+        'grid w-full min-w-0 rounded-2xl bg-muted/40 p-1 dark:bg-muted/20 gap-1',
+        visibleModes.length === 3 ? 'grid-cols-3' : 'grid-cols-2',
+        'sm:inline-flex sm:w-auto sm:grid-cols-none sm:items-center sm:rounded-full sm:p-0.5',
       )}
+    >
+      {visibleModes.map((mode) => {
+        const isActive = value === mode.key;
+        return (
+          <Button
+            key={mode.key}
+            type="button"
+            size="sm"
+            variant={isActive ? 'default' : 'ghost'}
+            onClick={() => onValueChange(mode.key)}
+            className="rounded-xl h-6 text-sm font-medium leading-tight"
+          >
+            {mode.label}
+          </Button>
+        );
+      })}
     </div>
   );
 }

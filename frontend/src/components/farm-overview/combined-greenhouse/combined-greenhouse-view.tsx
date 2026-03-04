@@ -8,6 +8,8 @@ import {
 import { Card } from '@/components/ui/card';
 import type { Bay } from '@/lib/farm-types';
 import { PARAMETER_PRIORITY } from '@/lib/parameter-status';
+import { ParGraphSection } from '@/components/farm-overview';
+import { getAverageParameterValue } from '@/lib/bay-parameter-utils';
 
 export interface CombinedGreenhouse {
   key: string;
@@ -19,6 +21,9 @@ export interface CombinedGreenhouseViewProps {
   greenhouses: CombinedGreenhouse[];
   parameters: ParameterOption[];
   noDataMessage: string;
+  parGraphGreenhouseId: string;
+  parGraphLabel: string;
+  onParameterClick?: (greenhouseIndex: number, parameterKey: string) => void;
 }
 
 function orderParameters(parameters: ParameterOption[]): ParameterOption[] {
@@ -42,21 +47,37 @@ export function CombinedGreenhouseView({
   greenhouses,
   parameters,
   noDataMessage,
+  parGraphGreenhouseId,
+  parGraphLabel,
+  onParameterClick,
 }: CombinedGreenhouseViewProps) {
   const orderedParameters = React.useMemo(
     () => orderParameters(parameters),
     [parameters],
   );
 
-  if (orderedParameters.length === 0) {
-    return (
-      <Card className="h-full min-h-0 flex items-center justify-center p-6 rounded-sm">
-        <p className="text-sm text-muted-foreground">{noDataMessage}</p>
-      </Card>
-    );
-  }
+  const sharedParValue = React.useMemo(() => {
+    const referenceBay = greenhouses[0]?.bay ?? greenhouses[1]?.bay ?? null;
+    if (!referenceBay) return null;
+    // Use whichever PAR-like field is present in parameters
+    const parKey =
+      orderedParameters.find(
+        (p) => p.value === 'par' || p.value === 'par_estimated',
+      )?.value ?? 'par';
+    return getAverageParameterValue(referenceBay, parKey);
+  }, [greenhouses, orderedParameters]);
 
-  if (greenhouses.length === 0) {
+  const valueOverride = React.useCallback(
+    (parameterKey: string) => {
+      if (parameterKey === 'par' || parameterKey === 'par_estimated') {
+        return sharedParValue;
+      }
+      return null;
+    },
+    [sharedParValue],
+  );
+
+  if (orderedParameters.length === 0 || greenhouses.length === 0) {
     return (
       <Card className="h-full min-h-0 flex items-center justify-center p-6 rounded-sm">
         <p className="text-sm text-muted-foreground">{noDataMessage}</p>
@@ -65,16 +86,28 @@ export function CombinedGreenhouseView({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-1 pb-1 content-start items-stretch sm:grid-cols-2 sm:gap-2 xl:[grid-template-columns:repeat(auto-fit,minmax(10.75rem,1fr))]">
-      {greenhouses.map((greenhouse) => (
-        <GreenhouseSummaryCard
-          key={greenhouse.key}
-          title={greenhouse.label}
-          bay={greenhouse.bay}
-          parameters={orderedParameters}
-          noDataMessage={noDataMessage}
-        />
-      ))}
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="grid grid-cols-1 gap-1 pb-1 content-start items-stretch sm:grid-cols-2 sm:gap-2 xl:[grid-template-columns:repeat(auto-fit,minmax(10.75rem,1fr))]">
+        {greenhouses.map((greenhouse, index) => (
+          <GreenhouseSummaryCard
+            key={greenhouse.key}
+            title={greenhouse.label}
+            bay={greenhouse.bay}
+            parameters={orderedParameters}
+            noDataMessage={noDataMessage}
+            valueOverride={valueOverride}
+            onParameterClick={onParameterClick ? (parameterKey) => onParameterClick(index, parameterKey) : undefined}
+          />
+        ))}
+      </div>
+
+      <ParGraphSection
+        bay={null}
+        greenhouseId={parGraphGreenhouseId}
+        greenhouseLabel={parGraphLabel}
+        embedded
+        className="h-full w-full"
+      />
     </div>
   );
 }

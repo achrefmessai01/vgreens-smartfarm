@@ -58,6 +58,12 @@ export default function FarmOverviewPage() {
               greenhouses={state.combinedGreenhouses}
               parameters={state.parameterOptions}
               noDataMessage={state.labels.noData}
+              parGraphGreenhouseId="greenhouse_01"
+              parGraphLabel={state.labels.combined}
+              onParameterClick={(greenhouseIndex, parameterKey) => {
+                state.setActiveGreenhouseTab(greenhouseIndex + 1);
+                state.setSelectedParameter(parameterKey as any);
+              }}
             />
           ) : (
             <FarmOverviewCard
