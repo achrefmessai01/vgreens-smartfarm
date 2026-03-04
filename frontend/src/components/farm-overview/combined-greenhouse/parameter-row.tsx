@@ -13,46 +13,77 @@ export interface ParameterRowProps {
   parameterKey: string;
   parameterLabel: string;
   value: number | null;
-  isLast?: boolean;
+  onClick?: () => void;
 }
 
 export function ParameterRow({
   parameterKey,
   parameterLabel,
   value,
-  isLast,
+  onClick,
 }: ParameterRowProps) {
   const status: ParameterStatus = getParameterStatus(parameterKey, value);
   const unit = getDisplayUnit(parameterKey);
 
+  const textColor =
+    status === 'normal'
+      ? 'text-emerald-600 dark:text-emerald-400'
+      : status === 'warning'
+      ? 'text-amber-600 dark:text-amber-400'
+      : status === 'critical'
+      ? 'text-destructive'
+      : 'text-muted-foreground';
+
+  const dotColor =
+    status === 'normal'
+      ? 'bg-emerald-500'
+      : status === 'warning'
+      ? 'bg-amber-400'
+      : status === 'critical'
+      ? 'bg-destructive'
+      : 'bg-slate-500';
+
   return (
     <div
       className={cn(
-        'flex items-center gap-2.5 sm:gap-1.5 md:gap-2 lg:gap-2.5 px-3 sm:px-2 md:px-2.5 lg:px-3 py-1.5 sm:py-1 lg:py-1.5 transition-colors duration-700 ease-out',
-        !isLast && 'border-b border-border/35',
-        status === 'normal' &&
-          'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300',
-        status === 'warning' &&
-          'bg-amber-500/20 text-amber-800 dark:text-amber-300',
-        status === 'critical' && 'bg-destructive/20 text-destructive',
-        status === 'no-data' && 'bg-muted/30 text-muted-foreground',
+        'flex items-center justify-between px-3 py-1.5 mx-1 my-0.5 rounded-md transition-all duration-300 ease-out',
+        'bg-gradient-to-r from-background to-background/95 border border-border/60',
+        'shadow-sm hover:shadow-md active:shadow-lg',
+        'transform hover:scale-[1.01] active:scale-[0.99]',
+        onClick && 'cursor-pointer hover:bg-gradient-to-r hover:from-muted/20 hover:to-muted/10 active:from-muted/30 active:to-muted/20',
       )}
+      onClick={onClick}
+      style={{
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 1px rgba(0, 0, 0, 0.1)',
+      }}
     >
-      <ParameterIcon
-        parameterKey={parameterKey}
-        className="h-5 w-5 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 lg:h-5 lg:w-5 shrink-0"
-      />
-      <div className="flex flex-wrap items-baseline justify-start text-left gap-x-1 sm:gap-x-1.5 gap-y-0.5 tabular-nums min-w-0">
-        <span className="text-lg sm:text-sm md:text-base lg:text-xl xl:text-2xl leading-none">
-          {formatParameterValue(value)}
+      <div className="flex items-center gap-2.5 min-w-0">
+        <ParameterIcon
+          parameterKey={parameterKey}
+          className="h-4 w-4 shrink-0 text-muted-foreground/80"
+        />
+        <span className={cn('inline-block h-2 w-2 rounded-full shrink-0 shadow-sm', dotColor)} />
+        <span className="truncate text-sm font-semibold text-foreground">
+          {parameterLabel}
         </span>
-        {unit && (
-          <span className="text-sm sm:text-[9px] md:text-[10px] lg:text-[11px] xl:text-xs/none opacity-85 break-all">
-            {unit}
-          </span>
-        )}
       </div>
-      <span className="sr-only">{parameterLabel}</span>
+
+      <div className="flex items-center gap-2">
+        <div className="rounded-full px-2.5 py-1 text-sm font-semibold bg-white/60 dark:bg-gray-900/60 border border-border/30 shadow-sm">
+          <span className={cn('tabular-nums', textColor)}>
+            {formatParameterValue(value)}
+          </span>
+          {unit && <span className="ml-1.5 text-xs font-normal opacity-70 text-muted-foreground">{unit}</span>}
+        </div>
+        <svg
+          className="h-4 w-4 text-muted-foreground"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
     </div>
   );
 }
