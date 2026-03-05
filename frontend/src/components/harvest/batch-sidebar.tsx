@@ -21,6 +21,7 @@ import {
   BrixMeasurementsField,
   PhotosField,
 } from './batch-sidebar-additional-fields'
+import { useBatchSidebarState } from './batch-sidebar-state'
 
 export interface BatchSidebarProps {
   open: boolean
@@ -29,6 +30,7 @@ export interface BatchSidebarProps {
   onEdit?: (batch: BatchDetailsData) => void
   onComplete?: (batch: BatchDetailsData) => void
   onPhotoUpload?: (files: File[]) => void
+  onBatchUpdate?: (batch: BatchDetailsData) => void
   isLoading?: boolean
 }
 
@@ -39,51 +41,24 @@ export function BatchSidebar({
   onEdit,
   onComplete,
   onPhotoUpload,
+  onBatchUpdate,
   isLoading = false,
 }: BatchSidebarProps) {
   const { t } = useI18n()
   
-  // Local state to manage editable batch data
-  const [localBatchData, setLocalBatchData] = React.useState<BatchDetailsData | null>(null)
-
-  // Update local state when batchData changes
-  React.useEffect(() => {
-    setLocalBatchData(batchData)
-  }, [batchData])
-
-  const handleBrixMeasurementChange = (field: keyof BatchDetailsData['brixMeasurements'], value: number) => {
-    if (localBatchData) {
-      setLocalBatchData({
-        ...localBatchData,
-        brixMeasurements: {
-          ...localBatchData.brixMeasurements,
-          [field]: value,
-        },
-      })
-    }
-  }
-
-  const handleYieldChange = (field: 'marketable' | 'waste', value: number) => {
-    if (localBatchData) {
-      setLocalBatchData({
-        ...localBatchData,
-        todaysHarvest: {
-          ...localBatchData.todaysHarvest,
-          [field]: value,
-        },
-      })
-    }
-  }
-
-  const currentData = localBatchData || batchData
-  const canEdit = currentData?.status === 'active'
-  const canComplete = currentData?.status === 'active'
+  const {
+    currentData,
+    canEdit,
+    canComplete,
+    handleBrixMeasurementChange,
+    handleYieldChange,
+  } = useBatchSidebarState(batchData, onBatchUpdate)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-lg flex flex-col p-0 gap-0"
+        className="w-full sm:max-w-2xl flex flex-col p-0 gap-0"
       >
         <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
           <SheetTitle className="dark:text-card-foreground">
@@ -94,79 +69,69 @@ export function BatchSidebar({
           </SheetTitle>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+        <div className="flex-1 flex flex-col min-h-0">
           {currentData ? (
             <>
-              <BatchHeaderField
-                name={currentData.name}
-                species={currentData.species}
-                variety={currentData.variety}
-                status={currentData.status}
-                isLoading={isLoading}
-              />
+              {/* Fixed Upper Section - Batch Info through Area */}
+              <div className="shrink-0 px-6 py-4 border-b dark:border-primary-foreground/30 bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 space-y-6">
+                <BatchHeaderField
+                  name={currentData.name}
+                  species={currentData.species}
+                  variety={currentData.variety}
+                  status={currentData.status}
+                  isLoading={isLoading}
+                />
 
-              <BatchStatsField
-                daysAfterPlanting={currentData.daysAfterPlanting}
-                area={currentData.area}
-                isLoading={isLoading}
-              />
+                <BatchStatsField
+                  daysAfterPlanting={currentData.daysAfterPlanting}
+                  area={currentData.area}
+                  isLoading={isLoading}
+                />
+              </div>
 
-              <YieldDataField
-                marketable={currentData.todaysHarvest.marketable}
-                waste={currentData.todaysHarvest.waste}
-                onYieldChange={handleYieldChange}
-                isLoading={isLoading}
-              />
+              {/* Scrollable Lower Section - Data Entry */}
+              <div className="flex-1 min-h-0 overflow-y-scroll px-6 py-6 space-y-6">
+                <YieldDataField
+                  marketable={currentData.todaysHarvest.marketable}
+                  waste={currentData.todaysHarvest.waste}
+                  onYieldChange={handleYieldChange}
+                  isLoading={isLoading}
+                />
 
-              <BrixMeasurementsField
-                measurements={currentData.brixMeasurements}
-                onMeasurementChange={handleBrixMeasurementChange}
-                isLoading={isLoading}
-              />
+                <BrixMeasurementsField
+                  measurements={currentData.brixMeasurements}
+                  onMeasurementChange={handleBrixMeasurementChange}
+                  isLoading={isLoading}
+                />
 
-              <PhotosField
-                photos={currentData.photos}
-                onUpload={onPhotoUpload}
-                isLoading={isLoading}
-              />
+                <PhotosField
+                  photos={currentData.photos}
+                  onUpload={onPhotoUpload}
+                  isLoading={isLoading}
+                />
+                
+                {/* Extra spacing to ensure all content is accessible above the button */}
+                <div className="h-16"></div>
+              </div>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              {t.pages.harvest?.noBatchSelected || 'No batch selected'}
-            </p>
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-sm text-muted-foreground">
+                {t.pages.harvest?.noBatchSelected || 'No batch selected'}
+              </p>
+            </div>
           )}
         </div>
 
-        <SheetFooter className="flex-row gap-2 px-6 py-4 border-t dark:border-primary-foreground/30">
+        <SheetFooter className="px-6 py-4 border-t dark:border-primary-foreground/30">
           <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-            className="flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
+            onClick={() => onComplete?.(batchData!)}
+            disabled={isLoading || !batchData}
+            className="w-full h-12 text-lg font-semibold"
+            size="lg"
           >
-            {t.pages.harvest?.close || 'Close'}
+            Log Harvest
           </Button>
-
-          {canEdit && batchData && onEdit && (
-            <Button
-              variant="outline"
-              onClick={() => onEdit(batchData)}
-              disabled={isLoading}
-              className="flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
-            >
-              {t.pages.harvest?.editBatch || 'Edit'}
-            </Button>
-          )}
-
-          {canComplete && batchData && onComplete && (
-            <Button
-              onClick={() => onComplete(batchData)}
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {t.pages.harvest?.completeBatch || 'Complete Batch'}
-            </Button>
-          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>

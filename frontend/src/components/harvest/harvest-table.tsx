@@ -27,6 +27,7 @@ export function HarvestTable({ harvests, onViewDetails }: HarvestTableProps) {
           <TableRow className="bg-muted/20 hover:bg-muted/20">
             <TableHead className="font-medium">Date</TableHead>
             <TableHead className="font-medium">Batch</TableHead>
+            <TableHead className="font-medium">Greenhouse</TableHead>
             <TableHead className="font-medium">Class A (kg)</TableHead>
             <TableHead className="font-medium">Waste (kg)</TableHead>
             <TableHead className="font-medium">Avg Brix</TableHead>
@@ -36,10 +37,17 @@ export function HarvestTable({ harvests, onViewDetails }: HarvestTableProps) {
         </TableHeader>
         <TableBody>
           {harvests.map((harvest) => (
-            <TableRow key={harvest.id} className="hover:bg-muted/50">
+            <TableRow 
+              key={harvest.id} 
+              className="hover:bg-muted/50 cursor-pointer"
+              onClick={() => onViewDetails?.(harvest)}
+            >
               <TableCell className="font-medium">{harvest.date}</TableCell>
               <TableCell className="text-muted-foreground">
                 {harvest.batch}
+              </TableCell>
+              <TableCell className="font-medium text-blue-600">
+                GH{parseInt(harvest.id) % 2 === 1 ? '1' : '2'}
               </TableCell>
               <TableCell>
                 <span className={cn(
@@ -66,15 +74,7 @@ export function HarvestTable({ harvests, onViewDetails }: HarvestTableProps) {
                 {harvest.photos === 0 ? '-' : harvest.photos}
               </TableCell>
               <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onViewDetails?.(harvest)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Eye className="h-4 w-4" />
-                  <span className="sr-only">View details</span>
-                </Button>
+                <Eye className="h-4 w-4 text-muted-foreground" />
               </TableCell>
             </TableRow>
           ))}

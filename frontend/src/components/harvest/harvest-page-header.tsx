@@ -16,7 +16,7 @@ export function HarvestPageHeader({
   summary, 
   title, 
   onCreateBatch,
-  isLoading = false 
+  isLoading = false
 }: HarvestPageHeaderProps) {
   const { t } = useI18n()
   

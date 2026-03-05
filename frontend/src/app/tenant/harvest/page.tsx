@@ -11,7 +11,7 @@ import {
   CreateBatchDialog,
   BatchSidebar,
 } from '@/components/harvest'
-import { getAllHarvests, getHarvestSummary, addNewHarvest } from '@/lib/harvest-data'
+import { getAllHarvests, getHarvestSummary, addNewHarvest, addCompletedBatchToHistory } from '@/lib/harvest-data'
 import { createBatchDetailsFromForm } from '@/lib/utils/batch-utils'
 import { usePagination } from '@/lib/hooks/use-pagination'
 import { Pagination } from '@/components/ui/pagination'
@@ -84,22 +84,8 @@ export default function HarvestPage() {
   const handleBatchSubmit = async (data: BatchFormData) => {
     setIsCreatingBatch(true)
     try {
-      // Add new harvest record from batch data
-      const newHarvest = addNewHarvest(data)
-      
-      // Create batch details for sidebar
+      // Create batch details for sidebar (without adding to history)
       const batchDetails = createBatchDetailsFromForm(data)
-      
-      // Update the harvest list
-      const updatedHarvests = getAllHarvests()
-      setAllHarvests(updatedHarvests)
-      
-      // Update summary
-      const updatedSummary = getHarvestSummary()
-      setSummary(updatedSummary)
-      
-      // Go to first page to show the new harvest
-      goToPage(1)
       
       // Close create dialog and open batch sidebar
       setCreateBatchOpen(false)
@@ -128,7 +114,13 @@ export default function HarvestPage() {
     <FeatureGuard featureKey="harvest_management">
       <div className="space-y-6">
         <HarvestPageHeader 
-          summary={summary} 
+          summary={summary || {
+            totalHarvests: 0,
+            variety: 'Loading...',
+            totalClassA: 0,
+            totalWaste: 0,
+            avgBrix: 0,
+          }} 
           title={t.pages.harvest?.title || 'Harvest History'}
           onCreateBatch={handleCreateBatch}
           isLoading={loading || isCreatingBatch}
@@ -176,9 +168,29 @@ export default function HarvestPage() {
             console.log('Edit batch:', batch)
           }}
           onComplete={(batch: BatchDetailsData) => {
-            // TODO: Implement batch completion
-            console.log('Complete batch:', batch)
-            setSelectedBatch({ ...batch, status: 'completed' })
+            try {
+              // Add completed batch to harvest history
+              const newHarvest = addCompletedBatchToHistory(batch)
+              
+              // Update the harvest data
+              const updatedHarvests = getAllHarvests()
+              setAllHarvests(updatedHarvests)
+              
+              // Update summary
+              const updatedSummary = getHarvestSummary()
+              setSummary(updatedSummary)
+              
+              // Go to first page to show the new harvest and update display
+              goToPage(1)
+              
+              // Update batch status and close sidebar
+              setSelectedBatch({ ...batch, status: 'completed' })
+              setBatchSidebarOpen(false)
+              
+              console.log('Batch completed and added to harvest history:', newHarvest)
+            } catch (error) {
+              console.error('Error completing batch:', error)
+            }
           }}
           onPhotoUpload={(files: File[]) => {
             // TODO: Implement photo upload
