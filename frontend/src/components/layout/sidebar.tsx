@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { useClerk } from '@clerk/nextjs'
 import {
   AlertTriangle,
+  Apple,
   Bell,
   Building2,
   Clock,
@@ -119,6 +120,12 @@ export function Sidebar({ user: propUser, onLogout }: SidebarProps) {
       href: '/tenant/farm-overview',
       icon: Sprout,
       featureKey: 'farm_overview', // Always show farm overview
+    },
+    {
+      label: t.navigation.harvest || 'Harvest',
+      href: '/tenant/harvest',
+      icon: Apple,
+      // Always show harvest - no feature key required
     },
     {
       label: t.navigation.users,
