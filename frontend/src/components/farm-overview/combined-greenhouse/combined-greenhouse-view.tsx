@@ -106,7 +106,7 @@ export function CombinedGreenhouseView({
         greenhouseId={parGraphGreenhouseId}
         greenhouseLabel={parGraphLabel}
         embedded
-        className="h-auto w-full shrink-0 min-h-[15rem] sm:min-h-[17rem]"
+        className="h-auto w-full shrink-0 min-h-[15rem] sm:min-h-[17rem] lg:h-full lg:flex-1 lg:min-h-[15rem]"
       />
     </div>
   );
