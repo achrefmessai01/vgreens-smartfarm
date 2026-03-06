@@ -1,9 +1,11 @@
+import type { HarvestStatus } from '@/generated/graphql'
+
 export interface BatchDetailsData {
   id: string
   name: string
   species: string
   variety: string
-  status: 'active' | 'completed' | 'inactive'
+  status: HarvestStatus
   greenhouse: {
     id: string
     name: string
@@ -34,7 +36,7 @@ export interface BatchHeaderFieldProps {
   name: string
   species: string
   variety: string
-  status: 'active' | 'completed' | 'inactive'
+  status: HarvestStatus
   isLoading?: boolean
 }
 

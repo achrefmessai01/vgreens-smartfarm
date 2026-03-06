@@ -1,3 +1,4 @@
+import { HarvestStatus } from '@/generated/graphql'
 import type { BatchFormData } from '@/lib/types/batch'
 import type { BatchDetailsData } from '@/components/harvest/batch-sidebar-types'
 
@@ -20,7 +21,7 @@ export function createBatchDetailsFromForm(formData: BatchFormData): BatchDetail
     name: `${formData.species.charAt(0).toUpperCase() + formData.species.slice(1)} - ${formData.variety}`,
     species: formData.species.charAt(0).toUpperCase() + formData.species.slice(1),
     variety: formData.variety,
-    status: 'active',
+    status: HarvestStatus.Draft,
     greenhouse: {
       id: formData.sourceGreenhouseId,
       name: getGreenhouseName(formData.sourceGreenhouseId),

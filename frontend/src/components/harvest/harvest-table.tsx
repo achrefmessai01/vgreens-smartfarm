@@ -1,85 +1,97 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Eye } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { Eye } from 'lucide-react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import type { HarvestRecord } from '@/lib/types/harvest'
-import { cn } from '@/lib/utils'
+  formatHarvestDate,
+  getGreenhouseLabel,
+} from '@/app/tenant/harvest/harvest.utils';
+import { TableCell } from '@/components/ui/table';
+import type { Harvest } from '@/generated/graphql';
+import { DataTable, type Column } from '@/components/ui/data-table';
 
 interface HarvestTableProps {
-  harvests: HarvestRecord[]
-  onViewDetails?: (harvest: HarvestRecord) => void
+  harvests: Harvest[];
+  onViewDetails?: (harvest: Harvest) => void;
+  isLoading?: boolean;
+  emptyState?: { title: string; description?: string };
+  paginationLabels?: {
+    showing: string;
+    of: string;
+    results: string;
+    perPage: string;
+    previous: string;
+    next: string;
+  };
 }
 
-export function HarvestTable({ harvests, onViewDetails }: HarvestTableProps) {
+const HARVEST_COLUMNS: Column<Harvest>[] = [
+  { key: 'date', header: 'Date' },
+  { key: 'batch', header: 'Batch' },
+  { key: 'greenhouse', header: 'Greenhouse' },
+  { key: 'classA', header: 'Class A (kg)' },
+  { key: 'waste', header: 'Waste (kg)' },
+  { key: 'avgBrix', header: 'Avg Brix' },
+  { key: 'photos', header: 'Photos' },
+  { key: 'actions', header: 'Actions', headerClassName: 'text-right' },
+];
+
+export function HarvestTable({
+  harvests,
+  onViewDetails,
+  isLoading = false,
+  emptyState,
+  paginationLabels,
+}: HarvestTableProps) {
+  const renderRow = React.useCallback(
+    (harvest: Harvest) => (
+      <>
+        <TableCell className="font-medium">
+          {formatHarvestDate(harvest.date)}
+        </TableCell>
+        <TableCell className="text-muted-foreground">{harvest.batch}</TableCell>
+        <TableCell className="font-medium text-blue-600">
+          {getGreenhouseLabel(harvest.greenhouse)}
+        </TableCell>
+        <TableCell>
+          <span
+            className={cn('font-medium', 'text-green-600 dark:text-green-400')}
+          >
+            {harvest.classA}
+          </span>
+        </TableCell>
+        <TableCell>
+          <span className={cn('font-medium', 'text-red-600 dark:text-red-400')}>
+            {harvest.waste}
+          </span>
+        </TableCell>
+        <TableCell className="font-medium">{harvest.avgBrix}°Bx</TableCell>
+        <TableCell className="text-center text-muted-foreground">
+          {harvest.photos === 0 ? '-' : harvest.photos}
+        </TableCell>
+        <TableCell className="text-right">
+          <Eye className="h-4 w-4 text-muted-foreground" />
+        </TableCell>
+      </>
+    ),
+    [],
+  );
+
   return (
-    <div className="border border-border rounded-lg bg-card">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-muted/20 hover:bg-muted/20">
-            <TableHead className="font-medium">Date</TableHead>
-            <TableHead className="font-medium">Batch</TableHead>
-            <TableHead className="font-medium">Greenhouse</TableHead>
-            <TableHead className="font-medium">Class A (kg)</TableHead>
-            <TableHead className="font-medium">Waste (kg)</TableHead>
-            <TableHead className="font-medium">Avg Brix</TableHead>
-            <TableHead className="font-medium">Photos</TableHead>
-            <TableHead className="font-medium text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {harvests.map((harvest) => (
-            <TableRow 
-              key={harvest.id} 
-              className="hover:bg-muted/50 cursor-pointer"
-              onClick={() => onViewDetails?.(harvest)}
-            >
-              <TableCell className="font-medium">{harvest.date}</TableCell>
-              <TableCell className="text-muted-foreground">
-                {harvest.batch}
-              </TableCell>
-              <TableCell className="font-medium text-blue-600">
-                GH{parseInt(harvest.id) % 2 === 1 ? '1' : '2'}
-              </TableCell>
-              <TableCell>
-                <span className={cn(
-                  'font-medium',
-                  'text-green-600 dark:text-green-400'
-                )}>
-                  {harvest.classA}
-                </span>
-              </TableCell>
-              <TableCell>
-                <span className={cn(
-                  'font-medium',
-                  'text-red-600 dark:text-red-400'
-                )}>
-                  {harvest.waste}
-                </span>
-              </TableCell>
-              <TableCell>
-                <span className="font-medium">
-                  {harvest.avgBrix}°Bx
-                </span>
-              </TableCell>
-              <TableCell className="text-center text-muted-foreground">
-                {harvest.photos === 0 ? '-' : harvest.photos}
-              </TableCell>
-              <TableCell className="text-right">
-                <Eye className="h-4 w-4 text-muted-foreground" />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  )
+    <DataTable<Harvest>
+      data={harvests}
+      columns={HARVEST_COLUMNS}
+      renderRow={renderRow}
+      onRowClick={onViewDetails}
+      emptyState={{
+        title: emptyState?.title ?? 'No harvests yet',
+        description: emptyState?.description,
+      }}
+      paginationLabels={paginationLabels}
+      paginationVariant="compact"
+      defaultPageSize={15}
+      isLoading={isLoading}
+    />
+  );
 }

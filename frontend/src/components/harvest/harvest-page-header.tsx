@@ -1,37 +1,39 @@
-'use client'
+'use client';
 
-import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useI18n } from '@/i18n'
-import type { HarvestSummary } from '@/lib/types/harvest'
+import { useI18n } from '@/i18n';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import type { HarvestSummary } from '@/app/tenant/harvest/harvest.utils';
 
 interface HarvestPageHeaderProps {
-  summary: HarvestSummary
-  title: string
-  onCreateBatch?: () => void
-  isLoading?: boolean
+  summary: HarvestSummary;
+  title: string;
+  onCreateBatch?: () => void;
+  isLoading?: boolean;
 }
 
-export function HarvestPageHeader({ 
-  summary, 
-  title, 
+export function HarvestPageHeader({
+  summary,
+  title,
   onCreateBatch,
-  isLoading = false
+  isLoading = false,
 }: HarvestPageHeaderProps) {
-  const { t } = useI18n()
-  
+  const { t } = useI18n();
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
           <p className="text-muted-foreground">
-            {summary.totalHarvests} {t.pages.harvest?.harvestsLogged || 'harvests logged for'} {summary.variety}
+            {summary.totalHarvests}{' '}
+            {t.pages.harvest?.harvestsLogged || 'harvests logged for'}{' '}
+            {summary.variety}
           </p>
         </div>
-        
+
         {onCreateBatch && (
-          <Button 
+          <Button
             onClick={onCreateBatch}
             disabled={isLoading}
             className="bg-green-500 hover:bg-green-600 text-white"
@@ -42,5 +44,5 @@ export function HarvestPageHeader({
         )}
       </div>
     </div>
-  )
+  );
 }

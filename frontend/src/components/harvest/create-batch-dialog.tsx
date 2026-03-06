@@ -9,99 +9,47 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useI18n } from '@/i18n'
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch'
+import type { CreateHarvestMutation } from '@/generated/graphql'
 import { CreateBatchFormFields } from './create-batch-form-fields'
+import { useCreateBatchForm } from './use-create-batch-form'
 
 interface CreateBatchDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (data: BatchFormData) => void
-  isLoading?: boolean
+  onCreated?: (harvest: CreateHarvestMutation['createHarvest']) => void
 }
 
 export function CreateBatchDialog({
   open,
   onOpenChange,
-  onSubmit,
-  isLoading = false,
+  onCreated,
 }: CreateBatchDialogProps) {
   const { t } = useI18n()
-  const [formData, setFormData] = React.useState<BatchFormData>({
-    species: '',
-    variety: '',
-    plantingDate: new Date().toISOString().split('T')[0],
-    cultivationArea: 0,
-    sourceGreenhouseId: '',
-  })
+  const { formData, setFormData, errors, loading, reset, handleSubmit } =
+    useCreateBatchForm({
+      onSuccess: (harvest) => {
+        onOpenChange(false)
+        onCreated?.(harvest)
+      },
+    })
 
-  const [errors, setErrors] = React.useState<BatchFormErrors>({})
-
-  const validateForm = (): boolean => {
-    const newErrors: BatchFormErrors = {}
-
-    if (!formData.species) {
-      newErrors.species = 'Species is required'
-    }
-
-    if (!formData.variety) {
-      newErrors.variety = 'Variety is required'
-    }
-
-    if (!formData.plantingDate) {
-      newErrors.plantingDate = 'Planting date is required'
-    }
-
-    if (!formData.cultivationArea || formData.cultivationArea <= 0) {
-      newErrors.cultivationArea = 'Valid cultivation area is required'
-    }
-
-    if (!formData.sourceGreenhouseId) {
-      newErrors.sourceGreenhouseId = 'Greenhouse selection is required'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (validateForm()) {
-      onSubmit(formData)
-      // Reset form
-      setFormData({
-        species: '',
-        variety: '',
-        plantingDate: new Date().toISOString().split('T')[0],
-        cultivationArea: 0,
-        sourceGreenhouseId: '',
-      })
-      setErrors({})
-    }
-  }
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      // Reset form when closing
-      setFormData({
-        species: '',
-        variety: '',
-        plantingDate: new Date().toISOString().split('T')[0],
-        cultivationArea: 0,
-        sourceGreenhouseId: '',
-      })
-      setErrors({})
-    }
-    onOpenChange(open)
-  }
+  const handleOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      if (!nextOpen) reset()
+      onOpenChange(nextOpen)
+    },
+    [reset, onOpenChange],
+  )
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t.pages.harvest?.createNewBatch || 'Create New Batch'}</DialogTitle>
+          <DialogTitle>
+            {t.pages.harvest?.createNewBatch || 'Create New Batch'}
+          </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            {t.pages.harvest?.setUpNewBatch || 'Set up a new cultivation batch for GH1'}
+            {t.pages.harvest?.setUpNewBatch || 'Set up a new cultivation batch'}
           </p>
         </DialogHeader>
 
@@ -112,23 +60,20 @@ export function CreateBatchDialog({
             errors={errors}
           />
 
-          {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
               variant="outline"
               className="flex-1"
               onClick={() => handleOpenChange(false)}
-              disabled={isLoading}
+              disabled={loading}
             >
               {t.pages.harvest?.cancel || 'Cancel'}
             </Button>
-            <Button
-              type="submit" 
-              className="flex-1"
-              disabled={isLoading}
-            >
-              {isLoading ? (t.pages.harvest?.creating || 'Creating...') : (t.pages.harvest?.createBatch || 'Create Batch')}
+            <Button type="submit" className="flex-1" disabled={loading}>
+              {loading
+                ? (t.pages.harvest?.creating || 'Creating...')
+                : (t.pages.harvest?.createBatch || 'Create Batch')}
             </Button>
           </div>
         </form>

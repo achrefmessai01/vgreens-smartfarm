@@ -1,35 +1,38 @@
 'use client'
 
-import * as React from 'react'
 import { useI18n } from '@/i18n'
 import { Badge } from '@/components/ui/badge'
+import { HarvestStatus } from '@/generated/graphql'
 import type { BatchHeaderFieldProps, BatchStatsFieldProps } from './batch-sidebar-types'
+
+const STATUS_VARIANT: Record<HarvestStatus, 'default' | 'secondary' | 'outline'> = {
+  [HarvestStatus.Draft]: 'outline',
+  [HarvestStatus.Active]: 'default',
+  [HarvestStatus.Completed]: 'secondary',
+  [HarvestStatus.Inactive]: 'outline',
+}
+
+const STATUS_COLOR: Record<HarvestStatus, string> = {
+  [HarvestStatus.Draft]: 'bg-amber-500 hover:bg-amber-600',
+  [HarvestStatus.Active]: 'bg-green-500 hover:bg-green-600',
+  [HarvestStatus.Completed]: 'bg-blue-500 hover:bg-blue-600',
+  [HarvestStatus.Inactive]: 'bg-gray-500 hover:bg-gray-600',
+}
+
+const STATUS_LABEL: Record<HarvestStatus, string> = {
+  [HarvestStatus.Draft]: 'Draft',
+  [HarvestStatus.Active]: 'Active',
+  [HarvestStatus.Completed]: 'Completed',
+  [HarvestStatus.Inactive]: 'Inactive',
+}
 
 export function BatchHeaderField({
   name,
   species,
   variety,
   status,
-  isLoading = false
+  isLoading = false,
 }: BatchHeaderFieldProps) {
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'active': return 'default'
-      case 'completed': return 'secondary'
-      case 'inactive': return 'outline'
-      default: return 'outline'
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-500 hover:bg-green-600'
-      case 'completed': return 'bg-blue-500 hover:bg-blue-600'
-      case 'inactive': return 'bg-gray-500 hover:bg-gray-600'
-      default: return 'bg-gray-500 hover:bg-gray-600'
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -43,11 +46,11 @@ export function BatchHeaderField({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">{name}</h2>
-        <Badge  
-          variant={getStatusVariant(status)}
-          className={getStatusColor(status)}
+        <Badge
+          variant={STATUS_VARIANT[status] ?? 'outline'}
+          className={STATUS_COLOR[status] ?? 'bg-gray-500'}
         >
-          {status.charAt(0).toUpperCase() + status.slice(1)} Batch
+          {STATUS_LABEL[status] ?? status} Batch
         </Badge>
       </div>
       <p className="text-sm text-muted-foreground">
@@ -60,7 +63,7 @@ export function BatchHeaderField({
 export function BatchStatsField({
   daysAfterPlanting,
   area,
-  isLoading = false
+  isLoading = false,
 }: BatchStatsFieldProps) {
   const { t } = useI18n()
 
