@@ -8,13 +8,18 @@ import {
   EditHarvestDialog,
   DeleteHarvestDialog,
   HarvestPageSkeleton,
+  HarvestDashboard,
 } from '@/components/harvest';
 import { useI18n } from '@/i18n';
 import { useHarvestPage } from './use-harvest-page';
 import { FeatureGuard } from '@/components/features/feature-guard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart3, History } from 'lucide-react';
+import { useDashboardData } from '@/components/harvest/dashboard/use-dashboard-data';
 
 export default function HarvestPage() {
   const { t } = useI18n();
+  const dashboardData = useDashboardData();
   const {
     harvests,
     summary,
@@ -54,19 +59,40 @@ export default function HarvestPage() {
   return (
     <FeatureGuard featureKey="harvest_management">
       <div className="space-y-6">
-        <HarvestPageHeader
-          summary={summary}
-          title={t.pages.harvest?.title || 'Harvest History'}
-          onCreateBatch={handleCreateBatch}
-        />
+        <Tabs defaultValue="dashboard" className="w-full">
+          <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2 px-4 py-1">
+              <BarChart3 className="h-4 w-4" />
+              {t.navigation?.dashboard || 'Dashboard'}
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2 px-4 py-1">
+              <History className="h-4 w-4" />
+              {t.navigation?.history || 'History'}
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="dashboard" className="mt-6">
+            <HarvestDashboard data={dashboardData} />
+          </TabsContent>
+          
+          <TabsContent value="history" className="mt-6">
+            <div className="space-y-6">
+              <HarvestPageHeader
+                summary={summary}
+                title={t.pages.harvest?.historyTitle || 'Harvest History'}
+                onCreateBatch={handleCreateBatch}
+              />
 
-        <HarvestTable
-          harvests={harvests ?? []}
-          onEdit={handleEditRequest}
-          onDelete={handleDeleteRequest}
-          onSidebarEdit={handleSidebarEdit}
-          isLoading={loading}
-        />
+              <HarvestTable
+                harvests={harvests ?? []}
+                onEdit={handleEditRequest}
+                onDelete={handleDeleteRequest}
+                onSidebarEdit={handleSidebarEdit}
+                isLoading={loading}
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <CreateBatchDialog
           open={createBatchOpen}
