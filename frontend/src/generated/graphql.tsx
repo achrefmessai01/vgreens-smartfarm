@@ -110,6 +110,37 @@ export type CreateFeatureInput = {
   name: Scalars['String']['input'];
 };
 
+export type CreateHarvestInput = {
+  avgBrix?: Scalars['Float']['input'];
+  /** Defaults to "species - variety" if omitted */
+  batch?: InputMaybe<Scalars['String']['input']>;
+  brix1?: Scalars['Float']['input'];
+  brix2?: Scalars['Float']['input'];
+  brix3?: Scalars['Float']['input'];
+  brix4?: Scalars['Float']['input'];
+  brix5?: Scalars['Float']['input'];
+  brix6?: Scalars['Float']['input'];
+  brix7?: Scalars['Float']['input'];
+  brix8?: Scalars['Float']['input'];
+  brix9?: Scalars['Float']['input'];
+  brix10?: Scalars['Float']['input'];
+  classA?: Scalars['Float']['input'];
+  /** Cultivation area in m² */
+  cultivationArea: Scalars['Float']['input'];
+  /** Harvest date (ISO date string) */
+  date: Scalars['String']['input'];
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  photoUrls?: InputMaybe<Array<Scalars['String']['input']>>;
+  photos?: Scalars['Int']['input'];
+  /** Planting date (ISO date string) */
+  plantingDate: Scalars['String']['input'];
+  species: Scalars['String']['input'];
+  status?: InputMaybe<HarvestStatus>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+  variety: Scalars['String']['input'];
+  waste?: Scalars['Float']['input'];
+};
+
 export type CreateTenantInput = {
   companyName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
@@ -185,6 +216,65 @@ export type GetParDliTodayInput = {
   greenhouse: Scalars['String']['input'];
 };
 
+export type Harvest = {
+  __typename?: 'Harvest';
+  avgBrix: Scalars['Float']['output'];
+  batch: Scalars['String']['output'];
+  brix1: Scalars['Float']['output'];
+  brix2: Scalars['Float']['output'];
+  brix3: Scalars['Float']['output'];
+  brix4: Scalars['Float']['output'];
+  brix5: Scalars['Float']['output'];
+  brix6: Scalars['Float']['output'];
+  brix7: Scalars['Float']['output'];
+  brix8: Scalars['Float']['output'];
+  brix9: Scalars['Float']['output'];
+  brix10: Scalars['Float']['output'];
+  classA: Scalars['Float']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  createdBy?: Maybe<User>;
+  createdById?: Maybe<Scalars['ID']['output']>;
+  cultivationArea: Scalars['Float']['output'];
+  date: Scalars['DateTime']['output'];
+  greenhouse?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  photoUrls?: Maybe<Array<Scalars['String']['output']>>;
+  photos: Scalars['Int']['output'];
+  plantingDate: Scalars['DateTime']['output'];
+  species: Scalars['String']['output'];
+  status: HarvestStatus;
+  tenant?: Maybe<Tenant>;
+  tenantId: Scalars['ID']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  variety: Scalars['String']['output'];
+  waste: Scalars['Float']['output'];
+};
+
+export type HarvestFilterInput = {
+  /** Filter by user who created */
+  createdById?: InputMaybe<Scalars['ID']['input']>;
+  /** Harvests from this date (inclusive) */
+  dateFrom?: InputMaybe<Scalars['String']['input']>;
+  /** Harvests until this date (inclusive) */
+  dateTo?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by greenhouse */
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  /** Search in batch / species / variety */
+  search?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by status */
+  status?: InputMaybe<HarvestStatus>;
+  /** Filter by tenant (VGreens admin only) */
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Harvest batch lifecycle status */
+export enum HarvestStatus {
+  Active = 'ACTIVE',
+  Completed = 'COMPLETED',
+  Draft = 'DRAFT',
+  Inactive = 'INACTIVE'
+}
+
 export type InfluxDbData = {
   __typename?: 'InfluxDBData';
   data: Scalars['JSONObject']['output'];
@@ -195,10 +285,12 @@ export type Mutation = {
   acknowledgeAlert: Alert;
   createAlert: Alert;
   createFeature: Feature;
+  createHarvest: Harvest;
   createTenant: Tenant;
   createUser: User;
   deleteAlert: Scalars['Boolean']['output'];
   deleteFeature: Scalars['Boolean']['output'];
+  deleteHarvest: Scalars['Boolean']['output'];
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   resolveAlert: Alert;
@@ -206,6 +298,7 @@ export type Mutation = {
   toggleTenantFeature: TenantFeature;
   updateAlert: Alert;
   updateFeature: Feature;
+  updateHarvest: Harvest;
   updateTenant: Tenant;
   updateUser: User;
 };
@@ -226,6 +319,11 @@ export type MutationCreateFeatureArgs = {
 };
 
 
+export type MutationCreateHarvestArgs = {
+  input: CreateHarvestInput;
+};
+
+
 export type MutationCreateTenantArgs = {
   input: CreateTenantInput;
 };
@@ -242,6 +340,11 @@ export type MutationDeleteAlertArgs = {
 
 
 export type MutationDeleteFeatureArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteHarvestArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -284,6 +387,12 @@ export type MutationUpdateFeatureArgs = {
 };
 
 
+export type MutationUpdateHarvestArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateHarvestInput;
+};
+
+
 export type MutationUpdateTenantArgs = {
   id: Scalars['ID']['input'];
   input: UpdateTenantInput;
@@ -313,6 +422,8 @@ export type Query = {
   getBucketFields: Array<Scalars['String']['output']>;
   getBuckets: Array<Scalars['String']['output']>;
   getParDliToday: Array<ParDliPoint>;
+  harvest?: Maybe<Harvest>;
+  harvests: Array<Harvest>;
   health: Scalars['String']['output'];
   me?: Maybe<User>;
   tenant?: Maybe<Tenant>;
@@ -363,6 +474,16 @@ export type QueryGetBucketFieldsArgs = {
 
 export type QueryGetParDliTodayArgs = {
   input: GetParDliTodayInput;
+};
+
+
+export type QueryHarvestArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryHarvestsArgs = {
+  filter?: InputMaybe<HarvestFilterInput>;
 };
 
 
@@ -436,6 +557,32 @@ export type UpdateFeatureInput = {
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   key?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateHarvestInput = {
+  avgBrix?: InputMaybe<Scalars['Float']['input']>;
+  batch?: InputMaybe<Scalars['String']['input']>;
+  brix1?: InputMaybe<Scalars['Float']['input']>;
+  brix2?: InputMaybe<Scalars['Float']['input']>;
+  brix3?: InputMaybe<Scalars['Float']['input']>;
+  brix4?: InputMaybe<Scalars['Float']['input']>;
+  brix5?: InputMaybe<Scalars['Float']['input']>;
+  brix6?: InputMaybe<Scalars['Float']['input']>;
+  brix7?: InputMaybe<Scalars['Float']['input']>;
+  brix8?: InputMaybe<Scalars['Float']['input']>;
+  brix9?: InputMaybe<Scalars['Float']['input']>;
+  brix10?: InputMaybe<Scalars['Float']['input']>;
+  classA?: InputMaybe<Scalars['Float']['input']>;
+  cultivationArea?: InputMaybe<Scalars['Float']['input']>;
+  date?: InputMaybe<Scalars['String']['input']>;
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  photoUrls?: InputMaybe<Array<Scalars['String']['input']>>;
+  photos?: InputMaybe<Scalars['Int']['input']>;
+  plantingDate?: InputMaybe<Scalars['String']['input']>;
+  species?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<HarvestStatus>;
+  variety?: InputMaybe<Scalars['String']['input']>;
+  waste?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type UpdateTenantInput = {
@@ -516,6 +663,28 @@ export type ToggleTenantFeatureMutationVariables = Exact<{
 
 
 export type ToggleTenantFeatureMutation = { __typename?: 'Mutation', toggleTenantFeature: { __typename?: 'TenantFeature', id: string, tenantId: string, featureId: string, enabled: boolean, createdAt: any, updatedAt: any, feature?: { __typename?: 'Feature', id: string, key: string, name: string, description?: string | null, category?: string | null, isActive: boolean } | null } };
+
+export type CreateHarvestMutationVariables = Exact<{
+  input: CreateHarvestInput;
+}>;
+
+
+export type CreateHarvestMutation = { __typename?: 'Mutation', createHarvest: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, greenhouse?: string | null, plantingDate: any, cultivationArea: number, status: HarvestStatus, date: any, classA: number, waste: number, avgBrix: number, brix1: number, brix2: number, brix3: number, brix4: number, brix5: number, brix6: number, brix7: number, brix8: number, brix9: number, brix10: number, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any } };
+
+export type UpdateHarvestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateHarvestInput;
+}>;
+
+
+export type UpdateHarvestMutation = { __typename?: 'Mutation', updateHarvest: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, greenhouse?: string | null, plantingDate: any, cultivationArea: number, status: HarvestStatus, date: any, classA: number, waste: number, avgBrix: number, brix1: number, brix2: number, brix3: number, brix4: number, brix5: number, brix6: number, brix7: number, brix8: number, brix9: number, brix10: number, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any } };
+
+export type DeleteHarvestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteHarvestMutation = { __typename?: 'Mutation', deleteHarvest: boolean };
 
 export type CreateTenantMutationVariables = Exact<{
   input: CreateTenantInput;
@@ -636,6 +805,20 @@ export type TenantFeaturesQueryVariables = Exact<{
 
 
 export type TenantFeaturesQuery = { __typename?: 'Query', tenantFeatures: Array<{ __typename?: 'TenantFeature', id: string, tenantId: string, featureId: string, enabled: boolean, createdAt: any, updatedAt: any, feature?: { __typename?: 'Feature', id: string, key: string, name: string, description?: string | null, category?: string | null, isActive: boolean } | null }> };
+
+export type HarvestsQueryVariables = Exact<{
+  filter?: InputMaybe<HarvestFilterInput>;
+}>;
+
+
+export type HarvestsQuery = { __typename?: 'Query', harvests: Array<{ __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, greenhouse?: string | null, plantingDate: any, cultivationArea: number, status: HarvestStatus, date: any, classA: number, waste: number, avgBrix: number, brix1: number, brix2: number, brix3: number, brix4: number, brix5: number, brix6: number, brix7: number, brix8: number, brix9: number, brix10: number, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
+
+export type HarvestQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type HarvestQuery = { __typename?: 'Query', harvest?: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, greenhouse?: string | null, plantingDate: any, cultivationArea: number, status: HarvestStatus, date: any, classA: number, waste: number, avgBrix: number, brix1: number, brix2: number, brix3: number, brix4: number, brix5: number, brix6: number, brix7: number, brix8: number, brix9: number, brix10: number, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
 
 export type GetBucketDataQueryVariables = Exact<{
   input: GetBucketDataInput;
@@ -862,6 +1045,158 @@ export function useToggleTenantFeatureMutation(baseOptions?: Apollo.MutationHook
 export type ToggleTenantFeatureMutationHookResult = ReturnType<typeof useToggleTenantFeatureMutation>;
 export type ToggleTenantFeatureMutationResult = Apollo.MutationResult<ToggleTenantFeatureMutation>;
 export type ToggleTenantFeatureMutationOptions = Apollo.BaseMutationOptions<ToggleTenantFeatureMutation, ToggleTenantFeatureMutationVariables>;
+export const CreateHarvestDocument = gql`
+    mutation CreateHarvest($input: CreateHarvestInput!) {
+  createHarvest(input: $input) {
+    id
+    tenantId
+    createdById
+    species
+    variety
+    batch
+    greenhouse
+    plantingDate
+    cultivationArea
+    status
+    date
+    classA
+    waste
+    avgBrix
+    brix1
+    brix2
+    brix3
+    brix4
+    brix5
+    brix6
+    brix7
+    brix8
+    brix9
+    brix10
+    photos
+    photoUrls
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateHarvestMutationFn = Apollo.MutationFunction<CreateHarvestMutation, CreateHarvestMutationVariables>;
+
+/**
+ * __useCreateHarvestMutation__
+ *
+ * To run a mutation, you first call `useCreateHarvestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateHarvestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createHarvestMutation, { data, loading, error }] = useCreateHarvestMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateHarvestMutation(baseOptions?: Apollo.MutationHookOptions<CreateHarvestMutation, CreateHarvestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateHarvestMutation, CreateHarvestMutationVariables>(CreateHarvestDocument, options);
+      }
+export type CreateHarvestMutationHookResult = ReturnType<typeof useCreateHarvestMutation>;
+export type CreateHarvestMutationResult = Apollo.MutationResult<CreateHarvestMutation>;
+export type CreateHarvestMutationOptions = Apollo.BaseMutationOptions<CreateHarvestMutation, CreateHarvestMutationVariables>;
+export const UpdateHarvestDocument = gql`
+    mutation UpdateHarvest($id: ID!, $input: UpdateHarvestInput!) {
+  updateHarvest(id: $id, input: $input) {
+    id
+    tenantId
+    createdById
+    species
+    variety
+    batch
+    greenhouse
+    plantingDate
+    cultivationArea
+    status
+    date
+    classA
+    waste
+    avgBrix
+    brix1
+    brix2
+    brix3
+    brix4
+    brix5
+    brix6
+    brix7
+    brix8
+    brix9
+    brix10
+    photos
+    photoUrls
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type UpdateHarvestMutationFn = Apollo.MutationFunction<UpdateHarvestMutation, UpdateHarvestMutationVariables>;
+
+/**
+ * __useUpdateHarvestMutation__
+ *
+ * To run a mutation, you first call `useUpdateHarvestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateHarvestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateHarvestMutation, { data, loading, error }] = useUpdateHarvestMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateHarvestMutation(baseOptions?: Apollo.MutationHookOptions<UpdateHarvestMutation, UpdateHarvestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateHarvestMutation, UpdateHarvestMutationVariables>(UpdateHarvestDocument, options);
+      }
+export type UpdateHarvestMutationHookResult = ReturnType<typeof useUpdateHarvestMutation>;
+export type UpdateHarvestMutationResult = Apollo.MutationResult<UpdateHarvestMutation>;
+export type UpdateHarvestMutationOptions = Apollo.BaseMutationOptions<UpdateHarvestMutation, UpdateHarvestMutationVariables>;
+export const DeleteHarvestDocument = gql`
+    mutation DeleteHarvest($id: ID!) {
+  deleteHarvest(id: $id)
+}
+    `;
+export type DeleteHarvestMutationFn = Apollo.MutationFunction<DeleteHarvestMutation, DeleteHarvestMutationVariables>;
+
+/**
+ * __useDeleteHarvestMutation__
+ *
+ * To run a mutation, you first call `useDeleteHarvestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteHarvestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteHarvestMutation, { data, loading, error }] = useDeleteHarvestMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteHarvestMutation(baseOptions?: Apollo.MutationHookOptions<DeleteHarvestMutation, DeleteHarvestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteHarvestMutation, DeleteHarvestMutationVariables>(DeleteHarvestDocument, options);
+      }
+export type DeleteHarvestMutationHookResult = ReturnType<typeof useDeleteHarvestMutation>;
+export type DeleteHarvestMutationResult = Apollo.MutationResult<DeleteHarvestMutation>;
+export type DeleteHarvestMutationOptions = Apollo.BaseMutationOptions<DeleteHarvestMutation, DeleteHarvestMutationVariables>;
 export const CreateTenantDocument = gql`
     mutation CreateTenant($input: CreateTenantInput!) {
   createTenant(input: $input) {
@@ -1665,6 +2000,158 @@ export type TenantFeaturesQueryHookResult = ReturnType<typeof useTenantFeaturesQ
 export type TenantFeaturesLazyQueryHookResult = ReturnType<typeof useTenantFeaturesLazyQuery>;
 export type TenantFeaturesSuspenseQueryHookResult = ReturnType<typeof useTenantFeaturesSuspenseQuery>;
 export type TenantFeaturesQueryResult = Apollo.QueryResult<TenantFeaturesQuery, TenantFeaturesQueryVariables>;
+export const HarvestsDocument = gql`
+    query Harvests($filter: HarvestFilterInput) {
+  harvests(filter: $filter) {
+    id
+    tenantId
+    createdById
+    species
+    variety
+    batch
+    greenhouse
+    plantingDate
+    cultivationArea
+    status
+    date
+    classA
+    waste
+    avgBrix
+    brix1
+    brix2
+    brix3
+    brix4
+    brix5
+    brix6
+    brix7
+    brix8
+    brix9
+    brix10
+    photos
+    photoUrls
+    createdAt
+    updatedAt
+    createdBy {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}
+    `;
+
+/**
+ * __useHarvestsQuery__
+ *
+ * To run a query within a React component, call `useHarvestsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHarvestsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHarvestsQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useHarvestsQuery(baseOptions?: Apollo.QueryHookOptions<HarvestsQuery, HarvestsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HarvestsQuery, HarvestsQueryVariables>(HarvestsDocument, options);
+      }
+export function useHarvestsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HarvestsQuery, HarvestsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HarvestsQuery, HarvestsQueryVariables>(HarvestsDocument, options);
+        }
+// @ts-ignore
+export function useHarvestsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HarvestsQuery, HarvestsQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestsQuery, HarvestsQueryVariables>;
+export function useHarvestsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestsQuery, HarvestsQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestsQuery | undefined, HarvestsQueryVariables>;
+export function useHarvestsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestsQuery, HarvestsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HarvestsQuery, HarvestsQueryVariables>(HarvestsDocument, options);
+        }
+export type HarvestsQueryHookResult = ReturnType<typeof useHarvestsQuery>;
+export type HarvestsLazyQueryHookResult = ReturnType<typeof useHarvestsLazyQuery>;
+export type HarvestsSuspenseQueryHookResult = ReturnType<typeof useHarvestsSuspenseQuery>;
+export type HarvestsQueryResult = Apollo.QueryResult<HarvestsQuery, HarvestsQueryVariables>;
+export const HarvestDocument = gql`
+    query Harvest($id: ID!) {
+  harvest(id: $id) {
+    id
+    tenantId
+    createdById
+    species
+    variety
+    batch
+    greenhouse
+    plantingDate
+    cultivationArea
+    status
+    date
+    classA
+    waste
+    avgBrix
+    brix1
+    brix2
+    brix3
+    brix4
+    brix5
+    brix6
+    brix7
+    brix8
+    brix9
+    brix10
+    photos
+    photoUrls
+    createdAt
+    updatedAt
+    createdBy {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}
+    `;
+
+/**
+ * __useHarvestQuery__
+ *
+ * To run a query within a React component, call `useHarvestQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHarvestQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHarvestQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useHarvestQuery(baseOptions: Apollo.QueryHookOptions<HarvestQuery, HarvestQueryVariables> & ({ variables: HarvestQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HarvestQuery, HarvestQueryVariables>(HarvestDocument, options);
+      }
+export function useHarvestLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HarvestQuery, HarvestQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HarvestQuery, HarvestQueryVariables>(HarvestDocument, options);
+        }
+// @ts-ignore
+export function useHarvestSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HarvestQuery, HarvestQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestQuery, HarvestQueryVariables>;
+export function useHarvestSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestQuery, HarvestQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestQuery | undefined, HarvestQueryVariables>;
+export function useHarvestSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestQuery, HarvestQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HarvestQuery, HarvestQueryVariables>(HarvestDocument, options);
+        }
+export type HarvestQueryHookResult = ReturnType<typeof useHarvestQuery>;
+export type HarvestLazyQueryHookResult = ReturnType<typeof useHarvestLazyQuery>;
+export type HarvestSuspenseQueryHookResult = ReturnType<typeof useHarvestSuspenseQuery>;
+export type HarvestQueryResult = Apollo.QueryResult<HarvestQuery, HarvestQueryVariables>;
 export const GetBucketDataDocument = gql`
     query GetBucketData($input: GetBucketDataInput!) {
   getBucketData(input: $input) {
