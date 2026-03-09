@@ -3,6 +3,9 @@
 import * as React from 'react';
 import { useHarvestsQuery, type HarvestsQuery } from '@/generated/graphql';
 import type { BatchDetailsData } from '@/components/harvest/batch-sidebar-types';
+import type { SidebarMode } from '@/components/harvest/use-batch-sidebar';
+import { useEditHarvest } from '@/components/harvest/use-edit-harvest';
+import { useDeleteHarvest } from '@/components/harvest/use-delete-harvest';
 import { computeSummary, harvestToBatchDetails } from './harvest.utils';
 import type { HarvestSummary } from './harvest.utils';
 
@@ -19,20 +22,31 @@ export function useHarvestPage() {
     [harvests],
   );
 
-  const [selectedHarvest, setSelectedHarvest] =
-    React.useState<HarvestItem | null>(null);
-  const [detailsOpen, setDetailsOpen] = React.useState(false);
   const [createBatchOpen, setCreateBatchOpen] = React.useState(false);
   const [batchSidebarOpen, setBatchSidebarOpen] = React.useState(false);
+  const [sidebarMode, setSidebarMode] = React.useState<SidebarMode>('create');
+  const [editOpen, setEditOpen] = React.useState(false);
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [deleteTarget, setDeleteTarget] = React.useState<HarvestItem | null>(null);
   const [pendingBatch, setPendingBatch] = React.useState<{
     id: string;
     details: BatchDetailsData;
   } | null>(null);
 
-  const handleViewDetails = React.useCallback((harvest: HarvestItem) => {
-    setSelectedHarvest(harvest);
-    setDetailsOpen(true);
-  }, []);
+  const editHarvest = useEditHarvest({
+    onSuccess: () => {
+      setEditOpen(false);
+      refetch();
+    },
+  });
+
+  const { handleDelete, loading: deleteLoading } = useDeleteHarvest({
+    onSuccess: () => {
+      setDeleteOpen(false);
+      setDeleteTarget(null);
+      refetch();
+    },
+  });
 
   const handleCreateBatch = React.useCallback(() => {
     setCreateBatchOpen(true);
@@ -42,6 +56,7 @@ export function useHarvestPage() {
     (harvest: Parameters<typeof harvestToBatchDetails>[0]) => {
       const details = harvestToBatchDetails(harvest);
       setPendingBatch({ id: harvest.id, details });
+      setSidebarMode('create');
       setBatchSidebarOpen(true);
     },
     [],
@@ -53,21 +68,52 @@ export function useHarvestPage() {
     refetch();
   }, [refetch]);
 
+  const handleEditRequest = React.useCallback(
+    (harvest: HarvestItem) => {
+      editHarvest.populate(harvest);
+      setEditOpen(true);
+    },
+    [editHarvest],
+  );
+
+  const handleSidebarEdit = React.useCallback((harvest: HarvestItem) => {
+    const details = harvestToBatchDetails(harvest);
+    setPendingBatch({ id: harvest.id, details });
+    setSidebarMode('edit');
+    setBatchSidebarOpen(true);
+  }, []);
+
+  const handleDeleteRequest = React.useCallback((harvest: HarvestItem) => {
+    setDeleteTarget(harvest);
+    setDeleteOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = React.useCallback(() => {
+    if (deleteTarget) handleDelete(deleteTarget.id);
+  }, [deleteTarget, handleDelete]);
+
   return {
     harvests,
     summary,
     loading,
-    selectedHarvest,
-    detailsOpen,
-    setDetailsOpen,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,
     setBatchSidebarOpen,
+    sidebarMode,
     pendingBatch,
-    handleViewDetails,
     handleCreateBatch,
     handleBatchCreated,
     handleSidebarCompleted,
+    handleSidebarEdit,
+    editOpen,
+    setEditOpen,
+    editHarvest,
+    handleEditRequest,
+    deleteOpen,
+    setDeleteOpen,
+    deleteLoading,
+    handleDeleteRequest,
+    handleDeleteConfirm,
   };
 }

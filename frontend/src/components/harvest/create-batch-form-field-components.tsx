@@ -8,11 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useI18n } from '@/i18n'
 import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch'
-import { getVarietiesForSpecies, speciesOptions, greenhouseOptions } from './create-batch-data'
+import { speciesOptions, greenhouseOptions } from './create-batch-data'
 
 interface FormFieldProps {
   formData: BatchFormData
@@ -21,10 +20,13 @@ interface FormFieldProps {
 }
 
 export function GreenhouseField({ formData, setFormData, errors }: FormFieldProps) {
+  const { t } = useI18n()
+  const h = t.pages.harvest
+
   return (
     <div className="space-y-2">
       <Label htmlFor="sourceGreenhouse" className="text-sm font-medium">
-       Greenhouse <span className="text-destructive">*</span>
+        {h?.greenhouse ?? 'Greenhouse'} <span className="text-destructive">*</span>
       </Label>
       <Select
         value={formData.sourceGreenhouseId}
@@ -33,7 +35,7 @@ export function GreenhouseField({ formData, setFormData, errors }: FormFieldProp
         }
       >
         <SelectTrigger className={`w-full h-10 ${errors.sourceGreenhouseId ? 'border-destructive' : ''}`}>
-          <SelectValue placeholder="Select greenhouse..." />
+          <SelectValue placeholder={h?.selectGreenhouse ?? 'Select greenhouse...'} />
         </SelectTrigger>
         <SelectContent>
           {greenhouseOptions.map((greenhouse) => (
@@ -52,11 +54,12 @@ export function GreenhouseField({ formData, setFormData, errors }: FormFieldProp
 
 export function SpeciesField({ formData, setFormData, errors }: FormFieldProps) {
   const { t } = useI18n()
-  
+  const h = t.pages.harvest
+
   return (
     <div className="space-y-2">
       <Label htmlFor="species" className="text-sm font-medium">
-        {t.pages.harvest?.species || 'Species'} <span className="text-destructive">*</span>
+        {h?.species ?? 'Species'} <span className="text-destructive">*</span>
       </Label>
       <Select
         value={formData.species}
@@ -65,7 +68,7 @@ export function SpeciesField({ formData, setFormData, errors }: FormFieldProps) 
         }}
       >
         <SelectTrigger className={`w-full h-10 ${errors.species ? 'border-destructive' : ''}`}>
-          <SelectValue placeholder="Select species..." />
+          <SelectValue placeholder={h?.selectSpecies ?? 'Select species...'} />
         </SelectTrigger>
         <SelectContent>
           {speciesOptions.map((species) => (

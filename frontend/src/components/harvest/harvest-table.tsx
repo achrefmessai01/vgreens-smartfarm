@@ -2,50 +2,56 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { Eye } from 'lucide-react';
+import { useI18n } from '@/i18n';
 import {
   formatHarvestDate,
   getGreenhouseLabel,
 } from '@/app/tenant/harvest/harvest.utils';
+import { Eye, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { TableCell } from '@/components/ui/table';
-import type { Harvest } from '@/generated/graphql';
+import type { HarvestsQuery } from '@/generated/graphql';
 import { DataTable, type Column } from '@/components/ui/data-table';
 
-interface HarvestTableProps {
-  harvests: Harvest[];
-  onViewDetails?: (harvest: Harvest) => void;
-  isLoading?: boolean;
-  emptyState?: { title: string; description?: string };
-  paginationLabels?: {
-    showing: string;
-    of: string;
-    results: string;
-    perPage: string;
-    previous: string;
-    next: string;
-  };
-}
+type HarvestItem = HarvestsQuery['harvests'][number];
 
-const HARVEST_COLUMNS: Column<Harvest>[] = [
-  { key: 'date', header: 'Date' },
-  { key: 'batch', header: 'Batch' },
-  { key: 'greenhouse', header: 'Greenhouse' },
-  { key: 'classA', header: 'Class A (kg)' },
-  { key: 'waste', header: 'Waste (kg)' },
-  { key: 'avgBrix', header: 'Avg Brix' },
-  { key: 'photos', header: 'Photos' },
-  { key: 'actions', header: 'Actions', headerClassName: 'text-right' },
-];
+interface HarvestTableProps {
+  harvests: HarvestItem[];
+  onEdit?: (harvest: HarvestItem) => void;
+  onDelete?: (harvest: HarvestItem) => void;
+  onSidebarEdit?: (harvest: HarvestItem) => void;
+  isLoading?: boolean;
+}
 
 export function HarvestTable({
   harvests,
-  onViewDetails,
+  onDelete,
+  onSidebarEdit,
   isLoading = false,
-  emptyState,
-  paginationLabels,
 }: HarvestTableProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  const columns: Column<HarvestItem>[] = React.useMemo(
+    () => [
+      { key: 'date', header: h?.date ?? 'Date' },
+      { key: 'batch', header: h?.batch ?? 'Batch' },
+      { key: 'greenhouse', header: h?.greenhouse ?? 'Greenhouse' },
+      { key: 'classA', header: h?.classA ?? 'Class A (kg)' },
+      { key: 'waste', header: h?.waste ?? 'Waste (kg)' },
+      { key: 'avgBrix', header: h?.avgBrix ?? 'Avg Brix' },
+      { key: 'photos', header: h?.photos ?? 'Photos' },
+      {
+        key: 'actions',
+        header: h?.actions ?? 'Actions',
+        headerClassName: 'text-right',
+      },
+    ],
+    [h],
+  );
+
   const renderRow = React.useCallback(
-    (harvest: Harvest) => (
+    (harvest: HarvestItem) => (
       <>
         <TableCell className="font-medium">
           {formatHarvestDate(harvest.date)}
@@ -71,24 +77,44 @@ export function HarvestTable({
           {harvest.photos === 0 ? '-' : harvest.photos}
         </TableCell>
         <TableCell className="text-right">
-          <Eye className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center justify-end gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSidebarEdit?.(harvest);
+              }}
+            >
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(harvest);
+              }}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </div>
         </TableCell>
       </>
     ),
-    [],
+    [onDelete, onSidebarEdit],
   );
 
   return (
-    <DataTable<Harvest>
+    <DataTable<HarvestItem>
       data={harvests}
-      columns={HARVEST_COLUMNS}
+      columns={columns}
       renderRow={renderRow}
-      onRowClick={onViewDetails}
-      emptyState={{
-        title: emptyState?.title ?? 'No harvests yet',
-        description: emptyState?.description,
-      }}
-      paginationLabels={paginationLabels}
+      onRowClick={onSidebarEdit}
+      emptyState={{ title: h?.noHarvestsYet ?? 'No harvests yet' }}
       paginationVariant="compact"
       defaultPageSize={15}
       isLoading={isLoading}

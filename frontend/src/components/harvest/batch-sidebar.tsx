@@ -14,13 +14,14 @@ import { BatchHeaderField, BatchStatsField } from './batch-sidebar-basic-fields'
 import { BrixMeasurementsField } from './batch-sidebar-brix-field'
 import { PhotosField } from './batch-sidebar-photos-field'
 import { YieldDataField } from './batch-sidebar-yield-field'
-import { useBatchSidebar } from './use-batch-sidebar'
+import { useBatchSidebar, type SidebarMode } from './use-batch-sidebar'
 
 export interface BatchSidebarProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   harvestId: string | null
   batchData: BatchDetailsData | null
+  mode?: SidebarMode
   onCompleted?: () => void
   onPhotoUpload?: (files: File[]) => void
   isLoading?: boolean
@@ -31,20 +32,26 @@ export function BatchSidebar({
   onOpenChange,
   harvestId,
   batchData,
+  mode = 'create',
   onCompleted,
   onPhotoUpload,
   isLoading = false,
 }: BatchSidebarProps) {
   const { t } = useI18n()
+  const h = t.pages.harvest
   const {
     currentData,
     loading: isSaving,
     handleBrixChange,
     handleYieldChange,
-    handleLogHarvest,
-  } = useBatchSidebar({ harvestId, batchData, onCompleted })
+    handleSave,
+  } = useBatchSidebar({ harvestId, batchData, mode, onCompleted })
 
   const busy = isLoading || isSaving
+
+  const buttonLabel = isSaving
+    ? (mode === 'edit' ? (h?.updating ?? 'Updating...') : (h?.saving ?? 'Saving...'))
+    : (mode === 'edit' ? (h?.update ?? 'Update') : (h?.logHarvest ?? 'Log Harvest'))
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -52,8 +59,8 @@ export function BatchSidebar({
         <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
           <SheetTitle className="dark:text-card-foreground">
             {currentData?.greenhouse?.name
-              ? `${t.pages.harvest?.batchDetails || 'Batch Details'} for ${currentData.greenhouse.name}`
-              : t.pages.harvest?.batchDetails || 'Batch Details'}
+              ? `${h?.batchDetails ?? 'Batch Details'} for ${currentData.greenhouse.name}`
+              : h?.batchDetails ?? 'Batch Details'}
           </SheetTitle>
         </SheetHeader>
 
@@ -98,7 +105,7 @@ export function BatchSidebar({
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <p className="text-sm text-muted-foreground">
-                {t.pages.harvest?.noBatchSelected || 'No batch selected'}
+                {h?.noBatchSelected ?? 'No batch selected'}
               </p>
             </div>
           )}
@@ -106,12 +113,12 @@ export function BatchSidebar({
 
         <SheetFooter className="px-6 py-4 border-t dark:border-primary-foreground/30">
           <Button
-            onClick={handleLogHarvest}
+            onClick={handleSave}
             disabled={busy || !harvestId}
             className="w-full h-12 text-lg font-semibold"
             size="lg"
           >
-            {isSaving ? 'Saving...' : 'Log Harvest'}
+            {buttonLabel}
           </Button>
         </SheetFooter>
       </SheetContent>

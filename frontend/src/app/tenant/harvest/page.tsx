@@ -3,9 +3,10 @@
 import {
   HarvestTable,
   BatchSidebar,
-  HarvestDetails,
   HarvestPageHeader,
   CreateBatchDialog,
+  EditHarvestDialog,
+  DeleteHarvestDialog,
   HarvestPageSkeleton,
 } from '@/components/harvest';
 import { useI18n } from '@/i18n';
@@ -18,18 +19,25 @@ export default function HarvestPage() {
     harvests,
     summary,
     loading,
-    selectedHarvest,
-    detailsOpen,
-    setDetailsOpen,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,
     setBatchSidebarOpen,
+    sidebarMode,
     pendingBatch,
-    handleViewDetails,
     handleCreateBatch,
     handleBatchCreated,
     handleSidebarCompleted,
+    handleSidebarEdit,
+    editOpen,
+    setEditOpen,
+    editHarvest,
+    handleEditRequest,
+    deleteOpen,
+    setDeleteOpen,
+    deleteLoading,
+    handleDeleteConfirm,
+    handleDeleteRequest,
   } = useHarvestPage();
 
   if (loading && (harvests?.length ?? 0) === 0) {
@@ -53,15 +61,11 @@ export default function HarvestPage() {
         />
 
         <HarvestTable
-          harvests={harvests}
-          onViewDetails={handleViewDetails}
+          harvests={harvests ?? []}
+          onEdit={handleEditRequest}
+          onDelete={handleDeleteRequest}
+          onSidebarEdit={handleSidebarEdit}
           isLoading={loading}
-        />
-
-        <HarvestDetails
-          harvest={selectedHarvest}
-          open={detailsOpen}
-          onOpenChange={setDetailsOpen}
         />
 
         <CreateBatchDialog
@@ -70,11 +74,30 @@ export default function HarvestPage() {
           onCreated={handleBatchCreated}
         />
 
+        <EditHarvestDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          formData={editHarvest.formData}
+          setFormData={editHarvest.setFormData}
+          errors={editHarvest.errors}
+          loading={editHarvest.loading}
+          onSubmit={editHarvest.handleSubmit}
+          onReset={editHarvest.reset}
+        />
+
+        <DeleteHarvestDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          onConfirm={handleDeleteConfirm}
+          loading={deleteLoading}
+        />
+
         <BatchSidebar
           open={batchSidebarOpen}
           onOpenChange={setBatchSidebarOpen}
           harvestId={pendingBatch?.id ?? null}
           batchData={pendingBatch?.details ?? null}
+          mode={sidebarMode}
           onCompleted={handleSidebarCompleted}
           onPhotoUpload={(files) => {
             console.log('Upload photos:', files);

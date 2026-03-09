@@ -19,13 +19,6 @@ const STATUS_COLOR: Record<HarvestStatus, string> = {
   [HarvestStatus.Inactive]: 'bg-gray-500 hover:bg-gray-600',
 }
 
-const STATUS_LABEL: Record<HarvestStatus, string> = {
-  [HarvestStatus.Draft]: 'Draft',
-  [HarvestStatus.Active]: 'Active',
-  [HarvestStatus.Completed]: 'Completed',
-  [HarvestStatus.Inactive]: 'Inactive',
-}
-
 export function BatchHeaderField({
   name,
   species,
@@ -33,6 +26,16 @@ export function BatchHeaderField({
   status,
   isLoading = false,
 }: BatchHeaderFieldProps) {
+  const { t } = useI18n()
+  const h = t.pages.harvest
+
+  const STATUS_LABEL: Record<HarvestStatus, string> = {
+    [HarvestStatus.Draft]: h?.statusDraft ?? 'Draft',
+    [HarvestStatus.Active]: h?.statusActive ?? 'Active',
+    [HarvestStatus.Completed]: h?.statusCompleted ?? 'Completed',
+    [HarvestStatus.Inactive]: h?.statusInactive ?? 'Inactive',
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -50,7 +53,7 @@ export function BatchHeaderField({
           variant={STATUS_VARIANT[status] ?? 'outline'}
           className={STATUS_COLOR[status] ?? 'bg-gray-500'}
         >
-          {STATUS_LABEL[status] ?? status} Batch
+          {STATUS_LABEL[status] ?? status} {h?.batchSuffix ?? 'Batch'}
         </Badge>
       </div>
       <p className="text-sm text-muted-foreground">
@@ -66,6 +69,7 @@ export function BatchStatsField({
   isLoading = false,
 }: BatchStatsFieldProps) {
   const { t } = useI18n()
+  const h = t.pages.harvest
 
   if (isLoading) {
     return (
@@ -76,10 +80,12 @@ export function BatchStatsField({
     )
   }
 
+  const dayText = (h?.dayAfterPlanting ?? 'Day {days} after planting').replace('{days}', String(daysAfterPlanting))
+
   return (
     <div className="flex items-center justify-between py-2 text-sm text-muted-foreground border-b pb-4">
-      <span>📅 Day {daysAfterPlanting} after planting</span>
-      <span>📐 Area: {area} m²</span>
+      <span>📅 {dayText}</span>
+      <span>📐 {h?.area ?? 'Area'}: {area} m²</span>
     </div>
   )
 }

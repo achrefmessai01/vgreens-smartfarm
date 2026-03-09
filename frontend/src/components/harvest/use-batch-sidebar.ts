@@ -7,6 +7,8 @@ import {
 } from '@/generated/graphql'
 import type { BatchDetailsData } from './batch-sidebar-types'
 
+export type SidebarMode = 'create' | 'edit'
+
 function computeAvgBrix(brix: BatchDetailsData['brixMeasurements']): number {
   const values = [
     brix.brix1, brix.brix2, brix.brix3, brix.brix4, brix.brix5,
@@ -19,12 +21,14 @@ function computeAvgBrix(brix: BatchDetailsData['brixMeasurements']): number {
 interface UseBatchSidebarOptions {
   harvestId: string | null
   batchData: BatchDetailsData | null
+  mode?: SidebarMode
   onCompleted?: () => void
 }
 
 export function useBatchSidebar({
   harvestId,
   batchData,
+  mode = 'create',
   onCompleted,
 }: UseBatchSidebarOptions) {
   const [localData, setLocalData] = React.useState<BatchDetailsData | null>(null)
@@ -54,9 +58,10 @@ export function useBatchSidebar({
     [],
   )
 
-  const handleLogHarvest = React.useCallback(async () => {
+  const handleSave = React.useCallback(async () => {
     if (!harvestId || !currentData) return
     const brix = currentData.brixMeasurements
+    const status = mode === 'edit' ? currentData.status : HarvestStatus.Completed
     try {
       await updateHarvest({
         variables: {
@@ -68,27 +73,23 @@ export function useBatchSidebar({
             ...brix,
             photos: currentData.photos.length,
             photoUrls: currentData.photos,
-            date: new Date().toISOString(),
-            status: HarvestStatus.Completed,
+            date: mode === 'edit' ? undefined : new Date().toISOString(),
+            status,
           },
         },
       })
       onCompleted?.()
     } catch (err) {
-      console.error('Failed to log harvest:', err)
+      console.error('Failed to save harvest:', err)
     }
-  }, [harvestId, currentData, updateHarvest, onCompleted])
-
-  const canEdit = currentData?.status === HarvestStatus.Draft || currentData?.status === HarvestStatus.Active
-  const canComplete = canEdit
+  }, [harvestId, currentData, mode, updateHarvest, onCompleted])
 
   return {
     currentData,
     loading,
-    canEdit,
-    canComplete,
+    mode,
     handleBrixChange,
     handleYieldChange,
-    handleLogHarvest,
+    handleSave,
   }
 }

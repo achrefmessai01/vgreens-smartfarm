@@ -22,11 +22,12 @@ interface FormFieldProps {
 
 export function VarietyField({ formData, setFormData, errors }: FormFieldProps) {
   const { t } = useI18n()
-  
+  const h = t.pages.harvest
+
   return (
     <div className="space-y-2">
       <Label htmlFor="variety" className="text-sm font-medium">
-        {t.pages.harvest?.variety || 'Variety'} <span className="text-destructive">*</span>
+        {h?.variety ?? 'Variety'} <span className="text-destructive">*</span>
       </Label>
       <Select
         value={formData.variety}
@@ -36,7 +37,7 @@ export function VarietyField({ formData, setFormData, errors }: FormFieldProps) 
         disabled={!formData.species}
       >
         <SelectTrigger className={`w-full h-10 ${errors.variety ? 'border-destructive' : ''}`}>
-          <SelectValue placeholder="Select variety..." />
+          <SelectValue placeholder={h?.selectVariety ?? 'Select variety...'} />
         </SelectTrigger>
         <SelectContent>
           {getVarietiesForSpecies(formData.species).map((variety) => (
@@ -55,11 +56,12 @@ export function VarietyField({ formData, setFormData, errors }: FormFieldProps) 
 
 export function PlantingDateField({ formData, setFormData, errors }: FormFieldProps) {
   const { t } = useI18n()
-  
+  const h = t.pages.harvest
+
   return (
     <div className="space-y-2">
       <Label htmlFor="plantingDate" className="text-sm font-medium">
-        {t.pages.harvest?.plantingDate || 'Planting Date'} <span className="text-destructive">*</span>
+        {h?.plantingDate ?? 'Planting Date'} <span className="text-destructive">*</span>
       </Label>
       <Input
         id="plantingDate"
@@ -79,18 +81,19 @@ export function PlantingDateField({ formData, setFormData, errors }: FormFieldPr
 
 export function CultivationAreaField({ formData, setFormData, errors }: FormFieldProps) {
   const { t } = useI18n()
-  
+  const h = t.pages.harvest
+
   return (
     <div className="space-y-2">
       <Label htmlFor="cultivationArea" className="text-sm font-medium">
-        {t.pages.harvest?.cultivationArea || 'Cultivation Area (m²)'} <span className="text-destructive">*</span>
+        {h?.cultivationArea ?? 'Cultivation Area (m²)'} <span className="text-destructive">*</span>
       </Label>
       <Input
         id="cultivationArea"
         type="number"
         min="0"
         step="0.1"
-        placeholder="Enter area in square meters"
+        placeholder={h?.enterArea ?? 'Enter area in square meters'}
         value={formData.cultivationArea || ''}
         onChange={(e) =>
           setFormData((prev) => ({

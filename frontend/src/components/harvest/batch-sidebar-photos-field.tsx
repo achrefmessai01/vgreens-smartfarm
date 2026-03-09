@@ -8,9 +8,10 @@ import type { PhotosFieldProps } from './batch-sidebar-types'
 export function PhotosField({
   photos = [],
   onUpload,
-  isLoading = false
+  isLoading = false,
 }: PhotosFieldProps) {
   const { t } = useI18n()
+  const h = t.pages.harvest
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   const handleUploadClick = () => {
@@ -35,17 +36,17 @@ export function PhotosField({
 
   return (
     <div className="space-y-4">
-      <h3 className="font-medium">Photos</h3>
-      <div 
+      <h3 className="font-medium">{h?.photos ?? 'Photos'}</h3>
+      <div
         className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
         onClick={handleUploadClick}
       >
         <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
         <p className="text-sm text-muted-foreground">
-          Click to upload or drag and drop
+          {h?.uploadPhotos ?? 'Click to upload or drag and drop'}
         </p>
       </div>
-      
+
       <input
         ref={fileInputRef}
         type="file"
@@ -54,14 +55,14 @@ export function PhotosField({
         className="hidden"
         onChange={handleFileChange}
       />
-      
+
       {photos.length > 0 && (
         <div className="grid grid-cols-3 gap-2">
           {photos.map((photo, index) => (
             <div key={index} className="aspect-square bg-muted rounded-lg overflow-hidden">
-              <img 
-                src={photo} 
-                alt={`Photo ${index + 1}`}
+              <img
+                src={photo}
+                alt={`${h?.photoAlt ?? 'Photo'} ${index + 1}`}
                 className="w-full h-full object-cover"
               />
             </div>
