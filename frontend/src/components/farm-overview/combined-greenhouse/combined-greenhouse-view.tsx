@@ -86,7 +86,7 @@ export function CombinedGreenhouseView({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
+    <div className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto pr-1">
       <div className="grid grid-cols-1 gap-1 pb-1 content-start items-stretch sm:grid-cols-2 sm:gap-2 xl:[grid-template-columns:repeat(auto-fit,minmax(10.75rem,1fr))]">
         {greenhouses.map((greenhouse, index) => (
           <GreenhouseSummaryCard
@@ -106,7 +106,7 @@ export function CombinedGreenhouseView({
         greenhouseId={parGraphGreenhouseId}
         greenhouseLabel={parGraphLabel}
         embedded
-        className="h-full w-full"
+        className="h-auto w-full shrink-0 min-h-[15rem] sm:min-h-[17rem] lg:h-full lg:flex-1 lg:min-h-[15rem]"
       />
     </div>
   );

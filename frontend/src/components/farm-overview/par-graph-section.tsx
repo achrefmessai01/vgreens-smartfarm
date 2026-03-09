@@ -49,7 +49,7 @@ export function ParGraphSection({
     return (
       <div
         className={cn(
-          'h-full min-h-0 flex flex-col overflow-hidden rounded-sm border border-border/50 bg-background',
+          'h-full min-h-[17rem] flex flex-col overflow-hidden rounded-sm border border-border/50 bg-background',
           className,
         )}
       >
@@ -59,7 +59,7 @@ export function ParGraphSection({
   }
 
   return (
-    <Card className={cn('gap-0 py-0 overflow-hidden rounded-sm', className)}>
+    <Card className={cn('gap-0 py-0 overflow-hidden rounded-sm min-h-[17rem]', className)}>
       {content}
     </Card>
   );
