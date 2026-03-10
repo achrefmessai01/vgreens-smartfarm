@@ -62,7 +62,7 @@ export function BrixTrendChart({ data, className }: BrixTrendChartProps) {
                   <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <CartesianGrid strokeDasharray="3 3" className="opacity-60" stroke="#94a3b8" />
               <XAxis 
                 dataKey="date" 
                 fontSize={12}

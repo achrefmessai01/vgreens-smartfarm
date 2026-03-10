@@ -62,7 +62,7 @@ export function YieldOverTimeChart({ data, className }: YieldOverTimeChartProps)
                   <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <CartesianGrid strokeDasharray="3 3" className="opacity-60" stroke="#94a3b8" />
               <XAxis 
                 dataKey="date" 
                 fontSize={12}

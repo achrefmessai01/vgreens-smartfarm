@@ -51,7 +51,7 @@ export function ClassDistributionChart({ data, className }: ClassDistributionCha
                   <stop offset="95%" stopColor="#dc2626" stopOpacity={1}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <CartesianGrid strokeDasharray="3 3" className="opacity-60" stroke="#94a3b8" />
               <XAxis 
                 dataKey="date" 
                 fontSize={12}
