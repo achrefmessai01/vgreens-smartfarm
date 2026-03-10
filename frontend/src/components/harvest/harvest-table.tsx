@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { TableCell } from '@/components/ui/table';
 import type { HarvestsQuery } from '@/generated/graphql';
 import { DataTable, type Column } from '@/components/ui/data-table';
+import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
 
@@ -31,6 +32,10 @@ export function HarvestTable({
 }: HarvestTableProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  const paginationConfig = usePaginationConfig({
+    defaultPageSize: 15,
+    pageSizeOptions: [10, 15, 25, 50]
+  });
 
   const columns: Column<HarvestItem>[] = React.useMemo(
     () => [
@@ -116,7 +121,9 @@ export function HarvestTable({
       onRowClick={onSidebarEdit}
       emptyState={{ title: h?.noHarvestsYet ?? 'No harvests yet' }}
       paginationVariant="compact"
-      defaultPageSize={15}
+      defaultPageSize={paginationConfig.defaultPageSize}
+      pageSizeOptions={paginationConfig.pageSizeOptions}
+      paginationLabels={paginationConfig.paginationLabels}
       isLoading={isLoading}
     />
   );
