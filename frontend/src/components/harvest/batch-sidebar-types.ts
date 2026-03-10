@@ -73,5 +73,6 @@ export interface BrixMeasurementsFieldProps {
 export interface PhotosFieldProps {
   photos: string[]
   onUpload?: (files: File[]) => void
+  onRemove?: (index: number) => void
   isLoading?: boolean
 }

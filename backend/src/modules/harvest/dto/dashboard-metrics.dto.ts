@@ -1,0 +1,88 @@
+import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
+
+@ObjectType()
+export class YieldOverTimeData {
+  @Field()
+  date: string;
+
+  @Field(() => Float)
+  yield: number;
+}
+
+@ObjectType()
+export class ClassDistributionData {
+  @Field()
+  date: string;
+
+  @Field(() => Float)
+  marketable: number;
+
+  @Field(() => Float)
+  waste: number;
+}
+
+@ObjectType()
+export class BrixTrendData {
+  @Field()
+  date: string;
+
+  @Field(() => Float)
+  brix: number;
+}
+
+@ObjectType()
+export class CumulativeYieldData {
+  @Field()
+  date: string;
+
+  @Field(() => Float)
+  cumulative: number;
+
+  @Field(() => Float)
+  cumulativeWaste: number;
+}
+
+@ObjectType()
+export class HarvestDashboardMetrics {
+  @Field()
+  species: string;
+
+  @Field()
+  variety: string;
+
+  @Field(() => Int)
+  harvestCount: number;
+
+  @Field(() => Float)
+  totalYield: number;
+
+  @Field(() => Float)
+  averageBrix: number;
+
+  @Field(() => Float)
+  marketablePercent: number;
+
+  @Field(() => Float)
+  wastePercent: number;
+
+  @Field(() => Float)
+  wasteTotal: number;
+
+  @Field(() => Int)
+  criticalAlerts: number;
+
+  @Field(() => Int)
+  daysActive: number;
+
+  @Field(() => [YieldOverTimeData])
+  yieldOverTime: YieldOverTimeData[];
+
+  @Field(() => [ClassDistributionData])
+  classDistribution: ClassDistributionData[];
+
+  @Field(() => [BrixTrendData])
+  brixTrend: BrixTrendData[];
+
+  @Field(() => [CumulativeYieldData])
+  cumulativeYield: CumulativeYieldData[];
+}
