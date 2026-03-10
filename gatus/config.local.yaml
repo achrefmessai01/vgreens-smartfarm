@@ -1,0 +1,242 @@
+storage:
+  type: sqlite
+  path: /data/gatus.db
+
+ui:
+  title: VGreens Status (Local)
+  header: vGreens Lab Status
+  description: Local testing - VGreens Smart Farm services
+  logo: "https://vgreens-frontend.fly.dev/vGreens.svg"
+  favicon:
+    default: "https://vgreens-frontend.fly.dev/vGreens.svg"
+    size16x16: "https://vgreens-frontend.fly.dev/vGreens.svg"
+    size32x32: "https://vgreens-frontend.fly.dev/vGreens.svg"
+
+web:
+  port: 8080
+
+metrics: true
+
+endpoints:
+  # ──────────────────────────────────────
+  # Core Infrastructure
+  # ──────────────────────────────────────
+  - name: Frontend
+    group: Infrastructure
+    url: "http://host.docker.internal:3000"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Backend API
+    group: Infrastructure
+    url: "http://host.docker.internal:3001/health"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 3000"
+
+  - name: GraphQL API
+    group: Infrastructure
+    url: "http://host.docker.internal:3001/graphql"
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"query":"{ health }"}'
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 3000"
+
+  - name: InfluxDB
+    group: Infrastructure
+    url: "http://host.docker.internal:3001/influxdb/test"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 3000"
+
+  # ──────────────────────────────────────
+  # Authentication
+  # ──────────────────────────────────────
+  - name: Login Page
+    group: Authentication
+    url: "http://host.docker.internal:3000/login"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Sign Up Page
+    group: Authentication
+    url: "http://host.docker.internal:3000/sign-up"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Clerk Auth Provider
+    group: Authentication
+    url: "https://api.clerk.com"
+    interval: 30s
+    conditions:
+      - "[STATUS] < 500"
+      - "[RESPONSE_TIME] < 5000"
+
+  # ──────────────────────────────────────
+  # Harvest
+  # ──────────────────────────────────────
+  - name: Harvest Page
+    group: Harvest
+    url: "http://host.docker.internal:3000/tenant/harvest"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Harvest API
+    group: Harvest
+    url: "http://host.docker.internal:3001/graphql"
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"query":"{ harvests { id } }"}'
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 3000"
+
+  # ──────────────────────────────────────
+  # Alerts & Warnings
+  # ──────────────────────────────────────
+  - name: Alerts Page
+    group: Alerts & Warnings
+    url: "http://host.docker.internal:3000/tenant/alerts"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Warnings Page
+    group: Alerts & Warnings
+    url: "http://host.docker.internal:3000/tenant/warnings"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Alerts API
+    group: Alerts & Warnings
+    url: "http://host.docker.internal:3001/graphql"
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"query":"{ alerts { id } }"}'
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 3000"
+
+  # ──────────────────────────────────────
+  # Farm Data (InfluxDB)
+  # ──────────────────────────────────────
+  - name: Farm Overview Page
+    group: Farm Data
+    url: "http://host.docker.internal:3000/tenant/farm-overview"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: History Page
+    group: Farm Data
+    url: "http://host.docker.internal:3000/tenant/history"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Camera Livestream Page
+    group: Farm Data
+    url: "http://host.docker.internal:3000/tenant/camera-livestream"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: InfluxDB Connection
+    group: Farm Data
+    url: "http://host.docker.internal:3001/influxdb/test"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 3000"
+
+  # ──────────────────────────────────────
+  # User Management
+  # ──────────────────────────────────────
+  - name: Tenant Users Page
+    group: User Management
+    url: "http://host.docker.internal:3000/tenant/users"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Admin Users Page
+    group: User Management
+    url: "http://host.docker.internal:3000/admin/users"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  # ──────────────────────────────────────
+  # Tenant Management
+  # ──────────────────────────────────────
+  - name: Tenants Page
+    group: Tenant Management
+    url: "http://host.docker.internal:3000/admin/tenants"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  # ──────────────────────────────────────
+  # Admin & Feature Flags
+  # ──────────────────────────────────────
+  - name: Admin Dashboard
+    group: Admin
+    url: "http://host.docker.internal:3000/admin/dashboard"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Feature Flags Page
+    group: Admin
+    url: "http://host.docker.internal:3000/admin/feature-flags"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  - name: Admin Settings Page
+    group: Admin
+    url: "http://host.docker.internal:3000/admin/settings"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
+
+  # ──────────────────────────────────────
+  # Tenant Dashboard
+  # ──────────────────────────────────────
+  - name: Tenant Dashboard
+    group: Dashboard
+    url: "http://host.docker.internal:3000/tenant/dashboard"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 5000"
