@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { MetricCard } from './metric-card';
@@ -8,7 +8,7 @@ import { BrixTrendChart } from './brix-trend-chart';
 import { CumulativeYieldChart } from './cumulative-yield-chart';
 import { DashboardFilters } from './dashboard-filters';
 import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
-import { Calendar, Target, AlertTriangle, Activity, TrendingUp, Package } from 'lucide-react';
+import { Target, AlertTriangle, Activity, TrendingUp, Package } from 'lucide-react';
 import { useHarvestDashboard, type DateFilter } from '@/lib/hooks/use-harvest-dashboard';
 
 interface HarvestDashboardProps {
@@ -40,6 +40,18 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
   const formatAcrossHarvests = (count: number) => {
     return t.pages.harvest?.acrossHarvests?.replace('{count}', count.toString()) || 
            `Across ${count} harvests`;
+  };
+
+  const getFilterLabel = (filter: DateFilter) => {
+    const filterLabels = {
+      'today': t.common?.today || 'today',
+      'thisWeek': t.common?.thisWeek || 'this week', 
+      'lastWeek': t.common?.lastWeek || 'last week',
+      'thisMonth': t.common?.thisMonth || 'this month',
+      'lastMonth': t.common?.lastMonth || 'last month',
+      'total': t.common?.total || 'total'
+    };
+    return filterLabels[filter] || filter;
   };
 
   if (loading) {
@@ -80,7 +92,7 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
             {t.pages.harvest?.performanceDashboard || 'Performance Dashboard'}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {data.species} - {data.variety} • {data.harvestCount} {t.pages.harvest?.harvestsLogged || 'harvests logged'}
+            {data.harvestCount} {t.pages.harvest?.harvestsLogged || 'harvests logged'} for {getFilterLabel(currentFilter)}
           </p>
         </div>
         <DashboardFilters 
