@@ -6,6 +6,8 @@ import {
   CreateHarvestInput,
   UpdateHarvestInput,
   HarvestFilterInput,
+  DashboardFilterInput,
+  HarvestDashboardMetrics,
 } from './dto';
 import { User } from '@modules/users/entities/user.entity';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
@@ -50,6 +52,25 @@ export class HarvestsResolver {
         : currentUser.tenantId;
 
     return this.harvestsService.findOneWithRelations(id, tenantId);
+  }
+
+  @Query(() => HarvestDashboardMetrics, { name: 'harvestDashboard' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  async getDashboardMetrics(
+    @CurrentUser() currentUser: User,
+    @Args('filter', { type: () => DashboardFilterInput, nullable: true })
+    filter?: DashboardFilterInput | null,
+  ): Promise<HarvestDashboardMetrics> {
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? undefined
+        : currentUser.tenantId;
+
+    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
+    return this.harvestsService.getDashboardMetrics(tenantId, filter);
   }
 
   @Mutation(() => Harvest)

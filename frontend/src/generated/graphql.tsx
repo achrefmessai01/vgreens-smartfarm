@@ -83,6 +83,19 @@ export type AlertsFilterInput = {
   statusIn?: InputMaybe<Array<AlertStatus>>;
 };
 
+export type BrixTrendData = {
+  __typename?: 'BrixTrendData';
+  brix: Scalars['Float']['output'];
+  date: Scalars['String']['output'];
+};
+
+export type ClassDistributionData = {
+  __typename?: 'ClassDistributionData';
+  date: Scalars['String']['output'];
+  marketable: Scalars['Float']['output'];
+  waste: Scalars['Float']['output'];
+};
+
 export type CreateAlertInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   column?: InputMaybe<Scalars['String']['input']>;
@@ -157,6 +170,29 @@ export type CreateUserInput = {
   lastName?: InputMaybe<Scalars['String']['input']>;
   role?: InputMaybe<UserRole>;
   tenantId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CumulativeYieldData = {
+  __typename?: 'CumulativeYieldData';
+  cumulative: Scalars['Float']['output'];
+  cumulativeWaste: Scalars['Float']['output'];
+  date: Scalars['String']['output'];
+};
+
+export type DashboardFilterInput = {
+  /** Filter by batch name */
+  batch?: InputMaybe<Scalars['String']['input']>;
+  /** Start date for dashboard data (ISO date string) */
+  dateFrom?: InputMaybe<Scalars['String']['input']>;
+  /** End date for dashboard data (ISO date string) */
+  dateTo?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by greenhouse */
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by species */
+  species?: InputMaybe<Scalars['String']['input']>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+  /** Filter by variety */
+  variety?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Feature = {
@@ -248,6 +284,24 @@ export type Harvest = {
   updatedAt: Scalars['DateTime']['output'];
   variety: Scalars['String']['output'];
   waste: Scalars['Float']['output'];
+};
+
+export type HarvestDashboardMetrics = {
+  __typename?: 'HarvestDashboardMetrics';
+  averageBrix: Scalars['Float']['output'];
+  brixTrend: Array<BrixTrendData>;
+  classDistribution: Array<ClassDistributionData>;
+  criticalAlerts: Scalars['Int']['output'];
+  cumulativeYield: Array<CumulativeYieldData>;
+  daysActive: Scalars['Int']['output'];
+  harvestCount: Scalars['Int']['output'];
+  marketablePercent: Scalars['Float']['output'];
+  species: Scalars['String']['output'];
+  totalYield: Scalars['Float']['output'];
+  variety: Scalars['String']['output'];
+  wastePercent: Scalars['Float']['output'];
+  wasteTotal: Scalars['Float']['output'];
+  yieldOverTime: Array<YieldOverTimeData>;
 };
 
 export type HarvestFilterInput = {
@@ -423,6 +477,7 @@ export type Query = {
   getBuckets: Array<Scalars['String']['output']>;
   getParDliToday: Array<ParDliPoint>;
   harvest?: Maybe<Harvest>;
+  harvestDashboard: HarvestDashboardMetrics;
   harvests: Array<Harvest>;
   health: Scalars['String']['output'];
   me?: Maybe<User>;
@@ -479,6 +534,11 @@ export type QueryGetParDliTodayArgs = {
 
 export type QueryHarvestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryHarvestDashboardArgs = {
+  filter?: InputMaybe<DashboardFilterInput>;
 };
 
 
@@ -634,6 +694,12 @@ export enum UserStatus {
   Inactive = 'INACTIVE',
   Pending = 'PENDING'
 }
+
+export type YieldOverTimeData = {
+  __typename?: 'YieldOverTimeData';
+  date: Scalars['String']['output'];
+  yield: Scalars['Float']['output'];
+};
 
 export type CreateFeatureMutationVariables = Exact<{
   input: CreateFeatureInput;
@@ -805,6 +871,69 @@ export type TenantFeaturesQueryVariables = Exact<{
 
 
 export type TenantFeaturesQuery = { __typename?: 'Query', tenantFeatures: Array<{ __typename?: 'TenantFeature', id: string, tenantId: string, featureId: string, enabled: boolean, createdAt: any, updatedAt: any, feature?: { __typename?: 'Feature', id: string, key: string, name: string, description?: string | null, category?: string | null, isActive: boolean } | null }> };
+
+export type GetHarvestDashboardQueryVariables = Exact<{
+  filter?: InputMaybe<DashboardFilterInput>;
+}>;
+
+
+export type GetHarvestDashboardQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, marketablePercent: number, wastePercent: number, wasteTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeWaste: number }> } };
+
+export type GetHarvestDashboardWithVariablesQueryVariables = Exact<{
+  filter?: InputMaybe<DashboardFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+  species?: InputMaybe<Scalars['String']['input']>;
+  variety?: InputMaybe<Scalars['String']['input']>;
+  batch?: InputMaybe<Scalars['String']['input']>;
+  dateFrom?: InputMaybe<Scalars['String']['input']>;
+  dateTo?: InputMaybe<Scalars['String']['input']>;
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetHarvestDashboardWithVariablesQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, marketablePercent: number, wastePercent: number, wasteTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeWaste: number }> } };
+
+export type GetHarvestMetricsQueryVariables = Exact<{
+  filter?: InputMaybe<DashboardFilterInput>;
+}>;
+
+
+export type GetHarvestMetricsQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, marketablePercent: number, wastePercent: number, wasteTotal: number, criticalAlerts: number, daysActive: number } };
+
+export type GetYieldOverTimeQueryVariables = Exact<{
+  filter?: InputMaybe<DashboardFilterInput>;
+}>;
+
+
+export type GetYieldOverTimeQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }> } };
+
+export type GetClassDistributionQueryVariables = Exact<{
+  filter?: InputMaybe<DashboardFilterInput>;
+}>;
+
+
+export type GetClassDistributionQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, waste: number }> } };
+
+export type GetBrixTrendQueryVariables = Exact<{
+  filter?: InputMaybe<DashboardFilterInput>;
+}>;
+
+
+export type GetBrixTrendQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }> } };
+
+export type GetCumulativeYieldQueryVariables = Exact<{
+  filter?: InputMaybe<DashboardFilterInput>;
+}>;
+
+
+export type GetCumulativeYieldQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeWaste: number }> } };
+
+export type GetHarvestSummaryQueryVariables = Exact<{
+  filter?: InputMaybe<HarvestFilterInput>;
+}>;
+
+
+export type GetHarvestSummaryQuery = { __typename?: 'Query', harvests: Array<{ __typename?: 'Harvest', id: string, date: any, classA: number, waste: number, avgBrix: number, species: string, variety: string, batch: string, greenhouse?: string | null, status: HarvestStatus, createdAt: any }> };
 
 export type HarvestsQueryVariables = Exact<{
   filter?: InputMaybe<HarvestFilterInput>;
@@ -2000,6 +2129,446 @@ export type TenantFeaturesQueryHookResult = ReturnType<typeof useTenantFeaturesQ
 export type TenantFeaturesLazyQueryHookResult = ReturnType<typeof useTenantFeaturesLazyQuery>;
 export type TenantFeaturesSuspenseQueryHookResult = ReturnType<typeof useTenantFeaturesSuspenseQuery>;
 export type TenantFeaturesQueryResult = Apollo.QueryResult<TenantFeaturesQuery, TenantFeaturesQueryVariables>;
+export const GetHarvestDashboardDocument = gql`
+    query GetHarvestDashboard($filter: DashboardFilterInput) {
+  harvestDashboard(filter: $filter) {
+    species
+    variety
+    harvestCount
+    totalYield
+    averageBrix
+    marketablePercent
+    wastePercent
+    wasteTotal
+    criticalAlerts
+    daysActive
+    yieldOverTime {
+      date
+      yield
+    }
+    classDistribution {
+      date
+      marketable
+      waste
+    }
+    brixTrend {
+      date
+      brix
+    }
+    cumulativeYield {
+      date
+      cumulative
+      cumulativeWaste
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetHarvestDashboardQuery__
+ *
+ * To run a query within a React component, call `useGetHarvestDashboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetHarvestDashboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetHarvestDashboardQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useGetHarvestDashboardQuery(baseOptions?: Apollo.QueryHookOptions<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>(GetHarvestDashboardDocument, options);
+      }
+export function useGetHarvestDashboardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>(GetHarvestDashboardDocument, options);
+        }
+// @ts-ignore
+export function useGetHarvestDashboardSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>;
+export function useGetHarvestDashboardSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestDashboardQuery | undefined, GetHarvestDashboardQueryVariables>;
+export function useGetHarvestDashboardSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>(GetHarvestDashboardDocument, options);
+        }
+export type GetHarvestDashboardQueryHookResult = ReturnType<typeof useGetHarvestDashboardQuery>;
+export type GetHarvestDashboardLazyQueryHookResult = ReturnType<typeof useGetHarvestDashboardLazyQuery>;
+export type GetHarvestDashboardSuspenseQueryHookResult = ReturnType<typeof useGetHarvestDashboardSuspenseQuery>;
+export type GetHarvestDashboardQueryResult = Apollo.QueryResult<GetHarvestDashboardQuery, GetHarvestDashboardQueryVariables>;
+export const GetHarvestDashboardWithVariablesDocument = gql`
+    query GetHarvestDashboardWithVariables($filter: DashboardFilterInput, $tenantId: ID, $species: String, $variety: String, $batch: String, $dateFrom: String, $dateTo: String, $greenhouse: String) {
+  harvestDashboard(
+    filter: {tenantId: $tenantId, species: $species, variety: $variety, batch: $batch, dateFrom: $dateFrom, dateTo: $dateTo, greenhouse: $greenhouse}
+  ) {
+    species
+    variety
+    harvestCount
+    totalYield
+    averageBrix
+    marketablePercent
+    wastePercent
+    wasteTotal
+    criticalAlerts
+    daysActive
+    yieldOverTime {
+      date
+      yield
+    }
+    classDistribution {
+      date
+      marketable
+      waste
+    }
+    brixTrend {
+      date
+      brix
+    }
+    cumulativeYield {
+      date
+      cumulative
+      cumulativeWaste
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetHarvestDashboardWithVariablesQuery__
+ *
+ * To run a query within a React component, call `useGetHarvestDashboardWithVariablesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetHarvestDashboardWithVariablesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetHarvestDashboardWithVariablesQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
+ *      species: // value for 'species'
+ *      variety: // value for 'variety'
+ *      batch: // value for 'batch'
+ *      dateFrom: // value for 'dateFrom'
+ *      dateTo: // value for 'dateTo'
+ *      greenhouse: // value for 'greenhouse'
+ *   },
+ * });
+ */
+export function useGetHarvestDashboardWithVariablesQuery(baseOptions?: Apollo.QueryHookOptions<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>(GetHarvestDashboardWithVariablesDocument, options);
+      }
+export function useGetHarvestDashboardWithVariablesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>(GetHarvestDashboardWithVariablesDocument, options);
+        }
+// @ts-ignore
+export function useGetHarvestDashboardWithVariablesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>;
+export function useGetHarvestDashboardWithVariablesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestDashboardWithVariablesQuery | undefined, GetHarvestDashboardWithVariablesQueryVariables>;
+export function useGetHarvestDashboardWithVariablesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>(GetHarvestDashboardWithVariablesDocument, options);
+        }
+export type GetHarvestDashboardWithVariablesQueryHookResult = ReturnType<typeof useGetHarvestDashboardWithVariablesQuery>;
+export type GetHarvestDashboardWithVariablesLazyQueryHookResult = ReturnType<typeof useGetHarvestDashboardWithVariablesLazyQuery>;
+export type GetHarvestDashboardWithVariablesSuspenseQueryHookResult = ReturnType<typeof useGetHarvestDashboardWithVariablesSuspenseQuery>;
+export type GetHarvestDashboardWithVariablesQueryResult = Apollo.QueryResult<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>;
+export const GetHarvestMetricsDocument = gql`
+    query GetHarvestMetrics($filter: DashboardFilterInput) {
+  harvestDashboard(filter: $filter) {
+    species
+    variety
+    harvestCount
+    totalYield
+    averageBrix
+    marketablePercent
+    wastePercent
+    wasteTotal
+    criticalAlerts
+    daysActive
+  }
+}
+    `;
+
+/**
+ * __useGetHarvestMetricsQuery__
+ *
+ * To run a query within a React component, call `useGetHarvestMetricsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetHarvestMetricsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetHarvestMetricsQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useGetHarvestMetricsQuery(baseOptions?: Apollo.QueryHookOptions<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>(GetHarvestMetricsDocument, options);
+      }
+export function useGetHarvestMetricsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>(GetHarvestMetricsDocument, options);
+        }
+// @ts-ignore
+export function useGetHarvestMetricsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>;
+export function useGetHarvestMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestMetricsQuery | undefined, GetHarvestMetricsQueryVariables>;
+export function useGetHarvestMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>(GetHarvestMetricsDocument, options);
+        }
+export type GetHarvestMetricsQueryHookResult = ReturnType<typeof useGetHarvestMetricsQuery>;
+export type GetHarvestMetricsLazyQueryHookResult = ReturnType<typeof useGetHarvestMetricsLazyQuery>;
+export type GetHarvestMetricsSuspenseQueryHookResult = ReturnType<typeof useGetHarvestMetricsSuspenseQuery>;
+export type GetHarvestMetricsQueryResult = Apollo.QueryResult<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>;
+export const GetYieldOverTimeDocument = gql`
+    query GetYieldOverTime($filter: DashboardFilterInput) {
+  harvestDashboard(filter: $filter) {
+    yieldOverTime {
+      date
+      yield
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetYieldOverTimeQuery__
+ *
+ * To run a query within a React component, call `useGetYieldOverTimeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetYieldOverTimeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetYieldOverTimeQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useGetYieldOverTimeQuery(baseOptions?: Apollo.QueryHookOptions<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>(GetYieldOverTimeDocument, options);
+      }
+export function useGetYieldOverTimeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>(GetYieldOverTimeDocument, options);
+        }
+// @ts-ignore
+export function useGetYieldOverTimeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>): Apollo.UseSuspenseQueryResult<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>;
+export function useGetYieldOverTimeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>): Apollo.UseSuspenseQueryResult<GetYieldOverTimeQuery | undefined, GetYieldOverTimeQueryVariables>;
+export function useGetYieldOverTimeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>(GetYieldOverTimeDocument, options);
+        }
+export type GetYieldOverTimeQueryHookResult = ReturnType<typeof useGetYieldOverTimeQuery>;
+export type GetYieldOverTimeLazyQueryHookResult = ReturnType<typeof useGetYieldOverTimeLazyQuery>;
+export type GetYieldOverTimeSuspenseQueryHookResult = ReturnType<typeof useGetYieldOverTimeSuspenseQuery>;
+export type GetYieldOverTimeQueryResult = Apollo.QueryResult<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>;
+export const GetClassDistributionDocument = gql`
+    query GetClassDistribution($filter: DashboardFilterInput) {
+  harvestDashboard(filter: $filter) {
+    classDistribution {
+      date
+      marketable
+      waste
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetClassDistributionQuery__
+ *
+ * To run a query within a React component, call `useGetClassDistributionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetClassDistributionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetClassDistributionQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useGetClassDistributionQuery(baseOptions?: Apollo.QueryHookOptions<GetClassDistributionQuery, GetClassDistributionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetClassDistributionQuery, GetClassDistributionQueryVariables>(GetClassDistributionDocument, options);
+      }
+export function useGetClassDistributionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetClassDistributionQuery, GetClassDistributionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetClassDistributionQuery, GetClassDistributionQueryVariables>(GetClassDistributionDocument, options);
+        }
+// @ts-ignore
+export function useGetClassDistributionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetClassDistributionQuery, GetClassDistributionQueryVariables>): Apollo.UseSuspenseQueryResult<GetClassDistributionQuery, GetClassDistributionQueryVariables>;
+export function useGetClassDistributionSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetClassDistributionQuery, GetClassDistributionQueryVariables>): Apollo.UseSuspenseQueryResult<GetClassDistributionQuery | undefined, GetClassDistributionQueryVariables>;
+export function useGetClassDistributionSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetClassDistributionQuery, GetClassDistributionQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetClassDistributionQuery, GetClassDistributionQueryVariables>(GetClassDistributionDocument, options);
+        }
+export type GetClassDistributionQueryHookResult = ReturnType<typeof useGetClassDistributionQuery>;
+export type GetClassDistributionLazyQueryHookResult = ReturnType<typeof useGetClassDistributionLazyQuery>;
+export type GetClassDistributionSuspenseQueryHookResult = ReturnType<typeof useGetClassDistributionSuspenseQuery>;
+export type GetClassDistributionQueryResult = Apollo.QueryResult<GetClassDistributionQuery, GetClassDistributionQueryVariables>;
+export const GetBrixTrendDocument = gql`
+    query GetBrixTrend($filter: DashboardFilterInput) {
+  harvestDashboard(filter: $filter) {
+    brixTrend {
+      date
+      brix
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetBrixTrendQuery__
+ *
+ * To run a query within a React component, call `useGetBrixTrendQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetBrixTrendQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetBrixTrendQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useGetBrixTrendQuery(baseOptions?: Apollo.QueryHookOptions<GetBrixTrendQuery, GetBrixTrendQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetBrixTrendQuery, GetBrixTrendQueryVariables>(GetBrixTrendDocument, options);
+      }
+export function useGetBrixTrendLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetBrixTrendQuery, GetBrixTrendQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetBrixTrendQuery, GetBrixTrendQueryVariables>(GetBrixTrendDocument, options);
+        }
+// @ts-ignore
+export function useGetBrixTrendSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetBrixTrendQuery, GetBrixTrendQueryVariables>): Apollo.UseSuspenseQueryResult<GetBrixTrendQuery, GetBrixTrendQueryVariables>;
+export function useGetBrixTrendSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBrixTrendQuery, GetBrixTrendQueryVariables>): Apollo.UseSuspenseQueryResult<GetBrixTrendQuery | undefined, GetBrixTrendQueryVariables>;
+export function useGetBrixTrendSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetBrixTrendQuery, GetBrixTrendQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetBrixTrendQuery, GetBrixTrendQueryVariables>(GetBrixTrendDocument, options);
+        }
+export type GetBrixTrendQueryHookResult = ReturnType<typeof useGetBrixTrendQuery>;
+export type GetBrixTrendLazyQueryHookResult = ReturnType<typeof useGetBrixTrendLazyQuery>;
+export type GetBrixTrendSuspenseQueryHookResult = ReturnType<typeof useGetBrixTrendSuspenseQuery>;
+export type GetBrixTrendQueryResult = Apollo.QueryResult<GetBrixTrendQuery, GetBrixTrendQueryVariables>;
+export const GetCumulativeYieldDocument = gql`
+    query GetCumulativeYield($filter: DashboardFilterInput) {
+  harvestDashboard(filter: $filter) {
+    cumulativeYield {
+      date
+      cumulative
+      cumulativeWaste
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCumulativeYieldQuery__
+ *
+ * To run a query within a React component, call `useGetCumulativeYieldQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCumulativeYieldQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCumulativeYieldQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useGetCumulativeYieldQuery(baseOptions?: Apollo.QueryHookOptions<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>(GetCumulativeYieldDocument, options);
+      }
+export function useGetCumulativeYieldLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>(GetCumulativeYieldDocument, options);
+        }
+// @ts-ignore
+export function useGetCumulativeYieldSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>): Apollo.UseSuspenseQueryResult<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>;
+export function useGetCumulativeYieldSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>): Apollo.UseSuspenseQueryResult<GetCumulativeYieldQuery | undefined, GetCumulativeYieldQueryVariables>;
+export function useGetCumulativeYieldSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>(GetCumulativeYieldDocument, options);
+        }
+export type GetCumulativeYieldQueryHookResult = ReturnType<typeof useGetCumulativeYieldQuery>;
+export type GetCumulativeYieldLazyQueryHookResult = ReturnType<typeof useGetCumulativeYieldLazyQuery>;
+export type GetCumulativeYieldSuspenseQueryHookResult = ReturnType<typeof useGetCumulativeYieldSuspenseQuery>;
+export type GetCumulativeYieldQueryResult = Apollo.QueryResult<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>;
+export const GetHarvestSummaryDocument = gql`
+    query GetHarvestSummary($filter: HarvestFilterInput) {
+  harvests(filter: $filter) {
+    id
+    date
+    classA
+    waste
+    avgBrix
+    species
+    variety
+    batch
+    greenhouse
+    status
+    createdAt
+  }
+}
+    `;
+
+/**
+ * __useGetHarvestSummaryQuery__
+ *
+ * To run a query within a React component, call `useGetHarvestSummaryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetHarvestSummaryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetHarvestSummaryQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useGetHarvestSummaryQuery(baseOptions?: Apollo.QueryHookOptions<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>(GetHarvestSummaryDocument, options);
+      }
+export function useGetHarvestSummaryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>(GetHarvestSummaryDocument, options);
+        }
+// @ts-ignore
+export function useGetHarvestSummarySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>;
+export function useGetHarvestSummarySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestSummaryQuery | undefined, GetHarvestSummaryQueryVariables>;
+export function useGetHarvestSummarySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>(GetHarvestSummaryDocument, options);
+        }
+export type GetHarvestSummaryQueryHookResult = ReturnType<typeof useGetHarvestSummaryQuery>;
+export type GetHarvestSummaryLazyQueryHookResult = ReturnType<typeof useGetHarvestSummaryLazyQuery>;
+export type GetHarvestSummarySuspenseQueryHookResult = ReturnType<typeof useGetHarvestSummarySuspenseQuery>;
+export type GetHarvestSummaryQueryResult = Apollo.QueryResult<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>;
 export const HarvestsDocument = gql`
     query Harvests($filter: HarvestFilterInput) {
   harvests(filter: $filter) {
