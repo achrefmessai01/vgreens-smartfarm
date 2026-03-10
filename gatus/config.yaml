@@ -1,0 +1,234 @@
+storage:
+  type: sqlite
+  path: /data/gatus.db
+
+ui:
+  title: VGreens Status
+  header: vGreens Lab Status
+  description: Real-time status of all VGreens Smart Farm services
+  logo: 'https://vgreens-frontend.fly.dev/vGreens.svg'
+  favicon:
+    default: 'https://vgreens-frontend.fly.dev/vGreens.svg'
+    size16x16: 'https://vgreens-frontend.fly.dev/vGreens.svg'
+    size32x32: 'https://vgreens-frontend.fly.dev/vGreens.svg'
+
+web:
+  port: 8080
+
+metrics: true
+
+endpoints:
+  # ──────────────────────────────────────
+  # Core Infrastructure
+  # ──────────────────────────────────────
+  - name: Frontend
+    group: Infrastructure
+    url: 'https://vgreens-frontend.fly.dev'
+    interval: 3m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Backend API
+    group: Infrastructure
+    url: 'https://vgreens-backend.fly.dev/health'
+    interval: 2m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 3000'
+
+  - name: GraphQL API
+    group: Infrastructure
+    url: 'https://vgreens-backend.fly.dev/graphql'
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"query":"{ health }"}'
+    interval: 3m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 3000'
+
+  - name: InfluxDB
+    group: Infrastructure
+    url: 'https://vgreens-influx.fly.dev/health'
+    interval: 3m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 3000'
+
+  # ──────────────────────────────────────
+  # Authentication
+  # ──────────────────────────────────────
+  - name: Login Page
+    group: Authentication
+    url: 'https://vgreens-frontend.fly.dev/login'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Sign Up Page
+    group: Authentication
+    url: 'https://vgreens-frontend.fly.dev/sign-up'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Clerk Auth Provider
+    group: Authentication
+    url: 'https://api.clerk.com'
+    interval: 5m
+    conditions:
+      - '[STATUS] < 500'
+      - '[RESPONSE_TIME] < 5000'
+
+  # ──────────────────────────────────────
+  # Harvest
+  # ──────────────────────────────────────
+  - name: Harvest Page
+    group: Harvest
+    url: 'https://vgreens-frontend.fly.dev/tenant/harvest'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Harvest API
+    group: Harvest
+    url: 'https://vgreens-backend.fly.dev/graphql'
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"query":"{ harvests { id } }"}'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 3000'
+
+  # ──────────────────────────────────────
+  # Alerts & Warnings
+  # ──────────────────────────────────────
+  - name: Alerts Page
+    group: Alerts & Warnings
+    url: 'https://vgreens-frontend.fly.dev/tenant/alerts'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Warnings Page
+    group: Alerts & Warnings
+    url: 'https://vgreens-frontend.fly.dev/tenant/warnings'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Alerts API
+    group: Alerts & Warnings
+    url: 'https://vgreens-backend.fly.dev/graphql'
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"query":"{ alerts { id } }"}'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 3000'
+
+  # ──────────────────────────────────────
+  # Farm Data (InfluxDB)
+  # ──────────────────────────────────────
+  - name: Farm Overview Page
+    group: Farm Data
+    url: 'https://vgreens-frontend.fly.dev/tenant/farm-overview'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: History Page
+    group: Farm Data
+    url: 'https://vgreens-frontend.fly.dev/tenant/history'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Camera Livestream Page
+    group: Farm Data
+    url: 'https://vgreens-frontend.fly.dev/tenant/camera-livestream'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  # ──────────────────────────────────────
+  # User Management
+  # ──────────────────────────────────────
+  - name: Tenant Users Page
+    group: User Management
+    url: 'https://vgreens-frontend.fly.dev/tenant/users'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Admin Users Page
+    group: User Management
+    url: 'https://vgreens-frontend.fly.dev/admin/users'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  # ──────────────────────────────────────
+  # Tenant Management
+  # ──────────────────────────────────────
+  - name: Tenants Page
+    group: Tenant Management
+    url: 'https://vgreens-frontend.fly.dev/admin/tenants'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  # ──────────────────────────────────────
+  # Admin & Feature Flags
+  # ──────────────────────────────────────
+  - name: Admin Dashboard
+    group: Admin
+    url: 'https://vgreens-frontend.fly.dev/admin/dashboard'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Feature Flags Page
+    group: Admin
+    url: 'https://vgreens-frontend.fly.dev/admin/feature-flags'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  - name: Admin Settings Page
+    group: Admin
+    url: 'https://vgreens-frontend.fly.dev/admin/settings'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
+
+  # ──────────────────────────────────────
+  # Tenant Dashboard
+  # ──────────────────────────────────────
+  - name: Tenant Dashboard
+    group: Dashboard
+    url: 'https://vgreens-frontend.fly.dev/tenant/dashboard'
+    interval: 5m
+    conditions:
+      - '[STATUS] == 200'
+      - '[RESPONSE_TIME] < 5000'
