@@ -147,9 +147,6 @@ export default function HarvestPage() {
           batchData={pendingBatch?.details ?? null}
           mode={sidebarMode}
           onCompleted={handleSidebarCompleted}
-          onPhotoUpload={(files) => {
-            console.log('Upload photos:', files);
-          }}
         />
       </div>
     </FeatureGuard>

@@ -78,7 +78,7 @@ export function CumulativeYieldChart({ data, className }: CumulativeYieldChartPr
                   </feMerge>
                 </filter>
               </defs>
-              <CartesianGrid strokeDasharray="5 5" className="opacity-50" stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="3 3" className="opacity-60" stroke="#94a3b8" />
               <XAxis 
                 dataKey="date" 
                 fontSize={12}

@@ -23,7 +23,6 @@ export interface BatchSidebarProps {
   batchData: BatchDetailsData | null
   mode?: SidebarMode
   onCompleted?: () => void
-  onPhotoUpload?: (files: File[]) => void
   isLoading?: boolean
 }
 
@@ -34,7 +33,6 @@ export function BatchSidebar({
   batchData,
   mode = 'create',
   onCompleted,
-  onPhotoUpload,
   isLoading = false,
 }: BatchSidebarProps) {
   const { t } = useI18n()
@@ -44,6 +42,8 @@ export function BatchSidebar({
     loading: isSaving,
     handleBrixChange,
     handleYieldChange,
+    handlePhotoUpload,
+    handleRemovePhoto,
     handleSave,
   } = useBatchSidebar({ harvestId, batchData, mode, onCompleted })
 
@@ -96,7 +96,8 @@ export function BatchSidebar({
                 />
                 <PhotosField
                   photos={currentData.photos}
-                  onUpload={onPhotoUpload}
+                  onUpload={handlePhotoUpload}
+                  onRemove={handleRemovePhoto}
                   isLoading={busy}
                 />
                 <div className="h-16" />

@@ -38,6 +38,19 @@ export function useBatchSidebar({
     setLocalData(batchData)
   }, [batchData])
 
+  // Cleanup object URLs on unmount to prevent memory leaks
+  React.useEffect(() => {
+    return () => {
+      if (localData?.photos) {
+        localData.photos.forEach(url => {
+          if (url.startsWith('blob:')) {
+            URL.revokeObjectURL(url)
+          }
+        })
+      }
+    }
+  }, [])
+
   const currentData = localData ?? batchData
 
   const handleBrixChange = React.useCallback(
@@ -57,6 +70,32 @@ export function useBatchSidebar({
     },
     [],
   )
+
+  const handlePhotoUpload = React.useCallback((files: File[]) => {
+    // Convert files to object URLs for display
+    const photoUrls = files.map(file => URL.createObjectURL(file))
+    
+    setLocalData((prev) =>
+      prev ? { ...prev, photos: [...prev.photos, ...photoUrls] } : prev,
+    )
+  }, [])
+
+  const handleRemovePhoto = React.useCallback((indexToRemove: number) => {
+    setLocalData((prev) => {
+      if (!prev) return prev
+      
+      // Revoke the object URL to free memory
+      const urlToRevoke = prev.photos[indexToRemove]
+      if (urlToRevoke && urlToRevoke.startsWith('blob:')) {
+        URL.revokeObjectURL(urlToRevoke)
+      }
+      
+      return {
+        ...prev,
+        photos: prev.photos.filter((_, index) => index !== indexToRemove)
+      }
+    })
+  }, [])
 
   const handleSave = React.useCallback(async () => {
     if (!harvestId || !currentData) return
@@ -90,6 +129,8 @@ export function useBatchSidebar({
     mode,
     handleBrixChange,
     handleYieldChange,
+    handlePhotoUpload,
+    handleRemovePhoto,
     handleSave,
   }
 }
