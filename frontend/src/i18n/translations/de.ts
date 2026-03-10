@@ -36,6 +36,8 @@ export const de = {
     next: 'Nächste',
     today: 'Heute',
     thisWeek: 'Diese Woche',
+    lastWeek: 'Letzte Woche',
+    lastMonth: 'Letzter Monat',
     thisMonth: 'Dieser Monat',
     total: 'Gesamt',
     yes: 'Ja'
