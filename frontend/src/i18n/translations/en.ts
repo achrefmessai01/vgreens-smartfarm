@@ -36,7 +36,9 @@ export const en = {
     next: 'Next',
     today: 'Today',
     thisWeek: 'This Week',
+    lastWeek: 'Last Week',
     thisMonth: 'This Month',
+    lastMonth: 'Last Month',
     total: 'Total',
     yes: 'Yes'
   },
