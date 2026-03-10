@@ -34,6 +34,11 @@ export const en = {
     results: 'results',
     previous: 'Previous',
     next: 'Next',
+    today: 'Today',
+    thisWeek: 'This Week',
+    thisMonth: 'This Month',
+    total: 'Total',
+    yes: 'Yes'
   },
   login: {
     title: 'Welcome back',

@@ -16,10 +16,17 @@ import { FeatureGuard } from '@/components/features/feature-guard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, History } from 'lucide-react';
 import { useDashboardData } from '@/components/harvest/dashboard/use-dashboard-data';
+import { useHarvestDashboard } from '@/lib/hooks/use-harvest-dashboard';
+
+// Toggle this flag to switch between mock and real data
+const USE_REAL_DATA = true;
 
 export default function HarvestPage() {
   const { t } = useI18n();
-  const dashboardData = useDashboardData();
+  const mockData = useDashboardData();
+  const { data: realData, loading: dashboardLoading, error: dashboardError } = useHarvestDashboard();
+  const dashboardData = USE_REAL_DATA ? realData : mockData;
+  
   const {
     harvests,
     summary,
@@ -45,16 +52,11 @@ export default function HarvestPage() {
     handleDeleteRequest,
   } = useHarvestPage();
 
-  if (loading && (harvests?.length ?? 0) === 0) {
-    return (
-      <FeatureGuard
-        featureKey="harvest_management"
-        skeleton={<HarvestPageSkeleton />}
-      >
-        <HarvestPageSkeleton />
-      </FeatureGuard>
-    );
+  if ((loading && (harvests?.length ?? 0) === 0) || (USE_REAL_DATA && dashboardLoading && !dashboardData)) {
+    return <FeatureGuard featureKey="harvest_management" skeleton={<HarvestPageSkeleton />}><HarvestPageSkeleton /></FeatureGuard>;
   }
+
+  if (USE_REAL_DATA && dashboardError) console.error('Dashboard error:', dashboardError);
 
   return (
     <FeatureGuard featureKey="harvest_management">
@@ -72,7 +74,7 @@ export default function HarvestPage() {
           </TabsList>
           
           <TabsContent value="dashboard" className="mt-6">
-            <HarvestDashboard data={dashboardData} />
+            <HarvestDashboard />
           </TabsContent>
           
           <TabsContent value="history" className="mt-6">

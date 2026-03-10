@@ -34,6 +34,11 @@ export const de = {
     results: 'Ergebnisse',
     previous: 'Vorherige',
     next: 'Nächste',
+    today: 'Heute',
+    thisWeek: 'Diese Woche',
+    thisMonth: 'Dieser Monat',
+    total: 'Gesamt',
+    yes: 'Ja'
   },
   login: {
     title: 'Willkommen zurück',

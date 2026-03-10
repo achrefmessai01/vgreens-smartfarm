@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { MetricCard } from './metric-card';
@@ -5,37 +6,76 @@ import { YieldOverTimeChart } from './yield-over-time-chart';
 import { ClassDistributionChart } from './class-distribution-chart';
 import { BrixTrendChart } from './brix-trend-chart';
 import { CumulativeYieldChart } from './cumulative-yield-chart';
+import { DashboardFilters } from './dashboard-filters';
 import { Calendar, Target, AlertTriangle, Activity, TrendingUp, Package } from 'lucide-react';
-
-interface DashboardData {
-  species: string;
-  variety: string;
-  harvestCount: number;
-  totalYield: number;
-  averageBrix: number;
-  marketablePercent: number;
-  wastePercent: number;
-  wasteTotal: number;
-  criticalAlerts: number;
-  daysActive: number;
-  yieldOverTime: Array<{date: string; yield: number}>;
-  classDistribution: Array<{date: string; marketable: number; waste: number}>;
-  brixTrend: Array<{date: string; brix: number}>;
-  cumulativeYield: Array<{date: string; cumulative: number}>;
-}
+import { useHarvestDashboard, type DateFilter } from '@/lib/hooks/use-harvest-dashboard';
 
 interface HarvestDashboardProps {
-  data: DashboardData;
   className?: string;
+  species?: string;
+  variety?: string;
 }
 
-export function HarvestDashboard({ data, className }: HarvestDashboardProps) {
+export function HarvestDashboard({ className, species, variety }: HarvestDashboardProps) {
   const { t } = useI18n();
+  const [currentFilter, setCurrentFilter] = useState<DateFilter>('thisWeek');
+  
+
+  // When 'total' is selected, pass no filter to show all harvests
+  const { data, loading, error, refetch } = useHarvestDashboard(
+    currentFilter === 'total' ? undefined : {
+      dateFilter: currentFilter,
+      species,
+      variety
+    }
+  );
+
+  const handleFilterChange = (filter: { dateFilter?: DateFilter }) => {
+    if (filter.dateFilter && filter.dateFilter !== currentFilter) {
+      setCurrentFilter(filter.dateFilter);
+    }
+  };
 
   const formatAcrossHarvests = (count: number) => {
     return t.pages.harvest?.acrossHarvests?.replace('{count}', count.toString()) || 
            `Across ${count} harvests`;
   };
+
+  if (loading) {
+    return (
+      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">{(t.common as any)?.loading || 'Loading dashboard...'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
+        <div className="text-center">
+          <AlertTriangle className="h-8 w-8 text-destructive mx-auto mb-4" />
+          <p className="text-destructive mb-4">{error?.message || 'An error occurred'}</p>
+          <Button onClick={() => refetch()} variant="outline">
+            {(t.common as any)?.retry || 'Try Again'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
+        <div className="text-center">
+          <Package className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">No harvest data available</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={className}>
@@ -49,51 +89,52 @@ export function HarvestDashboard({ data, className }: HarvestDashboardProps) {
             {data.species} - {data.variety} • {data.harvestCount} {t.pages.harvest?.harvestsLogged || 'harvests logged'}
           </p>
         </div>
-        <Button variant="outline" size="sm">
-          <Package className="h-4 w-4 mr-2" />
-          {t.pages.harvest?.total || 'Total'}
-        </Button>
+        <DashboardFilters 
+          onFilterChange={handleFilterChange}
+          className="w-64"
+          defaultValue={currentFilter}
+        />
       </div>
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
         <MetricCard
           title={t.pages.harvest?.totalYield || 'Total Yield'}
-          value={`${data.totalYield} kg`}
+          value={`${data.totalYield?.toFixed(2) || 0} kg`}
           subtitle={formatAcrossHarvests(data.harvestCount)}
           icon={<TrendingUp className="h-4 w-4" />}
           color="default"
         />
         <MetricCard
           title={t.pages.harvest?.averageBrix || 'Average Brix'}
-          value={`${data.averageBrix}°Bx`}
+          value={`${data.averageBrix?.toFixed(1) || 0}°Bx`}
           subtitle={t.pages.harvest?.qualityIndicator || 'Quality indicator'}
           icon={<Target className="h-4 w-4" />}
           color="info"
         />
         <MetricCard
           title={t.pages.harvest?.marketablePercent || 'Marketable %'}
-          value={`${data.marketablePercent}%`}
-          subtitle={t.pages.harvest?.marketableYield || 'Marketable yield'}
+          value={`${data.marketablePercent?.toFixed(1) || 0}%`}
+          subtitle={`${((data.totalYield || 0) - (data.wasteTotal || 0)).toFixed(2)} ${t.pages.harvest?.kgTotal || 'kg total'}`}
           icon={<Package className="h-4 w-4" />}
           color="success"
         />
         <MetricCard
           title={t.pages.harvest?.wastePercent || 'Waste %'}
-          value={`${data.wastePercent}%`}
-          subtitle={`${data.wasteTotal} ${t.pages.harvest?.kgTotal || 'kg total'}`}
+          value={`${data.wastePercent?.toFixed(1) || 0}%`}
+          subtitle={`${data.wasteTotal?.toFixed(2) || 0} ${t.pages.harvest?.kgTotal || 'kg total'}`}
           color="error"
         />
         <MetricCard
           title={t.pages.harvest?.criticalAlerts || 'Critical Alerts'}
-          value={data.criticalAlerts}
+          value={data.criticalAlerts || 0}
           subtitle={t.pages.harvest?.requiresAttention || 'Requires attention'}
           icon={<AlertTriangle className="h-4 w-4" />}
           color="warning"
         />
         <MetricCard
           title={t.pages.harvest?.daysActive || 'Days Active'}
-          value={data.daysActive}
+          value={data.daysActive || 0}
           subtitle={t.pages.harvest?.sincePlanting || 'Since planting'}
           icon={<Activity className="h-4 w-4" />}
           color="info"
@@ -102,10 +143,12 @@ export function HarvestDashboard({ data, className }: HarvestDashboardProps) {
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <YieldOverTimeChart data={data.yieldOverTime} />
-        <ClassDistributionChart data={data.classDistribution} />
-        <BrixTrendChart data={data.brixTrend} />
-        <CumulativeYieldChart data={data.cumulativeYield as Array<{date: string; cumulative: number; cumulativeWaste: number}>} />
+        <YieldOverTimeChart data={data.yieldOverTime || []} />
+        <ClassDistributionChart data={data.classDistribution || []} />
+        <BrixTrendChart data={data.brixTrend || []} />
+        <CumulativeYieldChart 
+          data={data.cumulativeYield as Array<{date: string; cumulative: number; cumulativeWaste: number}> || []} 
+        />
       </div>
     </div>
   );
