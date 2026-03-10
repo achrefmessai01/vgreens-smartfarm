@@ -18,7 +18,7 @@ export interface DashboardFiltersProps {
 export function DashboardFilters({ 
   onFilterChange, 
   className, 
-  defaultValue = 'thisWeek' 
+  defaultValue = 'today' 
 }: DashboardFiltersProps) {
   const { t } = useI18n();
   const [selectedFilter, setSelectedFilter] = useState<DateFilter>(defaultValue);

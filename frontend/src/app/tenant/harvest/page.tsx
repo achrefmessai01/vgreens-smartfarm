@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   HarvestTable,
   BatchSidebar,
@@ -23,9 +25,32 @@ const USE_REAL_DATA = true;
 
 export default function HarvestPage() {
   const { t } = useI18n();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Get initial tab from URL parameter, default to dashboard
+  const initialTab = searchParams.get('tab') || 'dashboard';
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
+  
   const mockData = useDashboardData();
   const { data: realData, loading: dashboardLoading, error: dashboardError } = useHarvestDashboard();
   const dashboardData = USE_REAL_DATA ? realData : mockData;
+  
+  // Update URL when tab changes
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', newTab);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+  
+  // Initialize tab from URL on mount
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl && (tabFromUrl === 'dashboard' || tabFromUrl === 'history')) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
   
   const {
     harvests,
@@ -56,7 +81,7 @@ export default function HarvestPage() {
   return (
     <FeatureGuard featureKey="harvest_management">
       <div className="space-y-6">
-        <Tabs defaultValue="dashboard" className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
             <TabsTrigger value="dashboard" className="flex items-center gap-2 px-4 py-1">
               <BarChart3 className="h-4 w-4" />

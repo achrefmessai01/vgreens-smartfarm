@@ -19,7 +19,7 @@ interface HarvestDashboardProps {
 
 export function HarvestDashboard({ className, species, variety }: HarvestDashboardProps) {
   const { t } = useI18n();
-  const [currentFilter, setCurrentFilter] = useState<DateFilter>('thisWeek');
+  const [currentFilter, setCurrentFilter] = useState<DateFilter>('today');
   
 
   // When 'total' is selected, pass no filter to show all harvests
