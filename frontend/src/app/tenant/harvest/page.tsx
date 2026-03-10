@@ -52,12 +52,7 @@ export default function HarvestPage() {
     handleDeleteRequest,
   } = useHarvestPage();
 
-  if ((loading && (harvests?.length ?? 0) === 0) || (USE_REAL_DATA && dashboardLoading && !dashboardData)) {
-    return <FeatureGuard featureKey="harvest_management" skeleton={<HarvestPageSkeleton />}><HarvestPageSkeleton /></FeatureGuard>;
-  }
-
-  if (USE_REAL_DATA && dashboardError) console.error('Dashboard error:', dashboardError);
-
+  
   return (
     <FeatureGuard featureKey="harvest_management">
       <div className="space-y-6">
