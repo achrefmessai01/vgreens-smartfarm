@@ -7,6 +7,7 @@ import { ClassDistributionChart } from './class-distribution-chart';
 import { BrixTrendChart } from './brix-trend-chart';
 import { CumulativeYieldChart } from './cumulative-yield-chart';
 import { DashboardFilters } from './dashboard-filters';
+import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
 import { Calendar, Target, AlertTriangle, Activity, TrendingUp, Package } from 'lucide-react';
 import { useHarvestDashboard, type DateFilter } from '@/lib/hooks/use-harvest-dashboard';
 
@@ -42,14 +43,7 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
   };
 
   if (loading) {
-    return (
-      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">{(t.common as any)?.loading || 'Loading dashboard...'}</p>
-        </div>
-      </div>
-    );
+    return <HarvestDashboardSkeleton className={className} />;
   }
 
   if (error) {
