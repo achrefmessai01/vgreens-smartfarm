@@ -285,6 +285,7 @@ export const en = {
       wasteColumn: 'Waste (kg)',
       avgBrix: 'Avg Brix',
       photos: 'Photos',
+      createdBy: 'Created By',
       actions: 'Actions',
       viewDetails: 'View Details',
       harvestsLoggedFor: 'harvests logged for',

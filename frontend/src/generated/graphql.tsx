@@ -282,6 +282,7 @@ export type Harvest = {
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
   updatedAt: Scalars['DateTime']['output'];
+  uploaderName?: Maybe<Scalars['String']['output']>;
   variety: Scalars['String']['output'];
   waste: Scalars['Float']['output'];
 };
