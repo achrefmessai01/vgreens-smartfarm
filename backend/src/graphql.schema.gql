@@ -1,0 +1,636 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Alert {
+  acknowledgedBy: User
+  acknowledgedById: ID
+  acknowledgedTime: DateTime
+  city: String
+  column: String
+  createdAt: DateTime!
+  description: String
+  device: String
+  field: String
+  greenhouse: String
+  id: ID!
+  measurement: String
+  profile: String
+  resolvedBy: User
+  resolvedById: ID
+  resolvedTime: DateTime
+  row: String
+  ruleKey: String
+  sensorName: String!
+  severity: AlertSeverity!
+  status: AlertStatus!
+  tenant: Tenant
+  tenantId: ID!
+  timestamp: DateTime
+  tunnelId: ID
+  updatedAt: DateTime!
+  value: String!
+}
+
+"""Alert severity levels"""
+enum AlertSeverity {
+  CRITICAL
+}
+
+"""Alert status types"""
+enum AlertStatus {
+  ACKNOWLEDGED
+  OPEN
+  RESOLVED
+}
+
+input AlertsFilterInput {
+  acknowledgedById: ID
+
+  """Filter by any of these user IDs (OR)"""
+  acknowledgedByIdIn: [ID!]
+
+  """Filter alerts from this date (timestamp or createdAt)"""
+  dateFrom: String
+
+  """Filter alerts until this date (timestamp or createdAt)"""
+  dateTo: String
+  resolvedById: ID
+
+  """Filter by any of these user IDs (OR)"""
+  resolvedByIdIn: [ID!]
+
+  """Generic search: sensor name, acknowledged by, resolved by, value"""
+  search: String
+  severity: AlertSeverity
+
+  """Filter by multiple severities (OR)"""
+  severityIn: [AlertSeverity!]
+  status: AlertStatus
+
+  """Filter by multiple statuses (OR)"""
+  statusIn: [AlertStatus!]
+}
+
+type BrixTrendData {
+  brix: Float!
+  date: String!
+}
+
+type ClassDistributionData {
+  date: String!
+  marketable: Float!
+  waste: Float!
+}
+
+input CreateAlertInput {
+  city: String
+  column: String
+  description: String
+  device: String
+  field: String
+  greenhouse: String
+  measurement: String
+  profile: String
+  row: String
+  ruleKey: String
+  sensorName: String!
+  severity: AlertSeverity
+  tenantId: ID
+  timestamp: String
+  tunnelId: ID
+  value: String!
+}
+
+input CreateFeatureInput {
+  category: String
+  description: String
+  isActive: Boolean
+  key: String!
+  name: String!
+}
+
+input CreateHarvestInput {
+  avgBrix: Float! = 0
+
+  """Defaults to "species - variety" if omitted"""
+  batch: String
+  brix1: Float! = 0
+  brix2: Float! = 0
+  brix3: Float! = 0
+  brix4: Float! = 0
+  brix5: Float! = 0
+  brix6: Float! = 0
+  brix7: Float! = 0
+  brix8: Float! = 0
+  brix9: Float! = 0
+  brix10: Float! = 0
+  classA: Float! = 0
+
+  """Cultivation area in m²"""
+  cultivationArea: Float!
+
+  """Harvest date (ISO date string)"""
+  date: String!
+  greenhouse: String
+  photoUrls: [String!]
+  photos: Int! = 0
+
+  """Planting date (ISO date string)"""
+  plantingDate: String!
+  species: String!
+  status: HarvestStatus = ACTIVE
+  tenantId: ID
+  variety: String!
+  waste: Float! = 0
+}
+
+input CreateImageUploadInput {
+  """Signed upload URL validity in seconds (default: 600, max: 3600)."""
+  expiresIn: Int
+
+  """Original filename including extension"""
+  filename: String!
+
+  """
+  Logical folder under the tenant, e.g. "harvest" or "avatars". Defaults to "images".
+  """
+  folder: String
+
+  """
+  Optional tenant override. Only honoured for vGreens admins; for others the tenant is taken from the current user.
+  """
+  tenantId: ID
+}
+
+input CreateTenantInput {
+  companyName: String
+  email: String
+  isActive: Boolean = true
+  name: String!
+  phone: String
+}
+
+input CreateUserInput {
+  clerkUserId: String
+  email: String!
+  firstName: String
+  imageUrl: String
+  lastName: String
+  role: UserRole
+  tenantId: String
+}
+
+type CumulativeYieldData {
+  cumulative: Float!
+  cumulativeWaste: Float!
+  date: String!
+}
+
+input DashboardFilterInput {
+  """Filter by batch name"""
+  batch: String
+
+  """Start date for dashboard data (ISO date string)"""
+  dateFrom: String
+
+  """End date for dashboard data (ISO date string)"""
+  dateTo: String
+
+  """Filter by greenhouse"""
+  greenhouse: String
+
+  """Filter by species"""
+  species: String
+  tenantId: ID
+
+  """Filter by variety"""
+  variety: String
+}
+
+"""DateTime custom scalar type"""
+scalar DateTime
+
+input DeleteImageInput {
+  """
+  Full storage path of the image relative to the bucket (including tenant prefix).
+  """
+  path: String!
+}
+
+type Feature {
+  category: String
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  isActive: Boolean!
+  key: String!
+  name: String!
+  tenantFeatures: [TenantFeature!]
+  updatedAt: DateTime!
+}
+
+type FeatureWithTenantStatus {
+  category: String
+  createdAt: DateTime!
+  description: String
+  enabledForTenant: Boolean
+  id: String!
+  isActive: Boolean!
+  key: String!
+  name: String!
+  updatedAt: DateTime!
+}
+
+type FieldMeanMetric {
+  field: String!
+  greenhouse: String
+  time: DateTime!
+  value: Float!
+}
+
+input GetBucketDataInput {
+  bucketName: String!
+  device: String
+  field: String
+  greenhouse: String
+  level: String
+  limit: Int
+  start: String
+  stop: String
+  useLastPerSeries: Boolean
+}
+
+input GetFieldMeansInput {
+  bucketName: String!
+  greenhouse: String
+  windowMinutes: Int! = 5
+}
+
+input GetParDliTodayInput {
+  bucketName: String!
+  greenhouse: String!
+}
+
+input GetSignedImageUrlInput {
+  """Signed URL validity in seconds (default: 600, max: 3600)."""
+  expiresIn: Int
+
+  """
+  Full storage path of the image relative to the bucket (including tenant prefix).
+  """
+  path: String!
+}
+
+type Harvest {
+  avgBrix: Float!
+  batch: String!
+  brix1: Float!
+  brix2: Float!
+  brix3: Float!
+  brix4: Float!
+  brix5: Float!
+  brix6: Float!
+  brix7: Float!
+  brix8: Float!
+  brix9: Float!
+  brix10: Float!
+  classA: Float!
+  createdAt: DateTime!
+  createdBy: User
+  createdById: ID
+  cultivationArea: Float!
+  date: DateTime!
+  greenhouse: String
+  id: ID!
+  photoUrls: [String!]
+  photos: Int!
+  plantingDate: DateTime!
+  species: String!
+  status: HarvestStatus!
+  tenant: Tenant
+  tenantId: ID!
+  updatedAt: DateTime!
+  variety: String!
+  waste: Float!
+}
+
+type HarvestDashboardMetrics {
+  averageBrix: Float!
+  brixTrend: [BrixTrendData!]!
+  classDistribution: [ClassDistributionData!]!
+  criticalAlerts: Int!
+  cumulativeYield: [CumulativeYieldData!]!
+  daysActive: Int!
+  harvestCount: Int!
+  marketablePercent: Float!
+  species: String!
+  totalYield: Float!
+  variety: String!
+  wastePercent: Float!
+  wasteTotal: Float!
+  yieldOverTime: [YieldOverTimeData!]!
+}
+
+input HarvestFilterInput {
+  """Filter by user who created"""
+  createdById: ID
+
+  """Harvests from this date (inclusive)"""
+  dateFrom: String
+
+  """Harvests until this date (inclusive)"""
+  dateTo: String
+
+  """Filter by greenhouse"""
+  greenhouse: String
+
+  """Search in batch / species / variety"""
+  search: String
+
+  """Filter by status"""
+  status: HarvestStatus
+
+  """Filter by tenant (VGreens admin only)"""
+  tenantId: ID
+}
+
+"""Harvest batch lifecycle status"""
+enum HarvestStatus {
+  ACTIVE
+  COMPLETED
+  DRAFT
+  INACTIVE
+}
+
+type ImageFile {
+  """Bucket in which the image is stored."""
+  bucket: String!
+
+  """Timestamp when the image was created in storage."""
+  createdAt: DateTime
+
+  """Filename of the image."""
+  filename: String!
+
+  """MIME type as reported by Supabase."""
+  mimeType: String
+
+  """
+  Full storage path of the image relative to the bucket (including tenant prefix).
+  """
+  path: String!
+
+  """Size of the image in bytes."""
+  size: Float
+
+  """Timestamp when the image was last updated."""
+  updatedAt: DateTime
+}
+
+type InfluxDBData {
+  data: JSONObject!
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+input ListImagesInput {
+  """
+  Folder under the tenant prefix to list, e.g. "harvest". Defaults to listing all images for the tenant.
+  """
+  folder: String
+
+  """Maximum number of results to return (default: 50, max: 200)."""
+  limit: Int
+
+  """Number of items to skip (offset-based pagination)."""
+  offset: Int
+
+  """
+  Optional tenant override. Only honoured for vGreens admins; for others the tenant is taken from the current user.
+  """
+  tenantId: ID
+}
+
+type Mutation {
+  acknowledgeAlert(id: ID!): Alert!
+  createAlert(input: CreateAlertInput!): Alert!
+  createFeature(input: CreateFeatureInput!): Feature!
+  createHarvest(input: CreateHarvestInput!): Harvest!
+
+  """
+  Create a signed URL that allows the client to upload an image directly to Supabase Storage.
+  """
+  createImageUploadUrl(input: CreateImageUploadInput!): SignedUrl!
+  createTenant(input: CreateTenantInput!): Tenant!
+  createUser(input: CreateUserInput!): User!
+  deleteAlert(id: ID!): Boolean!
+  deleteFeature(id: ID!): Boolean!
+  deleteHarvest(id: ID!): Boolean!
+
+  """
+  Delete an image from Supabase Storage. Non-admins can only delete their tenant images.
+  """
+  deleteImage(input: DeleteImageInput!): Boolean!
+  deleteTenant(id: ID!): Boolean!
+  deleteUser(id: ID!): Boolean!
+  resolveAlert(id: ID!): Alert!
+  runThresholdCheck(bucketName: String!, tenantId: ID!): Boolean!
+  toggleTenantFeature(input: ToggleTenantFeatureInput!): TenantFeature!
+  updateAlert(id: ID!, input: UpdateAlertInput!): Alert!
+  updateFeature(id: ID!, input: UpdateFeatureInput!): Feature!
+  updateHarvest(id: ID!, input: UpdateHarvestInput!): Harvest!
+  updateTenant(id: ID!, input: UpdateTenantInput!): Tenant!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+}
+
+type ParDliPoint {
+  dli: Float!
+  time: DateTime!
+}
+
+type Query {
+  alert(id: ID!): Alert
+  alerts(filter: AlertsFilterInput): [Alert!]!
+  feature(id: ID!): Feature
+  features: [Feature!]!
+  featuresWithTenantStatus(tenantId: ID): [FeatureWithTenantStatus!]!
+  getBucketData(input: GetBucketDataInput!): [InfluxDBData!]!
+  getBucketFieldMeansLastMinutes(input: GetFieldMeansInput!): [FieldMeanMetric!]!
+  getBucketFields(bucketName: String!, start: String, stop: String): [String!]!
+  getBuckets: [String!]!
+  getParDliToday(input: GetParDliTodayInput!): [ParDliPoint!]!
+  harvest(id: ID!): Harvest
+  harvestDashboard(filter: DashboardFilterInput): HarvestDashboardMetrics!
+  harvests(filter: HarvestFilterInput): [Harvest!]!
+  health: String!
+
+  """
+  List images stored for the current tenant (or a specific tenant for admins).
+  """
+  images(input: ListImagesInput): [ImageFile!]!
+  me: User
+
+  """
+  Create a time-limited signed URL for viewing or downloading a private image.
+  """
+  signedImageUrl(input: GetSignedImageUrlInput!): SignedUrl!
+  tenant(id: ID!): Tenant
+  tenantFeatures(tenantId: ID): [TenantFeature!]!
+  tenants: [Tenant!]!
+  testInfluxDBConnection: String!
+  user(id: ID!): User
+  users: [User!]!
+}
+
+type SignedUrl {
+  """Timestamp at which the signed URL expires."""
+  expiresAt: DateTime
+
+  """
+  Full storage path of the image relative to the bucket (including tenant prefix).
+  """
+  path: String!
+
+  """Time-limited URL that can be used to upload or download the image."""
+  url: String!
+}
+
+type Tenant {
+  companyName: String
+  createdAt: DateTime!
+  email: String
+  id: ID!
+  influxBucketName: String
+  isActive: Boolean!
+  name: String!
+  phone: String
+  tenantFeatures: [TenantFeature!]
+  tenantId: ID
+  timezone: String
+  updatedAt: DateTime!
+  users: [User!]
+}
+
+type TenantFeature {
+  createdAt: DateTime!
+  enabled: Boolean!
+  feature: Feature
+  featureId: ID!
+  id: ID!
+  tenantId: ID!
+  updatedAt: DateTime!
+}
+
+input ToggleTenantFeatureInput {
+  enabled: Boolean!
+  featureId: ID!
+  tenantId: ID!
+}
+
+input UpdateAlertInput {
+  city: String
+  column: String
+  description: String
+  device: String
+  field: String
+  greenhouse: String
+  measurement: String
+  profile: String
+  row: String
+  sensorName: String
+  status: AlertStatus
+  value: String
+}
+
+input UpdateFeatureInput {
+  category: String
+  description: String
+  id: ID!
+  isActive: Boolean
+  key: String
+  name: String
+}
+
+input UpdateHarvestInput {
+  avgBrix: Float
+  batch: String
+  brix1: Float
+  brix2: Float
+  brix3: Float
+  brix4: Float
+  brix5: Float
+  brix6: Float
+  brix7: Float
+  brix8: Float
+  brix9: Float
+  brix10: Float
+  classA: Float
+  cultivationArea: Float
+  date: String
+  greenhouse: String
+  photoUrls: [String!]
+  photos: Int
+  plantingDate: String
+  species: String
+  status: HarvestStatus
+  variety: String
+  waste: Float
+}
+
+input UpdateTenantInput {
+  companyName: String
+  email: String
+  isActive: Boolean = true
+  name: String
+  phone: String
+}
+
+input UpdateUserInput {
+  clerkUserId: String
+  email: String
+  firstName: String
+  imageUrl: String
+  isActive: Boolean
+  lastName: String
+  role: UserRole
+  tenantId: String
+}
+
+type User {
+  clerkUserId: String!
+  createdAt: DateTime!
+  email: String
+  firstName: String
+  id: ID!
+  imageUrl: String
+  isActive: Boolean!
+  lastName: String
+  role: UserRole!
+  status: UserStatus
+  tenant: Tenant
+  tenantId: ID
+  updatedAt: DateTime!
+}
+
+"""User role types"""
+enum UserRole {
+  TENANT_ADMIN
+  TENANT_USER
+  VGREENS_ADMIN
+}
+
+"""User invitation and activation status"""
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+type YieldOverTimeData {
+  date: String!
+  yield: Float!
+}
