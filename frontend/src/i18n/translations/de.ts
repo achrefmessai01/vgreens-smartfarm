@@ -40,7 +40,9 @@ export const de = {
     lastMonth: 'Letzter Monat',
     thisMonth: 'Dieser Monat',
     total: 'Gesamt',
-    yes: 'Ja'
+    yes: 'Ja',
+    retry: 'Erneut versuchen',
+    selectPeriod: 'Zeitraum auswählen',
   },
   login: {
     title: 'Willkommen zurück',
@@ -340,12 +342,15 @@ export const de = {
       selectGreenhouse: 'Gewächshaus auswählen...',
       selectSpecies: 'Art auswählen...',
       selectVariety: 'Sorte auswählen...',
+      enterSpecies: 'Art eingeben...',
+      enterVariety: 'Sorte eingeben...',
       enterArea: 'Fläche in Quadratmetern eingeben',
       editHarvest: 'Ernte bearbeiten',
       editHarvestDescription: 'Ernte-Aufzeichnung aktualisieren.',
       deleteHarvest: 'Ernte löschen',
       deleteHarvestTitle: 'Ernte-Aufzeichnung löschen',
-      deleteHarvestDescription: 'Sind Sie sicher, dass Sie diese Ernte-Aufzeichnung löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+      deleteHarvestDescription:
+        'Sind Sie sicher, dass Sie diese Ernte-Aufzeichnung löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
       confirmDelete: 'Löschen',
       deleting: 'Löschen...',
       updating: 'Aktualisieren...',
