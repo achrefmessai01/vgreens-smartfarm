@@ -30,14 +30,14 @@ export function Navbar({ user, welcomeMessage, dateInfo }: NavbarProps) {
   })
 
   return (
-    <nav className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background dark:bg-background px-4 lg:px-6">
-      <div className="flex flex-1 items-center gap-4">
+    <nav className="sticky top-0 z-30 flex h-16 items-center justify-end border-b bg-background px-4 dark:bg-background lg:justify-between lg:px-6">
+      <div className="absolute inset-x-0 flex justify-center px-16 md:px-20 lg:static lg:flex-1 lg:justify-start lg:px-0">
         {/* Welcome Section */}
-        <div className="hidden md:block">
-          <p className="text-sm font-medium text-foreground dark:text-white">
+        <div className="min-w-0 max-w-full text-center lg:text-left">
+          <p className="truncate text-xs font-medium text-foreground dark:text-white sm:text-sm">
             {welcomeMessage || defaultWelcomeMessage}
           </p>
-          <p className="text-xs text-muted-foreground dark:text-white">
+          <p className="truncate text-[11px] text-muted-foreground dark:text-white sm:text-xs">
             {dateInfo || defaultDateInfo}
           </p>
         </div>
