@@ -46,6 +46,7 @@ export function HarvestTable({
       { key: 'waste', header: h?.waste ?? 'Waste (kg)' },
       { key: 'avgBrix', header: h?.avgBrix ?? 'Avg Brix' },
       { key: 'photos', header: h?.photos ?? 'Photos' },
+      { key: 'createdBy', header: h?.createdBy ?? 'Created By' },
       {
         key: 'actions',
         header: h?.actions ?? 'Actions',
@@ -80,6 +81,14 @@ export function HarvestTable({
         <TableCell className="font-medium">{harvest.avgBrix}°Bx</TableCell>
         <TableCell className="text-center text-muted-foreground">
           {harvest.photos === 0 ? '-' : harvest.photos}
+        </TableCell>
+        <TableCell className="text-muted-foreground">
+          {harvest.createdBy ? 
+            (harvest.createdBy.firstName || harvest.createdBy.lastName
+              ? [harvest.createdBy.firstName, harvest.createdBy.lastName].filter(Boolean).join(' ')
+              : harvest.createdBy.email || '-'
+            ) : '-'
+          }
         </TableCell>
         <TableCell className="text-right">
           <div className="flex items-center justify-end gap-1">

@@ -34,7 +34,3 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
-
-# GraphQL Schema
-src/graphql.schema.gql
-

@@ -75,3 +75,22 @@ export const DELETE_HARVEST_MUTATION = gql`
     deleteHarvest(id: $id)
   }
 `
+
+export const UPLOAD_HARVEST_IMAGE_MUTATION = gql`
+  mutation UploadHarvestImage($input: UploadImageInput!) {
+    uploadImage(input: $input) {
+      path
+      filename
+      bucket
+      mimeType
+      url
+    }
+  }
+`
+
+export const DELETE_HARVEST_IMAGE_MUTATION = gql`
+  mutation DeleteHarvestImage($path: String!) {
+    deleteImage(input: { path: $path })
+  }
+`
+
