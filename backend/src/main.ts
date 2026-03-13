@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import 'tsconfig-paths/register';
 import type { Express } from 'express';
 import { AppModule } from '@modules/app';
 import { NestFactory } from '@nestjs/core';
