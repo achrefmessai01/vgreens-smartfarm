@@ -242,6 +242,9 @@ export class FilesService {
       throw new InternalServerErrorException('Failed to upload image');
     }
 
+    const normalizedPath = path.replace(/^\/+/, '');
+    const publicUrl = `${this.publicBaseUrl}/${normalizedPath}`;
+
     return {
       path,
       filename: sanitizedFilename,
@@ -250,6 +253,7 @@ export class FilesService {
       size: null,
       createdAt: null,
       updatedAt: null,
+      url: publicUrl,
     };
   }
 
