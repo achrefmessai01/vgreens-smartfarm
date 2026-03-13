@@ -1,18 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useI18n } from '@/i18n'
 import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch'
-import { getVarietiesForSpecies } from './create-batch-data'
 
 interface FormFieldProps {
   formData: BatchFormData
@@ -29,24 +21,16 @@ export function VarietyField({ formData, setFormData, errors }: FormFieldProps) 
       <Label htmlFor="variety" className="text-sm font-medium">
         {h?.variety ?? 'Variety'} <span className="text-destructive">*</span>
       </Label>
-      <Select
+      <Input
+        id="variety"
+        type="text"
+        placeholder={h?.enterVariety ?? 'Enter variety...'}
         value={formData.variety}
-        onValueChange={(value) =>
-          setFormData((prev) => ({ ...prev, variety: value }))
+        onChange={(e) =>
+          setFormData((prev) => ({ ...prev, variety: e.target.value }))
         }
-        disabled={!formData.species}
-      >
-        <SelectTrigger className={`w-full h-10 ${errors.variety ? 'border-destructive' : ''}`}>
-          <SelectValue placeholder={h?.selectVariety ?? 'Select variety...'} />
-        </SelectTrigger>
-        <SelectContent>
-          {getVarietiesForSpecies(formData.species).map((variety) => (
-            <SelectItem key={variety.value} value={variety.value}>
-              {variety.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        className={`h-10 ${errors.variety ? 'border-destructive' : ''}`}
+      />
       {errors.variety && (
         <p className="text-sm text-destructive">{errors.variety}</p>
       )}

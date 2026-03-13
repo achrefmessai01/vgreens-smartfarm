@@ -1,11 +1,11 @@
 import {
-  HttpLink,
   ApolloLink,
   ApolloClient,
   InMemoryCache,
   Observable,
   type FetchResult,
-} from '@apollo/client'
+} from '@apollo/client';
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 
 export const createApolloClient = (getToken: () => Promise<string | null>) => {
   const errorLink = new ApolloLink((operation, forward) => {
@@ -15,10 +15,10 @@ export const createApolloClient = (getToken: () => Promise<string | null>) => {
           // Handle GraphQL errors
           if (result.errors) {
             result.errors.forEach((error) => {
-              const { message, locations, path, extensions } = error
+              const { message, locations, path, extensions } = error;
               console.error(
-                `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-              )
+                `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+              );
 
               // Handle rate limit errors separately
               if (
@@ -27,14 +27,14 @@ export const createApolloClient = (getToken: () => Promise<string | null>) => {
                 message.includes('Too Many Requests')
               ) {
                 console.warn(
-                  '[GraphQL error]: Rate limit exceeded - too many requests'
-                )
+                  '[GraphQL error]: Rate limit exceeded - too many requests',
+                );
                 if (typeof window !== 'undefined') {
                   window.dispatchEvent(
                     new CustomEvent('apollo-rate-limit-error', {
                       detail: { message, operation },
-                    })
-                  )
+                    }),
+                  );
                 }
               }
 
@@ -43,43 +43,43 @@ export const createApolloClient = (getToken: () => Promise<string | null>) => {
                 if (typeof window !== 'undefined') {
                   window.location.href =
                     process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL ||
-                    '/auth/clinic/sign-in'
+                    '/auth/clinic/sign-in';
                 }
               }
-            })
+            });
           }
-          observer.next(result)
+          observer.next(result);
         },
         error: (networkError) => {
-          console.error(`[Network error]: ${networkError}`)
+          console.error(`[Network error]: ${networkError}`);
           if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('apollo-network-error'))
+            window.dispatchEvent(new CustomEvent('apollo-network-error'));
           }
-          observer.error(networkError)
+          observer.error(networkError);
         },
         complete: () => {
-          observer.complete()
+          observer.complete();
         },
-      })
-      return subscription
-    })
-  })
+      });
+      return subscription;
+    });
+  });
 
-  const graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT
+  const graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT;
 
   if (!graphqlEndpoint) {
     throw new Error(
-      'NEXT_PUBLIC_GRAPHQL_ENDPOINT is not set. Configure it in your environment (Fly secrets or .env).'
-    )
+      'NEXT_PUBLIC_GRAPHQL_ENDPOINT is not set. Configure it in your environment (Fly secrets or .env).',
+    );
   }
 
-  const httpLink = new HttpLink({
+  const httpLink = createUploadLink({
     uri: graphqlEndpoint,
     credentials: 'include',
     headers: {
       'apollo-require-preflight': 'true',
     },
-  })
+  }) as unknown as ApolloLink;
 
   const authLink = new ApolloLink((operation, forward) => {
     return new Observable<FetchResult>((observer) => {
@@ -92,15 +92,15 @@ export const createApolloClient = (getToken: () => Promise<string | null>) => {
               'x-client-url':
                 typeof window !== 'undefined' ? window.location.href : '',
             },
-          }))
-          const subscription = forward(operation).subscribe(observer)
-          return subscription
+          }));
+          const subscription = forward(operation).subscribe(observer);
+          return subscription;
         })
         .catch((error) => {
-          observer.error(error)
-        })
-    })
-  })
+          observer.error(error);
+        });
+    });
+  });
 
   return new ApolloClient({
     link: ApolloLink.from([authLink, errorLink, httpLink]),
@@ -118,5 +118,5 @@ export const createApolloClient = (getToken: () => Promise<string | null>) => {
         errorPolicy: 'all',
       },
     },
-  })
-}
+  });
+};

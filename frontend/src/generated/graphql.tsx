@@ -17,6 +17,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   DateTime: { input: any; output: any; }
   JSONObject: { input: any; output: any; }
+  Upload: { input: any; output: any; }
 };
 
 export type Alert = {
@@ -154,6 +155,17 @@ export type CreateHarvestInput = {
   waste?: Scalars['Float']['input'];
 };
 
+export type CreateImageUploadInput = {
+  /** Signed upload URL validity in seconds (default: 600, max: 3600). */
+  expiresIn?: InputMaybe<Scalars['Int']['input']>;
+  /** Original filename including extension */
+  filename: Scalars['String']['input'];
+  /** Logical folder under the tenant, e.g. "harvest" or "avatars". Defaults to "images". */
+  folder?: InputMaybe<Scalars['String']['input']>;
+  /** Optional tenant override. Only honoured for vGreens admins; for others the tenant is taken from the current user. */
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type CreateTenantInput = {
   companyName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
@@ -193,6 +205,11 @@ export type DashboardFilterInput = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
   /** Filter by variety */
   variety?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DeleteImageInput = {
+  /** Full storage path of the image relative to the bucket (including tenant prefix). */
+  path: Scalars['String']['input'];
 };
 
 export type Feature = {
@@ -252,6 +269,13 @@ export type GetParDliTodayInput = {
   greenhouse: Scalars['String']['input'];
 };
 
+export type GetSignedImageUrlInput = {
+  /** Signed URL validity in seconds (default: 600, max: 3600). */
+  expiresIn?: InputMaybe<Scalars['Int']['input']>;
+  /** Full storage path of the image relative to the bucket (including tenant prefix). */
+  path: Scalars['String']['input'];
+};
+
 export type Harvest = {
   __typename?: 'Harvest';
   avgBrix: Scalars['Float']['output'];
@@ -282,6 +306,7 @@ export type Harvest = {
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
   updatedAt: Scalars['DateTime']['output'];
+  uploaderName?: Maybe<Scalars['String']['output']>;
   variety: Scalars['String']['output'];
   waste: Scalars['Float']['output'];
 };
@@ -329,9 +354,40 @@ export enum HarvestStatus {
   Inactive = 'INACTIVE'
 }
 
+export type ImageFile = {
+  __typename?: 'ImageFile';
+  /** Bucket in which the image is stored. */
+  bucket: Scalars['String']['output'];
+  /** Timestamp when the image was created in storage. */
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Filename of the image. */
+  filename: Scalars['String']['output'];
+  /** MIME type as reported by Supabase. */
+  mimeType?: Maybe<Scalars['String']['output']>;
+  /** Full storage path of the image relative to the bucket (including tenant prefix). */
+  path: Scalars['String']['output'];
+  /** Size of the image in bytes. */
+  size?: Maybe<Scalars['Float']['output']>;
+  /** Timestamp when the image was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Time-limited URL that can be used to view the image. Only populated when returned from listImages. */
+  url?: Maybe<Scalars['String']['output']>;
+};
+
 export type InfluxDbData = {
   __typename?: 'InfluxDBData';
   data: Scalars['JSONObject']['output'];
+};
+
+export type ListImagesInput = {
+  /** Folder under the tenant prefix to list, e.g. "harvest". Defaults to listing all images for the tenant. */
+  folder?: InputMaybe<Scalars['String']['input']>;
+  /** Maximum number of results to return (default: 50, max: 200). */
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  /** Number of items to skip (offset-based pagination). */
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  /** Optional tenant override. Only honoured for vGreens admins; for others the tenant is taken from the current user. */
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type Mutation = {
@@ -340,11 +396,15 @@ export type Mutation = {
   createAlert: Alert;
   createFeature: Feature;
   createHarvest: Harvest;
+  /** Create a signed URL that allows the client to upload an image directly to Supabase Storage. */
+  createImageUploadUrl: SignedUrl;
   createTenant: Tenant;
   createUser: User;
   deleteAlert: Scalars['Boolean']['output'];
   deleteFeature: Scalars['Boolean']['output'];
   deleteHarvest: Scalars['Boolean']['output'];
+  /** Delete an image from Supabase Storage. Non-admins can only delete their tenant images. */
+  deleteImage: Scalars['Boolean']['output'];
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   resolveAlert: Alert;
@@ -355,6 +415,8 @@ export type Mutation = {
   updateHarvest: Harvest;
   updateTenant: Tenant;
   updateUser: User;
+  /** Upload an image file directly via GraphQL and store it in Supabase Storage. */
+  uploadImage: ImageFile;
 };
 
 
@@ -375,6 +437,11 @@ export type MutationCreateFeatureArgs = {
 
 export type MutationCreateHarvestArgs = {
   input: CreateHarvestInput;
+};
+
+
+export type MutationCreateImageUploadUrlArgs = {
+  input: CreateImageUploadInput;
 };
 
 
@@ -400,6 +467,11 @@ export type MutationDeleteFeatureArgs = {
 
 export type MutationDeleteHarvestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteImageArgs = {
+  input: DeleteImageInput;
 };
 
 
@@ -458,6 +530,11 @@ export type MutationUpdateUserArgs = {
   input: UpdateUserInput;
 };
 
+
+export type MutationUploadImageArgs = {
+  input: UploadImageInput;
+};
+
 export type ParDliPoint = {
   __typename?: 'ParDliPoint';
   dli: Scalars['Float']['output'];
@@ -480,7 +557,11 @@ export type Query = {
   harvestDashboard: HarvestDashboardMetrics;
   harvests: Array<Harvest>;
   health: Scalars['String']['output'];
+  /** List images stored for the current tenant (or a specific tenant for admins). */
+  images: Array<ImageFile>;
   me?: Maybe<User>;
+  /** Create a time-limited signed URL for viewing or downloading a private image. */
+  signedImageUrl: SignedUrl;
   tenant?: Maybe<Tenant>;
   tenantFeatures: Array<TenantFeature>;
   tenants: Array<Tenant>;
@@ -547,6 +628,16 @@ export type QueryHarvestsArgs = {
 };
 
 
+export type QueryImagesArgs = {
+  input?: InputMaybe<ListImagesInput>;
+};
+
+
+export type QuerySignedImageUrlArgs = {
+  input: GetSignedImageUrlInput;
+};
+
+
 export type QueryTenantArgs = {
   id: Scalars['ID']['input'];
 };
@@ -559,6 +650,16 @@ export type QueryTenantFeaturesArgs = {
 
 export type QueryUserArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type SignedUrl = {
+  __typename?: 'SignedUrl';
+  /** Timestamp at which the signed URL expires. */
+  expiresAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Full storage path of the image relative to the bucket (including tenant prefix). */
+  path: Scalars['String']['output'];
+  /** Time-limited URL that can be used to upload or download the image. */
+  url: Scalars['String']['output'];
 };
 
 export type Tenant = {
@@ -664,6 +765,15 @@ export type UpdateUserInput = {
   tenantId?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UploadImageInput = {
+  /** Image file to upload. */
+  file: Scalars['Upload']['input'];
+  /** Logical folder, e.g. "harvest" or "avatars". */
+  folder?: InputMaybe<Scalars['String']['input']>;
+  /** Optional tenant override. Only honoured for vGreens admins; for others the tenant is taken from the current user. */
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type User = {
   __typename?: 'User';
   clerkUserId: Scalars['String']['output'];
@@ -751,6 +861,20 @@ export type DeleteHarvestMutationVariables = Exact<{
 
 
 export type DeleteHarvestMutation = { __typename?: 'Mutation', deleteHarvest: boolean };
+
+export type UploadHarvestImageMutationVariables = Exact<{
+  input: UploadImageInput;
+}>;
+
+
+export type UploadHarvestImageMutation = { __typename?: 'Mutation', uploadImage: { __typename?: 'ImageFile', path: string, filename: string, bucket: string, mimeType?: string | null, url?: string | null } };
+
+export type DeleteHarvestImageMutationVariables = Exact<{
+  path: Scalars['String']['input'];
+}>;
+
+
+export type DeleteHarvestImageMutation = { __typename?: 'Mutation', deleteImage: boolean };
 
 export type CreateTenantMutationVariables = Exact<{
   input: CreateTenantInput;
@@ -948,6 +1072,13 @@ export type HarvestQueryVariables = Exact<{
 
 
 export type HarvestQuery = { __typename?: 'Query', harvest?: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, greenhouse?: string | null, plantingDate: any, cultivationArea: number, status: HarvestStatus, date: any, classA: number, waste: number, avgBrix: number, brix1: number, brix2: number, brix3: number, brix4: number, brix5: number, brix6: number, brix7: number, brix8: number, brix9: number, brix10: number, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
+
+export type HarvestImagesQueryVariables = Exact<{
+  folder?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type HarvestImagesQuery = { __typename?: 'Query', images: Array<{ __typename?: 'ImageFile', path: string, filename: string, mimeType?: string | null, url?: string | null }> };
 
 export type GetBucketDataQueryVariables = Exact<{
   input: GetBucketDataInput;
@@ -1326,6 +1457,74 @@ export function useDeleteHarvestMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteHarvestMutationHookResult = ReturnType<typeof useDeleteHarvestMutation>;
 export type DeleteHarvestMutationResult = Apollo.MutationResult<DeleteHarvestMutation>;
 export type DeleteHarvestMutationOptions = Apollo.BaseMutationOptions<DeleteHarvestMutation, DeleteHarvestMutationVariables>;
+export const UploadHarvestImageDocument = gql`
+    mutation UploadHarvestImage($input: UploadImageInput!) {
+  uploadImage(input: $input) {
+    path
+    filename
+    bucket
+    mimeType
+    url
+  }
+}
+    `;
+export type UploadHarvestImageMutationFn = Apollo.MutationFunction<UploadHarvestImageMutation, UploadHarvestImageMutationVariables>;
+
+/**
+ * __useUploadHarvestImageMutation__
+ *
+ * To run a mutation, you first call `useUploadHarvestImageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadHarvestImageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadHarvestImageMutation, { data, loading, error }] = useUploadHarvestImageMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUploadHarvestImageMutation(baseOptions?: Apollo.MutationHookOptions<UploadHarvestImageMutation, UploadHarvestImageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UploadHarvestImageMutation, UploadHarvestImageMutationVariables>(UploadHarvestImageDocument, options);
+      }
+export type UploadHarvestImageMutationHookResult = ReturnType<typeof useUploadHarvestImageMutation>;
+export type UploadHarvestImageMutationResult = Apollo.MutationResult<UploadHarvestImageMutation>;
+export type UploadHarvestImageMutationOptions = Apollo.BaseMutationOptions<UploadHarvestImageMutation, UploadHarvestImageMutationVariables>;
+export const DeleteHarvestImageDocument = gql`
+    mutation DeleteHarvestImage($path: String!) {
+  deleteImage(input: {path: $path})
+}
+    `;
+export type DeleteHarvestImageMutationFn = Apollo.MutationFunction<DeleteHarvestImageMutation, DeleteHarvestImageMutationVariables>;
+
+/**
+ * __useDeleteHarvestImageMutation__
+ *
+ * To run a mutation, you first call `useDeleteHarvestImageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteHarvestImageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteHarvestImageMutation, { data, loading, error }] = useDeleteHarvestImageMutation({
+ *   variables: {
+ *      path: // value for 'path'
+ *   },
+ * });
+ */
+export function useDeleteHarvestImageMutation(baseOptions?: Apollo.MutationHookOptions<DeleteHarvestImageMutation, DeleteHarvestImageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteHarvestImageMutation, DeleteHarvestImageMutationVariables>(DeleteHarvestImageDocument, options);
+      }
+export type DeleteHarvestImageMutationHookResult = ReturnType<typeof useDeleteHarvestImageMutation>;
+export type DeleteHarvestImageMutationResult = Apollo.MutationResult<DeleteHarvestImageMutation>;
+export type DeleteHarvestImageMutationOptions = Apollo.BaseMutationOptions<DeleteHarvestImageMutation, DeleteHarvestImageMutationVariables>;
 export const CreateTenantDocument = gql`
     mutation CreateTenant($input: CreateTenantInput!) {
   createTenant(input: $input) {
@@ -2721,6 +2920,52 @@ export type HarvestQueryHookResult = ReturnType<typeof useHarvestQuery>;
 export type HarvestLazyQueryHookResult = ReturnType<typeof useHarvestLazyQuery>;
 export type HarvestSuspenseQueryHookResult = ReturnType<typeof useHarvestSuspenseQuery>;
 export type HarvestQueryResult = Apollo.QueryResult<HarvestQuery, HarvestQueryVariables>;
+export const HarvestImagesDocument = gql`
+    query HarvestImages($folder: String) {
+  images(input: {folder: $folder}) {
+    path
+    filename
+    mimeType
+    url
+  }
+}
+    `;
+
+/**
+ * __useHarvestImagesQuery__
+ *
+ * To run a query within a React component, call `useHarvestImagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHarvestImagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHarvestImagesQuery({
+ *   variables: {
+ *      folder: // value for 'folder'
+ *   },
+ * });
+ */
+export function useHarvestImagesQuery(baseOptions?: Apollo.QueryHookOptions<HarvestImagesQuery, HarvestImagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HarvestImagesQuery, HarvestImagesQueryVariables>(HarvestImagesDocument, options);
+      }
+export function useHarvestImagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HarvestImagesQuery, HarvestImagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HarvestImagesQuery, HarvestImagesQueryVariables>(HarvestImagesDocument, options);
+        }
+// @ts-ignore
+export function useHarvestImagesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HarvestImagesQuery, HarvestImagesQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestImagesQuery, HarvestImagesQueryVariables>;
+export function useHarvestImagesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestImagesQuery, HarvestImagesQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestImagesQuery | undefined, HarvestImagesQueryVariables>;
+export function useHarvestImagesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestImagesQuery, HarvestImagesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HarvestImagesQuery, HarvestImagesQueryVariables>(HarvestImagesDocument, options);
+        }
+export type HarvestImagesQueryHookResult = ReturnType<typeof useHarvestImagesQuery>;
+export type HarvestImagesLazyQueryHookResult = ReturnType<typeof useHarvestImagesLazyQuery>;
+export type HarvestImagesSuspenseQueryHookResult = ReturnType<typeof useHarvestImagesSuspenseQuery>;
+export type HarvestImagesQueryResult = Apollo.QueryResult<HarvestImagesQuery, HarvestImagesQueryVariables>;
 export const GetBucketDataDocument = gql`
     query GetBucketData($input: GetBucketDataInput!) {
   getBucketData(input: $input) {

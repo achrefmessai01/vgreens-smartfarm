@@ -40,7 +40,9 @@ export const en = {
     thisMonth: 'This Month',
     lastMonth: 'Last Month',
     total: 'Total',
-    yes: 'Yes'
+    yes: 'Yes',
+    retry: 'Retry',
+    selectPeriod: 'Select period',
   },
   login: {
     title: 'Welcome back',
@@ -208,7 +210,8 @@ export const en = {
       startLabel: 'Start',
       stopLabel: 'Stop',
       entranceLabel: '↓ Entrance',
-      emptyHistoryDrawerPlaceholder: 'No history data for this sensor in the selected range.',
+      emptyHistoryDrawerPlaceholder:
+        'No history data for this sensor in the selected range.',
       parGraph: {
         title: 'PAR Graph',
         currentPpfd: 'Current PPFD',
@@ -285,6 +288,7 @@ export const en = {
       wasteColumn: 'Waste (kg)',
       avgBrix: 'Avg Brix',
       photos: 'Photos',
+      createdBy: 'Created By',
       actions: 'Actions',
       viewDetails: 'View Details',
       harvestsLoggedFor: 'harvests logged for',
@@ -334,12 +338,15 @@ export const en = {
       selectGreenhouse: 'Select greenhouse...',
       selectSpecies: 'Select species...',
       selectVariety: 'Select variety...',
+      enterSpecies: 'Enter species...',
+      enterVariety: 'Enter variety...',
       enterArea: 'Enter area in square meters',
       editHarvest: 'Edit Harvest',
       editHarvestDescription: 'Update the harvest record details.',
       deleteHarvest: 'Delete Harvest',
       deleteHarvestTitle: 'Delete Harvest Record',
-      deleteHarvestDescription: 'Are you sure you want to delete this harvest record? This action cannot be undone.',
+      deleteHarvestDescription:
+        'Are you sure you want to delete this harvest record? This action cannot be undone.',
       confirmDelete: 'Delete',
       deleting: 'Deleting...',
       updating: 'Updating...',

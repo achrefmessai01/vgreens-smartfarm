@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppResolver } from './app.resolver';
 import { UsersModule } from '@modules/users';
+import { FilesModule } from '@modules/files';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DateTimeScalar } from '@common/scalar';
@@ -37,6 +38,7 @@ import { TenantInterceptor, UserInterceptor } from '@common/interceptors';
     AlertsModule,
     HarvestsModule,
     InfluxDBModule,
+    FilesModule,
   ],
   providers: [
     AppResolver,

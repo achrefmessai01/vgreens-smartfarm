@@ -8,8 +8,17 @@ import { BrixTrendChart } from './brix-trend-chart';
 import { CumulativeYieldChart } from './cumulative-yield-chart';
 import { DashboardFilters } from './dashboard-filters';
 import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
-import { Target, AlertTriangle, Activity, TrendingUp, Package } from 'lucide-react';
-import { useHarvestDashboard, type DateFilter } from '@/lib/hooks/use-harvest-dashboard';
+import {
+  Target,
+  AlertTriangle,
+  Activity,
+  TrendingUp,
+  Package,
+} from 'lucide-react';
+import {
+  useHarvestDashboard,
+  type DateFilter,
+} from '@/lib/hooks/use-harvest-dashboard';
 
 interface HarvestDashboardProps {
   className?: string;
@@ -17,18 +26,23 @@ interface HarvestDashboardProps {
   variety?: string;
 }
 
-export function HarvestDashboard({ className, species, variety }: HarvestDashboardProps) {
+export function HarvestDashboard({
+  className,
+  species,
+  variety,
+}: HarvestDashboardProps) {
   const { t } = useI18n();
-  const [currentFilter, setCurrentFilter] = useState<DateFilter>('today');
-  
+  const [currentFilter, setCurrentFilter] = useState<DateFilter>('thisMonth');
 
   // When 'total' is selected, pass no filter to show all harvests
   const { data, loading, error, refetch } = useHarvestDashboard(
-    currentFilter === 'total' ? undefined : {
-      dateFilter: currentFilter,
-      species,
-      variety
-    }
+    currentFilter === 'total'
+      ? undefined
+      : {
+          dateFilter: currentFilter,
+          species,
+          variety,
+        },
   );
 
   const handleFilterChange = (filter: { dateFilter?: DateFilter }) => {
@@ -38,18 +52,20 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
   };
 
   const formatAcrossHarvests = (count: number) => {
-    return t.pages.harvest?.acrossHarvests?.replace('{count}', count.toString()) || 
-           `Across ${count} harvests`;
+    return (
+      t.pages.harvest?.acrossHarvests?.replace('{count}', count.toString()) ||
+      `Across ${count} harvests`
+    );
   };
 
   const getFilterLabel = (filter: DateFilter) => {
     const filterLabels = {
-      'today': t.common?.today || 'today',
-      'thisWeek': t.common?.thisWeek || 'this week', 
-      'lastWeek': t.common?.lastWeek || 'last week',
-      'thisMonth': t.common?.thisMonth || 'this month',
-      'lastMonth': t.common?.lastMonth || 'last month',
-      'total': t.common?.total || 'total'
+      today: t.common?.today || 'today',
+      thisWeek: t.common?.thisWeek || 'this week',
+      lastWeek: t.common?.lastWeek || 'last week',
+      thisMonth: t.common?.thisMonth || 'this month',
+      lastMonth: t.common?.lastMonth || 'last month',
+      total: t.common?.total || 'total',
     };
     return filterLabels[filter] || filter;
   };
@@ -60,12 +76,16 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
 
   if (error) {
     return (
-      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
+      <div
+        className={`flex items-center justify-center min-h-[400px] ${className}`}
+      >
         <div className="text-center">
           <AlertTriangle className="h-8 w-8 text-destructive mx-auto mb-4" />
-          <p className="text-destructive mb-4">{error?.message || 'An error occurred'}</p>
+          <p className="text-destructive mb-4">
+            {error?.message || 'An error occurred'}
+          </p>
           <Button onClick={() => refetch()} variant="outline">
-            {(t.common as any)?.retry || 'Try Again'}
+            {t.common.retry || 'Try Again'}
           </Button>
         </div>
       </div>
@@ -74,7 +94,9 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
 
   if (!data) {
     return (
-      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
+      <div
+        className={`flex items-center justify-center min-h-[400px] ${className}`}
+      >
         <div className="text-center">
           <Package className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">No harvest data available</p>
@@ -92,10 +114,12 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
             {t.pages.harvest?.performanceDashboard || 'Performance Dashboard'}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {data.harvestCount} {t.pages.harvest?.harvestsLogged || 'harvests logged'} for {getFilterLabel(currentFilter)}
+            {data.harvestCount}{' '}
+            {t.pages.harvest?.harvestsLogged || 'harvests logged'} for{' '}
+            {getFilterLabel(currentFilter)}
           </p>
         </div>
-        <DashboardFilters 
+        <DashboardFilters
           onFilterChange={handleFilterChange}
           className="w-64"
           defaultValue={currentFilter}
@@ -152,8 +176,14 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
         <YieldOverTimeChart data={data.yieldOverTime || []} />
         <ClassDistributionChart data={data.classDistribution || []} />
         <BrixTrendChart data={data.brixTrend || []} />
-        <CumulativeYieldChart 
-          data={data.cumulativeYield as Array<{date: string; cumulative: number; cumulativeWaste: number}> || []} 
+        <CumulativeYieldChart
+          data={
+            (data.cumulativeYield as Array<{
+              date: string;
+              cumulative: number;
+              cumulativeWaste: number;
+            }>) || []
+          }
         />
       </div>
     </div>

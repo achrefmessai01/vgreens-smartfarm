@@ -8,10 +8,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useI18n } from '@/i18n'
 import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch'
-import { speciesOptions, greenhouseOptions } from './create-batch-data'
+import { greenhouseOptions } from './create-batch-data'
 
 interface FormFieldProps {
   formData: BatchFormData
@@ -61,23 +62,16 @@ export function SpeciesField({ formData, setFormData, errors }: FormFieldProps) 
       <Label htmlFor="species" className="text-sm font-medium">
         {h?.species ?? 'Species'} <span className="text-destructive">*</span>
       </Label>
-      <Select
+      <Input
+        id="species"
+        type="text"
+        placeholder={h?.enterSpecies ?? 'Enter species...'}
         value={formData.species}
-        onValueChange={(value) => {
-          setFormData((prev) => ({ ...prev, species: value, variety: '' }))
-        }}
-      >
-        <SelectTrigger className={`w-full h-10 ${errors.species ? 'border-destructive' : ''}`}>
-          <SelectValue placeholder={h?.selectSpecies ?? 'Select species...'} />
-        </SelectTrigger>
-        <SelectContent>
-          {speciesOptions.map((species) => (
-            <SelectItem key={species.value} value={species.value}>
-              {species.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        onChange={(e) =>
+          setFormData((prev) => ({ ...prev, species: e.target.value }))
+        }
+        className={`h-10 ${errors.species ? 'border-destructive' : ''}`}
+      />
       {errors.species && (
         <p className="text-sm text-destructive">{errors.species}</p>
       )}

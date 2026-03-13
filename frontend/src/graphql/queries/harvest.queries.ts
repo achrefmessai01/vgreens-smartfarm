@@ -81,3 +81,15 @@ export const HARVEST_QUERY = gql`
     }
   }
 `
+
+export const HARVEST_IMAGES_QUERY = gql`
+  query HarvestImages($folder: String) {
+    images(input: { folder: $folder }) {
+      path
+      filename
+      mimeType
+      url
+    }
+  }
+`
+
