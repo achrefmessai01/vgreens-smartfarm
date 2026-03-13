@@ -1,28 +1,22 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   HarvestStatus,
   useUpdateHarvestMutation,
-} from '@/generated/graphql'
-import type { BatchDetailsData } from './batch-sidebar-types'
+  useDeleteHarvestImageMutation,
+} from '@/generated/graphql';
+import type { BatchDetailsData } from './batch-sidebar-types';
+import { useHarvestPhotosUpload } from './use-harvest-photos-upload';
+import { computeAvgBrix, extractStoragePathFromUrl } from '@/lib/harvest-utils';
 
-export type SidebarMode = 'create' | 'edit'
-
-function computeAvgBrix(brix: BatchDetailsData['brixMeasurements']): number {
-  const values = [
-    brix.brix1, brix.brix2, brix.brix3, brix.brix4, brix.brix5,
-    brix.brix6, brix.brix7, brix.brix8, brix.brix9, brix.brix10,
-  ].filter((v) => v > 0)
-  if (values.length === 0) return 0
-  return Math.round((values.reduce((s, v) => s + v, 0) / values.length) * 10) / 10
-}
+export type SidebarMode = 'create' | 'edit';
 
 interface UseBatchSidebarOptions {
-  harvestId: string | null
-  batchData: BatchDetailsData | null
-  mode?: SidebarMode
-  onCompleted?: () => void
+  harvestId: string | null;
+  batchData: BatchDetailsData | null;
+  mode?: SidebarMode;
+  onCompleted?: () => void;
 }
 
 export function useBatchSidebar({
@@ -31,76 +25,106 @@ export function useBatchSidebar({
   mode = 'create',
   onCompleted,
 }: UseBatchSidebarOptions) {
-  const [localData, setLocalData] = React.useState<BatchDetailsData | null>(null)
-  const [updateHarvest, { loading }] = useUpdateHarvestMutation()
+  const [localData, setLocalData] = React.useState<BatchDetailsData | null>(
+    null,
+  );
+  const [updateHarvest, { loading }] = useUpdateHarvestMutation();
+  const { uploadPhotos, uploading } = useHarvestPhotosUpload(harvestId);
+  const [deleteHarvestImage] = useDeleteHarvestImageMutation();
 
   React.useEffect(() => {
-    setLocalData(batchData)
-  }, [batchData])
+    setLocalData(batchData);
+  }, [batchData]);
 
   // Cleanup object URLs on unmount to prevent memory leaks
   React.useEffect(() => {
     return () => {
       if (localData?.photos) {
-        localData.photos.forEach(url => {
+        localData.photos.forEach((url) => {
           if (url.startsWith('blob:')) {
-            URL.revokeObjectURL(url)
+            URL.revokeObjectURL(url);
           }
-        })
+        });
       }
-    }
-  }, [])
+    };
+  }, []);
 
-  const currentData = localData ?? batchData
+  const currentData = localData ?? batchData;
 
   const handleBrixChange = React.useCallback(
     (field: keyof BatchDetailsData['brixMeasurements'], value: number) => {
       setLocalData((prev) =>
-        prev ? { ...prev, brixMeasurements: { ...prev.brixMeasurements, [field]: value } } : prev,
-      )
+        prev
+          ? {
+              ...prev,
+              brixMeasurements: { ...prev.brixMeasurements, [field]: value },
+            }
+          : prev,
+      );
     },
     [],
-  )
+  );
 
   const handleYieldChange = React.useCallback(
     (field: 'marketable' | 'waste', value: number) => {
       setLocalData((prev) =>
-        prev ? { ...prev, todaysHarvest: { ...prev.todaysHarvest, [field]: value } } : prev,
-      )
+        prev
+          ? {
+              ...prev,
+              todaysHarvest: { ...prev.todaysHarvest, [field]: value },
+            }
+          : prev,
+      );
     },
     [],
-  )
+  );
 
-  const handlePhotoUpload = React.useCallback((files: File[]) => {
-    // Convert files to object URLs for display
-    const photoUrls = files.map(file => URL.createObjectURL(file))
-    
-    setLocalData((prev) =>
-      prev ? { ...prev, photos: [...prev.photos, ...photoUrls] } : prev,
-    )
-  }, [])
+  const handlePhotoUpload = React.useCallback(
+    async (files: File[]) => {
+      const uploadedUrls = await uploadPhotos(files);
+      if (uploadedUrls.length === 0) return;
 
-  const handleRemovePhoto = React.useCallback((indexToRemove: number) => {
-    setLocalData((prev) => {
-      if (!prev) return prev
-      
-      // Revoke the object URL to free memory
-      const urlToRevoke = prev.photos[indexToRemove]
-      if (urlToRevoke && urlToRevoke.startsWith('blob:')) {
-        URL.revokeObjectURL(urlToRevoke)
+      setLocalData((prev) =>
+        prev ? { ...prev, photos: [...prev.photos, ...uploadedUrls] } : prev,
+      );
+    },
+    [uploadPhotos],
+  );
+
+  const handleRemovePhoto = React.useCallback(
+    async (indexToRemove: number) => {
+      let urlToRemove: string | undefined;
+
+      setLocalData((prev) => {
+        if (!prev) return prev;
+
+        urlToRemove = prev.photos[indexToRemove];
+
+        return {
+          ...prev,
+          photos: prev.photos.filter((_, index) => index !== indexToRemove),
+        };
+      });
+
+      if (!urlToRemove) return;
+
+      const path = extractStoragePathFromUrl(urlToRemove);
+      if (!path) return;
+
+      try {
+        await deleteHarvestImage({ variables: { path } });
+      } catch (error) {
+        console.error('Failed to delete harvest photo:', error);
       }
-      
-      return {
-        ...prev,
-        photos: prev.photos.filter((_, index) => index !== indexToRemove)
-      }
-    })
-  }, [])
+    },
+    [deleteHarvestImage],
+  );
 
   const handleSave = React.useCallback(async () => {
-    if (!harvestId || !currentData) return
-    const brix = currentData.brixMeasurements
-    const status = mode === 'edit' ? currentData.status : HarvestStatus.Completed
+    if (!harvestId || !currentData) return;
+    const brix = currentData.brixMeasurements;
+    const status =
+      mode === 'edit' ? currentData.status : HarvestStatus.Completed;
     try {
       await updateHarvest({
         variables: {
@@ -116,21 +140,21 @@ export function useBatchSidebar({
             status,
           },
         },
-      })
-      onCompleted?.()
+      });
+      onCompleted?.();
     } catch (err) {
-      console.error('Failed to save harvest:', err)
+      console.error('Failed to save harvest:', err);
     }
-  }, [harvestId, currentData, mode, updateHarvest, onCompleted])
+  }, [harvestId, currentData, mode, updateHarvest, onCompleted]);
 
   return {
     currentData,
-    loading,
+    loading: loading || uploading,
     mode,
     handleBrixChange,
     handleYieldChange,
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
-  }
+  };
 }
