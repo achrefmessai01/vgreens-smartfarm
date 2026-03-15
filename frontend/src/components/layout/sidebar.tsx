@@ -15,6 +15,7 @@ import {
   Bell,
   Building2,
   Clock,
+  ClipboardList,
   Flag,
   LayoutDashboard,
   Menu,
@@ -105,6 +106,11 @@ export function Sidebar({ user: propUser, onLogout }: SidebarProps) {
       label: 'Feature Flags',
       href: '/admin/feature-flags',
       icon: Flag,
+    },
+    {
+      label: 'Reports',
+      href: '/admin/reports',
+      icon: ClipboardList,
     },
     {
       label: 'Settings',
