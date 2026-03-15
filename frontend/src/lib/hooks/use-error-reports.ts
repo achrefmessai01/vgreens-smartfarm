@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@apollo/client';
 import { 
   CREATE_ERROR_REPORT, 
   UPDATE_ERROR_REPORT, 
+  UPDATE_ERROR_REPORT_STATUS,
   RESOLVE_ERROR_REPORT, 
   DELETE_ERROR_REPORT,
   GET_ERROR_REPORTS,
@@ -25,6 +26,13 @@ export const useCreateErrorReport = () => {
 // Hook for updating error reports (admin only)
 export const useUpdateErrorReport = () => {
   return useMutation(UPDATE_ERROR_REPORT, {
+    refetchQueries: ['GetErrorReports', 'GetUnresolvedErrorReportsCount']
+  });
+};
+
+// Hook for updating error report status (admin only)
+export const useUpdateErrorReportStatus = () => {
+  return useMutation(UPDATE_ERROR_REPORT_STATUS, {
     refetchQueries: ['GetErrorReports', 'GetUnresolvedErrorReportsCount']
   });
 };

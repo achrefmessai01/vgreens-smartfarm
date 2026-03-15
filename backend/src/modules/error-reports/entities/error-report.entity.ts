@@ -9,7 +9,7 @@ import {
 import { BaseEntity } from '@common/entities';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { User } from '@modules/users/entities/user.entity';
-import { ReportSeverity } from '@common/enums';
+import { ReportSeverity, ReportStatus } from '@common/enums';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 
 @ObjectType()
@@ -55,6 +55,14 @@ export class ErrorReport extends BaseEntity {
     default: ReportSeverity.MEDIUM,
   })
   severity: ReportSeverity;
+
+  @Field(() => ReportStatus)
+  @Column({
+    type: 'enum',
+    enum: ReportStatus,
+    default: ReportStatus.OPEN,
+  })
+  status: ReportStatus;
 
   @Field({ nullable: true })
   @Column({ type: 'varchar', length: 255, nullable: true })

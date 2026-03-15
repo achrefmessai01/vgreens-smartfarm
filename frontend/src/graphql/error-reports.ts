@@ -8,6 +8,7 @@ const ERROR_REPORT_FRAGMENT = gql`
     errorTitle
     errorDetails
     severity
+    status
     reproductionSteps
     expectedVsActual
     browserInfo
@@ -50,6 +51,16 @@ export const CREATE_ERROR_REPORT = gql`
 export const UPDATE_ERROR_REPORT = gql`
   mutation UpdateErrorReport($id: ID!, $input: UpdateErrorReportInput!) {
     updateErrorReport(id: $id, input: $input) {
+      ...ErrorReportFragment
+    }
+  }
+  ${ERROR_REPORT_FRAGMENT}
+`;
+
+// Update Error Report Status Mutation
+export const UPDATE_ERROR_REPORT_STATUS = gql`
+  mutation UpdateErrorReportStatus($id: ID!, $status: String!) {
+    updateErrorReportStatus(id: $id, status: $status) {
       ...ErrorReportFragment
     }
   }

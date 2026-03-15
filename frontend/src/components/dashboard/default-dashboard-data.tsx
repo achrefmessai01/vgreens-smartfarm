@@ -23,14 +23,14 @@ export function getDefaultDashboardContentProps(): Omit<
     ],
     metricCards: [
       {
-        icon: <span className="text-2xl">💧</span>,
+        icon: '💧',
         title: 'Average Soil Moisture',
         value: '42%',
         subtitle: 'Last 24h average from sensors',
         sparklineData: [35, 40, 45, 42, 38, 42],
       },
       {
-        icon: <span className="text-2xl">🌡️</span>,
+        icon: '🌡️',
         title: 'Average Air Temperature',
         value: '23°C',
         subtitle: 'Greenhouse zones',
@@ -39,14 +39,14 @@ export function getDefaultDashboardContentProps(): Omit<
     ],
     progressCards: [
       {
-        icon: <span className="text-2xl">🌿</span>,
+        icon: '🌿',
         title: 'Crop Health Score',
         value: '78 / 100',
         subtitle: 'AI-based estimate',
         progressPercent: 78,
       },
       {
-        icon: <span className="text-2xl">📈</span>,
+        icon: '📈',
         title: 'Predicted Weekly Yield',
         value: '1,200 kg',
         subtitle: 'Estimated from growth models',
@@ -59,7 +59,7 @@ export function getDefaultDashboardContentProps(): Omit<
       subtitle: 'Critical sensor readings',
     },
     recommendation: {
-      icon: <span className="text-2xl">🫧</span>,
+      icon: '🫧',
       title: 'Irrigation Recommendation',
       description:
         'Delay irrigation for 6 hours in Zone A. Increase drip rate in Zone C by 10%.',

@@ -5,7 +5,7 @@ import {
   IsBoolean,
   IsDateString,
 } from 'class-validator';
-import { ReportSeverity } from '@common/enums';
+import { ReportSeverity, ReportStatus } from '@common/enums';
 import { OrderDirection } from '@common/enums';
 import { InputType, Field, ID } from '@nestjs/graphql';
 
@@ -25,6 +25,11 @@ export class ErrorReportsFilterInput {
   @IsOptional()
   @IsEnum(ReportSeverity)
   severity?: ReportSeverity;
+
+  @Field(() => ReportStatus, { nullable: true })
+  @IsOptional()
+  @IsEnum(ReportStatus)
+  status?: ReportStatus;
 
   @Field({ nullable: true })
   @IsOptional()
