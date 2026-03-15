@@ -16,6 +16,7 @@ import { HarvestsModule } from '../harvest/harvests.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FeaturesModule } from '../features/features.module';
 import { InfluxDBModule } from '../influxdb/influxdb.module';
+import { ErrorReportsModule } from '../error-reports/error-reports.module';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { TenantInterceptor, UserInterceptor } from '@common/interceptors';
 
@@ -39,6 +40,7 @@ import { TenantInterceptor, UserInterceptor } from '@common/interceptors';
     HarvestsModule,
     InfluxDBModule,
     FilesModule,
+    ErrorReportsModule,
   ],
   providers: [
     AppResolver,
