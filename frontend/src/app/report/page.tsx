@@ -14,7 +14,7 @@ export default function ReportPage() {
     title: '',
     description: '',
     email: '',
-    severity: 'medium' as ReportSeverity,
+    severity: ReportSeverity.Medium,
     section: '',
     steps: ''
   })
@@ -186,10 +186,11 @@ export default function ReportPage() {
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 bg-gray-50/80 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300/50 dark:border-gray-600/30 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all duration-300"
               >
-                <option value="low">Low - Minor inconvenience</option>
-                <option value="medium">Medium - Affects functionality</option>
-                <option value="high">High - Blocks important tasks</option>
-                <option value="critical">Critical - System unusable</option>
+                <option value={ReportSeverity.Low}>Low - Minor inconvenience</option>
+                <option value={ReportSeverity.Medium}>Medium - Affects functionality</option>
+                <option value={ReportSeverity.High}>High - Blocks important tasks</option>
+                <option value={ReportSeverity.Critical}>Critical - System unusable</option>
+                <option value={ReportSeverity.Urgent}>Urgent - Immediate attention required</option>
               </select>
             </div>
 
