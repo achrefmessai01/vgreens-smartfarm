@@ -41,6 +41,10 @@ export class ErrorReportsService {
         query.andWhere('errorReport.severity = :severity', { severity: filter.severity });
       }
 
+      if (filter.status) {
+        query.andWhere('errorReport.status = :status', { status: filter.status });
+      }
+
       if (typeof filter.isResolved === 'boolean') {
         query.andWhere('errorReport.isResolved = :isResolved', { isResolved: filter.isResolved });
       }

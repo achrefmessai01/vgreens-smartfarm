@@ -239,6 +239,7 @@ export type ErrorReport = {
   resolvedBy?: Maybe<Scalars['String']['output']>;
   resolvedByUser?: Maybe<User>;
   severity: ReportSeverity;
+  status: ReportStatus;
   tenant?: Maybe<Tenant>;
   tenantId?: Maybe<Scalars['ID']['output']>;
   updatedAt: Scalars['DateTime']['output'];
@@ -253,6 +254,7 @@ export type ErrorReportsFilterInput = {
   isResolved?: InputMaybe<Scalars['Boolean']['input']>;
   orderDirection?: InputMaybe<OrderDirection>;
   severity?: InputMaybe<ReportSeverity>;
+  status?: InputMaybe<ReportStatus>;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -459,6 +461,7 @@ export type Mutation = {
   toggleTenantFeature: TenantFeature;
   updateAlert: Alert;
   updateErrorReport: ErrorReport;
+  updateErrorReportStatus: ErrorReport;
   updateFeature: Feature;
   updateHarvest: Harvest;
   updateTenant: Tenant;
@@ -574,6 +577,12 @@ export type MutationUpdateAlertArgs = {
 export type MutationUpdateErrorReportArgs = {
   id: Scalars['ID']['input'];
   input: UpdateErrorReportInput;
+};
+
+
+export type MutationUpdateErrorReportStatusArgs = {
+  id: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
 };
 
 
@@ -749,6 +758,13 @@ export enum ReportSeverity {
   Urgent = 'URGENT'
 }
 
+/** Error report status levels */
+export enum ReportStatus {
+  InProgress = 'IN_PROGRESS',
+  Open = 'OPEN',
+  Resolved = 'RESOLVED'
+}
+
 export type SignedUrl = {
   __typename?: 'SignedUrl';
   /** Timestamp at which the signed URL expires. */
@@ -817,6 +833,7 @@ export type UpdateErrorReportInput = {
   isResolved?: InputMaybe<Scalars['Boolean']['input']>;
   reproductionSteps?: InputMaybe<Scalars['String']['input']>;
   severity?: InputMaybe<ReportSeverity>;
+  status?: InputMaybe<ReportStatus>;
 };
 
 export type UpdateFeatureInput = {
@@ -919,14 +936,14 @@ export type YieldOverTimeData = {
   yield: Scalars['Float']['output'];
 };
 
-export type ErrorReportFragmentFragment = { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null };
+export type ErrorReportFragmentFragment = { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null };
 
 export type CreateErrorReportMutationVariables = Exact<{
   input: CreateErrorReportInput;
 }>;
 
 
-export type CreateErrorReportMutation = { __typename?: 'Mutation', createErrorReport: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
+export type CreateErrorReportMutation = { __typename?: 'Mutation', createErrorReport: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
 
 export type UpdateErrorReportMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -934,7 +951,15 @@ export type UpdateErrorReportMutationVariables = Exact<{
 }>;
 
 
-export type UpdateErrorReportMutation = { __typename?: 'Mutation', updateErrorReport: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
+export type UpdateErrorReportMutation = { __typename?: 'Mutation', updateErrorReport: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
+
+export type UpdateErrorReportStatusMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
+}>;
+
+
+export type UpdateErrorReportStatusMutation = { __typename?: 'Mutation', updateErrorReportStatus: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
 
 export type ResolveErrorReportMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -942,7 +967,7 @@ export type ResolveErrorReportMutationVariables = Exact<{
 }>;
 
 
-export type ResolveErrorReportMutation = { __typename?: 'Mutation', resolveErrorReport: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
+export type ResolveErrorReportMutation = { __typename?: 'Mutation', resolveErrorReport: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
 
 export type DeleteErrorReportMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -956,14 +981,14 @@ export type GetErrorReportsQueryVariables = Exact<{
 }>;
 
 
-export type GetErrorReportsQuery = { __typename?: 'Query', errorReports: Array<{ __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
+export type GetErrorReportsQuery = { __typename?: 'Query', errorReports: Array<{ __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
 
 export type GetErrorReportQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetErrorReportQuery = { __typename?: 'Query', errorReport?: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
+export type GetErrorReportQuery = { __typename?: 'Query', errorReport?: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
 
 export type GetUnresolvedErrorReportsCountQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1312,6 +1337,7 @@ export const ErrorReportFragmentFragmentDoc = gql`
   errorTitle
   errorDetails
   severity
+  status
   reproductionSteps
   expectedVsActual
   browserInfo
@@ -1406,6 +1432,40 @@ export function useUpdateErrorReportMutation(baseOptions?: Apollo.MutationHookOp
 export type UpdateErrorReportMutationHookResult = ReturnType<typeof useUpdateErrorReportMutation>;
 export type UpdateErrorReportMutationResult = Apollo.MutationResult<UpdateErrorReportMutation>;
 export type UpdateErrorReportMutationOptions = Apollo.BaseMutationOptions<UpdateErrorReportMutation, UpdateErrorReportMutationVariables>;
+export const UpdateErrorReportStatusDocument = gql`
+    mutation UpdateErrorReportStatus($id: ID!, $status: String!) {
+  updateErrorReportStatus(id: $id, status: $status) {
+    ...ErrorReportFragment
+  }
+}
+    ${ErrorReportFragmentFragmentDoc}`;
+export type UpdateErrorReportStatusMutationFn = Apollo.MutationFunction<UpdateErrorReportStatusMutation, UpdateErrorReportStatusMutationVariables>;
+
+/**
+ * __useUpdateErrorReportStatusMutation__
+ *
+ * To run a mutation, you first call `useUpdateErrorReportStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateErrorReportStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateErrorReportStatusMutation, { data, loading, error }] = useUpdateErrorReportStatusMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      status: // value for 'status'
+ *   },
+ * });
+ */
+export function useUpdateErrorReportStatusMutation(baseOptions?: Apollo.MutationHookOptions<UpdateErrorReportStatusMutation, UpdateErrorReportStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateErrorReportStatusMutation, UpdateErrorReportStatusMutationVariables>(UpdateErrorReportStatusDocument, options);
+      }
+export type UpdateErrorReportStatusMutationHookResult = ReturnType<typeof useUpdateErrorReportStatusMutation>;
+export type UpdateErrorReportStatusMutationResult = Apollo.MutationResult<UpdateErrorReportStatusMutation>;
+export type UpdateErrorReportStatusMutationOptions = Apollo.BaseMutationOptions<UpdateErrorReportStatusMutation, UpdateErrorReportStatusMutationVariables>;
 export const ResolveErrorReportDocument = gql`
     mutation ResolveErrorReport($id: ID!, $adminNotes: String) {
   resolveErrorReport(id: $id, adminNotes: $adminNotes) {

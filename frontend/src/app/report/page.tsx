@@ -10,6 +10,7 @@ import { useCreateErrorReport } from '@/lib/hooks/use-error-reports'
 export default function ReportPage() {
   const router = useRouter()
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [reportId, setReportId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -39,15 +40,21 @@ export default function ReportPage() {
         // attachments: [] // Will be implemented with file upload later
       }
       
-      await createErrorReport({
+      const result = await createErrorReport({
         variables: { input }
       })
       
+      const createdReportId = result.data?.createErrorReport?.id
+      setReportId(createdReportId || null)
       setIsSubmitted(true)
       
-      // Auto redirect after 3 seconds
+      // Auto redirect to status page with report ID after 3 seconds
       setTimeout(() => {
-        router.push('/tenant/dashboard')
+        if (createdReportId) {
+          router.push(`/report-status?id=${createdReportId}`)
+        } else {
+          router.push('/tenant/dashboard')
+        }
       }, 3000)
     } catch (error) {
       console.error('Failed to submit error report:', error)
@@ -97,11 +104,22 @@ export default function ReportPage() {
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed max-w-sm mx-auto">
                 Thank you for your report. Our team will review it and get back to you soon.
               </p>
+              
+              {reportId && (
+                <div className="pt-4">
+                  <Link href={`/report-status?id=${reportId}`}>
+                    <button className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 dark:bg-green-500 text-white font-medium rounded-xl hover:bg-green-700 dark:hover:bg-green-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                      <FileText className="h-4 w-4" />
+                      View Report Status
+                    </button>
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Automatic redirect notice */}
             <div className="text-sm text-gray-500 dark:text-gray-500">
-              Redirecting to dashboard in 3 seconds...
+              Redirecting to report status in 3 seconds...
             </div>
           </div>
         </div>

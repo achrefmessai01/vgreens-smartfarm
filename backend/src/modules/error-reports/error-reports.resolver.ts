@@ -115,6 +115,25 @@ export class ErrorReportsResolver {
 
   @Mutation(() => ErrorReport)
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  async updateErrorReportStatus(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('status', { type: () => String }) status: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<ErrorReport> {
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? undefined
+        : currentUser.tenantId;
+
+    return this.errorReportsService.updateErrorReport(
+      id, 
+      { status: status as any },
+      tenantId
+    );
+  }
+
+  @Mutation(() => ErrorReport)
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
   async resolveErrorReport(
     @Args('id', { type: () => ID }) id: string,
     @Args('adminNotes', { type: () => String, nullable: true })
