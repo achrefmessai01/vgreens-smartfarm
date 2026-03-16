@@ -1,30 +1,30 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { UserRole } from '@/generated/graphql'
-import { SignUp, useAuth } from '@clerk/nextjs'
-import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import { UserRole } from '@/generated/graphql';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { SignUp, useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function SignUpPage() {
-  const { isSignedIn } = useAuth()
-  const router = useRouter()
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
 
-  const { role, loading: userLoading } = useCurrentUser()
+  const { role, loading: userLoading } = useCurrentUser();
 
   useEffect(() => {
-    if (!isSignedIn) return
+    if (!isSignedIn) return;
 
     // Wait for user data to load
-    if (userLoading) return
+    if (userLoading) return;
 
     // Check user role and redirect to appropriate dashboard
     if (role === UserRole.VgreensAdmin) {
-      router.push('/admin/dashboard')
+      router.push('/admin/dashboard');
     } else {
-      router.push('/tenant/dashboard')
+      router.push('/tenant/dashboard');
     }
-  }, [isSignedIn, router, role, userLoading])
+  }, [isSignedIn, router, role, userLoading]);
 
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
@@ -43,5 +43,5 @@ export default function SignUpPage() {
         />
       </div>
     </div>
-  )
+  );
 }
