@@ -177,6 +177,26 @@ export type CreateImageUploadInput = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type CreateSystemErrorInput = {
+  action?: InputMaybe<Scalars['String']['input']>;
+  component?: InputMaybe<Scalars['String']['input']>;
+  errorMessage: Scalars['String']['input'];
+  errorType: ErrorType;
+  httpMethod?: InputMaybe<Scalars['String']['input']>;
+  httpStatusCode?: InputMaybe<Scalars['Float']['input']>;
+  ipAddress?: InputMaybe<Scalars['String']['input']>;
+  metadata?: InputMaybe<Scalars['JSONObject']['input']>;
+  requestPayload?: InputMaybe<Scalars['JSONObject']['input']>;
+  requestUrl?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  severity: ReportSeverity;
+  source: ErrorSource;
+  stackTrace?: InputMaybe<Scalars['String']['input']>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+  userAgent?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type CreateTenantInput = {
   companyName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
@@ -258,6 +278,33 @@ export type ErrorReportsFilterInput = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
+
+/** Source of the error - where it originated */
+export enum ErrorSource {
+  Backend = 'BACKEND',
+  Database = 'DATABASE',
+  ExternalApi = 'EXTERNAL_API',
+  Frontend = 'FRONTEND',
+  Infrastructure = 'INFRASTRUCTURE'
+}
+
+/** Type/category of the error */
+export enum ErrorType {
+  ApiError = 'API_ERROR',
+  AuthenticationError = 'AUTHENTICATION_ERROR',
+  AuthorizationError = 'AUTHORIZATION_ERROR',
+  BusinessLogicError = 'BUSINESS_LOGIC_ERROR',
+  ConfigurationError = 'CONFIGURATION_ERROR',
+  DatabaseError = 'DATABASE_ERROR',
+  ExternalServiceError = 'EXTERNAL_SERVICE_ERROR',
+  MemoryError = 'MEMORY_ERROR',
+  NetworkError = 'NETWORK_ERROR',
+  RuntimeError = 'RUNTIME_ERROR',
+  SyntaxError = 'SYNTAX_ERROR',
+  TimeoutError = 'TIMEOUT_ERROR',
+  UnknownError = 'UNKNOWN_ERROR',
+  ValidationError = 'VALIDATION_ERROR'
+}
 
 export type Feature = {
   __typename?: 'Feature';
@@ -455,8 +502,10 @@ export type Mutation = {
   deleteImage: Scalars['Boolean']['output'];
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  logSystemError: SystemError;
   resolveAlert: Alert;
   resolveErrorReport: ErrorReport;
+  resolveSystemError: SystemError;
   runThresholdCheck: Scalars['Boolean']['output'];
   toggleTenantFeature: TenantFeature;
   updateAlert: Alert;
@@ -546,6 +595,11 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationLogSystemErrorArgs = {
+  input: CreateSystemErrorInput;
+};
+
+
 export type MutationResolveAlertArgs = {
   id: Scalars['ID']['input'];
 };
@@ -554,6 +608,12 @@ export type MutationResolveAlertArgs = {
 export type MutationResolveErrorReportArgs = {
   adminNotes?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationResolveSystemErrorArgs = {
+  errorId: Scalars['ID']['input'];
+  resolutionNotes?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -639,6 +699,8 @@ export type Query = {
   getBucketFields: Array<Scalars['String']['output']>;
   getBuckets: Array<Scalars['String']['output']>;
   getParDliToday: Array<ParDliPoint>;
+  getRecentSystemErrors: Array<SystemError>;
+  getSystemErrorStats: Scalars['String']['output'];
   harvest?: Maybe<Harvest>;
   harvestDashboard: HarvestDashboardMetrics;
   harvests: Array<Harvest>;
@@ -710,6 +772,20 @@ export type QueryGetParDliTodayArgs = {
 };
 
 
+export type QueryGetRecentSystemErrorsArgs = {
+  isResolved?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  offset?: InputMaybe<Scalars['Float']['input']>;
+  severity?: InputMaybe<ReportSeverity>;
+  source?: InputMaybe<ErrorSource>;
+};
+
+
+export type QueryGetSystemErrorStatsArgs = {
+  hours?: InputMaybe<Scalars['Float']['input']>;
+};
+
+
 export type QueryHarvestArgs = {
   id: Scalars['ID']['input'];
 };
@@ -773,6 +849,41 @@ export type SignedUrl = {
   path: Scalars['String']['output'];
   /** Time-limited URL that can be used to upload or download the image. */
   url: Scalars['String']['output'];
+};
+
+export type SystemError = {
+  __typename?: 'SystemError';
+  action?: Maybe<Scalars['String']['output']>;
+  component?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  errorHash?: Maybe<Scalars['String']['output']>;
+  errorMessage: Scalars['String']['output'];
+  errorType: ErrorType;
+  httpMethod?: Maybe<Scalars['String']['output']>;
+  httpStatusCode?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  ipAddress?: Maybe<Scalars['String']['output']>;
+  isNotified?: Maybe<Scalars['Boolean']['output']>;
+  isResolved: Scalars['Boolean']['output'];
+  lastOccurredAt?: Maybe<Scalars['DateTime']['output']>;
+  metadata?: Maybe<Scalars['JSONObject']['output']>;
+  occurrenceCount?: Maybe<Scalars['Float']['output']>;
+  requestPayload?: Maybe<Scalars['JSONObject']['output']>;
+  requestUrl?: Maybe<Scalars['String']['output']>;
+  resolutionNotes?: Maybe<Scalars['String']['output']>;
+  resolvedAt?: Maybe<Scalars['DateTime']['output']>;
+  resolvedBy?: Maybe<Scalars['String']['output']>;
+  resolver?: Maybe<User>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  severity: ReportSeverity;
+  source: ErrorSource;
+  stackTrace?: Maybe<Scalars['String']['output']>;
+  tenant?: Maybe<Tenant>;
+  tenantId?: Maybe<Scalars['ID']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  user?: Maybe<User>;
+  userAgent?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['ID']['output']>;
 };
 
 export type Tenant = {

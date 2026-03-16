@@ -17,8 +17,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FeaturesModule } from '../features/features.module';
 import { InfluxDBModule } from '../influxdb/influxdb.module';
 import { ErrorReportsModule } from '../error-reports/error-reports.module';
+import { SystemErrorsModule } from '../system-errors/system-errors.module';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { TenantInterceptor, UserInterceptor } from '@common/interceptors';
+import { TenantInterceptor, UserInterceptor, ErrorLoggingInterceptor } from '@common/interceptors';
 
 @Module({
   imports: [
@@ -41,10 +42,15 @@ import { TenantInterceptor, UserInterceptor } from '@common/interceptors';
     InfluxDBModule,
     FilesModule,
     ErrorReportsModule,
+    SystemErrorsModule,
   ],
   providers: [
     AppResolver,
     DateTimeScalar,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ErrorLoggingInterceptor,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: UserInterceptor,

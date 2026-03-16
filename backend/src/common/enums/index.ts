@@ -6,3 +6,5 @@ export * from './harvest-status.enum';
 export * from './order-direction.enum';
 export * from './report-severity.enum';
 export * from './report-status.enum';
+export * from './error-source.enum';
+export * from './error-type.enum';
