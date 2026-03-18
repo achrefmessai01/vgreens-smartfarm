@@ -126,7 +126,7 @@ export function HarvestTable({
 
   const renderCard = React.useCallback(
     (harvest: HarvestItem) => (
-      <Card className="overflow-hidden border border-border/60 transition-all hover:shadow-md">
+      <Card className="overflow-hidden border-3 border-border transition-all shadow-md hover:shadow-xl hover:border-border/80">
         <CardContent>
           <div className="space-y-1">
             {/* Date Header */}
@@ -214,7 +214,7 @@ export function HarvestTable({
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-2 pt-1">
               <Button
-                variant="outline"
+                variant="default"
                 size="sm"
                 className="w-full"
                 onClick={(e) => {
@@ -225,9 +225,9 @@ export function HarvestTable({
                 View
               </Button>
               <Button
-                variant="outline"
+                variant="destructive"
                 size="sm"
-                className="w-full text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                className="w-full hover:bg-destructive hover:text-destructive-foreground"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete?.(harvest);
