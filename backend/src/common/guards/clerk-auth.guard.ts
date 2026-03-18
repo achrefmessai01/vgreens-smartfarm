@@ -1,17 +1,17 @@
+import { clerkClient } from '@clerk/clerk-sdk-node';
+import type { User } from '@modules/users/entities/user.entity';
+import { UsersService } from '@modules/users/users.service';
 import {
-  Logger,
-  Injectable,
   CanActivate,
   ExecutionContext,
+  Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { Reflector, ModuleRef } from '@nestjs/core';
-import { clerkClient } from '@clerk/clerk-sdk-node';
+import { ModuleRef, Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { UsersService } from '@modules/users/users.service';
+import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import type { User } from '@modules/users/entities/user.entity';
 
 export interface AuthRequest extends Request {
   clerkSession?: Awaited<ReturnType<typeof clerkClient.verifyToken>>;
@@ -44,14 +44,30 @@ export class ClerkAuthGuard implements CanActivate {
 
     const token = this.extractTokenFromHeader(request);
     if (!token) {
+      this.logger.warn('No token provided in request');
       throw new UnauthorizedException('No token provided');
     }
 
+    this.logger.debug(
+      `Verifying token (length: ${token.length}, prefix: ${token.substring(0, 20)}...`,
+    );
+
     try {
-      const session = await clerkClient.verifyToken(token);
+      // Verify token with proper options
+      // authorizedParties tells Clerk which frontend(s) can use this token
+      const session = await clerkClient.verifyToken(token, {
+        // Extract the instance ID from the publishable key (format: pk_test_<instance>_<key>)
+        authorizedParties: process.env.FRONTEND_APP_URL
+          ? [process.env.FRONTEND_APP_URL]
+          : undefined,
+      });
       request.clerkSession = session;
       const sub = session.sub ?? session.userId;
       request.clerkUserId = typeof sub === 'string' ? sub : undefined;
+
+      this.logger.debug(
+        `Token verified successfully for user: ${request.clerkUserId}`,
+      );
 
       // Fetch user from database (must happen here before RolesGuard runs)
       if (request.clerkUserId) {
@@ -60,7 +76,12 @@ export class ClerkAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      this.logger.error('Token verification failed', error);
+      this.logger.error('Token verification failed:', {
+        error: error instanceof Error ? error.message : String(error),
+        errorName: error instanceof Error ? error.constructor.name : 'Unknown',
+        tokenPrefix: token.substring(0, 20),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       throw new UnauthorizedException('Invalid token');
     }
   }

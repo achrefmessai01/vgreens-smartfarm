@@ -5,6 +5,8 @@ import { ThemeProvider } from 'next-themes'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ApolloProvider } from '@/lib/apollo-provider'
+import { ErrorBoundary } from '@/components/error-boundary'
+import { ErrorMonitoringInitializer } from '@/components/error-monitoring-initializer'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -38,18 +40,21 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <ApolloProvider>
-            <I18nProvider defaultLocale="en">
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {children}
-              </ThemeProvider>
-            </I18nProvider>
-          </ApolloProvider>
+          <ErrorBoundary level="global">
+            <ApolloProvider>
+              <I18nProvider defaultLocale="en">
+                <ThemeProvider
+                  attribute="class" 
+                  defaultTheme="system"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  <ErrorMonitoringInitializer />
+                  {children}
+                </ThemeProvider>
+              </I18nProvider>
+            </ApolloProvider>
+          </ErrorBoundary>
         </body>
       </html>
     </ClerkProvider>

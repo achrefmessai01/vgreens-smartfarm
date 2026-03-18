@@ -1,32 +1,32 @@
-import Link from 'next/link'
-import * as React from 'react'
-import { cn } from '@/lib/utils'
-import { useI18n } from '@/i18n'
-import '@/components/ui/logo-spin.css'
-import { Button } from '@/components/ui/button'
-import { LogoSVG } from '@/components/ui/logo-svg'
-import { Separator } from '@/components/ui/separator'
-import { ChevronRight, LogOut, Moon, Sun, X } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import '@/components/ui/logo-spin.css';
+import { LogoSVG } from '@/components/ui/logo-svg';
+import { Separator } from '@/components/ui/separator';
+import { useI18n } from '@/i18n';
+import { cn } from '@/lib/utils';
+import { ChevronRight, LogOut, Moon, Sun } from 'lucide-react';
+import Link from 'next/link';
+import * as React from 'react';
 
 interface NavItem {
-  label: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 interface SidebarContentProps {
-  mobile?: boolean
-  isCollapsed: boolean
-  pathname: string
-  navItems: NavItem[]
-  defaultUser: { name: string; role: string; avatar?: string }
-  t: ReturnType<typeof useI18n>['t']
-  theme: string | undefined
-  setTheme: (theme: string) => void
-  onLogout?: () => void
-  onToggleCollapse: () => void
-  onCloseMobile: () => void
+  mobile?: boolean;
+  isCollapsed: boolean;
+  pathname: string;
+  navItems: NavItem[];
+  defaultUser: { name: string; role: string; avatar?: string };
+  t: ReturnType<typeof useI18n>['t'];
+  theme: string | undefined;
+  setTheme: (theme: string) => void;
+  onLogout?: () => void;
+  onToggleCollapse: () => void;
+  onCloseMobile: () => void;
 }
 
 export function SidebarContent({
@@ -46,7 +46,16 @@ export function SidebarContent({
     <div className="flex h-full flex-col bg-muted/30 dark:bg-background text-foreground dark:text-sidebar-foreground">
       {/* Header */}
       <div className="flex h-16 items-center justify-between border-b border-border dark:border-sidebar-border/70 px-4">
-        <div className="flex items-center gap-2">
+        <button
+          className={cn(
+            'flex items-center gap-2 bg-transparent border-0 p-0',
+            isCollapsed &&
+              !mobile &&
+              'cursor-pointer hover:opacity-80 transition-opacity',
+          )}
+          onClick={isCollapsed && !mobile ? onToggleCollapse : undefined}
+          disabled={!isCollapsed || mobile}
+        >
           <div className="sidebar-logo-spin h-8 w-8 shrink-0" aria-hidden>
             <div className="sidebar-spin-3d">
               <div className="sidebar-face sidebar-front">
@@ -62,30 +71,15 @@ export function SidebarContent({
               vGreens Lab
             </span>
           )}
-        </div>
-        {!mobile && (
+        </button>
+        {!mobile && !isCollapsed && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-foreground dark:text-sidebar-foreground hover:bg-accent dark:hover:bg-sidebar-accent"
+            className="h-8 w-8 text-foreground dark:text-sidebar-foregroundent"
             onClick={onToggleCollapse}
           >
-            <ChevronRight
-              className={cn(
-                'h-4 w-4 transition-transform',
-                isCollapsed && 'rotate-180',
-              )}
-            />
-          </Button>
-        )}
-        {mobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-foreground dark:text-sidebar-foreground hover:bg-accent dark:hover:bg-sidebar-accent"
-            onClick={onCloseMobile}
-          >
-            <X className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 transition-transform" />
           </Button>
         )}
       </div>
@@ -93,8 +87,8 @@ export function SidebarContent({
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-4">
         {navItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
           return (
             <Link
               key={item.href}
@@ -116,7 +110,7 @@ export function SidebarContent({
                 <div className="ml-auto h-6 w-1 rounded-full bg-primary-foreground/90 dark:bg-primary shadow-sm" />
               )}
             </Link>
-          )
+          );
         })}
       </nav>
 
@@ -185,5 +179,5 @@ export function SidebarContent({
         </div>
       </div>
     </div>
-  )
+  );
 }
