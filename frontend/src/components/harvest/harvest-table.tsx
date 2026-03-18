@@ -33,7 +33,7 @@ export function HarvestTable({
   const { t } = useI18n();
   const h = t.pages.harvest;
   const paginationConfig = usePaginationConfig({
-    defaultPageSize: 15,
+    defaultPageSize: 10,
     pageSizeOptions: [10, 15, 25, 50]
   });
 

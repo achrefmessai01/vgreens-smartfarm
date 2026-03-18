@@ -116,6 +116,17 @@ export type CreateAlertInput = {
   value: Scalars['String']['input'];
 };
 
+export type CreateErrorReportInput = {
+  attachments?: InputMaybe<Array<Scalars['String']['input']>>;
+  browserInfo?: InputMaybe<Scalars['String']['input']>;
+  errorDetails: Scalars['String']['input'];
+  errorTitle: Scalars['String']['input'];
+  expectedVsActual?: InputMaybe<Scalars['String']['input']>;
+  reproductionSteps?: InputMaybe<Scalars['String']['input']>;
+  severity: ReportSeverity;
+  userEmail: Scalars['String']['input'];
+};
+
 export type CreateFeatureInput = {
   category?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
@@ -166,6 +177,26 @@ export type CreateImageUploadInput = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type CreateSystemErrorInput = {
+  action?: InputMaybe<Scalars['String']['input']>;
+  component?: InputMaybe<Scalars['String']['input']>;
+  errorMessage: Scalars['String']['input'];
+  errorType: ErrorType;
+  httpMethod?: InputMaybe<Scalars['String']['input']>;
+  httpStatusCode?: InputMaybe<Scalars['Float']['input']>;
+  ipAddress?: InputMaybe<Scalars['String']['input']>;
+  metadata?: InputMaybe<Scalars['JSONObject']['input']>;
+  requestPayload?: InputMaybe<Scalars['JSONObject']['input']>;
+  requestUrl?: InputMaybe<Scalars['String']['input']>;
+  sessionId?: InputMaybe<Scalars['String']['input']>;
+  severity: ReportSeverity;
+  source: ErrorSource;
+  stackTrace?: InputMaybe<Scalars['String']['input']>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+  userAgent?: InputMaybe<Scalars['String']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type CreateTenantInput = {
   companyName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
@@ -211,6 +242,69 @@ export type DeleteImageInput = {
   /** Full storage path of the image relative to the bucket (including tenant prefix). */
   path: Scalars['String']['input'];
 };
+
+export type ErrorReport = {
+  __typename?: 'ErrorReport';
+  adminNotes?: Maybe<Scalars['String']['output']>;
+  attachments?: Maybe<Array<Scalars['String']['output']>>;
+  browserInfo?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  errorDetails: Scalars['String']['output'];
+  errorTitle: Scalars['String']['output'];
+  expectedVsActual?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isResolved?: Maybe<Scalars['Boolean']['output']>;
+  reproductionSteps?: Maybe<Scalars['String']['output']>;
+  resolvedAt?: Maybe<Scalars['DateTime']['output']>;
+  resolvedBy?: Maybe<Scalars['String']['output']>;
+  resolvedByUser?: Maybe<User>;
+  severity: ReportSeverity;
+  status: ReportStatus;
+  tenant?: Maybe<Tenant>;
+  tenantId?: Maybe<Scalars['ID']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  user: User;
+  userEmail: Scalars['String']['output'];
+  userId: Scalars['ID']['output'];
+};
+
+export type ErrorReportsFilterInput = {
+  createdAfter?: InputMaybe<Scalars['String']['input']>;
+  createdBefore?: InputMaybe<Scalars['String']['input']>;
+  isResolved?: InputMaybe<Scalars['Boolean']['input']>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  severity?: InputMaybe<ReportSeverity>;
+  status?: InputMaybe<ReportStatus>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Source of the error - where it originated */
+export enum ErrorSource {
+  Backend = 'BACKEND',
+  Database = 'DATABASE',
+  ExternalApi = 'EXTERNAL_API',
+  Frontend = 'FRONTEND',
+  Infrastructure = 'INFRASTRUCTURE'
+}
+
+/** Type/category of the error */
+export enum ErrorType {
+  ApiError = 'API_ERROR',
+  AuthenticationError = 'AUTHENTICATION_ERROR',
+  AuthorizationError = 'AUTHORIZATION_ERROR',
+  BusinessLogicError = 'BUSINESS_LOGIC_ERROR',
+  ConfigurationError = 'CONFIGURATION_ERROR',
+  DatabaseError = 'DATABASE_ERROR',
+  ExternalServiceError = 'EXTERNAL_SERVICE_ERROR',
+  MemoryError = 'MEMORY_ERROR',
+  NetworkError = 'NETWORK_ERROR',
+  RuntimeError = 'RUNTIME_ERROR',
+  SyntaxError = 'SYNTAX_ERROR',
+  TimeoutError = 'TIMEOUT_ERROR',
+  UnknownError = 'UNKNOWN_ERROR',
+  ValidationError = 'VALIDATION_ERROR'
+}
 
 export type Feature = {
   __typename?: 'Feature';
@@ -306,7 +400,6 @@ export type Harvest = {
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
   updatedAt: Scalars['DateTime']['output'];
-  uploaderName?: Maybe<Scalars['String']['output']>;
   variety: Scalars['String']['output'];
   waste: Scalars['Float']['output'];
 };
@@ -394,6 +487,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   acknowledgeAlert: Alert;
   createAlert: Alert;
+  createErrorReport: ErrorReport;
   createFeature: Feature;
   createHarvest: Harvest;
   /** Create a signed URL that allows the client to upload an image directly to Supabase Storage. */
@@ -401,16 +495,22 @@ export type Mutation = {
   createTenant: Tenant;
   createUser: User;
   deleteAlert: Scalars['Boolean']['output'];
+  deleteErrorReport: Scalars['Boolean']['output'];
   deleteFeature: Scalars['Boolean']['output'];
   deleteHarvest: Scalars['Boolean']['output'];
   /** Delete an image from Supabase Storage. Non-admins can only delete their tenant images. */
   deleteImage: Scalars['Boolean']['output'];
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  logSystemError: SystemError;
   resolveAlert: Alert;
+  resolveErrorReport: ErrorReport;
+  resolveSystemError: SystemError;
   runThresholdCheck: Scalars['Boolean']['output'];
   toggleTenantFeature: TenantFeature;
   updateAlert: Alert;
+  updateErrorReport: ErrorReport;
+  updateErrorReportStatus: ErrorReport;
   updateFeature: Feature;
   updateHarvest: Harvest;
   updateTenant: Tenant;
@@ -427,6 +527,11 @@ export type MutationAcknowledgeAlertArgs = {
 
 export type MutationCreateAlertArgs = {
   input: CreateAlertInput;
+};
+
+
+export type MutationCreateErrorReportArgs = {
+  input: CreateErrorReportInput;
 };
 
 
@@ -460,6 +565,11 @@ export type MutationDeleteAlertArgs = {
 };
 
 
+export type MutationDeleteErrorReportArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteFeatureArgs = {
   id: Scalars['ID']['input'];
 };
@@ -485,8 +595,25 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationLogSystemErrorArgs = {
+  input: CreateSystemErrorInput;
+};
+
+
 export type MutationResolveAlertArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationResolveErrorReportArgs = {
+  adminNotes?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationResolveSystemErrorArgs = {
+  errorId: Scalars['ID']['input'];
+  resolutionNotes?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -504,6 +631,18 @@ export type MutationToggleTenantFeatureArgs = {
 export type MutationUpdateAlertArgs = {
   id: Scalars['ID']['input'];
   input: UpdateAlertInput;
+};
+
+
+export type MutationUpdateErrorReportArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateErrorReportInput;
+};
+
+
+export type MutationUpdateErrorReportStatusArgs = {
+  id: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
 };
 
 
@@ -535,6 +674,11 @@ export type MutationUploadImageArgs = {
   input: UploadImageInput;
 };
 
+export enum OrderDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
 export type ParDliPoint = {
   __typename?: 'ParDliPoint';
   dli: Scalars['Float']['output'];
@@ -545,6 +689,8 @@ export type Query = {
   __typename?: 'Query';
   alert?: Maybe<Alert>;
   alerts: Array<Alert>;
+  errorReport?: Maybe<ErrorReport>;
+  errorReports: Array<ErrorReport>;
   feature?: Maybe<Feature>;
   features: Array<Feature>;
   featuresWithTenantStatus: Array<FeatureWithTenantStatus>;
@@ -553,6 +699,8 @@ export type Query = {
   getBucketFields: Array<Scalars['String']['output']>;
   getBuckets: Array<Scalars['String']['output']>;
   getParDliToday: Array<ParDliPoint>;
+  getRecentSystemErrors: Array<SystemError>;
+  getSystemErrorStats: Scalars['String']['output'];
   harvest?: Maybe<Harvest>;
   harvestDashboard: HarvestDashboardMetrics;
   harvests: Array<Harvest>;
@@ -566,6 +714,7 @@ export type Query = {
   tenantFeatures: Array<TenantFeature>;
   tenants: Array<Tenant>;
   testInfluxDBConnection: Scalars['String']['output'];
+  unresolvedErrorReportsCount: Scalars['Int']['output'];
   user?: Maybe<User>;
   users: Array<User>;
 };
@@ -578,6 +727,16 @@ export type QueryAlertArgs = {
 
 export type QueryAlertsArgs = {
   filter?: InputMaybe<AlertsFilterInput>;
+};
+
+
+export type QueryErrorReportArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryErrorReportsArgs = {
+  filter?: InputMaybe<ErrorReportsFilterInput>;
 };
 
 
@@ -610,6 +769,20 @@ export type QueryGetBucketFieldsArgs = {
 
 export type QueryGetParDliTodayArgs = {
   input: GetParDliTodayInput;
+};
+
+
+export type QueryGetRecentSystemErrorsArgs = {
+  isResolved?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  offset?: InputMaybe<Scalars['Float']['input']>;
+  severity?: InputMaybe<ReportSeverity>;
+  source?: InputMaybe<ErrorSource>;
+};
+
+
+export type QueryGetSystemErrorStatsArgs = {
+  hours?: InputMaybe<Scalars['Float']['input']>;
 };
 
 
@@ -652,6 +825,22 @@ export type QueryUserArgs = {
   id: Scalars['ID']['input'];
 };
 
+/** Error report severity levels */
+export enum ReportSeverity {
+  Critical = 'CRITICAL',
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM',
+  Urgent = 'URGENT'
+}
+
+/** Error report status levels */
+export enum ReportStatus {
+  InProgress = 'IN_PROGRESS',
+  Open = 'OPEN',
+  Resolved = 'RESOLVED'
+}
+
 export type SignedUrl = {
   __typename?: 'SignedUrl';
   /** Timestamp at which the signed URL expires. */
@@ -660,6 +849,41 @@ export type SignedUrl = {
   path: Scalars['String']['output'];
   /** Time-limited URL that can be used to upload or download the image. */
   url: Scalars['String']['output'];
+};
+
+export type SystemError = {
+  __typename?: 'SystemError';
+  action?: Maybe<Scalars['String']['output']>;
+  component?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  errorHash?: Maybe<Scalars['String']['output']>;
+  errorMessage: Scalars['String']['output'];
+  errorType: ErrorType;
+  httpMethod?: Maybe<Scalars['String']['output']>;
+  httpStatusCode?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  ipAddress?: Maybe<Scalars['String']['output']>;
+  isNotified?: Maybe<Scalars['Boolean']['output']>;
+  isResolved: Scalars['Boolean']['output'];
+  lastOccurredAt?: Maybe<Scalars['DateTime']['output']>;
+  metadata?: Maybe<Scalars['JSONObject']['output']>;
+  occurrenceCount?: Maybe<Scalars['Float']['output']>;
+  requestPayload?: Maybe<Scalars['JSONObject']['output']>;
+  requestUrl?: Maybe<Scalars['String']['output']>;
+  resolutionNotes?: Maybe<Scalars['String']['output']>;
+  resolvedAt?: Maybe<Scalars['DateTime']['output']>;
+  resolvedBy?: Maybe<Scalars['String']['output']>;
+  resolver?: Maybe<User>;
+  sessionId?: Maybe<Scalars['String']['output']>;
+  severity: ReportSeverity;
+  source: ErrorSource;
+  stackTrace?: Maybe<Scalars['String']['output']>;
+  tenant?: Maybe<Tenant>;
+  tenantId?: Maybe<Scalars['ID']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  user?: Maybe<User>;
+  userAgent?: Maybe<Scalars['String']['output']>;
+  userId?: Maybe<Scalars['ID']['output']>;
 };
 
 export type Tenant = {
@@ -709,6 +933,18 @@ export type UpdateAlertInput = {
   sensorName?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<AlertStatus>;
   value?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateErrorReportInput = {
+  adminNotes?: InputMaybe<Scalars['String']['input']>;
+  browserInfo?: InputMaybe<Scalars['String']['input']>;
+  errorDetails?: InputMaybe<Scalars['String']['input']>;
+  errorTitle?: InputMaybe<Scalars['String']['input']>;
+  expectedVsActual?: InputMaybe<Scalars['String']['input']>;
+  isResolved?: InputMaybe<Scalars['Boolean']['input']>;
+  reproductionSteps?: InputMaybe<Scalars['String']['input']>;
+  severity?: InputMaybe<ReportSeverity>;
+  status?: InputMaybe<ReportStatus>;
 };
 
 export type UpdateFeatureInput = {
@@ -810,6 +1046,65 @@ export type YieldOverTimeData = {
   date: Scalars['String']['output'];
   yield: Scalars['Float']['output'];
 };
+
+export type ErrorReportFragmentFragment = { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null };
+
+export type CreateErrorReportMutationVariables = Exact<{
+  input: CreateErrorReportInput;
+}>;
+
+
+export type CreateErrorReportMutation = { __typename?: 'Mutation', createErrorReport: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
+
+export type UpdateErrorReportMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateErrorReportInput;
+}>;
+
+
+export type UpdateErrorReportMutation = { __typename?: 'Mutation', updateErrorReport: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
+
+export type UpdateErrorReportStatusMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  status: Scalars['String']['input'];
+}>;
+
+
+export type UpdateErrorReportStatusMutation = { __typename?: 'Mutation', updateErrorReportStatus: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
+
+export type ResolveErrorReportMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  adminNotes?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ResolveErrorReportMutation = { __typename?: 'Mutation', resolveErrorReport: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } };
+
+export type DeleteErrorReportMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteErrorReportMutation = { __typename?: 'Mutation', deleteErrorReport: boolean };
+
+export type GetErrorReportsQueryVariables = Exact<{
+  filter?: InputMaybe<ErrorReportsFilterInput>;
+}>;
+
+
+export type GetErrorReportsQuery = { __typename?: 'Query', errorReports: Array<{ __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
+
+export type GetErrorReportQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetErrorReportQuery = { __typename?: 'Query', errorReport?: { __typename?: 'ErrorReport', id: string, userEmail: string, errorTitle: string, errorDetails: string, severity: ReportSeverity, status: ReportStatus, reproductionSteps?: string | null, expectedVsActual?: string | null, browserInfo?: string | null, attachments?: Array<string> | null, adminNotes?: string | null, isResolved?: boolean | null, resolvedAt?: any | null, createdAt: any, updatedAt: any, user: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null }, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, resolvedByUser?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
+
+export type GetUnresolvedErrorReportsCountQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetUnresolvedErrorReportsCountQuery = { __typename?: 'Query', unresolvedErrorReportsCount: number };
 
 export type CreateFeatureMutationVariables = Exact<{
   input: CreateFeatureInput;
@@ -919,6 +1214,31 @@ export type DeleteUserMutationVariables = Exact<{
 
 
 export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean };
+
+export type GetRecentSystemErrorsQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Float']['input']>;
+  severity?: InputMaybe<ReportSeverity>;
+  source?: InputMaybe<ErrorSource>;
+  isResolved?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GetRecentSystemErrorsQuery = { __typename?: 'Query', getRecentSystemErrors: Array<{ __typename?: 'SystemError', id: string, source: ErrorSource, errorType: ErrorType, severity: ReportSeverity, errorMessage: string, component?: string | null, action?: string | null, occurrenceCount?: number | null, isResolved: boolean, createdAt: any, updatedAt: any, lastOccurredAt?: any | null, user?: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email?: string | null, id: string, isActive: boolean, createdAt: any, updatedAt: any, clerkUserId: string, role: UserRole } | null, tenant?: { __typename?: 'Tenant', id: string, isActive: boolean, createdAt: any, updatedAt: any, name: string } | null }> };
+
+export type GetSystemErrorStatsQueryVariables = Exact<{
+  hours?: InputMaybe<Scalars['Float']['input']>;
+}>;
+
+
+export type GetSystemErrorStatsQuery = { __typename?: 'Query', getSystemErrorStats: string };
+
+export type ResolveSystemErrorMutationVariables = Exact<{
+  errorId: Scalars['ID']['input'];
+  resolutionNotes?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ResolveSystemErrorMutation = { __typename?: 'Mutation', resolveSystemError: { __typename?: 'SystemError', id: string, isResolved: boolean, resolvedAt?: any | null } };
 
 export type AlertsQueryVariables = Exact<{
   filter?: InputMaybe<AlertsFilterInput>;
@@ -1146,7 +1466,333 @@ export type UserQueryVariables = Exact<{
 
 export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, createdAt: any, updatedAt: any } | null };
 
+export const ErrorReportFragmentFragmentDoc = gql`
+    fragment ErrorReportFragment on ErrorReport {
+  id
+  userEmail
+  errorTitle
+  errorDetails
+  severity
+  status
+  reproductionSteps
+  expectedVsActual
+  browserInfo
+  attachments
+  adminNotes
+  isResolved
+  resolvedAt
+  createdAt
+  updatedAt
+  user {
+    id
+    firstName
+    lastName
+    email
+  }
+  tenant {
+    id
+    name
+  }
+  resolvedByUser {
+    id
+    firstName
+    lastName
+    email
+  }
+}
+    `;
+export const CreateErrorReportDocument = gql`
+    mutation CreateErrorReport($input: CreateErrorReportInput!) {
+  createErrorReport(input: $input) {
+    ...ErrorReportFragment
+  }
+}
+    ${ErrorReportFragmentFragmentDoc}`;
+export type CreateErrorReportMutationFn = Apollo.MutationFunction<CreateErrorReportMutation, CreateErrorReportMutationVariables>;
 
+/**
+ * __useCreateErrorReportMutation__
+ *
+ * To run a mutation, you first call `useCreateErrorReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateErrorReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createErrorReportMutation, { data, loading, error }] = useCreateErrorReportMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateErrorReportMutation(baseOptions?: Apollo.MutationHookOptions<CreateErrorReportMutation, CreateErrorReportMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateErrorReportMutation, CreateErrorReportMutationVariables>(CreateErrorReportDocument, options);
+      }
+export type CreateErrorReportMutationHookResult = ReturnType<typeof useCreateErrorReportMutation>;
+export type CreateErrorReportMutationResult = Apollo.MutationResult<CreateErrorReportMutation>;
+export type CreateErrorReportMutationOptions = Apollo.BaseMutationOptions<CreateErrorReportMutation, CreateErrorReportMutationVariables>;
+export const UpdateErrorReportDocument = gql`
+    mutation UpdateErrorReport($id: ID!, $input: UpdateErrorReportInput!) {
+  updateErrorReport(id: $id, input: $input) {
+    ...ErrorReportFragment
+  }
+}
+    ${ErrorReportFragmentFragmentDoc}`;
+export type UpdateErrorReportMutationFn = Apollo.MutationFunction<UpdateErrorReportMutation, UpdateErrorReportMutationVariables>;
+
+/**
+ * __useUpdateErrorReportMutation__
+ *
+ * To run a mutation, you first call `useUpdateErrorReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateErrorReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateErrorReportMutation, { data, loading, error }] = useUpdateErrorReportMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateErrorReportMutation(baseOptions?: Apollo.MutationHookOptions<UpdateErrorReportMutation, UpdateErrorReportMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateErrorReportMutation, UpdateErrorReportMutationVariables>(UpdateErrorReportDocument, options);
+      }
+export type UpdateErrorReportMutationHookResult = ReturnType<typeof useUpdateErrorReportMutation>;
+export type UpdateErrorReportMutationResult = Apollo.MutationResult<UpdateErrorReportMutation>;
+export type UpdateErrorReportMutationOptions = Apollo.BaseMutationOptions<UpdateErrorReportMutation, UpdateErrorReportMutationVariables>;
+export const UpdateErrorReportStatusDocument = gql`
+    mutation UpdateErrorReportStatus($id: ID!, $status: String!) {
+  updateErrorReportStatus(id: $id, status: $status) {
+    ...ErrorReportFragment
+  }
+}
+    ${ErrorReportFragmentFragmentDoc}`;
+export type UpdateErrorReportStatusMutationFn = Apollo.MutationFunction<UpdateErrorReportStatusMutation, UpdateErrorReportStatusMutationVariables>;
+
+/**
+ * __useUpdateErrorReportStatusMutation__
+ *
+ * To run a mutation, you first call `useUpdateErrorReportStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateErrorReportStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateErrorReportStatusMutation, { data, loading, error }] = useUpdateErrorReportStatusMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      status: // value for 'status'
+ *   },
+ * });
+ */
+export function useUpdateErrorReportStatusMutation(baseOptions?: Apollo.MutationHookOptions<UpdateErrorReportStatusMutation, UpdateErrorReportStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateErrorReportStatusMutation, UpdateErrorReportStatusMutationVariables>(UpdateErrorReportStatusDocument, options);
+      }
+export type UpdateErrorReportStatusMutationHookResult = ReturnType<typeof useUpdateErrorReportStatusMutation>;
+export type UpdateErrorReportStatusMutationResult = Apollo.MutationResult<UpdateErrorReportStatusMutation>;
+export type UpdateErrorReportStatusMutationOptions = Apollo.BaseMutationOptions<UpdateErrorReportStatusMutation, UpdateErrorReportStatusMutationVariables>;
+export const ResolveErrorReportDocument = gql`
+    mutation ResolveErrorReport($id: ID!, $adminNotes: String) {
+  resolveErrorReport(id: $id, adminNotes: $adminNotes) {
+    ...ErrorReportFragment
+  }
+}
+    ${ErrorReportFragmentFragmentDoc}`;
+export type ResolveErrorReportMutationFn = Apollo.MutationFunction<ResolveErrorReportMutation, ResolveErrorReportMutationVariables>;
+
+/**
+ * __useResolveErrorReportMutation__
+ *
+ * To run a mutation, you first call `useResolveErrorReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResolveErrorReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resolveErrorReportMutation, { data, loading, error }] = useResolveErrorReportMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      adminNotes: // value for 'adminNotes'
+ *   },
+ * });
+ */
+export function useResolveErrorReportMutation(baseOptions?: Apollo.MutationHookOptions<ResolveErrorReportMutation, ResolveErrorReportMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResolveErrorReportMutation, ResolveErrorReportMutationVariables>(ResolveErrorReportDocument, options);
+      }
+export type ResolveErrorReportMutationHookResult = ReturnType<typeof useResolveErrorReportMutation>;
+export type ResolveErrorReportMutationResult = Apollo.MutationResult<ResolveErrorReportMutation>;
+export type ResolveErrorReportMutationOptions = Apollo.BaseMutationOptions<ResolveErrorReportMutation, ResolveErrorReportMutationVariables>;
+export const DeleteErrorReportDocument = gql`
+    mutation DeleteErrorReport($id: ID!) {
+  deleteErrorReport(id: $id)
+}
+    `;
+export type DeleteErrorReportMutationFn = Apollo.MutationFunction<DeleteErrorReportMutation, DeleteErrorReportMutationVariables>;
+
+/**
+ * __useDeleteErrorReportMutation__
+ *
+ * To run a mutation, you first call `useDeleteErrorReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteErrorReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteErrorReportMutation, { data, loading, error }] = useDeleteErrorReportMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteErrorReportMutation(baseOptions?: Apollo.MutationHookOptions<DeleteErrorReportMutation, DeleteErrorReportMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteErrorReportMutation, DeleteErrorReportMutationVariables>(DeleteErrorReportDocument, options);
+      }
+export type DeleteErrorReportMutationHookResult = ReturnType<typeof useDeleteErrorReportMutation>;
+export type DeleteErrorReportMutationResult = Apollo.MutationResult<DeleteErrorReportMutation>;
+export type DeleteErrorReportMutationOptions = Apollo.BaseMutationOptions<DeleteErrorReportMutation, DeleteErrorReportMutationVariables>;
+export const GetErrorReportsDocument = gql`
+    query GetErrorReports($filter: ErrorReportsFilterInput) {
+  errorReports(filter: $filter) {
+    ...ErrorReportFragment
+  }
+}
+    ${ErrorReportFragmentFragmentDoc}`;
+
+/**
+ * __useGetErrorReportsQuery__
+ *
+ * To run a query within a React component, call `useGetErrorReportsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetErrorReportsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetErrorReportsQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useGetErrorReportsQuery(baseOptions?: Apollo.QueryHookOptions<GetErrorReportsQuery, GetErrorReportsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetErrorReportsQuery, GetErrorReportsQueryVariables>(GetErrorReportsDocument, options);
+      }
+export function useGetErrorReportsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetErrorReportsQuery, GetErrorReportsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetErrorReportsQuery, GetErrorReportsQueryVariables>(GetErrorReportsDocument, options);
+        }
+// @ts-ignore
+export function useGetErrorReportsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetErrorReportsQuery, GetErrorReportsQueryVariables>): Apollo.UseSuspenseQueryResult<GetErrorReportsQuery, GetErrorReportsQueryVariables>;
+export function useGetErrorReportsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetErrorReportsQuery, GetErrorReportsQueryVariables>): Apollo.UseSuspenseQueryResult<GetErrorReportsQuery | undefined, GetErrorReportsQueryVariables>;
+export function useGetErrorReportsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetErrorReportsQuery, GetErrorReportsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetErrorReportsQuery, GetErrorReportsQueryVariables>(GetErrorReportsDocument, options);
+        }
+export type GetErrorReportsQueryHookResult = ReturnType<typeof useGetErrorReportsQuery>;
+export type GetErrorReportsLazyQueryHookResult = ReturnType<typeof useGetErrorReportsLazyQuery>;
+export type GetErrorReportsSuspenseQueryHookResult = ReturnType<typeof useGetErrorReportsSuspenseQuery>;
+export type GetErrorReportsQueryResult = Apollo.QueryResult<GetErrorReportsQuery, GetErrorReportsQueryVariables>;
+export const GetErrorReportDocument = gql`
+    query GetErrorReport($id: ID!) {
+  errorReport(id: $id) {
+    ...ErrorReportFragment
+  }
+}
+    ${ErrorReportFragmentFragmentDoc}`;
+
+/**
+ * __useGetErrorReportQuery__
+ *
+ * To run a query within a React component, call `useGetErrorReportQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetErrorReportQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetErrorReportQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetErrorReportQuery(baseOptions: Apollo.QueryHookOptions<GetErrorReportQuery, GetErrorReportQueryVariables> & ({ variables: GetErrorReportQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetErrorReportQuery, GetErrorReportQueryVariables>(GetErrorReportDocument, options);
+      }
+export function useGetErrorReportLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetErrorReportQuery, GetErrorReportQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetErrorReportQuery, GetErrorReportQueryVariables>(GetErrorReportDocument, options);
+        }
+// @ts-ignore
+export function useGetErrorReportSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetErrorReportQuery, GetErrorReportQueryVariables>): Apollo.UseSuspenseQueryResult<GetErrorReportQuery, GetErrorReportQueryVariables>;
+export function useGetErrorReportSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetErrorReportQuery, GetErrorReportQueryVariables>): Apollo.UseSuspenseQueryResult<GetErrorReportQuery | undefined, GetErrorReportQueryVariables>;
+export function useGetErrorReportSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetErrorReportQuery, GetErrorReportQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetErrorReportQuery, GetErrorReportQueryVariables>(GetErrorReportDocument, options);
+        }
+export type GetErrorReportQueryHookResult = ReturnType<typeof useGetErrorReportQuery>;
+export type GetErrorReportLazyQueryHookResult = ReturnType<typeof useGetErrorReportLazyQuery>;
+export type GetErrorReportSuspenseQueryHookResult = ReturnType<typeof useGetErrorReportSuspenseQuery>;
+export type GetErrorReportQueryResult = Apollo.QueryResult<GetErrorReportQuery, GetErrorReportQueryVariables>;
+export const GetUnresolvedErrorReportsCountDocument = gql`
+    query GetUnresolvedErrorReportsCount {
+  unresolvedErrorReportsCount
+}
+    `;
+
+/**
+ * __useGetUnresolvedErrorReportsCountQuery__
+ *
+ * To run a query within a React component, call `useGetUnresolvedErrorReportsCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUnresolvedErrorReportsCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUnresolvedErrorReportsCountQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetUnresolvedErrorReportsCountQuery(baseOptions?: Apollo.QueryHookOptions<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>(GetUnresolvedErrorReportsCountDocument, options);
+      }
+export function useGetUnresolvedErrorReportsCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>(GetUnresolvedErrorReportsCountDocument, options);
+        }
+// @ts-ignore
+export function useGetUnresolvedErrorReportsCountSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>): Apollo.UseSuspenseQueryResult<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>;
+export function useGetUnresolvedErrorReportsCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>): Apollo.UseSuspenseQueryResult<GetUnresolvedErrorReportsCountQuery | undefined, GetUnresolvedErrorReportsCountQueryVariables>;
+export function useGetUnresolvedErrorReportsCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>(GetUnresolvedErrorReportsCountDocument, options);
+        }
+export type GetUnresolvedErrorReportsCountQueryHookResult = ReturnType<typeof useGetUnresolvedErrorReportsCountQuery>;
+export type GetUnresolvedErrorReportsCountLazyQueryHookResult = ReturnType<typeof useGetUnresolvedErrorReportsCountLazyQuery>;
+export type GetUnresolvedErrorReportsCountSuspenseQueryHookResult = ReturnType<typeof useGetUnresolvedErrorReportsCountSuspenseQuery>;
+export type GetUnresolvedErrorReportsCountQueryResult = Apollo.QueryResult<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>;
 export const CreateFeatureDocument = gql`
     mutation CreateFeature($input: CreateFeatureInput!) {
   createFeature(input: $input) {
@@ -1756,6 +2402,163 @@ export function useDeleteUserMutation(baseOptions?: Apollo.MutationHookOptions<D
 export type DeleteUserMutationHookResult = ReturnType<typeof useDeleteUserMutation>;
 export type DeleteUserMutationResult = Apollo.MutationResult<DeleteUserMutation>;
 export type DeleteUserMutationOptions = Apollo.BaseMutationOptions<DeleteUserMutation, DeleteUserMutationVariables>;
+export const GetRecentSystemErrorsDocument = gql`
+    query GetRecentSystemErrors($limit: Float, $severity: ReportSeverity, $source: ErrorSource, $isResolved: Boolean) {
+  getRecentSystemErrors(
+    limit: $limit
+    severity: $severity
+    source: $source
+    isResolved: $isResolved
+  ) {
+    id
+    source
+    errorType
+    severity
+    errorMessage
+    component
+    action
+    occurrenceCount
+    isResolved
+    createdAt
+    updatedAt
+    lastOccurredAt
+    user {
+      firstName
+      lastName
+      email
+      id
+      isActive
+      createdAt
+      updatedAt
+      clerkUserId
+      role
+    }
+    tenant {
+      id
+      isActive
+      createdAt
+      updatedAt
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetRecentSystemErrorsQuery__
+ *
+ * To run a query within a React component, call `useGetRecentSystemErrorsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRecentSystemErrorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetRecentSystemErrorsQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *      severity: // value for 'severity'
+ *      source: // value for 'source'
+ *      isResolved: // value for 'isResolved'
+ *   },
+ * });
+ */
+export function useGetRecentSystemErrorsQuery(baseOptions?: Apollo.QueryHookOptions<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>(GetRecentSystemErrorsDocument, options);
+      }
+export function useGetRecentSystemErrorsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>(GetRecentSystemErrorsDocument, options);
+        }
+// @ts-ignore
+export function useGetRecentSystemErrorsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>): Apollo.UseSuspenseQueryResult<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>;
+export function useGetRecentSystemErrorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>): Apollo.UseSuspenseQueryResult<GetRecentSystemErrorsQuery | undefined, GetRecentSystemErrorsQueryVariables>;
+export function useGetRecentSystemErrorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>(GetRecentSystemErrorsDocument, options);
+        }
+export type GetRecentSystemErrorsQueryHookResult = ReturnType<typeof useGetRecentSystemErrorsQuery>;
+export type GetRecentSystemErrorsLazyQueryHookResult = ReturnType<typeof useGetRecentSystemErrorsLazyQuery>;
+export type GetRecentSystemErrorsSuspenseQueryHookResult = ReturnType<typeof useGetRecentSystemErrorsSuspenseQuery>;
+export type GetRecentSystemErrorsQueryResult = Apollo.QueryResult<GetRecentSystemErrorsQuery, GetRecentSystemErrorsQueryVariables>;
+export const GetSystemErrorStatsDocument = gql`
+    query GetSystemErrorStats($hours: Float) {
+  getSystemErrorStats(hours: $hours)
+}
+    `;
+
+/**
+ * __useGetSystemErrorStatsQuery__
+ *
+ * To run a query within a React component, call `useGetSystemErrorStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetSystemErrorStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetSystemErrorStatsQuery({
+ *   variables: {
+ *      hours: // value for 'hours'
+ *   },
+ * });
+ */
+export function useGetSystemErrorStatsQuery(baseOptions?: Apollo.QueryHookOptions<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>(GetSystemErrorStatsDocument, options);
+      }
+export function useGetSystemErrorStatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>(GetSystemErrorStatsDocument, options);
+        }
+// @ts-ignore
+export function useGetSystemErrorStatsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>): Apollo.UseSuspenseQueryResult<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>;
+export function useGetSystemErrorStatsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>): Apollo.UseSuspenseQueryResult<GetSystemErrorStatsQuery | undefined, GetSystemErrorStatsQueryVariables>;
+export function useGetSystemErrorStatsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>(GetSystemErrorStatsDocument, options);
+        }
+export type GetSystemErrorStatsQueryHookResult = ReturnType<typeof useGetSystemErrorStatsQuery>;
+export type GetSystemErrorStatsLazyQueryHookResult = ReturnType<typeof useGetSystemErrorStatsLazyQuery>;
+export type GetSystemErrorStatsSuspenseQueryHookResult = ReturnType<typeof useGetSystemErrorStatsSuspenseQuery>;
+export type GetSystemErrorStatsQueryResult = Apollo.QueryResult<GetSystemErrorStatsQuery, GetSystemErrorStatsQueryVariables>;
+export const ResolveSystemErrorDocument = gql`
+    mutation ResolveSystemError($errorId: ID!, $resolutionNotes: String) {
+  resolveSystemError(errorId: $errorId, resolutionNotes: $resolutionNotes) {
+    id
+    isResolved
+    resolvedAt
+  }
+}
+    `;
+export type ResolveSystemErrorMutationFn = Apollo.MutationFunction<ResolveSystemErrorMutation, ResolveSystemErrorMutationVariables>;
+
+/**
+ * __useResolveSystemErrorMutation__
+ *
+ * To run a mutation, you first call `useResolveSystemErrorMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResolveSystemErrorMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resolveSystemErrorMutation, { data, loading, error }] = useResolveSystemErrorMutation({
+ *   variables: {
+ *      errorId: // value for 'errorId'
+ *      resolutionNotes: // value for 'resolutionNotes'
+ *   },
+ * });
+ */
+export function useResolveSystemErrorMutation(baseOptions?: Apollo.MutationHookOptions<ResolveSystemErrorMutation, ResolveSystemErrorMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResolveSystemErrorMutation, ResolveSystemErrorMutationVariables>(ResolveSystemErrorDocument, options);
+      }
+export type ResolveSystemErrorMutationHookResult = ReturnType<typeof useResolveSystemErrorMutation>;
+export type ResolveSystemErrorMutationResult = Apollo.MutationResult<ResolveSystemErrorMutation>;
+export type ResolveSystemErrorMutationOptions = Apollo.BaseMutationOptions<ResolveSystemErrorMutation, ResolveSystemErrorMutationVariables>;
 export const AlertsDocument = gql`
     query Alerts($filter: AlertsFilterInput) {
   alerts(filter: $filter) {
