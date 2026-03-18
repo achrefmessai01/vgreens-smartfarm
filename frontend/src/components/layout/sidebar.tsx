@@ -9,32 +9,12 @@ import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features'
 import { cn } from '@/lib/utils'
 import { useClerk } from '@clerk/nextjs'
-import {
-  AlertTriangle,
-  Apple,
-  Bell,
-  Building2,
-  Clock,
-  ClipboardList,
-  Flag,
-  LayoutDashboard,
-  Menu,
-  Settings,
-  Sprout,
-  Users,
-  Video,
-} from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { usePathname, useRouter } from 'next/navigation'
 import * as React from 'react'
 import { SidebarContent } from './sidebar-content'
-
-interface NavItem {
-  label: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  featureKey?: string // Optional feature key to check if item should be shown
-}
+import { getNavigationItems } from './sidebar-navigation'
 
 interface SidebarProps {
   user?: User | null
@@ -85,98 +65,8 @@ export function Sidebar({ user: propUser, onLogout }: SidebarProps) {
     localStorage.setItem('sidebarCollapsed', JSON.stringify(newState))
   }
 
-  // Admin navigation items
-  const adminNavItems: NavItem[] = [
-    {
-      label: 'Dashboard',
-      href: '/admin/dashboard',
-      icon: LayoutDashboard,
-    },
-    {
-      label: 'Tenants',
-      href: '/admin/tenants',
-      icon: Building2,
-    },
-    {
-      label: 'Users',
-      href: '/admin/users',
-      icon: Users,
-    },
-    {
-      label: 'Feature Flags',
-      href: '/admin/feature-flags',
-      icon: Flag,
-    },
-    {
-      label: 'Reports',
-      href: '/admin/reports',
-      icon: ClipboardList,
-    },
-    {
-      label: 'Settings',
-      href: '/admin/settings',
-      icon: Settings,
-    },
-  ]
-
-  // Tenant navigation items - filtered by enabled features
-  const allTenantNavItems: NavItem[] = [
-    {
-      label: t.navigation.farmOverview,
-      href: '/tenant/farm-overview',
-      icon: Sprout,
-      featureKey: 'farm_overview', // Always show farm overview
-    },
-    {
-      label: t.navigation.harvest || 'Harvest',
-      href: '/tenant/harvest',
-      icon: Apple,
-      // Always show harvest - no feature key required
-    },
-    {
-      label: t.navigation.users,
-      href: '/tenant/users',
-      icon: Users,
-      featureKey: 'user_management', // Always show user management
-    },
-    {
-      label: t.navigation.warnings,
-      href: '/tenant/warnings',
-      icon: Bell,
-      featureKey: 'sensor_alerts',
-    },
-    {
-      label: t.navigation.alerts,
-      href: '/tenant/alerts',
-      icon: AlertTriangle,
-      featureKey: 'sensor_alerts',
-    },
-    {
-      label: t.navigation.cameraLivestream,
-      href: '/tenant/camera-livestream',
-      icon: Video,
-      featureKey: 'camera_livestream',
-    },
-    {
-      label: t.navigation.history,
-      href: '/tenant/history',
-      icon: Clock,
-      featureKey: 'data_analytics',
-    },
-  ]
-
-  // Filter navigation items based on enabled features
-  const tenantNavItems: NavItem[] = allTenantNavItems.filter((item) => {
-    // Always show items without featureKey or if feature is enabled
-    if (!item.featureKey) return true
-    // For admin users, show all items
-    if (isVGreensAdmin) return true
-    // For tenant users, check if feature is enabled
-    return hasFeature(item.featureKey)
-  })
-
-  // Select nav items based on role
-  const navItems = isVGreensAdmin ? adminNavItems : tenantNavItems
+  // Get navigation items based on user role and features
+  const navItems = getNavigationItems(role, t, hasFeature)
 
   const defaultUser = {
     name: user?.firstName

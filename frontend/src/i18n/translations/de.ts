@@ -474,6 +474,8 @@ export const de = {
         description: 'Description',
         reproductionSteps: 'Steps to Reproduce',
         expectedVsActual: 'Expected vs Actual',
+        type: 'Type',
+        source: 'Source',
         
         details: {
           title: 'Error Report Details',
@@ -709,5 +711,53 @@ export const de = {
       save: 'Speichern',
       delete: 'Löschen',
     },
+
+    reportStatus: {
+      title: 'Berichtstatus',
+      backToDashboard: 'Zurück zum Dashboard',
+      reportNotFound: 'Bericht nicht gefunden',
+      reportNotFoundDescription: "Der gesuchte Bericht existiert nicht oder Sie haben keine Berechtigung, ihn anzuzeigen.",
+      loadingStatus: 'Lade Berichtstatus...',
+      
+      status: {
+        open: 'Offen',
+        inProgress: 'In Bearbeitung', 
+        resolved: 'Gelöst',
+        openDescription: 'Ihr Bericht wurde erhalten und wartet auf die Überprüfung.',
+        inProgressDescription: 'Unser Team untersucht Ihren Bericht aktiv.',
+        resolvedDescription: 'Ihr Bericht wurde gelöst! Vielen Dank, dass Sie uns bei der Verbesserung helfen.',
+      },
+      
+      details: {
+        title: 'Berichtdetails',
+        description: 'Beschreibung',
+        reproductionSteps: 'Schritte zur Reproduktion',
+        expectedVsActual: 'Erwartet vs Tatsächlich',
+        adminNotes: 'Adminnotizen',
+      },
+      
+      timeline: {
+        title: 'Status-Timeline',
+        submitted: 'Eingereicht',
+        underInvestigation: 'Unter Untersuchung',
+        pendingReview: 'Wartet auf Überprüfung',
+        pendingResolution: 'Wartet auf Lösung',
+      },
+      
+      info: {
+        title: 'Berichtinformationen',
+        reportId: 'Bericht-ID',
+        submittedBy: 'Eingereicht von',
+        lastUpdated: 'Zuletzt aktualisiert',
+        resolvedBy: 'Gelöst von',
+      },
+      
+      contact: {
+        title: 'Benötigen Sie Hilfe?',
+        description: 'Wenn Sie Fragen zu diesem Bericht haben, kontaktieren Sie bitte unser Support-Team.',
+        submitAnother: 'Weiteren Bericht einreichen',
+      },
+    },
   },
+  
 } as const;

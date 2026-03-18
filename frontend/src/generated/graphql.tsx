@@ -1223,7 +1223,7 @@ export type GetRecentSystemErrorsQueryVariables = Exact<{
 }>;
 
 
-export type GetRecentSystemErrorsQuery = { __typename?: 'Query', getRecentSystemErrors: Array<{ __typename?: 'SystemError', id: string, source: ErrorSource, errorType: ErrorType, severity: ReportSeverity, errorMessage: string, component?: string | null, action?: string | null, occurrenceCount?: number | null, isResolved: boolean, createdAt: any, lastOccurredAt?: any | null, user?: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email?: string | null } | null, tenant?: { __typename?: 'Tenant', name: string } | null }> };
+export type GetRecentSystemErrorsQuery = { __typename?: 'Query', getRecentSystemErrors: Array<{ __typename?: 'SystemError', id: string, source: ErrorSource, errorType: ErrorType, severity: ReportSeverity, errorMessage: string, component?: string | null, action?: string | null, occurrenceCount?: number | null, isResolved: boolean, createdAt: any, updatedAt: any, lastOccurredAt?: any | null, user?: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email?: string | null, id: string, isActive: boolean, createdAt: any, updatedAt: any, clerkUserId: string, role: UserRole } | null, tenant?: { __typename?: 'Tenant', id: string, isActive: boolean, createdAt: any, updatedAt: any, name: string } | null }> };
 
 export type GetSystemErrorStatsQueryVariables = Exact<{
   hours?: InputMaybe<Scalars['Float']['input']>;
@@ -2420,13 +2420,24 @@ export const GetRecentSystemErrorsDocument = gql`
     occurrenceCount
     isResolved
     createdAt
+    updatedAt
     lastOccurredAt
     user {
       firstName
       lastName
       email
+      id
+      isActive
+      createdAt
+      updatedAt
+      clerkUserId
+      role
     }
     tenant {
+      id
+      isActive
+      createdAt
+      updatedAt
       name
     }
   }

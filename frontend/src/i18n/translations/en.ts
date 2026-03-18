@@ -25,6 +25,8 @@ export const en = {
     system: 'System',
     otherMenu: 'Other menu',
     admin: 'Admin',
+    type: 'Type',
+    status: 'Status',
     exportCsv: 'Export CSV',
     exportPdf: 'Export PDF',
     selectDateRange: 'Select date range',
@@ -529,6 +531,8 @@ export const en = {
         description: 'Description',
         reproductionSteps: 'Steps to Reproduce',
         expectedVsActual: 'Expected vs Actual',
+        type: 'Type',
+        source: 'Source',
         
         details: {
           title: 'Error Report Details',
@@ -544,6 +548,7 @@ export const en = {
           update: 'Update Report',
           cancel: 'Cancel',
           close: 'Close',
+
         },
         
         statuses: {

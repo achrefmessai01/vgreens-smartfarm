@@ -27,5 +27,3 @@ export default function UsersErrorPage({
     />
   )
 }
-import React from 'react'
-const [test,setTest] = React.useState()

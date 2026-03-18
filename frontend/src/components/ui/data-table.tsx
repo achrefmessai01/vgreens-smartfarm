@@ -1,19 +1,19 @@
 'use client'
 
-import * as React from 'react'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Table,
-  TableRow,
   TableBody,
   TableHead,
   TableHeader,
+  TableRow,
 } from '@/components/ui/table'
-import { Card, CardContent } from '@/components/ui/card'
 import { TableEmptyState } from '@/components/ui/table-empty-state'
 import { TablePagination } from '@/components/ui/table-pagination'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { TableToolbar } from '@/components/ui/table-toolbar'
 import { cn } from '@/lib/utils'
+import * as React from 'react'
 
 export interface Column<T> {
   key: string
