@@ -14,6 +14,7 @@ import {
   Apple,
   Bell,
   Building2,
+  ClipboardList,
   Clock,
   Flag,
   LayoutDashboard,
@@ -22,6 +23,7 @@ import {
   Sprout,
   Users,
   Video,
+  Zap,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { usePathname, useRouter } from 'next/navigation';
@@ -126,6 +128,16 @@ export function Sidebar({
       label: 'Feature Flags',
       href: '/admin/feature-flags',
       icon: Flag,
+    },
+    {
+      label: 'Reports',
+      href: '/admin/reports',
+      icon: ClipboardList,
+    },
+    {
+      label: 'System Errors',
+      href: '/admin/system-errors',
+      icon: Zap,
     },
     {
       label: 'Settings',
