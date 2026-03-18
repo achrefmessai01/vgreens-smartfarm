@@ -1,18 +1,19 @@
 'use client';
 
-import * as React from 'react';
-import { cn } from '@/lib/utils';
-import { useI18n } from '@/i18n';
 import {
   formatHarvestDate,
   getGreenhouseLabel,
 } from '@/app/tenant/harvest/harvest.utils';
-import { Eye, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { DataTable, type Column } from '@/components/ui/data-table';
 import { TableCell } from '@/components/ui/table';
 import type { HarvestsQuery } from '@/generated/graphql';
-import { DataTable, type Column } from '@/components/ui/data-table';
+import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import { cn } from '@/lib/utils';
+import { Calendar, Eye, Home, Package, Scale, Trash2 } from 'lucide-react';
+import * as React from 'react';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
 
@@ -34,7 +35,7 @@ export function HarvestTable({
   const h = t.pages.harvest;
   const paginationConfig = usePaginationConfig({
     defaultPageSize: 15,
-    pageSizeOptions: [10, 15, 25, 50]
+    pageSizeOptions: [10, 15, 25, 50],
   });
 
   const columns: Column<HarvestItem>[] = React.useMemo(
@@ -83,12 +84,13 @@ export function HarvestTable({
           {harvest.photos === 0 ? '-' : harvest.photos}
         </TableCell>
         <TableCell className="text-muted-foreground">
-          {harvest.createdBy ? 
-            (harvest.createdBy.firstName || harvest.createdBy.lastName
-              ? [harvest.createdBy.firstName, harvest.createdBy.lastName].filter(Boolean).join(' ')
+          {harvest.createdBy
+            ? harvest.createdBy.firstName || harvest.createdBy.lastName
+              ? [harvest.createdBy.firstName, harvest.createdBy.lastName]
+                  .filter(Boolean)
+                  .join(' ')
               : harvest.createdBy.email || '-'
-            ) : '-'
-          }
+            : '-'}
         </TableCell>
         <TableCell className="text-right">
           <div className="flex items-center justify-end gap-1">
@@ -122,11 +124,131 @@ export function HarvestTable({
     [onDelete, onSidebarEdit],
   );
 
+  const renderCard = React.useCallback(
+    (harvest: HarvestItem) => (
+      <Card className="overflow-hidden border border-border/60 transition-all hover:shadow-md">
+        <CardContent>
+          <div className="space-y-1">
+            {/* Date Header */}
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>{formatHarvestDate(harvest.date)}</span>
+            </div>
+
+            {/* Greenhouse and Batch */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Home className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-xs text-muted-foreground">
+                    {h?.greenhouse ?? 'Greenhouse'}
+                  </div>
+                  <div className="text-sm font-medium text-blue-600">
+                    {getGreenhouseLabel(harvest.greenhouse)}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Package className="h-4 w-4 text-muted-foreground" />
+                <div className="text-left">
+                  <div className="text-xs text-muted-foreground">
+                    {h?.batch ?? 'Batch'}
+                  </div>
+                  <div className="text-sm font-medium">{harvest.batch}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-3 gap-3 rounded-lg bg-muted/30 p-3 text-center">
+              <div>
+                <div className="text-xs text-muted-foreground">
+                  {h?.classA ?? 'Class A'}
+                </div>
+                <div className="text-lg font-semibold text-green-600 dark:text-green-400">
+                  {harvest.classA}
+                  <span className="text-xs font-normal">kg</span>
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">
+                  {h?.waste ?? 'Waste'}
+                </div>
+                <div className="text-lg font-semibold text-red-600 dark:text-red-400">
+                  {harvest.waste}
+                  <span className="text-xs font-normal">kg</span>
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">
+                  {h?.avgBrix ?? 'Brix'}
+                </div>
+                <div className="text-lg font-semibold">
+                  {harvest.avgBrix}
+                  <span className="text-xs font-normal">°Bx</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Author and Photos */}
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="truncate">
+                {harvest.createdBy
+                  ? harvest.createdBy.firstName || harvest.createdBy.lastName
+                    ? [harvest.createdBy.firstName, harvest.createdBy.lastName]
+                        .filter(Boolean)
+                        .join(' ')
+                    : harvest.createdBy.email || '-'
+                  : '-'}
+              </div>
+              <div className="flex items-center gap-1">
+                <Scale className="h-3 w-3" />
+                <span>
+                  {harvest.photos === 0
+                    ? 'No photos'
+                    : `${harvest.photos} photo${harvest.photos === 1 ? '' : 's'}`}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSidebarEdit?.(harvest);
+                }}
+              >
+                View
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.(harvest);
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ),
+    [h, onDelete, onSidebarEdit],
+  );
+
   return (
     <DataTable<HarvestItem>
       data={harvests}
       columns={columns}
       renderRow={renderRow}
+      renderCard={renderCard}
       onRowClick={onSidebarEdit}
       emptyState={{ title: h?.noHarvestsYet ?? 'No harvests yet' }}
       paginationVariant="compact"
@@ -134,6 +256,7 @@ export function HarvestTable({
       pageSizeOptions={paginationConfig.pageSizeOptions}
       paginationLabels={paginationConfig.paginationLabels}
       isLoading={isLoading}
+      responsiveBreakpoint="lg"
     />
   );
 }
