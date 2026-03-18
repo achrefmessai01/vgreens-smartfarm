@@ -47,7 +47,7 @@ export function EditHarvestDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
             {h?.editHarvest ?? 'Edit Harvest'}
@@ -57,24 +57,23 @@ export function EditHarvestDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-6">
           <CreateBatchFormFields
             formData={formData}
             setFormData={setFormData}
             errors={errors}
           />
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex justify-end space-x-2">
             <Button
               type="button"
               variant="outline"
-              className="flex-1"
               onClick={() => handleOpenChange(false)}
               disabled={loading}
             >
               {h?.cancel ?? 'Cancel'}
             </Button>
-            <Button type="submit" className="flex-1" disabled={loading}>
+            <Button type="submit" disabled={loading}>
               {loading
                 ? (h?.updating ?? 'Updating...')
                 : (h?.update ?? 'Update')}

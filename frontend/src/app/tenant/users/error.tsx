@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import ErrorPage from '@/components/ui/error-page'
-import { Users } from 'lucide-react'
+import ErrorPage from '@/components/ui/error-page';
+import { Users } from 'lucide-react';
 
 export default function UsersErrorPage({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <ErrorPage
@@ -20,12 +20,10 @@ export default function UsersErrorPage({
       theme="emerald"
       resetLabel="Reload Users"
       backLink={{
-        href: "/tenant/dashboard",
-        label: "Back to Dashboard",
-        icon: Users
+        href: '/tenant/dashboard',
+        label: 'Back to Dashboard',
+        icon: Users,
       }}
     />
-  )
+  );
 }
-import React from 'react'
-const [test,setTest] = React.useState()

@@ -25,6 +25,8 @@ export const en = {
     system: 'System',
     otherMenu: 'Other menu',
     admin: 'Admin',
+    type: 'Type',
+    status: 'Status',
     exportCsv: 'Export CSV',
     exportPdf: 'Export PDF',
     selectDateRange: 'Select date range',
@@ -529,7 +531,9 @@ export const en = {
         description: 'Description',
         reproductionSteps: 'Steps to Reproduce',
         expectedVsActual: 'Expected vs Actual',
-        
+        type: 'Type',
+        source: 'Source',
+
         details: {
           title: 'Error Report Details',
           subtitle: 'Review and update error report information',
@@ -539,13 +543,14 @@ export const en = {
           expectedVsActual: 'Expected vs Actual',
           adminControls: 'Admin Controls',
           adminNotes: 'Admin Notes',
-          adminNotesPlaceholder: 'Add notes about investigation, resolution, etc.',
+          adminNotesPlaceholder:
+            'Add notes about investigation, resolution, etc.',
           severityLevel: 'Severity Level',
           update: 'Update Report',
           cancel: 'Cancel',
           close: 'Close',
         },
-        
+
         statuses: {
           open: 'Open',
           inProgress: 'In Progress',
@@ -554,10 +559,10 @@ export const en = {
           inProgressDescription: 'Report is being investigated',
           resolvedDescription: 'Report has been resolved',
         },
-        
+
         severities: {
           low: 'Low',
-          medium: 'Medium', 
+          medium: 'Medium',
           high: 'High',
           critical: 'Critical',
           urgent: 'Urgent',
@@ -565,17 +570,18 @@ export const en = {
           mediumPriority: 'Medium Priority',
           highPriority: 'High Priority',
         },
-        
+
         reportActions: {
           edit: 'Edit',
           delete: 'Delete',
           updateStatus: 'Update Status',
           quickUpdate: 'Quick Update',
         },
-        
+
         deleteDialog: {
           title: 'Delete Error Report',
-          description: 'Are you sure you want to delete this error report? This action cannot be undone.',
+          description:
+            'Are you sure you want to delete this error report? This action cannot be undone.',
           confirm: 'Delete',
           cancel: 'Cancel',
         },
@@ -702,18 +708,22 @@ export const en = {
       title: 'Report Status',
       backToDashboard: 'Back to Dashboard',
       reportNotFound: 'Report Not Found',
-      reportNotFoundDescription: "The report you're looking for doesn't exist or you don't have permission to view it.",
+      reportNotFoundDescription:
+        "The report you're looking for doesn't exist or you don't have permission to view it.",
       loadingStatus: 'Loading report status...',
-      
+
       status: {
         open: 'Open',
-        inProgress: 'In Progress', 
+        inProgress: 'In Progress',
         resolved: 'Resolved',
-        openDescription: 'Your report has been received and is waiting to be reviewed.',
-        inProgressDescription: 'Our team is actively investigating your report.',
-        resolvedDescription: 'Your report has been resolved! Thank you for helping us improve.',
+        openDescription:
+          'Your report has been received and is waiting to be reviewed.',
+        inProgressDescription:
+          'Our team is actively investigating your report.',
+        resolvedDescription:
+          'Your report has been resolved! Thank you for helping us improve.',
       },
-      
+
       details: {
         title: 'Report Details',
         description: 'Description',
@@ -721,7 +731,7 @@ export const en = {
         expectedVsActual: 'Expected vs Actual',
         adminNotes: 'Admin Notes',
       },
-      
+
       timeline: {
         title: 'Status Timeline',
         submitted: 'Submitted',
@@ -729,7 +739,7 @@ export const en = {
         pendingReview: 'Pending review',
         pendingResolution: 'Pending resolution',
       },
-      
+
       info: {
         title: 'Report Information',
         reportId: 'Report ID',
@@ -737,10 +747,11 @@ export const en = {
         lastUpdated: 'Last Updated',
         resolvedBy: 'Resolved By',
       },
-      
+
       contact: {
         title: 'Need Help?',
-        description: 'If you have questions about this report, please contact our support team.',
+        description:
+          'If you have questions about this report, please contact our support team.',
         submitAnother: 'Submit Another Report',
       },
     },
