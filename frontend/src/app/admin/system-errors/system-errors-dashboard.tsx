@@ -1,101 +1,93 @@
-import * as React from 'react'
-import { useState } from 'react'
-import { PageHeader } from '@/components/layout'
-import { SystemError, ReportSeverity, ErrorSource, ErrorType } from '@/generated/graphql'
-import { useI18n } from '@/i18n'
-import { useSystemErrors, useResolveSystemError, useSystemErrorStats } from '@/lib/hooks/use-system-errors'
-import { SystemErrorsTable } from '@/components/system-errors'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { AlertCircle, CheckCircle2, RefreshCw, TrendingUp } from 'lucide-react'
-import { SystemErrorDetailsDialog } from '@/components/system-errors'
-
-type SystemErrorListItem = {
-  __typename?: "SystemError"
-  id: string
-  source: ErrorSource
-  errorType: ErrorType
-  severity: ReportSeverity
-  errorMessage: string
-  component?: string | null
-  action?: string | null
-  occurrenceCount?: number | null
-  isResolved: boolean
-  createdAt: any
-  updatedAt: any
-  lastOccurredAt?: any | null
-  user?: {
-    __typename?: "User"
-    firstName?: string | null
-    lastName?: string | null
-    email?: string | null
-  } | null
-  tenant?: {
-    __typename?: "Tenant"
-    name: string
-  } | null
-}
+import {
+  Select,
+  SelectItem,
+  SelectValue,
+  SelectContent,
+  SelectTrigger,
+} from '@/components/ui/select';
+import { useI18n } from '@/i18n';
+import { useState } from 'react';
+import {
+  useSystemErrors,
+  useSystemErrorStats,
+  useResolveSystemError,
+} from '@/lib/hooks/use-system-errors';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout';
+import { SystemErrorsTable } from '@/components/system-errors';
+import { SystemErrorDetailsDialog } from '@/components/system-errors';
+import { SystemError, ReportSeverity, ErrorSource } from '@/generated/graphql';
+import { AlertCircle, CheckCircle2, RefreshCw, TrendingUp } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function SystemErrorsDashboard() {
-  const { t } = useI18n()
-  const [selectedError, setSelectedError] = useState<SystemError | null>(null)
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const [severityFilter, setSeverityFilter] = useState<ReportSeverity | undefined>()
-  const [sourceFilter, setSourceFilter] = useState<ErrorSource | undefined>()
-  const [resolvedFilter, setResolvedFilter] = useState<boolean | undefined>()
+  const { t } = useI18n();
+  const [selectedError, setSelectedError] = useState<SystemError | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [severityFilter, setSeverityFilter] = useState<
+    ReportSeverity | undefined
+  >();
+  const [sourceFilter, setSourceFilter] = useState<ErrorSource | undefined>();
+  const [resolvedFilter, setResolvedFilter] = useState<boolean | undefined>();
 
   const { data, loading, refetch } = useSystemErrors({
     severity: severityFilter,
     source: sourceFilter,
     isResolved: resolvedFilter,
-    limit: 100
-  })
-  const { data: statsData } = useSystemErrorStats(24)
-  const [resolveError, { loading: isResolving }] = useResolveSystemError()
-  const errors = data?.getRecentSystemErrors || []
+    limit: 100,
+  });
+  const { data: statsData } = useSystemErrorStats(24);
+  const [resolveError, { loading: isResolving }] = useResolveSystemError();
+  const errors = data?.getRecentSystemErrors || [];
 
-  let stats = { total: 0, active: 0, resolved: 0, critical: 0 }
+  let stats = { total: 0, active: 0, resolved: 0, critical: 0 };
   try {
     if (statsData?.getSystemErrorStats) {
-      stats = JSON.parse(statsData.getSystemErrorStats)
+      stats = JSON.parse(statsData.getSystemErrorStats);
     }
   } catch (e) {
-    console.error('Failed to parse error stats:', e)
+    console.error('Failed to parse error stats:', e);
   }
 
-  const handleResolveError = async (errorId: string, resolutionNotes?: string) => {
+  const handleResolveError = async (
+    errorId: string,
+    resolutionNotes?: string,
+  ) => {
     try {
-      await resolveError({ variables: { errorId, resolutionNotes } })
-      await refetch()
-      console.log('Error marked as resolved')
+      await resolveError({ variables: { errorId, resolutionNotes } });
+      await refetch();
+      console.log('Error marked as resolved');
     } catch (error) {
-      console.error('Failed to resolve error:', error)
+      console.error('Failed to resolve error:', error);
     }
-  }
+  };
 
-  const handleViewDetails = (error: SystemErrorListItem) => {
-    setSelectedError(error as SystemError)
-    setIsDetailsOpen(true)
-  }
+  const handleViewDetails = (error: SystemError) => {
+    setSelectedError(error);
+    setIsDetailsOpen(true);
+  };
 
   const handleRefresh = async () => {
-    await refetch()
-    console.log('Data refreshed')
-  }
+    await refetch();
+    console.log('Data refreshed');
+  };
 
   const clearFilters = () => {
-    setSeverityFilter(undefined)
-    setSourceFilter(undefined)
-    setResolvedFilter(undefined)
-  }
+    setSeverityFilter(undefined);
+    setSourceFilter(undefined);
+    setResolvedFilter(undefined);
+  };
 
-  const activeFiltersCount = [severityFilter, sourceFilter, resolvedFilter].filter(Boolean).length
+  const activeFiltersCount = [
+    severityFilter,
+    sourceFilter,
+    resolvedFilter,
+  ].filter(Boolean).length;
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <PageHeader 
+      <PageHeader
         title="System Error History"
         subtitle="Monitor and manage application errors and exceptions"
       />
@@ -117,7 +109,9 @@ export function SystemErrorsDashboard() {
             <AlertCircle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.active}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {stats.active}
+            </div>
             <p className="text-xs text-muted-foreground">Unresolved issues</p>
           </CardContent>
         </Card>
@@ -127,7 +121,9 @@ export function SystemErrorsDashboard() {
             <CheckCircle2 className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.resolved}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.resolved}
+            </div>
             <p className="text-xs text-muted-foreground">Fixed this period</p>
           </CardContent>
         </Card>
@@ -137,8 +133,12 @@ export function SystemErrorsDashboard() {
             <AlertCircle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.critical}</div>
-            <p className="text-xs text-muted-foreground">High priority issues</p>
+            <div className="text-2xl font-bold text-orange-600">
+              {stats.critical}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              High priority issues
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -153,8 +153,15 @@ export function SystemErrorsDashboard() {
                   Clear All ({activeFiltersCount})
                 </Button>
               )}
-              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={loading}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+                />
                 Refresh
               </Button>
             </div>
@@ -164,7 +171,12 @@ export function SystemErrorsDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Severity</label>
-              <Select value={severityFilter ?? ''} onValueChange={(value) => setSeverityFilter(value as ReportSeverity || undefined)}>
+              <Select
+                value={severityFilter ?? ''}
+                onValueChange={(value) =>
+                  setSeverityFilter((value as ReportSeverity) || undefined)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All severities" />
                 </SelectTrigger>
@@ -173,14 +185,21 @@ export function SystemErrorsDashboard() {
                   <SelectItem value={ReportSeverity.Low}>Low</SelectItem>
                   <SelectItem value={ReportSeverity.Medium}>Medium</SelectItem>
                   <SelectItem value={ReportSeverity.High}>High</SelectItem>
-                  <SelectItem value={ReportSeverity.Critical}>Critical</SelectItem>
+                  <SelectItem value={ReportSeverity.Critical}>
+                    Critical
+                  </SelectItem>
                   <SelectItem value={ReportSeverity.Urgent}>Urgent</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Source</label>
-              <Select value={sourceFilter ?? ''} onValueChange={(value) => setSourceFilter(value as ErrorSource || undefined)}>
+              <Select
+                value={sourceFilter ?? ''}
+                onValueChange={(value) =>
+                  setSourceFilter((value as ErrorSource) || undefined)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All sources" />
                 </SelectTrigger>
@@ -189,14 +208,29 @@ export function SystemErrorsDashboard() {
                   <SelectItem value={ErrorSource.Frontend}>Frontend</SelectItem>
                   <SelectItem value={ErrorSource.Backend}>Backend</SelectItem>
                   <SelectItem value={ErrorSource.Database}>Database</SelectItem>
-                  <SelectItem value={ErrorSource.ExternalApi}>External API</SelectItem>
-                  <SelectItem value={ErrorSource.Infrastructure}>Infrastructure</SelectItem>
+                  <SelectItem value={ErrorSource.ExternalApi}>
+                    External API
+                  </SelectItem>
+                  <SelectItem value={ErrorSource.Infrastructure}>
+                    Infrastructure
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Status</label>
-              <Select value={resolvedFilter?.toString() ?? ''} onValueChange={(value) => setResolvedFilter(value === 'true' ? true : value === 'false' ? false : undefined)}>
+              <Select
+                value={resolvedFilter?.toString() ?? ''}
+                onValueChange={(value) =>
+                  setResolvedFilter(
+                    value === 'true'
+                      ? true
+                      : value === 'false'
+                        ? false
+                        : undefined,
+                  )
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
@@ -219,7 +253,8 @@ export function SystemErrorsDashboard() {
               {/* <span>Showing {errors.length} errors</span> */}
               {activeFiltersCount > 0 && (
                 <Badge variant="outline">
-                  {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''} active
+                  {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''}{' '}
+                  active
                 </Badge>
               )}
             </div>
@@ -227,7 +262,7 @@ export function SystemErrorsDashboard() {
         </CardHeader>
         <CardContent>
           <SystemErrorsTable
-            errors={errors as unknown as SystemErrorListItem[]}
+            errors={errors}
             isLoading={loading}
             onResolve={(error) => handleResolveError(error.id)}
             onViewDetails={handleViewDetails}
@@ -240,12 +275,12 @@ export function SystemErrorsDashboard() {
         error={selectedError}
         open={isDetailsOpen}
         onClose={() => {
-          setIsDetailsOpen(false)
-          setSelectedError(null)
+          setIsDetailsOpen(false);
+          setSelectedError(null);
         }}
         onResolve={handleResolveError}
         isResolving={isResolving}
       />
     </div>
-  )
+  );
 }
