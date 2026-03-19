@@ -11,7 +11,7 @@ import { useI18n } from '@/i18n'
 import { Input } from '@/components/ui/input'
 import { Search, Filter, X } from 'lucide-react'
 import { getAllTunnels } from '@/lib/tunnel-data'
-import type { CameraStatus } from '@/lib/camera-types'
+import type { CameraStatus } from '@/types/camera.types'
 import { StyledSelect } from '@/components/ui/styled-select'
 
 interface CameraControlsProps {

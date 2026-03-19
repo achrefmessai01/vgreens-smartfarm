@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import { FeatureTable } from '@/components/features'
-import { FeatureDeleteDialog } from '@/components/features/feature-delete-dialog'
-import { FeatureFlagsPageSkeleton } from '@/components/features/feature-flags-page-skeleton'
-import { FeatureFormSheet } from '@/components/features/feature-form-sheet'
-import { PageHeader } from '@/components/layout'
-import { useI18n } from '@/i18n'
-import { useFeatureManagement } from '@/lib/hooks/use-feature-management'
-import { Flag } from 'lucide-react'
+import { FeatureTable } from '@/components/features';
+import { FeatureDeleteDialog } from '@/components/features/feature-delete-dialog';
+import { FeatureFlagsPageSkeleton } from '@/components/features/feature-flags-page-skeleton';
+import { FeatureFormSheet } from '@/components/features/feature-form-sheet';
+import { PageHeader } from '@/components/layout';
+import { useI18n } from '@/i18n';
+import { useFeatureManagement } from '@/lib/hooks/use-feature-management';
+import { Flag } from 'lucide-react';
 
 export default function FeatureFlagsPage() {
-  const { t } = useI18n()
+  const { t } = useI18n();
   const {
     features,
     loading,
@@ -25,14 +25,14 @@ export default function FeatureFlagsPage() {
     handleDeleteConfirm,
     handleSheetClose,
     handleDeleteDialogClose,
-  } = useFeatureManagement()
+  } = useFeatureManagement();
 
   if (loading) {
-    return <FeatureFlagsPageSkeleton />
+    return <FeatureFlagsPageSkeleton />;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 h-full min-h-0">
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-primary/10">
           <Flag className="h-5 w-5 text-primary" />
@@ -43,13 +43,15 @@ export default function FeatureFlagsPage() {
         />
       </div>
 
-      <FeatureTable
-        features={features}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onCreate={handleCreate}
-        isLoading={isLoading}
-      />
+      <div className="flex-1 min-h-0">
+        <FeatureTable
+          features={features}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onCreate={handleCreate}
+          isLoading={isLoading}
+        />
+      </div>
 
       <FeatureFormSheet
         open={isSheetOpen}
@@ -66,5 +68,5 @@ export default function FeatureFlagsPage() {
         onConfirm={handleDeleteConfirm}
       />
     </div>
-  )
+  );
 }

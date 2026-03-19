@@ -1,4 +1,14 @@
 import { errorLogger } from '@/lib/error-logging';
+
+/** Non-standard Chrome memory API — not in the TS lib, declared here for safe access */
+interface PerformanceMemory {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+interface PerformanceWithMemory extends Performance {
+  memory: PerformanceMemory;
+}
 import { createFetchInterceptor } from '@/lib/fetch-interceptor';
 import { apolloErrorLink, apolloRequestLoggingLink } from '@/lib/apollo-error-handling';
 import { ErrorType, ReportSeverity } from '@/types/error-types';
@@ -66,7 +76,7 @@ export function initializeAdvancedErrorMonitoring() {
   // Track memory usage (if available)
   if ('memory' in performance) {
     setInterval(() => {
-      const memory = (performance as any).memory;
+      const memory = (performance as PerformanceWithMemory).memory;
       const memoryUsage = memory.usedJSHeapSize / memory.totalJSHeapSize;
       
       if (memoryUsage > 0.9) { // Alert if memory usage > 90%

@@ -2,7 +2,7 @@ import {
   getMapDeviceId,
   getDeviceIdFromSlotId,
 } from '@/lib/sensor-map-positions'
-import type { Bay, PlantSlot } from '@/lib/farm-types'
+import type { Bay, PlantSlot } from '@/types/farm.types'
 
 export function buildDeviceToSlotMap(bay: Bay): Map<string, PlantSlot> {
   const map = new Map<string, PlantSlot>()

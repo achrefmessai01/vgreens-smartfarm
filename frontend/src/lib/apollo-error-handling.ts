@@ -1,61 +1,67 @@
 import { onError } from '@apollo/client/link/error';
 import { ApolloLink, Observable } from '@apollo/client';
+import type { ServerError } from '@apollo/client/link/utils';
 import { errorLogger } from '@/lib/error-logging';
 import { ErrorType, ReportSeverity } from '@/types/error-types';
 
 /**
  * Apollo Client error link that logs all GraphQL errors
  */
-export const apolloErrorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
-  if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path, extensions }) => {
-      const errorContext = {
-        operationName: operation.operationName,
-        variables: operation.variables,
-        query: operation.query.loc?.source.body,
-        path,
-        locations,
-        extensions,
-      };
+export const apolloErrorLink = onError(
+  ({ graphQLErrors, networkError, operation }) => {
+    if (graphQLErrors) {
+      graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+        const errorContext = {
+          operationName: operation.operationName,
+          variables: operation.variables,
+          query: operation.query.loc?.source.body,
+          path,
+          locations,
+          extensions,
+        };
 
-      errorLogger.logError({
-        errorMessage: `GraphQL Error: ${message}`,
-        component: 'apollo-client',
-        action: operation.operationName || 'unknown',
-        errorType: ErrorType.API_ERROR,
-        severity: extensions?.code === 'UNAUTHENTICATED' ? ReportSeverity.Medium : ReportSeverity.High,
-        metadata: errorContext,
-        requestUrl: `GraphQL: ${operation.operationName}`,
-        httpMethod: 'POST',
+        errorLogger.logError({
+          errorMessage: `GraphQL Error: ${message}`,
+          component: 'apollo-client',
+          action: operation.operationName || 'unknown',
+          errorType: ErrorType.API_ERROR,
+          severity:
+            extensions?.code === 'UNAUTHENTICATED'
+              ? ReportSeverity.Medium
+              : ReportSeverity.High,
+          metadata: errorContext,
+          requestUrl: `GraphQL: ${operation.operationName}`,
+          httpMethod: 'POST',
+        });
       });
-    });
-  }
+    }
 
-  if (networkError) {
-    const statusCode = (networkError as any)?.statusCode || 
-                     (networkError as any)?.response?.status || 
-                     0;
+    if (networkError) {
+      const serverError = networkError as ServerError;
+      const statusCode =
+        serverError?.statusCode ?? serverError?.response?.status ?? 0;
 
-    errorLogger.logNetworkError(
-      'GraphQL Endpoint',
-      'POST', 
-      statusCode,
-      `Network Error: ${networkError.message}`
-    );
-  }
-});
+      errorLogger.logNetworkError(
+        'GraphQL Endpoint',
+        'POST',
+        statusCode,
+        `Network Error: ${networkError.message}`,
+      );
+    }
+  },
+);
 
 /**
  * Request logging link for tracking all GraphQL operations
  */
 export const apolloRequestLoggingLink = new ApolloLink((operation, forward) => {
   const startTime = Date.now();
-  
+
   return new Observable((observer) => {
     forward(operation).subscribe({
       next: (result) => {
         const duration = Date.now() - startTime;
-        
+
         // Log slow queries (>2 seconds) as potential issues
         if (duration > 2000) {
           errorLogger.logError({
@@ -73,12 +79,12 @@ export const apolloRequestLoggingLink = new ApolloLink((operation, forward) => {
             httpMethod: 'POST',
           });
         }
-        
+
         observer.next(result);
       },
       error: (error) => {
         const duration = Date.now() - startTime;
-        
+
         errorLogger.logError({
           errorMessage: `GraphQL Operation Failed: ${error.message}`,
           stackTrace: error.stack,
@@ -95,7 +101,7 @@ export const apolloRequestLoggingLink = new ApolloLink((operation, forward) => {
           requestUrl: `GraphQL: ${operation.operationName}`,
           httpMethod: 'POST',
         });
-        
+
         observer.error(error);
       },
       complete: () => {

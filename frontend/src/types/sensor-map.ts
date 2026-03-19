@@ -1,4 +1,4 @@
-import type { Bay, ParameterType, PlantSlot } from '@/lib/farm-types'
+import type { Bay, ParameterType, PlantSlot } from '@/types/farm.types'
 
 export type SensorMapSensorType = 'air' | 'lux' | 'par' | 'soil'
 

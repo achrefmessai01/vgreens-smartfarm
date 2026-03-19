@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useI18n } from '@/i18n'
 import { getAllCameras } from '@/lib/camera-data'
 import { PageHeader } from '@/components/layout/page-header'
-import type { Camera, CameraStatus } from '@/lib/camera-types'
+import type { Camera, CameraStatus } from '@/types/camera.types'
 import { FeatureGuard } from '@/components/features/feature-guard'
 import { CameraGrid, CameraControls } from '@/components/camera-livestream'
 

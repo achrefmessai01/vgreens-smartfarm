@@ -1,4 +1,4 @@
-import type { Bay } from '@/lib/farm-types';
+import type { Bay } from '@/types/farm.types';
 import { getParameterAliases } from '@/lib/parameter-status';
 
 export function getAverageParameterValue(

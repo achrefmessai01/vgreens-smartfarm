@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { formatFieldToLabel } from '@/lib/farm-data'
-import type { ParameterType } from '@/lib/farm-types'
+import type { ParameterType } from '@/types/farm.types'
 import { useI18n } from '@/i18n'
 
 interface SensorHoverCardProps {

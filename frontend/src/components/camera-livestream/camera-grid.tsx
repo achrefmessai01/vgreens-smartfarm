@@ -1,7 +1,7 @@
 'use client'
 
 import { CameraCard } from './camera-card'
-import type { Camera } from '@/lib/camera-types'
+import type { Camera } from '@/types/camera.types'
 
 interface CameraGridProps {
   cameras: Camera[]

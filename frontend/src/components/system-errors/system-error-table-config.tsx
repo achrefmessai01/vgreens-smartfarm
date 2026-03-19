@@ -1,20 +1,20 @@
-import * as React from 'react'
-import { type FilterConfigOption } from '@/components/ui/data-table'
-import { ErrorSource, ErrorType, ReportSeverity } from '@/generated/graphql'
-import { useI18n } from '@/i18n'
+import { type FilterConfigOption } from '@/components/ui/data-table/data-table';
+import { ErrorSource, ErrorType, ReportSeverity } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import * as React from 'react';
 
 export interface SystemErrorsFilterInput {
-  severityIn?: ReportSeverity[]
-  sourceIn?: ErrorSource[]
-  typeIn?: ErrorType[]
-  isResolved?: boolean
+  severityIn?: ReportSeverity[];
+  sourceIn?: ErrorSource[];
+  typeIn?: ErrorType[];
+  isResolved?: boolean;
 }
 
 export const useSystemErrorTableFilters = (
   filter: SystemErrorsFilterInput,
-  onFilterChange: (updates: Partial<SystemErrorsFilterInput>) => void
+  onFilterChange: (updates: Partial<SystemErrorsFilterInput>) => void,
 ): FilterConfigOption[] => {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   return React.useMemo(
     () => [
@@ -22,17 +22,35 @@ export const useSystemErrorTableFilters = (
         label: t.pages.admin.reports.severity ?? 'Severity',
         value: filter.severityIn?.length ? filter.severityIn.join(',') : '',
         options: [
-          { label: t.pages.admin.reports.severities.low ?? 'Low', value: ReportSeverity.Low },
-          { label: t.pages.admin.reports.severities.medium ?? 'Medium', value: ReportSeverity.Medium },
-          { label: t.pages.admin.reports.severities.high ?? 'High', value: ReportSeverity.High },
-          { label: t.pages.admin.reports.severities.critical ?? 'Critical', value: ReportSeverity.Critical },
-          { label: t.pages.admin.reports.severities.urgent ?? 'Urgent', value: ReportSeverity.Urgent },
+          {
+            label: t.pages.admin.reports.severities.low ?? 'Low',
+            value: ReportSeverity.Low,
+          },
+          {
+            label: t.pages.admin.reports.severities.medium ?? 'Medium',
+            value: ReportSeverity.Medium,
+          },
+          {
+            label: t.pages.admin.reports.severities.high ?? 'High',
+            value: ReportSeverity.High,
+          },
+          {
+            label: t.pages.admin.reports.severities.critical ?? 'Critical',
+            value: ReportSeverity.Critical,
+          },
+          {
+            label: t.pages.admin.reports.severities.urgent ?? 'Urgent',
+            value: ReportSeverity.Urgent,
+          },
         ],
         multiSelect: true,
         onFilterChange: (value) =>
           onFilterChange({
             severityIn: value
-              ? (value.split(',').map((item) => item.trim()).filter(Boolean) as ReportSeverity[])
+              ? (value
+                  .split(',')
+                  .map((item) => item.trim())
+                  .filter(Boolean) as ReportSeverity[])
               : undefined,
           }),
       },
@@ -50,28 +68,48 @@ export const useSystemErrorTableFilters = (
         onFilterChange: (value) =>
           onFilterChange({
             sourceIn: value
-              ? (value.split(',').map((item) => item.trim()).filter(Boolean) as ErrorSource[])
+              ? (value
+                  .split(',')
+                  .map((item) => item.trim())
+                  .filter(Boolean) as ErrorSource[])
               : undefined,
           }),
       },
       {
         label: t.pages.admin.reports.type ?? 'Type',
         value: filter.typeIn?.length ? filter.typeIn.join(',') : '',
-        options: Object.values(ErrorType).map((type) => ({ label: type, value: type })),
+        options: Object.values(ErrorType).map((type) => ({
+          label: type,
+          value: type,
+        })),
         multiSelect: true,
         onFilterChange: (value) =>
           onFilterChange({
             typeIn: value
-              ? (value.split(',').map((item) => item.trim()).filter(Boolean) as ErrorType[])
+              ? (value
+                  .split(',')
+                  .map((item) => item.trim())
+                  .filter(Boolean) as ErrorType[])
               : undefined,
           }),
       },
       {
         label: t.pages.admin.reports.status ?? 'Status',
-        value: filter.isResolved === undefined ? '' : filter.isResolved ? 'resolved' : 'active',
+        value:
+          filter.isResolved === undefined
+            ? ''
+            : filter.isResolved
+              ? 'resolved'
+              : 'active',
         options: [
-          { label: t.pages.admin.reports.statuses.open ?? 'Active', value: 'active' },
-          { label: t.pages.admin.reports.statuses.resolved ?? 'Resolved', value: 'resolved' },
+          {
+            label: t.pages.admin.reports.statuses.open ?? 'Active',
+            value: 'active',
+          },
+          {
+            label: t.pages.admin.reports.statuses.resolved ?? 'Resolved',
+            value: 'resolved',
+          },
         ],
         multiSelect: false,
         onFilterChange: (value) =>
@@ -80,6 +118,6 @@ export const useSystemErrorTableFilters = (
           }),
       },
     ],
-    [filter, onFilterChange, t]
-  )
-}
+    [filter, onFilterChange, t],
+  );
+};

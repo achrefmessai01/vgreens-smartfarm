@@ -3,7 +3,7 @@
 import { useI18n } from '@/i18n';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { HarvestSummary } from '@/app/tenant/harvest/harvest.utils';
+import type { HarvestSummary } from '@/types/harvest.types';
 
 interface HarvestPageHeaderProps {
   summary: HarvestSummary;

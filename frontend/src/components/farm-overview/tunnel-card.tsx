@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { SensorGauge } from './sensor-gauge'
 import { AlertTriangle, Bell, Thermometer, Droplets } from 'lucide-react'
 import { useI18n } from '@/i18n'
-import type { Tunnel, TunnelStatus } from '@/lib/tunnel-types'
+import type { Tunnel, TunnelStatus } from '@/types/tunnel.types'
 import { cn } from '@/lib/utils'
 
 interface TunnelCardProps {

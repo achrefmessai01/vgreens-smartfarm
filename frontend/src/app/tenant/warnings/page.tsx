@@ -1,101 +1,105 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import { WarningTable } from '@/components/warnings'
-import { WarningSidebar } from '@/components/warnings/warning-sidebar'
-import { ConfirmationDialog } from '@/components/users'
-import { PageHeader } from '@/components/layout/page-header'
-import type { Warning, WarningStatus } from '@/lib/warning-types'
-import { FeatureGuard } from '@/components/features/feature-guard'
-import { getAllWarnings, updateWarningStatus } from '@/lib/warning-data'
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import { WarningTable } from '@/components/warnings';
+import { ConfirmationDialog } from '@/components/users';
+import { PageHeader } from '@/components/layout/page-header';
+import { FeatureGuard } from '@/components/features/feature-guard';
+import type { Warning, WarningStatus } from '@/types/warning.types';
+import { WarningSidebar } from '@/components/warnings/warning-sidebar';
+import { getAllWarnings, updateWarningStatus } from '@/lib/warning-data';
 
 export default function WarningsPage() {
-  const { t } = useI18n()
-  const [warnings, setWarnings] = React.useState<Warning[]>([])
+  const { t } = useI18n();
+  const [warnings, setWarnings] = React.useState<Warning[]>([]);
   const [selectedWarning, setSelectedWarning] = React.useState<Warning | null>(
-    null
-  )
+    null,
+  );
   const [actionDialog, setActionDialog] = React.useState<{
-    isOpen: boolean
-    warning: Warning | null
-    action: 'acknowledge' | 'resolve' | null
-  }>({ isOpen: false, warning: null, action: null })
+    isOpen: boolean;
+    warning: Warning | null;
+    action: 'acknowledge' | 'resolve' | null;
+  }>({ isOpen: false, warning: null, action: null });
 
   React.useEffect(() => {
-    setWarnings(getAllWarnings())
-  }, [])
+    setWarnings(getAllWarnings());
+  }, []);
 
   const handleAcknowledge = (warning: Warning) => {
-    setActionDialog({ isOpen: true, warning, action: 'acknowledge' })
-  }
+    setActionDialog({ isOpen: true, warning, action: 'acknowledge' });
+  };
 
   const handleResolve = (warning: Warning) => {
-    setActionDialog({ isOpen: true, warning, action: 'resolve' })
-  }
+    setActionDialog({ isOpen: true, warning, action: 'resolve' });
+  };
 
   const handleSidebarAcknowledge = (warning: Warning) => {
-    setSelectedWarning(null)
-    handleAcknowledge(warning)
-  }
+    setSelectedWarning(null);
+    handleAcknowledge(warning);
+  };
 
   const handleSidebarResolve = (warning: Warning) => {
-    setSelectedWarning(null)
-    handleResolve(warning)
-  }
+    setSelectedWarning(null);
+    handleResolve(warning);
+  };
 
   const handleWarningRowClick = (warning: Warning) => {
-    setSelectedWarning(warning)
-  }
+    setSelectedWarning(warning);
+  };
 
   const handleSidebarOpenChange = (open: boolean) => {
     if (!open) {
-      setSelectedWarning(null)
+      setSelectedWarning(null);
     }
-  }
+  };
 
   const confirmAction = () => {
     if (actionDialog.warning && actionDialog.action) {
       const newStatus: WarningStatus =
-        actionDialog.action === 'acknowledge' ? 'acknowledged' : 'resolved'
-      const updated = updateWarningStatus(actionDialog.warning.id, newStatus)
+        actionDialog.action === 'acknowledge' ? 'acknowledged' : 'resolved';
+      const updated = updateWarningStatus(actionDialog.warning.id, newStatus);
 
       if (updated) {
-        setWarnings(getAllWarnings())
-        setSelectedWarning((prev) => (prev?.id === updated.id ? updated : prev))
-        setActionDialog({ isOpen: false, warning: null, action: null })
+        setWarnings(getAllWarnings());
+        setSelectedWarning((prev) =>
+          prev?.id === updated.id ? updated : prev,
+        );
+        setActionDialog({ isOpen: false, warning: null, action: null });
       }
     }
-  }
+  };
 
   const getDialogTitle = () => {
     if (actionDialog.action === 'acknowledge') {
-      return t.pages.warnings.acknowledgeWarning
+      return t.pages.warnings.acknowledgeWarning;
     }
-    return t.pages.warnings.resolveWarning
-  }
+    return t.pages.warnings.resolveWarning;
+  };
 
   const getDialogDescription = () => {
     if (actionDialog.action === 'acknowledge') {
-      return t.pages.warnings.acknowledgeDescription
+      return t.pages.warnings.acknowledgeDescription;
     }
-    return t.pages.warnings.resolveDescription
-  }
+    return t.pages.warnings.resolveDescription;
+  };
 
   return (
     <FeatureGuard featureKey="sensor_alerts">
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6 h-full min-h-0">
         <PageHeader
           title={t.pages.warnings.title}
           subtitle={t.pages.warnings.subtitle}
         />
 
-        <WarningTable
-          warnings={warnings}
-          onAcknowledge={handleAcknowledge}
-          onResolve={handleResolve}
-          onRowClick={handleWarningRowClick}
-        />
+        <div className="flex-1 min-h-0">
+          <WarningTable
+            warnings={warnings}
+            onAcknowledge={handleAcknowledge}
+            onResolve={handleResolve}
+            onRowClick={handleWarningRowClick}
+          />
+        </div>
 
         <WarningSidebar
           open={selectedWarning !== null}
@@ -142,5 +146,5 @@ export default function WarningsPage() {
         </ConfirmationDialog>
       </div>
     </FeatureGuard>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import type { ParameterType, HistoryDataPoint } from './farm-types'
+import type { ParameterType, HistoryDataPoint } from '@/types/farm.types'
 
 export function generateHistoryDataForParameter(
   parameter: ParameterType,
