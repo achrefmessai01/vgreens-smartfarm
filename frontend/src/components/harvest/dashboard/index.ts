@@ -6,5 +6,5 @@ export { YieldOverTimeChart } from './yield-over-time-chart';
 export { ClassDistributionChart } from './class-distribution-chart';
 export { BrixTrendChart } from './brix-trend-chart';
 export { CumulativeYieldChart } from './cumulative-yield-chart';
-export { useDashboardData } from './use-dashboard-data';
-export type { DashboardData } from './use-dashboard-data';
+export { DashboardMetricsGrid } from './dashboard-metrics-grid';
+export { DashboardChartsGrid } from './dashboard-charts-grid';
