@@ -7,8 +7,8 @@ interface ReportSuccessScreenProps {
 
 export function ReportSuccessScreen({ reportId }: ReportSuccessScreenProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="relative w-full max-w-md bg-white/90 dark:bg-gray-900/60 backdrop-blur-xl border border-green-200/50 dark:border-green-500/20 rounded-2xl shadow-2xl shadow-green-200/40 dark:shadow-green-500/25 p-8">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="relative w-full max-w-md bg-white/90 dark:bg-gray-900/60 backdrop-blur-xl border border-green-200/50 dark:border-green-500/20 rounded-2xl shadow-2xl shadow-green-200/40 dark:shadow-green-500/25 p-6 sm:p-8">
         <div className="absolute top-4 right-4">
           <Sparkles className="h-5 w-5 text-green-500 dark:text-green-400 animate-pulse" />
         </div>
@@ -22,7 +22,7 @@ export function ReportSuccessScreen({ reportId }: ReportSuccessScreenProps) {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight">
               Report Submitted!
             </h2>
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed max-w-sm mx-auto">

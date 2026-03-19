@@ -35,7 +35,7 @@ export function ReportForm({
   onSubmit,
 }: ReportFormProps) {
   return (
-    <div className="min-h-screen p-8 bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen p-4 sm:p-8 bg-gray-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <Link
@@ -50,14 +50,14 @@ export function ReportForm({
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-100/80 to-orange-200/60 dark:from-orange-500/20 dark:to-orange-600/30 rounded-2xl flex items-center justify-center shadow-lg border border-orange-200/50 dark:border-orange-500/20">
               <FileText className="h-8 w-8 text-orange-600 dark:text-orange-400" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Report an Error</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white">Report an Error</h1>
             <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
               Help us improve by reporting any issues you've encountered.
             </p>
           </div>
         </div>
 
-        <div className="bg-white/90 dark:bg-gray-900/60 backdrop-blur-xl border border-orange-200/50 dark:border-orange-500/20 rounded-2xl shadow-2xl shadow-orange-200/40 dark:shadow-orange-500/25 p-8">
+        <div className="bg-white/90 dark:bg-gray-900/60 backdrop-blur-xl border border-orange-200/50 dark:border-orange-500/20 rounded-2xl shadow-2xl shadow-orange-200/40 dark:shadow-orange-500/25 p-5 sm:p-8">
           <form onSubmit={onSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className={labelClass}>Your Email (Optional)</label>
