@@ -6,7 +6,7 @@ import {
 } from '@/app/tenant/harvest/harvest.utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { DataTable, type Column } from '@/components/ui/data-table';
+import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { TableCell } from '@/components/ui/table';
 import type { HarvestsQuery } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
@@ -126,8 +126,8 @@ export function HarvestTable({
 
   const renderCard = React.useCallback(
     (harvest: HarvestItem) => (
-      <Card className="overflow-hidden border-3 border-border transition-all shadow-md hover:shadow-xl hover:border-border/80">
-        <CardContent>
+      <Card className="gap-0 border-3 border-border py-0 transition-all shadow-md hover:shadow-xl hover:border-border/80">
+        <CardContent className="px-4 py-4">
           <div className="space-y-1">
             {/* Date Header */}
             <div className="flex items-center gap-2 text-sm font-medium">

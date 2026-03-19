@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import { useI18n } from '@/i18n'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { TableCell } from '@/components/ui/table'
-import type { Tenant } from '@/generated/graphql'
-import { Edit2, Trash2, Plus, Users, Settings } from 'lucide-react'
-import { DataTable, type Column } from '@/components/ui/data-table'
-import { usePaginationConfig } from '@/lib/hooks/use-pagination-config'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { DataTable, type Column } from '@/components/ui/data-table/data-table';
+import { TableCell } from '@/components/ui/table';
+import type { Tenant } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import { Edit2, Plus, Settings, Trash2, Users } from 'lucide-react';
 
 interface TenantTableProps {
-  tenants: Tenant[]
-  onEdit: (tenant: Tenant) => void
-  onDelete: (tenant: Tenant) => void
-  onCreate: () => void
-  onViewUsers?: (tenant: Tenant) => void
-  onManageFeatures?: (tenant: Tenant) => void
-  onRowClick?: (tenant: Tenant) => void
+  tenants: Tenant[];
+  onEdit: (tenant: Tenant) => void;
+  onDelete: (tenant: Tenant) => void;
+  onCreate: () => void;
+  onViewUsers?: (tenant: Tenant) => void;
+  onManageFeatures?: (tenant: Tenant) => void;
+  onRowClick?: (tenant: Tenant) => void;
 }
 
 export function TenantTable({
@@ -29,8 +29,8 @@ export function TenantTable({
   onManageFeatures,
   onRowClick,
 }: TenantTableProps) {
-  const { t } = useI18n()
-  const paginationConfig = usePaginationConfig()
+  const { t } = useI18n();
+  const paginationConfig = usePaginationConfig();
   const columns: Column<Tenant>[] = [
     {
       key: 'name',
@@ -61,7 +61,7 @@ export function TenantTable({
       header: t.pages.admin.tenants.actions,
       headerClassName: 'text-right',
     },
-  ]
+  ];
 
   const renderRow = (tenant: Tenant) => (
     <>
@@ -75,8 +75,8 @@ export function TenantTable({
             variant="ghost"
             size="sm"
             onClick={(e) => {
-              e.stopPropagation()
-              onViewUsers(tenant)
+              e.stopPropagation();
+              onViewUsers(tenant);
             }}
             className="h-6 px-2"
           >
@@ -101,8 +101,8 @@ export function TenantTable({
               variant="ghost"
               size="icon"
               onClick={(e) => {
-                e.stopPropagation()
-                onManageFeatures(tenant)
+                e.stopPropagation();
+                onManageFeatures(tenant);
               }}
               className="h-8 w-8"
               title={t.pages.admin.tenants.manageFeatures}
@@ -114,8 +114,8 @@ export function TenantTable({
             variant="ghost"
             size="icon"
             onClick={(e) => {
-              e.stopPropagation()
-              onEdit(tenant)
+              e.stopPropagation();
+              onEdit(tenant);
             }}
             className="h-8 w-8"
           >
@@ -125,8 +125,8 @@ export function TenantTable({
             variant="ghost"
             size="icon"
             onClick={(e) => {
-              e.stopPropagation()
-              onDelete(tenant)
+              e.stopPropagation();
+              onDelete(tenant);
             }}
             className="h-8 w-8 text-destructive hover:text-destructive"
           >
@@ -135,7 +135,7 @@ export function TenantTable({
         </div>
       </TableCell>
     </>
-  )
+  );
 
   const renderCard = (tenant: Tenant) => (
     <Card className="gap-0 overflow-hidden border border-border/60 py-0 shadow-none">
@@ -176,8 +176,8 @@ export function TenantTable({
             variant="outline"
             size="sm"
             onClick={(event) => {
-              event.stopPropagation()
-              onViewUsers(tenant)
+              event.stopPropagation();
+              onViewUsers(tenant);
             }}
             className="h-8"
           >
@@ -190,8 +190,8 @@ export function TenantTable({
             variant="outline"
             size="sm"
             onClick={(event) => {
-              event.stopPropagation()
-              onManageFeatures(tenant)
+              event.stopPropagation();
+              onManageFeatures(tenant);
             }}
             className="h-8"
           >
@@ -203,8 +203,8 @@ export function TenantTable({
           variant="ghost"
           size="icon"
           onClick={(event) => {
-            event.stopPropagation()
-            onEdit(tenant)
+            event.stopPropagation();
+            onEdit(tenant);
           }}
           className="h-8 w-8"
         >
@@ -214,8 +214,8 @@ export function TenantTable({
           variant="ghost"
           size="icon"
           onClick={(event) => {
-            event.stopPropagation()
-            onDelete(tenant)
+            event.stopPropagation();
+            onDelete(tenant);
           }}
           className="h-8 w-8 text-destructive hover:text-destructive"
         >
@@ -223,7 +223,7 @@ export function TenantTable({
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 
   return (
     <div className="space-y-4">
@@ -246,5 +246,5 @@ export function TenantTable({
         responsiveBreakpoint="xl"
       />
     </div>
-  )
+  );
 }

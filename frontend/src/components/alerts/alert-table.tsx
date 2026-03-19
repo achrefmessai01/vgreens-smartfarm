@@ -1,39 +1,45 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { AlertTriangle, CheckCircle, CheckCircle2, Pencil, Trash2 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import {
   DataTable,
   type Column,
   type FilterConfigOption,
-} from '@/components/ui/data-table'
-import { TableCell } from '@/components/ui/table'
-import { Alert, AlertSeverity, AlertStatus, User } from '@/generated/graphql'
-import { useI18n } from '@/i18n'
-import { usePaginationConfig } from '@/lib/hooks/use-pagination-config'
-import type { AlertsFilterInput } from '@/lib/types/alerts-filter'
-import { cn } from '@/lib/utils'
+} from '@/components/ui/data-table/data-table';
+import { TableCell } from '@/components/ui/table';
+import { Alert, AlertSeverity, AlertStatus, User } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import type { AlertsFilterInput } from '@/lib/types/alerts-filter';
+import { cn } from '@/lib/utils';
+import {
+  AlertTriangle,
+  CheckCircle,
+  CheckCircle2,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
+import * as React from 'react';
 
 export type AlertTableUser = Pick<
   User,
   'id' | 'firstName' | 'lastName' | 'email'
->
+>;
 
 interface AlertTableProps {
-  alerts: Alert[]
-  filter: AlertsFilterInput
-  onFilterChange: (updates: Partial<AlertsFilterInput>) => void
-  users: AlertTableUser[]
-  onAcknowledge: (alert: Alert) => void
-  onResolve: (alert: Alert) => void
-  onEdit?: (alert: Alert) => void
-  onDelete?: (alert: Alert) => void
-  onRowClick?: (alert: Alert) => void
-  isLoading?: boolean
-  tableLoading?: boolean
+  alerts: Alert[];
+  filter: AlertsFilterInput;
+  onFilterChange: (updates: Partial<AlertsFilterInput>) => void;
+  users: AlertTableUser[];
+  onAcknowledge: (alert: Alert) => void;
+  onResolve: (alert: Alert) => void;
+  onEdit?: (alert: Alert) => void;
+  onDelete?: (alert: Alert) => void;
+  onRowClick?: (alert: Alert) => void;
+  isLoading?: boolean;
+  tableLoading?: boolean;
 }
 
 export function AlertTable({
@@ -49,18 +55,18 @@ export function AlertTable({
   isLoading = false,
   tableLoading = false,
 }: AlertTableProps) {
-  const { t } = useI18n()
-  const paginationConfig = usePaginationConfig()
+  const { t } = useI18n();
+  const paginationConfig = usePaginationConfig();
 
   const alertsT = t.pages.alerts as typeof t.pages.alerts & {
-    searchPlaceholder?: string
-    filterBySeverity?: string
-    allSeverities?: string
-    filterByAcknowledgedBy?: string
-    filterByResolvedBy?: string
-    dateRangePlaceholder?: string
-    allUsers?: string
-  }
+    searchPlaceholder?: string;
+    filterBySeverity?: string;
+    allSeverities?: string;
+    filterByAcknowledgedBy?: string;
+    filterByResolvedBy?: string;
+    dateRangePlaceholder?: string;
+    allUsers?: string;
+  };
 
   const userOptionsForMulti = React.useMemo(
     () =>
@@ -68,12 +74,12 @@ export function AlertTable({
         const name =
           [user.firstName, user.lastName].filter(Boolean).join(' ') ||
           user.email ||
-          user.id
+          user.id;
 
-        return { label: name, value: user.id }
+        return { label: name, value: user.id };
       }),
     [users],
-  )
+  );
 
   const filterConfigs: FilterConfigOption[] = React.useMemo(
     () => [
@@ -162,7 +168,7 @@ export function AlertTable({
       onFilterChange,
       userOptionsForMulti,
     ],
-  )
+  );
 
   const getStatusBadge = (status: AlertStatus) => {
     switch (status) {
@@ -172,7 +178,7 @@ export function AlertTable({
             <AlertTriangle className="h-3 w-3" />
             {t.pages.alerts.statusOpen}
           </Badge>
-        )
+        );
       case AlertStatus.Acknowledged:
         return (
           <Badge
@@ -182,7 +188,7 @@ export function AlertTable({
             <CheckCircle2 className="h-3 w-3" />
             {t.pages.alerts.statusAcknowledged}
           </Badge>
-        )
+        );
       case AlertStatus.Resolved:
         return (
           <Badge
@@ -192,55 +198,55 @@ export function AlertTable({
             <CheckCircle className="h-3.5 w-3.5" />
             {t.pages.alerts.statusResolved}
           </Badge>
-        )
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
 
   const getSeverityBadge = (severity: AlertSeverity) => {
     switch (severity) {
       case AlertSeverity.Critical:
-        return <Badge variant="destructive">{t.pages.alerts.critical}</Badge>
+        return <Badge variant="destructive">{t.pages.alerts.critical}</Badge>;
       default:
-        return <Badge variant="outline">{severity}</Badge>
+        return <Badge variant="outline">{severity}</Badge>;
     }
-  }
+  };
 
   const getRowClassName = (alert: Alert) => {
     if (alert.status === AlertStatus.Resolved) {
-      return 'bg-emerald-50/70 dark:bg-emerald-950/30'
+      return 'bg-emerald-50/70 dark:bg-emerald-950/30';
     }
 
     if (alert.status === AlertStatus.Acknowledged) {
-      return 'bg-amber-50/60 dark:bg-amber-950/20'
+      return 'bg-amber-50/60 dark:bg-amber-950/20';
     }
 
     if (
       alert.status === AlertStatus.Open &&
       alert.severity === AlertSeverity.Critical
     ) {
-      return 'bg-red-50/80 dark:bg-red-950/40'
+      return 'bg-red-50/80 dark:bg-red-950/40';
     }
 
-    return ''
-  }
+    return '';
+  };
 
   const formatTimestamp = (timestamp?: Alert['timestamp'] | null) => {
-    if (!timestamp) return '-'
-    const date = new Date(timestamp)
-    if (Number.isNaN(date.getTime())) return '-'
-    return date.toLocaleString()
-  }
+    if (!timestamp) return '-';
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleString();
+  };
 
   const getTimestampMs = (timestamp?: Alert['timestamp'] | null) => {
-    if (!timestamp) return 0
-    const time = new Date(timestamp).getTime()
-    return Number.isNaN(time) ? 0 : time
-  }
+    if (!timestamp) return 0;
+    const time = new Date(timestamp).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  };
 
   const formatFieldLabel = (field?: string | null) => {
-    if (!field) return '-'
+    if (!field) return '-';
 
     const labels: Record<string, string> = {
       temperature: 'Temperature',
@@ -251,19 +257,19 @@ export function AlertTable({
       soil_temp: 'Soil temp',
       par: 'PAR',
       co2: 'CO2',
-    }
+    };
 
     return (
       labels[field] ??
       field.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
-    )
-  }
+    );
+  };
 
   const formatUser = (user?: Alert['acknowledgedBy']) => {
-    if (!user) return '-'
-    const name = [user.firstName, user.lastName].filter(Boolean).join(' ')
-    return name || user.email || '-'
-  }
+    if (!user) return '-';
+    const name = [user.firstName, user.lastName].filter(Boolean).join(' ');
+    return name || user.email || '-';
+  };
 
   const getActionState = (alert: Alert) => ({
     canAcknowledge:
@@ -273,7 +279,7 @@ export function AlertTable({
         alert.status === AlertStatus.Acknowledged) &&
       alert.resolvedBy == null &&
       alert.acknowledgedBy != null,
-  })
+  });
 
   const columns: Column<Alert>[] = [
     { key: 'sensorName', header: t.pages.alerts.sensorName },
@@ -289,23 +295,24 @@ export function AlertTable({
       header: t.pages.alerts.actions,
       headerClassName: 'text-right',
     },
-  ]
+  ];
 
   const sortedAlerts = React.useMemo(
     () =>
       [...alerts].sort(
-        (left, right) => getTimestampMs(right.timestamp) - getTimestampMs(left.timestamp),
+        (left, right) =>
+          getTimestampMs(right.timestamp) - getTimestampMs(left.timestamp),
       ),
     [alerts],
-  )
+  );
 
-  const hideEditButton = true
-  const hasSecondaryActions = Boolean((onEdit && !hideEditButton) || onDelete)
+  const hideEditButton = true;
+  const hasSecondaryActions = Boolean((onEdit && !hideEditButton) || onDelete);
 
   const renderPrimaryActions = (alert: Alert, stacked = false) => {
-    const { canAcknowledge, canResolve } = getActionState(alert)
+    const { canAcknowledge, canResolve } = getActionState(alert);
 
-    if (!canAcknowledge && !canResolve) return null
+    if (!canAcknowledge && !canResolve) return null;
 
     return (
       <div
@@ -319,8 +326,8 @@ export function AlertTable({
             variant="outline"
             size="sm"
             onClick={(event) => {
-              event.stopPropagation()
-              onAcknowledge(alert)
+              event.stopPropagation();
+              onAcknowledge(alert);
             }}
             disabled={isLoading}
             className={cn('gap-1.5', stacked && 'w-full sm:w-auto')}
@@ -333,8 +340,8 @@ export function AlertTable({
             variant="default"
             size="sm"
             onClick={(event) => {
-              event.stopPropagation()
-              onResolve(alert)
+              event.stopPropagation();
+              onResolve(alert);
             }}
             disabled={isLoading}
             className={stacked ? 'w-full sm:w-auto' : undefined}
@@ -343,8 +350,8 @@ export function AlertTable({
           </Button>
         )}
       </div>
-    )
-  }
+    );
+  };
 
   const renderSecondaryActions = (alert: Alert) => (
     <>
@@ -353,8 +360,8 @@ export function AlertTable({
           variant="ghost"
           size="icon"
           onClick={(event) => {
-            event.stopPropagation()
-            onEdit(alert)
+            event.stopPropagation();
+            onEdit(alert);
           }}
           disabled={isLoading}
           className="h-8 w-8 rounded-full border border-sky-200/80 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/70 dark:text-sky-300 dark:hover:bg-sky-950/40"
@@ -367,8 +374,8 @@ export function AlertTable({
           variant="ghost"
           size="icon"
           onClick={(event) => {
-            event.stopPropagation()
-            onDelete(alert)
+            event.stopPropagation();
+            onDelete(alert);
           }}
           disabled={isLoading}
           className="h-8 w-8 rounded-full border border-rose-200/80 text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-900/70 dark:text-rose-300 dark:hover:bg-rose-950/40"
@@ -377,18 +384,18 @@ export function AlertTable({
         </Button>
       )}
     </>
-  )
+  );
 
   const hasAnyActions = (alert: Alert) => {
-    const { canAcknowledge, canResolve } = getActionState(alert)
-    return canAcknowledge || canResolve || hasSecondaryActions
-  }
+    const { canAcknowledge, canResolve } = getActionState(alert);
+    return canAcknowledge || canResolve || hasSecondaryActions;
+  };
 
   const renderRow = (alert: Alert) => {
-    const rowClassName = getRowClassName(alert)
-    const isResolved = alert.status === AlertStatus.Resolved
-    const textClassName = isResolved ? 'text-muted-foreground' : ''
-    const cellClassName = `${rowClassName} ${textClassName}`.trim()
+    const rowClassName = getRowClassName(alert);
+    const isResolved = alert.status === AlertStatus.Resolved;
+    const textClassName = isResolved ? 'text-muted-foreground' : '';
+    const cellClassName = `${rowClassName} ${textClassName}`.trim();
 
     return (
       <>
@@ -421,13 +428,13 @@ export function AlertTable({
           </div>
         </TableCell>
       </>
-    )
-  }
+    );
+  };
 
   const renderCard = (alert: Alert) => {
-    const rowClassName = getRowClassName(alert)
-    const isResolved = alert.status === AlertStatus.Resolved
-    const textClassName = isResolved ? 'text-muted-foreground' : ''
+    const rowClassName = getRowClassName(alert);
+    const isResolved = alert.status === AlertStatus.Resolved;
+    const textClassName = isResolved ? 'text-muted-foreground' : '';
     const details = [
       {
         label: t.pages.alerts.field ?? 'Parameter',
@@ -449,7 +456,7 @@ export function AlertTable({
         label: t.pages.alerts.resolvedBy,
         value: formatUser(alert.resolvedBy),
       },
-    ]
+    ];
 
     return (
       <Card
@@ -504,8 +511,8 @@ export function AlertTable({
           </CardFooter>
         ) : null}
       </Card>
-    )
-  }
+    );
+  };
 
   return (
     <DataTable
@@ -543,5 +550,5 @@ export function AlertTable({
       paginationLabels={paginationConfig.paginationLabels}
       responsiveBreakpoint="xl"
     />
-  )
+  );
 }

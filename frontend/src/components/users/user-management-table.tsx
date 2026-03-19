@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { useI18n } from '@/i18n'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { TableCell } from '@/components/ui/table'
-import { Edit2, Trash2, Plus } from 'lucide-react'
-import { User, UserRole, UserStatus } from '@/generated/graphql'
-import { DataTable, type Column } from '@/components/ui/data-table'
-import { usePaginationConfig } from '@/lib/hooks/use-pagination-config'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { DataTable, type Column } from '@/components/ui/data-table/data-table';
+import { TableCell } from '@/components/ui/table';
+import { User, UserRole, UserStatus } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import { Edit2, Plus, Trash2 } from 'lucide-react';
 
 interface UserManagementTableProps {
-  users: User[]
-  onEdit: (user: User) => void
-  onDelete: (user: User) => void
-  onCreate: () => void
-  isLoading?: boolean
-  hideTenantColumn?: boolean // Hide tenant column for tenant users
+  users: User[];
+  onEdit: (user: User) => void;
+  onDelete: (user: User) => void;
+  onCreate: () => void;
+  isLoading?: boolean;
+  hideTenantColumn?: boolean; // Hide tenant column for tenant users
 }
 
 export function UserManagementTable({
@@ -27,14 +27,14 @@ export function UserManagementTable({
   isLoading = false,
   hideTenantColumn = false,
 }: UserManagementTableProps) {
-  const { t } = useI18n()
-  const paginationConfig = usePaginationConfig()
+  const { t } = useI18n();
+  const paginationConfig = usePaginationConfig();
 
   const roleLabels: Record<UserRole, string> = {
     VGREENS_ADMIN: t.pages.admin.users.roleVgreensAdmin,
     TENANT_ADMIN: t.pages.admin.users.roleTenantAdmin,
     TENANT_USER: t.pages.admin.users.roleTenantUser,
-  }
+  };
 
   const columns: Column<User>[] = [
     {
@@ -66,12 +66,12 @@ export function UserManagementTable({
       header: t.pages.admin.users.actions,
       headerClassName: 'text-right',
     },
-  ]
+  ];
 
   const renderRow = (user: User) => {
     const fullName =
       [user.firstName, user.lastName].filter(Boolean).join(' ') ||
-      t.pages.admin.users.notAvailable
+      t.pages.admin.users.notAvailable;
 
     return (
       <>
@@ -87,15 +87,15 @@ export function UserManagementTable({
               user.status === UserStatus.Active
                 ? 'default'
                 : user.status === UserStatus.Pending
-                ? 'outline'
-                : 'secondary'
+                  ? 'outline'
+                  : 'secondary'
             }
           >
             {user.status === UserStatus.Pending
               ? t.pages.admin.users.pending
               : user.isActive
-              ? t.pages.admin.users.active
-              : t.pages.admin.users.inactive}
+                ? t.pages.admin.users.active
+                : t.pages.admin.users.inactive}
           </Badge>
         </TableCell>
         <TableCell className="text-right">
@@ -119,13 +119,13 @@ export function UserManagementTable({
           </div>
         </TableCell>
       </>
-    )
-  }
+    );
+  };
 
   const renderCard = (user: User) => {
     const fullName =
       [user.firstName, user.lastName].filter(Boolean).join(' ') ||
-      t.pages.admin.users.notAvailable
+      t.pages.admin.users.notAvailable;
 
     return (
       <Card className="gap-0 overflow-hidden border border-border/60 py-0 shadow-none">
@@ -137,7 +137,9 @@ export function UserManagementTable({
                 {user.email || '-'}
               </p>
             </div>
-            <Badge variant="outline">{roleLabels[user.role] || user.role}</Badge>
+            <Badge variant="outline">
+              {roleLabels[user.role] || user.role}
+            </Badge>
           </div>
 
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -159,15 +161,15 @@ export function UserManagementTable({
                     user.status === UserStatus.Active
                       ? 'default'
                       : user.status === UserStatus.Pending
-                      ? 'outline'
-                      : 'secondary'
+                        ? 'outline'
+                        : 'secondary'
                   }
                 >
                   {user.status === UserStatus.Pending
                     ? t.pages.admin.users.pending
                     : user.isActive
-                    ? t.pages.admin.users.active
-                    : t.pages.admin.users.inactive}
+                      ? t.pages.admin.users.active
+                      : t.pages.admin.users.inactive}
                 </Badge>
               </dd>
             </div>
@@ -195,8 +197,8 @@ export function UserManagementTable({
           </Button>
         </CardFooter>
       </Card>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -218,5 +220,5 @@ export function UserManagementTable({
         responsiveBreakpoint="xl"
       />
     </div>
-  )
+  );
 }
