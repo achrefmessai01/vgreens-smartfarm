@@ -8,6 +8,7 @@ import {
   getGreenhouseLabel,
 } from '@/lib/harvest-utils';
 import { Eye, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell } from '@/components/ui/table';
 import type { HarvestsQuery } from '@/generated/graphql';
@@ -122,11 +123,71 @@ export function HarvestTable({
     [onDelete, onSidebarEdit],
   );
 
+  const renderCard = React.useCallback(
+    (harvest: HarvestItem) => {
+      const createdBy = harvest.createdBy
+        ? (harvest.createdBy.firstName || harvest.createdBy.lastName
+            ? [harvest.createdBy.firstName, harvest.createdBy.lastName].filter(Boolean).join(' ')
+            : harvest.createdBy.email || '-')
+        : '-';
+
+      return (
+        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm space-y-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="font-medium">{formatHarvestDate(harvest.date)}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{harvest.batch}</p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => { e.stopPropagation(); onSidebarEdit?.(harvest); }}
+              >
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={(e) => { e.stopPropagation(); onDelete?.(harvest); }}
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Badge variant="outline" className="text-blue-600 border-blue-200">
+              {getGreenhouseLabel(harvest.greenhouse)}
+            </Badge>
+            <span className="text-green-600 font-medium">
+              {h?.classA ?? 'Class A'}: {harvest.classA} kg
+            </span>
+            <span className="text-red-500 font-medium">
+              {h?.waste ?? 'Waste'}: {harvest.waste} kg
+            </span>
+            <span className="font-medium">{harvest.avgBrix}°Bx</span>
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{createdBy}</span>
+            {harvest.photos > 0 && <span>{harvest.photos} photo{harvest.photos !== 1 ? 's' : ''}</span>}
+          </div>
+        </div>
+      );
+    },
+    [h, onDelete, onSidebarEdit],
+  );
+
   return (
     <DataTable<HarvestItem>
       data={harvests}
       columns={columns}
       renderRow={renderRow}
+      renderCard={renderCard}
+      responsiveBreakpoint="lg"
       onRowClick={onSidebarEdit}
       emptyState={{ title: h?.noHarvestsYet ?? 'No harvests yet' }}
       paginationVariant="compact"
