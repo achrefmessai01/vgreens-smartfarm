@@ -1,4 +1,4 @@
-import type { BatchDetailsData } from '@/components/harvest/batch-sidebar-types';
+import type { BatchDetailsData } from '@/components/harvest/batch-sidebar/batch-sidebar-types';
 
 export function computeAvgBrix(
   brix: BatchDetailsData['brixMeasurements'],

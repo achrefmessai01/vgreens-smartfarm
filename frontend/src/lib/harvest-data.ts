@@ -1,6 +1,6 @@
-import type { HarvestRecord, HarvestSummary } from '@/lib/types/harvest'
-import type { BatchFormData } from '@/lib/types/batch'
-import type { BatchDetailsData } from '@/components/harvest/batch-sidebar-types'
+import type { BatchDetailsData } from '@/components/harvest/batch-sidebar/batch-sidebar-types';
+import type { BatchFormData } from '@/lib/types/batch';
+import type { HarvestRecord, HarvestSummary } from '@/lib/types/harvest';
 
 const mockHarvestData: HarvestRecord[] = [
   {
@@ -69,31 +69,31 @@ const mockHarvestData: HarvestRecord[] = [
     createdAt: new Date('2026-02-29').toISOString(),
     updatedAt: new Date('2026-02-29').toISOString(),
   },
-]
+];
 
-let allHarvestData: HarvestRecord[] = [...mockHarvestData]
+let allHarvestData: HarvestRecord[] = [...mockHarvestData];
 
 export function getAllHarvests(): HarvestRecord[] {
-  return [...allHarvestData].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
+  return [...allHarvestData].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 }
 
 export function addNewHarvest(batchData: BatchFormData): HarvestRecord {
-  const newId = (allHarvestData.length + 1).toString()
-  const batchName = `${batchData.species} - ${batchData.variety}`
-  
+  const newId = (allHarvestData.length + 1).toString();
+  const batchName = `${batchData.species} - ${batchData.variety}`;
+
   // Generate realistic harvest data based on batch
-  const classA = Math.round((8 + Math.random() * 8) * 10) / 10 // 8-16 kg
-  const waste = Math.round((0.3 + Math.random() * 1.5) * 10) / 10 // 0.3-1.8 kg
-  const avgBrix = Math.round((6.5 + Math.random() * 2) * 10) / 10 // 6.5-8.5°Bx
-  
+  const classA = Math.round((8 + Math.random() * 8) * 10) / 10; // 8-16 kg
+  const waste = Math.round((0.3 + Math.random() * 1.5) * 10) / 10; // 0.3-1.8 kg
+  const avgBrix = Math.round((6.5 + Math.random() * 2) * 10) / 10; // 6.5-8.5°Bx
+
   const newHarvest: HarvestRecord = {
     id: newId,
-    date: new Date().toLocaleDateString('en-US', { 
-      month: 'numeric', 
-      day: 'numeric', 
-      year: 'numeric' 
+    date: new Date().toLocaleDateString('en-US', {
+      month: 'numeric',
+      day: 'numeric',
+      year: 'numeric',
     }),
     batch: batchName,
     classA,
@@ -102,16 +102,18 @@ export function addNewHarvest(batchData: BatchFormData): HarvestRecord {
     photos: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  }
-  
-  allHarvestData.unshift(newHarvest) // Add to beginning
-  return newHarvest
+  };
+
+  allHarvestData.unshift(newHarvest); // Add to beginning
+  return newHarvest;
 }
 
-export function addCompletedBatchToHistory(batchData: BatchDetailsData): HarvestRecord {
-  const newId = (allHarvestData.length + 1).toString()
-  const batchName = `${batchData.species} - ${batchData.variety}`
-  
+export function addCompletedBatchToHistory(
+  batchData: BatchDetailsData,
+): HarvestRecord {
+  const newId = (allHarvestData.length + 1).toString();
+  const batchName = `${batchData.species} - ${batchData.variety}`;
+
   // Calculate average Brix from all measurements
   const brixValues = [
     batchData.brixMeasurements.brix1,
@@ -124,18 +126,22 @@ export function addCompletedBatchToHistory(batchData: BatchDetailsData): Harvest
     batchData.brixMeasurements.brix8,
     batchData.brixMeasurements.brix9,
     batchData.brixMeasurements.brix10,
-  ].filter(value => value > 0) // Only include non-zero measurements
-  
-  const avgBrix = brixValues.length > 0 
-    ? Math.round((brixValues.reduce((sum, val) => sum + val, 0) / brixValues.length) * 10) / 10
-    : 0
-  
+  ].filter((value) => value > 0); // Only include non-zero measurements
+
+  const avgBrix =
+    brixValues.length > 0
+      ? Math.round(
+          (brixValues.reduce((sum, val) => sum + val, 0) / brixValues.length) *
+            10,
+        ) / 10
+      : 0;
+
   const newHarvest: HarvestRecord = {
     id: newId,
-    date: new Date().toLocaleDateString('en-US', { 
-      month: 'numeric', 
-      day: 'numeric', 
-      year: 'numeric' 
+    date: new Date().toLocaleDateString('en-US', {
+      month: 'numeric',
+      day: 'numeric',
+      year: 'numeric',
     }),
     batch: batchName,
     classA: batchData.todaysHarvest.marketable,
@@ -144,27 +150,36 @@ export function addCompletedBatchToHistory(batchData: BatchDetailsData): Harvest
     photos: batchData.photos.length,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  }
-  
-  allHarvestData.unshift(newHarvest) // Add to beginning
-  return newHarvest
+  };
+
+  allHarvestData.unshift(newHarvest); // Add to beginning
+  return newHarvest;
 }
 
 export function getHarvestSummary(): HarvestSummary {
-  const harvests = getAllHarvests()
-  const totalClassA = harvests.reduce((sum, harvest) => sum + harvest.classA, 0)
-  const totalWaste = harvests.reduce((sum, harvest) => sum + harvest.waste, 0)
-  const avgBrix = harvests.reduce((sum, harvest) => sum + harvest.avgBrix, 0) / harvests.length
+  const harvests = getAllHarvests();
+  const totalClassA = harvests.reduce(
+    (sum, harvest) => sum + harvest.classA,
+    0,
+  );
+  const totalWaste = harvests.reduce((sum, harvest) => sum + harvest.waste, 0);
+  const avgBrix =
+    harvests.reduce((sum, harvest) => sum + harvest.avgBrix, 0) /
+    harvests.length;
 
   // Get the most common variety from the batch names
-  const varieties = harvests.map(h => h.batch)
-  const varietyCounts = varieties.reduce((acc, variety) => {
-    acc[variety] = (acc[variety] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
-  
-  const mostCommonVariety = Object.entries(varietyCounts)
-    .sort(([,a], [,b]) => b - a)[0][0] || 'Strawberry - Elsanta'
+  const varieties = harvests.map((h) => h.batch);
+  const varietyCounts = varieties.reduce(
+    (acc, variety) => {
+      acc[variety] = (acc[variety] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  const mostCommonVariety =
+    Object.entries(varietyCounts).sort(([, a], [, b]) => b - a)[0][0] ||
+    'Strawberry - Elsanta';
 
   return {
     totalHarvests: harvests.length,
@@ -172,5 +187,5 @@ export function getHarvestSummary(): HarvestSummary {
     totalClassA: Math.round(totalClassA * 10) / 10,
     totalWaste: Math.round(totalWaste * 10) / 10,
     avgBrix: Math.round(avgBrix * 10) / 10,
-  }
+  };
 }

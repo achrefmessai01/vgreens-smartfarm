@@ -1,29 +1,32 @@
-'use client'
+'use client';
 
-import { useI18n } from '@/i18n'
-import type { BatchDetailsData } from './batch-sidebar-types'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
-} from '@/components/ui/sheet'
-import { BatchHeaderField, BatchStatsField } from './batch-sidebar-basic-fields'
-import { BrixMeasurementsField } from './batch-sidebar-brix-field'
-import { PhotosField } from './batch-sidebar-photos-field'
-import { YieldDataField } from './batch-sidebar-yield-field'
-import { useBatchSidebar, type SidebarMode } from './use-batch-sidebar'
+} from '@/components/ui/sheet';
+import { useI18n } from '@/i18n';
+import type { BatchDetailsData } from './batch-sidebar-types';
+import {
+  BatchHeaderField,
+  BatchStatsField,
+} from './fields/batch-sidebar-basic-fields';
+import { BrixMeasurementsField } from './fields/batch-sidebar-brix-field';
+import { PhotosField } from './fields/batch-sidebar-photos-field';
+import { YieldDataField } from './fields/batch-sidebar-yield-field';
+import { useBatchSidebar, type SidebarMode } from './use-batch-sidebar';
 
 export interface BatchSidebarProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  harvestId: string | null
-  batchData: BatchDetailsData | null
-  mode?: SidebarMode
-  onCompleted?: () => void
-  isLoading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  harvestId: string | null;
+  batchData: BatchDetailsData | null;
+  mode?: SidebarMode;
+  onCompleted?: () => void;
+  isLoading?: boolean;
 }
 
 export function BatchSidebar({
@@ -35,8 +38,8 @@ export function BatchSidebar({
   onCompleted,
   isLoading = false,
 }: BatchSidebarProps) {
-  const { t } = useI18n()
-  const h = t.pages.harvest
+  const { t } = useI18n();
+  const h = t.pages.harvest;
   const {
     currentData,
     loading: isSaving,
@@ -45,22 +48,29 @@ export function BatchSidebar({
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
-  } = useBatchSidebar({ harvestId, batchData, mode, onCompleted })
+  } = useBatchSidebar({ harvestId, batchData, mode, onCompleted });
 
-  const busy = isLoading || isSaving
+  const busy = isLoading || isSaving;
 
   const buttonLabel = isSaving
-    ? (mode === 'edit' ? (h?.updating ?? 'Updating...') : (h?.saving ?? 'Saving...'))
-    : (mode === 'edit' ? (h?.update ?? 'Update') : (h?.logHarvest ?? 'Log Harvest'))
+    ? mode === 'edit'
+      ? (h?.updating ?? 'Updating...')
+      : (h?.saving ?? 'Saving...')
+    : mode === 'edit'
+      ? (h?.update ?? 'Update')
+      : (h?.logHarvest ?? 'Log Harvest');
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl flex flex-col p-0 gap-0">
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-2xl flex flex-col p-0 gap-0"
+      >
         <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
           <SheetTitle className="dark:text-card-foreground">
             {currentData?.greenhouse?.name
               ? `${h?.batchDetails ?? 'Batch Details'} for ${currentData.greenhouse.name}`
-              : h?.batchDetails ?? 'Batch Details'}
+              : (h?.batchDetails ?? 'Batch Details')}
           </SheetTitle>
         </SheetHeader>
 
@@ -124,5 +134,5 @@ export function BatchSidebar({
         </SheetFooter>
       </SheetContent>
     </Sheet>
-  )
+  );
 }
