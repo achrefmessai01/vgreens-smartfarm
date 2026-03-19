@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -7,11 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import type { CreateHarvestMutation } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
-import * as React from 'react';
+import type { CreateHarvestMutation } from '@/generated/graphql';
 import { CreateBatchFormFields } from './form/create-batch-form-fields';
-import { useCreateBatchForm } from './use-create-batch-form';
+import { useCreateBatchForm } from '@/lib/hooks/use-create-batch-form';
 
 interface CreateBatchDialogProps {
   open: boolean;

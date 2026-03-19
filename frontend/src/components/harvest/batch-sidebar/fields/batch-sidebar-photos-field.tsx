@@ -1,10 +1,10 @@
 'use client';
 
+import * as React from 'react';
+import Image from 'next/image';
 import { useI18n } from '@/i18n';
 import { Upload, X } from 'lucide-react';
-import Image from 'next/image';
-import * as React from 'react';
-import type { PhotosFieldProps } from '../batch-sidebar-types';
+import type { PhotosFieldProps } from '@/types/batch-sidebar.types';
 
 export function PhotosField({
   photos = [],

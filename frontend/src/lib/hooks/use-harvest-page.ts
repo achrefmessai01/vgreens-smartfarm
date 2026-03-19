@@ -1,13 +1,13 @@
 'use client';
 
-import type { BatchDetailsData } from '@/components/harvest/batch-sidebar/batch-sidebar-types';
-import type { SidebarMode } from '@/components/harvest/batch-sidebar/use-batch-sidebar';
-import { useDeleteHarvest } from '@/components/harvest/dialogs/use-delete-harvest';
-import { useEditHarvest } from '@/components/harvest/dialogs/use-edit-harvest';
-import { useHarvestsQuery, type HarvestsQuery } from '@/generated/graphql';
 import * as React from 'react';
-import type { HarvestSummary } from './harvest.utils';
-import { computeSummary, harvestToBatchDetails } from './harvest.utils';
+import type { HarvestSummary } from '@/types/harvest.types';
+import { useEditHarvest } from '@/lib/hooks/use-edit-harvest';
+import type { SidebarMode } from '@/lib/hooks/use-batch-sidebar';
+import { useDeleteHarvest } from '@/lib/hooks/use-delete-harvest';
+import type { BatchDetailsData } from '@/types/batch-sidebar.types';
+import { computeSummary, harvestToBatchDetails } from '@/lib/harvest-utils';
+import { useHarvestsQuery, type HarvestsQuery } from '@/generated/graphql';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
 

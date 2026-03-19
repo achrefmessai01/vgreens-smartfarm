@@ -1,6 +1,6 @@
-import type { BatchDetailsData } from '@/components/harvest/batch-sidebar/batch-sidebar-types';
-import type { BatchFormData } from '@/lib/types/batch';
-import type { HarvestRecord, HarvestSummary } from '@/lib/types/harvest';
+import type { HarvestRecord, HarvestSummary } from '@/types/harvest.types';
+import type { BatchFormData } from '@/types/batch.types';
+import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 
 const mockHarvestData: HarvestRecord[] = [
   {
@@ -71,7 +71,7 @@ const mockHarvestData: HarvestRecord[] = [
   },
 ];
 
-let allHarvestData: HarvestRecord[] = [...mockHarvestData];
+const allHarvestData: HarvestRecord[] = [...mockHarvestData];
 
 export function getAllHarvests(): HarvestRecord[] {
   return [...allHarvestData].sort(

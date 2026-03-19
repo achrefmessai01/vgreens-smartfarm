@@ -1,12 +1,12 @@
 'use client';
 
+import { useI18n } from '@/i18n';
 import { Badge } from '@/components/ui/badge';
 import { HarvestStatus } from '@/generated/graphql';
-import { useI18n } from '@/i18n';
 import type {
   BatchHeaderFieldProps,
   BatchStatsFieldProps,
-} from '../batch-sidebar-types';
+} from '@/types/batch-sidebar.types';
 
 const STATUS_VARIANT: Record<
   HarvestStatus,

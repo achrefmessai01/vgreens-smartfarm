@@ -1,16 +1,16 @@
 'use client';
 
-import { DataTable } from '@/components/ui/data-table/data-table';
-import { Alert } from '@/generated/graphql';
-import { useI18n } from '@/i18n';
-import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
-import type { AlertsFilterInput } from '@/lib/types/alerts-filter';
-import * as React from 'react';
 import {
   useAlertTableColumns,
   useAlertTableFilters,
 } from './alert-table-config';
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import { Alert } from '@/generated/graphql';
 import { useAlertTableRow } from './alert-table-rows';
+import { DataTable } from '@/components/ui/data-table';
+import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import type { AlertsFilterInput } from '@/lib/alerts-filter';
 import { getTimestampMs, type AlertTableUser } from './alert-table-utils';
 
 interface AlertTableProps {

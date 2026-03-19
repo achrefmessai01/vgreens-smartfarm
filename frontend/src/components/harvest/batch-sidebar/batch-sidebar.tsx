@@ -1,23 +1,26 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n';
 import {
   Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
   SheetTitle,
+  SheetHeader,
+  SheetFooter,
+  SheetContent,
 } from '@/components/ui/sheet';
-import { useI18n } from '@/i18n';
-import type { BatchDetailsData } from './batch-sidebar-types';
 import {
-  BatchHeaderField,
+  useBatchSidebar,
+  type SidebarMode,
+} from '@/lib/hooks/use-batch-sidebar';
+import {
   BatchStatsField,
+  BatchHeaderField,
 } from './fields/batch-sidebar-basic-fields';
-import { BrixMeasurementsField } from './fields/batch-sidebar-brix-field';
+import { Button } from '@/components/ui/button';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
+import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { YieldDataField } from './fields/batch-sidebar-yield-field';
-import { useBatchSidebar, type SidebarMode } from './use-batch-sidebar';
+import { BrixMeasurementsField } from './fields/batch-sidebar-brix-field';
 
 export interface BatchSidebarProps {
   open: boolean;

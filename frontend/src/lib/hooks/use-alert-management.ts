@@ -10,8 +10,8 @@ import {
   useResolveAlertMutation,
   useAcknowledgeAlertMutation,
 } from '@/generated/graphql'
-import type { AlertsFilterInput } from '@/lib/types/alerts-filter'
-import { toAlertsFilterVariables } from '@/lib/types/alerts-filter'
+import type { AlertsFilterInput } from '@/lib/alerts-filter'
+import { toAlertsFilterVariables } from '@/lib/alerts-filter'
 
 interface AlertFormData {
   sensorName: string

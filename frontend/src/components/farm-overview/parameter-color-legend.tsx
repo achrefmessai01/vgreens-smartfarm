@@ -1,4 +1,4 @@
-import type { ParameterType } from '@/lib/farm-types';
+import type { ParameterType } from '@/types/farm.types';
 
 const gradientStyle = {
   background:

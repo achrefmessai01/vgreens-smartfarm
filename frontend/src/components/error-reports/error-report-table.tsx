@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { TableCell } from '@/components/ui/table';
-import { ErrorReport } from '@/generated/graphql';
+import { ErrorReport, ReportStatus } from '@/generated/graphql';
 import { formatDate } from '@/lib/utils/error-report-utils';
 import { Edit2, Trash2 } from 'lucide-react';
 import { ErrorReportQuickActions } from './error-report-quick-actions';
@@ -14,7 +14,7 @@ interface ErrorReportTableProps {
   isLoading?: boolean;
   onEdit: (report: ErrorReport) => void;
   onDelete: (report: ErrorReport) => void;
-  onStatusUpdate: (id: string, status: any) => Promise<void>;
+  onStatusUpdate: (id: string, status: ReportStatus) => Promise<void>;
   isUpdating?: boolean;
 }
 
@@ -176,11 +176,73 @@ export function ErrorReportTable({
     </>
   );
 
+  const renderCard = (report: ErrorReport) => (
+    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm space-y-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-medium truncate">{report.errorTitle}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            ID: {report.id.slice(0, 8)}...
+          </p>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(report)}
+            className="h-8 w-8 p-0"
+          >
+            <Edit2 className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(report)}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <ErrorReportSeverityBadge severity={report.severity} />
+        <ErrorReportQuickActions
+          report={report}
+          onStatusUpdate={onStatusUpdate}
+          isUpdating={isUpdating}
+        />
+      </div>
+
+      <div className="flex items-center justify-between text-sm">
+        <div>
+          <p className="font-medium">
+            {report.user.firstName} {report.user.lastName}
+          </p>
+          <p className="text-xs text-muted-foreground truncate max-w-[180px]">
+            {report.userEmail}
+          </p>
+        </div>
+        <div className="text-right text-xs text-muted-foreground shrink-0">
+          <p>{formatDate(report.createdAt)}</p>
+          <p>
+            {new Intl.DateTimeFormat('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+            }).format(new Date(report.createdAt))}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <DataTable
       data={reports}
       columns={columns}
       renderRow={renderRow}
+      renderCard={renderCard}
       isLoading={isLoading}
       searchConfig={{
         placeholder: 'Search reports by title, user email...',

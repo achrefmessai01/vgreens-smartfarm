@@ -1,8 +1,4 @@
-/**
- * Constants for farm overview URL persistence and options.
- */
-
-import type { ParameterType } from '@/lib/farm-types';
+import type { ParameterType } from '@/types/farm.types';
 
 /** URL search param keys for farm overview persistence. */
 export const PARAM_GREENHOUSE = 'greenhouse';

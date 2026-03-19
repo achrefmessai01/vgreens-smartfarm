@@ -52,3 +52,7 @@ docker/logs/
 # Git
 .git/
 HVST.md
+
+
+.cursor/
+.claude/

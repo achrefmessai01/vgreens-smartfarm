@@ -1,14 +1,14 @@
 'use client';
 
-import { FeatureGuard } from '@/components/features/feature-guard';
-import { PageHeader } from '@/components/layout/page-header';
-import { ConfirmationDialog } from '@/components/users';
-import { WarningTable } from '@/components/warnings';
-import { WarningSidebar } from '@/components/warnings/warning-sidebar';
-import { useI18n } from '@/i18n';
-import { getAllWarnings, updateWarningStatus } from '@/lib/warning-data';
-import type { Warning, WarningStatus } from '@/lib/warning-types';
 import * as React from 'react';
+import { useI18n } from '@/i18n';
+import { WarningTable } from '@/components/warnings';
+import { ConfirmationDialog } from '@/components/users';
+import { PageHeader } from '@/components/layout/page-header';
+import { FeatureGuard } from '@/components/features/feature-guard';
+import type { Warning, WarningStatus } from '@/types/warning.types';
+import { WarningSidebar } from '@/components/warnings/warning-sidebar';
+import { getAllWarnings, updateWarningStatus } from '@/lib/warning-data';
 
 export default function WarningsPage() {
   const { t } = useI18n();

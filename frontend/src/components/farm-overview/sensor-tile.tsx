@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
-import type { TunnelStatus } from '@/lib/tunnel-types'
+import type { TunnelStatus } from '@/types/tunnel.types'
 
 interface SensorTileProps {
   label: string

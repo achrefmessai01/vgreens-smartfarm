@@ -11,8 +11,8 @@ import { FeatureGuard } from '@/components/features/feature-guard';
 import { PageHeader } from '@/components/layout/page-header';
 import { TenantSelector } from '@/components/tenants';
 import { useI18n } from '@/i18n';
-import { useFarmOverviewPage } from './use-farm-overview-page';
-import { ParameterType } from '@/lib/farm-types';
+import { useFarmOverviewPage } from '@/lib/hooks/use-farm-overview-page';
+import { ParameterType } from '@/types/farm.types';
 
 export default function FarmOverviewPage() {
   const { t } = useI18n();

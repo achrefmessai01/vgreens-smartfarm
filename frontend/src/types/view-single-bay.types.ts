@@ -1,5 +1,5 @@
 import type { HeatmapPoint } from '@/lib/heatmap-utils';
-import type { Bay, ParameterType, PlantSlot } from '@/lib/farm-types';
+import type { Bay, ParameterType, PlantSlot } from '@/types/farm.types';
 
 export interface ViewSingleBayProps {
   bays: Bay[];

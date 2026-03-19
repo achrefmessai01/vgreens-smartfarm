@@ -2,13 +2,13 @@ import * as React from 'react';
 import type {
   FullMapDataResult,
   SensorWithPosition,
-} from './view-single-bay.types';
+} from '@/types/view-single-bay.types';
 import {
   bayHasDynamicPositions,
   getSlotPositionsFromBay,
 } from '@/lib/sensor-map-positions';
 import type { HeatmapPoint } from '@/lib/heatmap-utils';
-import type { Bay, ParameterType } from '@/lib/farm-types';
+import type { Bay, ParameterType } from '@/types/farm.types';
 import { isParameterSupportedByType } from '@/lib/sensor-map-parameter';
 
 export function useFullMapData(

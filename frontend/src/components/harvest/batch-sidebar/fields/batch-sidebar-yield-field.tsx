@@ -1,9 +1,9 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
-import { useI18n } from '@/i18n';
 import * as React from 'react';
-import type { YieldDataFieldProps } from '../batch-sidebar-types';
+import { useI18n } from '@/i18n';
+import { Input } from '@/components/ui/input';
+import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
 
 export function YieldDataField({
   marketable,

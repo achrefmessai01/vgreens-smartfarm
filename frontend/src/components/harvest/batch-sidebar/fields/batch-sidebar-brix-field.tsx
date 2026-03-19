@@ -1,10 +1,11 @@
 'use client';
 
-import { Field, FieldContent, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { useI18n } from '@/i18n';
 import * as React from 'react';
-import type { BrixMeasurementsFieldProps } from '../batch-sidebar-types';
+import { useI18n } from '@/i18n';
+import { Input } from '@/components/ui/input';
+import { computeAvgBrix } from '@/lib/harvest-utils';
+import { Field, FieldContent, FieldLabel } from '@/components/ui/field';
+import type { BrixMeasurementsFieldProps } from '@/types/batch-sidebar.types';
 
 export function BrixMeasurementsField({
   measurements,
@@ -13,13 +14,14 @@ export function BrixMeasurementsField({
 }: BrixMeasurementsFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  const inputRefs = React.useRef<Array<HTMLInputElement | null>>(
+    Array(10).fill(null),
+  );
 
   const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (currentIndex + 1 < 10) {
-        document.getElementById(`brix-${currentIndex + 2}`)?.focus();
-      }
+      inputRefs.current[currentIndex + 1]?.focus();
     }
   };
 
@@ -47,11 +49,7 @@ export function BrixMeasurementsField({
     placeholder: `${h?.enterBrixValue ?? 'Enter Brix value'} ${i + 1}`,
   }));
 
-  const brixValues = Object.values(measurements).filter((v) => v > 0);
-  const avgBrix =
-    brixValues.length > 0
-      ? brixValues.reduce((sum, val) => sum + val, 0) / brixValues.length
-      : 0;
+  const avgBrix = computeAvgBrix(measurements);
 
   return (
     <div className="space-y-4">
@@ -79,6 +77,9 @@ export function BrixMeasurementsField({
               <FieldContent>
                 <Input
                   id={`brix-${index + 1}`}
+                  ref={(el) => {
+                    inputRefs.current[index] = el;
+                  }}
                   type="number"
                   min="0"
                   max="30"

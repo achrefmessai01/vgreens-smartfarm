@@ -1,62 +1,43 @@
 'use client';
 
-import { FeatureGuard } from '@/components/features/feature-guard';
 import {
+  HarvestTable,
   BatchSidebar,
-  CreateBatchDialog,
-  DeleteHarvestDialog,
-  EditHarvestDialog,
   HarvestDashboard,
   HarvestPageHeader,
-  HarvestTable,
+  CreateBatchDialog,
+  EditHarvestDialog,
+  DeleteHarvestDialog,
 } from '@/components/harvest';
-import { useDashboardData } from '@/components/harvest/dashboard/use-dashboard-data';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n';
-import { useHarvestDashboard } from '@/lib/hooks/use-harvest-dashboard';
+import { useState, useEffect } from 'react';
 import { BarChart3, History } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useHarvestPage } from './use-harvest-page';
-
-// Toggle this flag to switch between mock and real data
-const USE_REAL_DATA = true;
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useHarvestPage } from '@/lib/hooks/use-harvest-page';
+import { FeatureGuard } from '@/components/features/feature-guard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function HarvestPage() {
   const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<string>(
+    searchParams.get('tab') || 'dashboard',
+  );
 
-  // Get initial tab from URL parameter, default to dashboard
-  const initialTab = searchParams.get('tab') || 'dashboard';
-  const [activeTab, setActiveTab] = useState<string>(initialTab);
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl === 'dashboard' || tabFromUrl === 'history') {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
 
-  const mockData = useDashboardData();
-  const {
-    data: realData,
-    loading: dashboardLoading,
-    error: dashboardError,
-  } = useHarvestDashboard();
-  const dashboardData = USE_REAL_DATA ? realData : mockData;
-
-  // Update URL when tab changes
   const handleTabChange = (newTab: string) => {
     setActiveTab(newTab);
     const params = new URLSearchParams(searchParams.toString());
     params.set('tab', newTab);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
-
-  // Initialize tab from URL on mount
-  useEffect(() => {
-    const tabFromUrl = searchParams.get('tab');
-    if (
-      tabFromUrl &&
-      (tabFromUrl === 'dashboard' || tabFromUrl === 'history')
-    ) {
-      setActiveTab(tabFromUrl);
-    }
-  }, [searchParams]);
 
   const {
     harvests,
@@ -122,7 +103,6 @@ export default function HarvestPage() {
                 title={t.pages.harvest?.historyTitle || 'Harvest History'}
                 onCreateBatch={handleCreateBatch}
               />
-
               <HarvestTable
                 harvests={harvests ?? []}
                 onEdit={handleEditRequest}

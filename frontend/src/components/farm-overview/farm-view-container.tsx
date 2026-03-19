@@ -1,4 +1,4 @@
-import type { Bay, ParameterType } from '@/lib/farm-types';
+import type { Bay, ParameterType } from '@/types/farm.types';
 import { EmptyState } from './empty-state';
 import { ParGraphSection } from './par-graph-section';
 import { ViewSensorMap } from './views/view-sensor-map';

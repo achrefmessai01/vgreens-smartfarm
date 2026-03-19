@@ -1,7 +1,6 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import * as React from 'react';
 import {
   Select,
   SelectContent,
@@ -10,9 +9,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useI18n } from '@/i18n';
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch';
-import * as React from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { greenhouseOptions } from '../create-batch-data';
+import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 interface FormFieldProps {
   formData: BatchFormData;

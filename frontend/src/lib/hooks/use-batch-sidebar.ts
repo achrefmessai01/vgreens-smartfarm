@@ -5,10 +5,10 @@ import {
   useDeleteHarvestImageMutation,
   useUpdateHarvestMutation,
 } from '@/generated/graphql';
+import type { BatchDetailsData } from '@/types/batch-sidebar.types';
+import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
 import { computeAvgBrix, extractStoragePathFromUrl } from '@/lib/harvest-utils';
 import * as React from 'react';
-import { useHarvestPhotosUpload } from '../hooks/use-harvest-photos-upload';
-import type { BatchDetailsData } from './batch-sidebar-types';
 
 export type SidebarMode = 'create' | 'edit';
 
@@ -36,14 +36,11 @@ export function useBatchSidebar({
     setLocalData(batchData);
   }, [batchData]);
 
-  // Cleanup object URLs on unmount to prevent memory leaks
   React.useEffect(() => {
     return () => {
       if (localData?.photos) {
         localData.photos.forEach((url) => {
-          if (url.startsWith('blob:')) {
-            URL.revokeObjectURL(url);
-          }
+          if (url.startsWith('blob:')) URL.revokeObjectURL(url);
         });
       }
     };
@@ -83,7 +80,6 @@ export function useBatchSidebar({
     async (files: File[]) => {
       const uploadedUrls = await uploadPhotos(files);
       if (uploadedUrls.length === 0) return;
-
       setLocalData((prev) =>
         prev ? { ...prev, photos: [...prev.photos, ...uploadedUrls] } : prev,
       );
@@ -94,23 +90,17 @@ export function useBatchSidebar({
   const handleRemovePhoto = React.useCallback(
     async (indexToRemove: number) => {
       let urlToRemove: string | undefined;
-
       setLocalData((prev) => {
         if (!prev) return prev;
-
         urlToRemove = prev.photos[indexToRemove];
-
         return {
           ...prev,
-          photos: prev.photos.filter((_, index) => index !== indexToRemove),
+          photos: prev.photos.filter((_, i) => i !== indexToRemove),
         };
       });
-
       if (!urlToRemove) return;
-
       const path = extractStoragePathFromUrl(urlToRemove);
       if (!path) return;
-
       try {
         await deleteHarvestImage({ variables: { path } });
       } catch (error) {

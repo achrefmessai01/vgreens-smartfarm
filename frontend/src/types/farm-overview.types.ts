@@ -1,7 +1,3 @@
-/**
- * Types for the farm overview page and hook.
- */
-
 export interface FarmOverviewTranslations {
   combined: string;
   greenHouse1: string;

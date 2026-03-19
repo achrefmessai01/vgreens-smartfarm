@@ -1,15 +1,15 @@
 'use client';
 
+import * as React from 'react';
+import { useI18n } from '@/i18n';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { TableCell } from '@/components/ui/table';
-import { useI18n } from '@/i18n';
+import type { Warning, WarningStatus } from '@/types/warning.types';
+import { DataTable, type Column } from '@/components/ui/data-table';
+import { CheckCircle2, AlertCircle, CheckCircle } from 'lucide-react';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
-import type { Warning, WarningStatus } from '@/lib/warning-types';
-import { AlertCircle, CheckCircle, CheckCircle2 } from 'lucide-react';
-import * as React from 'react';
 
 interface WarningTableProps {
   warnings: Warning[];

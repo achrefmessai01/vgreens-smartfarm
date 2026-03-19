@@ -1,6 +1,10 @@
 import { gql } from '@apollo/client';
-import { ErrorLogData } from './error-logging-types';
-import { enrichErrorData, generateSessionId, setupGlobalErrorListeners } from './error-enrichment';
+import { ErrorLogData, EnrichedErrorData } from './error-logging-types';
+import {
+  enrichErrorData,
+  generateSessionId,
+  setupGlobalErrorListeners,
+} from './error-enrichment';
 import { ErrorQueue } from './error-queue';
 
 const LOG_SYSTEM_ERROR = gql`
@@ -42,8 +46,12 @@ export class ErrorLoggingService {
   /**
    * Send enriched error to backend via GraphQL
    */
-  private async sendErrorToBackend(errorData: any): Promise<void> {
-    const graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:3001/graphql';
+  private async sendErrorToBackend(
+    errorData: EnrichedErrorData,
+  ): Promise<void> {
+    const graphqlEndpoint =
+      process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT ||
+      'http://localhost:3001/graphql';
     const response = await fetch(graphqlEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1,9 +1,9 @@
-export { BatchSidebar } from './batch-sidebar/batch-sidebar';
-export { CreateBatchDialog } from './create-batch/create-batch-dialog';
 export { HarvestDashboard } from './dashboard';
-export { DeleteHarvestDialog } from './dialogs/delete-harvest-dialog';
-export { EditHarvestDialog } from './dialogs/edit-harvest-dialog';
+export { HarvestTable } from './table/harvest-table';
 export { HarvestDetails } from './table/harvest-details';
 export { HarvestPageHeader } from './harvest-page-header';
+export { BatchSidebar } from './batch-sidebar/batch-sidebar';
 export { HarvestPageSkeleton } from './harvest-page-skeleton';
-export { HarvestTable } from './table/harvest-table';
+export { EditHarvestDialog } from './dialogs/edit-harvest-dialog';
+export { DeleteHarvestDialog } from './dialogs/delete-harvest-dialog';
+export { CreateBatchDialog } from './create-batch/create-batch-dialog';

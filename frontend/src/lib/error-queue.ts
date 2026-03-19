@@ -1,14 +1,14 @@
-import { ErrorLogData, EnrichedErrorData } from './error-logging-types';
+import { EnrichedErrorData } from './error-logging-types';
 
 /**
  * Error queue management for handling offline scenarios and batch sending
  */
 export class ErrorQueue {
-  private errorQueue: ErrorLogData[] = [];
+  private errorQueue: EnrichedErrorData[] = [];
   private isOnline = typeof window !== 'undefined' ? navigator.onLine : true;
-  private flushCallback: (error: ErrorLogData) => Promise<void>;
+  private flushCallback: (error: EnrichedErrorData) => Promise<void>;
 
-  constructor(flushCallback: (error: ErrorLogData) => Promise<void>) {
+  constructor(flushCallback: (error: EnrichedErrorData) => Promise<void>) {
     this.flushCallback = flushCallback;
     if (typeof window !== 'undefined') {
       this.setupEventListeners();
@@ -19,7 +19,7 @@ export class ErrorQueue {
   /**
    * Add error to queue (will attempt immediate send if online)
    */
-  async addError(errorData: ErrorLogData): Promise<void> {
+  async addError(errorData: EnrichedErrorData): Promise<void> {
     if (this.isOnline) {
       try {
         await this.flushCallback(errorData);
@@ -36,7 +36,7 @@ export class ErrorQueue {
   /**
    * Store error in localStorage as fallback
    */
-  private storeErrorLocally(errorData: ErrorLogData): void {
+  private storeErrorLocally(errorData: EnrichedErrorData): void {
     if (typeof window === 'undefined') return;
     
     try {

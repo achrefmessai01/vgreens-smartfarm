@@ -1,8 +1,4 @@
-/**
- * URL parsing and sync helpers for farm overview state.
- */
-
-import type { ParameterType } from '@/lib/farm-types';
+import type { ParameterType } from '@/types/farm.types';
 import {
   PARAM_GREENHOUSE,
   PARAM_PARAMETER,
@@ -10,7 +6,7 @@ import {
   VALID_PARAMETERS,
   VALID_VIEW_MODES,
   type ViewMode,
-} from './farm-overview.constants';
+} from '@/lib/farm-overview-constants';
 
 /** Parse greenhouse URL value to tab index (0 = combined, 1 = GH1, 2 = GH2). */
 export function parseGreenhouseTab(value: string | null): number {

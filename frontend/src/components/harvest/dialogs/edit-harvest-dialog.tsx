@@ -1,16 +1,16 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import * as React from 'react';
 import {
   Dialog,
+  DialogTitle,
+  DialogHeader,
   DialogContent,
   DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from '@/components/ui/dialog';
 import { useI18n } from '@/i18n';
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch';
-import * as React from 'react';
+import { Button } from '@/components/ui/button';
+import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 import { CreateBatchFormFields } from '../create-batch/form/create-batch-form-fields';
 
 interface EditHarvestDialogProps {

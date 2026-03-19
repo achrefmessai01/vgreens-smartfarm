@@ -1,125 +1,32 @@
 'use client';
 
-import { PageHeader } from '@/components/layout';
+import * as React from 'react';
 import {
-  TenantForm,
   TenantTable,
+  TenantForm,
   type TenantFormRef,
 } from '@/components/tenants';
-import type { TenantFormData } from '@/components/tenants/tenant-form';
+import { ConfirmationDialog } from '@/components/users';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout';
 import { ContentSkeleton } from '@/components/ui/content-skeleton';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
 import {
   Sheet,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
+  SheetFooter,
 } from '@/components/ui/sheet';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
-import { ConfirmationDialog } from '@/components/users';
-import type { Tenant } from '@/generated/graphql';
-import {
-  useCreateTenantMutation,
-  useDeleteTenantMutation,
-  useTenantsQuery,
-  useUpdateTenantMutation,
-} from '@/generated/graphql';
 import { useI18n } from '@/i18n';
-import { useRouter } from 'next/navigation';
-import * as React from 'react';
+import { useTenantsPage } from '@/lib/hooks/use-tenants-page';
 
 export default function TenantsPage() {
   const { t } = useI18n();
-  const router = useRouter();
-  const { data, loading, refetch } = useTenantsQuery();
-  const [createTenant] = useCreateTenantMutation();
-  const [updateTenant] = useUpdateTenantMutation();
-  const [deleteTenant] = useDeleteTenantMutation();
-
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-  const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [deleteConfirmation, setDeleteConfirmation] = React.useState<{
-    tenant: Tenant | null;
-    isOpen: boolean;
-  }>({ tenant: null, isOpen: false });
   const formRef = React.useRef<TenantFormRef>(null);
+  const page = useTenantsPage();
 
-  const tenants = data?.tenants || [];
-
-  const handleCreate = () => {
-    setEditingTenant(null);
-    setIsSheetOpen(true);
-  };
-
-  const handleEdit = (tenant: Tenant) => {
-    setEditingTenant(tenant);
-    setIsSheetOpen(true);
-  };
-
-  const handleDelete = (tenant: Tenant) => {
-    setDeleteConfirmation({ tenant, isOpen: true });
-  };
-
-  const handleManageFeatures = (tenant: Tenant) => {
-    router.push(`/admin/tenants/${tenant.id}/features`);
-  };
-
-  const handleRowClick = (tenant: Tenant) => {
-    router.push(`/tenant/farm-overview?tenantId=${tenant.id}`);
-  };
-
-  const confirmDelete = async () => {
-    if (deleteConfirmation.tenant) {
-      setIsLoading(true);
-      try {
-        await deleteTenant({
-          variables: { id: deleteConfirmation.tenant.id },
-        });
-        await refetch();
-        setDeleteConfirmation({ tenant: null, isOpen: false });
-      } catch (error) {
-        console.error('Error deleting tenant:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const handleSubmit = async (formData: TenantFormData) => {
-    setIsLoading(true);
-    try {
-      if (editingTenant) {
-        await updateTenant({
-          variables: {
-            id: editingTenant.id,
-            input: formData,
-          },
-        });
-      } else {
-        await createTenant({
-          variables: {
-            input: formData,
-          },
-        });
-      }
-      await refetch();
-      setIsSheetOpen(false);
-      setEditingTenant(null);
-    } catch (error) {
-      console.error('Error saving tenant:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsSheetOpen(false);
-    setEditingTenant(null);
-  };
-
-  if (loading) {
+  if (page.loading) {
     return (
       <div className="flex flex-col gap-6 h-full min-h-0">
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
@@ -137,56 +44,53 @@ export default function TenantsPage() {
 
       <div className="flex-1 min-h-0">
         <TenantTable
-          tenants={tenants}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onCreate={handleCreate}
-          onManageFeatures={handleManageFeatures}
-          onRowClick={handleRowClick}
+          tenants={page.tenants}
+          onEdit={page.handleEdit}
+          onDelete={page.handleDelete}
+          onCreate={page.handleCreate}
+          onManageFeatures={page.handleManageFeatures}
+          onRowClick={page.handleRowClick}
         />
       </div>
 
-      {/* Create/Edit Sheet */}
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+      <Sheet open={page.isSheetOpen} onOpenChange={page.setIsSheetOpen}>
         <SheetContent
           side="right"
           className="w-full sm:max-w-lg flex flex-col p-0 gap-0"
         >
           <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
             <SheetTitle className="dark:text-card-foreground">
-              {editingTenant
+              {page.editingTenant
                 ? t.pages.admin.tenants.editTenant
                 : t.pages.admin.tenants.createTenant}
             </SheetTitle>
           </SheetHeader>
-
           <div className="flex-1 overflow-y-auto px-6 py-4">
             <TenantForm
               ref={formRef}
-              initialData={editingTenant || undefined}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-              isLoading={isLoading}
+              initialData={page.editingTenant || undefined}
+              onSubmit={page.handleSubmit}
+              onCancel={page.handleCancel}
+              isLoading={page.isLoading}
             />
           </div>
-
           <SheetFooter className="flex-row gap-2 px-6 py-4 border-t dark:border-primary-foreground/30">
             <Button
               variant="outline"
-              onClick={handleCancel}
-              disabled={isLoading}
+              onClick={page.handleCancel}
+              disabled={page.isLoading}
               className="flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
             >
               {t.pages.users.cancel}
             </Button>
             <Button
               onClick={() => formRef.current?.submit()}
-              disabled={isLoading}
+              disabled={page.isLoading}
               className="flex-1"
             >
-              {isLoading
+              {page.isLoading
                 ? '...'
-                : editingTenant
+                : page.editingTenant
                   ? t.pages.admin.tenants.updateTenant
                   : t.pages.admin.tenants.createTenant}
             </Button>
@@ -194,11 +98,10 @@ export default function TenantsPage() {
         </SheetContent>
       </Sheet>
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
-        open={deleteConfirmation.isOpen}
+        open={page.deleteConfirmation.isOpen}
         onOpenChange={(open) =>
-          setDeleteConfirmation({ tenant: null, isOpen: open })
+          page.setDeleteConfirmation({ tenant: null, isOpen: open })
         }
         title={t.pages.admin.tenants.deleteTenant}
         description={
@@ -208,26 +111,26 @@ export default function TenantsPage() {
         confirmLabel={t.pages.users.delete}
         cancelLabel={t.pages.users.cancel}
         variant="destructive"
-        onConfirm={confirmDelete}
-        onCancel={() => setDeleteConfirmation({ tenant: null, isOpen: false })}
+        onConfirm={page.confirmDelete}
+        onCancel={() =>
+          page.setDeleteConfirmation({ tenant: null, isOpen: false })
+        }
       >
-        {deleteConfirmation.tenant && (
-          <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg dark:bg-primary-foreground/10 dark:border dark:border-primary-foreground/20">
-              <p className="font-medium dark:text-card-foreground">
-                {deleteConfirmation.tenant.name}
+        {page.deleteConfirmation.tenant && (
+          <div className="p-4 bg-muted rounded-lg dark:bg-primary-foreground/10 dark:border dark:border-primary-foreground/20">
+            <p className="font-medium dark:text-card-foreground">
+              {page.deleteConfirmation.tenant.name}
+            </p>
+            {page.deleteConfirmation.tenant.companyName && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {page.deleteConfirmation.tenant.companyName}
               </p>
-              {deleteConfirmation.tenant.companyName && (
-                <p className="text-sm text-muted-foreground dark:text-muted-foreground/80 mt-1">
-                  {deleteConfirmation.tenant.companyName}
-                </p>
-              )}
-              {deleteConfirmation.tenant.email && (
-                <p className="text-sm text-muted-foreground dark:text-muted-foreground/80 mt-1">
-                  {deleteConfirmation.tenant.email}
-                </p>
-              )}
-            </div>
+            )}
+            {page.deleteConfirmation.tenant.email && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {page.deleteConfirmation.tenant.email}
+              </p>
+            )}
           </div>
         )}
       </ConfirmationDialog>

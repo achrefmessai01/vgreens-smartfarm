@@ -3,7 +3,7 @@ import type {
   EnvironmentData,
   IrrigationData,
   TunnelStatus,
-} from './tunnel-types'
+} from '@/types/tunnel.types'
 
 // Thresholds for status determination
 const TEMP_NORMAL = { min: 18, max: 25 }

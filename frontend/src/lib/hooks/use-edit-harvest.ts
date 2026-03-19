@@ -1,11 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import {
-  useUpdateHarvestMutation,
-  type HarvestsQuery,
-} from '@/generated/graphql';
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch';
+import { useUpdateHarvestMutation, type HarvestsQuery } from '@/generated/graphql';
+import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
 
@@ -66,8 +63,7 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
       e.preventDefault();
       const validationErrors = validateEditForm(formData);
       setErrors(validationErrors);
-      if (Object.keys(validationErrors).length > 0) return;
-      if (!harvestId) return;
+      if (Object.keys(validationErrors).length > 0 || !harvestId) return;
 
       try {
         await updateHarvest({

@@ -1,4 +1,4 @@
-import type { Bay, PlantSlot, ParameterValue, Row, Column } from '@/lib/farm-types'
+import type { Bay, PlantSlot, ParameterValue, Row, Column } from '@/types/farm.types'
 
 /** One row from getBucketData (each item has a "data" object). */
 export type InfluxDBRow = Record<string, unknown> & {

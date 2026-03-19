@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { PageHeader } from '@/components/layout'
 import { SystemError, ReportSeverity, ErrorSource, ErrorType } from '@/generated/graphql'
 import { useI18n } from '@/i18n'
-import { SystemErrorsStatsCards, SystemErrorsFilters } from './system-errors-stats-filters'
+import { SystemErrorsStatsCards, SystemErrorsFilters } from '@/components/system-errors'
 import {
     useSystemErrors,
     useResolveSystemError,

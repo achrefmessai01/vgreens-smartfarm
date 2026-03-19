@@ -8,7 +8,7 @@ import {
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
-import type { Camera } from '@/lib/camera-types'
+import type { Camera } from '@/types/camera.types'
 import { Video, Circle, Clock, Monitor } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
