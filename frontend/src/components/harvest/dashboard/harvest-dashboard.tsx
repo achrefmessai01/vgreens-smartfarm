@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { BrixTrendChart } from './charts/brix-trend-chart';
 import { ClassDistributionChart } from './charts/class-distribution-chart';
 import { CumulativeYieldChart } from './charts/cumulative-yield-chart';
-import { DashboardFilters } from './dashboard-filters';
+import { DashboardFilters } from './harvest-dashboard-filters';
 import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
 import { MetricCard } from './metric-card';
 import { YieldOverTimeChart } from './yield-over-time-chart';
