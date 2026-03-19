@@ -257,6 +257,17 @@ export class SystemErrorsService {
     });
   }
 
+  /**
+   * Noisy error types that are expected on a resource-constrained machine.
+   * These are filtered out to prevent the timeout → log → timeout feedback loop.
+   */
+  private static readonly SKIP_ERROR_TYPES = new Set([
+    ErrorType.TIMEOUT_ERROR,
+    ErrorType.VALIDATION_ERROR,
+    ErrorType.AUTHENTICATION_ERROR,
+    ErrorType.AUTHORIZATION_ERROR,
+  ]);
+
   async logBackendError(errorData: {
     error: Error;
     httpMethod?: string;
@@ -267,11 +278,25 @@ export class SystemErrorsService {
     tenantId?: string;
     requestPayload?: Record<string, any>;
     severity?: ReportSeverity;
-  }): Promise<SystemError> {
+  }): Promise<SystemError | null> {
+    const errorType = this.classifyBackendError(errorData.error);
+    const severity = errorData.severity ?? this.determineSeverity(errorData.error);
+
+    // Drop noisy / low-value errors — don't touch the database for these
+    if (
+      SystemErrorsService.SKIP_ERROR_TYPES.has(errorType) ||
+      severity === ReportSeverity.LOW
+    ) {
+      this.logger.debug(
+        `Skipping non-critical error [${errorType}/${severity}]: ${errorData.error.message}`,
+      );
+      return null;
+    }
+
     return this.logError({
       source: ErrorSource.BACKEND,
-      errorType: this.classifyBackendError(errorData.error),
-      severity: errorData.severity || this.determineSeverity(errorData.error),
+      errorType,
+      severity,
       errorMessage: errorData.error.message,
       stackTrace: errorData.error.stack,
       httpMethod: errorData.httpMethod,
@@ -280,7 +305,7 @@ export class SystemErrorsService {
       component: errorData.component,
       userId: errorData.userId,
       tenantId: errorData.tenantId,
-      requestPayload: errorData.requestPayload
+      requestPayload: errorData.requestPayload,
     });
   }
 
@@ -314,21 +339,33 @@ export class SystemErrorsService {
   }
 
   /**
-   * Auto-determine error severity
+   * Auto-determine error severity.
+   * Timeouts are rated LOW — on a small machine they are expected noise,
+   * not actionable incidents. Logging them at MEDIUM would persist them
+   * and create a feedback loop that makes the problem worse.
    */
   private determineSeverity(error: Error): ReportSeverity {
     const message = error.message.toLowerCase();
-    
+    const name = error.name.toLowerCase();
+
     if (message.includes('critical') || message.includes('fatal')) {
       return ReportSeverity.CRITICAL;
     }
     if (message.includes('urgent') || message.includes('security')) {
-      return ReportSeverity.URGENT; 
+      return ReportSeverity.URGENT;
     }
     if (message.includes('database') || message.includes('connection')) {
       return ReportSeverity.HIGH;
     }
-    
+    // Timeouts on a slow/small machine are noise — mark LOW so they get dropped
+    if (
+      name.includes('timeout') ||
+      message.includes('timeout') ||
+      message.includes('etimedout')
+    ) {
+      return ReportSeverity.LOW;
+    }
+
     return ReportSeverity.MEDIUM;
   }
 }
