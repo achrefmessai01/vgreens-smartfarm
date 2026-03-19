@@ -226,25 +226,27 @@ export function TenantTable({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4 h-full min-h-0">
       <div className="flex justify-end">
         <Button onClick={onCreate}>
           <Plus className="mr-2 h-4 w-4" />
           {t.pages.admin.tenants.createTenant}
         </Button>
       </div>
-      <DataTable
-        data={tenants}
-        columns={columns}
-        renderRow={renderRow}
-        renderCard={renderCard}
-        onRowClick={onRowClick}
-        paginationVariant="compact"
-        defaultPageSize={paginationConfig.defaultPageSize}
-        pageSizeOptions={paginationConfig.pageSizeOptions}
-        paginationLabels={paginationConfig.paginationLabels}
-        responsiveBreakpoint="xl"
-      />
+      <div className="flex-1 min-h-0">
+        <DataTable
+          data={tenants}
+          columns={columns}
+          renderRow={renderRow}
+          renderCard={renderCard}
+          onRowClick={onRowClick}
+          paginationVariant="compact"
+          defaultPageSize={paginationConfig.defaultPageSize}
+          pageSizeOptions={paginationConfig.pageSizeOptions}
+          paginationLabels={paginationConfig.paginationLabels}
+          responsiveBreakpoint="xl"
+        />
+      </div>
     </div>
   );
 }

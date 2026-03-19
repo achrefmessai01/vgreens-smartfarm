@@ -1,94 +1,94 @@
-'use client'
+'use client';
 
+import { PageHeader } from '@/components/layout';
 import {
-  TenantTable,
   TenantForm,
+  TenantTable,
   type TenantFormRef,
-} from '@/components/tenants'
-import {
-  useTenantsQuery,
-  useCreateTenantMutation,
-  useUpdateTenantMutation,
-  useDeleteTenantMutation,
-} from '@/generated/graphql'
+} from '@/components/tenants';
+import type { TenantFormData } from '@/components/tenants/tenant-form';
+import { Button } from '@/components/ui/button';
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
-} from '@/components/ui/sheet'
-import { useI18n } from '@/i18n'
-import * as React from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/layout'
-import { ContentSkeleton } from '@/components/ui/content-skeleton'
-import { TableSkeleton } from '@/components/ui/table-skeleton'
-import type { Tenant } from '@/generated/graphql'
-import { ConfirmationDialog } from '@/components/users'
-import type { TenantFormData } from '@/components/tenants/tenant-form'
+} from '@/components/ui/sheet';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
+import { ConfirmationDialog } from '@/components/users';
+import type { Tenant } from '@/generated/graphql';
+import {
+  useCreateTenantMutation,
+  useDeleteTenantMutation,
+  useTenantsQuery,
+  useUpdateTenantMutation,
+} from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { useRouter } from 'next/navigation';
+import * as React from 'react';
 
 export default function TenantsPage() {
-  const { t } = useI18n()
-  const router = useRouter()
-  const { data, loading, refetch } = useTenantsQuery()
-  const [createTenant] = useCreateTenantMutation()
-  const [updateTenant] = useUpdateTenantMutation()
-  const [deleteTenant] = useDeleteTenantMutation()
+  const { t } = useI18n();
+  const router = useRouter();
+  const { data, loading, refetch } = useTenantsQuery();
+  const [createTenant] = useCreateTenantMutation();
+  const [updateTenant] = useUpdateTenantMutation();
+  const [deleteTenant] = useDeleteTenantMutation();
 
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false)
-  const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null)
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+  const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState<{
-    tenant: Tenant | null
-    isOpen: boolean
-  }>({ tenant: null, isOpen: false })
-  const formRef = React.useRef<TenantFormRef>(null)
+    tenant: Tenant | null;
+    isOpen: boolean;
+  }>({ tenant: null, isOpen: false });
+  const formRef = React.useRef<TenantFormRef>(null);
 
-  const tenants = data?.tenants || []
+  const tenants = data?.tenants || [];
 
   const handleCreate = () => {
-    setEditingTenant(null)
-    setIsSheetOpen(true)
-  }
+    setEditingTenant(null);
+    setIsSheetOpen(true);
+  };
 
   const handleEdit = (tenant: Tenant) => {
-    setEditingTenant(tenant)
-    setIsSheetOpen(true)
-  }
+    setEditingTenant(tenant);
+    setIsSheetOpen(true);
+  };
 
   const handleDelete = (tenant: Tenant) => {
-    setDeleteConfirmation({ tenant, isOpen: true })
-  }
+    setDeleteConfirmation({ tenant, isOpen: true });
+  };
 
   const handleManageFeatures = (tenant: Tenant) => {
-    router.push(`/admin/tenants/${tenant.id}/features`)
-  }
+    router.push(`/admin/tenants/${tenant.id}/features`);
+  };
 
   const handleRowClick = (tenant: Tenant) => {
-    router.push(`/tenant/farm-overview?tenantId=${tenant.id}`)
-  }
+    router.push(`/tenant/farm-overview?tenantId=${tenant.id}`);
+  };
 
   const confirmDelete = async () => {
     if (deleteConfirmation.tenant) {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
         await deleteTenant({
           variables: { id: deleteConfirmation.tenant.id },
-        })
-        await refetch()
-        setDeleteConfirmation({ tenant: null, isOpen: false })
+        });
+        await refetch();
+        setDeleteConfirmation({ tenant: null, isOpen: false });
       } catch (error) {
-        console.error('Error deleting tenant:', error)
+        console.error('Error deleting tenant:', error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
-  }
+  };
 
   const handleSubmit = async (formData: TenantFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       if (editingTenant) {
         await updateTenant({
@@ -96,53 +96,55 @@ export default function TenantsPage() {
             id: editingTenant.id,
             input: formData,
           },
-        })
+        });
       } else {
         await createTenant({
           variables: {
             input: formData,
           },
-        })
+        });
       }
-      await refetch()
-      setIsSheetOpen(false)
-      setEditingTenant(null)
+      await refetch();
+      setIsSheetOpen(false);
+      setEditingTenant(null);
     } catch (error) {
-      console.error('Error saving tenant:', error)
+      console.error('Error saving tenant:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setIsSheetOpen(false)
-    setEditingTenant(null)
-  }
+    setIsSheetOpen(false);
+    setEditingTenant(null);
+  };
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6 h-full min-h-0">
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
         <TableSkeleton columnCount={5} rowCount={8} />
       </div>
-    )
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 h-full min-h-0">
       <PageHeader
         title={t.pages.admin.tenants.title}
         subtitle={t.pages.admin.tenants.subtitle}
       />
 
-      <TenantTable
-        tenants={tenants}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onCreate={handleCreate}
-        onManageFeatures={handleManageFeatures}
-        onRowClick={handleRowClick}
-      />
+      <div className="flex-1 min-h-0">
+        <TenantTable
+          tenants={tenants}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onCreate={handleCreate}
+          onManageFeatures={handleManageFeatures}
+          onRowClick={handleRowClick}
+        />
+      </div>
 
       {/* Create/Edit Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -185,8 +187,8 @@ export default function TenantsPage() {
               {isLoading
                 ? '...'
                 : editingTenant
-                ? t.pages.admin.tenants.updateTenant
-                : t.pages.admin.tenants.createTenant}
+                  ? t.pages.admin.tenants.updateTenant
+                  : t.pages.admin.tenants.createTenant}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -230,5 +232,5 @@ export default function TenantsPage() {
         )}
       </ConfirmationDialog>
     </div>
-  )
+  );
 }
