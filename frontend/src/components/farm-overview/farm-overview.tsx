@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useI18n } from '@/i18n'
 import { TunnelCard } from './tunnel-card'
 import { SystemOverview } from './system-overview'
-import type { Tunnel } from '@/lib/tunnel-types'
+import type { Tunnel } from '@/types/tunnel.types'
 import type { SystemIrrigationData } from '@/lib/tunnel-data'
 
 interface FarmOverviewProps {

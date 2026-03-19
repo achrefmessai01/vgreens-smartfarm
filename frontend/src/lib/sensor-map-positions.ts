@@ -8,7 +8,7 @@
  * Device IDs vary per greenhouse (e.g. A_01–A_12, A_13–A_24).
  */
 
-import type { Bay, PlantSlot } from '@/lib/farm-types';
+import type { Bay, PlantSlot } from '@/types/farm.types';
 
 export type SensorMapType = 'air' | 'lux' | 'par' | 'soil';
 

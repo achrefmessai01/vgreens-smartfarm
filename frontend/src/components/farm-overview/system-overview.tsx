@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SensorGauge } from './sensor-gauge'
 import { Droplets } from 'lucide-react'
 import { useI18n } from '@/i18n'
-import type { TunnelStatus } from '@/lib/tunnel-types'
+import type { TunnelStatus } from '@/types/tunnel.types'
 
 interface SystemOverviewProps {
   pH: number

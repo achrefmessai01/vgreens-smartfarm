@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useI18n } from '@/i18n'
-import type { Warning } from '@/lib/warning-types'
+import type { Warning } from '@/types/warning.types'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,

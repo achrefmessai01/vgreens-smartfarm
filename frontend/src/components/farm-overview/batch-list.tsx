@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import type { Batch } from '@/lib/farm-types'
+import type { Batch } from '@/types/farm.types'
 import { getVarietyById } from '@/lib/variety-data'
 
 interface BatchListProps {

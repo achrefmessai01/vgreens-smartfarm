@@ -1,7 +1,7 @@
 'use client';
 
 import { StyledSelect } from '@/components/ui/styled-select';
-import type { ParameterType } from '@/lib/farm-types';
+import type { ParameterType } from '@/types/farm.types';
 
 interface ParameterSelectorProps {
   value: ParameterType;

@@ -1,4 +1,4 @@
-import type { Warning, Alert, WarningStatus } from './warning-types'
+import type { Warning, Alert, WarningStatus } from '@/types/warning.types'
 
 // In-memory storage for demo purposes
 // In a real app, this would be replaced with API calls

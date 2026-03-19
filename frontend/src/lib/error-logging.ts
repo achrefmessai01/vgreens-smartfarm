@@ -79,7 +79,7 @@ export class QuickErrorLogger {
     endpoint: string,
     method: string,
     statusCode: number,
-    response: any,
+    response: { message?: string } | Record<string, unknown>,
     component?: string
   ): Promise<void> {
     return this.logError({

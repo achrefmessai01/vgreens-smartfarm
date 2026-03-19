@@ -11,8 +11,8 @@ import { useI18n } from '@/i18n';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { idwInterpolate } from '@/lib/heatmap-utils';
-import { useFullMapData } from './view-single-bay.hooks';
-import type { ViewSingleBayProps } from './view-single-bay.types';
+import { useFullMapData } from '@/lib/hooks/use-full-map-data';
+import type { ViewSingleBayProps } from '@/types/view-single-bay.types';
 import { getLegendScale } from '@/components/farm-overview/parameter-color-legend';
 
 const HEATMAP_GRID_COLS = 80;

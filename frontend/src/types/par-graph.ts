@@ -1,4 +1,4 @@
-import type { Bay } from '@/lib/farm-types';
+import type { Bay } from '@/types/farm.types';
 
 export interface ParGraphSectionProps {
   bay: Bay | null;

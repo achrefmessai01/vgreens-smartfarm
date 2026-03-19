@@ -18,21 +18,23 @@ export class SystemErrorsService {
   /**
    * Log a system error with deduplication and alerting
    */
-  async logError(createSystemErrorInput: CreateSystemErrorInput): Promise<SystemError> {
+  async logError(
+    createSystemErrorInput: CreateSystemErrorInput,
+  ): Promise<SystemError> {
     try {
       // Create error hash for deduplication
       const errorHash = this.createErrorHash(
         createSystemErrorInput.errorMessage,
         createSystemErrorInput.stackTrace,
-        createSystemErrorInput.component
+        createSystemErrorInput.component,
       );
 
       // Check for existing error (within last hour for performance)
       const recentSimilarError = await this.systemErrorRepository
         .createQueryBuilder('error')
         .where('error.errorHash = :errorHash', { errorHash })
-        .andWhere('error.createdAt > :oneHourAgo', { 
-          oneHourAgo: new Date(Date.now() - 60 * 60 * 1000) 
+        .andWhere('error.createdAt > :oneHourAgo', {
+          oneHourAgo: new Date(Date.now() - 60 * 60 * 1000),
         })
         .getOne();
 
@@ -42,25 +44,30 @@ export class SystemErrorsService {
           occurrenceCount: recentSimilarError.occurrenceCount + 1,
           lastOccurredAt: new Date(),
           // Reset notification flag if it's been more than 15 minutes
-          isNotified: recentSimilarError.lastOccurredAt && 
-            (Date.now() - recentSimilarError.lastOccurredAt.getTime()) > 15 * 60 * 1000 
-            ? false 
-            : recentSimilarError.isNotified
+          isNotified:
+            recentSimilarError.lastOccurredAt &&
+            Date.now() - recentSimilarError.lastOccurredAt.getTime() >
+              15 * 60 * 1000
+              ? false
+              : recentSimilarError.isNotified,
         });
 
         const updatedError = await this.systemErrorRepository.findOne({
           where: { id: recentSimilarError.id },
-          relations: ['tenant', 'user', 'resolver']
+          relations: ['tenant', 'user', 'resolver'],
         });
 
         // Send alert for recurring high-severity errors
-        if (updatedError && !updatedError.isNotified && 
-            (updatedError.severity === ReportSeverity.CRITICAL || 
-             updatedError.severity === ReportSeverity.URGENT)) {
-          this.sendAlert(updatedError);
+        if (
+          updatedError &&
+          !updatedError.isNotified &&
+          (updatedError.severity === ReportSeverity.CRITICAL ||
+            updatedError.severity === ReportSeverity.URGENT)
+        ) {
+          void this.sendAlert(updatedError);
         }
 
-        return updatedError!;
+        return updatedError;
       }
 
       // Create new error record
@@ -77,22 +84,30 @@ export class SystemErrorsService {
       // Load relations
       const errorWithRelations = await this.systemErrorRepository.findOne({
         where: { id: savedError.id },
-        relations: ['tenant', 'user', 'resolver']
+        relations: ['tenant', 'user', 'resolver'],
       });
 
       // Send immediate alert for critical/urgent errors
-      if (errorWithRelations && 
-          (errorWithRelations.severity === ReportSeverity.CRITICAL || 
-           errorWithRelations.severity === ReportSeverity.URGENT)) {
-        this.sendAlert(errorWithRelations);
+      if (
+        errorWithRelations &&
+        (errorWithRelations.severity === ReportSeverity.CRITICAL ||
+          errorWithRelations.severity === ReportSeverity.URGENT)
+      ) {
+        void this.sendAlert(errorWithRelations);
       }
 
-      return errorWithRelations!;
-
-    } catch (error) {
-      this.logger.error(`Failed to log system error: ${error.message}`, error.stack);
+      return errorWithRelations;
+    } catch (error: unknown) {
+      const err = error as Error;
+      this.logger.error(
+        `Failed to log system error: ${err.message}`,
+        err.stack,
+      );
       // Fallback: still log to console if database fails
-      this.logger.error(`Original error: ${createSystemErrorInput.errorMessage}`, createSystemErrorInput.stackTrace);
+      this.logger.error(
+        `Original error: ${createSystemErrorInput.errorMessage}`,
+        createSystemErrorInput.stackTrace,
+      );
       throw error;
     }
   }
@@ -105,7 +120,7 @@ export class SystemErrorsService {
     offset: number = 0,
     severity?: ReportSeverity,
     source?: ErrorSource,
-    isResolved?: boolean
+    isResolved?: boolean,
   ): Promise<{ errors: SystemError[]; total: number }> {
     const queryBuilder = this.systemErrorRepository
       .createQueryBuilder('error')
@@ -144,34 +159,34 @@ export class SystemErrorsService {
       .createQueryBuilder('error')
       .select([
         'error.source as source',
-        'error.errorType as errorType', 
+        'error.errorType as errorType',
         'error.severity as severity',
         'COUNT(*) as count',
-        'SUM(error.occurrenceCount) as totalOccurrences'
+        'SUM(error.occurrenceCount) as totalOccurrences',
       ])
       .where('error.createdAt >= :sinceDate', { sinceDate })
       .groupBy('error.source, error.errorType, error.severity')
       .getRawMany();
 
     const unresolved = await this.systemErrorRepository.count({
-      where: { 
+      where: {
         isResolved: false,
-        createdAt: sinceDate
-      }
+        createdAt: sinceDate,
+      },
     });
 
     const critical = await this.systemErrorRepository.count({
       where: {
         severity: ReportSeverity.CRITICAL,
-        createdAt: sinceDate
-      }
+        createdAt: sinceDate,
+      },
     });
 
     return {
       stats,
       unresolved,
       critical,
-      timeframe: `${hours} hours`
+      timeframe: `${hours} hours`,
     };
   }
 
@@ -179,27 +194,31 @@ export class SystemErrorsService {
    * Mark error as resolved
    */
   async resolveError(
-    errorId: string, 
-    resolvedBy: string, 
-    resolutionNotes?: string
+    errorId: string,
+    resolvedBy: string,
+    resolutionNotes?: string,
   ): Promise<SystemError> {
     await this.systemErrorRepository.update(errorId, {
       isResolved: true,
       resolvedAt: new Date(),
       resolvedBy,
-      resolutionNotes
+      resolutionNotes,
     });
 
     return this.systemErrorRepository.findOne({
       where: { id: errorId },
-      relations: ['tenant', 'user', 'resolver']
-    })!;
+      relations: ['tenant', 'user', 'resolver'],
+    });
   }
 
   /**
    * Create hash for error deduplication
    */
-  private createErrorHash(message: string, stackTrace?: string, component?: string): string {
+  private createErrorHash(
+    message: string,
+    stackTrace?: string,
+    component?: string,
+  ): string {
     const hashInput = `${message}||${stackTrace || ''}||${component || ''}`;
     return createHash('md5').update(hashInput).digest('hex');
   }
@@ -218,7 +237,7 @@ export class SystemErrorsService {
         component: error.component,
         occurrences: error.occurrenceCount,
         tenantId: error.tenantId,
-        userId: error.userId
+        userId: error.userId,
       });
 
       // TODO: Implement real-time alerting
@@ -229,9 +248,10 @@ export class SystemErrorsService {
 
       // Mark as notified
       await this.systemErrorRepository.update(error.id, { isNotified: true });
-
-    } catch (alertError) {
-      this.logger.error(`Failed to send alert: ${alertError.message}`);
+    } catch (alertError: unknown) {
+      this.logger.error(
+        `Failed to send alert: ${(alertError as Error).message}`,
+      );
     }
   }
 
@@ -253,9 +273,20 @@ export class SystemErrorsService {
       source: ErrorSource.FRONTEND,
       errorType: ErrorType.RUNTIME_ERROR,
       severity: errorData.severity || ReportSeverity.MEDIUM,
-      ...errorData
+      ...errorData,
     });
   }
+
+  /**
+   * Noisy error types that are expected on a resource-constrained machine.
+   * These are filtered out to prevent the timeout → log → timeout feedback loop.
+   */
+  private static readonly SKIP_ERROR_TYPES = new Set([
+    ErrorType.TIMEOUT_ERROR,
+    ErrorType.VALIDATION_ERROR,
+    ErrorType.AUTHENTICATION_ERROR,
+    ErrorType.AUTHORIZATION_ERROR,
+  ]);
 
   async logBackendError(errorData: {
     error: Error;
@@ -267,11 +298,26 @@ export class SystemErrorsService {
     tenantId?: string;
     requestPayload?: Record<string, any>;
     severity?: ReportSeverity;
-  }): Promise<SystemError> {
+  }): Promise<SystemError | null> {
+    const errorType = this.classifyBackendError(errorData.error);
+    const severity =
+      errorData.severity ?? this.determineSeverity(errorData.error);
+
+    // Drop noisy / low-value errors — don't touch the database for these
+    if (
+      SystemErrorsService.SKIP_ERROR_TYPES.has(errorType) ||
+      severity === ReportSeverity.LOW
+    ) {
+      this.logger.debug(
+        `Skipping non-critical error [${errorType}/${severity}]: ${errorData.error.message}`,
+      );
+      return null;
+    }
+
     return this.logError({
       source: ErrorSource.BACKEND,
-      errorType: this.classifyBackendError(errorData.error),
-      severity: errorData.severity || this.determineSeverity(errorData.error),
+      errorType,
+      severity,
       errorMessage: errorData.error.message,
       stackTrace: errorData.error.stack,
       httpMethod: errorData.httpMethod,
@@ -280,7 +326,7 @@ export class SystemErrorsService {
       component: errorData.component,
       userId: errorData.userId,
       tenantId: errorData.tenantId,
-      requestPayload: errorData.requestPayload
+      requestPayload: errorData.requestPayload,
     });
   }
 
@@ -309,26 +355,38 @@ export class SystemErrorsService {
     if (message.includes('network') || message.includes('fetch')) {
       return ErrorType.NETWORK_ERROR;
     }
-    
+
     return ErrorType.RUNTIME_ERROR;
   }
 
   /**
-   * Auto-determine error severity
+   * Auto-determine error severity.
+   * Timeouts are rated LOW — on a small machine they are expected noise,
+   * not actionable incidents. Logging them at MEDIUM would persist them
+   * and create a feedback loop that makes the problem worse.
    */
   private determineSeverity(error: Error): ReportSeverity {
     const message = error.message.toLowerCase();
-    
+    const name = error.name.toLowerCase();
+
     if (message.includes('critical') || message.includes('fatal')) {
       return ReportSeverity.CRITICAL;
     }
     if (message.includes('urgent') || message.includes('security')) {
-      return ReportSeverity.URGENT; 
+      return ReportSeverity.URGENT;
     }
     if (message.includes('database') || message.includes('connection')) {
       return ReportSeverity.HIGH;
     }
-    
+    // Timeouts on a slow/small machine are noise — mark LOW so they get dropped
+    if (
+      name.includes('timeout') ||
+      message.includes('timeout') ||
+      message.includes('etimedout')
+    ) {
+      return ReportSeverity.LOW;
+    }
+
     return ReportSeverity.MEDIUM;
   }
 }

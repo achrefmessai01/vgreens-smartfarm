@@ -6,7 +6,7 @@ import {
   GreenhouseSummaryCard,
 } from './greenhouse-summary-card';
 import { Card } from '@/components/ui/card';
-import type { Bay } from '@/lib/farm-types';
+import type { Bay } from '@/types/farm.types';
 import { PARAMETER_PRIORITY } from '@/lib/parameter-status';
 import { ParGraphSection } from '@/components/farm-overview';
 import { getAverageParameterValue } from '@/lib/bay-parameter-utils';
