@@ -6,6 +6,7 @@ import {
   type FetchResult,
 } from '@apollo/client';
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
+import { apolloErrorLink, apolloRequestLoggingLink } from './apollo-error-handling';
 
 export const createApolloClient = (
   getToken: (options?: { skipCache?: boolean }) => Promise<string | null>,
@@ -114,7 +115,12 @@ export const createApolloClient = (
   });
 
   return new ApolloClient({
-    link: ApolloLink.from([authLink, errorLink, httpLink]),
+    link: ApolloLink.from([
+      apolloErrorLink,          // Enhanced error logging system
+      apolloRequestLoggingLink, // Request performance tracking
+      authLink, 
+      httpLink
+    ]),
     cache: new InMemoryCache(),
     defaultOptions: {
       watchQuery: {

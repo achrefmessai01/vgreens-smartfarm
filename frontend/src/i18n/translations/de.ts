@@ -456,6 +456,79 @@ export const de = {
         notAvailable: 'N/V',
         loading: 'Benutzer werden geladen...',
       },
+      reports: {
+        title: 'Error Reports Management',
+        subtitle: 'Monitor and manage error reports from users',
+        errorTitle: 'Error Title',
+        userEmail: 'User Email',
+        severity: 'Severity',
+        status: 'Status',
+        submittedBy: 'Submitted By',
+        submitted: 'Submitted',
+        created: 'Created',
+        lastUpdated: 'Last Updated',
+        actions: 'Actions',
+        searchPlaceholder: 'Search reports by title, user email...',
+        noReports: 'No error reports found',
+        loading: 'Loading reports...',
+        description: 'Description',
+        reproductionSteps: 'Steps to Reproduce',
+        expectedVsActual: 'Expected vs Actual',
+        type: 'Type',
+        source: 'Source',
+
+        details: {
+          title: 'Error Report Details',
+          subtitle: 'Review and update error report information',
+          basicInfo: 'Basic Information',
+          errorDescription: 'Error Description',
+          reproductionSteps: 'Steps to Reproduce',
+          expectedVsActual: 'Expected vs Actual',
+          adminControls: 'Admin Controls',
+          adminNotes: 'Admin Notes',
+          adminNotesPlaceholder:
+            'Add notes about investigation, resolution, etc.',
+          severityLevel: 'Severity Level',
+          update: 'Update Report',
+          cancel: 'Cancel',
+          close: 'Close',
+        },
+
+        statuses: {
+          open: 'Open',
+          inProgress: 'In Progress',
+          resolved: 'Resolved',
+          openDescription: 'New report awaiting review',
+          inProgressDescription: 'Report is being investigated',
+          resolvedDescription: 'Report has been resolved',
+        },
+
+        severities: {
+          low: 'Low',
+          medium: 'Medium',
+          high: 'High',
+          critical: 'Critical',
+          urgent: 'Urgent',
+          lowPriority: 'Low Priority',
+          mediumPriority: 'Medium Priority',
+          highPriority: 'High Priority',
+        },
+
+        reportActions: {
+          edit: 'Edit',
+          delete: 'Delete',
+          updateStatus: 'Update Status',
+          quickUpdate: 'Quick Update',
+        },
+
+        deleteDialog: {
+          title: 'Delete Error Report',
+          description:
+            'Are you sure you want to delete this error report? This action cannot be undone.',
+          confirm: 'Delete',
+          cancel: 'Cancel',
+        },
+      },
       tenants: {
         title: 'Mandantenverwaltung',
         subtitle: 'Verwalten Sie alle Mandanten im System',
@@ -639,6 +712,57 @@ export const de = {
       cancel: 'Abbrechen',
       save: 'Speichern',
       delete: 'Löschen',
+    },
+
+    reportStatus: {
+      title: 'Berichtstatus',
+      backToDashboard: 'Zurück zum Dashboard',
+      reportNotFound: 'Bericht nicht gefunden',
+      reportNotFoundDescription:
+        'Der gesuchte Bericht existiert nicht oder Sie haben keine Berechtigung, ihn anzuzeigen.',
+      loadingStatus: 'Lade Berichtstatus...',
+
+      status: {
+        open: 'Offen',
+        inProgress: 'In Bearbeitung',
+        resolved: 'Gelöst',
+        openDescription:
+          'Ihr Bericht wurde erhalten und wartet auf die Überprüfung.',
+        inProgressDescription: 'Unser Team untersucht Ihren Bericht aktiv.',
+        resolvedDescription:
+          'Ihr Bericht wurde gelöst! Vielen Dank, dass Sie uns bei der Verbesserung helfen.',
+      },
+
+      details: {
+        title: 'Berichtdetails',
+        description: 'Beschreibung',
+        reproductionSteps: 'Schritte zur Reproduktion',
+        expectedVsActual: 'Erwartet vs Tatsächlich',
+        adminNotes: 'Adminnotizen',
+      },
+
+      timeline: {
+        title: 'Status-Timeline',
+        submitted: 'Eingereicht',
+        underInvestigation: 'Unter Untersuchung',
+        pendingReview: 'Wartet auf Überprüfung',
+        pendingResolution: 'Wartet auf Lösung',
+      },
+
+      info: {
+        title: 'Berichtinformationen',
+        reportId: 'Bericht-ID',
+        submittedBy: 'Eingereicht von',
+        lastUpdated: 'Zuletzt aktualisiert',
+        resolvedBy: 'Gelöst von',
+      },
+
+      contact: {
+        title: 'Benötigen Sie Hilfe?',
+        description:
+          'Wenn Sie Fragen zu diesem Bericht haben, kontaktieren Sie bitte unser Support-Team.',
+        submitAnother: 'Weiteren Bericht einreichen',
+      },
     },
   },
 } as const;
