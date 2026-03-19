@@ -1,24 +1,24 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
-import { MetricCard } from './metric-card';
-import { YieldOverTimeChart } from './yield-over-time-chart';
-import { ClassDistributionChart } from './class-distribution-chart';
-import { BrixTrendChart } from './brix-trend-chart';
-import { CumulativeYieldChart } from './cumulative-yield-chart';
-import { DashboardFilters } from './dashboard-filters';
-import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
-import {
-  Target,
-  AlertTriangle,
-  Activity,
-  TrendingUp,
-  Package,
-} from 'lucide-react';
 import {
   useHarvestDashboard,
   type DateFilter,
 } from '@/lib/hooks/use-harvest-dashboard';
+import {
+  Activity,
+  AlertTriangle,
+  Package,
+  Target,
+  TrendingUp,
+} from 'lucide-react';
+import { useState } from 'react';
+import { BrixTrendChart } from './charts/brix-trend-chart';
+import { ClassDistributionChart } from './charts/class-distribution-chart';
+import { CumulativeYieldChart } from './charts/cumulative-yield-chart';
+import { YieldOverTimeChart } from './charts/yield-over-time-chart';
+import { DashboardFilters } from './harvest-dashboard-filters';
+import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
+import { MetricCard } from './metric-card/metric-card';
 
 interface HarvestDashboardProps {
   className?: string;

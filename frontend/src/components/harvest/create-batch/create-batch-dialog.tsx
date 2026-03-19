@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { useI18n } from '@/i18n'
-import type { CreateHarvestMutation } from '@/generated/graphql'
-import { CreateBatchFormFields } from './create-batch-form-fields'
-import { useCreateBatchForm } from './use-create-batch-form'
+} from '@/components/ui/dialog';
+import type { CreateHarvestMutation } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import * as React from 'react';
+import { CreateBatchFormFields } from './form/create-batch-form-fields';
+import { useCreateBatchForm } from './use-create-batch-form';
 
 interface CreateBatchDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onCreated?: (harvest: CreateHarvestMutation['createHarvest']) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated?: (harvest: CreateHarvestMutation['createHarvest']) => void;
 }
 
 export function CreateBatchDialog({
@@ -24,22 +24,22 @@ export function CreateBatchDialog({
   onOpenChange,
   onCreated,
 }: CreateBatchDialogProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
   const { formData, setFormData, errors, loading, reset, handleSubmit } =
     useCreateBatchForm({
       onSuccess: (harvest) => {
-        onOpenChange(false)
-        onCreated?.(harvest)
+        onOpenChange(false);
+        onCreated?.(harvest);
       },
-    })
+    });
 
   const handleOpenChange = React.useCallback(
     (nextOpen: boolean) => {
-      if (!nextOpen) reset()
-      onOpenChange(nextOpen)
+      if (!nextOpen) reset();
+      onOpenChange(nextOpen);
     },
     [reset, onOpenChange],
-  )
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -72,12 +72,12 @@ export function CreateBatchDialog({
             </Button>
             <Button type="submit" className="flex-1" disabled={loading}>
               {loading
-                ? (t.pages.harvest?.creating || 'Creating...')
-                : (t.pages.harvest?.createBatch || 'Create Batch')}
+                ? t.pages.harvest?.creating || 'Creating...'
+                : t.pages.harvest?.createBatch || 'Create Batch'}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

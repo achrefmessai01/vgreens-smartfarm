@@ -1,21 +1,21 @@
-'use client'
+'use client';
 
-import { useI18n } from '@/i18n'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { TableCell } from '@/components/ui/table'
-import type { Feature } from '@/generated/graphql'
-import { Edit2, Trash2, Plus } from 'lucide-react'
-import { DataTable, type Column } from '@/components/ui/data-table'
-import { usePaginationConfig } from '@/lib/hooks/use-pagination-config'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { DataTable, type Column } from '@/components/ui/data-table/data-table';
+import { TableCell } from '@/components/ui/table';
+import type { Feature } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import { Edit2, Plus, Trash2 } from 'lucide-react';
 
 interface FeatureTableProps {
-  features: Feature[]
-  onEdit: (feature: Feature) => void
-  onDelete: (feature: Feature) => void
-  onCreate: () => void
-  isLoading?: boolean
+  features: Feature[];
+  onEdit: (feature: Feature) => void;
+  onDelete: (feature: Feature) => void;
+  onCreate: () => void;
+  isLoading?: boolean;
 }
 
 export function FeatureTable({
@@ -25,8 +25,8 @@ export function FeatureTable({
   onCreate,
   isLoading = false,
 }: FeatureTableProps) {
-  const { t } = useI18n()
-  const paginationConfig = usePaginationConfig()
+  const { t } = useI18n();
+  const paginationConfig = usePaginationConfig();
   const columns: Column<Feature>[] = [
     {
       key: 'key',
@@ -53,7 +53,7 @@ export function FeatureTable({
       header: t.pages.admin.features.actions,
       headerClassName: 'text-right',
     },
-  ]
+  ];
 
   const renderRow = (feature: Feature) => (
     <>
@@ -101,7 +101,7 @@ export function FeatureTable({
         </div>
       </TableCell>
     </>
-  )
+  );
 
   const renderCard = (feature: Feature) => (
     <Card className="gap-0 overflow-hidden border border-border/60 py-0 shadow-none">
@@ -156,27 +156,29 @@ export function FeatureTable({
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4 h-full min-h-0">
       <div className="flex justify-end">
         <Button onClick={onCreate} disabled={isLoading}>
           <Plus className="mr-2 h-4 w-4" />
           {t.pages.admin.features.createFeature}
         </Button>
       </div>
-      <DataTable
-        data={features}
-        columns={columns}
-        renderRow={renderRow}
-        renderCard={renderCard}
-        paginationVariant="compact"
-        defaultPageSize={paginationConfig.defaultPageSize}
-        pageSizeOptions={paginationConfig.pageSizeOptions}
-        paginationLabels={paginationConfig.paginationLabels}
-        responsiveBreakpoint="xl"
-      />
+      <div className="flex-1 min-h-0">
+        <DataTable
+          data={features}
+          columns={columns}
+          renderRow={renderRow}
+          renderCard={renderCard}
+          paginationVariant="compact"
+          defaultPageSize={paginationConfig.defaultPageSize}
+          pageSizeOptions={paginationConfig.pageSizeOptions}
+          paginationLabels={paginationConfig.paginationLabels}
+          responsiveBreakpoint="xl"
+        />
+      </div>
     </div>
-  )
+  );
 }

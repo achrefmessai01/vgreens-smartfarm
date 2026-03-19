@@ -1,6 +1,14 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface BrixTrendData {
   date: string;
@@ -55,27 +63,38 @@ export function BrixTrendChart({ data, className }: BrixTrendChartProps) {
         </h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart
+              data={data}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               <defs>
                 <linearGradient id="brixGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-60" stroke="#94a3b8" />
-              <XAxis 
-                dataKey="date" 
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="opacity-60"
+                stroke="#94a3b8"
+              />
+              <XAxis
+                dataKey="date"
                 fontSize={12}
                 className="text-muted-foreground"
                 angle={-45}
                 textAnchor="end"
                 interval={0}
               />
-              <YAxis 
+              <YAxis
                 fontSize={12}
                 className="text-muted-foreground"
                 domain={[6, 9]}
-                label={{ value: t.pages.harvest?.brixValue || 'Brix (°Bx)', angle: -90, position: 'insideLeft' }}
+                label={{
+                  value: t.pages.harvest?.brixValue || 'Brix (°Bx)',
+                  angle: -90,
+                  position: 'insideLeft',
+                }}
               />
               <Tooltip content={<CustomTooltip />} />
               <Line
@@ -84,7 +103,7 @@ export function BrixTrendChart({ data, className }: BrixTrendChartProps) {
                 stroke="#06b6d4"
                 strokeWidth={3}
                 dot={<CustomDot />}
-                activeDot={{ r: 6, className: "drop-shadow-lg" }}
+                activeDot={{ r: 6, className: 'drop-shadow-lg' }}
                 strokeDasharray="5 5"
                 style={{
                   filter: 'drop-shadow(0 2px 4px rgba(6, 182, 212, 0.3))',

@@ -1,6 +1,14 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface YieldOverTimeData {
   date: string;
@@ -44,7 +52,10 @@ const CustomDot = (props: any) => {
   );
 };
 
-export function YieldOverTimeChart({ data, className }: YieldOverTimeChartProps) {
+export function YieldOverTimeChart({
+  data,
+  className,
+}: YieldOverTimeChartProps) {
   const { t } = useI18n();
 
   return (
@@ -55,26 +66,37 @@ export function YieldOverTimeChart({ data, className }: YieldOverTimeChartProps)
         </h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart
+              data={data}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               <defs>
                 <linearGradient id="yieldGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-60" stroke="#94a3b8" />
-              <XAxis 
-                dataKey="date" 
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="opacity-60"
+                stroke="#94a3b8"
+              />
+              <XAxis
+                dataKey="date"
                 fontSize={12}
                 className="text-muted-foreground"
                 angle={-45}
                 textAnchor="end"
                 interval={0}
               />
-              <YAxis 
+              <YAxis
                 fontSize={12}
                 className="text-muted-foreground"
-                label={{ value: t.pages.harvest?.yieldKg || 'Yield (kg)', angle: -90, position: 'insideLeft' }}
+                label={{
+                  value: t.pages.harvest?.yieldKg || 'Yield (kg)',
+                  angle: -90,
+                  position: 'insideLeft',
+                }}
               />
               <Tooltip content={<CustomTooltip />} />
               <Line
@@ -83,7 +105,7 @@ export function YieldOverTimeChart({ data, className }: YieldOverTimeChartProps)
                 stroke="#3b82f6"
                 strokeWidth={3}
                 dot={<CustomDot />}
-                activeDot={{ r: 6, className: "drop-shadow-lg" }}
+                activeDot={{ r: 6, className: 'drop-shadow-lg' }}
                 style={{
                   filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))',
                 }}

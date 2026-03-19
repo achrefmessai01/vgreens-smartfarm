@@ -1,93 +1,93 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { PageHeader } from '@/components/layout'
-import { ContentSkeleton } from '@/components/ui/content-skeleton'
-import { TableSkeleton } from '@/components/ui/table-skeleton'
-import {
-  UserManagementTable,
-  UserManagementForm,
-  type UserManagementFormRef,
-  type UserFormData,
-} from '@/components/users'
-import { ConfirmationDialog } from '@/components/users'
+import { PageHeader } from '@/components/layout';
+import { Button } from '@/components/ui/button';
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
-} from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
+} from '@/components/ui/sheet';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
 import {
-  useUsersQuery,
+  ConfirmationDialog,
+  UserManagementForm,
+  UserManagementTable,
+  type UserFormData,
+  type UserManagementFormRef,
+} from '@/components/users';
+import type { User } from '@/generated/graphql';
+import {
   useCreateUserMutation,
-  useUpdateUserMutation,
   useDeleteUserMutation,
   UserRole,
   UserStatus,
-} from '@/generated/graphql'
-import type { User } from '@/generated/graphql'
-import { useCurrentUser } from '@/lib/hooks/use-current-user'
+  useUpdateUserMutation,
+  useUsersQuery,
+} from '@/generated/graphql';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import * as React from 'react';
 
 export default function TenantUsersPage() {
-  const { user: currentUser } = useCurrentUser()
-  const { data, loading, refetch } = useUsersQuery()
-  const [createUser] = useCreateUserMutation()
-  const [updateUser] = useUpdateUserMutation()
-  const [deleteUser] = useDeleteUserMutation()
+  const { user: currentUser } = useCurrentUser();
+  const { data, loading, refetch } = useUsersQuery();
+  const [createUser] = useCreateUserMutation();
+  const [updateUser] = useUpdateUserMutation();
+  const [deleteUser] = useDeleteUserMutation();
 
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false)
-  const [editingUser, setEditingUser] = React.useState<User | null>(null)
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+  const [editingUser, setEditingUser] = React.useState<User | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState<{
-    user: User | null
-    isOpen: boolean
-  }>({ user: null, isOpen: false })
-  const formRef = React.useRef<UserManagementFormRef>(null)
+    user: User | null;
+    isOpen: boolean;
+  }>({ user: null, isOpen: false });
+  const formRef = React.useRef<UserManagementFormRef>(null);
 
   // Filter users to only show users from the current tenant
   // The backend already filters by tenant, but we add an extra check here
-  const tenantId = currentUser?.tenantId
+  const tenantId = currentUser?.tenantId;
   const users = React.useMemo(() => {
-    if (!data?.users) return []
+    if (!data?.users) return [];
     // Filter to only show users from the current tenant
-    return data.users.filter((user) => user.tenantId === tenantId) as User[]
-  }, [data?.users, tenantId])
+    return data.users.filter((user) => user.tenantId === tenantId) as User[];
+  }, [data?.users, tenantId]);
 
   const handleCreate = () => {
-    setEditingUser(null)
-    setIsSheetOpen(true)
-  }
+    setEditingUser(null);
+    setIsSheetOpen(true);
+  };
 
   const handleEdit = (user: User) => {
-    setEditingUser(user)
-    setIsSheetOpen(true)
-  }
+    setEditingUser(user);
+    setIsSheetOpen(true);
+  };
 
   const handleDelete = (user: User) => {
-    setDeleteConfirmation({ user, isOpen: true })
-  }
+    setDeleteConfirmation({ user, isOpen: true });
+  };
 
   const confirmDelete = async () => {
     if (deleteConfirmation.user) {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
         await deleteUser({
           variables: { id: deleteConfirmation.user.id },
-        })
-        await refetch()
-        setDeleteConfirmation({ user: null, isOpen: false })
+        });
+        await refetch();
+        setDeleteConfirmation({ user: null, isOpen: false });
       } catch (error) {
-        console.error('Error deleting user:', error)
+        console.error('Error deleting user:', error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
-  }
+  };
 
   const handleSubmit = async (formData: UserFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       if (editingUser) {
         await updateUser({
@@ -95,10 +95,10 @@ export default function TenantUsersPage() {
             id: editingUser.id,
             input: formData,
           },
-        })
-        await refetch()
-        setIsSheetOpen(false)
-        setEditingUser(null)
+        });
+        await refetch();
+        setIsSheetOpen(false);
+        setEditingUser(null);
       } else {
         // Create user - will send invitation
         // Tenant users can only create users for their own tenant
@@ -113,11 +113,11 @@ export default function TenantUsersPage() {
               tenantId: tenantId, // Always use current tenant's ID
             },
           },
-        })
+        });
 
-        await refetch()
-        setIsSheetOpen(false)
-        setEditingUser(null)
+        await refetch();
+        setIsSheetOpen(false);
+        setEditingUser(null);
 
         // Show success message with invitation info
         if (result.data?.createUser) {
@@ -125,22 +125,22 @@ export default function TenantUsersPage() {
           // You can check the user status to know if invitation was sent
           if (result.data.createUser.status === UserStatus.Pending) {
             // You can show a toast or alert here
-            console.log('User created with pending invitation')
+            console.log('User created with pending invitation');
           }
         }
       }
     } catch (error) {
-      console.error('Error saving user:', error)
+      console.error('Error saving user:', error);
       // You can show error toast here
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setIsSheetOpen(false)
-    setEditingUser(null)
-  }
+    setIsSheetOpen(false);
+    setEditingUser(null);
+  };
 
   if (loading) {
     return (
@@ -148,24 +148,26 @@ export default function TenantUsersPage() {
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
         <TableSkeleton columnCount={5} rowCount={8} />
       </div>
-    )
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 h-full min-h-0">
       <PageHeader
         title="User Management"
         subtitle="Manage users for your tenant"
       />
 
-      <UserManagementTable
-        users={users}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onCreate={handleCreate}
-        isLoading={isLoading}
-        hideTenantColumn={true}
-      />
+      <div className="flex-1 min-h-0">
+        <UserManagementTable
+          users={users}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onCreate={handleCreate}
+          isLoading={isLoading}
+          hideTenantColumn={true}
+        />
+      </div>
 
       {/* Create/Edit Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -246,7 +248,7 @@ export default function TenantUsersPage() {
         )}
       </ConfirmationDialog>
     </div>
-  )
+  );
 }
 
 

@@ -1,20 +1,24 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useI18n } from '@/i18n'
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch'
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useI18n } from '@/i18n';
+import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch';
+import * as React from 'react';
 
 interface FormFieldProps {
-  formData: BatchFormData
-  setFormData: React.Dispatch<React.SetStateAction<BatchFormData>>
-  errors: BatchFormErrors
+  formData: BatchFormData;
+  setFormData: React.Dispatch<React.SetStateAction<BatchFormData>>;
+  errors: BatchFormErrors;
 }
 
-export function VarietyField({ formData, setFormData, errors }: FormFieldProps) {
-  const { t } = useI18n()
-  const h = t.pages.harvest
+export function VarietyField({
+  formData,
+  setFormData,
+  errors,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
 
   return (
     <div className="space-y-2">
@@ -35,17 +39,22 @@ export function VarietyField({ formData, setFormData, errors }: FormFieldProps) 
         <p className="text-sm text-destructive">{errors.variety}</p>
       )}
     </div>
-  )
+  );
 }
 
-export function PlantingDateField({ formData, setFormData, errors }: FormFieldProps) {
-  const { t } = useI18n()
-  const h = t.pages.harvest
+export function PlantingDateField({
+  formData,
+  setFormData,
+  errors,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
 
   return (
     <div className="space-y-2">
       <Label htmlFor="plantingDate" className="text-sm font-medium">
-        {h?.plantingDate ?? 'Planting Date'} <span className="text-destructive">*</span>
+        {h?.plantingDate ?? 'Planting Date'}{' '}
+        <span className="text-destructive">*</span>
       </Label>
       <Input
         id="plantingDate"
@@ -60,17 +69,22 @@ export function PlantingDateField({ formData, setFormData, errors }: FormFieldPr
         <p className="text-sm text-destructive">{errors.plantingDate}</p>
       )}
     </div>
-  )
+  );
 }
 
-export function CultivationAreaField({ formData, setFormData, errors }: FormFieldProps) {
-  const { t } = useI18n()
-  const h = t.pages.harvest
+export function CultivationAreaField({
+  formData,
+  setFormData,
+  errors,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
 
   return (
     <div className="space-y-2">
       <Label htmlFor="cultivationArea" className="text-sm font-medium">
-        {h?.cultivationArea ?? 'Cultivation Area (m²)'} <span className="text-destructive">*</span>
+        {h?.cultivationArea ?? 'Cultivation Area (m²)'}{' '}
+        <span className="text-destructive">*</span>
       </Label>
       <Input
         id="cultivationArea"
@@ -91,5 +105,5 @@ export function CultivationAreaField({ formData, setFormData, errors }: FormFiel
         <p className="text-sm text-destructive">{errors.cultivationArea}</p>
       )}
     </div>
-  )
+  );
 }

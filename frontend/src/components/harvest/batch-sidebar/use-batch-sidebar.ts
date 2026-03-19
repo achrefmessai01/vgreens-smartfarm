@@ -1,14 +1,14 @@
 'use client';
 
-import * as React from 'react';
 import {
   HarvestStatus,
-  useUpdateHarvestMutation,
   useDeleteHarvestImageMutation,
+  useUpdateHarvestMutation,
 } from '@/generated/graphql';
-import type { BatchDetailsData } from './batch-sidebar-types';
-import { useHarvestPhotosUpload } from './use-harvest-photos-upload';
 import { computeAvgBrix, extractStoragePathFromUrl } from '@/lib/harvest-utils';
+import * as React from 'react';
+import { useHarvestPhotosUpload } from '../hooks/use-harvest-photos-upload';
+import type { BatchDetailsData } from './batch-sidebar-types';
 
 export type SidebarMode = 'create' | 'edit';
 

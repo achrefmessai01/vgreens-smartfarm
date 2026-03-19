@@ -1,27 +1,27 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
-import { CreateBatchFormFields } from './create-batch-form-fields'
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch'
+} from '@/components/ui/dialog';
+import { useI18n } from '@/i18n';
+import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch';
+import * as React from 'react';
+import { CreateBatchFormFields } from '../create-batch/form/create-batch-form-fields';
 
 interface EditHarvestDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  formData: BatchFormData
-  setFormData: React.Dispatch<React.SetStateAction<BatchFormData>>
-  errors: BatchFormErrors
-  loading: boolean
-  onSubmit: (e: React.FormEvent) => void
-  onReset: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  formData: BatchFormData;
+  setFormData: React.Dispatch<React.SetStateAction<BatchFormData>>;
+  errors: BatchFormErrors;
+  loading: boolean;
+  onSubmit: (e: React.FormEvent) => void;
+  onReset: () => void;
 }
 
 export function EditHarvestDialog({
@@ -34,24 +34,22 @@ export function EditHarvestDialog({
   onSubmit,
   onReset,
 }: EditHarvestDialogProps) {
-  const { t } = useI18n()
-  const h = t.pages.harvest
+  const { t } = useI18n();
+  const h = t.pages.harvest;
 
   const handleOpenChange = React.useCallback(
     (nextOpen: boolean) => {
-      if (!nextOpen) onReset()
-      onOpenChange(nextOpen)
+      if (!nextOpen) onReset();
+      onOpenChange(nextOpen);
     },
     [onReset, onOpenChange],
-  )
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {h?.editHarvest ?? 'Edit Harvest'}
-          </DialogTitle>
+          <DialogTitle>{h?.editHarvest ?? 'Edit Harvest'}</DialogTitle>
           <DialogDescription>
             {h?.editHarvestDescription ?? 'Update the harvest record details.'}
           </DialogDescription>
@@ -82,5 +80,5 @@ export function EditHarvestDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
