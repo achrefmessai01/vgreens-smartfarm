@@ -1,6 +1,14 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface CumulativeYieldData {
   date: string;
@@ -48,49 +56,70 @@ const CustomDot = (props: any) => {
   );
 };
 
-export function CumulativeYieldChart({ data, className }: CumulativeYieldChartProps) {
+export function CumulativeYieldChart({
+  data,
+  className,
+}: CumulativeYieldChartProps) {
   const { t } = useI18n();
 
   return (
     <Card className={className}>
       <div className="p-6">
         <h3 className="text-lg font-semibold mb-4">
-          {t.pages.harvest?.cumulativeYieldProgress || 'Cumulative Yield Progress'}
+          {t.pages.harvest?.cumulativeYieldProgress ||
+            'Cumulative Yield Progress'}
         </h3>
-        
+
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <AreaChart
+              data={data}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
               <defs>
-                <linearGradient id="cumulativeGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                <linearGradient
+                  id="cumulativeGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
                 </linearGradient>
                 <linearGradient id="wasteGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1}/>
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
                 </linearGradient>
                 <filter id="glow">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                  <feMerge> 
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="opacity-60" stroke="#94a3b8" />
-              <XAxis 
-                dataKey="date" 
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="opacity-60"
+                stroke="#94a3b8"
+              />
+              <XAxis
+                dataKey="date"
                 fontSize={12}
                 className="text-muted-foreground"
                 angle={-45}
                 textAnchor="end"
                 interval={0}
               />
-              <YAxis 
+              <YAxis
                 fontSize={12}
                 className="text-muted-foreground"
-                label={{ value: t.pages.harvest?.totalYieldKg || 'Total Yield (kg)', angle: -90, position: 'insideLeft' }}
+                label={{
+                  value: t.pages.harvest?.totalYieldKg || 'Total Yield (kg)',
+                  angle: -90,
+                  position: 'insideLeft',
+                }}
               />
               <Tooltip content={<CustomTooltip />} />
               <Area
@@ -101,7 +130,7 @@ export function CumulativeYieldChart({ data, className }: CumulativeYieldChartPr
                 strokeDasharray="3 0"
                 fill="url(#cumulativeGradient)"
                 dot={<CustomDot />}
-                activeDot={{ r: 6, className: "drop-shadow-lg" }}
+                activeDot={{ r: 6, className: 'drop-shadow-lg' }}
                 style={{
                   filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))',
                 }}
@@ -113,8 +142,8 @@ export function CumulativeYieldChart({ data, className }: CumulativeYieldChartPr
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 fill="url(#wasteGradient)"
-                dot={{ r: 3, fill: "#ef4444" }}
-                activeDot={{ r: 5, fill: "#ef4444" }}
+                dot={{ r: 3, fill: '#ef4444' }}
+                activeDot={{ r: 5, fill: '#ef4444' }}
                 style={{
                   filter: 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))',
                 }}
@@ -122,7 +151,7 @@ export function CumulativeYieldChart({ data, className }: CumulativeYieldChartPr
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        
+
         {/* Legend */}
         <div className="flex items-center justify-center gap-6 mt-4">
           <div className="flex items-center gap-2">
