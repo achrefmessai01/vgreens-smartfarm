@@ -1,30 +1,30 @@
-'use client'
+'use client';
 
-import { Button } from '@/components/ui/button'
-import { DataTable, type Column } from '@/components/ui/data-table'
-import { TableCell } from '@/components/ui/table'
-import { ErrorReport } from '@/generated/graphql'
-import { ErrorReportSeverityBadge } from './error-report-severity-badge'
-import { ErrorReportQuickActions } from './error-report-quick-actions'
-import { formatDate } from '@/lib/utils/error-report-utils'
-import { Edit2, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button';
+import { DataTable, type Column } from '@/components/ui/data-table/data-table';
+import { TableCell } from '@/components/ui/table';
+import { ErrorReport } from '@/generated/graphql';
+import { formatDate } from '@/lib/utils/error-report-utils';
+import { Edit2, Trash2 } from 'lucide-react';
+import { ErrorReportQuickActions } from './error-report-quick-actions';
+import { ErrorReportSeverityBadge } from './error-report-severity-badge';
 
 interface ErrorReportTableProps {
-  reports: ErrorReport[]
-  isLoading?: boolean
-  onEdit: (report: ErrorReport) => void
-  onDelete: (report: ErrorReport) => void
-  onStatusUpdate: (id: string, status: any) => Promise<void>
-  isUpdating?: boolean
+  reports: ErrorReport[];
+  isLoading?: boolean;
+  onEdit: (report: ErrorReport) => void;
+  onDelete: (report: ErrorReport) => void;
+  onStatusUpdate: (id: string, status: any) => Promise<void>;
+  isUpdating?: boolean;
 }
 
-export function ErrorReportTable({ 
-  reports, 
+export function ErrorReportTable({
+  reports,
   isLoading = false,
-  onEdit, 
-  onDelete, 
+  onEdit,
+  onDelete,
   onStatusUpdate,
-  isUpdating = false
+  isUpdating = false,
 }: ErrorReportTableProps) {
   // Table column configuration
   const columns: Column<ErrorReport>[] = [
@@ -38,33 +38,37 @@ export function ErrorReportTable({
             ID: {report.id.slice(0, 8)}...
           </div>
         </div>
-      )
+      ),
     },
     {
       key: 'userEmail',
       header: 'Submitted By',
       accessor: (report) => (
         <div className="text-sm">
-          <div className="font-medium">{report.user.firstName} {report.user.lastName}</div>
+          <div className="font-medium">
+            {report.user.firstName} {report.user.lastName}
+          </div>
           <div className="text-gray-500">{report.userEmail}</div>
         </div>
-      )
+      ),
     },
     {
       key: 'severity',
       header: 'Severity',
-      accessor: (report) => <ErrorReportSeverityBadge severity={report.severity} />
+      accessor: (report) => (
+        <ErrorReportSeverityBadge severity={report.severity} />
+      ),
     },
     {
       key: 'status',
       header: 'Status',
       accessor: (report) => (
-        <ErrorReportQuickActions 
+        <ErrorReportQuickActions
           report={report}
           onStatusUpdate={onStatusUpdate}
           isUpdating={isUpdating}
         />
-      )
+      ),
     },
     {
       key: 'createdAt',
@@ -76,11 +80,11 @@ export function ErrorReportTable({
             {new Intl.DateTimeFormat('en-US', {
               hour: '2-digit',
               minute: '2-digit',
-              hour12: false
+              hour12: false,
             }).format(new Date(report.createdAt))}
           </div>
         </div>
-      )
+      ),
     },
     {
       key: 'actions',
@@ -104,9 +108,9 @@ export function ErrorReportTable({
             <Trash2 className="h-3 w-3" />
           </Button>
         </div>
-      )
-    }
-  ]
+      ),
+    },
+  ];
 
   // Table row renderer (for mobile responsive view)
   const renderRow = (report: ErrorReport) => (
@@ -121,13 +125,17 @@ export function ErrorReportTable({
       </TableCell>
       <TableCell>
         <div className="text-sm">
-          <div className="font-medium">{report.user.firstName} {report.user.lastName}</div>
+          <div className="font-medium">
+            {report.user.firstName} {report.user.lastName}
+          </div>
           <div className="text-gray-500">{report.userEmail}</div>
         </div>
       </TableCell>
-      <TableCell><ErrorReportSeverityBadge severity={report.severity} /></TableCell>
       <TableCell>
-        <ErrorReportQuickActions 
+        <ErrorReportSeverityBadge severity={report.severity} />
+      </TableCell>
+      <TableCell>
+        <ErrorReportQuickActions
           report={report}
           onStatusUpdate={onStatusUpdate}
           isUpdating={isUpdating}
@@ -140,7 +148,7 @@ export function ErrorReportTable({
             {new Intl.DateTimeFormat('en-US', {
               hour: '2-digit',
               minute: '2-digit',
-              hour12: false
+              hour12: false,
             }).format(new Date(report.createdAt))}
           </div>
         </div>
@@ -166,7 +174,7 @@ export function ErrorReportTable({
         </div>
       </TableCell>
     </>
-  )
+  );
 
   return (
     <DataTable
@@ -176,15 +184,17 @@ export function ErrorReportTable({
       isLoading={isLoading}
       searchConfig={{
         placeholder: 'Search reports by title, user email...',
-        onSearch: (query, report) => 
+        onSearch: (query, report) =>
           report.errorTitle.toLowerCase().includes(query.toLowerCase()) ||
           report.userEmail.toLowerCase().includes(query.toLowerCase()) ||
-          (report.user.firstName + ' ' + report.user.lastName).toLowerCase().includes(query.toLowerCase())
+          (report.user.firstName + ' ' + report.user.lastName)
+            .toLowerCase()
+            .includes(query.toLowerCase()),
       }}
       emptyState={{
         title: 'No error reports found',
         description: 'No error reports found',
       }}
     />
-  )
+  );
 }

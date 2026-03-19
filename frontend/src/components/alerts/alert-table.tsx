@@ -1,14 +1,17 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { DataTable } from '@/components/ui/data-table'
-import { Alert } from '@/generated/graphql'
-import { useI18n } from '@/i18n'
-import { usePaginationConfig } from '@/lib/hooks/use-pagination-config'
-import type { AlertsFilterInput } from '@/lib/types/alerts-filter'
-import { getTimestampMs, type AlertTableUser } from './alert-table-utils'
-import { useAlertTableColumns, useAlertTableFilters } from './alert-table-config'
-import { useAlertTableRow } from './alert-table-rows'
+import { DataTable } from '@/components/ui/data-table/data-table';
+import { Alert } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import type { AlertsFilterInput } from '@/lib/types/alerts-filter';
+import * as React from 'react';
+import {
+  useAlertTableColumns,
+  useAlertTableFilters,
+} from './alert-table-config';
+import { useAlertTableRow } from './alert-table-rows';
+import { getTimestampMs, type AlertTableUser } from './alert-table-utils';
 
 interface AlertTableProps {
   alerts: Alert[];
@@ -37,21 +40,21 @@ export function AlertTable({
   isLoading = false,
   tableLoading = false,
 }: AlertTableProps) {
-  const { t } = useI18n()
-  const paginationConfig = usePaginationConfig()
-  
-  const columns = useAlertTableColumns()
-  const filterConfigs = useAlertTableFilters(filter, onFilterChange, users)
-  
+  const { t } = useI18n();
+  const paginationConfig = usePaginationConfig();
+
+  const columns = useAlertTableColumns();
+  const filterConfigs = useAlertTableFilters(filter, onFilterChange, users);
+
   const actionHandlers = {
     onAcknowledge,
     onResolve,
     onEdit,
     onDelete,
     isLoading,
-  }
-  
-  const { renderRow, renderCard } = useAlertTableRow(actionHandlers)
+  };
+
+  const { renderRow, renderCard } = useAlertTableRow(actionHandlers);
 
   const sortedAlerts = React.useMemo(
     () =>
@@ -63,9 +66,9 @@ export function AlertTable({
   );
 
   const alertsT = t.pages.alerts as typeof t.pages.alerts & {
-    searchPlaceholder?: string
-    dateRangePlaceholder?: string
-  }
+    searchPlaceholder?: string;
+    dateRangePlaceholder?: string;
+  };
 
   return (
     <DataTable
