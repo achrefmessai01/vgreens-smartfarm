@@ -2,7 +2,7 @@ import * as React from 'react';
 import type {
   FullMapDataResult,
   SensorWithPosition,
-} from './view-single-bay.types';
+} from '@/types/view-single-bay.types';
 import {
   bayHasDynamicPositions,
   getSlotPositionsFromBay,
