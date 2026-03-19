@@ -6,7 +6,7 @@ import {
   Package,
 } from 'lucide-react';
 import { useI18n } from '@/i18n';
-import { MetricCard } from './metric-card';
+import { MetricCard } from './metric-card/metric-card';
 import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
 
 interface DashboardMetricsGridProps {

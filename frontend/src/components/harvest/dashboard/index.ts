@@ -1,10 +1,13 @@
+export {
+  MetricCardSkeleton,
+  MetricCardSkeletonCompact,
+} from './metric-card/metric-card-skeleton';
+export { MetricCard } from './metric-card/metric-card';
 export { HarvestDashboard } from './harvest-dashboard';
-export { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
-export { MetricCard } from './metric-card';
-export { MetricCardSkeleton, MetricCardSkeletonCompact } from './metric-card-skeleton';
-export { YieldOverTimeChart } from './yield-over-time-chart';
-export { ClassDistributionChart } from './class-distribution-chart';
-export { BrixTrendChart } from './brix-trend-chart';
-export { CumulativeYieldChart } from './cumulative-yield-chart';
-export { DashboardMetricsGrid } from './dashboard-metrics-grid';
+export { BrixTrendChart } from './charts/brix-trend-chart';
 export { DashboardChartsGrid } from './dashboard-charts-grid';
+export { DashboardMetricsGrid } from './dashboard-metrics-grid';
+export { YieldOverTimeChart } from './charts/yield-over-time-chart';
+export { CumulativeYieldChart } from './charts/cumulative-yield-chart';
+export { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
+export { ClassDistributionChart } from './charts/class-distribution-chart';

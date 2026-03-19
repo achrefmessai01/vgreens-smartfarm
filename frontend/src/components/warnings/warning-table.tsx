@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { TableCell } from '@/components/ui/table'
-import type { Warning, WarningStatus } from '@/types/warning.types'
-import { DataTable, type Column } from '@/components/ui/data-table'
-import { CheckCircle2, AlertCircle, CheckCircle } from 'lucide-react'
-import { usePaginationConfig } from '@/lib/hooks/use-pagination-config'
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { TableCell } from '@/components/ui/table';
+import type { Warning, WarningStatus } from '@/types/warning.types';
+import { DataTable, type Column } from '@/components/ui/data-table';
+import { CheckCircle2, AlertCircle, CheckCircle } from 'lucide-react';
+import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
 
 interface WarningTableProps {
-  warnings: Warning[]
-  onAcknowledge: (warning: Warning) => void
-  onResolve: (warning: Warning) => void
-  onRowClick?: (warning: Warning) => void
-  isAlert?: boolean
+  warnings: Warning[];
+  onAcknowledge: (warning: Warning) => void;
+  onResolve: (warning: Warning) => void;
+  onRowClick?: (warning: Warning) => void;
+  isAlert?: boolean;
 }
 
 export function WarningTable({
@@ -26,20 +26,20 @@ export function WarningTable({
   onRowClick,
   isAlert = false,
 }: WarningTableProps) {
-  const { t } = useI18n()
-  const paginationConfig = usePaginationConfig()
+  const { t } = useI18n();
+  const paginationConfig = usePaginationConfig();
   const [statusFilter, setStatusFilter] = React.useState<WarningStatus | 'all'>(
-    'all'
-  )
+    'all',
+  );
 
-  const translations = isAlert ? t.pages.alerts : t.pages.warnings
+  const translations = isAlert ? t.pages.alerts : t.pages.warnings;
 
   const filteredWarnings = React.useMemo(() => {
     if (statusFilter === 'all') {
-      return warnings
+      return warnings;
     }
-    return warnings.filter((warning) => warning.status === statusFilter)
-  }, [warnings, statusFilter])
+    return warnings.filter((warning) => warning.status === statusFilter);
+  }, [warnings, statusFilter]);
 
   const getStatusBadge = (status: WarningStatus) => {
     const statusConfig = {
@@ -58,33 +58,33 @@ export function WarningTable({
         variant: 'default' as const,
         icon: CheckCircle,
       },
-    }
+    };
 
-    const config = statusConfig[status]
-    const Icon = config.icon
+    const config = statusConfig[status];
+    const Icon = config.icon;
 
     return (
       <Badge variant={config.variant} className="gap-1">
         <Icon className="h-3 w-3" />
         {config.label}
       </Badge>
-    )
-  }
+    );
+  };
 
   const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
-    return date.toLocaleDateString()
-  }
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
 
   const columns: Column<Warning>[] = [
     {
@@ -113,7 +113,7 @@ export function WarningTable({
       header: 'Actions',
       headerClassName: 'text-right',
     },
-  ]
+  ];
 
   const renderRow = (warning: Warning) => (
     <>
@@ -134,7 +134,10 @@ export function WarningTable({
             <Button
               variant="outline"
               size="sm"
-              onClick={(e) =>  { e.stopPropagation(); onAcknowledge(warning); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAcknowledge(warning);
+              }}
               className="h-8 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
             >
               {translations.acknowledge}
@@ -144,7 +147,10 @@ export function WarningTable({
             <Button
               variant="default"
               size="sm"
-              onClick={(e) => { e.stopPropagation(); onResolve(warning); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onResolve(warning);
+              }}
               className="h-8"
             >
               {translations.resolve}
@@ -153,7 +159,7 @@ export function WarningTable({
         </div>
       </TableCell>
     </>
-  )
+  );
 
   const renderCard = (warning: Warning) => (
     <Card className="gap-0 overflow-hidden border border-border/60 py-0 shadow-none">
@@ -197,8 +203,8 @@ export function WarningTable({
               variant="outline"
               size="sm"
               onClick={(event) => {
-                event.stopPropagation()
-                onAcknowledge(warning)
+                event.stopPropagation();
+                onAcknowledge(warning);
               }}
               className="h-8 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
             >
@@ -209,8 +215,8 @@ export function WarningTable({
             variant="default"
             size="sm"
             onClick={(event) => {
-              event.stopPropagation()
-              onResolve(warning)
+              event.stopPropagation();
+              onResolve(warning);
             }}
             className="h-8"
           >
@@ -219,7 +225,7 @@ export function WarningTable({
         </CardFooter>
       ) : null}
     </Card>
-  )
+  );
 
   return (
     <DataTable
@@ -252,5 +258,5 @@ export function WarningTable({
       paginationLabels={paginationConfig.paginationLabels}
       responsiveBreakpoint="xl"
     />
-  )
+  );
 }

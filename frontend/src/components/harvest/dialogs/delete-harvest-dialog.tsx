@@ -1,21 +1,21 @@
-'use client'
+'use client';
 
-import { useI18n } from '@/i18n'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useI18n } from '@/i18n';
 
 interface DeleteHarvestDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void
-  loading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  loading?: boolean;
 }
 
 export function DeleteHarvestDialog({
@@ -24,8 +24,8 @@ export function DeleteHarvestDialog({
   onConfirm,
   loading = false,
 }: DeleteHarvestDialogProps) {
-  const { t } = useI18n()
-  const h = t.pages.harvest
+  const { t } = useI18n();
+  const h = t.pages.harvest;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,11 +48,7 @@ export function DeleteHarvestDialog({
           >
             {h?.cancel ?? 'Cancel'}
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            disabled={loading}
-          >
+          <Button variant="destructive" onClick={onConfirm} disabled={loading}>
             {loading
               ? (h?.deleting ?? 'Deleting...')
               : (h?.confirmDelete ?? 'Delete')}
@@ -60,5 +56,5 @@ export function DeleteHarvestDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

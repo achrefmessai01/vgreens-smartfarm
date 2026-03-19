@@ -62,7 +62,13 @@ export function formatHarvestDate(dateStr: string): string {
 
 export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
   if (harvests.length === 0) {
-    return { totalHarvests: 0, variety: '-', totalClassA: 0, totalWaste: 0, avgBrix: 0 };
+    return {
+      totalHarvests: 0,
+      variety: '-',
+      totalClassA: 0,
+      totalWaste: 0,
+      avgBrix: 0,
+    };
   }
 
   const totalClassA = harvests.reduce((s, h) => s + h.classA, 0);
@@ -87,7 +93,10 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
 
 export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
   const plantingDate = new Date(h.plantingDate);
-  const days = Math.max(0, Math.floor((Date.now() - plantingDate.getTime()) / 86_400_000));
+  const days = Math.max(
+    0,
+    Math.floor((Date.now() - plantingDate.getTime()) / 86_400_000),
+  );
 
   return {
     id: h.id,
@@ -104,8 +113,16 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
     plantingDate: h.plantingDate,
     todaysHarvest: { marketable: h.classA, waste: h.waste },
     brixMeasurements: {
-      brix1: h.brix1, brix2: h.brix2, brix3: h.brix3, brix4: h.brix4, brix5: h.brix5,
-      brix6: h.brix6, brix7: h.brix7, brix8: h.brix8, brix9: h.brix9, brix10: h.brix10,
+      brix1: h.brix1,
+      brix2: h.brix2,
+      brix3: h.brix3,
+      brix4: h.brix4,
+      brix5: h.brix5,
+      brix6: h.brix6,
+      brix7: h.brix7,
+      brix8: h.brix8,
+      brix9: h.brix9,
+      brix10: h.brix10,
     },
     photos: h.photoUrls ?? [],
   };

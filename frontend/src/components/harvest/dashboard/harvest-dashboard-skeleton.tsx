@@ -1,11 +1,13 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { MetricCardSkeleton } from './metric-card-skeleton';
+import { MetricCardSkeleton } from './metric-card/metric-card-skeleton';
 
 interface HarvestDashboardSkeletonProps {
   className?: string;
 }
 
-export function HarvestDashboardSkeleton({ className }: HarvestDashboardSkeletonProps) {
+export function HarvestDashboardSkeleton({
+  className,
+}: HarvestDashboardSkeletonProps) {
   return (
     <div className={className}>
       <div className="flex items-center justify-between mb-8">
@@ -25,20 +27,25 @@ export function HarvestDashboardSkeleton({ className }: HarvestDashboardSkeleton
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {['Yield Over Time', 'Class Distribution', 'Brix Trend', 'Cumulative Yield'].map(
-          (title) => (
-            <Card key={title}>
-              <CardHeader>
-                <div className="h-5 bg-muted animate-pulse rounded w-32" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 bg-muted animate-pulse rounded flex items-center justify-center">
-                  <span className="text-muted-foreground/50 text-sm">{title}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ),
-        )}
+        {[
+          'Yield Over Time',
+          'Class Distribution',
+          'Brix Trend',
+          'Cumulative Yield',
+        ].map((title) => (
+          <Card key={title}>
+            <CardHeader>
+              <div className="h-5 bg-muted animate-pulse rounded w-32" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-64 bg-muted animate-pulse rounded flex items-center justify-center">
+                <span className="text-muted-foreground/50 text-sm">
+                  {title}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

@@ -7,10 +7,10 @@ import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
-  SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetFooter,
+  SheetHeader,
+  SheetContent,
 } from '@/components/ui/sheet';
 import {
   UserManagementTable,
@@ -34,20 +34,28 @@ export default function TenantUsersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="User Management" subtitle="Manage users for your tenant" />
-
-      <UserManagementTable
-        users={page.users}
-        onEdit={page.handleEdit}
-        onDelete={page.handleDelete}
-        onCreate={page.handleCreate}
-        isLoading={page.isLoading}
-        hideTenantColumn={true}
+    <div className="flex flex-col gap-6 h-full min-h-0">
+      <PageHeader
+        title="User Management"
+        subtitle="Manage users for your tenant"
       />
 
+      <div className="flex-1 min-h-0">
+        <UserManagementTable
+          users={page.users}
+          onEdit={page.handleEdit}
+          onDelete={page.handleDelete}
+          onCreate={page.handleCreate}
+          isLoading={page.isLoading}
+          hideTenantColumn={true}
+        />
+      </div>
+
       <Sheet open={page.isSheetOpen} onOpenChange={page.setIsSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg flex flex-col p-0 gap-0">
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-lg flex flex-col p-0 gap-0"
+        >
           <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
             <SheetTitle className="dark:text-card-foreground">
               {page.editingUser ? 'Edit User' : 'Create User'}
@@ -78,7 +86,11 @@ export default function TenantUsersPage() {
               disabled={page.isLoading}
               className="flex-1"
             >
-              {page.isLoading ? '...' : page.editingUser ? 'Update User' : 'Create User'}
+              {page.isLoading
+                ? '...'
+                : page.editingUser
+                  ? 'Update User'
+                  : 'Create User'}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -86,19 +98,24 @@ export default function TenantUsersPage() {
 
       <ConfirmationDialog
         open={page.deleteConfirmation.isOpen}
-        onOpenChange={(open) => page.setDeleteConfirmation({ user: null, isOpen: open })}
+        onOpenChange={(open) =>
+          page.setDeleteConfirmation({ user: null, isOpen: open })
+        }
         title="Delete User"
         description="Are you sure you want to delete this user? This action cannot be undone."
         confirmLabel="Delete"
         cancelLabel="Cancel"
         variant="destructive"
         onConfirm={page.confirmDelete}
-        onCancel={() => page.setDeleteConfirmation({ user: null, isOpen: false })}
+        onCancel={() =>
+          page.setDeleteConfirmation({ user: null, isOpen: false })
+        }
       >
         {page.deleteConfirmation.user && (
           <div className="p-4 bg-muted rounded-lg dark:bg-primary-foreground/10 dark:border dark:border-primary-foreground/20">
             <p className="font-medium dark:text-card-foreground">
-              {page.deleteConfirmation.user.firstName && page.deleteConfirmation.user.lastName
+              {page.deleteConfirmation.user.firstName &&
+              page.deleteConfirmation.user.lastName
                 ? `${page.deleteConfirmation.user.firstName} ${page.deleteConfirmation.user.lastName}`
                 : page.deleteConfirmation.user.email || 'Unknown User'}
             </p>

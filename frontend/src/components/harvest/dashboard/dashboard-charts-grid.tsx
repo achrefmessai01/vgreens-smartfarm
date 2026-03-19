@@ -1,7 +1,9 @@
-import { YieldOverTimeChart } from './yield-over-time-chart';
-import { ClassDistributionChart } from './class-distribution-chart';
-import { BrixTrendChart } from './brix-trend-chart';
-import { CumulativeYieldChart } from './cumulative-yield-chart';
+import {
+  BrixTrendChart,
+  YieldOverTimeChart,
+  CumulativeYieldChart,
+  ClassDistributionChart,
+} from './charts';
 import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
 
 interface DashboardChartsGridProps {

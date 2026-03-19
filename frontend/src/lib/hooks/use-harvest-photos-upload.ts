@@ -20,7 +20,9 @@ export function useHarvestPhotosUpload(harvestId: string | null) {
 
       return results
         .map((result) => result.data?.uploadImage?.url ?? null)
-        .filter((url): url is string => typeof url === 'string' && url.length > 0);
+        .filter(
+          (url): url is string => typeof url === 'string' && url.length > 0,
+        );
     },
     [harvestId, uploadHarvestImage],
   );

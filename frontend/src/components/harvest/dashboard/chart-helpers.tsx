@@ -20,7 +20,11 @@ export interface ChartDotProps {
   stroke: string;
 }
 
-export function ChartTooltipContainer({ children }: { children: React.ReactNode }) {
+export function ChartTooltipContainer({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
       {children}

@@ -1,14 +1,14 @@
 'use client';
 
-import * as React from 'react';
 import {
   HarvestStatus,
-  useUpdateHarvestMutation,
   useDeleteHarvestImageMutation,
+  useUpdateHarvestMutation,
 } from '@/generated/graphql';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
 import { computeAvgBrix, extractStoragePathFromUrl } from '@/lib/harvest-utils';
+import * as React from 'react';
 
 export type SidebarMode = 'create' | 'edit';
 
@@ -25,7 +25,9 @@ export function useBatchSidebar({
   mode = 'create',
   onCompleted,
 }: UseBatchSidebarOptions) {
-  const [localData, setLocalData] = React.useState<BatchDetailsData | null>(null);
+  const [localData, setLocalData] = React.useState<BatchDetailsData | null>(
+    null,
+  );
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
   const { uploadPhotos, uploading } = useHarvestPhotosUpload(harvestId);
   const [deleteHarvestImage] = useDeleteHarvestImageMutation();
@@ -49,7 +51,12 @@ export function useBatchSidebar({
   const handleBrixChange = React.useCallback(
     (field: keyof BatchDetailsData['brixMeasurements'], value: number) => {
       setLocalData((prev) =>
-        prev ? { ...prev, brixMeasurements: { ...prev.brixMeasurements, [field]: value } } : prev,
+        prev
+          ? {
+              ...prev,
+              brixMeasurements: { ...prev.brixMeasurements, [field]: value },
+            }
+          : prev,
       );
     },
     [],
@@ -58,7 +65,12 @@ export function useBatchSidebar({
   const handleYieldChange = React.useCallback(
     (field: 'marketable' | 'waste', value: number) => {
       setLocalData((prev) =>
-        prev ? { ...prev, todaysHarvest: { ...prev.todaysHarvest, [field]: value } } : prev,
+        prev
+          ? {
+              ...prev,
+              todaysHarvest: { ...prev.todaysHarvest, [field]: value },
+            }
+          : prev,
       );
     },
     [],
@@ -81,7 +93,10 @@ export function useBatchSidebar({
       setLocalData((prev) => {
         if (!prev) return prev;
         urlToRemove = prev.photos[indexToRemove];
-        return { ...prev, photos: prev.photos.filter((_, i) => i !== indexToRemove) };
+        return {
+          ...prev,
+          photos: prev.photos.filter((_, i) => i !== indexToRemove),
+        };
       });
       if (!urlToRemove) return;
       const path = extractStoragePathFromUrl(urlToRemove);
@@ -98,7 +113,8 @@ export function useBatchSidebar({
   const handleSave = React.useCallback(async () => {
     if (!harvestId || !currentData) return;
     const brix = currentData.brixMeasurements;
-    const status = mode === 'edit' ? currentData.status : HarvestStatus.Completed;
+    const status =
+      mode === 'edit' ? currentData.status : HarvestStatus.Completed;
     try {
       await updateHarvest({
         variables: {

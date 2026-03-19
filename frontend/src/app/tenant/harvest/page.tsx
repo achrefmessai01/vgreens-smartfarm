@@ -1,27 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import {
   HarvestTable,
   BatchSidebar,
+  HarvestDashboard,
   HarvestPageHeader,
   CreateBatchDialog,
   EditHarvestDialog,
   DeleteHarvestDialog,
-  HarvestDashboard,
 } from '@/components/harvest';
 import { useI18n } from '@/i18n';
+import { useState, useEffect } from 'react';
+import { BarChart3, History } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useHarvestPage } from '@/lib/hooks/use-harvest-page';
 import { FeatureGuard } from '@/components/features/feature-guard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, History } from 'lucide-react';
 
 export default function HarvestPage() {
   const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') || 'dashboard');
+  const [activeTab, setActiveTab] = useState<string>(
+    searchParams.get('tab') || 'dashboard',
+  );
 
   useEffect(() => {
     const tabFromUrl = searchParams.get('tab');
@@ -64,25 +66,38 @@ export default function HarvestPage() {
 
   return (
     <FeatureGuard featureKey="harvest_management">
-      <div className="space-y-6">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+      <div className="flex flex-col h-full min-h-0">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full flex flex-col h-full min-h-0"
+        >
           <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2 px-4 py-1">
+            <TabsTrigger
+              value="dashboard"
+              className="flex items-center gap-2 px-4 py-1"
+            >
               <BarChart3 className="h-4 w-4" />
               {t.navigation?.dashboard || 'Dashboard'}
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2 px-4 py-1">
+            <TabsTrigger
+              value="history"
+              className="flex items-center gap-2 px-4 py-1"
+            >
               <History className="h-4 w-4" />
               {t.navigation?.history || 'History'}
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="mt-6">
+          <TabsContent value="dashboard" className="mt-6 flex-1 min-h-0">
             <HarvestDashboard />
           </TabsContent>
 
-          <TabsContent value="history" className="mt-6">
-            <div className="space-y-6">
+          <TabsContent
+            value="history"
+            className="mt-6 flex-1 min-h-0 flex flex-col"
+          >
+            <div className="flex flex-col gap-6 h-full min-h-0">
               <HarvestPageHeader
                 summary={summary}
                 title={t.pages.harvest?.historyTitle || 'Harvest History'}

@@ -1,13 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { useHarvestsQuery, type HarvestsQuery } from '@/generated/graphql';
-import type { BatchDetailsData } from '@/types/batch-sidebar.types';
-import type { SidebarMode } from '@/lib/hooks/use-batch-sidebar';
-import { useEditHarvest } from '@/lib/hooks/use-edit-harvest';
-import { useDeleteHarvest } from '@/lib/hooks/use-delete-harvest';
-import { computeSummary, harvestToBatchDetails } from '@/lib/harvest-utils';
 import type { HarvestSummary } from '@/types/harvest.types';
+import { useEditHarvest } from '@/lib/hooks/use-edit-harvest';
+import type { SidebarMode } from '@/lib/hooks/use-batch-sidebar';
+import { useDeleteHarvest } from '@/lib/hooks/use-delete-harvest';
+import type { BatchDetailsData } from '@/types/batch-sidebar.types';
+import { computeSummary, harvestToBatchDetails } from '@/lib/harvest-utils';
+import { useHarvestsQuery, type HarvestsQuery } from '@/generated/graphql';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
 
@@ -27,7 +27,9 @@ export function useHarvestPage() {
   const [sidebarMode, setSidebarMode] = React.useState<SidebarMode>('create');
   const [editOpen, setEditOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
-  const [deleteTarget, setDeleteTarget] = React.useState<HarvestItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<HarvestItem | null>(
+    null,
+  );
   const [pendingBatch, setPendingBatch] = React.useState<{
     id: string;
     details: BatchDetailsData;

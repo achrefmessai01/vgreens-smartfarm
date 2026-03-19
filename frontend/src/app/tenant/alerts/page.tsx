@@ -2,18 +2,18 @@
 
 import {
   AlertTable,
+  AlertSidebar,
   AlertFormSheet,
   AlertPageHeader,
   AlertActionDialog,
   AlertDeleteDialog,
-  AlertSidebar,
 } from '@/components/alerts';
 import { useI18n } from '@/i18n';
 import { useUsersQuery } from '@/generated/graphql';
-import { FeatureGuard } from '@/components/features/feature-guard';
-import { ContentSkeleton } from '@/components/ui/content-skeleton';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { useAlertsPage } from '@/lib/hooks/use-alerts-page';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
+import { FeatureGuard } from '@/components/features/feature-guard';
 
 export default function AlertsPage() {
   const { t } = useI18n();
@@ -32,26 +32,28 @@ export default function AlertsPage() {
 
   return (
     <FeatureGuard featureKey="sensor_alerts">
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6 h-full min-h-0">
         <AlertPageHeader
           openAlertsCount={page.openAlertsCount}
           onCreate={page.onCreate}
           isLoading={page.isLoading}
         />
 
-        <AlertTable
-          alerts={page.alerts}
-          filter={page.filter}
-          onFilterChange={page.onFilterChange}
-          users={users}
-          onAcknowledge={page.onAcknowledge}
-          onResolve={page.onResolve}
-          onEdit={page.onEdit}
-          onDelete={page.onDelete}
-          onRowClick={page.handleAlertRowClick}
-          isLoading={page.isLoading}
-          tableLoading={page.loading}
-        />
+        <div className="flex-1 min-h-0">
+          <AlertTable
+            alerts={page.alerts}
+            filter={page.filter}
+            onFilterChange={page.onFilterChange}
+            users={users}
+            onAcknowledge={page.onAcknowledge}
+            onResolve={page.onResolve}
+            onEdit={page.onEdit}
+            onDelete={page.onDelete}
+            onRowClick={page.handleAlertRowClick}
+            isLoading={page.isLoading}
+            tableLoading={page.loading}
+          />
+        </div>
 
         <AlertSidebar
           open={page.selectedAlert !== null}
@@ -79,7 +81,9 @@ export default function AlertsPage() {
           alert={page.actionDialog.alert}
           action={page.actionDialog.action}
           onConfirm={page.confirmAction}
-          onCancel={() => page.setActionDialog({ isOpen: false, alert: null, action: null })}
+          onCancel={() =>
+            page.setActionDialog({ isOpen: false, alert: null, action: null })
+          }
           isLoading={page.isLoading}
         />
 
@@ -90,7 +94,9 @@ export default function AlertsPage() {
           }
           alert={page.deleteConfirmation.alert}
           onConfirm={page.confirmDelete}
-          onCancel={() => page.setDeleteConfirmation({ alert: null, isOpen: false })}
+          onCancel={() =>
+            page.setDeleteConfirmation({ alert: null, isOpen: false })
+          }
           isLoading={page.isLoading}
         />
       </div>

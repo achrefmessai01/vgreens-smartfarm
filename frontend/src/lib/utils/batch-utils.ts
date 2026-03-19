@@ -1,25 +1,30 @@
-import { HarvestStatus } from '@/generated/graphql'
-import type { BatchFormData } from '@/types/batch.types'
-import type { BatchDetailsData } from '@/types/batch-sidebar.types'
+import { HarvestStatus } from '@/generated/graphql';
+import type { BatchFormData } from '@/types/batch.types';
+import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 
 export function getGreenhouseName(greenhouseId: string): string {
   const greenhouseMap: Record<string, string> = {
-    'gh1': 'Green House 1',
-    'gh2': 'Green House 2',
-  }
-  return greenhouseMap[greenhouseId] || `Green House ${greenhouseId.toUpperCase()}`
+    gh1: 'Green House 1',
+    gh2: 'Green House 2',
+  };
+  return (
+    greenhouseMap[greenhouseId] || `Green House ${greenhouseId.toUpperCase()}`
+  );
 }
 
-export function createBatchDetailsFromForm(formData: BatchFormData): BatchDetailsData {
-  const plantingDate = new Date(formData.plantingDate)
-  const today = new Date()
-  const timeDiff = today.getTime() - plantingDate.getTime()
-  const daysAfterPlanting = Math.floor(timeDiff / (1000 * 3600 * 24))
+export function createBatchDetailsFromForm(
+  formData: BatchFormData,
+): BatchDetailsData {
+  const plantingDate = new Date(formData.plantingDate);
+  const today = new Date();
+  const timeDiff = today.getTime() - plantingDate.getTime();
+  const daysAfterPlanting = Math.floor(timeDiff / (1000 * 3600 * 24));
 
   return {
     id: `batch-${Date.now()}`,
     name: `${formData.species.charAt(0).toUpperCase() + formData.species.slice(1)} - ${formData.variety}`,
-    species: formData.species.charAt(0).toUpperCase() + formData.species.slice(1),
+    species:
+      formData.species.charAt(0).toUpperCase() + formData.species.slice(1),
     variety: formData.variety,
     status: HarvestStatus.Draft,
     greenhouse: {
@@ -46,5 +51,5 @@ export function createBatchDetailsFromForm(formData: BatchFormData): BatchDetail
       brix10: 0,
     },
     photos: [],
-  }
+  };
 }

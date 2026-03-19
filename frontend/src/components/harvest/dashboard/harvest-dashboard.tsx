@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Package } from 'lucide-react';
 import { useI18n } from '@/i18n';
-import { DashboardFilters } from './dashboard-filters';
+import { DashboardFilters } from './harvest-dashboard-filters';
 import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
 import { DashboardMetricsGrid } from './dashboard-metrics-grid';
 import { DashboardChartsGrid } from './dashboard-charts-grid';
@@ -26,12 +26,18 @@ const FILTER_LABEL_KEYS: Record<DateFilter, string> = {
   total: 'total',
 };
 
-export function HarvestDashboard({ className, species, variety }: HarvestDashboardProps) {
+export function HarvestDashboard({
+  className,
+  species,
+  variety,
+}: HarvestDashboardProps) {
   const { t } = useI18n();
   const [currentFilter, setCurrentFilter] = useState<DateFilter>('thisMonth');
 
   const { data, loading, error, refetch } = useHarvestDashboard(
-    currentFilter === 'total' ? undefined : { dateFilter: currentFilter, species, variety },
+    currentFilter === 'total'
+      ? undefined
+      : { dateFilter: currentFilter, species, variety },
   );
 
   const filterLabel =
@@ -42,7 +48,9 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
 
   if (error) {
     return (
-      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
+      <div
+        className={`flex items-center justify-center min-h-[400px] ${className}`}
+      >
         <div className="text-center">
           <AlertTriangle className="h-8 w-8 text-destructive mx-auto mb-4" />
           <p className="text-destructive mb-4">{error.message}</p>
@@ -56,7 +64,9 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
 
   if (!data) {
     return (
-      <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
+      <div
+        className={`flex items-center justify-center min-h-[400px] ${className}`}
+      >
         <div className="text-center">
           <Package className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">No harvest data available</p>
@@ -73,7 +83,8 @@ export function HarvestDashboard({ className, species, variety }: HarvestDashboa
             {t.pages.harvest?.performanceDashboard ?? 'Performance Dashboard'}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {data.harvestCount} {t.pages.harvest?.harvestsLogged ?? 'harvests logged'} for{' '}
+            {data.harvestCount}{' '}
+            {t.pages.harvest?.harvestsLogged ?? 'harvests logged'} for{' '}
             {filterLabel}
           </p>
         </div>

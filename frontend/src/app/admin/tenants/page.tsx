@@ -1,7 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { TenantTable, TenantForm, type TenantFormRef } from '@/components/tenants';
+import {
+  TenantTable,
+  TenantForm,
+  type TenantFormRef,
+} from '@/components/tenants';
 import { ConfirmationDialog } from '@/components/users';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout';
@@ -24,7 +28,7 @@ export default function TenantsPage() {
 
   if (page.loading) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6 h-full min-h-0">
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
         <TableSkeleton columnCount={5} rowCount={8} />
       </div>
@@ -32,23 +36,28 @@ export default function TenantsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 h-full min-h-0">
       <PageHeader
         title={t.pages.admin.tenants.title}
         subtitle={t.pages.admin.tenants.subtitle}
       />
 
-      <TenantTable
-        tenants={page.tenants}
-        onEdit={page.handleEdit}
-        onDelete={page.handleDelete}
-        onCreate={page.handleCreate}
-        onManageFeatures={page.handleManageFeatures}
-        onRowClick={page.handleRowClick}
-      />
+      <div className="flex-1 min-h-0">
+        <TenantTable
+          tenants={page.tenants}
+          onEdit={page.handleEdit}
+          onDelete={page.handleDelete}
+          onCreate={page.handleCreate}
+          onManageFeatures={page.handleManageFeatures}
+          onRowClick={page.handleRowClick}
+        />
+      </div>
 
       <Sheet open={page.isSheetOpen} onOpenChange={page.setIsSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg flex flex-col p-0 gap-0">
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-lg flex flex-col p-0 gap-0"
+        >
           <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
             <SheetTitle className="dark:text-card-foreground">
               {page.editingTenant
@@ -91,7 +100,9 @@ export default function TenantsPage() {
 
       <ConfirmationDialog
         open={page.deleteConfirmation.isOpen}
-        onOpenChange={(open) => page.setDeleteConfirmation({ tenant: null, isOpen: open })}
+        onOpenChange={(open) =>
+          page.setDeleteConfirmation({ tenant: null, isOpen: open })
+        }
         title={t.pages.admin.tenants.deleteTenant}
         description={
           t.pages.admin.tenants.deleteDescription ||
@@ -101,7 +112,9 @@ export default function TenantsPage() {
         cancelLabel={t.pages.users.cancel}
         variant="destructive"
         onConfirm={page.confirmDelete}
-        onCancel={() => page.setDeleteConfirmation({ tenant: null, isOpen: false })}
+        onCancel={() =>
+          page.setDeleteConfirmation({ tenant: null, isOpen: false })
+        }
       >
         {page.deleteConfirmation.tenant && (
           <div className="p-4 bg-muted rounded-lg dark:bg-primary-foreground/10 dark:border dark:border-primary-foreground/20">

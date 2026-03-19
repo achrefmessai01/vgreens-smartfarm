@@ -1,10 +1,11 @@
 'use client';
 
+import {
+  UserManagementForm,
+  ConfirmationDialog,
+  type UserManagementFormRef,
+} from '@/components/users';
 import * as React from 'react';
-import { PageHeader } from '@/components/layout';
-import { ContentSkeleton } from '@/components/ui/content-skeleton';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
-import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -12,14 +13,13 @@ import {
   SheetTitle,
   SheetFooter,
 } from '@/components/ui/sheet';
-import {
-  UserManagementForm,
-  ConfirmationDialog,
-  type UserManagementFormRef,
-} from '@/components/users';
-import { UserManagementTable } from '@/components/users/user-management-table';
 import { useI18n } from '@/i18n';
+import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import { useAdminUsersPage } from '@/lib/hooks/use-admin-users-page';
+import { UserManagementTable } from '@/components/users/user-management-table';
 
 export default function AdminUsersPage() {
   const { t } = useI18n();
@@ -28,7 +28,7 @@ export default function AdminUsersPage() {
 
   if (page.loading) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6 h-full min-h-0">
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
         <TableSkeleton columnCount={5} rowCount={8} />
       </div>
@@ -36,24 +36,31 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 h-full min-h-0">
       <PageHeader
         title={t.pages.admin.users.title}
         subtitle={t.pages.admin.users.subtitle}
       />
 
-      <UserManagementTable
-        users={page.users}
-        onEdit={page.handleEdit}
-        onDelete={page.handleDelete}
-        onCreate={page.handleCreate}
-      />
+      <div className="flex-1 min-h-0">
+        <UserManagementTable
+          users={page.users}
+          onEdit={page.handleEdit}
+          onDelete={page.handleDelete}
+          onCreate={page.handleCreate}
+        />
+      </div>
 
       <Sheet open={page.isSheetOpen} onOpenChange={page.setIsSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg flex flex-col p-0 gap-0">
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-lg flex flex-col p-0 gap-0"
+        >
           <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
             <SheetTitle className="dark:text-card-foreground">
-              {page.editingUser ? t.pages.admin.users.editUser : t.pages.admin.users.createUser}
+              {page.editingUser
+                ? t.pages.admin.users.editUser
+                : t.pages.admin.users.createUser}
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-6 py-4">
@@ -93,19 +100,26 @@ export default function AdminUsersPage() {
 
       <ConfirmationDialog
         open={page.deleteConfirmation.isOpen}
-        onOpenChange={(open) => page.setDeleteConfirmation({ user: null, isOpen: open })}
+        onOpenChange={(open) =>
+          page.setDeleteConfirmation({ user: null, isOpen: open })
+        }
         title={t.pages.admin.users.deleteUser}
         description={t.pages.users.confirmDeleteDescription}
         confirmLabel={t.pages.users.delete}
         cancelLabel={t.pages.users.cancel}
         variant="destructive"
         onConfirm={page.confirmDelete}
-        onCancel={() => page.setDeleteConfirmation({ user: null, isOpen: false })}
+        onCancel={() =>
+          page.setDeleteConfirmation({ user: null, isOpen: false })
+        }
       >
         {page.deleteConfirmation.user && (
           <div className="p-4 bg-muted rounded-lg dark:bg-primary-foreground/10 dark:border dark:border-primary-foreground/20">
             <p className="font-medium dark:text-card-foreground">
-              {[page.deleteConfirmation.user.firstName, page.deleteConfirmation.user.lastName]
+              {[
+                page.deleteConfirmation.user.firstName,
+                page.deleteConfirmation.user.lastName,
+              ]
                 .filter(Boolean)
                 .join(' ') || t.pages.admin.users.notAvailable}
             </p>
