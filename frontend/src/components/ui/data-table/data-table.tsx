@@ -200,7 +200,7 @@ export function DataTable<T extends { id: string | number }>({
   };
 
   return (
-    <div className="w-full min-w-0">
+    <div className="flex flex-col w-full h-full min-w-0 min-h-0">
       {hasToolbar && (
         <TableToolbar
           searchConfig={
@@ -219,8 +219,8 @@ export function DataTable<T extends { id: string | number }>({
         />
       )}
 
-      <Card className="rounded-xl border border-border/60 shadow-sm">
-        <CardContent className="p-0">
+      <Card className="rounded-xl border border-border/60 shadow-sm flex flex-col flex-1 min-h-0">
+        <CardContent className="p-0 flex flex-col flex-1 min-h-0">
           {isLoading ? (
             <TableSkeleton
               columnCount={columns.length}
@@ -245,7 +245,7 @@ export function DataTable<T extends { id: string | number }>({
                   className="rounded-none border-0"
                 />
               ) : (
-                <>
+                <div className="flex-1 min-h-0 overflow-y-auto">
                   {/* Render card view on mobile when available */}
                   {showCardView && renderCard && (
                     <DataTableCardView
@@ -264,7 +264,7 @@ export function DataTable<T extends { id: string | number }>({
                       onRowClick={onRowClick}
                     />
                   )}
-                </>
+                </div>
               )}
 
               <TablePagination

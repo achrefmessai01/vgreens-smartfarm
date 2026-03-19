@@ -1,9 +1,9 @@
 'use client';
 
+import { User } from '@/generated/graphql';
 import * as React from 'react';
 import { Navbar } from './navbar';
 import { Sidebar } from './sidebar';
-import { User } from '@/generated/graphql';
 
 interface AppLayoutProps {
   children: React.ReactNode;

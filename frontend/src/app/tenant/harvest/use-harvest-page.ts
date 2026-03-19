@@ -1,7 +1,7 @@
 'use client';
 
 import type { BatchDetailsData } from '@/components/harvest/batch-sidebar/batch-sidebar-types';
-import type { SidebarMode } from '@/components/harvest/use-batch-sidebar';
+import type { SidebarMode } from '@/components/harvest/batch-sidebar/use-batch-sidebar';
 import { useDeleteHarvest } from '@/components/harvest/dialogs/use-delete-harvest';
 import { useEditHarvest } from '@/components/harvest/dialogs/use-edit-harvest';
 import { useHarvestsQuery, type HarvestsQuery } from '@/generated/graphql';
