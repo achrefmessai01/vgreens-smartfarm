@@ -15,10 +15,10 @@ import { useState } from 'react';
 import { BrixTrendChart } from './charts/brix-trend-chart';
 import { ClassDistributionChart } from './charts/class-distribution-chart';
 import { CumulativeYieldChart } from './charts/cumulative-yield-chart';
+import { YieldOverTimeChart } from './charts/yield-over-time-chart';
 import { DashboardFilters } from './harvest-dashboard-filters';
 import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
 import { MetricCard } from './metric-card/metric-card';
-import { YieldOverTimeChart } from './yield-over-time-chart';
 
 interface HarvestDashboardProps {
   className?: string;

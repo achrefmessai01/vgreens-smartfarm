@@ -1,6 +1,7 @@
 export { BrixTrendChart } from './charts/brix-trend-chart';
 export { ClassDistributionChart } from './charts/class-distribution-chart';
 export { CumulativeYieldChart } from './charts/cumulative-yield-chart';
+export { YieldOverTimeChart } from './charts/yield-over-time-chart';
 export { HarvestDashboard } from './harvest-dashboard';
 export { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
 export { MetricCard } from './metric-card/metric-card';
@@ -10,4 +11,3 @@ export {
 } from './metric-card/metric-card-skeleton';
 export { useDashboardData } from './use-dashboard-data';
 export type { DashboardData } from './use-dashboard-data';
-export { YieldOverTimeChart } from './yield-over-time-chart';
