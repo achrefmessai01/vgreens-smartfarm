@@ -1,6 +1,6 @@
 'use client';
 
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch';
+import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 import * as React from 'react';
 import {
   GreenhouseField,

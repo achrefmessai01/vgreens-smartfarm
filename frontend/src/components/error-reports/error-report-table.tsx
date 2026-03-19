@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { TableCell } from '@/components/ui/table';
-import { ErrorReport } from '@/generated/graphql';
+import { ErrorReport, ReportStatus } from '@/generated/graphql';
 import { formatDate } from '@/lib/utils/error-report-utils';
 import { Edit2, Trash2 } from 'lucide-react';
 import { ErrorReportQuickActions } from './error-report-quick-actions';
@@ -14,7 +14,7 @@ interface ErrorReportTableProps {
   isLoading?: boolean;
   onEdit: (report: ErrorReport) => void;
   onDelete: (report: ErrorReport) => void;
-  onStatusUpdate: (id: string, status: any) => Promise<void>;
+  onStatusUpdate: (id: string, status: ReportStatus) => Promise<void>;
   isUpdating?: boolean;
 }
 

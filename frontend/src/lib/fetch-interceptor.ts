@@ -25,13 +25,6 @@ export function createFetchInterceptor() {
       
       // Log failed HTTP requests
       if (!response.ok) {
-        let responseText = '';
-        try {
-          responseText = await response.clone().text();
-        } catch (e) {
-          responseText = 'Could not read response body';
-        }
-        
         errorLogger.logNetworkError(
           url,
           method,
@@ -61,13 +54,14 @@ export function createFetchInterceptor() {
       }
       
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       const duration = Date.now() - startTime;
-      
+
       errorLogger.logError({
-        errorMessage: `Fetch Request Failed: ${error.message}`,
-        stackTrace: error.stack,
-        component: 'fetch-interceptor', 
+        errorMessage: `Fetch Request Failed: ${err.message}`,
+        stackTrace: err.stack,
+        component: 'fetch-interceptor',
         action: method.toLowerCase(),
         errorType: ErrorType.NETWORK_ERROR,
         severity: ReportSeverity.High,
@@ -75,12 +69,12 @@ export function createFetchInterceptor() {
           duration,
           url,
           method,
-          error: error.toString(),
+          error: err.toString(),
         },
         requestUrl: url,
         httpMethod: method,
       });
-      
+
       throw error;
     }
   };
@@ -113,10 +107,11 @@ export function createAdvancedFetchInterceptor(maxRetries: number = 3) {
     
     try {
       return await originalFetch(input, init);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error;
       if (retryCount < maxRetries) {
         errorLogger.logError({
-          errorMessage: `Fetch retry ${retryCount + 1}/${maxRetries}: ${error.message}`,
+          errorMessage: `Fetch retry ${retryCount + 1}/${maxRetries}: ${err.message}`,
           component: 'fetch-interceptor-retry',
           action: method.toLowerCase(),
           errorType: ErrorType.NETWORK_ERROR,
@@ -125,16 +120,16 @@ export function createAdvancedFetchInterceptor(maxRetries: number = 3) {
           requestUrl: url,
           httpMethod: method,
         });
-        
+
         // Wait before retry (exponential backoff)
         await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
         return interceptedFetch(input, init, retryCount + 1);
       }
-      
+
       // Final failure after all retries
       errorLogger.logError({
-        errorMessage: `Fetch failed after ${maxRetries} retries: ${error.message}`,
-        stackTrace: error.stack,
+        errorMessage: `Fetch failed after ${maxRetries} retries: ${err.message}`,
+        stackTrace: err.stack,
         component: 'fetch-interceptor-retry',
         action: method.toLowerCase(),
         errorType: ErrorType.NETWORK_ERROR,
@@ -143,7 +138,7 @@ export function createAdvancedFetchInterceptor(maxRetries: number = 3) {
         requestUrl: url,
         httpMethod: method,
       });
-      
+
       throw error;
     }
   };

@@ -1,4 +1,5 @@
-import { UserRole } from '@/generated/graphql'
+import { UserRole } from '@/generated/graphql';
+import type { Translations } from '@/i18n/translations';
 import {
   AlertTriangle,
   Apple,
@@ -13,14 +14,14 @@ import {
   Users,
   Video,
   Zap,
-} from 'lucide-react'
-import * as React from 'react'
+} from 'lucide-react';
+import * as React from 'react';
 
 export interface NavItem {
-  label: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  featureKey?: string // Optional feature key to check if item should be shown
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  featureKey?: string; // Optional feature key to check if item should be shown
 }
 
 // Admin navigation items
@@ -60,10 +61,10 @@ export const adminNavItems: NavItem[] = [
     href: '/admin/settings',
     icon: Settings,
   },
-]
+];
 
 // Get tenant navigation items with translations
-export const getTenantNavItems = (t: any): NavItem[] => [
+export const getTenantNavItems = (t: Translations): NavItem[] => [
   {
     label: t.navigation.farmOverview,
     href: '/tenant/farm-overview',
@@ -106,36 +107,36 @@ export const getTenantNavItems = (t: any): NavItem[] => [
     icon: Clock,
     featureKey: 'data_analytics',
   },
-]
+];
 
 // Filter navigation items based on enabled features
 export const filterTenantNavItems = (
   allItems: NavItem[],
   hasFeature: (key: string) => boolean,
-  isVGreensAdmin: boolean
+  isVGreensAdmin: boolean,
 ): NavItem[] => {
   return allItems.filter((item) => {
     // Always show items without featureKey or if feature is enabled
-    if (!item.featureKey) return true
+    if (!item.featureKey) return true;
     // For admin users, show all items
-    if (isVGreensAdmin) return true
+    if (isVGreensAdmin) return true;
     // For tenant users, check if feature is enabled
-    return hasFeature(item.featureKey)
-  })
-}
+    return hasFeature(item.featureKey);
+  });
+};
 
 // Get navigation items based on user role
 export const getNavigationItems = (
   role: UserRole | undefined,
-  t: any,
-  hasFeature: (key: string) => boolean
+  t: Translations,
+  hasFeature: (key: string) => boolean,
 ): NavItem[] => {
-  const isVGreensAdmin = role === UserRole.VgreensAdmin
-  
+  const isVGreensAdmin = role === UserRole.VgreensAdmin;
+
   if (isVGreensAdmin) {
-    return adminNavItems
+    return adminNavItems;
   }
-  
-  const allTenantItems = getTenantNavItems(t)
-  return filterTenantNavItems(allTenantItems, hasFeature, isVGreensAdmin)
-}
+
+  const allTenantItems = getTenantNavItems(t);
+  return filterTenantNavItems(allTenantItems, hasFeature, isVGreensAdmin);
+};
