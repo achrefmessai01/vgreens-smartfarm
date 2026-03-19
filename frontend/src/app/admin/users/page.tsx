@@ -1,100 +1,100 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import {
-  UserStatus,
-  useUsersQuery,
-  useTenantsQuery,
-  useCreateUserMutation,
-  useUpdateUserMutation,
-  useDeleteUserMutation,
-} from '@/generated/graphql'
+import { PageHeader } from '@/components/layout';
+import { Button } from '@/components/ui/button';
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import {
   Sheet,
-  SheetTitle,
-  SheetHeader,
-  SheetFooter,
   SheetContent,
-} from '@/components/ui/sheet'
-import { useI18n } from '@/i18n'
-import { ContentSkeleton } from '@/components/ui/content-skeleton'
-import { TableSkeleton } from '@/components/ui/table-skeleton'
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
+import { ConfirmationDialog } from '@/components/users';
 import {
   UserManagementForm,
   type UserFormData,
   type UserManagementFormRef,
-} from '@/components/users/user-management-form'
-import { UserRole } from '@/generated/graphql'
-import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/layout'
-import { ConfirmationDialog } from '@/components/users'
-import type { User, Tenant } from '@/generated/graphql'
-import { useCurrentUser } from '@/lib/hooks/use-current-user'
-import { UserManagementTable } from '@/components/users/user-management-table'
+} from '@/components/users/user-management-form';
+import { UserManagementTable } from '@/components/users/user-management-table';
+import type { Tenant, User } from '@/generated/graphql';
+import {
+  useCreateUserMutation,
+  useDeleteUserMutation,
+  UserRole,
+  UserStatus,
+  useTenantsQuery,
+  useUpdateUserMutation,
+  useUsersQuery,
+} from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import * as React from 'react';
 
 export default function AdminUsersPage() {
-  const { t } = useI18n()
-  const { role: currentUserRole } = useCurrentUser()
-  const isVGreensAdmin = currentUserRole === UserRole.VgreensAdmin
+  const { t } = useI18n();
+  const { role: currentUserRole } = useCurrentUser();
+  const isVGreensAdmin = currentUserRole === UserRole.VgreensAdmin;
 
   const {
     data: usersData,
     loading: usersLoading,
     refetch: refetchUsers,
-  } = useUsersQuery()
+  } = useUsersQuery();
   const { data: tenantsData, loading: tenantsLoading } = useTenantsQuery({
     skip: !isVGreensAdmin,
-  })
+  });
 
-  const [createUser] = useCreateUserMutation()
-  const [updateUser] = useUpdateUserMutation()
-  const [deleteUser] = useDeleteUserMutation()
+  const [createUser] = useCreateUserMutation();
+  const [updateUser] = useUpdateUserMutation();
+  const [deleteUser] = useDeleteUserMutation();
 
-  const [isSheetOpen, setIsSheetOpen] = React.useState(false)
-  const [editingUser, setEditingUser] = React.useState<User | null>(null)
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+  const [editingUser, setEditingUser] = React.useState<User | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState<{
-    user: User | null
-    isOpen: boolean
-  }>({ user: null, isOpen: false })
-  const formRef = React.useRef<UserManagementFormRef>(null)
+    user: User | null;
+    isOpen: boolean;
+  }>({ user: null, isOpen: false });
+  const formRef = React.useRef<UserManagementFormRef>(null);
 
-  const users = (usersData?.users || []) as User[]
-  const tenants = (tenantsData?.tenants || []) as Tenant[]
+  const users = (usersData?.users || []) as User[];
+  const tenants = (tenantsData?.tenants || []) as Tenant[];
 
   const handleCreate = () => {
-    setEditingUser(null)
-    setIsSheetOpen(true)
-  }
+    setEditingUser(null);
+    setIsSheetOpen(true);
+  };
 
   const handleEdit = (user: User) => {
-    setEditingUser(user)
-    setIsSheetOpen(true)
-  }
+    setEditingUser(user);
+    setIsSheetOpen(true);
+  };
 
   const handleDelete = (user: User) => {
-    setDeleteConfirmation({ user, isOpen: true })
-  }
+    setDeleteConfirmation({ user, isOpen: true });
+  };
 
   const confirmDelete = async () => {
     if (deleteConfirmation.user) {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
         await deleteUser({
           variables: { id: deleteConfirmation.user.id },
-        })
-        await refetchUsers()
-        setDeleteConfirmation({ user: null, isOpen: false })
+        });
+        await refetchUsers();
+        setDeleteConfirmation({ user: null, isOpen: false });
       } catch (error) {
-        console.error('Error deleting user:', error)
+        console.error('Error deleting user:', error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
-  }
+  };
 
   const handleSubmit = async (formData: UserFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       if (editingUser) {
         await updateUser({
@@ -102,10 +102,10 @@ export default function AdminUsersPage() {
             id: editingUser.id,
             input: formData,
           },
-        })
-        await refetchUsers()
-        setIsSheetOpen(false)
-        setEditingUser(null)
+        });
+        await refetchUsers();
+        setIsSheetOpen(false);
+        setEditingUser(null);
       } else {
         // Create user - will send invitation
         const result = await createUser({
@@ -119,11 +119,11 @@ export default function AdminUsersPage() {
               tenantId: formData.tenantId,
             },
           },
-        })
+        });
 
-        await refetchUsers()
-        setIsSheetOpen(false)
-        setEditingUser(null)
+        await refetchUsers();
+        setIsSheetOpen(false);
+        setEditingUser(null);
 
         // Show success message with invitation info
         if (result.data?.createUser) {
@@ -131,45 +131,47 @@ export default function AdminUsersPage() {
           // You can check the user status to know if invitation was sent
           if (result.data.createUser.status === UserStatus.Pending) {
             // You can show a toast or alert here
-            console.log('User created with pending invitation')
+            console.log('User created with pending invitation');
           }
         }
       }
     } catch (error) {
-      console.error('Error saving user:', error)
+      console.error('Error saving user:', error);
       // You can show error toast here
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setIsSheetOpen(false)
-    setEditingUser(null)
-  }
+    setIsSheetOpen(false);
+    setEditingUser(null);
+  };
 
   if (usersLoading || tenantsLoading) {
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6 h-full min-h-0">
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
         <TableSkeleton columnCount={5} rowCount={8} />
       </div>
-    )
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 h-full min-h-0">
       <PageHeader
         title={t.pages.admin.users.title}
         subtitle={t.pages.admin.users.subtitle}
       />
 
-      <UserManagementTable
-        users={users}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onCreate={handleCreate}
-      />
+      <div className="flex-1 min-h-0">
+        <UserManagementTable
+          users={users}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onCreate={handleCreate}
+        />
+      </div>
 
       {/* Create/Edit Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -214,8 +216,8 @@ export default function AdminUsersPage() {
               {isLoading
                 ? '...'
                 : editingUser
-                ? t.pages.admin.users.updateUser
-                : t.pages.admin.users.createUser}
+                  ? t.pages.admin.users.updateUser
+                  : t.pages.admin.users.createUser}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -256,5 +258,5 @@ export default function AdminUsersPage() {
         )}
       </ConfirmationDialog>
     </div>
-  )
+  );
 }
