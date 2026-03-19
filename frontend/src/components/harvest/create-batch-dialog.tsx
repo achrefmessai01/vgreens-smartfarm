@@ -11,7 +11,7 @@ import {
 import { useI18n } from '@/i18n'
 import type { CreateHarvestMutation } from '@/generated/graphql'
 import { CreateBatchFormFields } from './create-batch-form-fields'
-import { useCreateBatchForm } from './use-create-batch-form'
+import { useCreateBatchForm } from '@/lib/hooks/use-create-batch-form'
 
 interface CreateBatchDialogProps {
   open: boolean

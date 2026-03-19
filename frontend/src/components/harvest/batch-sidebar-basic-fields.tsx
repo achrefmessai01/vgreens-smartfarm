@@ -3,7 +3,7 @@
 import { useI18n } from '@/i18n'
 import { Badge } from '@/components/ui/badge'
 import { HarvestStatus } from '@/generated/graphql'
-import type { BatchHeaderFieldProps, BatchStatsFieldProps } from './batch-sidebar-types'
+import type { BatchHeaderFieldProps, BatchStatsFieldProps } from '@/types/batch-sidebar.types'
 
 const STATUS_VARIANT: Record<HarvestStatus, 'default' | 'secondary' | 'outline'> = {
   [HarvestStatus.Draft]: 'outline',

@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch'
+import type { BatchFormData, BatchFormErrors } from '@/types/batch.types'
 import { GreenhouseField, SpeciesField } from './create-batch-form-field-components'
 import { VarietyField, PlantingDateField, CultivationAreaField } from './create-batch-more-field-components'
 

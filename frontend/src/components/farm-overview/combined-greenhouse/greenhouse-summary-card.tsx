@@ -1,6 +1,6 @@
 'use client';
 
-import type { Bay } from '@/lib/farm-types';
+import type { Bay } from '@/types/farm.types';
 import { ParameterRow } from './parameter-row';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { getAverageParameterValue } from '@/lib/bay-parameter-utils';

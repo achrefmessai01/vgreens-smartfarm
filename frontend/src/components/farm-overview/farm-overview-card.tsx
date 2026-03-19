@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/context';
-import type { Bay, ParameterType } from '@/lib/farm-types';
+import type { Bay, ParameterType } from '@/types/farm.types';
 import { EmptyState } from './empty-state';
 import { FarmDataDisplay } from './farm-view-container';
 import { ParameterColorLegendBar } from './parameter-color-legend';

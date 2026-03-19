@@ -2,12 +2,12 @@
 
 import * as React from 'react';
 import { useHarvestsQuery, type HarvestsQuery } from '@/generated/graphql';
-import type { BatchDetailsData } from '@/components/harvest/batch-sidebar-types';
-import type { SidebarMode } from '@/components/harvest/use-batch-sidebar';
-import { useEditHarvest } from '@/components/harvest/use-edit-harvest';
-import { useDeleteHarvest } from '@/components/harvest/use-delete-harvest';
-import { computeSummary, harvestToBatchDetails } from './harvest.utils';
-import type { HarvestSummary } from './harvest.utils';
+import type { BatchDetailsData } from '@/types/batch-sidebar.types';
+import type { SidebarMode } from '@/lib/hooks/use-batch-sidebar';
+import { useEditHarvest } from '@/lib/hooks/use-edit-harvest';
+import { useDeleteHarvest } from '@/lib/hooks/use-delete-harvest';
+import { computeSummary, harvestToBatchDetails } from '@/lib/harvest-utils';
+import type { HarvestSummary } from '@/types/harvest.types';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
 

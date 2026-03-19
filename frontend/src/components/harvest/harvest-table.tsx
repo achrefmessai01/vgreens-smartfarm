@@ -6,7 +6,7 @@ import { useI18n } from '@/i18n';
 import {
   formatHarvestDate,
   getGreenhouseLabel,
-} from '@/app/tenant/harvest/harvest.utils';
+} from '@/lib/harvest-utils';
 import { Eye, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TableCell } from '@/components/ui/table';

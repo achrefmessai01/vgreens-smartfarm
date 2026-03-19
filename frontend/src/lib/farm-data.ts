@@ -6,7 +6,7 @@ import type {
   PlantSlot,
   Batch,
   ParameterValue,
-} from './farm-types'
+} from '@/types/farm.types'
 
 // =============================================================================
 // FARM STRUCTURE GENERATION (for development/testing)

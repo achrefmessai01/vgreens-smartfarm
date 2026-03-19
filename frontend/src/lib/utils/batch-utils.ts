@@ -1,6 +1,6 @@
 import { HarvestStatus } from '@/generated/graphql'
-import type { BatchFormData } from '@/lib/types/batch'
-import type { BatchDetailsData } from '@/components/harvest/batch-sidebar-types'
+import type { BatchFormData } from '@/types/batch.types'
+import type { BatchDetailsData } from '@/types/batch-sidebar.types'
 
 export function getGreenhouseName(greenhouseId: string): string {
   const greenhouseMap: Record<string, string> = {

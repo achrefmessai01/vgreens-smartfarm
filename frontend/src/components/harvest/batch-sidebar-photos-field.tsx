@@ -4,7 +4,7 @@ import * as React from 'react'
 import Image from 'next/image'
 import { Upload, X } from 'lucide-react'
 import { useI18n } from '@/i18n'
-import type { PhotosFieldProps } from './batch-sidebar-types'
+import type { PhotosFieldProps } from '@/types/batch-sidebar.types'
 
 export function PhotosField({
   photos = [],

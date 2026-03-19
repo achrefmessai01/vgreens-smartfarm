@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useI18n } from '@/i18n'
 import { Input } from '@/components/ui/input'
-import type { YieldDataFieldProps } from './batch-sidebar-types'
+import type { YieldDataFieldProps } from '@/types/batch-sidebar.types'
 
 export function YieldDataField({
   marketable,

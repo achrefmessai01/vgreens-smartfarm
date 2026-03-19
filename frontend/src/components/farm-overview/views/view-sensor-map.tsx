@@ -5,7 +5,7 @@ import {
   getParameterColor,
   getParameterUnit,
 } from '@/lib/farm-data';
-import type { ParameterType, PlantSlot } from '@/lib/farm-types';
+import type { ParameterType, PlantSlot } from '@/types/farm.types';
 import { isParameterSupportedByType } from '@/lib/sensor-map-parameter';
 import {
   BAY_COUNT,

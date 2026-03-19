@@ -1,5 +1,5 @@
 import { getAllTunnels } from './tunnel-data'
-import type { Camera, CameraStatus } from './camera-types'
+import type { Camera, CameraStatus } from '@/types/camera.types'
 
 const CAMERA_LOCATIONS = ['Entrance', 'Center', 'Exit', 'Overview', 'Corner']
 const RESOLUTIONS = ['1080p', '720p', '4K']

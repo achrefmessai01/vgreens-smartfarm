@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
 import { formatFieldToLabel } from '@/lib/farm-data';
-import type { ParameterType } from '@/lib/farm-types';
+import type { ParameterType } from '@/types/farm.types';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data';
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
@@ -14,16 +14,16 @@ import {
   PARAM_GREENHOUSE,
   PARAM_PARAMETER,
   PARAM_VIEW_MODE,
-} from './farm-overview.constants';
-import type { FarmOverviewTranslations } from './farm-overview.types';
+} from '@/lib/farm-overview-constants';
+import type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 import {
   parseGreenhouseTab,
   parseParameter,
   parseViewMode,
   syncFarmOverviewStateToUrl,
-} from './farm-overview.utils';
+} from '@/lib/farm-overview-utils';
 
-export type { FarmOverviewTranslations } from './farm-overview.types';
+export type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 
 export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const { role } = useCurrentUser();

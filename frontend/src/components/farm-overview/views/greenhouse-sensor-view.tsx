@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import type { TunnelStatus } from "@/lib/tunnel-types";
+import type { TunnelStatus } from "@/types/tunnel.types";
 import { cn } from "@/lib/utils";
 import * as React from "react";
 import { SensorTile } from "../sensor-tile";

@@ -1,7 +1,7 @@
 'use client'
 
 import { useI18n } from '@/i18n'
-import type { BatchDetailsData } from './batch-sidebar-types'
+import type { BatchDetailsData } from '@/types/batch-sidebar.types'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -14,7 +14,7 @@ import { BatchHeaderField, BatchStatsField } from './batch-sidebar-basic-fields'
 import { BrixMeasurementsField } from './batch-sidebar-brix-field'
 import { PhotosField } from './batch-sidebar-photos-field'
 import { YieldDataField } from './batch-sidebar-yield-field'
-import { useBatchSidebar, type SidebarMode } from './use-batch-sidebar'
+import { useBatchSidebar, type SidebarMode } from '@/lib/hooks/use-batch-sidebar'
 
 export interface BatchSidebarProps {
   open: boolean

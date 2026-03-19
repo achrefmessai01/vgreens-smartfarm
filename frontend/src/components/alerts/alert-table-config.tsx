@@ -2,7 +2,7 @@ import * as React from 'react'
 import { type Column, type FilterConfigOption } from '@/components/ui/data-table'
 import { Alert, AlertSeverity, AlertStatus } from '@/generated/graphql'
 import { useI18n } from '@/i18n'
-import type { AlertsFilterInput } from '@/lib/types/alerts-filter'
+import type { AlertsFilterInput } from '@/lib/alerts-filter'
 import { AlertTableUser, createUserOptions } from './alert-table-utils'
 
 /**

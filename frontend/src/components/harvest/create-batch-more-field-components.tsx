@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useI18n } from '@/i18n'
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch'
+import type { BatchFormData, BatchFormErrors } from '@/types/batch.types'
 
 interface FormFieldProps {
   formData: BatchFormData

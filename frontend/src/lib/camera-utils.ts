@@ -1,5 +1,5 @@
-import type { CameraStatus } from './camera-types'
-import type { Tunnel } from './tunnel-types'
+import type { CameraStatus } from '@/types/camera.types'
+import type { Tunnel } from '@/types/tunnel.types'
 
 export function getCameraStatusColor(status: CameraStatus): string {
   switch (status) {

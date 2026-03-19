@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { CreateBatchFormFields } from './create-batch-form-fields'
-import type { BatchFormData, BatchFormErrors } from '@/lib/types/batch'
+import type { BatchFormData, BatchFormErrors } from '@/types/batch.types'
 
 interface EditHarvestDialogProps {
   open: boolean

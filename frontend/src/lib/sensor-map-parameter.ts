@@ -1,4 +1,4 @@
-import type { ParameterType } from '@/lib/farm-types'
+import type { ParameterType } from '@/types/farm.types'
 import type { SensorMapType } from '@/lib/sensor-map-positions'
 
 export function isParameterSupportedByType(

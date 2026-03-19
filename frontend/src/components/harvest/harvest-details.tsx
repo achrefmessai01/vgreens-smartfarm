@@ -10,7 +10,7 @@ import {
 import {
   formatHarvestDate,
   getGreenhouseLabel,
-} from '@/app/tenant/harvest/harvest.utils'
+} from '@/lib/harvest-utils'
 import type { HarvestsQuery } from '@/generated/graphql'
 
 type HarvestItem = HarvestsQuery['harvests'][number]

@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useI18n } from '@/i18n'
 import { Input } from '@/components/ui/input'
 import { Field, FieldContent, FieldLabel } from '@/components/ui/field'
-import type { BrixMeasurementsFieldProps } from './batch-sidebar-types'
+import type { BrixMeasurementsFieldProps } from '@/types/batch-sidebar.types'
 
 export function BrixMeasurementsField({
   measurements,

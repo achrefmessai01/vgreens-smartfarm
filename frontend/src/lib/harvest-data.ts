@@ -1,6 +1,6 @@
-import type { HarvestRecord, HarvestSummary } from '@/lib/types/harvest'
-import type { BatchFormData } from '@/lib/types/batch'
-import type { BatchDetailsData } from '@/components/harvest/batch-sidebar-types'
+import type { HarvestRecord, HarvestSummary } from '@/types/harvest.types'
+import type { BatchFormData } from '@/types/batch.types'
+import type { BatchDetailsData } from '@/types/batch-sidebar.types'
 
 const mockHarvestData: HarvestRecord[] = [
   {

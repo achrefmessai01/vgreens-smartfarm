@@ -18,7 +18,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import type { ParameterType } from '@/lib/farm-types';
+import type { ParameterType } from '@/types/farm.types';
 import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql';
 import { HistoryChartSkeleton } from './history-chart-skeleton';
 import { useI18n } from '@/i18n';

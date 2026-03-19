@@ -6,7 +6,7 @@ import { WarningTable } from '@/components/warnings'
 import { WarningSidebar } from '@/components/warnings/warning-sidebar'
 import { ConfirmationDialog } from '@/components/users'
 import { PageHeader } from '@/components/layout/page-header'
-import type { Warning, WarningStatus } from '@/lib/warning-types'
+import type { Warning, WarningStatus } from '@/types/warning.types'
 import { FeatureGuard } from '@/components/features/feature-guard'
 import { getAllWarnings, updateWarningStatus } from '@/lib/warning-data'
 
