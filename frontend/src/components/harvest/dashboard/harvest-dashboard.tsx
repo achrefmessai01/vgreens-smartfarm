@@ -17,7 +17,7 @@ import { ClassDistributionChart } from './charts/class-distribution-chart';
 import { CumulativeYieldChart } from './charts/cumulative-yield-chart';
 import { DashboardFilters } from './harvest-dashboard-filters';
 import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
-import { MetricCard } from './metric-card';
+import { MetricCard } from './metric-card/metric-card';
 import { YieldOverTimeChart } from './yield-over-time-chart';
 
 interface HarvestDashboardProps {

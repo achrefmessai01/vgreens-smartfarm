@@ -3,11 +3,11 @@ export { ClassDistributionChart } from './charts/class-distribution-chart';
 export { CumulativeYieldChart } from './charts/cumulative-yield-chart';
 export { HarvestDashboard } from './harvest-dashboard';
 export { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
-export { MetricCard } from './metric-card';
+export { MetricCard } from './metric-card/metric-card';
 export {
   MetricCardSkeleton,
   MetricCardSkeletonCompact,
-} from './metric-card-skeleton';
+} from './metric-card/metric-card-skeleton';
 export { useDashboardData } from './use-dashboard-data';
 export type { DashboardData } from './use-dashboard-data';
 export { YieldOverTimeChart } from './yield-over-time-chart';
