@@ -1,5 +1,4 @@
 # Fly.io configuration for vGreens Smart Farm Frontend — Production
-# Deploy: flyctl deploy frontend --remote-only --config fly/production/frontend.toml
 app = "vgreens-frontend"
 primary_region = "fra"
 
