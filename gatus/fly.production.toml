@@ -1,3 +1,4 @@
+# Fly.io configuration for vGreens Status Page (Gatus) — Production
 app = "vgreens-status"
 primary_region = "fra"
 

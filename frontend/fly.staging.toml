@@ -1,0 +1,51 @@
+# Fly.io configuration for vGreens Smart Farm Frontend — Staging
+app = "vgreens-frontend-staging"
+primary_region = "fra"
+
+[build]
+  dockerfile = "docker/Dockerfile"
+
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "60s"
+    method = "GET"
+    path = "/"
+
+  [[services.tcp_checks]]
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "60s"
+
+[vm]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+  NEXT_TELEMETRY_DISABLED = "1"
+  HOSTNAME = "0.0.0.0"
+
+# NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY passed as --build-arg from CI
+# CLERK_SECRET_KEY set as a Fly secret from CI
+[build.args]
+  NEXT_PUBLIC_GRAPHQL_ENDPOINT = "https://vgreens-backend-staging.fly.dev/graphql"
+  NEXT_PUBLIC_API_URL = "https://vgreens-backend-staging.fly.dev"
+
+# One-time setup:
+#   flyctl apps create vgreens-frontend-staging
