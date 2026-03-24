@@ -318,7 +318,7 @@ export class SystemErrorsService {
       source: ErrorSource.BACKEND,
       errorType,
       severity,
-      errorMessage: errorData.error.message,
+      errorMessage: this.buildErrorDescription(errorData, errorType, severity),
       stackTrace: errorData.error.stack,
       httpMethod: errorData.httpMethod,
       requestUrl: errorData.requestUrl,
@@ -328,6 +328,72 @@ export class SystemErrorsService {
       tenantId: errorData.tenantId,
       requestPayload: errorData.requestPayload,
     });
+  }
+
+  /**
+   * Builds a structured, developer-readable error description.
+   *
+   * Example output:
+   *   [DATABASE_ERROR | HIGH] UsersResolver.findUser
+   *   → WHERE:   GraphQL: query findUser
+   *   → WHAT:    Connection to database timed out after 5000ms
+   *   → WHO:     userId=abc-123 | tenantId=xyz-456
+   *   → PAYLOAD: {"id":"farm-789"}
+   */
+  private buildErrorDescription(
+    errorData: {
+      error: Error;
+      component?: string;
+      httpMethod?: string;
+      requestUrl?: string;
+      httpStatusCode?: number;
+      userId?: string;
+      tenantId?: string;
+      requestPayload?: Record<string, unknown>;
+    },
+    errorType: ErrorType,
+    severity: ReportSeverity,
+  ): string {
+    const lines: string[] = [];
+
+    // Header: type, severity, and exact code location
+    const location = errorData.component ?? 'unknown';
+    lines.push(`[${errorType} | ${severity}] ${location}`);
+
+    // WHERE: the endpoint or GraphQL operation that was executing
+    if (errorData.requestUrl) {
+      const method = errorData.httpMethod ? `${errorData.httpMethod} ` : '';
+      const status = errorData.httpStatusCode
+        ? ` → HTTP ${errorData.httpStatusCode}`
+        : '';
+      lines.push(`→ WHERE:   ${method}${errorData.requestUrl}${status}`);
+    }
+
+    // WHAT: the actual error message
+    lines.push(`→ WHAT:    ${errorData.error.message}`);
+
+    // WHO: identity context so the dev can reproduce with the right user/tenant
+    const who = [
+      errorData.userId ? `userId=${errorData.userId}` : null,
+      errorData.tenantId ? `tenantId=${errorData.tenantId}` : null,
+    ]
+      .filter(Boolean)
+      .join(' | ');
+    if (who) lines.push(`→ WHO:     ${who}`);
+
+    // PAYLOAD: the arguments that triggered the error (already sanitized)
+    if (
+      errorData.requestPayload &&
+      Object.keys(errorData.requestPayload).length > 0
+    ) {
+      try {
+        lines.push(`→ PAYLOAD: ${JSON.stringify(errorData.requestPayload)}`);
+      } catch {
+        lines.push(`→ PAYLOAD: [unserializable]`);
+      }
+    }
+
+    return lines.join('\n');
   }
 
   /**

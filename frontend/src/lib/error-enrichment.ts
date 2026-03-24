@@ -92,8 +92,14 @@ export function setupGlobalErrorListeners(logError: (error: ErrorLogData) => voi
   });
 
   window.addEventListener('unhandledrejection', (event) => {
+    // Filter out network-related rejections — these are not app crashes.
+    // Genuine unhandled rejections (application logic bugs) are still logged.
+    const message = event.reason?.message ?? String(event.reason ?? '');
+    const isNetworkNoise = /fetch|network|failed to fetch|load failed|aborted|networkerror/i.test(message);
+    if (isNetworkNoise) return;
+
     logError({
-      errorMessage: `Unhandled Promise Rejection: ${event.reason}`,
+      errorMessage: `Unhandled Promise Rejection: ${message}`,
       stackTrace: event.reason?.stack,
       component: 'global',
       action: 'promise.rejection',
