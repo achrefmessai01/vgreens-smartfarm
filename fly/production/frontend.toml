@@ -1,13 +1,11 @@
-# Fly.io configuration for vGreens Smart Farm Frontend (Next.js)
-# App name must be globally unique on Fly.io
+# Fly.io configuration for vGreens Smart Farm Frontend — Production
+# Deploy: flyctl deploy frontend --remote-only --config fly/production/frontend.toml
 app = "vgreens-frontend"
-primary_region = "fra" # Frankfurt - change to your preferred region
+primary_region = "fra"
 
-# Build configuration
 [build]
   dockerfile = "docker/Dockerfile"
 
-# HTTP service
 [[services]]
   internal_port = 3000
   protocol = "tcp"
@@ -21,38 +19,31 @@ primary_region = "fra" # Frankfurt - change to your preferred region
     handlers = ["tls", "http"]
     port = 443
 
-  # Health checks
   [[services.http_checks]]
     interval = "30s"
     timeout = "10s"
     grace_period = "60s"
     method = "GET"
     path = "/"
-    
-  # Auto-scaling configuration
+
   [[services.tcp_checks]]
     interval = "30s"
     timeout = "10s"
     grace_period = "60s"
 
-# VM resources - Dedicated CPU Performance tier
 [vm]
-  memory = '4gb'
-  cpu_kind = 'performance'
+  memory = "4gb"
+  cpu_kind = "performance"
   cpus = 2
 
-# Environment variables (non-sensitive)
 [env]
   PORT = "3000"
   NODE_ENV = "production"
   NEXT_TELEMETRY_DISABLED = "1"
   HOSTNAME = "0.0.0.0"
 
-# Build arguments (NEXT_PUBLIC_* can be overridden by CI via fly deploy --build-arg)
+# NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY passed as --build-arg from CI
+# CLERK_SECRET_KEY set as a Fly secret from CI
 [build.args]
   NEXT_PUBLIC_GRAPHQL_ENDPOINT = "https://vgreens-backend.fly.dev/graphql"
   NEXT_PUBLIC_API_URL = "https://vgreens-backend.fly.dev"
-
-# From GitLab CI: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY (build arg), CLERK_SECRET_KEY (flyctl secrets set)
-# Note: Update NEXT_PUBLIC_GRAPHQL_ENDPOINT and NEXT_PUBLIC_API_URL above
-# with your actual backend Fly.io URL

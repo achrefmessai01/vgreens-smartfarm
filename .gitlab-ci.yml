@@ -7,33 +7,32 @@ variables:
   GIT_STRATEGY: fetch
   FLY_VERSION: '0.3.55'
 
-# Deploy Backend to Fly.io
+.flyctl_setup: &flyctl_setup
+  - apk add --no-cache curl
+  - curl -L https://fly.io/install.sh | sh
+  - export FLYCTL_INSTALL="/root/.fly"
+  - export PATH="$FLYCTL_INSTALL/bin:$PATH"
+  - test -n "$FLY_API_TOKEN" && echo "Token OK" || (echo "ERROR - Token not set" && exit 1)
+  - flyctl auth whoami || echo "Auth failed"
+
+# ──────────────────────────────────────
+# Production — triggered on master
+# ──────────────────────────────────────
+
 deploy_backend:
   stage: deploy
   only:
     - master
   before_script:
-    - apk add --no-cache curl
-    - curl -L https://fly.io/install.sh | sh
-    - export FLYCTL_INSTALL="/root/.fly"
-    - export PATH="$FLYCTL_INSTALL/bin:$PATH"
-    - echo "=== DEBUG - Environment Check ==="
-    - echo "Checking for FLY_API_TOKEN..."
-    - env | grep -i fly || echo "No FLY variables found"
-    - echo "=== Checking Token ==="
-    - test -n "$FLY_API_TOKEN" && echo "Token is set (length ${#FLY_API_TOKEN})" || (echo "ERROR - Token not set" && exit 1)
-    - echo "Testing authentication..."
-    - flyctl auth whoami || echo "Auth failed"
+    - *flyctl_setup
   script:
-    - cd backend
-    - echo "=== Starting Backend Deployment ==="
+    - echo "=== Starting Production Backend Deployment ==="
     - |
-      # Deploy with retry logic for lease conflicts
       MAX_RETRIES=3
       RETRY_COUNT=0
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy --remote-only --no-cache --config fly.toml; then
+        if flyctl deploy backend --remote-only --no-cache --config fly/production/backend.toml; then
           echo "Deployment successful!"
           exit 0
         else
@@ -51,33 +50,24 @@ deploy_backend:
     name: production/backend
     url: https://vgreens-backend.fly.dev
 
-# Deploy Frontend to Fly.io
 deploy_frontend:
   stage: deploy
   only:
     - master
   before_script:
-    - apk add --no-cache curl
-    - curl -L https://fly.io/install.sh | sh
-    - export FLYCTL_INSTALL="/root/.fly"
-    - export PATH="$FLYCTL_INSTALL/bin:$PATH"
-    - echo "=== Frontend Token Check ==="
-    - test -n "$FLY_API_TOKEN" && echo "Token OK" || (echo "ERROR - Token not set" && exit 1)
-    - flyctl auth whoami || echo "Auth failed"
+    - *flyctl_setup
   script:
-    - cd frontend
-    - echo "=== Starting Frontend Deployment ==="
-    - test -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" && echo "Clerk publishable key present" || (echo "ERROR - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY not set in CI/CD variables" && exit 1)
-    - test -n "$CLERK_SECRET_KEY" && echo "Clerk secret key present" || (echo "ERROR - CLERK_SECRET_KEY not set in CI/CD variables" && exit 1)
+    - echo "=== Starting Production Frontend Deployment ==="
+    - test -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" && echo "Clerk publishable key present" || (echo "ERROR - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY not set" && exit 1)
+    - test -n "$CLERK_SECRET_KEY" && echo "Clerk secret key present" || (echo "ERROR - CLERK_SECRET_KEY not set" && exit 1)
     - flyctl secrets set CLERK_SECRET_KEY="$CLERK_SECRET_KEY" --app vgreens-frontend
     - |
-      # Deploy with retry logic; build args from GitLab CI variables
       MAX_RETRIES=3
       RETRY_COUNT=0
       BUILD_ARGS="--build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy --remote-only --no-cache --config fly.toml $BUILD_ARGS; then
+        if flyctl deploy frontend --remote-only --no-cache --config fly/production/frontend.toml $BUILD_ARGS; then
           echo "Deployment successful!"
           exit 0
         else
@@ -97,27 +87,20 @@ deploy_frontend:
   needs:
     - deploy_backend
 
-# Deploy Status Page (Gatus) to Fly.io
 deploy_status:
   stage: deploy
   only:
     - master
   before_script:
-    - apk add --no-cache curl
-    - curl -L https://fly.io/install.sh | sh
-    - export FLYCTL_INSTALL="/root/.fly"
-    - export PATH="$FLYCTL_INSTALL/bin:$PATH"
-    - test -n "$FLY_API_TOKEN" && echo "Token OK" || (echo "ERROR - Token not set" && exit 1)
-    - flyctl auth whoami || echo "Auth failed"
+    - *flyctl_setup
   script:
-    - cd gatus
-    - echo "=== Starting Status Page Deployment ==="
+    - echo "=== Starting Production Status Page Deployment ==="
     - |
       MAX_RETRIES=3
       RETRY_COUNT=0
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy --remote-only --no-cache --config fly.toml; then
+        if flyctl deploy gatus --remote-only --no-cache --config fly/production/gatus.toml; then
           echo "Deployment successful!"
           exit 0
         else
@@ -135,20 +118,88 @@ deploy_status:
     name: production/status
     url: https://vgreens-status.fly.dev
 
-# Manual deployment
+# Manual production deployment
 deploy_manual:
   stage: deploy
   when: manual
   before_script:
-    - apk add --no-cache curl
-    - curl -L https://fly.io/install.sh | sh
-    - export FLYCTL_INSTALL="/root/.fly"
-    - export PATH="$FLYCTL_INSTALL/bin:$PATH"
-    - test -n "$FLY_API_TOKEN" && echo "Token OK" || (echo "ERROR - Token not set" && exit 1)
+    - *flyctl_setup
   script:
-    - echo "=== Deploying Backend ==="
-    - cd backend && flyctl deploy --remote-only --no-cache --config fly.toml
-    - echo "=== Deploying Frontend ==="
-    - cd ../frontend && flyctl deploy --remote-only --no-cache --config fly.toml
-    - echo "=== Deploying Status Page ==="
-    - cd ../gatus && flyctl deploy --remote-only --no-cache --config fly.toml
+    - echo "=== Deploying Backend (Production) ==="
+    - flyctl deploy backend --remote-only --no-cache --config fly/production/backend.toml
+    - echo "=== Deploying Frontend (Production) ==="
+    - flyctl deploy frontend --remote-only --no-cache --config fly/production/frontend.toml
+    - echo "=== Deploying Status Page (Production) ==="
+    - flyctl deploy gatus --remote-only --no-cache --config fly/production/gatus.toml
+
+# ──────────────────────────────────────
+# Staging — triggered on staging branch
+# ──────────────────────────────────────
+
+deploy_backend_staging:
+  stage: deploy
+  only:
+    - staging
+  before_script:
+    - *flyctl_setup
+  script:
+    - echo "=== Starting Staging Backend Deployment ==="
+    - |
+      MAX_RETRIES=3
+      RETRY_COUNT=0
+      while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+        if flyctl deploy backend --remote-only --no-cache --config fly/staging/backend.toml; then
+          echo "Deployment successful!"
+          exit 0
+        else
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+          if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "Deployment failed, waiting 30 seconds before retry..."
+            sleep 30
+          else
+            echo "All deployment attempts failed"
+            exit 1
+          fi
+        fi
+      done
+  environment:
+    name: staging/backend
+    url: https://vgreens-backend-staging.fly.dev
+
+deploy_frontend_staging:
+  stage: deploy
+  only:
+    - staging
+  before_script:
+    - *flyctl_setup
+  script:
+    - echo "=== Starting Staging Frontend Deployment ==="
+    - test -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" && echo "Clerk publishable key present" || (echo "ERROR - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY not set" && exit 1)
+    - test -n "$CLERK_SECRET_KEY" && echo "Clerk secret key present" || (echo "ERROR - CLERK_SECRET_KEY not set" && exit 1)
+    - flyctl secrets set CLERK_SECRET_KEY="$CLERK_SECRET_KEY" --app vgreens-frontend-staging
+    - |
+      MAX_RETRIES=3
+      RETRY_COUNT=0
+      BUILD_ARGS="--build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
+      while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
+        if flyctl deploy frontend --remote-only --no-cache --config fly/staging/frontend.toml $BUILD_ARGS; then
+          echo "Deployment successful!"
+          exit 0
+        else
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+          if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "Deployment failed, waiting 30 seconds before retry..."
+            sleep 30
+          else
+            echo "All deployment attempts failed"
+            exit 1
+          fi
+        fi
+      done
+  environment:
+    name: staging/frontend
+    url: https://vgreens-frontend-staging.fly.dev
+  needs:
+    - deploy_backend_staging
