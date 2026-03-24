@@ -1,5 +1,4 @@
 # Fly.io configuration for vGreens Smart Farm Backend — Production
-# Deploy: flyctl deploy backend --remote-only --config fly/production/backend.toml
 app = "vgreens-backend"
 primary_region = "fra"
 
@@ -41,7 +40,7 @@ primary_region = "fra"
   NODE_ENV = "production"
   HOSTNAME = "0.0.0.0"
 
-# Secrets managed via flyctl (set once, not in CI):
+# Secrets managed via flyctl (set once):
 # flyctl secrets set \
 #   DATABASE_HOST=... DATABASE_PORT=... DATABASE_NAME=... \
 #   DATABASE_USER=... DATABASE_PASSWORD=... \
