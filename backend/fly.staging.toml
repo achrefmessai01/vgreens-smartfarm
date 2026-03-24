@@ -1,5 +1,4 @@
 # Fly.io configuration for vGreens Smart Farm Backend — Staging
-# Deploy: flyctl deploy backend --remote-only --config fly/staging/backend.toml
 app = "vgreens-backend-staging"
 primary_region = "fra"
 

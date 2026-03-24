@@ -1,5 +1,4 @@
 # Fly.io configuration for vGreens InfluxDB — Shared (Production & Staging)
-# Deploy: flyctl deploy vgreens-influx --remote-only --config fly/production/influx.toml
 app = "vgreens-influx"
 primary_region = "fra"
 

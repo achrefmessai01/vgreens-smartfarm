@@ -1,5 +1,4 @@
 # Fly.io configuration for vGreens Status Page (Gatus) — Production
-# Deploy: flyctl deploy gatus --remote-only --config fly/production/gatus.toml
 app = "vgreens-status"
 primary_region = "fra"
 
