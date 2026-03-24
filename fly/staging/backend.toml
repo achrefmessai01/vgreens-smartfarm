@@ -1,0 +1,60 @@
+# Fly.io configuration for vGreens Smart Farm Backend — Staging
+# Deploy: flyctl deploy backend --remote-only --config fly/staging/backend.toml
+app = "vgreens-backend-staging"
+primary_region = "fra"
+
+[build]
+  dockerfile = "docker/Dockerfile"
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "60s"
+    method = "GET"
+    path = "/health"
+
+  [[services.tcp_checks]]
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "60s"
+
+[vm]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[env]
+  PORT = "8080"
+  NODE_ENV = "staging"
+  HOSTNAME = "0.0.0.0"
+
+# One-time setup:
+#   flyctl apps create vgreens-backend-staging
+#   flyctl secrets set \
+#     DATABASE_HOST=<staging-supabase-host> \
+#     DATABASE_PORT=<port> \
+#     DATABASE_NAME=<db> \
+#     DATABASE_USER=<user> \
+#     DATABASE_PASSWORD=<password> \
+#     CLERK_SECRET_KEY=<clerk-secret> \
+#     CLERK_WEBHOOK_SECRET=<clerk-webhook-secret> \
+#     INFLUXDB_URL=https://vgreens-influx.fly.dev \
+#     INFLUXDB_TOKEN=<token> \
+#     INFLUXDB_ORG=vgreens \
+#     INFLUXDB_BUCKET=vgreens-bucket \
+#     FRONTEND_APP_URL=https://vgreens-frontend-staging.fly.dev \
+#     FRONTEND_PROD_APP_URL=https://vgreens-frontend-staging.fly.dev \
+#     --app vgreens-backend-staging
