@@ -26,13 +26,14 @@ deploy_backend:
   before_script:
     - *flyctl_setup
   script:
+    - cd backend
     - echo "=== Starting Production Backend Deployment ==="
     - |
       MAX_RETRIES=3
       RETRY_COUNT=0
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy backend --remote-only --no-cache --config fly/production/backend.toml; then
+        if flyctl deploy --remote-only --no-cache --config ../fly/production/backend.toml; then
           echo "Deployment successful!"
           exit 0
         else
@@ -57,6 +58,7 @@ deploy_frontend:
   before_script:
     - *flyctl_setup
   script:
+    - cd frontend
     - echo "=== Starting Production Frontend Deployment ==="
     - test -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" && echo "Clerk publishable key present" || (echo "ERROR - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY not set" && exit 1)
     - test -n "$CLERK_SECRET_KEY" && echo "Clerk secret key present" || (echo "ERROR - CLERK_SECRET_KEY not set" && exit 1)
@@ -67,7 +69,7 @@ deploy_frontend:
       BUILD_ARGS="--build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy frontend --remote-only --no-cache --config fly/production/frontend.toml $BUILD_ARGS; then
+        if flyctl deploy --remote-only --no-cache --config ../fly/production/frontend.toml $BUILD_ARGS; then
           echo "Deployment successful!"
           exit 0
         else
@@ -94,13 +96,14 @@ deploy_status:
   before_script:
     - *flyctl_setup
   script:
+    - cd gatus
     - echo "=== Starting Production Status Page Deployment ==="
     - |
       MAX_RETRIES=3
       RETRY_COUNT=0
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy gatus --remote-only --no-cache --config fly/production/gatus.toml; then
+        if flyctl deploy --remote-only --no-cache --config ../fly/production/gatus.toml; then
           echo "Deployment successful!"
           exit 0
         else
@@ -126,11 +129,11 @@ deploy_manual:
     - *flyctl_setup
   script:
     - echo "=== Deploying Backend (Production) ==="
-    - flyctl deploy backend --remote-only --no-cache --config fly/production/backend.toml
+    - cd backend && flyctl deploy --remote-only --no-cache --config ../fly/production/backend.toml
     - echo "=== Deploying Frontend (Production) ==="
-    - flyctl deploy frontend --remote-only --no-cache --config fly/production/frontend.toml
+    - cd ../frontend && flyctl deploy --remote-only --no-cache --config ../fly/production/frontend.toml
     - echo "=== Deploying Status Page (Production) ==="
-    - flyctl deploy gatus --remote-only --no-cache --config fly/production/gatus.toml
+    - cd ../gatus && flyctl deploy --remote-only --no-cache --config ../fly/production/gatus.toml
 
 # ──────────────────────────────────────
 # Staging — triggered on staging branch
@@ -143,13 +146,14 @@ deploy_backend_staging:
   before_script:
     - *flyctl_setup
   script:
+    - cd backend
     - echo "=== Starting Staging Backend Deployment ==="
     - |
       MAX_RETRIES=3
       RETRY_COUNT=0
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy backend --remote-only --no-cache --config fly/staging/backend.toml; then
+        if flyctl deploy --remote-only --no-cache --config ../fly/staging/backend.toml; then
           echo "Deployment successful!"
           exit 0
         else
@@ -174,6 +178,7 @@ deploy_frontend_staging:
   before_script:
     - *flyctl_setup
   script:
+    - cd frontend
     - echo "=== Starting Staging Frontend Deployment ==="
     - test -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" && echo "Clerk publishable key present" || (echo "ERROR - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY not set" && exit 1)
     - test -n "$CLERK_SECRET_KEY" && echo "Clerk secret key present" || (echo "ERROR - CLERK_SECRET_KEY not set" && exit 1)
@@ -184,7 +189,7 @@ deploy_frontend_staging:
       BUILD_ARGS="--build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
-        if flyctl deploy frontend --remote-only --no-cache --config fly/staging/frontend.toml $BUILD_ARGS; then
+        if flyctl deploy --remote-only --no-cache --config ../fly/staging/frontend.toml $BUILD_ARGS; then
           echo "Deployment successful!"
           exit 0
         else
