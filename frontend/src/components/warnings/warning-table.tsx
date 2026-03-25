@@ -1,15 +1,15 @@
 'use client';
 
-import * as React from 'react';
-import { useI18n } from '@/i18n';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { TableCell } from '@/components/ui/table';
-import type { Warning, WarningStatus } from '@/types/warning.types';
+import { Card, CardContent } from '@/components/ui/card';
 import { DataTable, type Column } from '@/components/ui/data-table';
-import { CheckCircle2, AlertCircle, CheckCircle } from 'lucide-react';
+import { TableCell } from '@/components/ui/table';
+import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import type { Warning, WarningStatus } from '@/types/warning.types';
+import { AlertCircle, CheckCircle, CheckCircle2 } from 'lucide-react';
+import * as React from 'react';
 
 interface WarningTableProps {
   warnings: Warning[];
@@ -162,42 +162,46 @@ export function WarningTable({
   );
 
   const renderCard = (warning: Warning) => (
-    <Card className="gap-0 overflow-hidden border border-border/60 py-0 shadow-none">
-      <CardContent className="space-y-4 px-4 py-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <p className="text-base font-semibold dark:text-white">
-              {warning.sensorName}
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {warning.value}
-            </p>
-          </div>
-          <div>{getStatusBadge(warning.status)}</div>
+    <Card className="gap-2 overflow-hidden border py-2 shadow-none">
+      {/* Custom-Header implementation - using card-header breaks ux */}
+      <div className="flex flex-row items-center justify-between border-b px-6 pb-2">
+        <h3 className="text-sm font-semibold leading-none dark:text-white">
+          {warning.sensorName}
+        </h3>
+        {getStatusBadge(warning.status)}
+      </div>
+
+      <CardContent className="space-y-2 text-xs">
+        {/* Value */}
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">{translations.value}:</span>
+          <span className="font-medium dark:text-gray-300">
+            {warning.value}
+          </span>
         </div>
 
-        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-lg border border-border/50 bg-background/80 px-3 py-2">
-            <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              {translations.timestamp}
-            </dt>
-            <dd className="mt-1 text-sm dark:text-gray-300">
-              {formatTimestamp(warning.timestamp)}
-            </dd>
-          </div>
-          <div className="rounded-lg border border-border/50 bg-background/80 px-3 py-2">
-            <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              {translations.tunnel}
-            </dt>
-            <dd className="mt-1 text-sm dark:text-gray-300">
-              {warning.tunnel || '-'}
-            </dd>
-          </div>
-        </dl>
+        {/* Timestamp */}
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">
+            {translations.timestamp}:
+          </span>
+          <span className="font-medium dark:text-gray-300">
+            {formatTimestamp(warning.timestamp)}
+          </span>
+        </div>
+
+        {/* Tunnel */}
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">{translations.tunnel}:</span>
+          <span className="font-medium dark:text-gray-300">
+            {warning.tunnel || '-'}
+          </span>
+        </div>
       </CardContent>
 
-      {warning.status !== 'resolved' ? (
-        <CardFooter className="flex-col items-stretch gap-2 border-t border-border/50 px-4 py-4 sm:flex-row sm:justify-end">
+      {/* Custom-Footer implementation - using card-footer breaks ux */}
+      {warning.status !== 'resolved' && (
+        <div className="flex items-center gap-2 border-t px-6 pt-2">
           {warning.status === 'open' && (
             <Button
               variant="outline"
@@ -206,7 +210,7 @@ export function WarningTable({
                 event.stopPropagation();
                 onAcknowledge(warning);
               }}
-              className="h-8 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
+              className="h-8 flex-1 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
             >
               {translations.acknowledge}
             </Button>
@@ -218,12 +222,12 @@ export function WarningTable({
               event.stopPropagation();
               onResolve(warning);
             }}
-            className="h-8"
+            className="h-8 flex-1"
           >
             {translations.resolve}
           </Button>
-        </CardFooter>
-      ) : null}
+        </div>
+      )}
     </Card>
   );
 
