@@ -62,11 +62,12 @@ deploy_frontend:
     - echo "=== Starting Production Frontend Deployment ==="
     - test -n "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" && echo "Clerk publishable key present" || (echo "ERROR - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY not set" && exit 1)
     - test -n "$CLERK_SECRET_KEY" && echo "Clerk secret key present" || (echo "ERROR - CLERK_SECRET_KEY not set" && exit 1)
+    - test -n "$NEXT_PUBLIC_POSTHOG_KEY" && echo "PostHog key present" || (echo "ERROR - NEXT_PUBLIC_POSTHOG_KEY not set" && exit 1)
     - flyctl secrets set CLERK_SECRET_KEY="$CLERK_SECRET_KEY" --app vgreens-frontend
     - |
       MAX_RETRIES=3
       RETRY_COUNT=0
-      BUILD_ARGS="--build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
+      BUILD_ARGS="--build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY --build-arg NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY --build-arg NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST"
       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo "Deployment attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES..."
         if flyctl deploy --remote-only --no-cache --config fly.production.toml $BUILD_ARGS; then
