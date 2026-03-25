@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { TableCell } from '@/components/ui/table';
 import { User, UserRole, UserStatus } from '@/generated/graphql';
@@ -128,74 +128,81 @@ export function UserManagementTable({
       t.pages.admin.users.notAvailable;
 
     return (
-      <Card className="gap-0 overflow-hidden border border-border/60 py-0 shadow-none">
-        <CardContent className="space-y-4 px-4 py-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-base font-semibold">{fullName}</p>
-              <p className="mt-1 break-all text-sm text-muted-foreground">
-                {user.email || '-'}
-              </p>
-            </div>
-            <Badge variant="outline">
-              {roleLabels[user.role] || user.role}
-            </Badge>
+      <Card className="gap-2 overflow-hidden border py-2 shadow-none">
+        {/* Custom-Header implementation - using card-header breaks ux */}
+        <div className="flex flex-row items-center justify-between border-b px-6 pb-2">
+          <h3 className="text-sm font-semibold leading-none">{fullName}</h3>
+          <Badge variant="outline" className="text-xs">
+            {roleLabels[user.role] || user.role}
+          </Badge>
+        </div>
+
+        <CardContent className="space-y-2 text-xs">
+          {/* Email */}
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">
+              {t.pages.admin.users.email}:
+            </span>
+            <span className="break-all font-medium">{user.email || '-'}</span>
           </div>
 
-          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {!hideTenantColumn ? (
-              <div className="rounded-lg border border-border/50 bg-background/80 px-3 py-2">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                  {t.pages.admin.users.tenant}
-                </dt>
-                <dd className="mt-1 text-sm">{user.tenant?.name || '-'}</dd>
-              </div>
-            ) : null}
-            <div className="rounded-lg border border-border/50 bg-background/80 px-3 py-2">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                {t.pages.admin.users.status}
-              </dt>
-              <dd className="mt-1">
-                <Badge
-                  variant={
-                    user.status === UserStatus.Active
-                      ? 'default'
-                      : user.status === UserStatus.Pending
-                        ? 'outline'
-                        : 'secondary'
-                  }
-                >
-                  {user.status === UserStatus.Pending
-                    ? t.pages.admin.users.pending
-                    : user.isActive
-                      ? t.pages.admin.users.active
-                      : t.pages.admin.users.inactive}
-                </Badge>
-              </dd>
+          {/* Tenant */}
+          {!hideTenantColumn && (
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">
+                {t.pages.admin.users.tenant}:
+              </span>
+              <span className="font-medium">{user.tenant?.name || '-'}</span>
             </div>
-          </dl>
+          )}
+
+          {/* Status */}
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">
+              {t.pages.admin.users.status}:
+            </span>
+            <Badge
+              variant={
+                user.status === UserStatus.Active
+                  ? 'default'
+                  : user.status === UserStatus.Pending
+                    ? 'outline'
+                    : 'secondary'
+              }
+              className="h-5 text-xs"
+            >
+              {user.status === UserStatus.Pending
+                ? t.pages.admin.users.pending
+                : user.isActive
+                  ? t.pages.admin.users.active
+                  : t.pages.admin.users.inactive}
+            </Badge>
+          </div>
         </CardContent>
 
-        <CardFooter className="justify-end gap-2 border-t border-border/50 px-4 py-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onEdit(user)}
-            className="h-8 w-8"
-            disabled={isLoading}
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onDelete(user)}
-            className="h-8 w-8 text-destructive hover:text-destructive"
-            disabled={isLoading}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </CardFooter>
+        {/* Custom-Footer implementation - using card-footer breaks ux */}
+        <div className="flex items-center border-t px-6 pt-2">
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(user)}
+              className="h-8 w-8"
+              disabled={isLoading}
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onDelete(user)}
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              disabled={isLoading}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </Card>
     );
   };
