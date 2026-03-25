@@ -1,33 +1,33 @@
-'use client'
+'use client';
 
-import { TableSearch } from '@/components/ui/table-search'
-import { TableFilterPopover } from '@/components/ui/table-filter-popover'
-import { TableFiltersPopover } from '@/components/ui/table-filters-popover'
-import { TableFilterChips } from '@/components/ui/table-filter-chips'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
-import type { TableFilterConfig } from '@/components/ui/table-filter-popover'
-import type { FilterChip } from '@/components/ui/table-filter-chips'
-import { X } from 'lucide-react'
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import type { FilterChip } from '@/components/ui/table-filter-chips';
+import { TableFilterChips } from '@/components/ui/table-filter-chips';
+import type { TableFilterConfig } from '@/components/ui/table-filter-popover';
+import { TableFilterPopover } from '@/components/ui/table-filter-popover';
+import { TableFiltersPopover } from '@/components/ui/table-filters-popover';
+import { TableSearch } from '@/components/ui/table-search';
+import { X } from 'lucide-react';
 
 export interface DateRangeConfig {
-  dateFrom: Date | null
-  dateTo: Date | null
-  onRangeChange: (from: Date | null, to: Date | null) => void
-  placeholder?: string
+  dateFrom: Date | null;
+  dateTo: Date | null;
+  onRangeChange: (from: Date | null, to: Date | null) => void;
+  placeholder?: string;
 }
 
 export interface TableToolbarProps {
-  searchConfig?: { placeholder: string }
-  searchQuery: string
-  onSearchChange: (value: string) => void
-  filterConfig?: TableFilterConfig
-  filterConfigs?: TableFilterConfig[]
-  dateRangeConfig?: DateRangeConfig
-  clearFilter: () => void
-  clearAllFilters?: () => void
-  hasActiveFilter: boolean
-  filterChips: FilterChip[]
-  headerActions?: React.ReactNode
+  searchConfig?: { placeholder: string };
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  filterConfig?: TableFilterConfig;
+  filterConfigs?: TableFilterConfig[];
+  dateRangeConfig?: DateRangeConfig;
+  clearFilter: () => void;
+  clearAllFilters?: () => void;
+  hasActiveFilter: boolean;
+  filterChips: FilterChip[];
+  headerActions?: React.ReactNode;
 }
 
 export function TableToolbar({
@@ -43,23 +43,28 @@ export function TableToolbar({
   filterChips,
   headerActions,
 }: TableToolbarProps) {
-  const hasMultipleFilters = filterConfigs && filterConfigs.length > 0
-  const hasSingleFilter = filterConfig && !hasMultipleFilters
+  const hasMultipleFilters = filterConfigs && filterConfigs.length > 0;
+  const hasSingleFilter = filterConfig && !hasMultipleFilters;
   const showClear =
     (hasSingleFilter && hasActiveFilter) ||
-    (hasMultipleFilters && filterChips.length > 0 && clearAllFilters)
+    (hasMultipleFilters && filterChips.length > 0 && clearAllFilters);
 
   return (
     <div className="py-4 px-1">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          {searchConfig && (
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        {/* Search on its own row on mobile, inline on desktop */}
+        {searchConfig && (
+          <div className="w-full sm:w-auto">
             <TableSearch
               placeholder={searchConfig.placeholder}
               value={searchQuery}
               onChange={onSearchChange}
             />
-          )}
+          </div>
+        )}
+
+        {/* Filters and date picker on same row */}
+        <div className="flex flex-wrap items-center gap-2">
           {hasMultipleFilters ? (
             <>
               <TableFiltersPopover
@@ -104,6 +109,7 @@ export function TableToolbar({
             />
           )}
         </div>
+
         {headerActions && (
           <div className="sm:ml-auto shrink-0">{headerActions}</div>
         )}
@@ -112,5 +118,5 @@ export function TableToolbar({
         <TableFilterChips chips={filterChips} className="mt-3" />
       )}
     </div>
-  )
+  );
 }
