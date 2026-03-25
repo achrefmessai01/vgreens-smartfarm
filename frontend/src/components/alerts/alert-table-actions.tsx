@@ -1,52 +1,55 @@
-import * as React from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertStatus } from '@/generated/graphql'
-import { useI18n } from '@/i18n'
-import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button';
+import { Alert, AlertStatus } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { cn } from '@/lib/utils';
+import { Pencil, Trash2 } from 'lucide-react';
 
 /**
  * Alert table action logic and button rendering
  */
 
 export interface ActionHandlers {
-  onAcknowledge: (alert: Alert) => void
-  onResolve: (alert: Alert) => void
-  onEdit?: (alert: Alert) => void
-  onDelete?: (alert: Alert) => void
-  isLoading?: boolean
+  onAcknowledge: (alert: Alert) => void;
+  onResolve: (alert: Alert) => void;
+  onEdit?: (alert: Alert) => void;
+  onDelete?: (alert: Alert) => void;
+  isLoading?: boolean;
 }
 
 export const getActionState = (alert: Alert) => ({
-  canAcknowledge: alert.status === AlertStatus.Open && alert.acknowledgedBy == null,
+  canAcknowledge:
+    alert.status === AlertStatus.Open && alert.acknowledgedBy == null,
   canResolve:
-    (alert.status === AlertStatus.Open || alert.status === AlertStatus.Acknowledged) &&
+    (alert.status === AlertStatus.Open ||
+      alert.status === AlertStatus.Acknowledged) &&
     alert.resolvedBy == null &&
     alert.acknowledgedBy != null,
-})
+});
 
 export const renderPrimaryActions = (
-  alert: Alert, 
+  alert: Alert,
   { onAcknowledge, onResolve, isLoading }: ActionHandlers,
   t: ReturnType<typeof useI18n>['t'],
-  stacked = false
+  stacked = false,
 ) => {
-  const { canAcknowledge, canResolve } = getActionState(alert)
+  const { canAcknowledge, canResolve } = getActionState(alert);
 
-  if (!canAcknowledge && !canResolve) return null
+  if (!canAcknowledge && !canResolve) return null;
 
   return (
-    <div className={cn('flex gap-2', stacked ? 'flex-col sm:flex-row' : 'justify-end')}>
+    <div
+      className={cn('flex gap-2', stacked ? 'flex-col sm:flex-row' : 'flex-1')}
+    >
       {canAcknowledge && (
         <Button
           variant="outline"
           size="sm"
           onClick={(event) => {
-            event.stopPropagation()
-            onAcknowledge(alert)
+            event.stopPropagation();
+            onAcknowledge(alert);
           }}
           disabled={isLoading}
-          className={cn('gap-1.5', stacked && 'w-full sm:w-auto')}
+          className={cn('h-8 gap-1.5', stacked ? 'w-full sm:w-auto' : 'flex-1')}
         >
           {t.pages.alerts.acknowledge}
         </Button>
@@ -56,22 +59,22 @@ export const renderPrimaryActions = (
           variant="default"
           size="sm"
           onClick={(event) => {
-            event.stopPropagation()
-            onResolve(alert)
+            event.stopPropagation();
+            onResolve(alert);
           }}
           disabled={isLoading}
-          className={stacked ? 'w-full sm:w-auto' : undefined}
+          className={cn('h-8', stacked ? 'w-full sm:w-auto' : 'flex-1')}
         >
           {t.pages.alerts.resolve}
         </Button>
       )}
     </div>
-  )
-}
+  );
+};
 
 export const renderSecondaryActions = (
-  alert: Alert, 
-  { onEdit, onDelete, isLoading }: ActionHandlers
+  alert: Alert,
+  { onEdit, onDelete, isLoading }: ActionHandlers,
 ) => (
   <>
     {onEdit && (
@@ -79,8 +82,8 @@ export const renderSecondaryActions = (
         variant="ghost"
         size="icon"
         onClick={(event) => {
-          event.stopPropagation()
-          onEdit(alert)
+          event.stopPropagation();
+          onEdit(alert);
         }}
         disabled={isLoading}
         className="h-8 w-8 rounded-full border border-sky-200/80 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/70 dark:text-sky-300 dark:hover:bg-sky-950/40"
@@ -93,8 +96,8 @@ export const renderSecondaryActions = (
         variant="ghost"
         size="icon"
         onClick={(event) => {
-          event.stopPropagation()
-          onDelete(alert)
+          event.stopPropagation();
+          onDelete(alert);
         }}
         disabled={isLoading}
         className="h-8 w-8 rounded-full border border-rose-200/80 text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-900/70 dark:text-rose-300 dark:hover:bg-rose-950/40"
@@ -103,4 +106,4 @@ export const renderSecondaryActions = (
       </Button>
     )}
   </>
-)
+);
