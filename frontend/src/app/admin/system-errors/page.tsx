@@ -103,20 +103,6 @@ export default function AdminSystemErrorsPage() {
       {/* Stats Cards */}
       <SystemErrorsStatsCards stats={stats} />
 
-      {/* Filters */}
-      <SystemErrorsFilters
-        severityFilter={severityFilter}
-        sourceFilter={sourceFilter}
-        resolvedFilter={resolvedFilter}
-        setSeverityFilter={setSeverityFilter}
-        setSourceFilter={setSourceFilter}
-        setResolvedFilter={setResolvedFilter}
-        handleRefresh={handleRefresh}
-        clearFilters={clearFilters}
-        loading={loading}
-        activeFiltersCount={activeFiltersCount}
-      />
-
       {/* Error List */}
       <div className="flex-1 min-h-0 flex flex-col gap-4">
         <div className="flex items-center justify-between">
@@ -128,6 +114,21 @@ export default function AdminSystemErrorsPage() {
             </Badge>
           )}
         </div>
+
+        {/* Filters */}
+        <SystemErrorsFilters
+          severityFilter={severityFilter}
+          sourceFilter={sourceFilter}
+          resolvedFilter={resolvedFilter}
+          setSeverityFilter={setSeverityFilter}
+          setSourceFilter={setSourceFilter}
+          setResolvedFilter={setResolvedFilter}
+          handleRefresh={handleRefresh}
+          clearFilters={clearFilters}
+          loading={loading}
+          activeFiltersCount={activeFiltersCount}
+        />
+
         <SystemErrorsTable
           errors={errors}
           isLoading={loading}
