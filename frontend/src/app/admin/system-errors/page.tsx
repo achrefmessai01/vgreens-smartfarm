@@ -10,6 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ErrorSource, ReportSeverity, SystemError } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import {
   useResolveSystemError,
   useSystemErrors,
@@ -21,6 +22,7 @@ import { useState } from 'react';
 
 export default function AdminSystemErrorsPage() {
   const { t } = useI18n();
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const [selectedError, setSelectedError] = useState<SystemError | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -93,8 +95,17 @@ export default function AdminSystemErrorsPage() {
     resolvedFilter,
   ].filter(Boolean).length;
 
+  // Use dynamic layout for mobile, fixed height for desktop
+  const containerClassName = isMobile
+    ? 'flex flex-col gap-6'
+    : 'flex flex-col gap-6 h-full min-h-0';
+
+  const listContainerClassName = isMobile
+    ? 'flex flex-col gap-4'
+    : 'flex-1 min-h-0 flex flex-col gap-4';
+
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
+    <div className={containerClassName}>
       <PageHeader
         title="System Error History"
         subtitle="Monitor and manage application errors and exceptions"
@@ -104,7 +115,7 @@ export default function AdminSystemErrorsPage() {
       <SystemErrorsStatsCards stats={stats} />
 
       {/* Error List */}
-      <div className="flex-1 min-h-0 flex flex-col gap-4">
+      <div className={listContainerClassName}>
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Error History</h3>
           {activeFiltersCount > 0 && (
@@ -129,13 +140,15 @@ export default function AdminSystemErrorsPage() {
           activeFiltersCount={activeFiltersCount}
         />
 
-        <SystemErrorsTable
-          errors={errors}
-          isLoading={loading}
-          onResolve={(error) => handleResolveError(error.id)}
-          onViewDetails={handleViewDetails}
-          isResolving={isResolving}
-        />
+        <div className={isMobile ? '' : 'flex-1 min-h-0'}>
+          <SystemErrorsTable
+            errors={errors}
+            isLoading={loading}
+            onResolve={(error) => handleResolveError(error.id)}
+            onViewDetails={handleViewDetails}
+            isResolving={isResolving}
+          />
+        </div>
       </div>
 
       {/* Details Dialog */}
