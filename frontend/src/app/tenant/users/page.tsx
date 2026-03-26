@@ -1,26 +1,28 @@
 'use client';
 
-import * as React from 'react';
 import { PageHeader } from '@/components/layout';
-import { ContentSkeleton } from '@/components/ui/content-skeleton';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { Button } from '@/components/ui/button';
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import {
   Sheet,
-  SheetTitle,
+  SheetContent,
   SheetFooter,
   SheetHeader,
-  SheetContent,
+  SheetTitle,
 } from '@/components/ui/sheet';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
 import {
-  UserManagementTable,
-  UserManagementForm,
   ConfirmationDialog,
+  UserManagementForm,
+  UserManagementTable,
   type UserManagementFormRef,
 } from '@/components/users';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { useTenantUsersPage } from '@/lib/hooks/use-tenant-users-page';
+import * as React from 'react';
 
 export default function TenantUsersPage() {
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const formRef = React.useRef<UserManagementFormRef>(null);
   const page = useTenantUsersPage();
 
@@ -34,13 +36,17 @@ export default function TenantUsersPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
+    <div
+      className={
+        isMobile ? 'flex flex-col gap-6' : 'flex flex-col gap-6 h-full min-h-0'
+      }
+    >
       <PageHeader
         title="User Management"
         subtitle="Manage users for your tenant"
       />
 
-      <div className="flex-1 min-h-0">
+      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
         <UserManagementTable
           users={page.users}
           onEdit={page.handleEdit}
