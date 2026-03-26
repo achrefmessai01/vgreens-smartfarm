@@ -1,13 +1,13 @@
-import {
-  Target,
-  AlertTriangle,
-  Activity,
-  TrendingUp,
-  Package,
-} from 'lucide-react';
 import { useI18n } from '@/i18n';
-import { MetricCard } from './metric-card/metric-card';
 import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
+import {
+  Activity,
+  AlertTriangle,
+  Package,
+  Target,
+  TrendingUp,
+} from 'lucide-react';
+import { MetricCard } from './metric-card/metric-card';
 
 interface DashboardMetricsGridProps {
   data: HarvestDashboardData;
@@ -23,7 +23,7 @@ export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {
     `Across ${data.harvestCount} harvests`;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 sm:gap-6 sm:mb-8">
       <MetricCard
         title={h?.totalYield ?? 'Total Yield'}
         value={`${data.totalYield?.toFixed(2) ?? 0} kg`}

@@ -69,7 +69,9 @@ export default function HarvestPage() {
   return (
     <FeatureGuard featureKey="harvest_management">
       <div
-        className={isMobile ? 'flex flex-col' : 'flex flex-col h-full min-h-0'}
+        className={
+          isMobile ? 'flex flex-col sm:px-6' : 'flex flex-col h-full min-h-0'
+        }
       >
         <Tabs
           value={activeTab}
@@ -80,24 +82,31 @@ export default function HarvestPage() {
               : 'w-full flex flex-col h-full min-h-0'
           }
         >
-          <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+          <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full">
             <TabsTrigger
               value="dashboard"
-              className="flex items-center gap-2 px-4 py-1"
+              className="flex items-center justify-center gap-2 px-3 py-1 flex-1 sm:px-4"
             >
               <BarChart3 className="h-4 w-4" />
-              {t.navigation?.dashboard || 'Dashboard'}
+              <span className="text-xs sm:text-sm">
+                {t.navigation?.dashboard || 'Dashboard'}
+              </span>
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="flex items-center gap-2 px-4 py-1"
+              className="flex items-center justify-center gap-2 px-3 py-1 flex-1 sm:px-4"
             >
               <History className="h-4 w-4" />
-              {t.navigation?.history || 'History'}
+              <span className="text-xs sm:text-sm">
+                {t.navigation?.history || 'History'}
+              </span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="mt-6 flex-1 min-h-0">
+          <TabsContent
+            value="dashboard"
+            className="mt-4 flex-1 min-h-0 sm:mt-6"
+          >
             <HarvestDashboard />
           </TabsContent>
 
@@ -105,14 +114,14 @@ export default function HarvestPage() {
             value="history"
             className={
               isMobile
-                ? 'mt-6 flex flex-col'
+                ? 'mt-4 flex flex-col sm:mt-6'
                 : 'mt-6 flex-1 min-h-0 flex flex-col'
             }
           >
             <div
               className={
                 isMobile
-                  ? 'flex flex-col gap-6'
+                  ? 'flex flex-col gap-4 sm:gap-6'
                   : 'flex flex-col gap-6 h-full min-h-0'
               }
             >
