@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { SidebarSkeleton } from '@/components/ui/sidebar-skeleton';
 import { User, UserRole } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
@@ -233,6 +233,7 @@ export function Sidebar({
       {/* Mobile Sidebar */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="w-[280px] p-0">
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <SidebarContent
             mobile
             isCollapsed={false}

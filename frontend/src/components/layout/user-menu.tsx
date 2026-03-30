@@ -1,10 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useRouter } from 'next/navigation'
-import { useClerk } from '@clerk/nextjs'
-import { useTheme } from 'next-themes'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,82 +8,75 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-} from '@/components/ui/dropdown-menu'
-import { useI18n } from '@/i18n'
-import { useCurrentUser } from '@/lib/hooks/use-current-user'
-import { UserRole } from '@/generated/graphql'
-import {
-  LogOut,
-  Moon,
-  Sun,
-  Monitor,
-  User,
-  Building2,
-  Shield,
-} from 'lucide-react'
+} from '@/components/ui/dropdown-menu';
+import { UserRole } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { useClerk } from '@clerk/nextjs';
+import { Building2, LogOut, Moon, Shield, Sun, User } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useRouter } from 'next/navigation';
 
 interface UserMenuProps {
-  className?: string
+  className?: string;
 }
 
 export function UserMenu({ className }: UserMenuProps) {
-  const { t } = useI18n()
-  const router = useRouter()
-  const { signOut } = useClerk()
-  const { theme, setTheme } = useTheme()
-  const { user, role, isVGreensAdmin } = useCurrentUser()
+  const { t } = useI18n();
+  const router = useRouter();
+  const { signOut } = useClerk();
+  const { theme, setTheme } = useTheme();
+  const { user, role, isVGreensAdmin } = useCurrentUser();
 
   const handleLogout = async () => {
     try {
-      await signOut({ redirectUrl: '/login' })
-      router.push('/login')
+      await signOut({ redirectUrl: '/login' });
+      router.push('/login');
     } catch (error) {
-      console.error('Error during logout:', error)
+      console.error('Error during logout:', error);
     }
-  }
+  };
 
   const getUserDisplayName = () => {
     if (user?.firstName && user?.lastName) {
-      return `${user.firstName} ${user.lastName}`
+      return `${user.firstName} ${user.lastName}`;
     }
     if (user?.email) {
-      return user.email.split('@')[0]
+      return user.email.split('@')[0];
     }
-    return t.common.admin || 'User'
-  }
+    return t.common.admin || 'User';
+  };
 
   const getUserInitials = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName.charAt(0)}${user.lastName.charAt(
-        0
-      )}`.toUpperCase()
+        0,
+      )}`.toUpperCase();
     }
     if (user?.email) {
-      return user.email.charAt(0).toUpperCase()
+      return user.email.charAt(0).toUpperCase();
     }
-    return 'U'
-  }
+    return 'U';
+  };
 
   const getRoleLabel = () => {
     switch (role) {
       case UserRole.VgreensAdmin:
-        return t.pages.admin.users.roleVgreensAdmin
+        return t.pages.admin.users.roleVgreensAdmin;
       case UserRole.TenantAdmin:
-        return t.pages.admin.users.roleTenantAdmin
+        return t.pages.admin.users.roleTenantAdmin;
       case UserRole.TenantUser:
-        return t.pages.admin.users.roleTenantUser
+        return t.pages.admin.users.roleTenantUser;
       default:
-        return t.pages.admin.users.notAvailable
+        return t.pages.admin.users.notAvailable;
     }
-  }
+  };
 
   const getTenantName = () => {
     // Type assertion needed until GraphQL types are regenerated
-    const userWithTenant = user as typeof user & { tenant?: { name: string } }
-    return userWithTenant?.tenant?.name || t.pages.admin.users.notAvailable
-  }
+    const userWithTenant = user as typeof user & { tenant?: { name: string } };
+    return userWithTenant?.tenant?.name || t.pages.admin.users.notAvailable;
+  };
 
   return (
     <DropdownMenu>
@@ -149,27 +138,19 @@ export function UserMenu({ className }: UserMenuProps) {
           </>
         )}
 
-        {/* Theme Toggle Section */}
-        <DropdownMenuLabel className="px-2 py-1.5 text-xs font-normal text-muted-foreground">
-          {t.common.toggleTheme || 'Theme'}
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup
-          value={theme}
-          onValueChange={(value) => setTheme(value)}
+        {/* Theme Toggle */}
+        <DropdownMenuItem
+          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          className="cursor-pointer"
         >
-          <DropdownMenuRadioItem value="light">
-            <Sun className="mr-2 h-4 w-4" />
-            <span>{t.common.lightMode || 'Light'}</span>
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">
-            <Moon className="mr-2 h-4 w-4" />
-            <span>{t.common.darkMode || 'Dark'}</span>
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">
-            <Monitor className="mr-2 h-4 w-4" />
-            <span>{t.common.system || 'System'}</span>
-          </DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
+          <div className="relative mr-2 h-4 w-4">
+            <Moon className="absolute inset-0 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Sun className="absolute inset-0 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          </div>
+          <span>
+            {theme === 'dark' ? t.common.darkMode : t.common.lightMode}
+          </span>
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator />
 
@@ -184,5 +165,5 @@ export function UserMenu({ className }: UserMenuProps) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

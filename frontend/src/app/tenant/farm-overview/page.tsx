@@ -12,10 +12,12 @@ import { PageHeader } from '@/components/layout/page-header';
 import { TenantSelector } from '@/components/tenants';
 import { useI18n } from '@/i18n';
 import { useFarmOverviewPage } from '@/lib/hooks/use-farm-overview-page';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { ParameterType } from '@/types/farm.types';
 
 export default function FarmOverviewPage() {
   const { t } = useI18n();
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const farmOverviewT = t.pages.farmOverview as Parameters<
     typeof useFarmOverviewPage
   >[0];
@@ -31,7 +33,13 @@ export default function FarmOverviewPage() {
 
   return (
     <FeatureGuard featureKey="farm_overview">
-      <div className="flex h-full min-h-0 w-full min-w-0 flex-col gap-6 overflow-x-clip bg-background">
+      <div
+        className={
+          isMobile
+            ? 'flex h-[calc(100vh-8rem)] min-h-0 w-full min-w-0 flex-col gap-6 overflow-x-clip bg-background'
+            : 'flex h-full min-h-0 w-full min-w-0 flex-col gap-6 overflow-x-clip bg-background'
+        }
+      >
         <PageHeader
           title={t.pages.farmOverview.title}
           subtitle={t.pages.farmOverview.subtitle}

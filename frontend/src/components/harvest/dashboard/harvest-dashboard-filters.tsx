@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -8,6 +7,7 @@ import {
 } from '@/components/ui/select';
 import { useI18n } from '@/i18n';
 import { type DateFilter } from '@/lib/hooks/use-harvest-dashboard';
+import { useState } from 'react';
 
 export interface DashboardFiltersProps {
   onFilterChange?: (filter: { dateFilter?: DateFilter }) => void;
@@ -59,7 +59,7 @@ export function DashboardFilters({
   return (
     <div className={className}>
       <Select value={selectedFilter} onValueChange={handleFilterChange}>
-        <SelectTrigger className="w-64">
+        <SelectTrigger className="w-full">
           <SelectValue placeholder={t.common.selectPeriod || 'Select period'} />
         </SelectTrigger>
         <SelectContent>

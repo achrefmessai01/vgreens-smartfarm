@@ -709,6 +709,10 @@ export const de = {
       editAlert: 'Alarm bearbeiten',
       updateAlert: 'Alarm aktualisieren',
       deleteAlert: 'Alarm löschen',
+      toastTitle: 'Kritischer Alarm',
+      toastViewAction: 'Alarme ansehen',
+      toastFallbackDescription:
+        'Ein neuer kritischer Alarm erfordert Aufmerksamkeit.',
       cancel: 'Abbrechen',
       save: 'Speichern',
       delete: 'Löschen',

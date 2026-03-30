@@ -200,7 +200,13 @@ export function DataTable<T extends { id: string | number }>({
   };
 
   return (
-    <div className="flex flex-col w-full h-full min-w-0 min-h-0">
+    <div
+      className={
+        showCardView
+          ? 'flex flex-col w-full min-w-0' // Mobile: grow naturally
+          : 'flex flex-col w-full h-full min-w-0 min-h-0' // Desktop: constrained
+      }
+    >
       {hasToolbar && (
         <TableToolbar
           searchConfig={
@@ -219,7 +225,13 @@ export function DataTable<T extends { id: string | number }>({
         />
       )}
 
-      <Card className="rounded-xl border border-border/60 shadow-sm flex flex-col flex-1 min-h-0">
+      <Card
+        className={
+          showCardView
+            ? 'rounded-xl border border-border/60 shadow-sm flex flex-col' // Mobile: grow naturally
+            : 'rounded-xl border border-border/60 shadow-sm flex flex-col flex-1 min-h-0' // Desktop: constrained height
+        }
+      >
         <CardContent className="p-0 flex flex-col flex-1 min-h-0">
           {isLoading ? (
             <TableSkeleton
@@ -245,7 +257,13 @@ export function DataTable<T extends { id: string | number }>({
                   className="rounded-none border-0"
                 />
               ) : (
-                <div className="flex-1 min-h-0 overflow-y-auto">
+                <div
+                  className={
+                    showCardView
+                      ? 'flex-1' // Mobile: no overflow, let content grow naturally
+                      : 'flex-1 min-h-0 overflow-y-auto' // Desktop: fixed height with scroll
+                  }
+                >
                   {/* Render card view on mobile when available */}
                   {showCardView && renderCard && (
                     <DataTableCardView

@@ -8,6 +8,7 @@ import { TableCell } from '@/components/ui/table';
 import type { Feature } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { Edit2, Plus, Trash2 } from 'lucide-react';
 
 interface FeatureTableProps {
@@ -27,6 +28,7 @@ export function FeatureTable({
 }: FeatureTableProps) {
   const { t } = useI18n();
   const paginationConfig = usePaginationConfig();
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const columns: Column<Feature>[] = [
     {
       key: 'key',
@@ -178,14 +180,18 @@ export function FeatureTable({
   );
 
   return (
-    <div className="flex flex-col gap-4 h-full min-h-0">
+    <div
+      className={
+        isMobile ? 'flex flex-col gap-4' : 'flex flex-col gap-4 h-full min-h-0'
+      }
+    >
       <div className="flex justify-end">
         <Button onClick={onCreate} disabled={isLoading}>
           <Plus className="mr-2 h-4 w-4" />
           {t.pages.admin.features.createFeature}
         </Button>
       </div>
-      <div className="flex-1 min-h-0">
+      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
         <DataTable
           data={features}
           columns={columns}
