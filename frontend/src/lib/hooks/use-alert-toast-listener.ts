@@ -18,10 +18,6 @@ const MAX_TRACKED_ALERTS = 200
 
 type ToastableAlert = AlertsQuery['alerts'][number]
 
-interface AlertToastListenerProps {
-  user?: User
-}
-
 function formatFieldLabel(field?: string | null) {
   if (!field) {
     return null
@@ -48,7 +44,7 @@ function formatAlertDescription(alert: ToastableAlert, fallback: string) {
   return parts.length > 0 ? parts.join(' | ') : fallback
 }
 
-export function AlertToastListener({ user }: AlertToastListenerProps) {
+export function useAlertToastListener(user?: User): void {
   const router = useRouter()
   const { t } = useI18n()
   const { toast } = useToast()
@@ -148,6 +144,4 @@ export function AlertToastListener({ user }: AlertToastListenerProps) {
       )
     }
   }, [canWatchAlerts, data, router, t.pages.alerts, toast])
-
-  return null
 }

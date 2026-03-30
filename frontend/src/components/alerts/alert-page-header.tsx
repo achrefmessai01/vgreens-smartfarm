@@ -20,7 +20,7 @@ export function AlertPageHeader({
   const { t } = useI18n()
 
   // this is just a safety measure to hide the create alert button for now
-  const hideCreateAlertButton = true;
+  const hideCreateAlertButton = false;
 
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
