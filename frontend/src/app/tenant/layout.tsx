@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { AppLayout } from '@/components/layout'
 import { useRouter, usePathname } from 'next/navigation'
+import { AlertToastInitializer } from '@/components/alert-toast-initializer'
 import { useCurrentUser } from '@/lib/hooks/use-current-user'
 import { PageSkeleton } from '@/components/ui/page-skeleton'
 
@@ -40,5 +41,10 @@ export default function TenantLayout({
     return <PageSkeleton />
   }
 
-  return <AppLayout user={user || undefined}>{children}</AppLayout>
+  return (
+    <>
+      <AlertToastInitializer user={user || undefined} />
+      <AppLayout user={user || undefined}>{children}</AppLayout>
+    </>
+  )
 }

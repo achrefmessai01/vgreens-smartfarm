@@ -10,23 +10,23 @@ export function HarvestDashboardSkeleton({
 }: HarvestDashboardSkeletonProps) {
   return (
     <div className={className}>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <div className="h-9 bg-muted animate-pulse rounded w-64 mb-2" />
-          <div className="h-5 bg-muted animate-pulse rounded w-96" />
+      <div className="flex flex-row items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div className="flex-1 min-w-0">
+          <div className="h-7 bg-muted animate-pulse rounded w-48 mb-2 sm:h-8 sm:w-64 lg:h-9" />
+          <div className="h-4 bg-muted animate-pulse rounded w-40 sm:w-64" />
         </div>
-        <div className="w-64">
+        <div className="w-32 sm:w-40">
           <div className="h-10 bg-muted animate-pulse rounded" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 sm:gap-6 sm:mb-8">
         {Array.from({ length: 6 }).map((_, i) => (
           <MetricCardSkeleton key={i} />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {[
           'Yield Over Time',
           'Class Distribution',

@@ -1,34 +1,42 @@
 'use client';
 
-import * as React from 'react';
+import { PageHeader } from '@/components/layout';
 import {
-  TenantTable,
   TenantForm,
+  TenantTable,
   type TenantFormRef,
 } from '@/components/tenants';
-import { ConfirmationDialog } from '@/components/users';
 import { Button } from '@/components/ui/button';
-import { PageHeader } from '@/components/layout';
 import { ContentSkeleton } from '@/components/ui/content-skeleton';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from '@/components/ui/sheet';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
+import { ConfirmationDialog } from '@/components/users';
 import { useI18n } from '@/i18n';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { useTenantsPage } from '@/lib/hooks/use-tenants-page';
+import * as React from 'react';
 
 export default function TenantsPage() {
   const { t } = useI18n();
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const formRef = React.useRef<TenantFormRef>(null);
   const page = useTenantsPage();
 
   if (page.loading) {
     return (
-      <div className="flex flex-col gap-6 h-full min-h-0">
+      <div
+        className={
+          isMobile
+            ? 'flex flex-col gap-6'
+            : 'flex flex-col gap-6 h-full min-h-0'
+        }
+      >
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
         <TableSkeleton columnCount={5} rowCount={8} />
       </div>
@@ -36,13 +44,17 @@ export default function TenantsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
+    <div
+      className={
+        isMobile ? 'flex flex-col gap-6' : 'flex flex-col gap-6 h-full min-h-0'
+      }
+    >
       <PageHeader
         title={t.pages.admin.tenants.title}
         subtitle={t.pages.admin.tenants.subtitle}
       />
 
-      <div className="flex-1 min-h-0">
+      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
         <TenantTable
           tenants={page.tenants}
           onEdit={page.handleEdit}

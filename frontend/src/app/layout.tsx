@@ -8,6 +8,7 @@ import { ApolloProvider } from '@/lib/apollo-provider';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ErrorMonitoringInitializer } from '@/components/error-monitoring-initializer';
 import { PostHogProvider } from './providers';
+import { ToastProvider } from '@/components/ui/toast-provider'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -52,7 +53,7 @@ export default function RootLayout({
                     disableTransitionOnChange
                   >
                     <ErrorMonitoringInitializer />
-                    {children}
+                     <ToastProvider>{children}</ToastProvider>
                   </ThemeProvider>
                 </I18nProvider>
               </ApolloProvider>

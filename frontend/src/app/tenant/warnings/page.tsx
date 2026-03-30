@@ -1,17 +1,19 @@
 'use client';
 
-import * as React from 'react';
-import { useI18n } from '@/i18n';
-import { WarningTable } from '@/components/warnings';
-import { ConfirmationDialog } from '@/components/users';
-import { PageHeader } from '@/components/layout/page-header';
 import { FeatureGuard } from '@/components/features/feature-guard';
-import type { Warning, WarningStatus } from '@/types/warning.types';
+import { PageHeader } from '@/components/layout/page-header';
+import { ConfirmationDialog } from '@/components/users';
+import { WarningTable } from '@/components/warnings';
 import { WarningSidebar } from '@/components/warnings/warning-sidebar';
+import { useI18n } from '@/i18n';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { getAllWarnings, updateWarningStatus } from '@/lib/warning-data';
+import type { Warning, WarningStatus } from '@/types/warning.types';
+import * as React from 'react';
 
 export default function WarningsPage() {
   const { t } = useI18n();
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const [warnings, setWarnings] = React.useState<Warning[]>([]);
   const [selectedWarning, setSelectedWarning] = React.useState<Warning | null>(
     null,
@@ -86,13 +88,19 @@ export default function WarningsPage() {
 
   return (
     <FeatureGuard featureKey="sensor_alerts">
-      <div className="flex flex-col gap-6 h-full min-h-0">
+      <div
+        className={
+          isMobile
+            ? 'flex flex-col gap-6'
+            : 'flex flex-col gap-6 h-full min-h-0'
+        }
+      >
         <PageHeader
           title={t.pages.warnings.title}
           subtitle={t.pages.warnings.subtitle}
         />
 
-        <div className="flex-1 min-h-0">
+        <div className={isMobile ? '' : 'flex-1 min-h-0'}>
           <WarningTable
             warnings={warnings}
             onAcknowledge={handleAcknowledge}

@@ -5,6 +5,7 @@ import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { User, UserRole } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { Plus } from 'lucide-react';
 import { useUserManagementRow } from './user-management-table-rows';
 
@@ -27,6 +28,7 @@ export function UserManagementTable({
 }: UserManagementTableProps) {
   const { t } = useI18n();
   const paginationConfig = usePaginationConfig();
+  const { isMobile } = useResponsiveBreakpoint('lg');
 
   const roleLabels: Record<UserRole, string> = {
     VGREENS_ADMIN: t.pages.admin.users.roleVgreensAdmin,
@@ -76,14 +78,18 @@ export function UserManagementTable({
   ];
 
   return (
-    <div className="flex flex-col gap-4 h-full min-h-0">
+    <div
+      className={
+        isMobile ? 'flex flex-col gap-4' : 'flex flex-col gap-4 h-full min-h-0'
+      }
+    >
       <div className="flex justify-end">
         <Button onClick={onCreate} disabled={isLoading}>
           <Plus className="mr-2 h-4 w-4" />
           {t.pages.admin.users.createUser}
         </Button>
       </div>
-      <div className="flex-1 min-h-0">
+      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
         <DataTable
           data={users}
           columns={columns}

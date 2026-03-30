@@ -1,22 +1,24 @@
 'use client';
 
 import {
-  AlertTable,
-  AlertSidebar,
-  AlertFormSheet,
-  AlertPageHeader,
   AlertActionDialog,
   AlertDeleteDialog,
+  AlertFormSheet,
+  AlertPageHeader,
+  AlertSidebar,
+  AlertTable,
 } from '@/components/alerts';
-import { useI18n } from '@/i18n';
-import { useUsersQuery } from '@/generated/graphql';
-import { useAlertsPage } from '@/lib/hooks/use-alerts-page';
-import { TableSkeleton } from '@/components/ui/table-skeleton';
-import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import { FeatureGuard } from '@/components/features/feature-guard';
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
+import { useUsersQuery } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import { useAlertsPage } from '@/lib/hooks/use-alerts-page';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 
 export default function AlertsPage() {
   const { t } = useI18n();
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const { data: usersData } = useUsersQuery();
   const users = usersData?.users ?? [];
   const page = useAlertsPage();
@@ -32,14 +34,20 @@ export default function AlertsPage() {
 
   return (
     <FeatureGuard featureKey="sensor_alerts">
-      <div className="flex flex-col gap-6 h-full min-h-0">
+      <div
+        className={
+          isMobile
+            ? 'flex flex-col gap-6'
+            : 'flex flex-col gap-6 h-full min-h-0'
+        }
+      >
         <AlertPageHeader
           openAlertsCount={page.openAlertsCount}
           onCreate={page.onCreate}
           isLoading={page.isLoading}
         />
 
-        <div className="flex-1 min-h-0">
+        <div className={isMobile ? '' : 'flex-1 min-h-0'}>
           <AlertTable
             alerts={page.alerts}
             filter={page.filter}

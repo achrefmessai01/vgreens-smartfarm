@@ -7,10 +7,12 @@ import { FeatureFormSheet } from '@/components/features/feature-form-sheet';
 import { PageHeader } from '@/components/layout';
 import { useI18n } from '@/i18n';
 import { useFeatureManagement } from '@/lib/hooks/use-feature-management';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { Flag } from 'lucide-react';
 
 export default function FeatureFlagsPage() {
   const { t } = useI18n();
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const {
     features,
     loading,
@@ -32,7 +34,11 @@ export default function FeatureFlagsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
+    <div
+      className={
+        isMobile ? 'flex flex-col gap-6' : 'flex flex-col gap-6 h-full min-h-0'
+      }
+    >
       <div className="flex items-center gap-3">
         <div className="p-2 rounded-lg bg-primary/10">
           <Flag className="h-5 w-5 text-primary" />
@@ -43,7 +49,7 @@ export default function FeatureFlagsPage() {
         />
       </div>
 
-      <div className="flex-1 min-h-0">
+      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
         <FeatureTable
           features={features}
           onEdit={handleEdit}

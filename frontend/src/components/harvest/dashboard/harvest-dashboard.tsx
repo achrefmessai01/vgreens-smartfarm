@@ -1,15 +1,15 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Package } from 'lucide-react';
 import { useI18n } from '@/i18n';
-import { DashboardFilters } from './harvest-dashboard-filters';
-import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
-import { DashboardMetricsGrid } from './dashboard-metrics-grid';
-import { DashboardChartsGrid } from './dashboard-charts-grid';
 import {
   useHarvestDashboard,
   type DateFilter,
 } from '@/lib/hooks/use-harvest-dashboard';
+import { AlertTriangle, Package } from 'lucide-react';
+import { useState } from 'react';
+import { DashboardChartsGrid } from './dashboard-charts-grid';
+import { DashboardMetricsGrid } from './dashboard-metrics-grid';
+import { DashboardFilters } from './harvest-dashboard-filters';
+import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
 
 interface HarvestDashboardProps {
   className?: string;
@@ -49,12 +49,19 @@ export function HarvestDashboard({
   if (error) {
     return (
       <div
-        className={`flex items-center justify-center min-h-[400px] ${className}`}
+        className={`flex items-center justify-center min-h-[300px] px-4 sm:min-h-[400px] ${className}`}
       >
-        <div className="text-center">
-          <AlertTriangle className="h-8 w-8 text-destructive mx-auto mb-4" />
-          <p className="text-destructive mb-4">{error.message}</p>
-          <Button onClick={() => refetch()} variant="outline">
+        <div className="text-center max-w-md">
+          <AlertTriangle className="h-6 w-6 text-destructive mx-auto mb-3 sm:h-8 sm:w-8 sm:mb-4" />
+          <p className="text-sm text-destructive mb-3 sm:text-base sm:mb-4">
+            {error.message}
+          </p>
+          <Button
+            onClick={() => refetch()}
+            variant="outline"
+            size="sm"
+            className="sm:size-default"
+          >
             {t.common.retry ?? 'Try Again'}
           </Button>
         </div>
@@ -65,11 +72,13 @@ export function HarvestDashboard({
   if (!data) {
     return (
       <div
-        className={`flex items-center justify-center min-h-[400px] ${className}`}
+        className={`flex items-center justify-center min-h-[300px] px-4 sm:min-h-[400px] ${className}`}
       >
-        <div className="text-center">
-          <Package className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">No harvest data available</p>
+        <div className="text-center max-w-md">
+          <Package className="h-6 w-6 text-muted-foreground mx-auto mb-3 sm:h-8 sm:w-8 sm:mb-4" />
+          <p className="text-sm text-muted-foreground sm:text-base">
+            No harvest data available
+          </p>
         </div>
       </div>
     );
@@ -77,12 +86,12 @@ export function HarvestDashboard({
 
   return (
     <div className={className}>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+      <div className="flex flex-row items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
             {t.pages.harvest?.performanceDashboard ?? 'Performance Dashboard'}
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1 sm:text-sm">
             {data.harvestCount}{' '}
             {t.pages.harvest?.harvestsLogged ?? 'harvests logged'} for{' '}
             {filterLabel}
@@ -90,7 +99,7 @@ export function HarvestDashboard({
         </div>
         <DashboardFilters
           onFilterChange={(f) => f.dateFilter && setCurrentFilter(f.dateFilter)}
-          className="w-64"
+          className="w-32 sm:w-40"
           defaultValue={currentFilter}
         />
       </div>

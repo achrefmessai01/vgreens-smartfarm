@@ -1,24 +1,26 @@
 'use client';
 
+import { FeatureGuard } from '@/components/features/feature-guard';
 import {
-  HarvestTable,
   BatchSidebar,
+  CreateBatchDialog,
+  DeleteHarvestDialog,
+  EditHarvestDialog,
   HarvestDashboard,
   HarvestPageHeader,
-  CreateBatchDialog,
-  EditHarvestDialog,
-  DeleteHarvestDialog,
+  HarvestTable,
 } from '@/components/harvest';
-import { useI18n } from '@/i18n';
-import { useState, useEffect } from 'react';
-import { BarChart3, History } from 'lucide-react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useHarvestPage } from '@/lib/hooks/use-harvest-page';
-import { FeatureGuard } from '@/components/features/feature-guard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useI18n } from '@/i18n';
+import { useHarvestPage } from '@/lib/hooks/use-harvest-page';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
+import { BarChart3, History } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function HarvestPage() {
   const { t } = useI18n();
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<string>(
@@ -66,38 +68,63 @@ export default function HarvestPage() {
 
   return (
     <FeatureGuard featureKey="harvest_management">
-      <div className="flex flex-col h-full min-h-0">
+      <div
+        className={
+          isMobile ? 'flex flex-col sm:px-6' : 'flex flex-col h-full min-h-0'
+        }
+      >
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
-          className="w-full flex flex-col h-full min-h-0"
+          className={
+            isMobile
+              ? 'w-full flex flex-col'
+              : 'w-full flex flex-col h-full min-h-0'
+          }
         >
-          <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+          <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full">
             <TabsTrigger
               value="dashboard"
-              className="flex items-center gap-2 px-4 py-1"
+              className="flex items-center justify-center gap-2 px-3 py-1 flex-1 sm:px-4"
             >
               <BarChart3 className="h-4 w-4" />
-              {t.navigation?.dashboard || 'Dashboard'}
+              <span className="text-xs sm:text-sm">
+                {t.navigation?.dashboard || 'Dashboard'}
+              </span>
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="flex items-center gap-2 px-4 py-1"
+              className="flex items-center justify-center gap-2 px-3 py-1 flex-1 sm:px-4"
             >
               <History className="h-4 w-4" />
-              {t.navigation?.history || 'History'}
+              <span className="text-xs sm:text-sm">
+                {t.navigation?.history || 'History'}
+              </span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="mt-6 flex-1 min-h-0">
+          <TabsContent
+            value="dashboard"
+            className="mt-4 flex-1 min-h-0 sm:mt-6"
+          >
             <HarvestDashboard />
           </TabsContent>
 
           <TabsContent
             value="history"
-            className="mt-6 flex-1 min-h-0 flex flex-col"
+            className={
+              isMobile
+                ? 'mt-4 flex flex-col sm:mt-6'
+                : 'mt-6 flex-1 min-h-0 flex flex-col'
+            }
           >
-            <div className="flex flex-col gap-6 h-full min-h-0">
+            <div
+              className={
+                isMobile
+                  ? 'flex flex-col gap-4 sm:gap-6'
+                  : 'flex flex-col gap-6 h-full min-h-0'
+              }
+            >
               <HarvestPageHeader
                 summary={summary}
                 title={t.pages.harvest?.historyTitle || 'Harvest History'}
