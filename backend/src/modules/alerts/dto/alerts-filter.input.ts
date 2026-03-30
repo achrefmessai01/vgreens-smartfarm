@@ -11,17 +11,27 @@ import { InputType, Field, ID } from '@nestjs/graphql';
 
 @InputType()
 export class AlertsFilterInput {
-  @Field({ nullable: true, description: 'Generic search: sensor name, acknowledged by, resolved by, value' })
+  @Field({
+    nullable: true,
+    description:
+      'Generic search: sensor name, acknowledged by, resolved by, value',
+  })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @Field({ nullable: true, description: 'Filter alerts from this date (timestamp or createdAt)' })
+  @Field({
+    nullable: true,
+    description: 'Filter alerts from this date (timestamp or createdAt)',
+  })
   @IsOptional()
   @IsDateString()
   dateFrom?: string;
 
-  @Field({ nullable: true, description: 'Filter alerts until this date (timestamp or createdAt)' })
+  @Field({
+    nullable: true,
+    description: 'Filter alerts until this date (timestamp or createdAt)',
+  })
   @IsOptional()
   @IsDateString()
   dateTo?: string;
@@ -31,7 +41,10 @@ export class AlertsFilterInput {
   @IsEnum(AlertStatus)
   status?: AlertStatus;
 
-  @Field(() => [AlertStatus], { nullable: true, description: 'Filter by multiple statuses (OR)' })
+  @Field(() => [AlertStatus], {
+    nullable: true,
+    description: 'Filter by multiple statuses (OR)',
+  })
   @IsOptional()
   @IsEnum(AlertStatus, { each: true })
   statusIn?: AlertStatus[];
@@ -41,7 +54,10 @@ export class AlertsFilterInput {
   @IsEnum(AlertSeverity)
   severity?: AlertSeverity;
 
-  @Field(() => [AlertSeverity], { nullable: true, description: 'Filter by multiple severities (OR)' })
+  @Field(() => [AlertSeverity], {
+    nullable: true,
+    description: 'Filter by multiple severities (OR)',
+  })
   @IsOptional()
   @IsEnum(AlertSeverity, { each: true })
   severityIn?: AlertSeverity[];
@@ -51,7 +67,10 @@ export class AlertsFilterInput {
   @IsUUID()
   acknowledgedById?: string;
 
-  @Field(() => [ID], { nullable: true, description: 'Filter by any of these user IDs (OR)' })
+  @Field(() => [ID], {
+    nullable: true,
+    description: 'Filter by any of these user IDs (OR)',
+  })
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
@@ -62,7 +81,10 @@ export class AlertsFilterInput {
   @IsUUID()
   resolvedById?: string;
 
-  @Field(() => [ID], { nullable: true, description: 'Filter by any of these user IDs (OR)' })
+  @Field(() => [ID], {
+    nullable: true,
+    description: 'Filter by any of these user IDs (OR)',
+  })
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })

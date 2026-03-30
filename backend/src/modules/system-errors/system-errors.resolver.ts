@@ -25,16 +25,19 @@ export class SystemErrorsResolver {
   async getRecentSystemErrors(
     @Args('limit', { type: () => Number, nullable: true }) limit?: number,
     @Args('offset', { type: () => Number, nullable: true }) offset?: number,
-    @Args('severity', { type: () => ReportSeverity, nullable: true }) severity?: ReportSeverity,
-    @Args('source', { type: () => ErrorSource, nullable: true }) source?: ErrorSource,
-    @Args('isResolved', { type: () => Boolean, nullable: true }) isResolved?: boolean,
+    @Args('severity', { type: () => ReportSeverity, nullable: true })
+    severity?: ReportSeverity,
+    @Args('source', { type: () => ErrorSource, nullable: true })
+    source?: ErrorSource,
+    @Args('isResolved', { type: () => Boolean, nullable: true })
+    isResolved?: boolean,
   ): Promise<SystemError[]> {
     const { errors } = await this.systemErrorsService.getRecentErrors(
-      limit, 
-      offset, 
-      severity, 
-      source, 
-      isResolved
+      limit,
+      offset,
+      severity,
+      source,
+      isResolved,
     );
     return errors;
   }
@@ -52,9 +55,14 @@ export class SystemErrorsResolver {
   @UseGuards(AuthGuard)
   async resolveSystemError(
     @Args('errorId', { type: () => ID }) errorId: string,
-    @Args('resolutionNotes', { type: () => String, nullable: true }) resolutionNotes?: string,
+    @Args('resolutionNotes', { type: () => String, nullable: true })
+    resolutionNotes?: string,
     @CurrentUser() user?: User,
   ): Promise<SystemError> {
-    return this.systemErrorsService.resolveError(errorId, user!.id, resolutionNotes);
+    return this.systemErrorsService.resolveError(
+      errorId,
+      user!.id,
+      resolutionNotes,
+    );
   }
 }
