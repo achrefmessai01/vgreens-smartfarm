@@ -1,34 +1,42 @@
 'use client';
 
-import {
-  UserManagementForm,
-  ConfirmationDialog,
-  type UserManagementFormRef,
-} from '@/components/users';
-import * as React from 'react';
+import { PageHeader } from '@/components/layout';
+import { Button } from '@/components/ui/button';
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from '@/components/ui/sheet';
-import { useI18n } from '@/i18n';
-import { Button } from '@/components/ui/button';
-import { PageHeader } from '@/components/layout';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
-import { ContentSkeleton } from '@/components/ui/content-skeleton';
-import { useAdminUsersPage } from '@/lib/hooks/use-admin-users-page';
+import {
+  ConfirmationDialog,
+  UserManagementForm,
+  type UserManagementFormRef,
+} from '@/components/users';
 import { UserManagementTable } from '@/components/users/user-management-table';
+import { useI18n } from '@/i18n';
+import { useAdminUsersPage } from '@/lib/hooks/use-admin-users-page';
+import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
+import * as React from 'react';
 
 export default function AdminUsersPage() {
   const { t } = useI18n();
+  const { isMobile } = useResponsiveBreakpoint('lg');
   const formRef = React.useRef<UserManagementFormRef>(null);
   const page = useAdminUsersPage();
 
   if (page.loading) {
     return (
-      <div className="flex flex-col gap-6 h-full min-h-0">
+      <div
+        className={
+          isMobile
+            ? 'flex flex-col gap-6'
+            : 'flex flex-col gap-6 h-full min-h-0'
+        }
+      >
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
         <TableSkeleton columnCount={5} rowCount={8} />
       </div>
@@ -36,13 +44,17 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full min-h-0">
+    <div
+      className={
+        isMobile ? 'flex flex-col gap-6' : 'flex flex-col gap-6 h-full min-h-0'
+      }
+    >
       <PageHeader
         title={t.pages.admin.users.title}
         subtitle={t.pages.admin.users.subtitle}
       />
 
-      <div className="flex-1 min-h-0">
+      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
         <UserManagementTable
           users={page.users}
           onEdit={page.handleEdit}

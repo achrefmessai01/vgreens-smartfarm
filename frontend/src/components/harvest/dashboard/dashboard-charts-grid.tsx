@@ -1,10 +1,10 @@
+import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
 import {
   BrixTrendChart,
-  YieldOverTimeChart,
-  CumulativeYieldChart,
   ClassDistributionChart,
+  CumulativeYieldChart,
+  YieldOverTimeChart,
 } from './charts';
-import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
 
 interface DashboardChartsGridProps {
   data: HarvestDashboardData;
@@ -12,7 +12,7 @@ interface DashboardChartsGridProps {
 
 export function DashboardChartsGrid({ data }: DashboardChartsGridProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
       <YieldOverTimeChart data={data.yieldOverTime ?? []} />
       <ClassDistributionChart data={data.classDistribution ?? []} />
       <BrixTrendChart data={data.brixTrend ?? []} />
