@@ -20,7 +20,8 @@ export const apolloErrorLink = onError(
 
     if (networkError) {
       const serverError = networkError as ServerError;
-      const statusCode = serverError?.statusCode ?? serverError?.response?.status ?? 0;
+      const statusCode =
+        serverError?.statusCode ?? serverError?.response?.status ?? 0;
       console.error(
         `[Network error] op=${operation.operationName} status=${statusCode}`,
         networkError.message,
@@ -38,7 +39,10 @@ export const apolloRequestLoggingLink = new ApolloLink((operation, forward) => {
     forward(operation).subscribe({
       next: (result) => observer.next(result),
       error: (error) => {
-        console.error(`[GraphQL operation failed] op=${operation.operationName}`, error);
+        console.error(
+          `[GraphQL operation failed] op=${operation.operationName}`,
+          error,
+        );
         observer.error(error);
       },
       complete: () => observer.complete(),

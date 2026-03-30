@@ -26,8 +26,10 @@ export function toAlertsFilterVariables(
   else if (filter.status) f.status = filter.status;
   if (filter.severityIn?.length) f.severityIn = filter.severityIn;
   else if (filter.severity) f.severity = filter.severity;
-  if (filter.acknowledgedByIdIn?.length) f.acknowledgedByIdIn = filter.acknowledgedByIdIn;
-  else if (filter.acknowledgedById) f.acknowledgedById = filter.acknowledgedById;
+  if (filter.acknowledgedByIdIn?.length)
+    f.acknowledgedByIdIn = filter.acknowledgedByIdIn;
+  else if (filter.acknowledgedById)
+    f.acknowledgedById = filter.acknowledgedById;
   if (filter.resolvedByIdIn?.length) f.resolvedByIdIn = filter.resolvedByIdIn;
   else if (filter.resolvedById) f.resolvedById = filter.resolvedById;
   if (Object.keys(f).length === 0) return {};

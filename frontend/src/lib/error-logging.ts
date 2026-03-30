@@ -16,7 +16,11 @@ export class QuickErrorLogger {
   /**
    * Log a JavaScript/Runtime error
    */
-  async logJavaScriptError(error: Error, component?: string, action?: string): Promise<void> {
+  async logJavaScriptError(
+    error: Error,
+    component?: string,
+    action?: string,
+  ): Promise<void> {
     return this.logError({
       errorMessage: error.message,
       stackTrace: error.stack,
@@ -34,7 +38,7 @@ export class QuickErrorLogger {
     url: string,
     method: string,
     statusCode: number,
-    errorMessage: string
+    errorMessage: string,
   ): Promise<void> {
     return this.logError({
       errorMessage,
@@ -60,7 +64,7 @@ export class QuickErrorLogger {
   async logValidationError(
     component: string,
     fieldName: string,
-    errorMessage: string
+    errorMessage: string,
   ): Promise<void> {
     return this.logError({
       errorMessage: `Validation error in ${fieldName}: ${errorMessage}`,
@@ -80,7 +84,7 @@ export class QuickErrorLogger {
     method: string,
     statusCode: number,
     response: { message?: string } | Record<string, unknown>,
-    component?: string
+    component?: string,
   ): Promise<void> {
     return this.logError({
       errorMessage: `API Error: ${statusCode} ${response?.message || 'Unknown error'}`,

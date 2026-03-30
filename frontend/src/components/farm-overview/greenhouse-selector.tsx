@@ -14,7 +14,7 @@ export function GreenhouseSelector({
   options,
 }: GreenhouseSelectorProps) {
   return (
-    <div className="grid w-full min-w-0 grid-cols-3 border-b border-border/40 bg-muted/10 sm:flex">
+    <div className="border-border/40 bg-muted/10 grid w-full min-w-0 grid-cols-3 border-b sm:flex">
       {options.map((option, index) => {
         const isActive = value === index;
         return (
@@ -24,17 +24,11 @@ export function GreenhouseSelector({
             variant="ghost"
             size="sm"
             onClick={() => onValueChange(index)}
-            className={`
-              min-w-0 justify-center border-x border-border/20 text-center shadow-none cursor-pointer
-              h-auto px-2 py-2 text-[10px] font-semibold leading-tight tracking-[0.14em] whitespace-normal
-              sm:flex-1 sm:h-10 sm:px-6 sm:text-xs sm:tracking-wider sm:whitespace-nowrap
-              ${index === 0 ? 'rounded-l-md rounded-r-none' : index === options.length - 1 ? 'rounded-r-md rounded-l-none' : 'rounded-none'}
-              ${
-                isActive
-                  ? 'bg-primary text-white'
-                  : 'bg-muted/10 text-muted-foreground hover:bg-primary hover:text-primary-foreground'
-              }
-            `}
+            className={`border-border/20 h-auto min-w-0 cursor-pointer justify-center border-x px-2 py-2 text-center text-[10px] leading-tight font-semibold tracking-[0.14em] whitespace-normal shadow-none sm:h-10 sm:flex-1 sm:px-6 sm:text-xs sm:tracking-wider sm:whitespace-nowrap ${index === 0 ? 'rounded-l-md rounded-r-none' : index === options.length - 1 ? 'rounded-l-none rounded-r-md' : 'rounded-none'} ${
+              isActive
+                ? 'bg-primary text-white'
+                : 'bg-muted/10 text-muted-foreground hover:bg-primary hover:text-primary-foreground'
+            } `}
           >
             {option.label}
           </Button>

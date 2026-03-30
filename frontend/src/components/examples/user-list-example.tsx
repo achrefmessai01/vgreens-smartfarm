@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useUsersQuery } from '@/generated/graphql'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useUsersQuery } from '@/generated/graphql';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 /**
  * Example component showing how to use Apollo Client with generated types
@@ -11,14 +11,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
  * const { data, loading, error } = useUsersQuery()
  */
 export function UserListExample() {
-  const { data, loading, error } = useUsersQuery()
+  const { data, loading, error } = useUsersQuery();
 
   if (loading) {
-    return <div>Loading users...</div>
+    return <div>Loading users...</div>;
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   }
 
   return (
@@ -35,10 +35,10 @@ export function UserListExample() {
                   <p className="font-medium">
                     {user.firstName || ''} {user.lastName || ''}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {user.email || 'No email'}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     Role: {user.role}
                   </p>
                 </div>
@@ -50,5 +50,5 @@ export function UserListExample() {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

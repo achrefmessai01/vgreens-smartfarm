@@ -1,7 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { useUpdateHarvestMutation, type HarvestsQuery } from '@/generated/graphql';
+import {
+  useUpdateHarvestMutation,
+  type HarvestsQuery,
+} from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
@@ -54,7 +57,13 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
 
   const reset = React.useCallback(() => {
     setHarvestId(null);
-    setFormData({ species: '', variety: '', plantingDate: '', cultivationArea: 0, sourceGreenhouseId: '' });
+    setFormData({
+      species: '',
+      variety: '',
+      plantingDate: '',
+      cultivationArea: 0,
+      sourceGreenhouseId: '',
+    });
     setErrors({});
   }, []);
 
@@ -88,5 +97,13 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
     [formData, harvestId, updateHarvest, reset, onSuccess],
   );
 
-  return { formData, setFormData, errors, loading, populate, reset, handleSubmit };
+  return {
+    formData,
+    setFormData,
+    errors,
+    loading,
+    populate,
+    reset,
+    handleSubmit,
+  };
 }

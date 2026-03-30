@@ -3,7 +3,7 @@ import { registerEnumType } from '@nestjs/graphql';
 export enum ErrorType {
   RUNTIME_ERROR = 'RUNTIME_ERROR',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
-  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR', 
+  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
   AUTHORIZATION_ERROR = 'AUTHORIZATION_ERROR',
   DATABASE_ERROR = 'DATABASE_ERROR',
   NETWORK_ERROR = 'NETWORK_ERROR',
@@ -18,6 +18,6 @@ export enum ErrorType {
 }
 
 registerEnumType(ErrorType, {
-  name: 'ErrorType', 
+  name: 'ErrorType',
   description: 'Type/category of the error',
 });

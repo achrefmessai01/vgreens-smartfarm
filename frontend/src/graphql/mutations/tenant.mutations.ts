@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client';
 
 export const CREATE_TENANT_MUTATION = gql`
   mutation CreateTenant($input: CreateTenantInput!) {
@@ -13,7 +13,7 @@ export const CREATE_TENANT_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const UPDATE_TENANT_MUTATION = gql`
   mutation UpdateTenant($id: ID!, $input: UpdateTenantInput!) {
@@ -28,10 +28,10 @@ export const UPDATE_TENANT_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const DELETE_TENANT_MUTATION = gql`
   mutation DeleteTenant($id: ID!) {
     deleteTenant(id: $id)
   }
-`
+`;

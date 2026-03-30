@@ -73,7 +73,9 @@ export function useTenantUsersPage() {
       setIsLoading(true);
       try {
         if (editingUser) {
-          await updateUser({ variables: { id: editingUser.id, input: formData } });
+          await updateUser({
+            variables: { id: editingUser.id, input: formData },
+          });
         } else {
           const result = await createUser({
             variables: {

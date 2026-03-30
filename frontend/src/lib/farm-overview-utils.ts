@@ -26,7 +26,8 @@ export function parseParameter(value: string | null): ParameterType {
 
 /** Parse view mode URL value; returns default discrete if invalid. */
 export function parseViewMode(value: string | null): ViewMode {
-  if (value && VALID_VIEW_MODES.includes(value as ViewMode)) return value as ViewMode;
+  if (value && VALID_VIEW_MODES.includes(value as ViewMode))
+    return value as ViewMode;
   return 'discrete';
 }
 

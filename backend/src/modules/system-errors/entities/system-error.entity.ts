@@ -15,7 +15,7 @@ import { ReportSeverity, ErrorSource, ErrorType } from '@common/enums';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 
 @ObjectType()
-@Entity('system_errors') 
+@Entity('system_errors')
 @Index(['source', 'errorType', 'severity'])
 @Index(['createdAt'])
 @Index(['isResolved', 'severity'])
@@ -50,7 +50,7 @@ export class SystemError extends BaseEntity {
 
   @Field(() => ErrorType)
   @Column({
-    type: 'enum', 
+    type: 'enum',
     enum: ErrorType,
     default: ErrorType.UNKNOWN_ERROR,
   })

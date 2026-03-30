@@ -23,12 +23,18 @@ export class DashboardFilterInput {
   @IsString()
   batch?: string;
 
-  @Field({ nullable: true, description: 'Start date for dashboard data (ISO date string)' })
+  @Field({
+    nullable: true,
+    description: 'Start date for dashboard data (ISO date string)',
+  })
   @IsOptional()
   @IsDateString()
   dateFrom?: string;
 
-  @Field({ nullable: true, description: 'End date for dashboard data (ISO date string)' })
+  @Field({
+    nullable: true,
+    description: 'End date for dashboard data (ISO date string)',
+  })
   @IsOptional()
   @IsDateString()
   dateTo?: string;

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import {
   Table,
@@ -7,9 +7,9 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-} from '@/components/ui/table'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent } from '@/components/ui/card'
+} from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function FeatureTableSkeleton() {
   return (
@@ -42,7 +42,7 @@ export function FeatureTableSkeleton() {
                     <Skeleton className="h-4 w-20" />
                   </TableHead>
                   <TableHead className="text-right">
-                    <Skeleton className="h-4 w-20 ml-auto" />
+                    <Skeleton className="ml-auto h-4 w-20" />
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -78,5 +78,5 @@ export function FeatureTableSkeleton() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

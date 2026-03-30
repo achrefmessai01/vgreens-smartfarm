@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import ErrorPage from '@/components/ui/error-page'
-import { Wheat } from 'lucide-react'
+import ErrorPage from '@/components/ui/error-page';
+import { Wheat } from 'lucide-react';
 
 export default function HarvestErrorPage({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <ErrorPage
@@ -20,10 +20,10 @@ export default function HarvestErrorPage({
       theme="yellow"
       resetLabel="Reload Harvest"
       backLink={{
-        href: "/tenant/dashboard",
-        label: "Back to Dashboard",
-        icon: Wheat
+        href: '/tenant/dashboard',
+        label: 'Back to Dashboard',
+        icon: Wheat,
       }}
     />
-  )
+  );
 }

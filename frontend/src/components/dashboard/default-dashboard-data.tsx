@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import type { DashboardContentProps } from './dashboard-content'
+import type { DashboardContentProps } from './dashboard-content';
 
 export function getDefaultDashboardContentProps(): Omit<
   DashboardContentProps,
@@ -8,7 +8,11 @@ export function getDefaultDashboardContentProps(): Omit<
 > {
   return {
     kpiItems: [
-      { label: 'Farms Online', value: '5 / 5', subtitle: 'All sites reporting' },
+      {
+        label: 'Farms Online',
+        value: '5 / 5',
+        subtitle: 'All sites reporting',
+      },
       { label: 'Sensors Online', value: '1,248', subtitle: '98.7% uptime' },
       {
         label: 'Average Battery',
@@ -89,7 +93,10 @@ export function getDefaultDashboardContentProps(): Omit<
     trends: [
       { label: 'Soil Moisture', data: [38, 40, 42, 41, 39, 42, 43] },
       { label: 'Air Temperature', data: [22, 21, 23, 24, 23, 22, 23] },
-      { label: 'Water Usage', data: [3000, 3200, 3300, 3400, 3350, 3450, 3500] },
+      {
+        label: 'Water Usage',
+        data: [3000, 3200, 3300, 3400, 3350, 3450, 3500],
+      },
     ],
     maintenanceItems: [
       { title: 'Pump #1 — Filter change', due: 'Due in 2 days' },
@@ -106,5 +113,5 @@ export function getDefaultDashboardContentProps(): Omit<
       { label: 'Buffered: 12 devices', variant: 'warning' },
     ],
     lastUpdated: 'Last updated: 2 minutes ago',
-  }
+  };
 }

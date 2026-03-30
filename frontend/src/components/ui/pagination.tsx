@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useI18n } from '@/i18n'
-import { cn } from '@/lib/utils'
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n';
+import { cn } from '@/lib/utils';
 
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  hasNextPage: boolean
-  hasPreviousPage: boolean
-  onPageChange: (page: number) => void
-  onNext: () => void
-  onPrevious: () => void
-  showInfo?: boolean
-  startItem?: number
-  endItem?: number
-  totalItems?: number
-  className?: string
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  onPageChange: (page: number) => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  showInfo?: boolean;
+  startItem?: number;
+  endItem?: number;
+  totalItems?: number;
+  className?: string;
 }
 
 export function Pagination({
@@ -34,54 +34,55 @@ export function Pagination({
   totalItems,
   className,
 }: PaginationProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   if (totalPages <= 1) {
-    return null
+    return null;
   }
 
   const getVisiblePages = () => {
-    const pages: number[] = []
-    const maxVisible = 5
+    const pages: number[] = [];
+    const maxVisible = 5;
 
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
+        pages.push(i);
       }
     } else {
-      const start = Math.max(1, currentPage - 2)
-      const end = Math.min(totalPages, start + maxVisible - 1)
+      const start = Math.max(1, currentPage - 2);
+      const end = Math.min(totalPages, start + maxVisible - 1);
 
       if (start > 1) {
-        pages.push(1)
+        pages.push(1);
         if (start > 2) {
-          pages.push(-1) // Ellipsis
+          pages.push(-1); // Ellipsis
         }
       }
 
       for (let i = start; i <= end; i++) {
-        pages.push(i)
+        pages.push(i);
       }
 
       if (end < totalPages) {
         if (end < totalPages - 1) {
-          pages.push(-1) // Ellipsis
+          pages.push(-1); // Ellipsis
         }
-        pages.push(totalPages)
+        pages.push(totalPages);
       }
     }
 
-    return pages
-  }
+    return pages;
+  };
 
-  const visiblePages = getVisiblePages()
+  const visiblePages = getVisiblePages();
 
   return (
     <div className={cn('flex items-center justify-between', className)}>
       {showInfo && startItem && endItem && totalItems && (
-        <div className="text-sm text-muted-foreground">
+        <div className="text-muted-foreground text-sm">
           {t.common?.showing || 'Showing'} {startItem} {t.common?.to || 'to'}{' '}
-          {endItem} {t.common?.of || 'of'} {totalItems} {t.common?.results || 'results'}
+          {endItem} {t.common?.of || 'of'} {totalItems}{' '}
+          {t.common?.results || 'results'}
         </div>
       )}
 
@@ -100,10 +101,13 @@ export function Pagination({
         {visiblePages.map((page, index) => {
           if (page === -1) {
             return (
-              <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">
+              <span
+                key={`ellipsis-${index}`}
+                className="text-muted-foreground px-2"
+              >
                 ...
               </span>
-            )
+            );
           }
 
           return (
@@ -116,7 +120,7 @@ export function Pagination({
             >
               {page}
             </Button>
-          )
+          );
         })}
 
         <Button
@@ -131,5 +135,5 @@ export function Pagination({
         </Button>
       </div>
     </div>
-  )
+  );
 }

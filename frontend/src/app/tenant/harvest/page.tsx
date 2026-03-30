@@ -70,7 +70,7 @@ export default function HarvestPage() {
     <FeatureGuard featureKey="harvest_management">
       <div
         className={
-          isMobile ? 'flex flex-col sm:px-6' : 'flex flex-col h-full min-h-0'
+          isMobile ? 'flex flex-col sm:px-6' : 'flex h-full min-h-0 flex-col'
         }
       >
         <Tabs
@@ -78,14 +78,14 @@ export default function HarvestPage() {
           onValueChange={handleTabChange}
           className={
             isMobile
-              ? 'w-full flex flex-col'
-              : 'w-full flex flex-col h-full min-h-0'
+              ? 'flex w-full flex-col'
+              : 'flex h-full min-h-0 w-full flex-col'
           }
         >
-          <TabsList className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full">
+          <TabsList className="bg-muted text-muted-foreground inline-flex h-9 w-full items-center justify-center rounded-lg p-1">
             <TabsTrigger
               value="dashboard"
-              className="flex items-center justify-center gap-2 px-3 py-1 flex-1 sm:px-4"
+              className="flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4"
             >
               <BarChart3 className="h-4 w-4" />
               <span className="text-xs sm:text-sm">
@@ -94,7 +94,7 @@ export default function HarvestPage() {
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="flex items-center justify-center gap-2 px-3 py-1 flex-1 sm:px-4"
+              className="flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4"
             >
               <History className="h-4 w-4" />
               <span className="text-xs sm:text-sm">
@@ -105,7 +105,7 @@ export default function HarvestPage() {
 
           <TabsContent
             value="dashboard"
-            className="mt-4 flex-1 min-h-0 sm:mt-6"
+            className="mt-4 min-h-0 flex-1 sm:mt-6"
           >
             <HarvestDashboard />
           </TabsContent>
@@ -115,14 +115,14 @@ export default function HarvestPage() {
             className={
               isMobile
                 ? 'mt-4 flex flex-col sm:mt-6'
-                : 'mt-6 flex-1 min-h-0 flex flex-col'
+                : 'mt-6 flex min-h-0 flex-1 flex-col'
             }
           >
             <div
               className={
                 isMobile
                   ? 'flex flex-col gap-4 sm:gap-6'
-                  : 'flex flex-col gap-6 h-full min-h-0'
+                  : 'flex h-full min-h-0 flex-col gap-6'
               }
             >
               <HarvestPageHeader

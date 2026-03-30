@@ -35,7 +35,7 @@ export const useSystemErrorsCard = ({
       <Card className="gap-2 overflow-hidden border py-2 shadow-none">
         {/* Custom-Header implementation - using card-header breaks ux */}
         <div className="flex flex-row items-center justify-between border-b px-6 pb-2">
-          <h3 className="text-sm font-semibold leading-none line-clamp-2 pr-2">
+          <h3 className="line-clamp-2 pr-2 text-sm leading-none font-semibold">
             {error.errorMessage}
           </h3>
           <div className="shrink-0">

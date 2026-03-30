@@ -80,7 +80,9 @@ export function useTenantsPage() {
       setIsLoading(true);
       try {
         if (editingTenant) {
-          await updateTenant({ variables: { id: editingTenant.id, input: formData } });
+          await updateTenant({
+            variables: { id: editingTenant.id, input: formData },
+          });
         } else {
           await createTenant({ variables: { input: formData } });
         }

@@ -1,60 +1,60 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { SensorGauge } from './sensor-gauge'
-import { Droplets } from 'lucide-react'
-import { useI18n } from '@/i18n'
-import type { TunnelStatus } from '@/types/tunnel.types'
+import * as React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SensorGauge } from './sensor-gauge';
+import { Droplets } from 'lucide-react';
+import { useI18n } from '@/i18n';
+import type { TunnelStatus } from '@/types/tunnel.types';
 
 interface SystemOverviewProps {
-  pH: number
-  waterEC: number
+  pH: number;
+  waterEC: number;
 }
 
 export function SystemOverview({ pH, waterEC }: SystemOverviewProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const getParameterStatus = (
     value: number,
     normal: { min: number; max: number },
-    warning: { min: number; max: number }
+    warning: { min: number; max: number },
   ): TunnelStatus => {
     if (value >= normal.min && value <= normal.max) {
-      return 'normal'
+      return 'normal';
     }
     if (value >= warning.min && value <= warning.max) {
-      return 'warning'
+      return 'warning';
     }
-    return 'critical'
-  }
+    return 'critical';
+  };
 
   const pHStatus = getParameterStatus(
     pH,
     { min: 5.5, max: 6.5 },
-    { min: 5.0, max: 7.0 }
-  )
+    { min: 5.0, max: 7.0 },
+  );
 
   const waterECStatus = getParameterStatus(
     waterEC,
     { min: 1.2, max: 2.0 },
-    { min: 1.0, max: 2.5 }
-  )
+    { min: 1.0, max: 2.5 },
+  );
 
   return (
-    <Card className="bg-gradient-to-br from-card to-card/50 border-2 overflow-hidden">
-      <CardHeader className="py-3 px-4 border-b border-border/50 dark:border-border/30 bg-muted/30 dark:bg-muted/10">
+    <Card className="from-card to-card/50 overflow-hidden border-2 bg-gradient-to-br">
+      <CardHeader className="border-border/50 dark:border-border/30 bg-muted/30 dark:bg-muted/10 border-b px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-md bg-cyan-500/10 dark:bg-cyan-500/20">
+          <div className="rounded-md bg-cyan-500/10 p-1.5 dark:bg-cyan-500/20">
             <Droplets className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
           </div>
-          <CardTitle className="text-base font-bold tracking-tight text-foreground dark:text-white">
+          <CardTitle className="text-foreground text-base font-bold tracking-tight dark:text-white">
             {t.pages.farmOverview.systemOverview || 'System Overview'}
           </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="px-4 py-0 min-h-[500px]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-[450px]">
+      <CardContent className="min-h-[500px] px-4 py-0">
+        <div className="grid h-[450px] grid-cols-1 gap-6 sm:grid-cols-2">
           <SensorGauge
             label={t.pages.farmOverview.pH}
             value={pH}
@@ -82,5 +82,5 @@ export function SystemOverview({ pH, waterEC }: SystemOverviewProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -19,7 +19,11 @@ import { InfluxDBModule } from '../influxdb/influxdb.module';
 import { ErrorReportsModule } from '../error-reports/error-reports.module';
 import { SystemErrorsModule } from '../system-errors/system-errors.module';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { TenantInterceptor, UserInterceptor, ErrorLoggingInterceptor } from '@common/interceptors';
+import {
+  TenantInterceptor,
+  UserInterceptor,
+  ErrorLoggingInterceptor,
+} from '@common/interceptors';
 
 @Module({
   imports: [

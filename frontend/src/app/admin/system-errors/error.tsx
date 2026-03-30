@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import ErrorPage from '@/components/ui/error-page'
-import { RotateCcw } from 'lucide-react'
+import ErrorPage from '@/components/ui/error-page';
+import { RotateCcw } from 'lucide-react';
 
 export default function SystemErrorsErrorPage({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <ErrorPage
@@ -25,5 +25,5 @@ export default function SystemErrorsErrorPage({
       }}
       resetLabel="Retry Loading"
     />
-  )
+  );
 }

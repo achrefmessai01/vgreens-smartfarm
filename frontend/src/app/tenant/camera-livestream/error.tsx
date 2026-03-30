@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import ErrorPage from '@/components/ui/error-page'
-import { Camera } from 'lucide-react'
+import ErrorPage from '@/components/ui/error-page';
+import { Camera } from 'lucide-react';
 
 export default function CameraErrorPage({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <ErrorPage
@@ -20,10 +20,10 @@ export default function CameraErrorPage({
       theme="purple"
       resetLabel="Reconnect Camera"
       backLink={{
-        href: "/tenant/dashboard",
-        label: "Back to Dashboard",
-        icon: Camera
+        href: '/tenant/dashboard',
+        label: 'Back to Dashboard',
+        icon: Camera,
       }}
     />
-  )
+  );
 }

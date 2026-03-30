@@ -51,7 +51,7 @@ export function CumulativeYieldChart({
   return (
     <Card className={className}>
       <div className="p-6">
-        <h3 className="text-lg font-semibold mb-4">
+        <h3 className="mb-4 text-lg font-semibold">
           {t.pages.harvest?.cumulativeYieldProgress ??
             'Cumulative Yield Progress'}
         </h3>
@@ -139,15 +139,15 @@ export function CumulativeYieldChart({
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex items-center justify-center gap-6 mt-4">
+        <div className="mt-4 flex items-center justify-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-emerald-500" />
+            <div className="h-3 w-3 rounded-full bg-emerald-500" />
             <span className="text-sm font-medium">
               {t.pages.harvest?.yieldKg ?? 'Yield (kg)'}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
+            <div className="h-3 w-3 rounded-full bg-red-500" />
             <span className="text-sm font-medium">
               {t.pages.harvest?.waste ?? 'Waste'}
             </span>

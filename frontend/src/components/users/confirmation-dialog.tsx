@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,22 +8,22 @@ import {
   DialogFooter,
   DialogContent,
   DialogDescription,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 export interface ConfirmationDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title: string
-  description: string
-  confirmLabel?: string
-  cancelLabel?: string
-  variant?: 'default' | 'destructive'
-  onConfirm: () => void
-  onCancel?: () => void
-  isLoading?: boolean
-  children?: React.ReactNode
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  variant?: 'default' | 'destructive';
+  onConfirm: () => void;
+  onCancel?: () => void;
+  isLoading?: boolean;
+  children?: React.ReactNode;
 }
 
 export function ConfirmationDialog({
@@ -40,24 +40,24 @@ export function ConfirmationDialog({
   children,
 }: ConfirmationDialogProps) {
   const handleCancel = () => {
-    onCancel?.()
-    onOpenChange(false)
-  }
+    onCancel?.();
+    onOpenChange(false);
+  };
 
   const handleConfirm = () => {
-    onConfirm()
+    onConfirm();
     // Note: The parent component should handle closing the dialog
     // after the confirmation action is complete
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false} className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-left dark:text-card-foreground">
+          <DialogTitle className="dark:text-card-foreground text-left">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-left dark:text-muted-foreground/90">
+          <DialogDescription className="dark:text-muted-foreground/90 text-left">
             {description}
           </DialogDescription>
         </DialogHeader>
@@ -69,7 +69,7 @@ export function ConfirmationDialog({
             variant="outline"
             onClick={handleCancel}
             disabled={isLoading}
-            className="sm:flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
+            className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 sm:flex-1"
           >
             {cancelLabel}
           </Button>
@@ -91,5 +91,5 @@ export function ConfirmationDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

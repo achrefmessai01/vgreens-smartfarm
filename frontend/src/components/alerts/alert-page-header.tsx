@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { useI18n } from '@/i18n'
-import { AlertTriangle } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/layout/page-header'
+import { useI18n } from '@/i18n';
+import { AlertTriangle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout/page-header';
 
 interface AlertPageHeaderProps {
-  openAlertsCount: number
-  onCreate: () => void
-  isLoading?: boolean
+  openAlertsCount: number;
+  onCreate: () => void;
+  isLoading?: boolean;
 }
 
 export function AlertPageHeader({
@@ -17,13 +17,13 @@ export function AlertPageHeader({
   onCreate,
   isLoading = false,
 }: AlertPageHeaderProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   // this is just a safety measure to hide the create alert button for now
   const hideCreateAlertButton = true;
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
       <PageHeader
         title={t.pages.alerts.title}
         subtitle={t.pages.alerts.subtitle}
@@ -35,11 +35,12 @@ export function AlertPageHeader({
             {openAlertsCount} {t.pages.alerts.critical}
           </Badge>
         )}
-        {!hideCreateAlertButton && 
-        <Button onClick={onCreate} disabled={isLoading}>
-          {t.pages.alerts.createAlert}
-        </Button>}
+        {!hideCreateAlertButton && (
+          <Button onClick={onCreate} disabled={isLoading}>
+            {t.pages.alerts.createAlert}
+          </Button>
+        )}
       </div>
     </div>
-  )
+  );
 }

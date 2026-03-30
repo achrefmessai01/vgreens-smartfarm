@@ -12,7 +12,7 @@ interface DashboardChartsGridProps {
 
 export function DashboardChartsGrid({ data }: DashboardChartsGridProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
       <YieldOverTimeChart data={data.yieldOverTime ?? []} />
       <ClassDistributionChart data={data.classDistribution ?? []} />
       <BrixTrendChart data={data.brixTrend ?? []} />

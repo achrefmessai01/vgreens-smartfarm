@@ -29,30 +29,31 @@ export function GreenhouseSummaryCard({
   onParameterClick,
 }: GreenhouseSummaryCardProps) {
   const criticalCount = parameters.reduce((acc, p) => {
-    const val = valueOverride?.(p.value) ?? getAverageParameterValue(bay, p.value);
+    const val =
+      valueOverride?.(p.value) ?? getAverageParameterValue(bay, p.value);
     const status = getParameterStatus(p.value, val);
     return acc + (status === 'critical' ? 1 : 0);
   }, 0);
   return (
-    <Card className="w-full gap-0 py-0 overflow-hidden rounded-lg transition-shadow duration-700 ease-out hover:shadow-md bg-card/80">
-      <div className="flex items-center gap-3 border-b border-border/50 bg-muted/15 px-3 py-2 sm:px-2 sm:py-1.5 lg:py-2">
-        <CardTitle className="break-words text-xs font-semibold uppercase tracking-[0.12em] text-foreground/90 sm:text-[10px] md:text-[11px] lg:text-xs xl:text-sm">
+    <Card className="bg-card/80 w-full gap-0 overflow-hidden rounded-lg py-0 transition-shadow duration-700 ease-out hover:shadow-md">
+      <div className="border-border/50 bg-muted/15 flex items-center gap-3 border-b px-3 py-2 sm:px-2 sm:py-1.5 lg:py-2">
+        <CardTitle className="text-foreground/90 text-xs font-semibold tracking-[0.12em] break-words uppercase sm:text-[10px] md:text-[11px] lg:text-xs xl:text-sm">
           {title}
         </CardTitle>
         {criticalCount > 0 && (
-          <div className="ml-auto mr-1 flex items-center">
-            <span className="inline-flex items-center rounded-full bg-destructive/90 px-2 py-0.5 text-xs font-medium text-white">
+          <div className="mr-1 ml-auto flex items-center">
+            <span className="bg-destructive/90 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium text-white">
               {criticalCount} critical
             </span>
           </div>
         )}
       </div>
       {!bay && (
-        <p className="px-6 py-3 text-xs text-muted-foreground border-b border-border/40">
+        <p className="text-muted-foreground border-border/40 border-b px-6 py-3 text-xs">
           {noDataMessage}
         </p>
       )}
-      <CardContent className="p-1 space-y-0.5">
+      <CardContent className="space-y-0.5 p-1">
         {parameters.map((parameter) => (
           <ParameterRow
             key={parameter.value}
@@ -62,7 +63,11 @@ export function GreenhouseSummaryCard({
               valueOverride?.(parameter.value) ??
               getAverageParameterValue(bay, parameter.value)
             }
-            onClick={onParameterClick ? () => onParameterClick(parameter.value) : undefined}
+            onClick={
+              onParameterClick
+                ? () => onParameterClick(parameter.value)
+                : undefined
+            }
           />
         ))}
       </CardContent>

@@ -65,13 +65,12 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
     const status =
       httpStatusCode ??
       (typeof err?.status === 'number' ? err.status : undefined) ??
-      (typeof err?.statusCode === 'number'
-        ? err.statusCode
-        : undefined);
+      (typeof err?.statusCode === 'number' ? err.statusCode : undefined);
 
     if (status !== undefined && SKIP_HTTP_STATUSES.has(status)) return true;
 
-    const msg = typeof err?.message === 'string' ? err.message.toLowerCase() : '';
+    const msg =
+      typeof err?.message === 'string' ? err.message.toLowerCase() : '';
     const name = typeof err?.name === 'string' ? err.name.toLowerCase() : '';
 
     if (
@@ -97,9 +96,7 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
       let errorData: BackendErrorData = { error: error as Error, component };
 
       if (contextType === 'http') {
-        const request = context
-          .switchToHttp()
-          .getRequest<RequestWithUser>();
+        const request = context.switchToHttp().getRequest<RequestWithUser>();
         const response = context
           .switchToHttp()
           .getResponse<{ statusCode: number }>();

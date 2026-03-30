@@ -60,7 +60,7 @@ export const useWarningRow = ({
                 e.stopPropagation();
                 onAcknowledge(warning);
               }}
-              className="h-8 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
+              className="dark:border-border/50 dark:hover:bg-muted/70 h-8 dark:text-white"
             >
               {translations.acknowledge}
             </Button>

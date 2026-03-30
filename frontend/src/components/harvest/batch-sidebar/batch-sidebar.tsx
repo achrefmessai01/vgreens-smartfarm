@@ -67,9 +67,9 @@ export function BatchSidebar({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl flex flex-col p-0 gap-0"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl"
       >
-        <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
+        <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
           <SheetTitle className="dark:text-card-foreground">
             {currentData?.greenhouse?.name
               ? `${h?.batchDetails ?? 'Batch Details'} for ${currentData.greenhouse.name}`
@@ -77,10 +77,10 @@ export function BatchSidebar({
           </SheetTitle>
         </SheetHeader>
 
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col">
           {currentData ? (
             <>
-              <div className="shrink-0 px-6 py-4 border-b dark:border-primary-foreground/30 bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 space-y-6">
+              <div className="dark:border-primary-foreground/30 from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 shrink-0 space-y-6 border-b bg-gradient-to-r px-6 py-4">
                 <BatchHeaderField
                   name={currentData.name}
                   species={currentData.species}
@@ -95,7 +95,7 @@ export function BatchSidebar({
                 />
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-scroll px-6 py-6 space-y-6">
+              <div className="min-h-0 flex-1 space-y-6 overflow-y-scroll px-6 py-6">
                 <YieldDataField
                   marketable={currentData.todaysHarvest.marketable}
                   waste={currentData.todaysHarvest.waste}
@@ -117,19 +117,19 @@ export function BatchSidebar({
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex flex-1 items-center justify-center">
+              <p className="text-muted-foreground text-sm">
                 {h?.noBatchSelected ?? 'No batch selected'}
               </p>
             </div>
           )}
         </div>
 
-        <SheetFooter className="px-6 py-4 border-t dark:border-primary-foreground/30">
+        <SheetFooter className="dark:border-primary-foreground/30 border-t px-6 py-4">
           <Button
             onClick={handleSave}
             disabled={busy || !harvestId}
-            className="w-full h-12 text-lg font-semibold"
+            className="h-12 w-full text-lg font-semibold"
             size="lg"
           >
             {buttonLabel}

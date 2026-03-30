@@ -224,7 +224,7 @@ export function Sidebar({
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden fixed top-4 left-4 z-50"
+        className="fixed top-4 left-4 z-50 lg:hidden"
         onClick={() => setIsMobileOpen(true)}
       >
         <Menu className="h-5 w-5" />
@@ -253,7 +253,7 @@ export function Sidebar({
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col fixed left-0 top-0 h-screen z-40 transition-all duration-300 border-r dark:border-sidebar-border/70',
+          'dark:border-sidebar-border/70 fixed top-0 left-0 z-40 hidden h-screen flex-col border-r transition-all duration-300 lg:flex',
           isCollapsed ? 'w-16' : 'w-64',
         )}
       >

@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 interface LogoSVGProps {
-  color: string
-  glow?: boolean
-  className?: string
+  color: string;
+  glow?: boolean;
+  className?: string;
 }
 
 export function LogoSVG({ color, glow, className }: LogoSVGProps) {
@@ -27,5 +27,5 @@ export function LogoSVG({ color, glow, className }: LogoSVGProps) {
         fill={color}
       />
     </svg>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Card, CardContent } from "@/components/ui/card";
-import type { TunnelStatus } from "@/types/tunnel.types";
-import { cn } from "@/lib/utils";
-import * as React from "react";
-import { SensorTile } from "../sensor-tile";
+import { Card, CardContent } from '@/components/ui/card';
+import type { TunnelStatus } from '@/types/tunnel.types';
+import { cn } from '@/lib/utils';
+import * as React from 'react';
+import { SensorTile } from '../sensor-tile';
 
 export interface SensorBlock {
   id: string;
@@ -31,21 +31,21 @@ export function GreenhouseSensorView({
   return (
     <Card
       className={cn(
-        "h-full w-full border-2 border-border/60 bg-card/80 rounded-xl overflow-hidden",
+        'border-border/60 bg-card/80 h-full w-full overflow-hidden rounded-xl border-2',
         className,
       )}
     >
-      <CardContent className="p-4 h-full">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 h-full auto-rows-fr">
+      <CardContent className="h-full p-4">
+        <div className="grid h-full auto-rows-fr grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {sensorBlocks.map((block) => (
             <button
               key={block.id}
               type="button"
               onClick={() => onBlockClick?.(block.id)}
               className={cn(
-                "text-left rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 min-h-[100px]",
+                'focus-visible:ring-primary min-h-[100px] rounded-lg text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                 selectedBlockId === block.id &&
-                  "ring-2 ring-primary ring-offset-2",
+                  'ring-primary ring-2 ring-offset-2',
               )}
             >
               <SensorTile
@@ -66,48 +66,48 @@ export function GreenhouseSensorView({
 /** Mock sensor data per greenhouse (replace with API later) */
 export function useMockGreenhouseSensors(greenhouseId: string): SensorBlock[] {
   return React.useMemo(() => {
-    const base = greenhouseId === "greenhouse1" ? 0 : 2;
+    const base = greenhouseId === 'greenhouse1' ? 0 : 2;
     return [
       {
         id: `${greenhouseId}-temp`,
-        label: "Temperature",
+        label: 'Temperature',
         value: (21.2 + base * 0.5).toFixed(1),
-        unit: "°C",
-        status: "normal",
+        unit: '°C',
+        status: 'normal',
       },
       {
         id: `${greenhouseId}-humidity`,
-        label: "Humidity",
+        label: 'Humidity',
         value: 68 + base,
-        unit: "%",
-        status: "normal",
+        unit: '%',
+        status: 'normal',
       },
       {
         id: `${greenhouseId}-light`,
-        label: "Light",
+        label: 'Light',
         value: 420 + base * 20,
-        unit: "µmol/m²/s",
-        status: "normal",
+        unit: 'µmol/m²/s',
+        status: 'normal',
       },
       {
         id: `${greenhouseId}-co2`,
-        label: "CO₂",
+        label: 'CO₂',
         value: 820 + base * 30,
-        unit: "ppm",
-        status: base ? "warning" : "normal",
+        unit: 'ppm',
+        status: base ? 'warning' : 'normal',
       },
       {
         id: `${greenhouseId}-soil-moisture`,
-        label: "Soil Moisture",
+        label: 'Soil Moisture',
         value: 45 + base * 5,
-        unit: "%",
-        status: "normal",
+        unit: '%',
+        status: 'normal',
       },
       {
         id: `${greenhouseId}-ph`,
-        label: "pH",
+        label: 'pH',
         value: (6.2 + base * 0.1).toFixed(1),
-        status: "normal",
+        status: 'normal',
       },
     ];
   }, [greenhouseId]);

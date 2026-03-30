@@ -95,7 +95,11 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     React.useState(tabFromUrl);
 
   React.useEffect(() => {
-    syncFarmOverviewStateToUrl(activeGreenhouseTab, selectedParameter, viewMode);
+    syncFarmOverviewStateToUrl(
+      activeGreenhouseTab,
+      selectedParameter,
+      viewMode,
+    );
   }, [activeGreenhouseTab, selectedParameter, viewMode]);
 
   const greenhouseOptions = React.useMemo(
@@ -161,7 +165,8 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   React.useEffect(() => {
     const visibleKeys = new Set(parameterOptions.map((o) => o.value));
     if (!visibleKeys.has(selectedParameter)) {
-      const fallback = (parameterOptions[0]?.value as ParameterType) ?? 'temperature';
+      const fallback =
+        (parameterOptions[0]?.value as ParameterType) ?? 'temperature';
       setSelectedParameter(fallback);
     }
   }, [parameterOptions, selectedParameter]);
@@ -202,10 +207,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
 
   // For now PAR data is only available for greenhouse_01 and light is shared,
   // so use the same greenhouse id for both Green House 1 and 2 graphs.
-  const greenhouseId = React.useMemo(
-    () => 'greenhouse_01',
-    [],
-  );
+  const greenhouseId = React.useMemo(() => 'greenhouse_01', []);
 
   const greenhouseLabel = React.useMemo(
     () => (activeGreenhouseTab === 1 ? t.greenHouse1 : t.greenHouse2),

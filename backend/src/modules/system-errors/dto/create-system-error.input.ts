@@ -1,5 +1,15 @@
 import { InputType, Field, ID } from '@nestjs/graphql';
-import { IsString, IsOptional, IsEnum, IsInt, IsObject, IsIP, MaxLength, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsInt,
+  IsObject,
+  IsIP,
+  MaxLength,
+  Min,
+  Max,
+} from 'class-validator';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { ErrorSource, ErrorType, ReportSeverity } from '@common/enums';
 

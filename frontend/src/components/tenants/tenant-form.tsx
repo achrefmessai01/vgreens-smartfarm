@@ -1,44 +1,44 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldContent,
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import type { Tenant } from '@/generated/graphql'
-import { Checkbox } from '@/components/ui/checkbox'
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import type { Tenant } from '@/generated/graphql';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export interface TenantFormData {
-  name: string
-  companyName?: string
-  email?: string
-  phone?: string
-  isActive: boolean
+  name: string;
+  companyName?: string;
+  email?: string;
+  phone?: string;
+  isActive: boolean;
 }
 
 export interface TenantFormErrors {
-  name?: string
-  email?: string
+  name?: string;
+  email?: string;
 }
 
 interface TenantFormProps {
-  initialData?: Partial<Tenant>
-  onSubmit: (data: TenantFormData) => void
-  onCancel: () => void
-  isLoading?: boolean
+  initialData?: Partial<Tenant>;
+  onSubmit: (data: TenantFormData) => void;
+  onCancel: () => void;
+  isLoading?: boolean;
 }
 
 export interface TenantFormRef {
-  submit: () => void
+  submit: () => void;
 }
 
 export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
   ({ initialData, onSubmit, onCancel, isLoading = false }, ref) => {
-    const formRef = React.useRef<HTMLFormElement>(null)
+    const formRef = React.useRef<HTMLFormElement>(null);
     const [formData, setFormData] = React.useState<TenantFormData>(
       initialData
         ? {
@@ -54,55 +54,55 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
             email: '',
             phone: '',
             isActive: true,
-          }
-    )
-    const [errors, setErrors] = React.useState<TenantFormErrors>({})
+          },
+    );
+    const [errors, setErrors] = React.useState<TenantFormErrors>({});
 
     const validateForm = (): boolean => {
-      const newErrors: TenantFormErrors = {}
+      const newErrors: TenantFormErrors = {};
 
       if (!formData.name.trim()) {
-        newErrors.name = 'Name is required'
+        newErrors.name = 'Name is required';
       }
 
       if (
         formData.email &&
         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
       ) {
-        newErrors.email = 'Invalid email format'
+        newErrors.email = 'Invalid email format';
       }
 
-      setErrors(newErrors)
-      return Object.keys(newErrors).length === 0
-    }
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault()
+      e.preventDefault();
       if (validateForm()) {
-        onSubmit(formData)
+        onSubmit(formData);
       }
-    }
+    };
 
     const handleChange =
       (field: keyof TenantFormData) =>
       (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+        setFormData((prev) => ({ ...prev, [field]: e.target.value }));
         if (errors[field as keyof typeof errors]) {
-          setErrors((prev) => ({ ...prev, [field]: undefined }))
+          setErrors((prev) => ({ ...prev, [field]: undefined }));
         }
-      }
+      };
 
     const handleSwitchChange = (checked: boolean) => {
-      setFormData((prev) => ({ ...prev, isActive: checked }))
-    }
+      setFormData((prev) => ({ ...prev, isActive: checked }));
+    };
 
     React.useImperativeHandle(ref, () => ({
       submit: () => {
         if (formRef.current) {
-          formRef.current.requestSubmit()
+          formRef.current.requestSubmit();
         }
       },
-    }))
+    }));
 
     React.useEffect(() => {
       if (initialData) {
@@ -112,9 +112,9 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           email: initialData.email || '',
           phone: initialData.phone || '',
           isActive: initialData.isActive ?? true,
-        })
+        });
       }
-    }, [initialData])
+    }, [initialData]);
 
     return (
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
@@ -194,8 +194,8 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           </Field>
         </FieldGroup>
       </form>
-    )
-  }
-)
+    );
+  },
+);
 
-TenantForm.displayName = 'TenantForm'
+TenantForm.displayName = 'TenantForm';

@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client';
 
 export const ALERTS_QUERY = gql`
   query Alerts($filter: AlertsFilterInput) {
@@ -44,7 +44,7 @@ export const ALERTS_QUERY = gql`
       }
     }
   }
-`
+`;
 
 export const ALERT_QUERY = gql`
   query Alert($id: ID!) {
@@ -90,7 +90,7 @@ export const ALERT_QUERY = gql`
       }
     }
   }
-`
+`;
 
 export const CREATE_ALERT_MUTATION = gql`
   mutation CreateAlert($input: CreateAlertInput!) {
@@ -116,7 +116,7 @@ export const CREATE_ALERT_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const UPDATE_ALERT_MUTATION = gql`
   mutation UpdateAlert($id: ID!, $input: UpdateAlertInput!) {
@@ -142,7 +142,7 @@ export const UPDATE_ALERT_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const ACKNOWLEDGE_ALERT_MUTATION = gql`
   mutation AcknowledgeAlert($id: ID!) {
@@ -152,7 +152,7 @@ export const ACKNOWLEDGE_ALERT_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const RESOLVE_ALERT_MUTATION = gql`
   mutation ResolveAlert($id: ID!) {
@@ -162,10 +162,10 @@ export const RESOLVE_ALERT_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const DELETE_ALERT_MUTATION = gql`
   mutation DeleteAlert($id: ID!) {
     deleteAlert(id: $id)
   }
-`
+`;

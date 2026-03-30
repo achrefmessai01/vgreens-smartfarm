@@ -1,30 +1,30 @@
-'use client'
+'use client';
 
 import {
   useTenantQuery,
   useToggleTenantFeatureMutation,
   useFeaturesWithTenantStatusQuery,
-} from '@/generated/graphql'
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import { ArrowLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/layout'
-import { FeatureList } from '@/components/features'
-import { ContentSkeleton } from '@/components/ui/content-skeleton'
-import { TableSkeleton } from '@/components/ui/table-skeleton'
-import { useParams, useRouter } from 'next/navigation'
+} from '@/generated/graphql';
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout';
+import { FeatureList } from '@/components/features';
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
+import { useParams, useRouter } from 'next/navigation';
 
 export default function TenantFeaturesPage() {
-  const { t } = useI18n()
-  const params = useParams()
-  const router = useRouter()
-  const tenantId = params.tenantId as string
+  const { t } = useI18n();
+  const params = useParams();
+  const router = useRouter();
+  const tenantId = params.tenantId as string;
 
   const { data: tenantData, loading: tenantLoading } = useTenantQuery({
     variables: { id: tenantId },
     skip: !tenantId,
-  })
+  });
 
   const {
     data: featuresData,
@@ -33,14 +33,14 @@ export default function TenantFeaturesPage() {
   } = useFeaturesWithTenantStatusQuery({
     variables: { tenantId },
     skip: !tenantId,
-  })
+  });
 
-  const [toggleFeature] = useToggleTenantFeatureMutation()
+  const [toggleFeature] = useToggleTenantFeatureMutation();
 
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleToggle = async (featureId: string, enabled: boolean) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       await toggleFeature({
         variables: {
@@ -50,14 +50,14 @@ export default function TenantFeaturesPage() {
             enabled,
           },
         },
-      })
-      await refetchFeatures()
+      });
+      await refetchFeatures();
     } catch (error) {
-      console.error('Error toggling feature:', error)
+      console.error('Error toggling feature:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (tenantLoading || featuresLoading) {
     return (
@@ -65,11 +65,11 @@ export default function TenantFeaturesPage() {
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />
         <TableSkeleton columnCount={4} rowCount={6} />
       </div>
-    )
+    );
   }
 
-  const tenant = tenantData?.tenant
-  const features = featuresData?.featuresWithTenantStatus || []
+  const tenant = tenantData?.tenant;
+  const features = featuresData?.featuresWithTenantStatus || [];
 
   return (
     <div className="space-y-6">
@@ -99,5 +99,5 @@ export default function TenantFeaturesPage() {
         isLoading={isLoading}
       />
     </div>
-  )
+  );
 }

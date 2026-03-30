@@ -28,7 +28,7 @@ export const getStatusBadge = (
       return (
         <Badge
           variant="outline"
-          className="gap-1 text-xs border-amber-300 bg-amber-100 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+          className="gap-1 border-amber-300 bg-amber-100 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
         >
           <CheckCircle2 className="h-3 w-3" />
           {t.pages.alerts.statusAcknowledged}
@@ -38,7 +38,7 @@ export const getStatusBadge = (
       return (
         <Badge
           variant="outline"
-          className="gap-1 text-xs border-emerald-300 bg-emerald-100 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
+          className="gap-1 border-emerald-300 bg-emerald-100 text-xs text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
         >
           <CheckCircle className="h-3.5 w-3.5" />
           {t.pages.alerts.statusResolved}

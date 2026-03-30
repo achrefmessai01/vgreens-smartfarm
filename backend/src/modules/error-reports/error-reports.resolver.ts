@@ -17,9 +17,7 @@ import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
 @UseInterceptors(UserInterceptor, TenantInterceptor)
 @Resolver(() => ErrorReport)
 export class ErrorReportsResolver {
-  constructor(
-    private readonly errorReportsService: ErrorReportsService,
-  ) {}
+  constructor(private readonly errorReportsService: ErrorReportsService) {}
 
   @Query(() => [ErrorReport], { name: 'errorReports' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
@@ -56,7 +54,10 @@ export class ErrorReportsResolver {
         ? undefined
         : currentUser.tenantId;
 
-    const errorReport = await this.errorReportsService.findOneById(id, tenantId);
+    const errorReport = await this.errorReportsService.findOneById(
+      id,
+      tenantId,
+    );
 
     // Regular users can only see their own reports
     if (
@@ -72,9 +73,7 @@ export class ErrorReportsResolver {
 
   @Query(() => Int, { name: 'unresolvedErrorReportsCount' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
-  async getUnresolvedCount(
-    @CurrentUser() currentUser: User,
-  ): Promise<number> {
+  async getUnresolvedCount(@CurrentUser() currentUser: User): Promise<number> {
     const tenantId =
       currentUser.role === UserRole.VGREENS_ADMIN
         ? undefined
@@ -126,9 +125,9 @@ export class ErrorReportsResolver {
         : currentUser.tenantId;
 
     return this.errorReportsService.updateErrorReport(
-      id, 
+      id,
       { status: status as any },
-      tenantId
+      tenantId,
     );
   }
 

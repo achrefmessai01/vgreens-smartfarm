@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   Table,
   TableBody,
@@ -8,24 +8,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { useI18n } from '@/i18n'
+} from '@/components/ui/table';
+import { useI18n } from '@/i18n';
 
 export interface MonthTableData {
-  month: number
-  expectedYield: number
-  expectedBrix: number
-  productionCost: number
+  month: number;
+  expectedYield: number;
+  expectedBrix: number;
+  productionCost: number;
 }
 
 interface MonthDataTableProps {
-  data: MonthTableData[]
-  monthLabel: string
-  expectedYieldLabel: string
-  expectedBrixLabel: string
-  productionCostLabel: string
-  tonsLabel: string
-  brixUnit: string
+  data: MonthTableData[];
+  monthLabel: string;
+  expectedYieldLabel: string;
+  expectedBrixLabel: string;
+  productionCostLabel: string;
+  tonsLabel: string;
+  brixUnit: string;
 }
 
 const monthNames = [
@@ -41,7 +41,7 @@ const monthNames = [
   'October',
   'November',
   'December',
-]
+];
 
 export function MonthDataTable({
   data,
@@ -52,13 +52,13 @@ export function MonthDataTable({
   tonsLabel,
   brixUnit,
 }: MonthDataTableProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">
         {t.pages.yieldSettings.monthDataHighlights}
       </h3>
-      <div className="rounded-md border overflow-hidden">
+      <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
             <TableRow className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -95,5 +95,5 @@ export function MonthDataTable({
         </Table>
       </div>
     </div>
-  )
+  );
 }

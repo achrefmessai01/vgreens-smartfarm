@@ -1,26 +1,26 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { Bot, Send, MessageSquare } from 'lucide-react'
+import * as React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Bot, Send, MessageSquare } from 'lucide-react';
 
 interface ChatMessage {
-  id: string
-  text: string
-  isUser: boolean
+  id: string;
+  text: string;
+  isUser: boolean;
 }
 
 interface AICropConsultantCardProps {
-  title: string
-  subtitle: string
-  chatPlaceholder: string
-  sampleQuestion1: string
-  sampleQuestion2: string
-  sampleResponse: string
-  className?: string
+  title: string;
+  subtitle: string;
+  chatPlaceholder: string;
+  sampleQuestion1: string;
+  sampleQuestion2: string;
+  sampleResponse: string;
+  className?: string;
 }
 
 export function AICropConsultantCard({
@@ -38,44 +38,44 @@ export function AICropConsultantCard({
       text: sampleResponse,
       isUser: false,
     },
-  ])
+  ]);
 
   return (
-    <Card className={cn('bg-muted/30 flex flex-col h-full', className)}>
-      <CardHeader className="pb-3 flex-shrink-0">
+    <Card className={cn('bg-muted/30 flex h-full flex-col', className)}>
+      <CardHeader className="flex-shrink-0 pb-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-lg">
             <Bot className="h-4 w-4" />
           </div>
           <div className="flex-1">
-            <CardTitle className="text-base text-foreground">{title}</CardTitle>
-            <p className="text-xs text-foreground dark:text-foreground/80 mt-0.5">
+            <CardTitle className="text-foreground text-base">{title}</CardTitle>
+            <p className="text-foreground dark:text-foreground/80 mt-0.5 text-xs">
               {subtitle}
             </p>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col flex-1 min-h-0 space-y-4">
+      <CardContent className="flex min-h-0 flex-1 flex-col space-y-4">
         {/* Chat Messages Area */}
-        <div className="flex-1 space-y-3 min-h-0 overflow-y-auto pr-2">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2">
           {/* Sample Questions */}
           <div className="flex flex-col gap-2">
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start text-left h-auto py-2 px-3 text-xs text-foreground dark:text-foreground"
+              className="text-foreground dark:text-foreground h-auto w-full justify-start px-3 py-2 text-left text-xs"
               disabled
             >
-              <MessageSquare className="h-3 w-3 mr-2 shrink-0" />
+              <MessageSquare className="mr-2 h-3 w-3 shrink-0" />
               {sampleQuestion1}
             </Button>
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start text-left h-auto py-2 px-3 text-xs text-foreground dark:text-foreground"
+              className="text-foreground dark:text-foreground h-auto w-full justify-start px-3 py-2 text-left text-xs"
               disabled
             >
-              <MessageSquare className="h-3 w-3 mr-2 shrink-0" />
+              <MessageSquare className="mr-2 h-3 w-3 shrink-0" />
               {sampleQuestion2}
             </Button>
           </div>
@@ -87,27 +87,27 @@ export function AICropConsultantCard({
                 key={message.id}
                 className={cn(
                   'flex gap-2',
-                  message.isUser ? 'justify-end' : 'justify-start'
+                  message.isUser ? 'justify-end' : 'justify-start',
                 )}
               >
                 {!message.isUser && (
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
                     <Bot className="h-3 w-3" />
                   </div>
                 )}
                 <div
                   className={cn(
-                    'rounded-lg px-3 py-2 text-sm max-w-[80%]',
+                    'max-w-[80%] rounded-lg px-3 py-2 text-sm',
                     message.isUser
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-foreground dark:bg-muted/50 dark:text-foreground'
+                      : 'bg-muted text-foreground dark:bg-muted/50 dark:text-foreground',
                   )}
                 >
                   {message.text}
                 </div>
                 {message.isUser && (
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted">
-                    <MessageSquare className="h-3 w-3 text-foreground dark:text-foreground/70" />
+                  <div className="bg-muted flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                    <MessageSquare className="text-foreground dark:text-foreground/70 h-3 w-3" />
                   </div>
                 )}
               </div>
@@ -116,11 +116,11 @@ export function AICropConsultantCard({
         </div>
 
         {/* Chat Input */}
-        <div className="flex gap-2 pt-2 border-t border-border flex-shrink-0">
+        <div className="border-border flex flex-shrink-0 gap-2 border-t pt-2">
           <Input
             type="text"
             placeholder={chatPlaceholder}
-            className="flex-1 text-foreground"
+            className="text-foreground flex-1"
             disabled
           />
           <Button size="icon" variant="default" disabled>
@@ -129,5 +129,5 @@ export function AICropConsultantCard({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

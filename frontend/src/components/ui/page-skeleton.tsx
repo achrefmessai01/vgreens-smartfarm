@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import './page-skeleton.css'
-import { cn } from '@/lib/utils'
-import { LogoSVG } from './logo-svg'
-import { Skeleton } from '@/components/ui/skeleton'
+import './page-skeleton.css';
+import { cn } from '@/lib/utils';
+import { LogoSVG } from './logo-svg';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PageSkeletonProps {
-  className?: string
+  className?: string;
 }
 
 export function PageSkeleton({ className }: PageSkeletonProps) {
   return (
     <div
       className={cn(
-        'page-skeleton flex min-h-screen flex-col items-center justify-center bg-background',
+        'page-skeleton bg-background flex min-h-screen flex-col items-center justify-center',
         className,
       )}
       aria-label="Loading"
@@ -33,10 +33,10 @@ export function PageSkeleton({ className }: PageSkeletonProps) {
         </div>
 
         {/* Enhanced Stylish Skeleton */}
-        <div className="flex flex-col items-center gap-6 z-10">
+        <div className="z-10 flex flex-col items-center gap-6">
           <div className="flex flex-col items-center gap-2">
-            <Skeleton className="h-1 w-40 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-            <span className="text-[10px] uppercase tracking-[0.3em] text-primary/40 font-medium animate-pulse">
+            <Skeleton className="via-primary/30 h-1 w-40 bg-gradient-to-r from-transparent to-transparent" />
+            <span className="text-primary/40 animate-pulse text-[10px] font-medium tracking-[0.3em] uppercase">
               Initializing System
             </span>
           </div>
@@ -45,7 +45,7 @@ export function PageSkeleton({ className }: PageSkeletonProps) {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-1.5 h-1.5 rounded-full bg-primary/40"
+                className="bg-primary/40 h-1.5 w-1.5 rounded-full"
                 style={{
                   animation: 'dot-pulse 1.5s infinite ease-in-out',
                   animationDelay: `${i * 0.2}s`,
@@ -56,5 +56,5 @@ export function PageSkeleton({ className }: PageSkeletonProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -26,7 +26,7 @@ export function ChartTooltipContainer({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
+    <div className="bg-background border-border rounded-lg border p-3 shadow-lg">
       {children}
     </div>
   );
@@ -41,7 +41,7 @@ export function ChartDot({ cx = 0, cy = 0, fill, stroke }: ChartDotProps) {
       fill={fill}
       stroke={stroke}
       strokeWidth={2}
-      className="transition-all duration-200 cursor-pointer"
+      className="cursor-pointer transition-all duration-200"
       style={{ filter: `drop-shadow(0 4px 6px ${fill}66)` }}
     />
   );

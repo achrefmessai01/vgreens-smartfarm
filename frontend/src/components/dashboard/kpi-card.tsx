@@ -1,27 +1,24 @@
-'use client'
+'use client';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 export interface KpiCardProps {
-  label: string
-  value: string
-  subtitle?: string
-  className?: string
+  label: string;
+  value: string;
+  subtitle?: string;
+  className?: string;
 }
 
 export function KpiCard({ label, value, subtitle, className }: KpiCardProps) {
   return (
     <div
-      className={cn(
-        'rounded-lg border bg-card p-4 flex flex-col',
-        className,
-      )}
+      className={cn('bg-card flex flex-col rounded-lg border p-4', className)}
     >
-      <div className="text-sm text-muted-foreground">{label}</div>
+      <div className="text-muted-foreground text-sm">{label}</div>
       <div className="text-xl font-bold">{value}</div>
       {subtitle && (
-        <div className="text-xs text-muted-foreground mt-1">{subtitle}</div>
+        <div className="text-muted-foreground mt-1 text-xs">{subtitle}</div>
       )}
     </div>
-  )
+  );
 }

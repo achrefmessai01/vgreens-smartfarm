@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { useI18n } from "@/i18n/context";
-import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n/context';
+import { cn } from '@/lib/utils';
 
 export interface DashboardFooterProps {
   lastUpdated?: string;
@@ -25,7 +25,7 @@ export function DashboardFooter({
   return (
     <div
       className={cn(
-        "flex items-center justify-between text-sm text-muted-foreground",
+        'text-muted-foreground flex items-center justify-between text-sm',
         className,
       )}
     >

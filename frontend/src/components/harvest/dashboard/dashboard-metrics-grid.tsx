@@ -23,7 +23,7 @@ export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {
     `Across ${data.harvestCount} harvests`;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 sm:gap-6 sm:mb-8">
+    <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
       <MetricCard
         title={h?.totalYield ?? 'Total Yield'}
         value={`${data.totalYield?.toFixed(2) ?? 0} kg`}

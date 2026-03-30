@@ -47,7 +47,7 @@ export const useAlertTableCard = (
         {/* Custom-Header implementation */}
         <div className="flex flex-row items-center justify-between gap-2 border-b px-6 pb-2">
           <h3
-            className={cn('text-sm font-semibold leading-none', textClassName)}
+            className={cn('text-sm leading-none font-semibold', textClassName)}
           >
             {alert.sensorName}
           </h3>
