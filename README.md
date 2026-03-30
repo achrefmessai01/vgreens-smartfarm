@@ -84,7 +84,7 @@ The project is configured to automatically format files on save. If you want to 
 
 ### Prettier Configuration
 
-Both frontend and backend use the same Prettier configuration (`.prettierrc`):
+Both frontend and backend use the same base Prettier configuration (`.prettierrc`):
 
 ```json
 {
@@ -106,6 +106,14 @@ Both frontend and backend use the same Prettier configuration (`.prettierrc`):
 }
 ```
 
+**Frontend-specific:** The frontend also includes the [Tailwind CSS Prettier plugin](https://github.com/tailwindlabs/prettier-plugin-tailwindcss) which automatically sorts Tailwind CSS classes in the recommended order.
+
+```json
+{
+  "plugins": ["prettier-plugin-tailwindcss"]
+}
+```
+
 **Configuration explained:**
 - `printWidth: 80` - Wrap lines at 80 characters
 - `tabWidth: 4` - Use 4 spaces per indentation level
@@ -121,4 +129,5 @@ Both frontend and backend use the same Prettier configuration (`.prettierrc`):
 - `proseWrap: "preserve"` - Don't wrap markdown text
 - `htmlWhitespaceSensitivity: "css"` - Respect CSS display property for whitespace
 - `embeddedLanguageFormatting: "auto"` - Format embedded code (CSS in JS, etc.)
+- `plugins: ["prettier-plugin-tailwindcss"]` - (Frontend only) Automatically sorts Tailwind classes
 

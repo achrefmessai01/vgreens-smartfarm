@@ -13,5 +13,6 @@
     "endOfLine": "lf",
     "proseWrap": "preserve",
     "htmlWhitespaceSensitivity": "css",
-    "embeddedLanguageFormatting": "auto"
+    "embeddedLanguageFormatting": "auto",
+    "plugins": ["prettier-plugin-tailwindcss"]
 }
