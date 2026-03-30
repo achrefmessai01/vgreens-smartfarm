@@ -4,6 +4,8 @@ import { User } from '@/generated/graphql';
 import * as React from 'react';
 import { Navbar } from './navbar';
 import { Sidebar } from './sidebar';
+import { AlertToastListener } from '@/components/alerts/alert-toast-listener';
+
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -44,6 +46,7 @@ export function AppLayout({ children, user, onLogout }: AppLayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden">
+      <AlertToastListener user={user} />
       <Sidebar
         user={user}
         onLogout={handleLogout}
