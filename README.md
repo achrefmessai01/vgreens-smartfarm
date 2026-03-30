@@ -89,7 +89,7 @@ Both frontend and backend use the same base Prettier configuration (`.prettierrc
 ```json
 {
   "printWidth": 80,
-  "tabWidth": 4,
+  "tabWidth": 2,
   "useTabs": false,
   "semi": true,
   "singleQuote": true,
@@ -116,7 +116,7 @@ Both frontend and backend use the same base Prettier configuration (`.prettierrc
 
 **Configuration explained:**
 - `printWidth: 80` - Wrap lines at 80 characters
-- `tabWidth: 4` - Use 4 spaces per indentation level
+- `tabWidth: 2` - Use 2 spaces per indentation level
 - `useTabs: false` - Use spaces instead of tabs
 - `semi: true` - Add semicolons at the end of statements
 - `singleQuote: true` - Use single quotes for strings (except JSX)
