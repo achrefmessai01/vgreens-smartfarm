@@ -47,7 +47,7 @@ export function AppMobileLayout({
       {/* Main content area */}
       <div className="flex flex-1 flex-col">
         <Navbar user={navbarUser} onSettingsClick={handleSettingsClick} />
-        <main className="flex-1 bg-background p-4">{children}</main>
+        <main className="bg-background flex-1 p-4">{children}</main>
       </div>
     </div>
   );

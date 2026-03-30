@@ -1,54 +1,54 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { useAuth } from '@clerk/nextjs'
-import { UserRole } from '@/generated/graphql'
-import { AppLayout } from '@/components/layout'
-import { useRouter, usePathname } from 'next/navigation'
-import { PageSkeleton } from '@/components/ui/page-skeleton'
-import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import { useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs';
+import { UserRole } from '@/generated/graphql';
+import { AppLayout } from '@/components/layout';
+import { useRouter, usePathname } from 'next/navigation';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 
 export default function AdminLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const { isSignedIn, isLoaded } = useAuth()
-  const router = useRouter()
-  const pathname = usePathname()
-  const { user, role, loading } = useCurrentUser()
+  const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user, role, loading } = useCurrentUser();
 
   useEffect(() => {
     if (!isLoaded) {
-      return
+      return;
     }
 
     if (!isSignedIn) {
       if (pathname !== '/login') {
-        router.replace('/login')
+        router.replace('/login');
       }
-      return
+      return;
     }
 
     if (loading) {
-      return
+      return;
     }
 
     if (role && role !== UserRole.VgreensAdmin) {
       if (!pathname?.startsWith('/tenant')) {
-        router.replace('/tenant/dashboard')
+        router.replace('/tenant/dashboard');
       }
-      return
+      return;
     }
-  }, [isSignedIn, isLoaded, router, pathname, role, loading])
+  }, [isSignedIn, isLoaded, router, pathname, role, loading]);
 
   if (!isLoaded || !isSignedIn || loading) {
-    return <PageSkeleton />
+    return <PageSkeleton />;
   }
 
   if (role !== UserRole.VgreensAdmin) {
-    return null
+    return null;
   }
 
-  return <AppLayout user={user || undefined}>{children}</AppLayout>
+  return <AppLayout user={user || undefined}>{children}</AppLayout>;
 }

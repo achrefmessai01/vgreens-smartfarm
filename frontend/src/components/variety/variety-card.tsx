@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import { cn } from '@/lib/utils'
-import { Star } from 'lucide-react'
-import { type Variety } from '@/lib/variety-data'
-import { Card, CardContent } from '@/components/ui/card'
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import { cn } from '@/lib/utils';
+import { Star } from 'lucide-react';
+import { type Variety } from '@/lib/variety-data';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface VarietyCardProps {
-  variety: Variety
-  isSelected: boolean
-  onClick: () => void
+  variety: Variety;
+  isSelected: boolean;
+  onClick: () => void;
 }
 
 export function VarietyCard({
@@ -18,12 +18,12 @@ export function VarietyCard({
   isSelected,
   onClick,
 }: VarietyCardProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating)
-    const hasHalfStar = rating % 1 >= 0.5
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
     return (
       <div className="flex items-center gap-0.5">
@@ -32,7 +32,7 @@ export function VarietyCard({
             key={`full-${i}`}
             className={cn(
               'h-4 w-4 fill-yellow-400 text-yellow-400',
-              isSelected && 'fill-yellow-300 text-yellow-300'
+              isSelected && 'fill-yellow-300 text-yellow-300',
             )}
           />
         ))}
@@ -41,7 +41,7 @@ export function VarietyCard({
             key="half"
             className={cn(
               'h-4 w-4 fill-yellow-200 text-yellow-200',
-              isSelected && 'fill-yellow-300/50 text-yellow-300/50'
+              isSelected && 'fill-yellow-300/50 text-yellow-300/50',
             )}
           />
         )}
@@ -50,21 +50,21 @@ export function VarietyCard({
             key={`empty-${i}`}
             className={cn(
               'h-4 w-4 fill-gray-200 text-gray-200',
-              isSelected && 'fill-white/20 text-white/20'
+              isSelected && 'fill-white/20 text-white/20',
             )}
           />
         ))}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <Card
       className={cn(
-        'cursor-pointer transition-all shadow-sm hover:shadow-md border-0',
+        'cursor-pointer border-0 shadow-sm transition-all hover:shadow-md',
         isSelected
           ? 'bg-primary text-primary-foreground shadow-lg'
-          : 'bg-white dark:bg-gray-800'
+          : 'bg-white dark:bg-gray-800',
       )}
       onClick={onClick}
     >
@@ -75,7 +75,7 @@ export function VarietyCard({
               'text-lg font-bold',
               isSelected
                 ? 'text-primary-foreground'
-                : 'text-gray-900 dark:text-gray-100'
+                : 'text-gray-900 dark:text-gray-100',
             )}
           >
             {variety.name}
@@ -88,7 +88,7 @@ export function VarietyCard({
               className={cn(
                 isSelected
                   ? 'text-primary-foreground/90'
-                  : 'text-gray-600 dark:text-gray-400'
+                  : 'text-gray-600 dark:text-gray-400',
               )}
             >
               {t.pages.nextCyclePlanner.yield}
@@ -98,7 +98,7 @@ export function VarietyCard({
                 'font-semibold',
                 isSelected
                   ? 'text-primary-foreground'
-                  : 'text-gray-900 dark:text-gray-100'
+                  : 'text-gray-900 dark:text-gray-100',
               )}
             >
               {variety.yield} Kg
@@ -110,7 +110,7 @@ export function VarietyCard({
               className={cn(
                 isSelected
                   ? 'text-primary-foreground/90'
-                  : 'text-gray-600 dark:text-gray-400'
+                  : 'text-gray-600 dark:text-gray-400',
               )}
             >
               {t.pages.nextCyclePlanner.shelfLife}
@@ -123,7 +123,7 @@ export function VarietyCard({
               className={cn(
                 isSelected
                   ? 'text-primary-foreground/90'
-                  : 'text-gray-600 dark:text-gray-400'
+                  : 'text-gray-600 dark:text-gray-400',
               )}
             >
               {t.pages.nextCyclePlanner.taste}
@@ -136,7 +136,7 @@ export function VarietyCard({
               className={cn(
                 isSelected
                   ? 'text-primary-foreground/90'
-                  : 'text-gray-600 dark:text-gray-400'
+                  : 'text-gray-600 dark:text-gray-400',
               )}
             >
               {t.pages.nextCyclePlanner.diseaseResistance}
@@ -149,7 +149,7 @@ export function VarietyCard({
               className={cn(
                 isSelected
                   ? 'text-primary-foreground/90'
-                  : 'text-gray-600 dark:text-gray-400'
+                  : 'text-gray-600 dark:text-gray-400',
               )}
             >
               {t.pages.nextCyclePlanner.plantCycle}
@@ -159,7 +159,7 @@ export function VarietyCard({
                 'font-semibold',
                 isSelected
                   ? 'text-primary-foreground'
-                  : 'text-gray-900 dark:text-gray-100'
+                  : 'text-gray-900 dark:text-gray-100',
               )}
             >
               {variety.plantCycle}{' '}
@@ -171,5 +171,5 @@ export function VarietyCard({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,5 +1,8 @@
 // Re-export Apollo links for use in Apollo Client setup
-export { apolloErrorLink, apolloRequestLoggingLink } from '@/lib/apollo-error-handling';
+export {
+  apolloErrorLink,
+  apolloRequestLoggingLink,
+} from '@/lib/apollo-error-handling';
 
 /**
  * Initialize error monitoring on app startup.

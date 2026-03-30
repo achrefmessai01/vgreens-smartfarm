@@ -31,7 +31,7 @@ export const useWarningCard = ({
     <Card className="gap-2 overflow-hidden border py-2 shadow-none">
       {/* Custom-Header implementation - using card-header breaks ux */}
       <div className="flex flex-row items-center justify-between border-b px-6 pb-2">
-        <h3 className="text-sm font-semibold leading-none dark:text-white">
+        <h3 className="text-sm leading-none font-semibold dark:text-white">
           {warning.sensorName}
         </h3>
         {getStatusBadge({ status: warning.status, translations })}
@@ -76,7 +76,7 @@ export const useWarningCard = ({
                 event.stopPropagation();
                 onAcknowledge(warning);
               }}
-              className="h-8 flex-1 dark:border-border/50 dark:text-white dark:hover:bg-muted/70"
+              className="dark:border-border/50 dark:hover:bg-muted/70 h-8 flex-1 dark:text-white"
             >
               {translations.acknowledge}
             </Button>

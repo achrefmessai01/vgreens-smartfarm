@@ -203,8 +203,8 @@ export function DataTable<T extends { id: string | number }>({
     <div
       className={
         showCardView
-          ? 'flex flex-col w-full min-w-0' // Mobile: grow naturally
-          : 'flex flex-col w-full h-full min-w-0 min-h-0' // Desktop: constrained
+          ? 'flex w-full min-w-0 flex-col' // Mobile: grow naturally
+          : 'flex h-full min-h-0 w-full min-w-0 flex-col' // Desktop: constrained
       }
     >
       {hasToolbar && (
@@ -228,11 +228,11 @@ export function DataTable<T extends { id: string | number }>({
       <Card
         className={
           showCardView
-            ? 'rounded-xl border border-border/60 shadow-sm flex flex-col' // Mobile: grow naturally
-            : 'rounded-xl border border-border/60 shadow-sm flex flex-col flex-1 min-h-0' // Desktop: constrained height
+            ? 'border-border/60 flex flex-col rounded-xl border shadow-sm' // Mobile: grow naturally
+            : 'border-border/60 flex min-h-0 flex-1 flex-col rounded-xl border shadow-sm' // Desktop: constrained height
         }
       >
-        <CardContent className="p-0 flex flex-col flex-1 min-h-0">
+        <CardContent className="flex min-h-0 flex-1 flex-col p-0">
           {isLoading ? (
             <TableSkeleton
               columnCount={columns.length}
@@ -261,7 +261,7 @@ export function DataTable<T extends { id: string | number }>({
                   className={
                     showCardView
                       ? 'flex-1' // Mobile: no overflow, let content grow naturally
-                      : 'flex-1 min-h-0 overflow-y-auto' // Desktop: fixed height with scroll
+                      : 'min-h-0 flex-1 overflow-y-auto' // Desktop: fixed height with scroll
                   }
                 >
                   {/* Render card view on mobile when available */}

@@ -84,7 +84,7 @@ export function TenantTable({
   return (
     <div
       className={
-        isMobile ? 'flex flex-col gap-4' : 'flex flex-col gap-4 h-full min-h-0'
+        isMobile ? 'flex flex-col gap-4' : 'flex h-full min-h-0 flex-col gap-4'
       }
     >
       <div className="flex justify-end">
@@ -93,7 +93,7 @@ export function TenantTable({
           {t.pages.admin.tenants.createTenant}
         </Button>
       </div>
-      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
+      <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <DataTable
           data={tenants}
           columns={columns}

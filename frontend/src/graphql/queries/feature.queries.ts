@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client';
 
 export const FEATURES_QUERY = gql`
   query Features {
@@ -13,7 +13,7 @@ export const FEATURES_QUERY = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const FEATURES_WITH_TENANT_STATUS_QUERY = gql`
   query FeaturesWithTenantStatus($tenantId: ID) {
@@ -29,7 +29,7 @@ export const FEATURES_WITH_TENANT_STATUS_QUERY = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const FEATURE_QUERY = gql`
   query Feature($id: ID!) {
@@ -44,7 +44,7 @@ export const FEATURE_QUERY = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const TENANT_FEATURES_QUERY = gql`
   query TenantFeatures($tenantId: ID) {
@@ -65,4 +65,4 @@ export const TENANT_FEATURES_QUERY = gql`
       }
     }
   }
-`
+`;

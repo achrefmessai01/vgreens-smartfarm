@@ -38,7 +38,7 @@ export default function AlertsPage() {
         className={
           isMobile
             ? 'flex flex-col gap-6'
-            : 'flex flex-col gap-6 h-full min-h-0'
+            : 'flex h-full min-h-0 flex-col gap-6'
         }
       >
         <AlertPageHeader
@@ -47,7 +47,7 @@ export default function AlertsPage() {
           isLoading={page.isLoading}
         />
 
-        <div className={isMobile ? '' : 'flex-1 min-h-0'}>
+        <div className={isMobile ? '' : 'min-h-0 flex-1'}>
           <AlertTable
             alerts={page.alerts}
             filter={page.filter}

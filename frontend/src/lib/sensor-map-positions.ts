@@ -104,7 +104,10 @@ export function getSlotPositionsFromBay(bay: Bay): SlotWithPosition[] {
         const poleNum = Number(rawPole);
         if (isPoleRowHidden(poleNum)) continue;
 
-        const visiblePole = Math.max(1, Math.min(POLES_MAX, Math.round(poleNum)));
+        const visiblePole = Math.max(
+          1,
+          Math.min(POLES_MAX, Math.round(poleNum)),
+        );
         const rowIndex = VISIBLE_POLE_ROWS.indexOf(visiblePole);
         if (rowIndex < 0) continue;
 

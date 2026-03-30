@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { Badge } from '@/components/ui/badge'
-import { ErrorType } from '@/generated/graphql'
+import { Badge } from '@/components/ui/badge';
+import { ErrorType } from '@/generated/graphql';
 
 interface ErrorTypeBadgeProps {
-  errorType: ErrorType
-  className?: string
+  errorType: ErrorType;
+  className?: string;
 }
 
 export function ErrorTypeBadge({ errorType, className }: ErrorTypeBadgeProps) {
@@ -65,17 +65,17 @@ export function ErrorTypeBadge({ errorType, className }: ErrorTypeBadgeProps) {
     [ErrorType.ValidationError]: {
       label: 'Validation',
       variant: 'secondary' as const,
-    }
-  }
+    },
+  };
 
   const config = typeConfig[errorType] || {
     label: 'Unknown',
-    variant: 'secondary' as const
-  }
+    variant: 'secondary' as const,
+  };
 
   return (
     <Badge variant={config.variant} className={className}>
       {config.label}
     </Badge>
-  )
+  );
 }

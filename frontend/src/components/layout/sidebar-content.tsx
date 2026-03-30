@@ -43,15 +43,15 @@ export function SidebarContent({
   onCloseMobile,
 }: SidebarContentProps) {
   return (
-    <div className="flex h-full flex-col bg-muted/30 dark:bg-background text-foreground dark:text-sidebar-foreground">
+    <div className="bg-muted/30 dark:bg-background text-foreground dark:text-sidebar-foreground flex h-full flex-col">
       {/* Header */}
-      <div className="flex h-16 items-center justify-between border-b border-border dark:border-sidebar-border/70 px-4">
+      <div className="border-border dark:border-sidebar-border/70 flex h-16 items-center justify-between border-b px-4">
         <button
           className={cn(
-            'flex items-center gap-2 bg-transparent border-0 p-0',
+            'flex items-center gap-2 border-0 bg-transparent p-0',
             isCollapsed &&
               !mobile &&
-              'cursor-pointer hover:opacity-80 transition-opacity',
+              'cursor-pointer transition-opacity hover:opacity-80',
           )}
           onClick={isCollapsed && !mobile ? onToggleCollapse : undefined}
           disabled={!isCollapsed || mobile}
@@ -67,7 +67,7 @@ export function SidebarContent({
             </div>
           </div>
           {(!isCollapsed || mobile) && (
-            <span className="font-semibold text-foreground dark:text-sidebar-foreground">
+            <span className="text-foreground dark:text-sidebar-foreground font-semibold">
               vGreens Lab
             </span>
           )}
@@ -76,7 +76,7 @@ export function SidebarContent({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-foreground dark:text-sidebar-foregroundent"
+            className="text-foreground dark:text-sidebar-foregroundent h-8 w-8"
             onClick={onToggleCollapse}
           >
             <ChevronRight className="h-4 w-4 transition-transform" />
@@ -107,7 +107,7 @@ export function SidebarContent({
                 <span className="truncate">{item.label}</span>
               )}
               {isActive && !isCollapsed && !mobile && (
-                <div className="ml-auto h-6 w-1 rounded-full bg-primary-foreground/90 dark:bg-primary shadow-sm" />
+                <div className="bg-primary-foreground/90 dark:bg-primary ml-auto h-6 w-1 rounded-full shadow-sm" />
               )}
             </Link>
           );
@@ -119,18 +119,18 @@ export function SidebarContent({
         <>
           <Separator className="bg-border dark:bg-sidebar-border/70" />
           <div className="px-4 py-2">
-            <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-sidebar-foreground/70">
+            <p className="text-muted-foreground dark:text-sidebar-foreground/70 px-3 py-1.5 text-xs font-semibold tracking-wider uppercase">
               {t.common.otherMenu}
             </p>
             <div className="space-y-1">
               <Button
                 variant="ghost"
                 size="sm"
-                className="relative w-full justify-start gap-3 text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:text-sidebar-foreground/90 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground"
+                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:text-sidebar-foreground/90 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground relative w-full justify-start gap-3"
                 onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               >
-                <Moon className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Sun className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <Moon className="h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                <Sun className="absolute h-4 w-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
                 <span>
                   {theme === 'dark' ? t.common.darkMode : t.common.lightMode}
                 </span>
@@ -138,7 +138,7 @@ export function SidebarContent({
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start gap-3 text-destructive hover:bg-destructive/10 dark:text-sidebar-foreground/90 dark:hover:bg-destructive/25 dark:hover:text-sidebar-foreground"
+                className="text-destructive hover:bg-destructive/10 dark:text-sidebar-foreground/90 dark:hover:bg-destructive/25 dark:hover:text-sidebar-foreground w-full justify-start gap-3"
                 onClick={onLogout}
               >
                 <LogOut className="h-4 w-4" />
@@ -150,7 +150,7 @@ export function SidebarContent({
       )}
 
       {/* User Profile */}
-      <div className="border-t border-border dark:border-sidebar-border/70 p-4">
+      <div className="border-border dark:border-sidebar-border/70 border-t p-4">
         <div
           className={cn(
             'flex items-center gap-3',
@@ -161,17 +161,17 @@ export function SidebarContent({
             {defaultUser.avatar ? (
               <AvatarImage src={defaultUser.avatar} alt={defaultUser.name} />
             ) : (
-              <AvatarFallback className="bg-primary text-primary-foreground dark:bg-sidebar-accent dark:text-sidebar-accent-foreground dark:border dark:border-sidebar-border/70">
+              <AvatarFallback className="bg-primary text-primary-foreground dark:bg-sidebar-accent dark:text-sidebar-accent-foreground dark:border-sidebar-border/70 dark:border">
                 {defaultUser.name.charAt(0).toUpperCase()}
               </AvatarFallback>
             )}
           </Avatar>
           {(!isCollapsed || mobile) && (
             <div className="flex-1 overflow-hidden">
-              <p className="truncate text-sm font-medium text-foreground dark:text-sidebar-foreground">
+              <p className="text-foreground dark:text-sidebar-foreground truncate text-sm font-medium">
                 {defaultUser.name}
               </p>
-              <p className="truncate text-xs text-muted-foreground dark:text-sidebar-foreground/70">
+              <p className="text-muted-foreground dark:text-sidebar-foreground/70 truncate text-xs">
                 {defaultUser.role}
               </p>
             </div>

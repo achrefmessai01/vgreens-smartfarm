@@ -35,7 +35,7 @@ export const useTenantCard = ({
     <Card className="gap-2 overflow-hidden border py-2 shadow-none">
       {/* Custom-Header implementation - using card-header breaks ux */}
       <div className="flex flex-row items-center justify-between border-b px-6 pb-2">
-        <h3 className="text-sm font-semibold leading-none dark:text-white">
+        <h3 className="text-sm leading-none font-semibold dark:text-white">
           {tenant.name}
         </h3>
         <Badge variant={tenant.isActive ? 'default' : 'secondary'}>
@@ -117,7 +117,7 @@ export const useTenantCard = ({
             event.stopPropagation();
             onDelete(tenant);
           }}
-          className="h-8 w-8 text-destructive hover:text-destructive"
+          className="text-destructive hover:text-destructive h-8 w-8"
         >
           <Trash2 className="h-4 w-4" />
         </Button>

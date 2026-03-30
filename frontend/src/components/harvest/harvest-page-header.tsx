@@ -35,7 +35,7 @@ export function HarvestPageHeader({
           <Button
             onClick={onCreateBatch}
             disabled={isLoading}
-            className="bg-green-500 hover:bg-green-600 text-white"
+            className="bg-green-500 text-white hover:bg-green-600"
           >
             <Plus className="mr-2 h-4 w-4" />
             {t.pages.harvest?.createBatch || 'Create Batch'}

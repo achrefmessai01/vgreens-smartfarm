@@ -33,8 +33,8 @@ export function ErrorReportTable({
       header: 'Error Title',
       accessor: (report) => (
         <div className="max-w-xs">
-          <div className="font-medium truncate">{report.errorTitle}</div>
-          <div className="text-xs text-gray-500 truncate">
+          <div className="truncate font-medium">{report.errorTitle}</div>
+          <div className="truncate text-xs text-gray-500">
             ID: {report.id.slice(0, 8)}...
           </div>
         </div>
@@ -103,7 +103,7 @@ export function ErrorReportTable({
             variant="ghost"
             size="sm"
             onClick={() => onDelete(report)}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
           >
             <Trash2 className="h-3 w-3" />
           </Button>
@@ -117,8 +117,8 @@ export function ErrorReportTable({
     <>
       <TableCell>
         <div className="max-w-xs">
-          <div className="font-medium truncate">{report.errorTitle}</div>
-          <div className="text-xs text-gray-500 truncate">
+          <div className="truncate font-medium">{report.errorTitle}</div>
+          <div className="truncate text-xs text-gray-500">
             ID: {report.id.slice(0, 8)}...
           </div>
         </div>
@@ -167,7 +167,7 @@ export function ErrorReportTable({
             variant="ghost"
             size="sm"
             onClick={() => onDelete(report)}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
           >
             <Trash2 className="h-3 w-3" />
           </Button>
@@ -177,15 +177,15 @@ export function ErrorReportTable({
   );
 
   const renderCard = (report: ErrorReport) => (
-    <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm space-y-3">
+    <div className="border-border/60 bg-card space-y-3 rounded-xl border p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-medium truncate">{report.errorTitle}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="truncate font-medium">{report.errorTitle}</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">
             ID: {report.id.slice(0, 8)}...
           </p>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex shrink-0 items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
@@ -198,14 +198,14 @@ export function ErrorReportTable({
             variant="ghost"
             size="sm"
             onClick={() => onDelete(report)}
-            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
           >
             <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-wrap items-center gap-2">
         <ErrorReportSeverityBadge severity={report.severity} />
         <ErrorReportQuickActions
           report={report}
@@ -219,11 +219,11 @@ export function ErrorReportTable({
           <p className="font-medium">
             {report.user.firstName} {report.user.lastName}
           </p>
-          <p className="text-xs text-muted-foreground truncate max-w-[180px]">
+          <p className="text-muted-foreground max-w-[180px] truncate text-xs">
             {report.userEmail}
           </p>
         </div>
-        <div className="text-right text-xs text-muted-foreground shrink-0">
+        <div className="text-muted-foreground shrink-0 text-right text-xs">
           <p>{formatDate(report.createdAt)}</p>
           <p>
             {new Intl.DateTimeFormat('en-US', {

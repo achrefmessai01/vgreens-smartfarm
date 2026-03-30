@@ -35,7 +35,7 @@ export const useUserManagementCard = ({
       <Card className="gap-2 overflow-hidden border py-2 shadow-none">
         {/* Custom-Header implementation - using card-header breaks ux */}
         <div className="flex flex-row items-center justify-between border-b px-6 pb-2">
-          <h3 className="text-sm font-semibold leading-none">{fullName}</h3>
+          <h3 className="text-sm leading-none font-semibold">{fullName}</h3>
           <Badge variant="outline" className="text-xs">
             {roleLabels[user.role] || user.role}
           </Badge>
@@ -47,7 +47,7 @@ export const useUserManagementCard = ({
             <span className="text-muted-foreground">
               {t.pages.admin.users.email}:
             </span>
-            <span className="break-all font-medium">{user.email || '-'}</span>
+            <span className="font-medium break-all">{user.email || '-'}</span>
           </div>
 
           {/* Tenant */}
@@ -100,7 +100,7 @@ export const useUserManagementCard = ({
               variant="ghost"
               size="icon"
               onClick={() => onDelete(user)}
-              className="h-8 w-8 text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive h-8 w-8"
               disabled={isLoading}
             >
               <Trash2 className="h-4 w-4" />

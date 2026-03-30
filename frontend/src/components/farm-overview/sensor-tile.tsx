@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { cn } from '@/lib/utils'
-import type { TunnelStatus } from '@/types/tunnel.types'
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import type { TunnelStatus } from '@/types/tunnel.types';
 
 interface SensorTileProps {
-  label: string
-  value: string | number
-  unit?: string
-  status: TunnelStatus
-  className?: string
+  label: string;
+  value: string | number;
+  unit?: string;
+  status: TunnelStatus;
+  className?: string;
 }
 
 export function SensorTile({
@@ -38,32 +38,31 @@ export function SensorTile({
       dot: 'bg-red-500',
       text: 'text-red-700 dark:text-red-400',
     },
-  }
+  };
 
-  const config = statusConfig[status]
+  const config = statusConfig[status];
 
   return (
     <div
       className={cn(
-        'p-3 rounded-lg border-2 transition-all',
+        'rounded-lg border-2 p-3 transition-all',
         config.bg,
         config.border,
-        className
+        className,
       )}
     >
-      <div className="flex items-start justify-between gap-2 mb-1">
-        <p className="text-xs font-medium text-muted-foreground dark:text-muted-foreground/80">
+      <div className="mb-1 flex items-start justify-between gap-2">
+        <p className="text-muted-foreground dark:text-muted-foreground/80 text-xs font-medium">
           {label}
         </p>
         <div
-          className={cn('h-2 w-2 rounded-full shrink-0 mt-0.5', config.dot)}
+          className={cn('mt-0.5 h-2 w-2 shrink-0 rounded-full', config.dot)}
         />
       </div>
       <p className={cn('text-lg font-semibold', config.text)}>
         {value}
-        {unit && <span className="text-sm ml-1">{unit}</span>}
+        {unit && <span className="ml-1 text-sm">{unit}</span>}
       </p>
     </div>
-  )
+  );
 }
-

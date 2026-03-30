@@ -1,5 +1,5 @@
-import type { ParameterType } from '@/types/farm.types'
-import type { SensorMapType } from '@/lib/sensor-map-positions'
+import type { ParameterType } from '@/types/farm.types';
+import type { SensorMapType } from '@/lib/sensor-map-positions';
 
 export function isParameterSupportedByType(
   parameter: ParameterType,
@@ -15,17 +15,17 @@ export function isParameterSupportedByType(
     case 'current_ma':
     case 'rssi':
     case 'snr':
-      return type === 'air'
+      return type === 'air';
     case 'par':
     case 'par_estimated':
     case 'lux':
-      return type === 'lux'
+      return type === 'lux';
     case 'soil_moisture':
     case 'soil_temp':
     case 'soil_conductivity':
     case 'soilEC':
-      return type === 'soil'
+      return type === 'soil';
     default:
-      return true
+      return true;
   }
 }

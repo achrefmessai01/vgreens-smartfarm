@@ -1,23 +1,20 @@
-'use client'
+'use client';
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
 
 function SkeletonBlock({ className }: { className?: string }) {
   return (
     <div
-      className={cn(
-        'h-4 rounded-md bg-muted/40 animate-pulse',
-        className,
-      )}
+      className={cn('bg-muted/40 h-4 animate-pulse rounded-md', className)}
     />
-  )
+  );
 }
 
 function SkeletonCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'flex flex-col justify-between rounded-lg border border-border/60 bg-background/60 p-4 space-y-3',
+        'border-border/60 bg-background/60 flex flex-col justify-between space-y-3 rounded-lg border p-4',
         className,
       )}
     >
@@ -25,7 +22,7 @@ function SkeletonCard({ className }: { className?: string }) {
       <SkeletonBlock className="h-7 w-20" />
       <SkeletonBlock className="h-3 w-32" />
     </div>
-  )
+  );
 }
 
 export function DashboardContentSkeleton() {
@@ -36,7 +33,7 @@ export function DashboardContentSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-lg border border-border/60 bg-background/60 p-4 space-y-2"
+            className="border-border/60 bg-background/60 space-y-2 rounded-lg border p-4"
           >
             <SkeletonBlock className="h-3 w-20" />
             <SkeletonBlock className="h-7 w-24" />
@@ -54,11 +51,11 @@ export function DashboardContentSkeleton() {
 
       {/* Live map + device health */}
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-2 h-52 rounded-lg border border-border/60 bg-background/60 p-4">
-          <SkeletonBlock className="h-4 w-32 mb-3" />
-          <div className="h-full rounded-md bg-muted/30 animate-pulse" />
+        <div className="border-border/60 bg-background/60 h-52 rounded-lg border p-4 md:col-span-2">
+          <SkeletonBlock className="mb-3 h-4 w-32" />
+          <div className="bg-muted/30 h-full animate-pulse rounded-md" />
         </div>
-        <div className="h-52 rounded-lg border border-border/60 bg-background/60 p-4 space-y-3">
+        <div className="border-border/60 bg-background/60 h-52 space-y-3 rounded-lg border p-4">
           <SkeletonBlock className="h-4 w-24" />
           {Array.from({ length: 3 }).map((_, i) => (
             <SkeletonBlock key={i} className="h-3 w-full" />
@@ -68,17 +65,17 @@ export function DashboardContentSkeleton() {
 
       {/* Trends / maintenance / zones */}
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="h-40 rounded-lg border border-border/60 bg-background/60 p-4">
-          <SkeletonBlock className="h-4 w-28 mb-3" />
-          <div className="h-full rounded-md bg-muted/30 animate-pulse" />
+        <div className="border-border/60 bg-background/60 h-40 rounded-lg border p-4">
+          <SkeletonBlock className="mb-3 h-4 w-28" />
+          <div className="bg-muted/30 h-full animate-pulse rounded-md" />
         </div>
-        <div className="h-40 rounded-lg border border-border/60 bg-background/60 p-4 space-y-2">
+        <div className="border-border/60 bg-background/60 h-40 space-y-2 rounded-lg border p-4">
           <SkeletonBlock className="h-4 w-28" />
           {Array.from({ length: 3 }).map((_, i) => (
             <SkeletonBlock key={i} className="h-3 w-40" />
           ))}
         </div>
-        <div className="h-40 rounded-lg border border-border/60 bg-background/60 p-4 space-y-2">
+        <div className="border-border/60 bg-background/60 h-40 space-y-2 rounded-lg border p-4">
           <SkeletonBlock className="h-4 w-24" />
           {Array.from({ length: 3 }).map((_, i) => (
             <SkeletonBlock key={i} className="h-3 w-24" />
@@ -87,7 +84,7 @@ export function DashboardContentSkeleton() {
       </div>
 
       {/* Footer + actions */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/60 px-4 py-3">
+      <div className="border-border/60 bg-background/60 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3">
         <SkeletonBlock className="h-3 w-40" />
         <div className="flex gap-2">
           <SkeletonBlock className="h-8 w-20" />
@@ -95,6 +92,5 @@ export function DashboardContentSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

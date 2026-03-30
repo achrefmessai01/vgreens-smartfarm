@@ -22,9 +22,9 @@ export function TableSearch({
 
   placeholder = placeholder ?? t.common.searchPlaceholder;
   return (
-    <div className={cn('relative flex-1 min-w-0 max-w-md', className)}>
+    <div className={cn('relative max-w-md min-w-0 flex-1', className)}>
       <Search
-        className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none"
+        className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
         aria-hidden
       />
       <Input
@@ -32,7 +32,7 @@ export function TableSearch({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="pl-9 h-9 rounded-lg border-border/60 bg-background focus-visible:ring-2 focus-visible:ring-primary/20"
+        className="border-border/60 bg-background focus-visible:ring-primary/20 h-9 rounded-lg pl-9 focus-visible:ring-2"
       />
     </div>
   );

@@ -38,7 +38,7 @@ export default function TenantUsersPage() {
   return (
     <div
       className={
-        isMobile ? 'flex flex-col gap-6' : 'flex flex-col gap-6 h-full min-h-0'
+        isMobile ? 'flex flex-col gap-6' : 'flex h-full min-h-0 flex-col gap-6'
       }
     >
       <PageHeader
@@ -46,7 +46,7 @@ export default function TenantUsersPage() {
         subtitle="Manage users for your tenant"
       />
 
-      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
+      <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <UserManagementTable
           users={page.users}
           onEdit={page.handleEdit}
@@ -60,9 +60,9 @@ export default function TenantUsersPage() {
       <Sheet open={page.isSheetOpen} onOpenChange={page.setIsSheetOpen}>
         <SheetContent
           side="right"
-          className="w-full sm:max-w-lg flex flex-col p-0 gap-0"
+          className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
         >
-          <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
+          <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
             <SheetTitle className="dark:text-card-foreground">
               {page.editingUser ? 'Edit User' : 'Create User'}
             </SheetTitle>
@@ -78,12 +78,12 @@ export default function TenantUsersPage() {
               hideTenantSelection={true}
             />
           </div>
-          <SheetFooter className="flex-row gap-2 px-6 py-4 border-t dark:border-primary-foreground/30">
+          <SheetFooter className="dark:border-primary-foreground/30 flex-row gap-2 border-t px-6 py-4">
             <Button
               variant="outline"
               onClick={page.handleCancel}
               disabled={page.isLoading}
-              className="flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
+              className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 flex-1"
             >
               Cancel
             </Button>
@@ -118,15 +118,15 @@ export default function TenantUsersPage() {
         }
       >
         {page.deleteConfirmation.user && (
-          <div className="p-4 bg-muted rounded-lg dark:bg-primary-foreground/10 dark:border dark:border-primary-foreground/20">
-            <p className="font-medium dark:text-card-foreground">
+          <div className="bg-muted dark:bg-primary-foreground/10 dark:border-primary-foreground/20 rounded-lg p-4 dark:border">
+            <p className="dark:text-card-foreground font-medium">
               {page.deleteConfirmation.user.firstName &&
               page.deleteConfirmation.user.lastName
                 ? `${page.deleteConfirmation.user.firstName} ${page.deleteConfirmation.user.lastName}`
                 : page.deleteConfirmation.user.email || 'Unknown User'}
             </p>
             {page.deleteConfirmation.user.email && (
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-muted-foreground mt-1 text-sm">
                 {page.deleteConfirmation.user.email}
               </p>
             )}

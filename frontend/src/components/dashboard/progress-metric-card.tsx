@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { TiltCard } from './tilt-card'
-import { cn } from '@/lib/utils'
+import * as React from 'react';
+import { TiltCard } from './tilt-card';
+import { cn } from '@/lib/utils';
 
 export interface ProgressMetricCardProps {
-  icon: React.ReactNode
-  title: string
-  value: string
-  subtitle?: string
-  progressPercent: number
-  progressClassName?: string
-  secondaryBar?: { percent: number; label: string }
-  secondaryBarClassName?: string
-  className?: string
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  subtitle?: string;
+  progressPercent: number;
+  progressClassName?: string;
+  secondaryBar?: { percent: number; label: string };
+  secondaryBarClassName?: string;
+  className?: string;
 }
 
 export function ProgressMetricCard({
@@ -39,24 +39,24 @@ export function ProgressMetricCard({
             <div>
               <p className="text-2xl font-bold">{value}</p>
               {subtitle && (
-                <p className="text-sm text-muted-foreground mt-2">{subtitle}</p>
+                <p className="text-muted-foreground mt-2 text-sm">{subtitle}</p>
               )}
             </div>
             <div className="w-28 shrink-0">
-              <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+              <div className="bg-muted h-3 w-full overflow-hidden rounded-full">
                 <div
                   className={cn('h-full rounded-full', secondaryBarClassName)}
                   style={{ width: `${secondaryBar.percent}%` }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-muted-foreground mt-2 text-xs">
                 {secondaryBar.label}
               </p>
             </div>
           </div>
         ) : (
           <>
-            <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+            <div className="bg-muted h-3 w-full overflow-hidden rounded-full">
               <div
                 className={cn('h-full rounded-full', progressClassName)}
                 style={{ width: `${progressPercent}%` }}
@@ -64,11 +64,11 @@ export function ProgressMetricCard({
             </div>
             <p className="text-2xl font-bold">{value}</p>
             {subtitle && (
-              <p className="text-sm text-muted-foreground mt-2">{subtitle}</p>
+              <p className="text-muted-foreground mt-2 text-sm">{subtitle}</p>
             )}
           </>
         )}
       </div>
     </TiltCard>
-  )
+  );
 }

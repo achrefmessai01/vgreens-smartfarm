@@ -1,17 +1,23 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Search } from 'lucide-react';
 
 interface SystemErrorFiltersProps {
-  searchTerm: string
-  onSearchChange: (value: string) => void
-  selectedSeverity: string
-  onSeverityChange: (value: string) => void
-  selectedSource: string
-  onSourceChange: (value: string) => void
-  showResolved: boolean
-  onShowResolvedChange: (value: boolean) => void
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  selectedSeverity: string;
+  onSeverityChange: (value: string) => void;
+  selectedSource: string;
+  onSourceChange: (value: string) => void;
+  showResolved: boolean;
+  onShowResolvedChange: (value: boolean) => void;
 }
 
 export function SystemErrorFilters({
@@ -30,9 +36,9 @@ export function SystemErrorFilters({
         <CardTitle>Filters</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
             <Input
               placeholder="Search errors..."
               value={searchTerm}
@@ -83,5 +89,5 @@ export function SystemErrorFilters({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

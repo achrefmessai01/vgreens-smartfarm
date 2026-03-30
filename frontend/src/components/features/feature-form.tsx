@@ -1,43 +1,43 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import type { Feature } from '@/generated/graphql'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import type { Feature } from '@/generated/graphql';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export interface FeatureFormData {
-  key: string
-  name: string
-  description?: string
-  category?: string
-  isActive: boolean
+  key: string;
+  name: string;
+  description?: string;
+  category?: string;
+  isActive: boolean;
 }
 
 export interface FeatureFormRef {
-  submit: () => void
+  submit: () => void;
 }
 
 interface FeatureFormProps {
-  ref?: React.Ref<FeatureFormRef>
-  initialData?: Feature
-  onSubmit: (data: FeatureFormData) => void
-  onCancel?: () => void
-  isLoading?: boolean
+  ref?: React.Ref<FeatureFormRef>;
+  initialData?: Feature;
+  onSubmit: (data: FeatureFormData) => void;
+  onCancel?: () => void;
+  isLoading?: boolean;
 }
 
 export const FeatureForm = React.forwardRef<FeatureFormRef, FeatureFormProps>(
   ({ initialData, onSubmit, onCancel, isLoading = false }, ref) => {
-    const { t } = useI18n()
+    const { t } = useI18n();
     const [formData, setFormData] = React.useState<FeatureFormData>({
       key: initialData?.key || '',
       name: initialData?.name || '',
       description: initialData?.description || '',
       category: initialData?.category || '',
       isActive: initialData?.isActive ?? true,
-    })
+    });
 
     React.useEffect(() => {
       if (initialData) {
@@ -47,24 +47,24 @@ export const FeatureForm = React.forwardRef<FeatureFormRef, FeatureFormProps>(
           description: initialData.description || '',
           category: initialData.category || '',
           isActive: initialData.isActive,
-        })
+        });
       }
-    }, [initialData])
+    }, [initialData]);
 
     React.useImperativeHandle(ref, () => ({
       submit: () => {
         if (formData.key && formData.name) {
-          onSubmit(formData)
+          onSubmit(formData);
         }
       },
-    }))
+    }));
 
     const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault()
+      e.preventDefault();
       if (formData.key && formData.name) {
-        onSubmit(formData)
+        onSubmit(formData);
       }
-    }
+    };
 
     return (
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,7 +84,7 @@ export const FeatureForm = React.forwardRef<FeatureFormRef, FeatureFormProps>(
             disabled={isLoading || !!initialData}
             className="dark:bg-input/30"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {t.pages.admin.features.keyDescription}
           </p>
         </div>
@@ -149,8 +149,8 @@ export const FeatureForm = React.forwardRef<FeatureFormRef, FeatureFormProps>(
           </Label>
         </div>
       </form>
-    )
-  }
-)
+    );
+  },
+);
 
-FeatureForm.displayName = 'FeatureForm'
+FeatureForm.displayName = 'FeatureForm';

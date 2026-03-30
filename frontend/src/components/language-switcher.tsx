@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import { locales, localeNames } from '@/i18n/config'
-import { Button } from '@/components/ui/button'
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import { locales, localeNames } from '@/i18n/config';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { FlagIcon } from '@/components/ui/flag-icon'
-import { cn } from '@/lib/utils'
+} from '@/components/ui/dropdown-menu';
+import { FlagIcon } from '@/components/ui/flag-icon';
+import { cn } from '@/lib/utils';
 
 export function LanguageSwitcher() {
-  const { locale, setLocale } = useI18n()
+  const { locale, setLocale } = useI18n();
 
   return (
     <DropdownMenu>
@@ -31,7 +31,7 @@ export function LanguageSwitcher() {
             onClick={() => setLocale(loc)}
             className={cn(
               'flex items-center gap-2',
-              locale === loc && 'bg-accent font-medium'
+              locale === loc && 'bg-accent font-medium',
             )}
           >
             <FlagIcon locale={loc} className="h-4 w-4" />
@@ -40,5 +40,5 @@ export function LanguageSwitcher() {
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

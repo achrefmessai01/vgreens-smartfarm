@@ -1,8 +1,8 @@
-import { Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SpinnerProps {
-  className?: string
+  className?: string;
 }
 
 function Spinner({ className }: SpinnerProps) {
@@ -11,7 +11,7 @@ function Spinner({ className }: SpinnerProps) {
       aria-hidden="true"
       className={cn('h-4 w-4 animate-spin', className)}
     />
-  )
+  );
 }
 
-export { Spinner }
+export { Spinner };

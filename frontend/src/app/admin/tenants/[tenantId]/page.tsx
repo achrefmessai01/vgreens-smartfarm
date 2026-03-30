@@ -1,9 +1,9 @@
-import { PageHeader } from '@/components/layout'
+import { PageHeader } from '@/components/layout';
 
 export default function TenantDetailsPage({
   params,
 }: {
-  params: { tenantId: string }
+  params: { tenantId: string };
 }) {
   return (
     <div className="space-y-6">
@@ -11,11 +11,11 @@ export default function TenantDetailsPage({
         title={`Tenant Details: ${params.tenantId}`}
         subtitle="View and manage tenant details"
       />
-      <div className="rounded-lg border bg-card p-6">
+      <div className="bg-card rounded-lg border p-6">
         <p className="text-muted-foreground">
           Tenant details interface coming soon...
         </p>
       </div>
     </div>
-  )
+  );
 }

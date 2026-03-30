@@ -4,7 +4,7 @@
 export enum ErrorType {
   RUNTIME_ERROR = 'RUNTIME_ERROR',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
-  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR', 
+  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
   AUTHORIZATION_ERROR = 'AUTHORIZATION_ERROR',
   DATABASE_ERROR = 'DATABASE_ERROR',
   NETWORK_ERROR = 'NETWORK_ERROR',
@@ -27,4 +27,4 @@ export enum ErrorSource {
 }
 
 // Re-export enums from generated types
-export { ReportSeverity, ReportStatus } from '@/generated/graphql'
+export { ReportSeverity, ReportStatus } from '@/generated/graphql';

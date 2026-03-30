@@ -1,37 +1,37 @@
-'use client'
+'use client';
 
 import {
   Field,
   FieldContent,
   FieldError,
   FieldLabel,
-} from '@/components/ui/field'
+} from '@/components/ui/field';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import type { UserFormErrors } from './user-form-types'
+} from '@/components/ui/select';
+import type { UserFormErrors } from './user-form-types';
 
 export interface SelectOption {
-  value: string
-  label: string
+  value: string;
+  label: string;
 }
 
 interface SelectFieldProps {
-  id: string
-  label: string
-  value?: string
-  onChange: (value: string) => void
-  options: SelectOption[]
-  placeholder?: string
-  errors?: UserFormErrors
-  errorKey?: keyof UserFormErrors
-  isLoading?: boolean
-  disabled?: boolean
-  required?: boolean
+  id: string;
+  label: string;
+  value?: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  errors?: UserFormErrors;
+  errorKey?: keyof UserFormErrors;
+  isLoading?: boolean;
+  disabled?: boolean;
+  required?: boolean;
 }
 
 export function SelectField({
@@ -47,7 +47,7 @@ export function SelectField({
   disabled = false,
   required = false,
 }: SelectFieldProps) {
-  const error = errorKey && errors ? errors[errorKey] : undefined
+  const error = errorKey && errors ? errors[errorKey] : undefined;
 
   return (
     <Field>
@@ -75,5 +75,5 @@ export function SelectField({
         {error && <FieldError>{error}</FieldError>}
       </FieldContent>
     </Field>
-  )
+  );
 }

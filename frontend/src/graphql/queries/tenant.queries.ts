@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client';
 
 export const TENANTS_QUERY = gql`
   query Tenants {
@@ -13,7 +13,7 @@ export const TENANTS_QUERY = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const TENANT_QUERY = gql`
   query Tenant($id: ID!) {
@@ -35,7 +35,7 @@ export const TENANT_QUERY = gql`
       }
     }
   }
-`
+`;
 
 export const GET_TENANT_BUCKET_QUERY = gql`
   query GetTenantBucket($id: ID!) {
@@ -45,4 +45,4 @@ export const GET_TENANT_BUCKET_QUERY = gql`
       influxBucketName
     }
   }
-`
+`;

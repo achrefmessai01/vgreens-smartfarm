@@ -65,16 +65,16 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
   return (
     <div
       className={cn(
-        'flex flex-1 min-h-0 w-full h-full rounded-xl border border-border/40 bg-card shadow-sm overflow-hidden',
+        'border-border/40 bg-card flex h-full min-h-0 w-full flex-1 overflow-hidden rounded-xl border shadow-sm',
         className,
       )}
     >
-      <div className="flex h-full w-full min-h-0 min-w-0 px-0 pt-0 pb-0.5 sm:px-0.5 sm:pt-0 sm:pb-1.5">
+      <div className="flex h-full min-h-0 w-full min-w-0 px-0 pt-0 pb-0.5 sm:px-0.5 sm:pt-0 sm:pb-1.5">
         {Array.from({ length: BAY_COUNT }, (_, bayIndex) => (
           <div
             key={bayIndex}
             className={cn(
-              'flex flex-1 flex-col min-w-0 border-r border-border/40 last:border-r-0',
+              'border-border/40 flex min-w-0 flex-1 flex-col border-r last:border-r-0',
             )}
           >
             {Array.from({ length: ROWS_PER_BAY }, (_, rowIndex) => {
@@ -83,10 +83,12 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
               return (
                 <div
                   key={rowIndex}
-                  className="flex flex-1 min-h-0 flex-wrap items-center justify-center gap-0.5 p-0.5 sm:gap-1.5 sm:p-1.5 lg:gap-2 lg:p-2"
+                  className="flex min-h-0 flex-1 flex-wrap items-center justify-center gap-0.5 p-0.5 sm:gap-1.5 sm:p-1.5 lg:gap-2 lg:p-2"
                 >
                   {items.map(({ slot, deviceId, value }) => {
-                    const isSelected = slot ? selectedSlotId === slot.id : false;
+                    const isSelected = slot
+                      ? selectedSlotId === slot.id
+                      : false;
                     const glowColor = slot
                       ? getParameterColor(value ?? 0, parameter, slot.id)
                       : 'rgb(200, 200, 200)';
@@ -110,7 +112,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                         }
                         className={cn(
                           'relative flex min-w-0 items-center justify-center transition-transform duration-150',
-                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                          'focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-none',
                           'disabled:cursor-not-allowed',
                           'hover:scale-105',
                           isSelected && 'scale-110',
@@ -132,10 +134,10 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                         >
                           {value != null ? (
                             <>
-                              <span className="text-[7px] font-semibold leading-tight tracking-tight sm:text-[clamp(0.625rem,0.18vw+0.58rem,0.75rem)]">
+                              <span className="text-[7px] leading-tight font-semibold tracking-tight sm:text-[clamp(0.625rem,0.18vw+0.58rem,0.75rem)]">
                                 {formatParameterDisplayValue(value)}
                               </span>
-                              <span className="hidden text-[9px] font-medium -mt-0.5 sm:inline sm:text-[clamp(0.5rem,0.08vw+0.45rem,0.5625rem)]">
+                              <span className="-mt-0.5 hidden text-[9px] font-medium sm:inline sm:text-[clamp(0.5rem,0.08vw+0.45rem,0.5625rem)]">
                                 {unit}
                               </span>
                             </>

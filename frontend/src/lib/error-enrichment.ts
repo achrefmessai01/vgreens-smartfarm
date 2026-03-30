@@ -1,5 +1,9 @@
 import { ErrorType, ErrorSource, ReportSeverity } from '@/types/error-types';
-import { ErrorLogData, EnrichedErrorData, BrowserInfo } from './error-logging-types';
+import {
+  ErrorLogData,
+  EnrichedErrorData,
+  BrowserInfo,
+} from './error-logging-types';
 
 /**
  * Utility functions for enriching error data with browser and context information
@@ -30,7 +34,7 @@ export function getBrowserInfo(): BrowserInfo {
       },
     };
   }
-  
+
   return {
     userAgent: navigator.userAgent,
     language: navigator.language,
@@ -48,9 +52,12 @@ export function getBrowserInfo(): BrowserInfo {
 /**
  * Enrich error data with browser and session info
  */
-export function enrichErrorData(errorData: ErrorLogData, sessionId: string): EnrichedErrorData {
+export function enrichErrorData(
+  errorData: ErrorLogData,
+  sessionId: string,
+): EnrichedErrorData {
   const isSSR = typeof window === 'undefined';
-  
+
   return {
     ...errorData,
     source: ErrorSource.FRONTEND,
@@ -75,11 +82,13 @@ export function enrichErrorData(errorData: ErrorLogData, sessionId: string): Enr
 /**
  * Setup global error event listeners
  */
-export function setupGlobalErrorListeners(logError: (error: ErrorLogData) => void): void {
+export function setupGlobalErrorListeners(
+  logError: (error: ErrorLogData) => void,
+): void {
   if (typeof window === 'undefined') {
     return; // Skip setup during SSR
   }
-  
+
   window.addEventListener('error', (event) => {
     logError({
       errorMessage: event.message,
@@ -95,7 +104,10 @@ export function setupGlobalErrorListeners(logError: (error: ErrorLogData) => voi
     // Filter out network-related rejections — these are not app crashes.
     // Genuine unhandled rejections (application logic bugs) are still logged.
     const message = event.reason?.message ?? String(event.reason ?? '');
-    const isNetworkNoise = /fetch|network|failed to fetch|load failed|aborted|networkerror/i.test(message);
+    const isNetworkNoise =
+      /fetch|network|failed to fetch|load failed|aborted|networkerror/i.test(
+        message,
+      );
     if (isNetworkNoise) return;
 
     logError({

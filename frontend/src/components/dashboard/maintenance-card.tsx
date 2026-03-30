@@ -24,7 +24,7 @@ export function MaintenanceCard({
 
   title = title ?? t.pages.admin.dashboard.maintenanceComponentTitle;
   return (
-    <Card className={cn('rounded-lg border bg-card p-6', className)}>
+    <Card className={cn('bg-card rounded-lg border p-6', className)}>
       <h3 className="text-lg font-semibold">{title}</h3>
       <CardContent className="p-0">
         <ul className="mt-4 space-y-3 text-sm">

@@ -44,17 +44,17 @@ export function ViewSingleBay({
   return (
     <Card
       className={cn(
-        'flex h-full min-h-0 w-full gap-0 overflow-hidden border border-border/40 py-0',
-        'bg-white dark:bg-background',
+        'border-border/40 flex h-full min-h-0 w-full gap-0 overflow-hidden border py-0',
+        'dark:bg-background bg-white',
         className,
       )}
     >
       {!hasAnyData ? (
-        <div className="flex flex-1 items-center justify-center p-4 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex flex-1 items-center justify-center p-4 text-sm">
           {t.pages.farmOverview.noData}
         </div>
       ) : (
-        <div className="relative flex-1 min-h-0 min-w-0 overflow-hidden">
+        <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
           <div
             className="absolute inset-0 grid h-full w-full"
             style={{
@@ -66,7 +66,7 @@ export function ViewSingleBay({
               row.map((val, j) => (
                 <div
                   key={`${i}-${j}`}
-                  className="min-w-0 min-h-0"
+                  className="min-h-0 min-w-0"
                   style={{
                     backgroundColor: Number.isNaN(val)
                       ? 'rgb(240,240,240)'
@@ -105,11 +105,11 @@ export function ViewSingleBay({
                   className={cn(
                     'absolute inline-flex flex-col items-center justify-center px-0.5',
                     'h-auto border-none bg-transparent hover:bg-transparent',
-                    'text-[10px] sm:text-[14px] font-bold tabular-nums text-black',
+                    'text-[10px] font-bold text-black tabular-nums sm:text-[14px]',
                     'drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]',
-                    'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1',
+                    'focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-1',
                     slot && 'cursor-pointer',
-                    isSelected && 'ring-2 ring-primary ring-offset-1 rounded',
+                    isSelected && 'ring-primary rounded ring-2 ring-offset-1',
                   )}
                   style={{
                     left: `${leftPercent}%`,
@@ -128,7 +128,7 @@ export function ViewSingleBay({
                         {displayValue}
                       </span>
                       {unit ? (
-                        <span className="text-[10px] font-medium opacity-85 leading-tight">
+                        <span className="text-[10px] leading-tight font-medium opacity-85">
                           {unit}
                         </span>
                       ) : null}

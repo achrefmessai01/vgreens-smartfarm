@@ -22,9 +22,12 @@ export function useAlertsPage() {
     action: 'acknowledge' | 'resolve' | null;
   }>({ isOpen: false, alert: null, action: null });
 
-  const onFilterChange = React.useCallback((updates: Partial<AlertsFilterInput>) => {
-    setFilter((prev) => ({ ...prev, ...updates }));
-  }, []);
+  const onFilterChange = React.useCallback(
+    (updates: Partial<AlertsFilterInput>) => {
+      setFilter((prev) => ({ ...prev, ...updates }));
+    },
+    [],
+  );
 
   const onCreate = React.useCallback(() => {
     setSelectedAlert(null);
@@ -70,7 +73,9 @@ export function useAlertsPage() {
 
   const confirmDelete = React.useCallback(async () => {
     if (deleteConfirmation.alert) {
-      const success = await management.handleDelete(deleteConfirmation.alert.id);
+      const success = await management.handleDelete(
+        deleteConfirmation.alert.id,
+      );
       if (success) setDeleteConfirmation({ alert: null, isOpen: false });
     }
   }, [deleteConfirmation.alert, management]);
@@ -81,12 +86,17 @@ export function useAlertsPage() {
         actionDialog.action === 'acknowledge'
           ? await management.handleAcknowledge(actionDialog.alert.id)
           : await management.handleResolve(actionDialog.alert.id);
-      if (success) setActionDialog({ isOpen: false, alert: null, action: null });
+      if (success)
+        setActionDialog({ isOpen: false, alert: null, action: null });
     }
   }, [actionDialog, management]);
 
   const handleSubmit = React.useCallback(
-    async (formData: { sensorName: string; value: string; description?: string }) => {
+    async (formData: {
+      sensorName: string;
+      value: string;
+      description?: string;
+    }) => {
       const success = editingAlert
         ? await management.handleUpdate(editingAlert.id, formData)
         : await management.handleCreate(formData);

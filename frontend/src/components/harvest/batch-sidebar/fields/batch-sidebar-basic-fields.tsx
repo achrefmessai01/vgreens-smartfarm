@@ -45,8 +45,8 @@ export function BatchHeaderField({
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <div className="h-6 bg-muted animate-pulse rounded" />
-        <div className="h-4 bg-muted animate-pulse rounded w-2/3" />
+        <div className="bg-muted h-6 animate-pulse rounded" />
+        <div className="bg-muted h-4 w-2/3 animate-pulse rounded" />
       </div>
     );
   }
@@ -62,7 +62,7 @@ export function BatchHeaderField({
           {STATUS_LABEL[status] ?? status} {h?.batchSuffix ?? 'Batch'}
         </Badge>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {species} • {variety}
       </p>
     </div>
@@ -80,8 +80,8 @@ export function BatchStatsField({
   if (isLoading) {
     return (
       <div className="flex items-center justify-between py-2">
-        <div className="h-4 bg-muted animate-pulse rounded flex-1" />
-        <div className="h-4 bg-muted animate-pulse rounded w-16 ml-4" />
+        <div className="bg-muted h-4 flex-1 animate-pulse rounded" />
+        <div className="bg-muted ml-4 h-4 w-16 animate-pulse rounded" />
       </div>
     );
   }
@@ -92,7 +92,7 @@ export function BatchStatsField({
   );
 
   return (
-    <div className="flex items-center justify-between py-2 text-sm text-muted-foreground border-b pb-4">
+    <div className="text-muted-foreground flex items-center justify-between border-b py-2 pb-4 text-sm">
       <span>📅 {dayText}</span>
       <span>
         📐 {h?.area ?? 'Area'}: {area} m²

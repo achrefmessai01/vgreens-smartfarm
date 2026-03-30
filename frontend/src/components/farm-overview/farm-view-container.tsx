@@ -57,7 +57,7 @@ export function FarmDataDisplay({
           parameter={parameter}
           selectedSlotId={selectedSlotId}
           onSelectSlot={onSelectSlot}
-          className="flex-1 min-h-0"
+          className="min-h-0 flex-1"
           showOnlyFilledPositions={false}
         />
       ) : (

@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client';
 
 export const CREATE_FEATURE_MUTATION = gql`
   mutation CreateFeature($input: CreateFeatureInput!) {
@@ -13,7 +13,7 @@ export const CREATE_FEATURE_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const UPDATE_FEATURE_MUTATION = gql`
   mutation UpdateFeature($id: ID!, $input: UpdateFeatureInput!) {
@@ -28,13 +28,13 @@ export const UPDATE_FEATURE_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const DELETE_FEATURE_MUTATION = gql`
   mutation DeleteFeature($id: ID!) {
     deleteFeature(id: $id)
   }
-`
+`;
 
 export const TOGGLE_TENANT_FEATURE_MUTATION = gql`
   mutation ToggleTenantFeature($input: ToggleTenantFeatureInput!) {
@@ -55,4 +55,4 @@ export const TOGGLE_TENANT_FEATURE_MUTATION = gql`
       }
     }
   }
-`
+`;

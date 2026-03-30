@@ -28,12 +28,12 @@ export function BrixMeasurementsField({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-5 bg-muted animate-pulse rounded" />
+        <div className="bg-muted h-5 animate-pulse rounded" />
         <div className="grid grid-cols-5 gap-3">
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="space-y-2">
-              <div className="h-4 bg-muted animate-pulse rounded" />
-              <div className="h-10 bg-muted animate-pulse rounded" />
+              <div className="bg-muted h-4 animate-pulse rounded" />
+              <div className="bg-muted h-10 animate-pulse rounded" />
             </div>
           ))}
         </div>
@@ -53,7 +53,7 @@ export function BrixMeasurementsField({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground font-medium">
+      <p className="text-muted-foreground text-sm font-medium">
         {h?.qualityMetrics ?? 'Quality Metrics'}
       </p>
       <div className="space-y-4">
@@ -61,9 +61,9 @@ export function BrixMeasurementsField({
           <p className="text-sm font-medium">
             {h?.brixMeasurements ?? 'Brix Measurements'}
           </p>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-muted-foreground text-sm">
             {h?.average ?? 'Average'}:{' '}
-            <span className="text-lg text-orange-500 font-medium">
+            <span className="text-lg font-medium text-orange-500">
               {avgBrix > 0 ? avgBrix.toFixed(1) : '0.0'}°Bx
             </span>
           </span>

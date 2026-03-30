@@ -36,8 +36,8 @@ export default function FarmOverviewPage() {
       <div
         className={
           isMobile
-            ? 'flex h-[calc(100vh-8rem)] min-h-0 w-full min-w-0 flex-col gap-6 overflow-x-clip bg-background'
-            : 'flex h-full min-h-0 w-full min-w-0 flex-col gap-6 overflow-x-clip bg-background'
+            ? 'bg-background flex h-[calc(100vh-8rem)] min-h-0 w-full min-w-0 flex-col gap-6 overflow-x-clip'
+            : 'bg-background flex h-full min-h-0 w-full min-w-0 flex-col gap-6 overflow-x-clip'
         }
       >
         <PageHeader
@@ -61,7 +61,7 @@ export default function FarmOverviewPage() {
           options={state.greenhouseOptions}
         />
 
-        <div className="flex flex-1 min-h-0 min-w-0 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           {state.isCombinedView ? (
             <CombinedGreenhouseView
               greenhouses={state.combinedGreenhouses}

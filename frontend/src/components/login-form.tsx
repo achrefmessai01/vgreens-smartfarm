@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { useI18n } from '@/i18n'
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { useI18n } from '@/i18n';
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -111,5 +111,5 @@ export function LoginForm({
         {t.common.and} <a href="#">{t.common.privacyPolicy}</a>.
       </FieldDescription>
     </div>
-  )
+  );
 }

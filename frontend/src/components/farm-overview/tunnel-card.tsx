@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { SensorGauge } from './sensor-gauge'
-import { AlertTriangle, Bell, Thermometer, Droplets } from 'lucide-react'
-import { useI18n } from '@/i18n'
-import type { Tunnel, TunnelStatus } from '@/types/tunnel.types'
-import { cn } from '@/lib/utils'
+import * as React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { SensorGauge } from './sensor-gauge';
+import { AlertTriangle, Bell, Thermometer, Droplets } from 'lucide-react';
+import { useI18n } from '@/i18n';
+import type { Tunnel, TunnelStatus } from '@/types/tunnel.types';
+import { cn } from '@/lib/utils';
 
 interface TunnelCardProps {
-  tunnel: Tunnel
+  tunnel: Tunnel;
 }
 
 export function TunnelCard({ tunnel }: TunnelCardProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const getStatusBadge = (status: TunnelStatus) => {
     const statusConfig = {
@@ -33,103 +33,103 @@ export function TunnelCard({ tunnel }: TunnelCardProps) {
         variant: 'destructive' as const,
         className: '',
       },
-    }
+    };
 
-    const config = statusConfig[status]
+    const config = statusConfig[status];
 
     return (
       <Badge
         variant={config.variant}
         className={cn(
           'gap-1.5 px-3 py-1.5 font-semibold shadow-sm',
-          config.className
+          config.className,
         )}
       >
         {status === 'critical' && <AlertTriangle className="h-3.5 w-3.5" />}
         {config.label}
       </Badge>
-    )
-  }
+    );
+  };
 
   const formatLastIrrigation = (timestamp: string) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
 
     if (diffMins < 60) {
-      return `${diffMins} ${t.pages.farmOverview.minutesAgo}`
+      return `${diffMins} ${t.pages.farmOverview.minutesAgo}`;
     }
     if (diffHours < 24) {
-      return `${diffHours} ${t.pages.farmOverview.hoursAgo}`
+      return `${diffHours} ${t.pages.farmOverview.hoursAgo}`;
     }
-    return `${diffDays} ${t.pages.farmOverview.daysAgo}`
-  }
+    return `${diffDays} ${t.pages.farmOverview.daysAgo}`;
+  };
 
   const getParameterStatus = (
     value: number,
     normal: { min: number; max: number },
-    warning: { min: number; max: number }
+    warning: { min: number; max: number },
   ): TunnelStatus => {
     if (value >= normal.min && value <= normal.max) {
-      return 'normal'
+      return 'normal';
     }
     if (value >= warning.min && value <= warning.max) {
-      return 'warning'
+      return 'warning';
     }
-    return 'critical'
-  }
+    return 'critical';
+  };
 
   // Calculate status for each parameter
   const tempStatus = getParameterStatus(
     tunnel.environment.temperature,
     { min: 18, max: 25 },
-    { min: 15, max: 28 }
-  )
+    { min: 15, max: 28 },
+  );
   const humidityStatus = getParameterStatus(
     tunnel.environment.humidity,
     { min: 50, max: 75 },
-    { min: 40, max: 85 }
-  )
+    { min: 40, max: 85 },
+  );
   const co2Status = getParameterStatus(
     tunnel.environment.co2,
     { min: 350, max: 450 },
-    { min: 300, max: 500 }
-  )
+    { min: 300, max: 500 },
+  );
   const lightStatus = getParameterStatus(
     tunnel.environment.light,
     { min: 200, max: 600 },
-    { min: 150, max: 700 }
-  )
+    { min: 150, max: 700 },
+  );
   const moistureStatus = getParameterStatus(
     tunnel.irrigation.soilMoisture,
     { min: 40, max: 70 },
-    { min: 30, max: 80 }
-  )
+    { min: 30, max: 80 },
+  );
   const soilECStatus = getParameterStatus(
     tunnel.irrigation.soilEC,
     { min: 1.5, max: 2.5 },
-    { min: 1.0, max: 3.0 }
-  )
+    { min: 1.0, max: 3.0 },
+  );
 
   return (
     <Card
       className={cn(
-        'transition-all duration-300 hover:shadow-md hover:scale-[1.02] border-2 gap-0 py-0 pt-4',
-        'bg-gradient-to-br from-card to-card/50',
+        'gap-0 border-2 py-0 pt-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-md',
+        'from-card to-card/50 bg-gradient-to-br',
         tunnel.status === 'critical' &&
           'border-destructive/60 dark:border-destructive/60 shadow-destructive/10 hover:bg-destructive/10 dark:hover:bg-destructive/5',
         tunnel.status === 'warning' &&
           'border-chart-5/60 dark:border-chart-5/60 shadow-chart-5/10 hover:bg-chart-5/10 dark:hover:bg-chart-5/5',
         tunnel.status === 'normal' &&
-          'border-primary/30 dark:border-primary/20 shadow-primary/5 hover:bg-primary/10 dark:hover:bg-primary/5'
+          'border-primary/30 dark:border-primary/20 shadow-primary/5 hover:bg-primary/10 dark:hover:bg-primary/5',
       )}
     >
-      <CardHeader className="py-0 !pb-0 px-4 border-b border-border/50 dark:border-border/30 bg-muted/30 dark:bg-muted/10">
+      <CardHeader className="border-border/50 dark:border-border/30 bg-muted/30 dark:bg-muted/10 border-b px-4 py-0 !pb-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-bold tracking-tight text-foreground dark:text-white">
+          <CardTitle className="text-foreground text-xl font-bold tracking-tight dark:text-white">
             {tunnel.name}
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export function TunnelCard({ tunnel }: TunnelCardProps) {
             {tunnel.hasWarning && !tunnel.hasAlert && (
               <Badge
                 variant="secondary"
-                className="gap-1.5 px-2.5 py-1 shadow-sm bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/30"
+                className="gap-1.5 border-yellow-500/30 bg-yellow-500/10 px-2.5 py-1 text-yellow-700 shadow-sm dark:text-yellow-400"
               >
                 <Bell className="h-3.5 w-3.5" />
                 {tunnel.warningCount}
@@ -158,11 +158,11 @@ export function TunnelCard({ tunnel }: TunnelCardProps) {
       <CardContent className="space-y-4 px-4 py-4">
         {/* Environment Section */}
         <div>
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="p-1.5 rounded-md bg-blue-500/10 dark:bg-blue-500/20">
+          <div className="mb-3 flex items-center gap-2.5">
+            <div className="rounded-md bg-blue-500/10 p-1.5 dark:bg-blue-500/20">
               <Thermometer className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             </div>
-            <h3 className="text-sm font-bold uppercase tracking-wide text-foreground/90 dark:text-white">
+            <h3 className="text-foreground/90 text-sm font-bold tracking-wide uppercase dark:text-white">
               {t.pages.farmOverview.environment}
             </h3>
           </div>
@@ -220,11 +220,11 @@ export function TunnelCard({ tunnel }: TunnelCardProps) {
 
         {/* Irrigation Section */}
         <div>
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="p-1.5 rounded-md bg-cyan-500/10 dark:bg-cyan-500/20">
+          <div className="mb-3 flex items-center gap-2.5">
+            <div className="rounded-md bg-cyan-500/10 p-1.5 dark:bg-cyan-500/20">
               <Droplets className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
             </div>
-            <h3 className="text-sm font-bold uppercase tracking-wide text-foreground/90 dark:text-white">
+            <h3 className="text-foreground/90 text-sm font-bold tracking-wide uppercase dark:text-white">
               {t.pages.farmOverview.irrigation}
             </h3>
           </div>
@@ -254,12 +254,12 @@ export function TunnelCard({ tunnel }: TunnelCardProps) {
               status={moistureStatus}
             />
           </div>
-          <div className="mt-3 pt-3 border-t border-border/50 dark:border-border/30">
-            <div className="flex items-center justify-between px-2 py-2.5 bg-gradient-to-r from-muted/60 to-muted/40 dark:from-muted/30 dark:to-muted/20 rounded-lg border border-border/30 dark:border-border/20">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground dark:text-gray-300">
+          <div className="border-border/50 dark:border-border/30 mt-3 border-t pt-3">
+            <div className="from-muted/60 to-muted/40 dark:from-muted/30 dark:to-muted/20 border-border/30 dark:border-border/20 flex items-center justify-between rounded-lg border bg-gradient-to-r px-2 py-2.5">
+              <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase dark:text-gray-300">
                 {t.pages.farmOverview.lastIrrigation}
               </p>
-              <span className="text-sm font-bold text-foreground dark:text-white">
+              <span className="text-foreground text-sm font-bold dark:text-white">
                 {formatLastIrrigation(tunnel.irrigation.lastIrrigation)}
               </span>
             </div>
@@ -267,5 +267,5 @@ export function TunnelCard({ tunnel }: TunnelCardProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
