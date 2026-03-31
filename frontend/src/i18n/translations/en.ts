@@ -473,6 +473,11 @@ export const en = {
         inactive: 'Inactive',
         notAvailable: 'N/A',
         loading: 'Loading tenants...',
+        tabs: {
+          features: 'Features',
+          alertConfiguration: 'Alert Configuration',
+          farmOverviewConfiguration: 'Farm Overview Configuration',
+        },
       },
       features: {
         title: 'Feature Flag Management',
@@ -644,6 +649,8 @@ export const en = {
     alerts: {
       title: 'Alerts',
       subtitle: 'Monitor and manage critical alerts',
+      alertType: 'Alert Type',
+      name: 'Name',
       sensorName: 'Sensor Name',
       sensorNameRequired: 'Sensor name is required',
       sensorNamePlaceholder: 'e.g., Temperature Sensor 1',

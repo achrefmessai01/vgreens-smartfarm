@@ -16,8 +16,7 @@ export const useAlertTableColumns = (): Column<Alert>[] => {
   const { t } = useI18n();
 
   return [
-    { key: 'sensorName', header: t.pages.alerts.sensorName },
-    { key: 'field', header: t.pages.alerts.field ?? 'Parameter' },
+    { key: 'field', header: t.pages.alerts.name },
     { key: 'value', header: t.pages.alerts.value },
     { key: 'status', header: t.pages.alerts.status },
     { key: 'severity', header: t.pages.alerts.severity },

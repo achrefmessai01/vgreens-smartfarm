@@ -1,21 +1,14 @@
 import { PageHeader } from '@/components/layout';
+import { TenantDetailsTabs } from '@/components/tenants';
 
-export default function TenantDetailsPage({
-  params,
-}: {
-  params: { tenantId: string };
-}) {
+export default function TenantDetailsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Tenant Details: ${params.tenantId}`}
+        title="Tenant Details"
         subtitle="View and manage tenant details"
       />
-      <div className="bg-card rounded-lg border p-6">
-        <p className="text-muted-foreground">
-          Tenant details interface coming soon...
-        </p>
-      </div>
+      <TenantDetailsTabs />
     </div>
   );
 }

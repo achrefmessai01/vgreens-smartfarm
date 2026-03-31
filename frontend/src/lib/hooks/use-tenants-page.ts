@@ -49,7 +49,7 @@ export function useTenantsPage() {
 
   const handleManageFeatures = React.useCallback(
     (tenant: Tenant) => {
-      router.push(`/admin/tenants/${tenant.id}/features`);
+      router.push(`/admin/tenants/${tenant.id}`);
     },
     [router],
   );

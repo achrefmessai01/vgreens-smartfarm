@@ -333,6 +333,26 @@ export class AlertsService extends BaseService<Alert> {
     });
   }
 
+  async findOpenAlertForRuleKey(
+    tenantId: string,
+    ruleKey: string,
+  ): Promise<Alert | null> {
+    return this.alertRepository.findOne({
+      where: { tenantId, ruleKey, status: AlertStatus.OPEN },
+      order: { createdAt: OrderDirection.DESC },
+    });
+  }
+
+  async findOpenAlertForField(
+    tenantId: string,
+    field: string,
+  ): Promise<Alert | null> {
+    return this.alertRepository.findOne({
+      where: { tenantId, field, status: AlertStatus.OPEN },
+      order: { createdAt: OrderDirection.DESC },
+    });
+  }
+
   async resolveAlertBySystem(id: string, tenantId?: string): Promise<Alert> {
     try {
       const alert = await this.findOneById(id, tenantId);

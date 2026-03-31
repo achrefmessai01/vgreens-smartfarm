@@ -551,6 +551,11 @@ export const de = {
         inactive: 'Inaktiv',
         notAvailable: 'N/V',
         loading: 'Mandanten werden geladen...',
+        tabs: {
+          features: 'Funktionen',
+          alertConfiguration: 'Alarmkonfiguration',
+          farmOverviewConfiguration: 'Farm-Übersichtskonfiguration',
+        },
       },
       features: {
         title: 'Feature-Flag-Verwaltung',
@@ -654,6 +659,8 @@ export const de = {
     alerts: {
       title: 'Alarme',
       subtitle: 'Überwachen und verwalten Sie kritische Alarme',
+      alertType: 'Alarmtyp',
+      name: 'Name',
       sensorName: 'Sensor-Name',
       sensorNameRequired: 'Sensor-Name ist erforderlich',
       sensorNamePlaceholder: 'z.B. Temperatursensor 1',
