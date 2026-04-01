@@ -8,8 +8,7 @@ import {
 import type { ParameterType, PlantSlot } from '@/types/farm.types';
 import { isParameterSupportedByType } from '@/lib/sensor-map-parameter';
 import {
-  BAY_COUNT,
-  ROWS_PER_BAY,
+  DEFAULT_FARM_LAYOUT,
   getSlotPositionsFromBay,
   bayHasDynamicPositions,
 } from '@/lib/sensor-map-positions';
@@ -27,11 +26,12 @@ function buildBayRowToSlots(
   bay: ViewSensorMapProps['bay'],
   parameter: ParameterType,
   showOnlyFilledPositions: boolean,
+  farmLayout: ViewSensorMapProps['farmLayout'],
 ): Map<string, CellItem[]> {
   const map = new Map<string, CellItem[]>();
 
   if (bay && bayHasDynamicPositions(bay)) {
-    const positions = getSlotPositionsFromBay(bay);
+    const positions = getSlotPositionsFromBay(bay, farmLayout);
     for (const p of positions) {
       if (!isParameterSupportedByType(parameter, p.type)) continue;
       const value =
@@ -50,7 +50,10 @@ function buildBayRowToSlots(
 }
 
 export function ViewSensorMap(props: ViewSensorMapProps) {
-  const { parameter, selectedSlotId, onSelectSlot, className } = props;
+  const { parameter, selectedSlotId, onSelectSlot, className, farmLayout } = props;
+  const layout = farmLayout ?? DEFAULT_FARM_LAYOUT;
+  const { bayCount, polesMax } = layout;
+  const rowsPerBay = polesMax; // all poles visible (HIDDEN_POLE_ROWS is empty)
   const unit = getParameterUnit(parameter);
   const bayRowToSlots = React.useMemo(
     () =>
@@ -58,8 +61,9 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
         props.bay,
         props.parameter,
         props.showOnlyFilledPositions ?? false,
+        props.farmLayout,
       ),
-    [props.bay, props.parameter, props.showOnlyFilledPositions],
+    [props.bay, props.parameter, props.showOnlyFilledPositions, props.farmLayout],
   );
 
   return (
@@ -70,14 +74,14 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
       )}
     >
       <div className="flex h-full min-h-0 w-full min-w-0 px-0 pt-0 pb-0.5 sm:px-0.5 sm:pt-0 sm:pb-1.5">
-        {Array.from({ length: BAY_COUNT }, (_, bayIndex) => (
+        {Array.from({ length: bayCount }, (_, bayIndex) => (
           <div
             key={bayIndex}
             className={cn(
               'border-border/40 flex min-w-0 flex-1 flex-col border-r last:border-r-0',
             )}
           >
-            {Array.from({ length: ROWS_PER_BAY }, (_, rowIndex) => {
+            {Array.from({ length: rowsPerBay }, (_, rowIndex) => {
               const key = `${bayIndex}-${rowIndex}`;
               const items = bayRowToSlots.get(key) ?? [];
               return (
@@ -117,7 +121,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                           'hover:scale-105',
                           isSelected && 'scale-110',
                           !slot && 'opacity-50',
-                          rowIndex === ROWS_PER_BAY - 1 &&
+                          rowIndex === rowsPerBay - 1 &&
                             '-translate-y-1 sm:-translate-y-[0.375rem]',
                         )}
                       >

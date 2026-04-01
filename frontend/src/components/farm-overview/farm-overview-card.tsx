@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/context';
 import type { Bay, ParameterType } from '@/types/farm.types';
+import type { FarmLayoutConfig } from '@/lib/sensor-map-positions';
 import { EmptyState } from './empty-state';
 import { FarmDataDisplay } from './farm-view-container';
 import { ParameterColorLegendBar } from './parameter-color-legend';
@@ -28,6 +29,7 @@ export interface FarmOverviewCardProps {
   noDataMessage: string;
   emptyForNowMessage: string;
   entranceLabel?: string;
+  farmLayout?: FarmLayoutConfig;
 }
 
 export function FarmOverviewCard({
@@ -49,6 +51,7 @@ export function FarmOverviewCard({
   noDataMessage,
   emptyForNowMessage,
   entranceLabel,
+  farmLayout,
 }: FarmOverviewCardProps) {
   const { t } = useI18n();
 
@@ -105,6 +108,7 @@ export function FarmOverviewCard({
                 parameterLabel={parameterLabel}
                 noSensorLabel={noSensorLabel}
                 noDataMessage={noDataMessage}
+                farmLayout={farmLayout}
               />
               {viewMode !== 'graph' && (
                 <div

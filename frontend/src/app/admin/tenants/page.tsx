@@ -81,6 +81,7 @@ export default function TenantsPage() {
             <TenantForm
               ref={formRef}
               initialData={page.editingTenant || undefined}
+              tenantId={page.editingTenant?.id}
               onSubmit={page.handleSubmit}
               onCancel={page.handleCancel}
               isLoading={page.isLoading}

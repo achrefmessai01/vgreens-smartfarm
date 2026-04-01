@@ -8,7 +8,7 @@ import {
 import { useMemo } from 'react';
 import type { Bay } from '@/types/farm.types';
 import { generateFarm } from '@/lib/farm-data';
-import { influxRowsToBays } from '@/lib/farm-data-live';
+import { influxRowsToBays, type SensorConfigOverride } from '@/lib/farm-data-live';
 
 const BUCKET_START_DEFAULT = '-1h';
 const POLL_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
@@ -31,6 +31,8 @@ export interface LiveFarmDataRange {
 export interface LiveFarmDataOptions {
   range?: LiveFarmDataRange;
   tenantBucketName?: string | null;
+  /** PostgreSQL SensorConfig overrides keyed by device name */
+  sensorConfigs?: Map<string, SensorConfigOverride>;
 }
 
 export function useLiveFarmData(
@@ -51,6 +53,9 @@ export function useLiveFarmData(
     options && 'tenantBucketName' in options
       ? options.tenantBucketName
       : undefined;
+
+  const sensorConfigs =
+    options && 'sensorConfigs' in options ? options.sensorConfigs : undefined;
 
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-first',
@@ -126,7 +131,7 @@ export function useLiveFarmData(
       bucketData.getBucketData.length > 0
     ) {
       try {
-        const bays = influxRowsToBays(bucketData.getBucketData);
+        const bays = influxRowsToBays(bucketData.getBucketData, sensorConfigs);
         if (bays.length > 0) {
           return {
             bays,
@@ -161,5 +166,6 @@ export function useLiveFarmData(
     bucketData,
     bucketError,
     bucketFields,
+    sensorConfigs,
   ]);
 }

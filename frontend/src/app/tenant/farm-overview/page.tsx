@@ -93,6 +93,7 @@ export default function FarmOverviewPage() {
               noSensorLabel={state.labels.noSensor}
               noDataMessage={state.labels.noData}
               emptyForNowMessage={state.labels.emptyForNow}
+              farmLayout={state.farmLayout}
             />
           )}
         </div>

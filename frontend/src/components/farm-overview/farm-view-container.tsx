@@ -1,4 +1,5 @@
 import type { Bay, ParameterType } from '@/types/farm.types';
+import type { FarmLayoutConfig } from '@/lib/sensor-map-positions';
 import { EmptyState } from './empty-state';
 import { ParGraphSection } from './par-graph-section';
 import { ViewSensorMap } from './views/view-sensor-map';
@@ -15,6 +16,7 @@ interface FarmDataDisplayProps {
   parameterLabel: string;
   noSensorLabel: string;
   noDataMessage: string;
+  farmLayout?: FarmLayoutConfig;
 }
 
 export function FarmDataDisplay({
@@ -28,6 +30,7 @@ export function FarmDataDisplay({
   parameterLabel,
   noSensorLabel,
   noDataMessage,
+  farmLayout,
 }: FarmDataDisplayProps) {
   const showEmpty = bays.length === 0 && viewMode !== 'graph';
   if (showEmpty) {
@@ -59,6 +62,7 @@ export function FarmDataDisplay({
           onSelectSlot={onSelectSlot}
           className="min-h-0 flex-1"
           showOnlyFilledPositions={false}
+          farmLayout={farmLayout}
         />
       ) : (
         <ViewSingleBay

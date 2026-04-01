@@ -6,6 +6,18 @@ import type {
   Column,
 } from '@/types/farm.types';
 
+/**
+ * PostgreSQL SensorConfig override values for a single device.
+ * When present, these values take precedence over the InfluxDB tag values.
+ */
+export interface SensorConfigOverride {
+  bay?: string | null;
+  pole?: string | null;
+  row?: string | null;
+  greenhouse?: string | null;
+  city?: string | null;
+}
+
 /** One row from getBucketData (each item has a "data" object). */
 export type InfluxDBRow = Record<string, unknown> & {
   _field?: string;
@@ -32,7 +44,16 @@ const GRID_SIZE = SENSOR_COLS * SENSOR_ROWS;
  * Group InfluxDB rows by sensor position (chamber + device + level).
  * For each position, take latest value per _field (any field from bucket) and build ParameterValue (Record<string, number>).
  */
-function buildSlotsFromRows(rows: InfluxDBRow[]): PlantSlot[] {
+function toNum(v: string | null | undefined): number | undefined {
+  if (v == null || v === '') return undefined;
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function buildSlotsFromRows(
+  rows: InfluxDBRow[],
+  sensorConfigs?: Map<string, SensorConfigOverride>,
+): PlantSlot[] {
   type SlotKey = string;
   type FieldValues = Record<string, { value: number; time: string }>;
   type SlotMeta = {
@@ -55,9 +76,13 @@ function buildSlotsFromRows(rows: InfluxDBRow[]): PlantSlot[] {
   const metaBySlot = new Map<SlotKey, SlotMeta>();
 
   for (const row of rows) {
-    const chamberOrGreenhouse =
+    const influxGreenhouse =
       (row.greenhouse as string) ?? (row.chamber as string) ?? '';
     const device = (row.device as string) ?? '';
+    const config = device ? sensorConfigs?.get(device) : undefined;
+    // Use PostgreSQL greenhouse override if present, else InfluxDB value
+    const chamberOrGreenhouse =
+      (config?.greenhouse ?? influxGreenhouse) || influxGreenhouse;
     const level = (row.level as string) ?? '';
     const key: SlotKey = `${chamberOrGreenhouse}|${device}|${level}`;
     const field = (row._field as string) ?? '';
@@ -77,24 +102,29 @@ function buildSlotsFromRows(rows: InfluxDBRow[]): PlantSlot[] {
     const rawBay = row.bay;
     const rawPole = row.pole;
     const rawRow = row.row;
-    const bayNum =
+    const influxBayNum =
       typeof rawBay === 'number'
         ? rawBay
         : typeof rawBay === 'string'
           ? parseInt(rawBay, 10)
           : undefined;
-    const poleNum =
+    const influxPoleNum =
       typeof rawPole === 'number'
         ? rawPole
         : typeof rawPole === 'string'
           ? parseInt(rawPole, 10)
           : undefined;
-    const rowNum =
+    const influxRowNum =
       typeof rawRow === 'number'
         ? rawRow
         : typeof rawRow === 'string'
           ? parseInt(rawRow, 10)
           : undefined;
+
+    // Apply PostgreSQL SensorConfig overrides: config values take priority over InfluxDB tags
+    const bayNum = toNum(config?.bay) ?? influxBayNum;
+    const poleNum = toNum(config?.pole) ?? influxPoleNum;
+    const rowNum = toNum(config?.row) ?? influxRowNum;
 
     metaBySlot.set(key, {
       _start: (row._start as string) ?? undefined,
@@ -184,11 +214,12 @@ function buildBayFromSlots(
  */
 export function influxRowsToBays(
   bucketDataRows: { data: Record<string, unknown> }[],
+  sensorConfigs?: Map<string, SensorConfigOverride>,
 ): Bay[] {
   const rows: InfluxDBRow[] = bucketDataRows.map(
     (item) => item.data as InfluxDBRow,
   );
-  const allSlots = buildSlotsFromRows(rows);
+  const allSlots = buildSlotsFromRows(rows, sensorConfigs);
 
   // Group by chamber (from slot id: live_Chamber_01|device|level)
   const byChamber = new Map<string, PlantSlot[]>();
