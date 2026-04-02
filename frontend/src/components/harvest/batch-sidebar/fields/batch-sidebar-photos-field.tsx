@@ -65,8 +65,8 @@ export function PhotosField({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-5 bg-muted animate-pulse rounded" />
-        <div className="h-32 bg-muted animate-pulse rounded" />
+        <div className="bg-muted h-5 animate-pulse rounded" />
+        <div className="bg-muted h-32 animate-pulse rounded" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ export function PhotosField({
     <div className="space-y-4">
       <h3 className="font-medium">{h?.photos ?? 'Photos'}</h3>
       <div
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${
+        className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-all duration-200 ${
           isDragOver
             ? 'border-primary bg-primary/5 scale-105'
             : 'border-muted-foreground/25 hover:border-muted-foreground/50'
@@ -87,7 +87,7 @@ export function PhotosField({
         onDrop={handleDrop}
       >
         <Upload
-          className={`h-8 w-8 mx-auto mb-2 transition-colors ${
+          className={`mx-auto mb-2 h-8 w-8 transition-colors ${
             isDragOver ? 'text-primary' : 'text-muted-foreground'
           }`}
         />
@@ -101,7 +101,7 @@ export function PhotosField({
             : (h?.uploadPhotos ?? 'Click to upload or drag and drop')}
         </p>
         {isDragOver && (
-          <p className="text-xs text-primary mt-1">Release to upload</p>
+          <p className="text-primary mt-1 text-xs">Release to upload</p>
         )}
       </div>
 
@@ -119,7 +119,7 @@ export function PhotosField({
           {photos.map((photo, index) => (
             <div
               key={index}
-              className="aspect-square bg-muted rounded-lg overflow-hidden relative group"
+              className="bg-muted group relative aspect-square overflow-hidden rounded-lg"
             >
               <Image
                 src={photo}
@@ -133,7 +133,7 @@ export function PhotosField({
                 <button
                   type="button"
                   onClick={() => onRemove(index)}
-                  className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
                 >
                   <X className="h-3 w-3" />
                 </button>

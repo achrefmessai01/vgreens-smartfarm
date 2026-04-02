@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import GaugeComponent from 'react-gauge-component'
-import { useTheme } from 'next-themes'
-import { cn } from '@/lib/utils'
-import type { TunnelStatus } from '@/types/tunnel.types'
+import * as React from 'react';
+import GaugeComponent from 'react-gauge-component';
+import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
+import type { TunnelStatus } from '@/types/tunnel.types';
 
 interface SensorGaugeProps {
-  label: string
-  value: number
-  unit?: string
-  min: number
-  max: number
-  normalMin: number
-  normalMax: number
-  warningMin: number
-  warningMax: number
-  status: TunnelStatus
-  className?: string
+  label: string;
+  value: number;
+  unit?: string;
+  min: number;
+  max: number;
+  normalMin: number;
+  normalMax: number;
+  warningMin: number;
+  warningMax: number;
+  status: TunnelStatus;
+  className?: string;
 }
 
 export function SensorGauge({
@@ -55,56 +55,59 @@ export function SensorGauge({
       text: 'text-red-600 dark:text-red-400',
       pointerColor: '#ef4444',
     },
-  }
+  };
 
-  const config = statusConfig[status]
-  const { theme } = useTheme()
-  const isDark = theme === 'dark'
+  const config = statusConfig[status];
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   // Calculate percentage for the gauge (0-100)
-  const range = max - min
-  const valuePercent = Math.min(100, Math.max(0, ((value - min) / range) * 100))
+  const range = max - min;
+  const valuePercent = Math.min(
+    100,
+    Math.max(0, ((value - min) / range) * 100),
+  );
 
   // Create color zones for the gauge
   // Red at edges, orange in warning zones, green in normal zone
-  const subArcs = []
+  const subArcs = [];
 
   // Critical zone (below warning) - Red
   if (warningMin > min) {
-    const criticalPercent = ((warningMin - min) / range) * 100
+    const criticalPercent = ((warningMin - min) / range) * 100;
     subArcs.push({
       limit: criticalPercent,
       color: '#ef4444',
       showTick: false,
-    })
+    });
   }
 
   // Warning zone (below normal) - Orange
   if (normalMin > warningMin) {
-    const warningBelowPercent = ((normalMin - min) / range) * 100
+    const warningBelowPercent = ((normalMin - min) / range) * 100;
     subArcs.push({
       limit: warningBelowPercent,
       color: '#f97316',
       showTick: false,
-    })
+    });
   }
 
   // Normal zone - Green
-  const normalPercent = ((normalMax - min) / range) * 100
+  const normalPercent = ((normalMax - min) / range) * 100;
   subArcs.push({
     limit: normalPercent,
     color: '#22c55e',
     showTick: false,
-  })
+  });
 
   // Warning zone (above normal) - Orange
   if (warningMax > normalMax) {
-    const warningAbovePercent = ((warningMax - min) / range) * 100
+    const warningAbovePercent = ((warningMax - min) / range) * 100;
     subArcs.push({
       limit: warningAbovePercent,
       color: '#f97316',
       showTick: false,
-    })
+    });
   }
 
   // Critical zone (above warning) - Red
@@ -113,38 +116,38 @@ export function SensorGauge({
       limit: 100,
       color: '#ef4444',
       showTick: false,
-    })
+    });
   }
 
   return (
     <div
       className={cn(
-        'p-3 rounded-xl border-2 transition-all duration-300',
-        'shadow-md hover:shadow-xl hover:scale-105',
+        'rounded-xl border-2 p-3 transition-all duration-300',
+        'shadow-md hover:scale-105 hover:shadow-xl',
         'backdrop-blur-lg',
         !isDark &&
-          '[background:linear-gradient(to_bottom_right,#3bc0d026,#3a7c988c))] bg-white/80',
-        isDark && 'bg-gradient-to-br from-card to-card/100',
+          'bg-white/80 [background:linear-gradient(to_bottom_right,#3bc0d026,#3a7c988c))]',
+        isDark && 'from-card to-card/100 bg-gradient-to-br',
         config.border,
-        className
+        className,
       )}
     >
       {/* Header with label and status dot */}
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <p className="text-xs font-bold uppercase tracking-wide text-foreground/80 dark:text-white">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-foreground/80 text-xs font-bold tracking-wide uppercase dark:text-white">
           {label}
         </p>
         <div
           className={cn(
-            'h-2.5 w-2.5 rounded-full shrink-0 shadow-sm ring-2 ring-white dark:ring-card',
-            config.dot
+            'dark:ring-card h-2.5 w-2.5 shrink-0 rounded-full shadow-sm ring-2 ring-white',
+            config.dot,
           )}
         />
       </div>
 
       {/* Gauge Component */}
       <div
-        className="w-full mb-3 [&_svg_text]:fill-gray-900 dark:[&_svg_text]:fill-white"
+        className="mb-3 w-full [&_svg_text]:fill-gray-900 dark:[&_svg_text]:fill-white"
         style={{ height: '90px' }}
       >
         <GaugeComponent
@@ -179,12 +182,12 @@ export function SensorGauge({
                   valueConfig: {
                     formatTextValue: () => {
                       if (unit === 'ppm' || unit === 'µmol/m²/s') {
-                        return Math.round(min).toString()
+                        return Math.round(min).toString();
                       }
                       if (unit === 'pH' || unit === 'dS/m') {
-                        return min.toFixed(1)
+                        return min.toFixed(1);
                       }
-                      return min.toFixed(0)
+                      return min.toFixed(0);
                     },
                     style: {
                       fontSize: '10px',
@@ -197,12 +200,12 @@ export function SensorGauge({
                   valueConfig: {
                     formatTextValue: () => {
                       if (unit === 'ppm' || unit === 'µmol/m²/s') {
-                        return Math.round(max).toString()
+                        return Math.round(max).toString();
                       }
                       if (unit === 'pH' || unit === 'dS/m') {
-                        return max.toFixed(1)
+                        return max.toFixed(1);
                       }
-                      return max.toFixed(0)
+                      return max.toFixed(0);
                     },
                     style: {
                       fontSize: '10px',
@@ -222,22 +225,22 @@ export function SensorGauge({
       <div className="text-center">
         <p
           className={cn(
-            'text-xl font-extrabold leading-tight tracking-tight',
-            config.text
+            'text-xl leading-tight font-extrabold tracking-tight',
+            config.text,
           )}
         >
           {value.toFixed(
             unit === 'ppm' || unit === 'µmol/m²/s'
               ? 0
               : unit === 'pH' || unit === 'dS/m'
-              ? 2
-              : 1
+                ? 2
+                : 1,
           )}
           {unit && (
-            <span className="text-sm ml-1.5 font-bold opacity-80">{unit}</span>
+            <span className="ml-1.5 text-sm font-bold opacity-80">{unit}</span>
           )}
         </p>
       </div>
     </div>
-  )
+  );
 }

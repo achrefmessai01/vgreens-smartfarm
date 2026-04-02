@@ -1,18 +1,18 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
+import * as React from 'react';
+import { useI18n } from '@/i18n';
 import type {
   UserFormData,
   UserFormErrors,
-} from '@/components/users/user-form-types'
-import { UserRole } from '@/generated/graphql'
-import type { User } from '@/generated/graphql'
+} from '@/components/users/user-form-types';
+import { UserRole } from '@/generated/graphql';
+import type { User } from '@/generated/graphql';
 
 interface UseUserManagementFormProps {
-  initialData?: Partial<User>
-  hideTenantSelection?: boolean
-  onSubmit: (data: UserFormData) => void
+  initialData?: Partial<User>;
+  hideTenantSelection?: boolean;
+  onSubmit: (data: UserFormData) => void;
 }
 
 export function useUserManagementForm({
@@ -20,8 +20,8 @@ export function useUserManagementForm({
   hideTenantSelection = false,
   onSubmit,
 }: UseUserManagementFormProps) {
-  const { t } = useI18n()
-  const formRef = React.useRef<HTMLFormElement>(null)
+  const { t } = useI18n();
+  const formRef = React.useRef<HTMLFormElement>(null);
   const [formData, setFormData] = React.useState<UserFormData>(
     initialData
       ? {
@@ -43,9 +43,9 @@ export function useUserManagementForm({
           role: undefined,
           tenantId: '',
           isActive: true,
-        }
-  )
-  const [errors, setErrors] = React.useState<UserFormErrors>({})
+        },
+  );
+  const [errors, setErrors] = React.useState<UserFormErrors>({});
 
   React.useEffect(() => {
     if (initialData) {
@@ -58,23 +58,23 @@ export function useUserManagementForm({
         role: initialData.role,
         tenantId: initialData.tenantId || '',
         isActive: initialData.isActive ?? true,
-      })
+      });
     }
-  }, [initialData])
+  }, [initialData]);
 
   const validateForm = (): boolean => {
-    const newErrors: UserFormErrors = {}
+    const newErrors: UserFormErrors = {};
 
     if (!initialData && !formData.email?.trim()) {
-      newErrors.email = 'Email is required'
+      newErrors.email = 'Email is required';
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = t.pages.users.emailInvalid
+      newErrors.email = t.pages.users.emailInvalid;
     }
 
     if (!formData.role) {
-      newErrors.role = t.pages.admin.users.roleRequired || 'Role is required'
+      newErrors.role = t.pages.admin.users.roleRequired || 'Role is required';
     }
 
     if (
@@ -83,15 +83,15 @@ export function useUserManagementForm({
       formData.role !== UserRole.VgreensAdmin &&
       !formData.tenantId
     ) {
-      newErrors.tenantId = t.pages.admin.users.tenantRequired
+      newErrors.tenantId = t.pages.admin.users.tenantRequired;
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (validateForm()) {
       const submitData: UserFormData = {
         ...formData,
@@ -99,37 +99,37 @@ export function useUserManagementForm({
           formData.role === UserRole.VgreensAdmin
             ? undefined
             : hideTenantSelection
-            ? undefined
-            : formData.tenantId,
-      }
-      onSubmit(submitData)
+              ? undefined
+              : formData.tenantId,
+      };
+      onSubmit(submitData);
     }
-  }
+  };
 
   const handleChange =
     (field: keyof UserFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
       if (errors[field as keyof typeof errors]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }))
+        setErrors((prev) => ({ ...prev, [field]: undefined }));
       }
-    }
+    };
 
   const handleSelectChange = (field: keyof UserFormData) => (value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value || undefined }))
+    setFormData((prev) => ({ ...prev, [field]: value || undefined }));
     if (errors[field as keyof typeof errors]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
-  }
+  };
 
   const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, isActive: checked }))
-  }
+    setFormData((prev) => ({ ...prev, isActive: checked }));
+  };
 
   const submit = () => {
     if (formRef.current) {
-      formRef.current.requestSubmit()
+      formRef.current.requestSubmit();
     }
-  }
+  };
 
   return {
     formRef,
@@ -140,5 +140,5 @@ export function useUserManagementForm({
     handleSelectChange,
     handleCheckboxChange,
     submit,
-  }
+  };
 }

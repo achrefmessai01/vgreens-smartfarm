@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
 import {
   FeatureForm,
   type FeatureFormRef,
   type FeatureFormData,
-} from './feature-form'
-import * as React from 'react'
+} from './feature-form';
+import * as React from 'react';
 import {
   Sheet,
   SheetTitle,
   SheetHeader,
   SheetFooter,
   SheetContent,
-} from '@/components/ui/sheet'
-import { useI18n } from '@/i18n'
-import { Button } from '@/components/ui/button'
-import type { Feature } from '@/generated/graphql'
+} from '@/components/ui/sheet';
+import { useI18n } from '@/i18n';
+import { Button } from '@/components/ui/button';
+import type { Feature } from '@/generated/graphql';
 
 interface FeatureFormSheetProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  feature: Feature | null
-  onSubmit: (data: FeatureFormData) => void
-  isLoading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  feature: Feature | null;
+  onSubmit: (data: FeatureFormData) => void;
+  isLoading?: boolean;
 }
 
 export function FeatureFormSheet({
@@ -32,24 +32,24 @@ export function FeatureFormSheet({
   onSubmit,
   isLoading = false,
 }: FeatureFormSheetProps) {
-  const { t } = useI18n()
-  const formRef = React.useRef<FeatureFormRef>(null)
+  const { t } = useI18n();
+  const formRef = React.useRef<FeatureFormRef>(null);
 
   const handleSubmit = async (data: FeatureFormData) => {
-    await onSubmit(data)
-  }
+    await onSubmit(data);
+  };
 
   const handleCancel = () => {
-    onOpenChange(false)
-  }
+    onOpenChange(false);
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-lg flex flex-col p-0 gap-0"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
       >
-        <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
+        <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
           <SheetTitle className="dark:text-card-foreground">
             {feature
               ? t.pages.admin.features.editTitle
@@ -67,12 +67,12 @@ export function FeatureFormSheet({
           />
         </div>
 
-        <SheetFooter className="flex-row gap-2 px-6 py-4 border-t dark:border-primary-foreground/30">
+        <SheetFooter className="dark:border-primary-foreground/30 flex-row gap-2 border-t px-6 py-4">
           <Button
             variant="outline"
             onClick={handleCancel}
             disabled={isLoading}
-            className="flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
+            className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 flex-1"
           >
             {t.pages.users.cancel}
           </Button>
@@ -84,11 +84,11 @@ export function FeatureFormSheet({
             {isLoading
               ? '...'
               : feature
-              ? t.pages.admin.features.updateFeature
-              : t.pages.admin.features.createFeature}
+                ? t.pages.admin.features.updateFeature
+                : t.pages.admin.features.createFeature}
           </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

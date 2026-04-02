@@ -36,12 +36,12 @@ export default function FeatureFlagsPage() {
   return (
     <div
       className={
-        isMobile ? 'flex flex-col gap-6' : 'flex flex-col gap-6 h-full min-h-0'
+        isMobile ? 'flex flex-col gap-6' : 'flex h-full min-h-0 flex-col gap-6'
       }
     >
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <Flag className="h-5 w-5 text-primary" />
+        <div className="bg-primary/10 rounded-lg p-2">
+          <Flag className="text-primary h-5 w-5" />
         </div>
         <PageHeader
           title={t.pages.admin.features.title}
@@ -49,7 +49,7 @@ export default function FeatureFlagsPage() {
         />
       </div>
 
-      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
+      <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <FeatureTable
           features={features}
           onEdit={handleEdit}

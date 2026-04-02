@@ -1,32 +1,32 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import type { Warning } from '@/types/warning.types'
-import { Button } from '@/components/ui/button'
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import type { Warning } from '@/types/warning.types';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetFooter,
-} from '@/components/ui/sheet'
-import { FieldGroup } from '@/components/ui/field'
+} from '@/components/ui/sheet';
+import { FieldGroup } from '@/components/ui/field';
 import {
   SensorNameField,
   ValueField,
   TimeStampField,
   TunnelField,
   StatusField,
-} from './warning-sidebar-fields'
+} from './warning-sidebar-fields';
 
 export interface WarningSidebarProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  warning: Warning | null
-  onAcknowledge?: (warning: Warning) => void
-  onResolve?: (warning: Warning) => void
-  isLoading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  warning: Warning | null;
+  onAcknowledge?: (warning: Warning) => void;
+  onResolve?: (warning: Warning) => void;
+  isLoading?: boolean;
 }
 
 export function WarningSidebar({
@@ -37,18 +37,18 @@ export function WarningSidebar({
   onResolve,
   isLoading = false,
 }: WarningSidebarProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
-  const canAcknowledge = warning?.status === 'open'
-  const canResolve = warning ? warning.status !== 'resolved' : false
+  const canAcknowledge = warning?.status === 'open';
+  const canResolve = warning ? warning.status !== 'resolved' : false;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-lg flex flex-col p-0 gap-0"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
       >
-        <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
+        <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
           <SheetTitle className="dark:text-card-foreground">
             {t.pages.warnings.title}
           </SheetTitle>
@@ -70,18 +70,18 @@ export function WarningSidebar({
               <StatusField status={warning.status} isLoading={isLoading} />
             </FieldGroup>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {t.pages.warnings.noWarningsDescription}
             </p>
           )}
         </div>
 
-        <SheetFooter className="flex-row gap-2 px-6 py-4 border-t dark:border-primary-foreground/30">
+        <SheetFooter className="dark:border-primary-foreground/30 flex-row gap-2 border-t px-6 py-4">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
-            className="flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
+            className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 flex-1"
           >
             {t.pages.users.cancel}
           </Button>
@@ -91,7 +91,7 @@ export function WarningSidebar({
               variant="outline"
               onClick={() => onAcknowledge(warning)}
               disabled={isLoading}
-              className="flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
+              className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 flex-1"
             >
               {t.pages.warnings.acknowledge}
             </Button>
@@ -109,5 +109,5 @@ export function WarningSidebar({
         </SheetFooter>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

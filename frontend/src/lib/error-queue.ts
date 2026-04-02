@@ -28,7 +28,7 @@ export class ErrorQueue {
         console.error('Failed to send error immediately:', error);
       }
     }
-    
+
     this.errorQueue.push(errorData);
     this.storeErrorLocally(errorData);
   }
@@ -38,16 +38,16 @@ export class ErrorQueue {
    */
   private storeErrorLocally(errorData: EnrichedErrorData): void {
     if (typeof window === 'undefined') return;
-    
+
     try {
       const errors = JSON.parse(localStorage.getItem('pendingErrors') || '[]');
       errors.push({ ...errorData, timestamp: Date.now() });
-      
+
       // Keep only last 50 errors to prevent storage bloat
       if (errors.length > 50) {
         errors.splice(0, errors.length - 50);
       }
-      
+
       localStorage.setItem('pendingErrors', JSON.stringify(errors));
     } catch (storageError) {
       console.error('Failed to store error locally:', storageError);
@@ -59,7 +59,7 @@ export class ErrorQueue {
    */
   private setupEventListeners(): void {
     if (typeof window === 'undefined') return;
-    
+
     window.addEventListener('online', () => {
       this.isOnline = true;
       this.flushQueuedErrors();
@@ -75,7 +75,7 @@ export class ErrorQueue {
    */
   private setupPeriodicFlush(): void {
     if (typeof window === 'undefined') return;
-    
+
     setInterval(() => {
       if (this.isOnline && this.errorQueue.length > 0) {
         this.flushQueuedErrors();
@@ -108,9 +108,11 @@ export class ErrorQueue {
    */
   private async flushStoredErrors(): Promise<void> {
     if (typeof window === 'undefined') return;
-    
+
     try {
-      const storedErrors = JSON.parse(localStorage.getItem('pendingErrors') || '[]');
+      const storedErrors = JSON.parse(
+        localStorage.getItem('pendingErrors') || '[]',
+      );
       if (storedErrors.length > 0) {
         for (const error of storedErrors) {
           try {

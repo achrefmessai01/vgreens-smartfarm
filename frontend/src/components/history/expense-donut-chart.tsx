@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { PieChart, Pie, Cell, Tooltip } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChartContainer } from '@/components/ui/chart'
+import * as React from 'react';
+import { PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer } from '@/components/ui/chart';
 
 export interface ExpenseData {
-  name: string
-  value: number
-  percentage: number
-  color: string
+  name: string;
+  value: number;
+  percentage: number;
+  color: string;
 }
 
 interface ExpenseDonutChartProps {
-  data: ExpenseData[]
-  title: string
+  data: ExpenseData[];
+  title: string;
 }
 
-const COLORS = ['#016F7C', '#0EA97C', '#0DBA97', '#0ECA97', '#0EDA97']
+const COLORS = ['#016F7C', '#0EA97C', '#0DBA97', '#0ECA97', '#0EDA97'];
 
 export function ExpenseDonutChart({ data, title }: ExpenseDonutChartProps) {
   return (
@@ -78,5 +78,5 @@ export function ExpenseDonutChart({ data, title }: ExpenseDonutChartProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

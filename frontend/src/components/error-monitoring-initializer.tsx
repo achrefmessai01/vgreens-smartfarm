@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
-import { initializeErrorMonitoring } from '@/lib/error-monitoring'
+import { useEffect } from 'react';
+import { initializeErrorMonitoring } from '@/lib/error-monitoring';
 
 /**
  * Component to initialize error monitoring on app startup
@@ -10,12 +10,12 @@ import { initializeErrorMonitoring } from '@/lib/error-monitoring'
 export function ErrorMonitoringInitializer() {
   useEffect(() => {
     // Initialize error monitoring system
-    const cleanup = initializeErrorMonitoring()
-    
+    const cleanup = initializeErrorMonitoring();
+
     // Return cleanup function for component unmount
-    return cleanup
-  }, [])
+    return cleanup;
+  }, []);
 
   // This component doesn't render anything visible
-  return null
+  return null;
 }

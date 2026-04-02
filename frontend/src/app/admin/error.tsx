@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import ErrorPage from '@/components/ui/error-page'
-import { Settings } from 'lucide-react'
+import ErrorPage from '@/components/ui/error-page';
+import { Settings } from 'lucide-react';
 
 export default function AdminErrorPage({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <ErrorPage
@@ -19,10 +19,10 @@ export default function AdminErrorPage({
       sectionName="Admin"
       theme="indigo"
       backLink={{
-        href: "/admin/dashboard",
-        label: "Back to Admin Dashboard",
-        icon: Settings
+        href: '/admin/dashboard',
+        label: 'Back to Admin Dashboard',
+        icon: Settings,
       }}
     />
-  )
+  );
 }

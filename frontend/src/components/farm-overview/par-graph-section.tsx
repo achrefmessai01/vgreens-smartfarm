@@ -38,7 +38,7 @@ export function ParGraphSection({
           yMax={yMax}
         />
       ) : (
-        <div className="flex flex-1 min-h-0 items-center justify-center p-6 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex min-h-0 flex-1 items-center justify-center p-6 text-sm">
           {t.pages.farmOverview.noData}
         </div>
       )}
@@ -49,7 +49,7 @@ export function ParGraphSection({
     return (
       <div
         className={cn(
-          'h-full min-h-[17rem] flex flex-col overflow-hidden rounded-sm border border-border/50 bg-background',
+          'border-border/50 bg-background flex h-full min-h-[17rem] flex-col overflow-hidden rounded-sm border',
           className,
         )}
       >
@@ -59,7 +59,12 @@ export function ParGraphSection({
   }
 
   return (
-    <Card className={cn('gap-0 py-0 overflow-hidden rounded-sm min-h-[17rem]', className)}>
+    <Card
+      className={cn(
+        'min-h-[17rem] gap-0 overflow-hidden rounded-sm py-0',
+        className,
+      )}
+    >
       {content}
     </Card>
   );

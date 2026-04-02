@@ -1,57 +1,57 @@
 export interface BaseFieldProps {
-  isLoading?: boolean
+  isLoading?: boolean;
 }
 
 export interface SensorNameFieldProps extends BaseFieldProps {
-  sensorName: string
+  sensorName: string;
 }
 
 export interface ValueFieldProps extends BaseFieldProps {
-  value: string
+  value: string;
 }
 
 export interface StatusFieldProps extends BaseFieldProps {
-  status: string
+  status: string;
 }
 
 export interface SeverityFieldProps extends BaseFieldProps {
-  severity: string
+  severity: string;
 }
 
 export interface TimeStampFieldProps extends BaseFieldProps {
-  timestamp: string
+  timestamp: string;
 }
 
 export interface DescriptionFieldProps extends BaseFieldProps {
-  description: string
+  description: string;
 }
 
 export interface AcknowledgedByFieldProps extends BaseFieldProps {
-  acknowledgedBy: string
+  acknowledgedBy: string;
 }
 
 export interface ResolvedByFieldProps extends BaseFieldProps {
-  resolvedBy: string
+  resolvedBy: string;
 }
 
 export interface FieldFieldProps extends BaseFieldProps {
-  field: string
+  field: string;
 }
 
 export interface LocationFieldProps extends BaseFieldProps {
-  greenhouse?: string | null
-  device?: string | null
-  city?: string | null
-  column?: string | null
-  row?: string | null
-  measurement?: string | null
-  profile?: string | null
+  greenhouse?: string | null;
+  device?: string | null;
+  city?: string | null;
+  column?: string | null;
+  row?: string | null;
+  measurement?: string | null;
+  profile?: string | null;
 }
 
 export interface AcknowledgedAtFieldProps extends BaseFieldProps {
-  acknowledgedAt: string
+  acknowledgedAt: string;
 }
 
 export interface ResolvedAtFieldProps extends BaseFieldProps {
-  resolvedAt: string
+  resolvedAt: string;
 }

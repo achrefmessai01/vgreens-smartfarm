@@ -34,13 +34,19 @@ interface UseCreateBatchFormOptions {
   onSuccess?: (harvest: CreatedHarvest) => void;
 }
 
-export function useCreateBatchForm({ onSuccess }: UseCreateBatchFormOptions = {}) {
-  const [formData, setFormData] = React.useState<BatchFormData>(INITIAL_FORM_DATA);
+export function useCreateBatchForm({
+  onSuccess,
+}: UseCreateBatchFormOptions = {}) {
+  const [formData, setFormData] =
+    React.useState<BatchFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = React.useState<BatchFormErrors>({});
   const [createHarvest, { loading }] = useCreateHarvestMutation();
 
   const reset = React.useCallback(() => {
-    setFormData({ ...INITIAL_FORM_DATA, plantingDate: new Date().toISOString().split('T')[0] });
+    setFormData({
+      ...INITIAL_FORM_DATA,
+      plantingDate: new Date().toISOString().split('T')[0],
+    });
     setErrors({});
   }, []);
 

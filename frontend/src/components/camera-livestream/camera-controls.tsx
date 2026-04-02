@@ -1,28 +1,28 @@
-'use client'
+'use client';
 
 import {
   getCameraStatusOptions,
   getCameraTunnelOptions,
   hasActiveCameraFilters,
-} from '@/lib/camera-utils'
-import * as React from 'react'
-import { cn } from '@/lib/utils'
-import { useI18n } from '@/i18n'
-import { Input } from '@/components/ui/input'
-import { Search, Filter, X } from 'lucide-react'
-import { getAllTunnels } from '@/lib/tunnel-data'
-import type { CameraStatus } from '@/types/camera.types'
-import { StyledSelect } from '@/components/ui/styled-select'
+} from '@/lib/camera-utils';
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n';
+import { Input } from '@/components/ui/input';
+import { Search, Filter, X } from 'lucide-react';
+import { getAllTunnels } from '@/lib/tunnel-data';
+import type { CameraStatus } from '@/types/camera.types';
+import { StyledSelect } from '@/components/ui/styled-select';
 
 interface CameraControlsProps {
-  searchQuery: string
-  onSearchChange: (query: string) => void
-  selectedTunnel: string
-  onTunnelChange: (tunnelId: string) => void
-  selectedStatus: CameraStatus | 'all'
-  onStatusChange: (status: CameraStatus | 'all') => void
-  totalCameras: number
-  filteredCount: number
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  selectedTunnel: string;
+  onTunnelChange: (tunnelId: string) => void;
+  selectedStatus: CameraStatus | 'all';
+  onStatusChange: (status: CameraStatus | 'all') => void;
+  totalCameras: number;
+  filteredCount: number;
 }
 
 export function CameraControls({
@@ -35,8 +35,8 @@ export function CameraControls({
   totalCameras,
   filteredCount,
 }: CameraControlsProps) {
-  const { t } = useI18n()
-  const tunnels = React.useMemo(() => getAllTunnels(), [])
+  const { t } = useI18n();
+  const tunnels = React.useMemo(() => getAllTunnels(), []);
 
   const statusOptions = React.useMemo(
     () =>
@@ -47,35 +47,35 @@ export function CameraControls({
         offline: t.pages.cameraLivestream.filters.offline,
         error: t.pages.cameraLivestream.filters.error,
       }),
-    [t]
-  )
+    [t],
+  );
 
   const tunnelOptions = React.useMemo(
     () =>
       getCameraTunnelOptions(
         tunnels,
-        t.pages.cameraLivestream.filters.allTunnels
+        t.pages.cameraLivestream.filters.allTunnels,
       ),
-    [tunnels, t]
-  )
+    [tunnels, t],
+  );
 
   const hasActiveFilters = hasActiveCameraFilters(
     searchQuery,
     selectedTunnel,
-    selectedStatus
-  )
+    selectedStatus,
+  );
 
   const clearFilters = () => {
-    onSearchChange('')
-    onTunnelChange('all')
-    onStatusChange('all')
-  }
+    onSearchChange('');
+    onTunnelChange('all');
+    onStatusChange('all');
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground dark:text-white/50" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 dark:text-white/50" />
           <Input
             type="text"
             placeholder={
@@ -83,12 +83,12 @@ export function CameraControls({
             }
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 pr-9 h-10"
+            className="h-10 pr-9 pl-9"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground dark:text-white/50 dark:hover:text-white transition-colors"
+              className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors dark:text-white/50 dark:hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
@@ -117,14 +117,14 @@ export function CameraControls({
         />
       </div>
 
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-white/70">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-muted-foreground flex items-center gap-2 text-sm dark:text-white/70">
           <Filter className="h-4 w-4" />
           <span>
             {filteredCount === totalCameras ? (
               <>
                 Showing{' '}
-                <span className="font-semibold text-foreground dark:text-white">
+                <span className="text-foreground font-semibold dark:text-white">
                   {totalCameras}
                 </span>{' '}
                 camera{totalCameras !== 1 ? 's' : ''}
@@ -132,11 +132,11 @@ export function CameraControls({
             ) : (
               <>
                 Showing{' '}
-                <span className="font-semibold text-foreground dark:text-white">
+                <span className="text-foreground font-semibold dark:text-white">
                   {filteredCount}
                 </span>{' '}
                 of{' '}
-                <span className="font-semibold text-foreground dark:text-white">
+                <span className="text-foreground font-semibold dark:text-white">
                   {totalCameras}
                 </span>{' '}
                 cameras
@@ -149,9 +149,9 @@ export function CameraControls({
           <button
             onClick={clearFilters}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md',
+              'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium',
               'text-muted-foreground hover:text-foreground dark:text-white/70 dark:hover:text-white',
-              'hover:bg-accent dark:hover:bg-accent/50 transition-colors'
+              'hover:bg-accent dark:hover:bg-accent/50 transition-colors',
             )}
           >
             <X className="h-3.5 w-3.5" />
@@ -160,5 +160,5 @@ export function CameraControls({
         )}
       </div>
     </div>
-  )
+  );
 }

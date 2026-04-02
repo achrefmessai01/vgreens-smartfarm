@@ -79,15 +79,15 @@ export function CombinedGreenhouseView({
 
   if (orderedParameters.length === 0 || greenhouses.length === 0) {
     return (
-      <Card className="h-full min-h-0 flex items-center justify-center p-6 rounded-sm">
-        <p className="text-sm text-muted-foreground">{noDataMessage}</p>
+      <Card className="flex h-full min-h-0 items-center justify-center rounded-sm p-6">
+        <p className="text-muted-foreground text-sm">{noDataMessage}</p>
       </Card>
     );
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto pr-1">
-      <div className="grid grid-cols-1 gap-1 pb-1 content-start items-stretch sm:grid-cols-2 sm:gap-2 xl:[grid-template-columns:repeat(auto-fit,minmax(10.75rem,1fr))]">
+      <div className="grid grid-cols-1 content-start items-stretch gap-1 pb-1 sm:grid-cols-2 sm:gap-2 xl:[grid-template-columns:repeat(auto-fit,minmax(10.75rem,1fr))]">
         {greenhouses.map((greenhouse, index) => (
           <GreenhouseSummaryCard
             key={greenhouse.key}
@@ -96,7 +96,11 @@ export function CombinedGreenhouseView({
             parameters={orderedParameters}
             noDataMessage={noDataMessage}
             valueOverride={valueOverride}
-            onParameterClick={onParameterClick ? (parameterKey) => onParameterClick(index, parameterKey) : undefined}
+            onParameterClick={
+              onParameterClick
+                ? (parameterKey) => onParameterClick(index, parameterKey)
+                : undefined
+            }
           />
         ))}
       </div>
@@ -106,7 +110,7 @@ export function CombinedGreenhouseView({
         greenhouseId={parGraphGreenhouseId}
         greenhouseLabel={parGraphLabel}
         embedded
-        className="w-full shrink-0 min-h-[15rem] sm:min-h-[17rem] md:min-h-[20rem] lg:min-h-[24rem]"
+        className="min-h-[15rem] w-full shrink-0 sm:min-h-[17rem] md:min-h-[20rem] lg:min-h-[24rem]"
       />
     </div>
   );

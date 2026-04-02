@@ -1,31 +1,31 @@
 export interface SensorData {
-  sensorName?: string
-  value: string
-  timestamp?: string
-  tunnel?: string
-  status?: string
+  sensorName?: string;
+  value: string;
+  timestamp?: string;
+  tunnel?: string;
+  status?: string;
 }
 
 export interface BaseFieldProps {
-  isLoading?: boolean
+  isLoading?: boolean;
 }
 
 export interface SensorNameFieldProps extends BaseFieldProps {
-  sensorName: string
+  sensorName: string;
 }
 
 export interface ValueFieldProps extends BaseFieldProps {
-  value: string
+  value: string;
 }
 
 export interface TimeStampFieldProps extends BaseFieldProps {
-  timestamp: string
+  timestamp: string;
 }
 
 export interface TunnelFieldProps extends BaseFieldProps {
-  tunnel: string
+  tunnel: string;
 }
 
 export interface StatusFieldProps extends BaseFieldProps {
-  status: string
+  status: string;
 }

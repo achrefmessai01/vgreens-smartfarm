@@ -91,11 +91,11 @@ function DefaultErrorFallback({
   retry: () => void;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <Card className="max-w-md w-full">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-900 rounded-full mb-4">
-            <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+            <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
           </div>
           <CardTitle className="text-gray-900 dark:text-white">
             Something went wrong
@@ -111,7 +111,7 @@ function DefaultErrorFallback({
               <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-300">
                 Error details (dev only)
               </summary>
-              <pre className="mt-2 text-xs text-red-600 dark:text-red-400 bg-gray-100 dark:bg-gray-700 p-2 rounded overflow-auto max-h-32">
+              <pre className="mt-2 max-h-32 overflow-auto rounded bg-gray-100 p-2 text-xs text-red-600 dark:bg-gray-700 dark:text-red-400">
                 {error.message}
                 {error.stack && `\n\n${error.stack}`}
               </pre>

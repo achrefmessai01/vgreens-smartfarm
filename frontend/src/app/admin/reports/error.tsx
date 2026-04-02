@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import ErrorPage from '@/components/ui/error-page'
+import ErrorPage from '@/components/ui/error-page';
 
 export default function AdminReportsError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <ErrorPage
@@ -17,5 +17,5 @@ export default function AdminReportsError({
       description="We encountered an error while loading the reports management page."
       theme="blue"
     />
-  )
+  );
 }

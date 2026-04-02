@@ -74,7 +74,7 @@ export default function AdminReportsPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto space-y-6 py-6">
       <PageHeader
         title={t.pages.admin.reports.title}
         subtitle={t.pages.admin.reports.subtitle}

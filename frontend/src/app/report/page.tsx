@@ -39,7 +39,11 @@ export default function ReportPage() {
       setReportId(createdReportId || null);
       setIsSubmitted(true);
       setTimeout(() => {
-        router.push(createdReportId ? `/report-status?id=${createdReportId}` : '/tenant/dashboard');
+        router.push(
+          createdReportId
+            ? `/report-status?id=${createdReportId}`
+            : '/tenant/dashboard',
+        );
       }, 3000);
     } catch (error) {
       console.error('Failed to submit error report:', error);
@@ -47,7 +51,9 @@ export default function ReportPage() {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -56,7 +62,9 @@ export default function ReportPage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      const imageFiles = Array.from(files).filter((f) => f.type.startsWith('image/'));
+      const imageFiles = Array.from(files).filter((f) =>
+        f.type.startsWith('image/'),
+      );
       setUploadedImages((prev) => [...prev, ...imageFiles].slice(0, 3));
     }
   };

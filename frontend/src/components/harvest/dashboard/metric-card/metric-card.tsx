@@ -27,17 +27,22 @@ export function MetricCard({
   className,
 }: MetricCardProps) {
   return (
-    <Card className={cn('p-6 hover:shadow-lg transition-all duration-300 transform hover:scale-105', className)}>
+    <Card
+      className={cn(
+        'transform p-6 transition-all duration-300 hover:scale-105 hover:shadow-lg',
+        className,
+      )}
+    >
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-muted-foreground text-sm font-medium">{title}</p>
           {icon && <div className="text-muted-foreground">{icon}</div>}
         </div>
         <div className="space-y-1">
           <h3 className={cn('text-2xl font-bold', colorClasses[color])}>
             {value}
           </h3>
-          <p className="text-xs text-muted-foreground">{subtitle}</p>
+          <p className="text-muted-foreground text-xs">{subtitle}</p>
         </div>
       </div>
     </Card>

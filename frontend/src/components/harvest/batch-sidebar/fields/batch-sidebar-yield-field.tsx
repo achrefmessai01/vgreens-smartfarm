@@ -33,10 +33,10 @@ export function YieldDataField({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-5 bg-muted animate-pulse rounded" />
+        <div className="bg-muted h-5 animate-pulse rounded" />
         <div className="grid grid-cols-2 gap-4">
-          <div className="h-16 bg-muted animate-pulse rounded" />
-          <div className="h-16 bg-muted animate-pulse rounded" />
+          <div className="bg-muted h-16 animate-pulse rounded" />
+          <div className="bg-muted h-16 animate-pulse rounded" />
         </div>
       </div>
     );
@@ -51,12 +51,12 @@ export function YieldDataField({
         </span>
       </div>
       <div className="space-y-3">
-        <p className="text-sm text-muted-foreground font-medium">
+        <p className="text-muted-foreground text-sm font-medium">
           {h?.yieldData ?? 'Yield Data'}
         </p>
         <div className="grid grid-cols-2 gap-4">
-          <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
+          <div className="space-y-2 text-center">
+            <p className="text-muted-foreground text-sm">
               {h?.marketable ?? 'Marketable'}
             </p>
             <div className="relative">
@@ -70,18 +70,18 @@ export function YieldDataField({
                   onYieldChange?.('marketable', parseFloat(e.target.value) || 0)
                 }
                 onKeyDown={(e) => handleKeyDown(e, 'waste')}
-                className="text-center text-2xl font-light h-16 pr-12"
+                className="h-16 pr-12 text-center text-2xl font-light"
                 placeholder={
                   h?.enterMarketableYield ?? 'Enter marketable yield'
                 }
               />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+              <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
                 kg
               </span>
             </div>
           </div>
-          <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
+          <div className="space-y-2 text-center">
+            <p className="text-muted-foreground text-sm">
               {h?.waste ?? 'Waste'}
             </p>
             <div className="relative">
@@ -95,10 +95,10 @@ export function YieldDataField({
                   onYieldChange?.('waste', parseFloat(e.target.value) || 0)
                 }
                 onKeyDown={(e) => handleKeyDown(e, 'brix1')}
-                className="text-center text-2xl font-light h-16 pr-12"
+                className="h-16 pr-12 text-center text-2xl font-light"
                 placeholder={h?.enterWasteAmount ?? 'Enter waste amount'}
               />
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+              <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
                 kg
               </span>
             </div>

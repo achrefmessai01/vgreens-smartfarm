@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import ErrorPage from '@/components/ui/error-page'
-import { Clock } from 'lucide-react'
+import ErrorPage from '@/components/ui/error-page';
+import { Clock } from 'lucide-react';
 
 export default function HistoryErrorPage({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   return (
     <ErrorPage
@@ -20,10 +20,10 @@ export default function HistoryErrorPage({
       theme="cyan"
       resetLabel="Reload History"
       backLink={{
-        href: "/tenant/dashboard",
-        label: "Back to Dashboard",
-        icon: Clock
+        href: '/tenant/dashboard',
+        label: 'Back to Dashboard',
+        icon: Clock,
       }}
     />
-  )
+  );
 }

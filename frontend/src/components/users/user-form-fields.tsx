@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import type {
   RoleFieldProps,
@@ -8,21 +8,21 @@ import type {
   ImageUrlFieldProps,
   ClerkUserIdFieldProps,
   ActiveStatusFieldProps,
-} from './user-form-types'
+} from './user-form-types';
 import {
   Field,
   FieldContent,
   FieldError,
   FieldLabel,
-} from '@/components/ui/field'
-import { useI18n } from '@/i18n'
-import { Input } from '@/components/ui/input'
-import { UserRole } from '@/generated/graphql'
-import { Checkbox } from '@/components/ui/checkbox'
-import { SelectField, type SelectOption } from './select-field'
+} from '@/components/ui/field';
+import { useI18n } from '@/i18n';
+import { Input } from '@/components/ui/input';
+import { UserRole } from '@/generated/graphql';
+import { Checkbox } from '@/components/ui/checkbox';
+import { SelectField, type SelectOption } from './select-field';
 
 export function ClerkUserIdField({ value }: ClerkUserIdFieldProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
   return (
     <Field>
       <FieldLabel htmlFor="clerkUserId">
@@ -36,12 +36,12 @@ export function ClerkUserIdField({ value }: ClerkUserIdFieldProps) {
           disabled
           className="bg-muted"
         />
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-muted-foreground mt-1 text-xs">
           {t.pages.admin.users.clerkUserIdDescription}
         </p>
       </FieldContent>
     </Field>
-  )
+  );
 }
 
 export function EmailField({
@@ -51,7 +51,7 @@ export function EmailField({
   isLoading,
   isEditMode,
 }: EmailFieldProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
   return (
     <Field>
       <FieldLabel htmlFor="email">
@@ -69,13 +69,13 @@ export function EmailField({
         />
         {errors.email && <FieldError>{errors.email}</FieldError>}
         {!isEditMode && (
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-xs">
             {t.pages.admin.users.invitationEmailDescription}
           </p>
         )}
       </FieldContent>
     </Field>
-  )
+  );
 }
 
 export function NameFields({
@@ -85,7 +85,7 @@ export function NameFields({
   onLastNameChange,
   isLoading,
 }: NameFieldsProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
   return (
     <>
       <Field>
@@ -119,7 +119,7 @@ export function NameFields({
         </FieldContent>
       </Field>
     </>
-  )
+  );
 }
 
 export function ImageUrlField({
@@ -127,7 +127,7 @@ export function ImageUrlField({
   onChange,
   isLoading,
 }: ImageUrlFieldProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
   return (
     <Field>
       <FieldLabel htmlFor="imageUrl">{t.pages.admin.users.imageUrl}</FieldLabel>
@@ -142,7 +142,7 @@ export function ImageUrlField({
         />
       </FieldContent>
     </Field>
-  )
+  );
 }
 
 export function RoleField({
@@ -153,9 +153,9 @@ export function RoleField({
   allowedRoles,
   isVGreensAdmin,
 }: RoleFieldProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
-  const roleOptions: SelectOption[] = []
+  const roleOptions: SelectOption[] = [];
 
   if (
     (!allowedRoles || allowedRoles.includes(UserRole.VgreensAdmin)) &&
@@ -164,21 +164,21 @@ export function RoleField({
     roleOptions.push({
       value: UserRole.VgreensAdmin,
       label: t.pages.admin.users.roleVgreensAdmin,
-    })
+    });
   }
 
   if (!allowedRoles || allowedRoles.includes(UserRole.TenantAdmin)) {
     roleOptions.push({
       value: UserRole.TenantAdmin,
       label: t.pages.admin.users.roleTenantAdmin,
-    })
+    });
   }
 
   if (!allowedRoles || allowedRoles.includes(UserRole.TenantUser)) {
     roleOptions.push({
       value: UserRole.TenantUser,
       label: t.pages.admin.users.roleTenantUser,
-    })
+    });
   }
 
   return (
@@ -194,7 +194,7 @@ export function RoleField({
       isLoading={isLoading}
       required
     />
-  )
+  );
 }
 
 export function TenantField({
@@ -204,12 +204,12 @@ export function TenantField({
   isLoading,
   tenants,
 }: TenantFieldProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const tenantOptions: SelectOption[] = tenants.map((tenant) => ({
     value: tenant.id,
     label: tenant.name,
-  }))
+  }));
 
   return (
     <SelectField
@@ -224,7 +224,7 @@ export function TenantField({
       isLoading={isLoading}
       required
     />
-  )
+  );
 }
 
 export function ActiveStatusField({
@@ -232,7 +232,7 @@ export function ActiveStatusField({
   onChange,
   isLoading,
 }: ActiveStatusFieldProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
   return (
     <Field>
       <div className="flex items-center gap-2">
@@ -247,5 +247,5 @@ export function ActiveStatusField({
         </FieldLabel>
       </div>
     </Field>
-  )
+  );
 }

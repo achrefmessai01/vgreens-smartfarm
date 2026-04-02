@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Droplet, Zap, Leaf, Users } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import * as React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Droplet, Zap, Leaf, Users } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface RevenueData {
-  water: number
-  energy: number
-  consumables: number
-  labor: number
+  water: number;
+  energy: number;
+  consumables: number;
+  labor: number;
 }
 
 interface RevenueCardProps {
-  data: RevenueData
-  title: string
-  waterLabel: string
-  energyLabel: string
-  consumablesLabel: string
-  laborLabel: string
-  totalLabel: string
+  data: RevenueData;
+  title: string;
+  waterLabel: string;
+  energyLabel: string;
+  consumablesLabel: string;
+  laborLabel: string;
+  totalLabel: string;
 }
 
 export function RevenueCard({
@@ -31,7 +31,7 @@ export function RevenueCard({
   laborLabel,
   totalLabel,
 }: RevenueCardProps) {
-  const total = data.water + data.energy + data.consumables + data.labor
+  const total = data.water + data.energy + data.consumables + data.labor;
 
   return (
     <Card>
@@ -69,15 +69,15 @@ export function RevenueCard({
           </div>
           <span className="font-medium">€{data.labor.toLocaleString()}</span>
         </div>
-        <div className="border-t pt-3 mt-3">
+        <div className="mt-3 border-t pt-3">
           <div className="flex items-center justify-between">
             <span className="font-semibold">{totalLabel}</span>
-            <span className="text-lg font-bold text-primary">
+            <span className="text-primary text-lg font-bold">
               €{total.toLocaleString()}
             </span>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

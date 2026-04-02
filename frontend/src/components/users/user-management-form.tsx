@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import {
   RoleField,
@@ -8,29 +8,29 @@ import {
   ImageUrlField,
   ClerkUserIdField,
   ActiveStatusField,
-} from './user-form-fields'
-import * as React from 'react'
-import { UserRole } from '@/generated/graphql'
-import { FieldGroup } from '@/components/ui/field'
-import type { User, Tenant } from '@/generated/graphql'
-import type { UserFormData, UserFormErrors } from './user-form-types'
-import { useUserManagementForm } from '@/lib/hooks/use-user-management-form'
+} from './user-form-fields';
+import * as React from 'react';
+import { UserRole } from '@/generated/graphql';
+import { FieldGroup } from '@/components/ui/field';
+import type { User, Tenant } from '@/generated/graphql';
+import type { UserFormData, UserFormErrors } from './user-form-types';
+import { useUserManagementForm } from '@/lib/hooks/use-user-management-form';
 
-export type { UserFormData, UserFormErrors }
+export type { UserFormData, UserFormErrors };
 
 interface UserManagementFormProps {
-  initialData?: Partial<User>
-  tenants?: Tenant[]
-  isVGreensAdmin?: boolean
-  onSubmit: (data: UserFormData) => void
-  onCancel: () => void
-  isLoading?: boolean
-  allowedRoles?: UserRole[]
-  hideTenantSelection?: boolean
+  initialData?: Partial<User>;
+  tenants?: Tenant[];
+  isVGreensAdmin?: boolean;
+  onSubmit: (data: UserFormData) => void;
+  onCancel: () => void;
+  isLoading?: boolean;
+  allowedRoles?: UserRole[];
+  hideTenantSelection?: boolean;
 }
 
 export interface UserManagementFormRef {
-  submit: () => void
+  submit: () => void;
 }
 
 export const UserManagementForm = React.forwardRef<
@@ -48,7 +48,7 @@ export const UserManagementForm = React.forwardRef<
       allowedRoles,
       hideTenantSelection = false,
     },
-    ref
+    ref,
   ) => {
     const {
       formRef,
@@ -63,9 +63,9 @@ export const UserManagementForm = React.forwardRef<
       initialData,
       hideTenantSelection,
       onSubmit,
-    })
+    });
 
-    React.useImperativeHandle(ref, () => ({ submit }))
+    React.useImperativeHandle(ref, () => ({ submit }));
 
     return (
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
@@ -129,8 +129,8 @@ export const UserManagementForm = React.forwardRef<
           />
         </FieldGroup>
       </form>
-    )
-  }
-)
+    );
+  },
+);
 
-UserManagementForm.displayName = 'UserManagementForm'
+UserManagementForm.displayName = 'UserManagementForm';

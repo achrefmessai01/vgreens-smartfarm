@@ -34,19 +34,27 @@ export class ErrorReportsService {
     // Apply filters
     if (filter) {
       if (filter.userId) {
-        query.andWhere('errorReport.userId = :userId', { userId: filter.userId });
+        query.andWhere('errorReport.userId = :userId', {
+          userId: filter.userId,
+        });
       }
 
       if (filter.severity) {
-        query.andWhere('errorReport.severity = :severity', { severity: filter.severity });
+        query.andWhere('errorReport.severity = :severity', {
+          severity: filter.severity,
+        });
       }
 
       if (filter.status) {
-        query.andWhere('errorReport.status = :status', { status: filter.status });
+        query.andWhere('errorReport.status = :status', {
+          status: filter.status,
+        });
       }
 
       if (typeof filter.isResolved === 'boolean') {
-        query.andWhere('errorReport.isResolved = :isResolved', { isResolved: filter.isResolved });
+        query.andWhere('errorReport.isResolved = :isResolved', {
+          isResolved: filter.isResolved,
+        });
       }
 
       if (filter.createdAfter) {
@@ -69,7 +77,10 @@ export class ErrorReportsService {
     return query.getMany();
   }
 
-  async findOneById(id: string, tenantId?: string): Promise<ErrorReport | null> {
+  async findOneById(
+    id: string,
+    tenantId?: string,
+  ): Promise<ErrorReport | null> {
     const query = this.errorReportRepository
       .createQueryBuilder('errorReport')
       .leftJoinAndSelect('errorReport.user', 'user')
@@ -93,7 +104,9 @@ export class ErrorReportsService {
       ...input,
       userId,
       tenantId,
-      attachments: input.attachments ? JSON.stringify(input.attachments) : undefined,
+      attachments: input.attachments
+        ? JSON.stringify(input.attachments)
+        : undefined,
     });
 
     return this.errorReportRepository.save(errorReport);

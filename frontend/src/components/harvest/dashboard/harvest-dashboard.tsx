@@ -49,11 +49,11 @@ export function HarvestDashboard({
   if (error) {
     return (
       <div
-        className={`flex items-center justify-center min-h-[300px] px-4 sm:min-h-[400px] ${className}`}
+        className={`flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px] ${className}`}
       >
-        <div className="text-center max-w-md">
-          <AlertTriangle className="h-6 w-6 text-destructive mx-auto mb-3 sm:h-8 sm:w-8 sm:mb-4" />
-          <p className="text-sm text-destructive mb-3 sm:text-base sm:mb-4">
+        <div className="max-w-md text-center">
+          <AlertTriangle className="text-destructive mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
+          <p className="text-destructive mb-3 text-sm sm:mb-4 sm:text-base">
             {error.message}
           </p>
           <Button
@@ -72,11 +72,11 @@ export function HarvestDashboard({
   if (!data) {
     return (
       <div
-        className={`flex items-center justify-center min-h-[300px] px-4 sm:min-h-[400px] ${className}`}
+        className={`flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px] ${className}`}
       >
-        <div className="text-center max-w-md">
-          <Package className="h-6 w-6 text-muted-foreground mx-auto mb-3 sm:h-8 sm:w-8 sm:mb-4" />
-          <p className="text-sm text-muted-foreground sm:text-base">
+        <div className="max-w-md text-center">
+          <Package className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
+          <p className="text-muted-foreground text-sm sm:text-base">
             No harvest data available
           </p>
         </div>
@@ -86,12 +86,12 @@ export function HarvestDashboard({
 
   return (
     <div className={className}>
-      <div className="flex flex-row items-center justify-between gap-4 mb-6 sm:mb-8">
-        <div className="flex-1 min-w-0">
+      <div className="mb-6 flex flex-row items-center justify-between gap-4 sm:mb-8">
+        <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
             {t.pages.harvest?.performanceDashboard ?? 'Performance Dashboard'}
           </h1>
-          <p className="text-xs text-muted-foreground mt-1 sm:text-sm">
+          <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
             {data.harvestCount}{' '}
             {t.pages.harvest?.harvestsLogged ?? 'harvests logged'} for{' '}
             {filterLabel}

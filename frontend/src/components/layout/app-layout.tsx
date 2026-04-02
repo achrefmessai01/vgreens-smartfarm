@@ -59,7 +59,7 @@ export function AppLayout({ children, user, onLogout }: AppLayoutProps) {
           className={`flex flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}
         >
           <Navbar user={navbarUser} onSettingsClick={handleSettingsClick} />
-          <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
+          <main className="bg-background flex-1 overflow-y-auto p-4 lg:p-6">
             {children}
           </main>
         </div>
@@ -89,7 +89,7 @@ export function AppLayout({ children, user, onLogout }: AppLayoutProps) {
         className={`flex flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}
       >
         <Navbar user={navbarUser} onSettingsClick={handleSettingsClick} />
-        <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
+        <main className="bg-background flex-1 overflow-y-auto p-4 lg:p-6">
           {children}
         </main>
       </div>

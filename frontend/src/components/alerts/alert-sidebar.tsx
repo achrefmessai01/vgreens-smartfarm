@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetFooter,
-} from '@/components/ui/sheet'
-import { Alert, AlertSeverity, AlertStatus } from '@/generated/graphql'
+} from '@/components/ui/sheet';
+import { Alert, AlertSeverity, AlertStatus } from '@/generated/graphql';
 import {
   SensorNameField,
   ValueField,
@@ -23,17 +23,17 @@ import {
   LocationFields,
   AcknowledgedAtField,
   ResolvedAtField,
-} from './alert-sidebar-fields'
-import { CheckCircle2, CheckCircle, AlertTriangle } from 'lucide-react'
-import { cn } from '@/lib/utils'
+} from './alert-sidebar-fields';
+import { CheckCircle2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface AlertSidebarProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  alert: Alert | null
-  onAcknowledge?: (alert: Alert) => void
-  onResolve?: (alert: Alert) => void
-  isLoading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  alert: Alert | null;
+  onAcknowledge?: (alert: Alert) => void;
+  onResolve?: (alert: Alert) => void;
+  isLoading?: boolean;
 }
 
 export function AlertSidebar({
@@ -44,61 +44,64 @@ export function AlertSidebar({
   onResolve,
   isLoading = false,
 }: AlertSidebarProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
-  const canAcknowledge = alert?.status === AlertStatus.Open && alert?.acknowledgedBy == null
-    const canResolve =
-      (alert?.status === AlertStatus.Open ||
-      alert?.status === AlertStatus.Acknowledged ) && alert?.resolvedBy == null && alert?.acknowledgedBy != null
-  
+  const canAcknowledge =
+    alert?.status === AlertStatus.Open && alert?.acknowledgedBy == null;
+  const canResolve =
+    (alert?.status === AlertStatus.Open ||
+      alert?.status === AlertStatus.Acknowledged) &&
+    alert?.resolvedBy == null &&
+    alert?.acknowledgedBy != null;
+
   const getStatusLabel = (status?: AlertStatus | null) => {
     switch (status) {
       case AlertStatus.Open:
-        return t.pages.alerts.statusOpen
+        return t.pages.alerts.statusOpen;
       case AlertStatus.Acknowledged:
-        return t.pages.alerts.statusAcknowledged
+        return t.pages.alerts.statusAcknowledged;
       case AlertStatus.Resolved:
-        return t.pages.alerts.statusResolved
+        return t.pages.alerts.statusResolved;
       default:
-        return '-'
+        return '-';
     }
-  }
+  };
 
   const getSeverityLabel = (severity?: AlertSeverity | null) => {
     switch (severity) {
       case AlertSeverity.Critical:
-        return t.pages.alerts.critical
+        return t.pages.alerts.critical;
       default:
-        return severity ?? '-'
+        return severity ?? '-';
     }
-  }
+  };
 
   const formatTimestamp = (timestamp?: string | null) => {
-    if (!timestamp) return '-'
-    return new Date(timestamp).toLocaleString()
-  }
+    if (!timestamp) return '-';
+    return new Date(timestamp).toLocaleString();
+  };
 
   const formatRelativeOrAbsolute = (timestamp?: string | null) => {
-    if (!timestamp) return '-'
-    const d = new Date(timestamp)
-    if (Number.isNaN(d.getTime())) return '-'
-    const now = Date.now()
-    const diffMs = now - d.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins} min ago`
-    if (diffHours < 24) return `${diffHours} h ago`
-    if (diffDays < 7) return `${diffDays} days ago`
-    return d.toLocaleString()
-  }
+    if (!timestamp) return '-';
+    const d = new Date(timestamp);
+    if (Number.isNaN(d.getTime())) return '-';
+    const now = Date.now();
+    const diffMs = now - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24) return `${diffHours} h ago`;
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return d.toLocaleString();
+  };
 
   const formatUser = (user?: Alert['acknowledgedBy']) => {
-    if (!user) return '-'
-    const name = [user.firstName, user.lastName].filter(Boolean).join(' ')
-    return name || user.email || '-'
-  }
+    if (!user) return '-';
+    const name = [user.firstName, user.lastName].filter(Boolean).join(' ');
+    return name || user.email || '-';
+  };
 
   const statusBadge =
     alert?.status === AlertStatus.Open ? (
@@ -122,25 +125,25 @@ export function AlertSidebar({
         <CheckCircle className="h-3.5 w-3.5" />
         {getStatusLabel(alert?.status)}
       </Badge>
-    ) : null
+    ) : null;
 
   const severityBadge =
     alert?.severity === AlertSeverity.Critical ? (
       <Badge variant="destructive">{getSeverityLabel(alert.severity)}</Badge>
     ) : (
       <Badge variant="outline">{getSeverityLabel(alert?.severity)}</Badge>
-    )
+    );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
         className={cn(
-          'w-full sm:max-w-xl md:max-w-2xl flex flex-col p-0 gap-0',
-          'bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80',
+          'flex w-full flex-col gap-0 p-0 sm:max-w-xl md:max-w-2xl',
+          'bg-card/95 supports-[backdrop-filter]:bg-card/80 backdrop-blur',
         )}
       >
-        <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/60">
+        <SheetHeader className="border-border/60 border-b px-6 pt-6 pb-4">
           <SheetTitle className="text-lg font-semibold tracking-tight">
             {t.pages.alerts.title}
           </SheetTitle>
@@ -150,15 +153,15 @@ export function AlertSidebar({
           {alert ? (
             <div className="space-y-6">
               {/* Status & Severity at top with labels */}
-              <div className="flex flex-wrap gap-4 sm:gap-6 items-end">
+              <div className="flex flex-wrap items-end gap-4 sm:gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                     {t.pages.alerts.status}
                   </span>
                   <div>{statusBadge}</div>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                     {t.pages.alerts.severity}
                   </span>
                   <div>{severityBadge}</div>
@@ -166,8 +169,11 @@ export function AlertSidebar({
               </div>
 
               {/* Two-column grid for main fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <SensorNameField sensorName={alert.sensorName} isLoading={isLoading} />
+              <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                <SensorNameField
+                  sensorName={alert.sensorName}
+                  isLoading={isLoading}
+                />
                 <FieldField field={alert.field ?? '-'} isLoading={isLoading} />
                 <ValueField value={alert.value} isLoading={isLoading} />
                 <TimeStampField
@@ -193,17 +199,19 @@ export function AlertSidebar({
               />
 
               {/* Resolution in two columns */}
-              <div className="pt-2 border-t border-border/60 space-y-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <div className="border-border/60 space-y-4 border-t pt-2">
+                <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                   {t.pages.alerts.resolutionSection ?? 'Resolution'}
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
                   <AcknowledgedByField
                     acknowledgedBy={formatUser(alert.acknowledgedBy)}
                     isLoading={isLoading}
                   />
                   <AcknowledgedAtField
-                    acknowledgedAt={formatRelativeOrAbsolute(alert.acknowledgedTime) ?? '-'}
+                    acknowledgedAt={
+                      formatRelativeOrAbsolute(alert.acknowledgedTime) ?? '-'
+                    }
                     isLoading={isLoading}
                   />
                   <ResolvedByField
@@ -211,20 +219,22 @@ export function AlertSidebar({
                     isLoading={isLoading}
                   />
                   <ResolvedAtField
-                    resolvedAt={formatRelativeOrAbsolute(alert.resolvedTime) ?? '-'}
+                    resolvedAt={
+                      formatRelativeOrAbsolute(alert.resolvedTime) ?? '-'
+                    }
                     isLoading={isLoading}
                   />
                 </div>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {t.pages.alerts.noAlertsDescription}
             </p>
           )}
         </div>
 
-        <SheetFooter className="flex-row gap-2 px-6 py-4 border-t border-border/60 bg-muted/20">
+        <SheetFooter className="border-border/60 bg-muted/20 flex-row gap-2 border-t px-6 py-4">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -238,18 +248,22 @@ export function AlertSidebar({
               variant="outline"
               onClick={() => onAcknowledge(alert)}
               disabled={isLoading}
-              className="flex-1 border-primary/50 text-primary hover:bg-primary/10"
+              className="border-primary/50 text-primary hover:bg-primary/10 flex-1"
             >
               {t.pages.alerts.acknowledge}
             </Button>
           )}
           {canResolve && alert && onResolve && (
-            <Button onClick={() => onResolve(alert)} disabled={isLoading} className="flex-1">
+            <Button
+              onClick={() => onResolve(alert)}
+              disabled={isLoading}
+              className="flex-1"
+            >
               {t.pages.alerts.resolve}
             </Button>
           )}
         </SheetFooter>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   Table,
   TableBody,
@@ -8,37 +8,37 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { cn } from '@/lib/utils'
+} from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 
-export type HistoryViewType = 'yield' | 'brix' | 'both'
+export type HistoryViewType = 'yield' | 'brix' | 'both';
 
 export interface HistoryTableData {
-  week: number
-  date: string
-  expectedYield?: number
-  actualYield?: number
-  yieldPercentageDiff?: number
-  expectedBrix?: number
-  actualBrix?: number
-  brixPercentageDiff?: number
-  expectedProductionCost: number
-  actualProductionCost: number
+  week: number;
+  date: string;
+  expectedYield?: number;
+  actualYield?: number;
+  yieldPercentageDiff?: number;
+  expectedBrix?: number;
+  actualBrix?: number;
+  brixPercentageDiff?: number;
+  expectedProductionCost: number;
+  actualProductionCost: number;
 }
 
 interface HistoryTableProps {
-  data: HistoryTableData[]
-  viewType: HistoryViewType
-  weekLabel: string
-  dateLabel: string
-  expectedYieldLabel: string
-  actualYieldLabel: string
-  expectedBrixLabel: string
-  actualBrixLabel: string
-  expectedProductionCostLabel: string
-  actualProductionCostLabel: string
-  tonsLabel: string
-  brixUnit: string
+  data: HistoryTableData[];
+  viewType: HistoryViewType;
+  weekLabel: string;
+  dateLabel: string;
+  expectedYieldLabel: string;
+  actualYieldLabel: string;
+  expectedBrixLabel: string;
+  actualBrixLabel: string;
+  expectedProductionCostLabel: string;
+  actualProductionCostLabel: string;
+  tonsLabel: string;
+  brixUnit: string;
 }
 
 export function HistoryTable({
@@ -55,24 +55,24 @@ export function HistoryTable({
   tonsLabel,
   brixUnit,
 }: HistoryTableProps) {
-  const showYield = viewType === 'yield' || viewType === 'both'
-  const showBrix = viewType === 'brix' || viewType === 'both'
+  const showYield = viewType === 'yield' || viewType === 'both';
+  const showBrix = viewType === 'brix' || viewType === 'both';
 
   const formatPercentage = (percentage: number) => {
-    const sign = percentage >= 0 ? '+' : ''
-    return `${sign}${percentage.toFixed(1)}%`
-  }
+    const sign = percentage >= 0 ? '+' : '';
+    return `${sign}${percentage.toFixed(1)}%`;
+  };
 
   const getPercentageColor = (percentage: number) => {
     if (percentage >= 0) {
-      return 'text-green-600 dark:text-green-400'
+      return 'text-green-600 dark:text-green-400';
     }
-    return 'text-red-600 dark:text-red-400'
-  }
+    return 'text-red-600 dark:text-red-400';
+  };
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border overflow-hidden">
+      <div className="overflow-hidden rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow className="bg-primary text-primary-foreground hover:bg-primary/90">
@@ -126,7 +126,7 @@ export function HistoryTable({
                         <span
                           className={cn(
                             'ml-2 text-sm',
-                            getPercentageColor(row.yieldPercentageDiff)
+                            getPercentageColor(row.yieldPercentageDiff),
                           )}
                         >
                           ({formatPercentage(row.yieldPercentageDiff)})
@@ -146,7 +146,7 @@ export function HistoryTable({
                         <span
                           className={cn(
                             'ml-2 text-sm',
-                            getPercentageColor(row.brixPercentageDiff)
+                            getPercentageColor(row.brixPercentageDiff),
                           )}
                         >
                           ({formatPercentage(row.brixPercentageDiff)})
@@ -165,5 +165,5 @@ export function HistoryTable({
         </Table>
       </div>
     </div>
-  )
+  );
 }

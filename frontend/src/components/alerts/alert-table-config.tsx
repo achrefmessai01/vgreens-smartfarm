@@ -1,20 +1,22 @@
-import * as React from 'react'
-import { type Column, type FilterConfigOption } from '@/components/ui/data-table'
-import { Alert, AlertSeverity, AlertStatus } from '@/generated/graphql'
-import { useI18n } from '@/i18n'
-import type { AlertsFilterInput } from '@/lib/alerts-filter'
-import { AlertTableUser, createUserOptions } from './alert-table-utils'
+import * as React from 'react';
+import {
+  type Column,
+  type FilterConfigOption,
+} from '@/components/ui/data-table';
+import { Alert, AlertSeverity, AlertStatus } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
+import type { AlertsFilterInput } from '@/lib/alerts-filter';
+import { AlertTableUser, createUserOptions } from './alert-table-utils';
 
 /**
  * Configuration for alert table filters and columns
  */
 
 export const useAlertTableColumns = (): Column<Alert>[] => {
-  const { t } = useI18n()
-  
+  const { t } = useI18n();
+
   return [
-    { key: 'sensorName', header: t.pages.alerts.sensorName },
-    { key: 'field', header: t.pages.alerts.field ?? 'Parameter' },
+    { key: 'field', header: t.pages.alerts.name },
     { key: 'value', header: t.pages.alerts.value },
     { key: 'status', header: t.pages.alerts.status },
     { key: 'severity', header: t.pages.alerts.severity },
@@ -26,27 +28,30 @@ export const useAlertTableColumns = (): Column<Alert>[] => {
       header: t.pages.alerts.actions,
       headerClassName: 'text-right',
     },
-  ]
-}
+  ];
+};
 
 export const useAlertTableFilters = (
   filter: AlertsFilterInput,
   onFilterChange: (updates: Partial<AlertsFilterInput>) => void,
-  users: AlertTableUser[]
+  users: AlertTableUser[],
 ): FilterConfigOption[] => {
-  const { t } = useI18n()
-  
-  const alertsT = t.pages.alerts as typeof t.pages.alerts & {
-    searchPlaceholder?: string
-    filterBySeverity?: string
-    allSeverities?: string
-    filterByAcknowledgedBy?: string
-    filterByResolvedBy?: string
-    dateRangePlaceholder?: string
-    allUsers?: string
-  }
+  const { t } = useI18n();
 
-  const userOptionsForMulti = React.useMemo(() => createUserOptions(users), [users])
+  const alertsT = t.pages.alerts as typeof t.pages.alerts & {
+    searchPlaceholder?: string;
+    filterBySeverity?: string;
+    allSeverities?: string;
+    filterByAcknowledgedBy?: string;
+    filterByResolvedBy?: string;
+    dateRangePlaceholder?: string;
+    allUsers?: string;
+  };
+
+  const userOptionsForMulti = React.useMemo(
+    () => createUserOptions(users),
+    [users],
+  );
 
   return React.useMemo(
     () => [
@@ -55,7 +60,10 @@ export const useAlertTableFilters = (
         value: filter.statusIn?.length ? filter.statusIn.join(',') : '',
         options: [
           { label: alertsT.statusOpen, value: AlertStatus.Open },
-          { label: alertsT.statusAcknowledged, value: AlertStatus.Acknowledged },
+          {
+            label: alertsT.statusAcknowledged,
+            value: AlertStatus.Acknowledged,
+          },
           { label: alertsT.statusResolved, value: AlertStatus.Resolved },
         ],
         multiSelect: true,
@@ -132,5 +140,5 @@ export const useAlertTableFilters = (
       onFilterChange,
       userOptionsForMulti,
     ],
-  )
-}
+  );
+};

@@ -1,31 +1,31 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { StyledSelect } from '@/components/ui/styled-select'
-import { cn } from '@/lib/utils'
+import * as React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { StyledSelect } from '@/components/ui/styled-select';
+import { cn } from '@/lib/utils';
 
 export interface TablePaginationProps {
-  startIndex: number
-  endIndex: number
-  totalItems: number
-  currentPage: number
-  totalPages: number
-  pageSize: number
-  pageSizeOptions: number[]
-  onPageChange: (page: number) => void
-  onPageSizeChange: (size: number) => void
+  startIndex: number;
+  endIndex: number;
+  totalItems: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  pageSizeOptions: number[];
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
   labels?: Partial<{
-    showing: string
-    of: string
-    results: string
-    perPage: string
-    previous: string
-    next: string
-  }>
-  variant?: 'default' | 'compact'
-  className?: string
+    showing: string;
+    of: string;
+    results: string;
+    perPage: string;
+    previous: string;
+    next: string;
+  }>;
+  variant?: 'default' | 'compact';
+  className?: string;
 }
 
 export function TablePagination({
@@ -42,48 +42,49 @@ export function TablePagination({
   variant = 'default',
   className,
 }: TablePaginationProps) {
-  const showing = labels.showing ?? 'Showing'
-  const ofLabel = labels.of ?? 'of'
-  const results = labels.results ?? 'results'
-  const perPage = labels.perPage ?? 'per page'
-  const previous = labels.previous ?? 'Previous'
-  const next = labels.next ?? 'Next'
-  const isCompact = variant === 'compact'
-  const safeTotalPages = Math.max(totalPages, 1)
+  const showing = labels.showing ?? 'Showing';
+  const ofLabel = labels.of ?? 'of';
+  const results = labels.results ?? 'results';
+  const perPage = labels.perPage ?? 'per page';
+  const previous = labels.previous ?? 'Previous';
+  const next = labels.next ?? 'Next';
+  const isCompact = variant === 'compact';
+  const safeTotalPages = Math.max(totalPages, 1);
 
   const pageNumbers = React.useMemo(() => {
     if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1)
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    const set = new Set<number>([1, totalPages])
-    set.add(currentPage)
-    if (currentPage > 1) set.add(currentPage - 1)
-    if (currentPage < totalPages) set.add(currentPage + 1)
+    const set = new Set<number>([1, totalPages]);
+    set.add(currentPage);
+    if (currentPage > 1) set.add(currentPage - 1);
+    if (currentPage < totalPages) set.add(currentPage + 1);
 
-    return Array.from(set).sort((a, b) => a - b)
-  }, [currentPage, totalPages])
+    return Array.from(set).sort((a, b) => a - b);
+  }, [currentPage, totalPages]);
 
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 border-t border-border/60 bg-muted/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5',
+        'border-border/60 bg-muted/20 flex flex-col gap-4 border-t px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5',
         className,
       )}
     >
-      <p className="order-2 text-sm text-muted-foreground sm:order-1">
+      <p className="text-muted-foreground order-2 text-sm sm:order-1">
         {showing}{' '}
-        <span className="font-medium text-foreground">
-          {totalItems === 0 ? 0 : startIndex + 1}-{Math.min(endIndex, totalItems)}
+        <span className="text-foreground font-medium">
+          {totalItems === 0 ? 0 : startIndex + 1}-
+          {Math.min(endIndex, totalItems)}
         </span>{' '}
         {ofLabel}{' '}
-        <span className="font-medium text-foreground">{totalItems}</span>{' '}
+        <span className="text-foreground font-medium">{totalItems}</span>{' '}
         {results}
       </p>
 
       <div className="order-1 flex flex-col gap-3 sm:order-2 sm:flex-row sm:items-center sm:gap-4">
         <div className="flex items-center justify-between gap-2 sm:justify-start">
-          <span className="whitespace-nowrap text-sm text-muted-foreground">
+          <span className="text-muted-foreground text-sm whitespace-nowrap">
             {perPage}
           </span>
           <StyledSelect
@@ -117,7 +118,7 @@ export function TablePagination({
                 </Button>
 
                 <span
-                  className="min-w-0 text-center text-sm font-medium text-foreground"
+                  className="text-foreground min-w-0 text-center text-sm font-medium"
                   aria-live="polite"
                 >
                   {currentPage} / {safeTotalPages}
@@ -156,13 +157,13 @@ export function TablePagination({
 
               {pageNumbers.map((page, index) => {
                 const showEllipsisBefore =
-                  index > 0 && pageNumbers[index - 1] !== page - 1
+                  index > 0 && pageNumbers[index - 1] !== page - 1;
 
                 return (
                   <React.Fragment key={page}>
                     {showEllipsisBefore && (
                       <span
-                        className="flex w-8 items-center justify-center text-sm text-muted-foreground"
+                        className="text-muted-foreground flex w-8 items-center justify-center text-sm"
                         aria-hidden
                       >
                         ...
@@ -177,7 +178,7 @@ export function TablePagination({
                       {page}
                     </Button>
                   </React.Fragment>
-                )
+                );
               })}
 
               <Button
@@ -195,5 +196,5 @@ export function TablePagination({
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,17 +1,20 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ErrorReport, ReportStatus } from '@/generated/graphql'
-import { formatDateTime, getTimelineStatus } from '@/lib/utils/error-report-utils'
-import { useI18n } from '@/i18n'
-import { Clock } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ErrorReport, ReportStatus } from '@/generated/graphql';
+import {
+  formatDateTime,
+  getTimelineStatus,
+} from '@/lib/utils/error-report-utils';
+import { useI18n } from '@/i18n';
+import { Clock } from 'lucide-react';
 
 interface ReportStatusTimelineProps {
-  report: ErrorReport
+  report: ErrorReport;
 }
 
 export function ReportStatusTimeline({ report }: ReportStatusTimelineProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const timelineSteps = [
     {
@@ -26,20 +29,23 @@ export function ReportStatusTimeline({ report }: ReportStatusTimelineProps) {
       status: ReportStatus.InProgress,
       label: t.pages.reportStatus.status.inProgress,
       timestamp: null,
-      description: report.status === ReportStatus.InProgress || report.status === ReportStatus.Resolved
-        ? t.pages.reportStatus.timeline.underInvestigation
-        : t.pages.reportStatus.timeline.pendingReview,
+      description:
+        report.status === ReportStatus.InProgress ||
+        report.status === ReportStatus.Resolved
+          ? t.pages.reportStatus.timeline.underInvestigation
+          : t.pages.reportStatus.timeline.pendingReview,
     },
     {
       key: 'resolved',
       status: ReportStatus.Resolved,
       label: t.pages.reportStatus.status.resolved,
       timestamp: report.resolvedAt ? formatDateTime(report.resolvedAt) : null,
-      description: report.status === ReportStatus.Resolved && report.resolvedAt
-        ? formatDateTime(report.resolvedAt)
-        : t.pages.reportStatus.timeline.pendingResolution,
+      description:
+        report.status === ReportStatus.Resolved && report.resolvedAt
+          ? formatDateTime(report.resolvedAt)
+          : t.pages.reportStatus.timeline.pendingResolution,
     },
-  ]
+  ];
 
   return (
     <Card>
@@ -52,29 +58,31 @@ export function ReportStatusTimeline({ report }: ReportStatusTimelineProps) {
       <CardContent>
         <div className="space-y-4">
           {timelineSteps.map((step, index) => {
-            const status = getTimelineStatus(report.status, step.status)
-            const isCompleted = status === 'completed'
-            
+            const status = getTimelineStatus(report.status, step.status);
+            const isCompleted = status === 'completed';
+
             return (
               <div key={step.key} className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${
-                  isCompleted 
-                    ? 'bg-green-500' 
-                    : index === 0 || report.status === step.status
-                      ? 'bg-yellow-500'
-                      : 'bg-gray-300'
-                }`} />
+                <div
+                  className={`h-3 w-3 rounded-full ${
+                    isCompleted
+                      ? 'bg-green-500'
+                      : index === 0 || report.status === step.status
+                        ? 'bg-yellow-500'
+                        : 'bg-gray-300'
+                  }`}
+                />
                 <div className="flex-1">
-                  <div className="font-medium text-sm">{step.label}</div>
+                  <div className="text-sm font-medium">{step.label}</div>
                   <div className="text-xs text-gray-500">
                     {step.timestamp || step.description}
                   </div>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

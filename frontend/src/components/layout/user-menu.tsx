@@ -82,20 +82,21 @@ export function UserMenu({ className }: UserMenuProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className={`flex items-center gap-2 rounded-full cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${className}`}
+          className={`focus:ring-ring flex cursor-pointer items-center gap-2 rounded-full transition-opacity hover:opacity-80 focus:ring-2 focus:ring-offset-2 focus:outline-none ${className}`}
           aria-label={t.common.settings || 'User menu'}
         >
-          <Avatar className="h-8 w-8 border-2 border-border cursor-pointer">
+          <Avatar className="border-border h-8 w-8 cursor-pointer border-2">
             {user?.imageUrl ? (
               <AvatarImage
                 src={user.imageUrl}
                 alt={getUserDisplayName()}
                 className="object-cover"
               />
-            ) : null}
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-              {getUserInitials()}
-            </AvatarFallback>
+            ) : (
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+                {getUserInitials()}
+              </AvatarFallback>
+            )}
           </Avatar>
         </button>
       </DropdownMenuTrigger>
@@ -103,13 +104,13 @@ export function UserMenu({ className }: UserMenuProps) {
         {/* User Info Section */}
         <DropdownMenuLabel className="flex flex-col gap-1 p-3">
           <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold text-sm">
+            <User className="text-muted-foreground h-4 w-4" />
+            <span className="text-sm font-semibold">
               {getUserDisplayName()}
             </span>
           </div>
           {user?.email && (
-            <span className="text-xs text-muted-foreground ml-6">
+            <span className="text-muted-foreground ml-6 text-xs">
               {user.email}
             </span>
           )}
@@ -119,7 +120,7 @@ export function UserMenu({ className }: UserMenuProps) {
 
         {/* Role Section */}
         <div className="px-2 py-1.5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-2 text-xs">
             <Shield className="h-3.5 w-3.5" />
             <span>{getRoleLabel()}</span>
           </div>
@@ -129,7 +130,7 @@ export function UserMenu({ className }: UserMenuProps) {
         {!isVGreensAdmin && user?.tenantId && (
           <>
             <div className="px-2 py-1.5">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="text-muted-foreground flex items-center gap-2 text-xs">
                 <Building2 className="h-3.5 w-3.5" />
                 <span>{getTenantName()}</span>
               </div>
@@ -144,8 +145,8 @@ export function UserMenu({ className }: UserMenuProps) {
           className="cursor-pointer"
         >
           <div className="relative mr-2 h-4 w-4">
-            <Moon className="absolute inset-0 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Sun className="absolute inset-0 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <Moon className="absolute inset-0 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+            <Sun className="absolute inset-0 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
           </div>
           <span>
             {theme === 'dark' ? t.common.darkMode : t.common.lightMode}

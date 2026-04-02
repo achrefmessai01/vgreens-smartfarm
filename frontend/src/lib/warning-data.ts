@@ -1,4 +1,4 @@
-import type { Warning, Alert, WarningStatus } from '@/types/warning.types'
+import type { Warning, Alert, WarningStatus } from '@/types/warning.types';
 
 // In-memory storage for demo purposes
 // In a real app, this would be replaced with API calls
@@ -44,7 +44,7 @@ let warnings: Warning[] = [
     createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
   },
-]
+];
 
 let alerts: Alert[] = [
   {
@@ -80,61 +80,60 @@ let alerts: Alert[] = [
     createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
   },
-]
+];
 
 export function getAllWarnings(): Warning[] {
-  return [...warnings]
+  return [...warnings];
 }
 
 export function getWarningsByStatus(status: WarningStatus | 'all'): Warning[] {
   if (status === 'all') {
-    return warnings
+    return warnings;
   }
-  return warnings.filter((warning) => warning.status === status)
+  return warnings.filter((warning) => warning.status === status);
 }
 
 export function updateWarningStatus(
   id: string,
-  status: WarningStatus
+  status: WarningStatus,
 ): Warning | null {
-  const warningIndex = warnings.findIndex((warning) => warning.id === id)
+  const warningIndex = warnings.findIndex((warning) => warning.id === id);
   if (warningIndex === -1) {
-    return null
+    return null;
   }
 
   warnings[warningIndex] = {
     ...warnings[warningIndex],
     status,
     updatedAt: new Date().toISOString(),
-  }
-  return warnings[warningIndex]
+  };
+  return warnings[warningIndex];
 }
 
 export function getAllAlerts(): Alert[] {
-  return [...alerts]
+  return [...alerts];
 }
 
 export function getAlertsByStatus(status: WarningStatus | 'all'): Alert[] {
   if (status === 'all') {
-    return alerts
+    return alerts;
   }
-  return alerts.filter((alert) => alert.status === status)
+  return alerts.filter((alert) => alert.status === status);
 }
 
 export function updateAlertStatus(
   id: string,
-  status: WarningStatus
+  status: WarningStatus,
 ): Alert | null {
-  const alertIndex = alerts.findIndex((alert) => alert.id === id)
+  const alertIndex = alerts.findIndex((alert) => alert.id === id);
   if (alertIndex === -1) {
-    return null
+    return null;
   }
 
   alerts[alertIndex] = {
     ...alerts[alertIndex],
     status,
     updatedAt: new Date().toISOString(),
-  }
-  return alerts[alertIndex]
+  };
+  return alerts[alertIndex];
 }
-

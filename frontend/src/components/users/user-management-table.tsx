@@ -80,7 +80,7 @@ export function UserManagementTable({
   return (
     <div
       className={
-        isMobile ? 'flex flex-col gap-4' : 'flex flex-col gap-4 h-full min-h-0'
+        isMobile ? 'flex flex-col gap-4' : 'flex h-full min-h-0 flex-col gap-4'
       }
     >
       <div className="flex justify-end">
@@ -89,7 +89,7 @@ export function UserManagementTable({
           {t.pages.admin.users.createUser}
         </Button>
       </div>
-      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
+      <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <DataTable
           data={users}
           columns={columns}

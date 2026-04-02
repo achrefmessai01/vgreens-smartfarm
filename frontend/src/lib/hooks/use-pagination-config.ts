@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import { useI18n } from '@/i18n'
+import { useI18n } from '@/i18n';
 import {
   type PaginationConfig,
   DEFAULT_PAGINATION_CONFIG,
-} from '@/lib/config/pagination.config'
+} from '@/lib/config/pagination.config';
 
 export function usePaginationConfig(options?: {
-  defaultPageSize?: number
-  pageSizeOptions?: number[]
+  defaultPageSize?: number;
+  pageSizeOptions?: number[];
 }): PaginationConfig {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const paginationLabels = {
     showing:
@@ -28,7 +28,7 @@ export function usePaginationConfig(options?: {
       DEFAULT_PAGINATION_CONFIG.paginationLabels.previous,
     next:
       t.pages?.users?.next ?? DEFAULT_PAGINATION_CONFIG.paginationLabels.next,
-  }
+  };
 
   return {
     defaultPageSize:
@@ -36,5 +36,5 @@ export function usePaginationConfig(options?: {
     pageSizeOptions:
       options?.pageSizeOptions ?? DEFAULT_PAGINATION_CONFIG.pageSizeOptions,
     paginationLabels,
-  }
+  };
 }

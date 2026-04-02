@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   type Alert,
   useAlertsQuery,
@@ -9,37 +9,37 @@ import {
   useDeleteAlertMutation,
   useResolveAlertMutation,
   useAcknowledgeAlertMutation,
-} from '@/generated/graphql'
-import type { AlertsFilterInput } from '@/lib/alerts-filter'
-import { toAlertsFilterVariables } from '@/lib/alerts-filter'
+} from '@/generated/graphql';
+import type { AlertsFilterInput } from '@/lib/alerts-filter';
+import { toAlertsFilterVariables } from '@/lib/alerts-filter';
 
 interface AlertFormData {
-  sensorName: string
-  value: string
-  description?: string
+  sensorName: string;
+  value: string;
+  description?: string;
 }
 
 export function useAlertManagement(filter?: AlertsFilterInput | null) {
   const variables = React.useMemo(
     () => toAlertsFilterVariables(filter),
-    [filter]
-  )
+    [filter],
+  );
   const { data, loading, refetch } = useAlertsQuery({
     variables: variables as { filter?: AlertsFilterInput },
-  })
-  const [createAlert] = useCreateAlertMutation()
-  const [updateAlert] = useUpdateAlertMutation()
-  const [deleteAlert] = useDeleteAlertMutation()
-  const [acknowledgeAlert] = useAcknowledgeAlertMutation()
-  const [resolveAlert] = useResolveAlertMutation()
+  });
+  const [createAlert] = useCreateAlertMutation();
+  const [updateAlert] = useUpdateAlertMutation();
+  const [deleteAlert] = useDeleteAlertMutation();
+  const [acknowledgeAlert] = useAcknowledgeAlertMutation();
+  const [resolveAlert] = useResolveAlertMutation();
 
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const alerts = (data?.alerts || []) as Alert[]
-  const openAlertsCount = alerts.filter((a) => a.status === 'OPEN').length
+  const alerts = (data?.alerts || []) as Alert[];
+  const openAlertsCount = alerts.filter((a) => a.status === 'OPEN').length;
 
   const handleCreate = async (formData: AlertFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       await createAlert({
         variables: {
@@ -49,19 +49,19 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
             description: formData.description,
           },
         },
-      })
-      refetch()
-      return true
+      });
+      refetch();
+      return true;
     } catch (error) {
-      console.error('Error creating alert:', error)
-      return false
+      console.error('Error creating alert:', error);
+      return false;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleUpdate = async (id: string, formData: AlertFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       await updateAlert({
         variables: {
@@ -72,58 +72,58 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
             description: formData.description,
           },
         },
-      })
-      refetch()
-      return true
+      });
+      refetch();
+      return true;
     } catch (error) {
-      console.error('Error updating alert:', error)
-      return false
+      console.error('Error updating alert:', error);
+      return false;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await deleteAlert({ variables: { id } })
-      refetch()
-      return true
+      await deleteAlert({ variables: { id } });
+      refetch();
+      return true;
     } catch (error) {
-      console.error('Error deleting alert:', error)
-      return false
+      console.error('Error deleting alert:', error);
+      return false;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleAcknowledge = async (id: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await acknowledgeAlert({ variables: { id } })
-      await refetch()
-      return true
+      await acknowledgeAlert({ variables: { id } });
+      await refetch();
+      return true;
     } catch (error) {
-      console.error('Error acknowledging alert:', error)
-      return false
+      console.error('Error acknowledging alert:', error);
+      return false;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleResolve = async (id: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await resolveAlert({ variables: { id } })
-      await refetch()
-      return true
+      await resolveAlert({ variables: { id } });
+      await refetch();
+      return true;
     } catch (error) {
-      console.error('Error resolving alert:', error)
-      return false
+      console.error('Error resolving alert:', error);
+      return false;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return {
     alerts,
@@ -136,5 +136,5 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
     handleAcknowledge,
     handleResolve,
     refetch,
-  }
+  };
 }

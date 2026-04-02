@@ -42,7 +42,7 @@ export const useSystemErrorsRow = ({
 
     return (
       <>
-        <TableCell className="font-medium max-w-xs truncate">
+        <TableCell className="max-w-xs truncate font-medium">
           {error.errorMessage}
         </TableCell>
         <TableCell>{error.component || '-'}</TableCell>

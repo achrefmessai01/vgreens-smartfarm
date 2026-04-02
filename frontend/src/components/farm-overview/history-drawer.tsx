@@ -169,9 +169,7 @@ export function HistoryDrawer({
         </SheetHeader>
         <div className="space-y-4 overflow-x-hidden px-4 pb-4 sm:px-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <label className="text-sm font-medium">
-              {timeRangeLabel}:
-            </label>
+            <label className="text-sm font-medium">{timeRangeLabel}:</label>
             <div className="w-full sm:w-auto">
               <StyledSelect
                 value={timeRange}
@@ -192,7 +190,7 @@ export function HistoryDrawer({
             {historyLoading ? (
               <HistoryChartSkeleton className="h-full w-full" />
             ) : historyData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+              <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
                 {t.pages.farmOverview.emptyHistoryDrawerPlaceholder}
               </div>
             ) : (

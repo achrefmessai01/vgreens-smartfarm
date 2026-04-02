@@ -275,8 +275,7 @@ export class HarvestsService extends BaseService<Harvest> {
     filter?: DashboardFilterInput | null,
   ): Promise<HarvestDashboardMetrics> {
     try {
-      const qb = this.harvestRepository
-        .createQueryBuilder('harvest');
+      const qb = this.harvestRepository.createQueryBuilder('harvest');
 
       if (tenantId !== undefined) {
         qb.andWhere('harvest.tenantId = :tenantId', { tenantId });
@@ -330,39 +329,53 @@ export class HarvestsService extends BaseService<Harvest> {
       // Get primary species and variety (most common)
       const speciesMap = new Map<string, number>();
       const varietyMap = new Map<string, number>();
-      
-      harvests.forEach(h => {
+
+      harvests.forEach((h) => {
         speciesMap.set(h.species, (speciesMap.get(h.species) || 0) + 1);
         varietyMap.set(h.variety, (varietyMap.get(h.variety) || 0) + 1);
       });
 
-      const primarySpecies = [...speciesMap.entries()].sort((a, b) => b[1] - a[1])[0][0];
-      const primaryVariety = [...varietyMap.entries()].sort((a, b) => b[1] - a[1])[0][0];
+      const primarySpecies = [...speciesMap.entries()].sort(
+        (a, b) => b[1] - a[1],
+      )[0][0];
+      const primaryVariety = [...varietyMap.entries()].sort(
+        (a, b) => b[1] - a[1],
+      )[0][0];
 
       // Calculate metrics
       const totalMarketable = harvests.reduce((sum, h) => sum + h.classA, 0);
       const totalWaste = harvests.reduce((sum, h) => sum + h.waste, 0);
       const totalYield = totalMarketable + totalWaste;
 
-      const marketablePercent = totalYield > 0 ? (totalMarketable / totalYield) * 100 : 0;
+      const marketablePercent =
+        totalYield > 0 ? (totalMarketable / totalYield) * 100 : 0;
       const wastePercent = totalYield > 0 ? (totalWaste / totalYield) * 100 : 0;
 
       // Calculate average brix
-      const validBrixHarvests = harvests.filter(h => h.avgBrix > 0);
-      const averageBrix = validBrixHarvests.length > 0 
-        ? validBrixHarvests.reduce((sum, h) => sum + h.avgBrix, 0) / validBrixHarvests.length
-        : 0;
+      const validBrixHarvests = harvests.filter((h) => h.avgBrix > 0);
+      const averageBrix =
+        validBrixHarvests.length > 0
+          ? validBrixHarvests.reduce((sum, h) => sum + h.avgBrix, 0) /
+            validBrixHarvests.length
+          : 0;
 
       // Calculate days active (from earliest planting date to latest harvest date)
-      const plantingDates = harvests.map(h => new Date(h.plantingDate));
-      const harvestDates = harvests.map(h => new Date(h.date));
-      const earliestPlanting = new Date(Math.min(...plantingDates.map(d => d.getTime())));
-      const latestHarvest = new Date(Math.max(...harvestDates.map(d => d.getTime())));
-      const daysActive = Math.ceil((latestHarvest.getTime() - earliestPlanting.getTime()) / (1000 * 60 * 60 * 24));
+      const plantingDates = harvests.map((h) => new Date(h.plantingDate));
+      const harvestDates = harvests.map((h) => new Date(h.date));
+      const earliestPlanting = new Date(
+        Math.min(...plantingDates.map((d) => d.getTime())),
+      );
+      const latestHarvest = new Date(
+        Math.max(...harvestDates.map((d) => d.getTime())),
+      );
+      const daysActive = Math.ceil(
+        (latestHarvest.getTime() - earliestPlanting.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
 
       // Critical alerts (harvests with low brix or high waste percentage)
-      const criticalAlerts = harvests.filter(h => 
-        h.avgBrix < 6.0 || (h.waste / (h.classA + h.waste)) > 0.15
+      const criticalAlerts = harvests.filter(
+        (h) => h.avgBrix < 6.0 || h.waste / (h.classA + h.waste) > 0.15,
       ).length;
 
       // Generate time series data
@@ -392,7 +405,9 @@ export class HarvestsService extends BaseService<Harvest> {
         `getDashboardMetrics failed: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
       );
-      throw new InternalServerErrorException('Failed to fetch dashboard metrics');
+      throw new InternalServerErrorException(
+        'Failed to fetch dashboard metrics',
+      );
     }
   }
 
@@ -417,8 +432,8 @@ export class HarvestsService extends BaseService<Harvest> {
 
   private generateYieldOverTimeData(harvests: Harvest[]): YieldOverTimeData[] {
     const dailyYield = new Map<string, number>();
-    
-    harvests.forEach(harvest => {
+
+    harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
       const currentYield = dailyYield.get(dateStr) || 0;
       dailyYield.set(dateStr, currentYield + harvest.classA);
@@ -432,10 +447,12 @@ export class HarvestsService extends BaseService<Harvest> {
       }));
   }
 
-  private generateClassDistributionData(harvests: Harvest[]): ClassDistributionData[] {
+  private generateClassDistributionData(
+    harvests: Harvest[],
+  ): ClassDistributionData[] {
     const dailyData = new Map<string, { marketable: number; waste: number }>();
-    
-    harvests.forEach(harvest => {
+
+    harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
       const current = dailyData.get(dateStr) || { marketable: 0, waste: 0 };
       dailyData.set(dateStr, {
@@ -455,8 +472,8 @@ export class HarvestsService extends BaseService<Harvest> {
 
   private generateBrixTrendData(harvests: Harvest[]): BrixTrendData[] {
     const dailyBrix = new Map<string, { total: number; count: number }>();
-    
-    harvests.forEach(harvest => {
+
+    harvests.forEach((harvest) => {
       if (harvest.avgBrix > 0) {
         const dateStr = harvest.date.toISOString().split('T')[0];
         const current = dailyBrix.get(dateStr) || { total: 0, count: 0 };
@@ -475,10 +492,12 @@ export class HarvestsService extends BaseService<Harvest> {
       }));
   }
 
-  private generateCumulativeYieldData(harvests: Harvest[]): CumulativeYieldData[] {
+  private generateCumulativeYieldData(
+    harvests: Harvest[],
+  ): CumulativeYieldData[] {
     const dailyData = new Map<string, { marketable: number; waste: number }>();
-    
-    harvests.forEach(harvest => {
+
+    harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
       const current = dailyData.get(dateStr) || { marketable: 0, waste: 0 };
       dailyData.set(dateStr, {
@@ -487,8 +506,9 @@ export class HarvestsService extends BaseService<Harvest> {
       });
     });
 
-    const sortedEntries = Array.from(dailyData.entries())
-      .sort(([a], [b]) => a.localeCompare(b));
+    const sortedEntries = Array.from(dailyData.entries()).sort(([a], [b]) =>
+      a.localeCompare(b),
+    );
 
     let cumulative = 0;
     let cumulativeWaste = 0;

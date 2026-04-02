@@ -18,8 +18,14 @@ import { FeaturesModule } from '../features/features.module';
 import { InfluxDBModule } from '../influxdb/influxdb.module';
 import { ErrorReportsModule } from '../error-reports/error-reports.module';
 import { SystemErrorsModule } from '../system-errors/system-errors.module';
+import { SensorConfigModule } from '../sensor-config/sensor-config.module';
+import { TenantFarmConfigModule } from '../tenant-farm-config/tenant-farm-config.module';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { TenantInterceptor, UserInterceptor, ErrorLoggingInterceptor } from '@common/interceptors';
+import {
+  TenantInterceptor,
+  UserInterceptor,
+  ErrorLoggingInterceptor,
+} from '@common/interceptors';
 
 @Module({
   imports: [
@@ -43,6 +49,8 @@ import { TenantInterceptor, UserInterceptor, ErrorLoggingInterceptor } from '@co
     FilesModule,
     ErrorReportsModule,
     SystemErrorsModule,
+    SensorConfigModule,
+    TenantFarmConfigModule,
   ],
   providers: [
     AppResolver,

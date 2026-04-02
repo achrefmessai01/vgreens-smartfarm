@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   CartesianGrid,
   Area,
@@ -10,25 +10,25 @@ import {
   ComposedChart,
   XAxis,
   YAxis,
-} from 'recharts'
+} from 'recharts';
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart'
-import type { HistoryViewType } from './history-table'
+} from '@/components/ui/chart';
+import type { HistoryViewType } from './history-table';
 
 export interface HistoryChartData {
-  week: number
-  yield?: number
-  brix?: number
+  week: number;
+  yield?: number;
+  brix?: number;
 }
 
 interface HistoryChartProps {
-  data: HistoryChartData[]
-  viewType: HistoryViewType
-  title: string
+  data: HistoryChartData[];
+  viewType: HistoryViewType;
+  title: string;
 }
 
 const chartConfig = {
@@ -40,7 +40,7 @@ const chartConfig = {
     label: 'Brix',
     color: '#016F7C',
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function HistoryChart({ data, viewType, title }: HistoryChartProps) {
   const chartData = data.map((d) => ({
@@ -48,13 +48,13 @@ export function HistoryChart({ data, viewType, title }: HistoryChartProps) {
     weekNum: d.week,
     yield: d.yield ? Number(d.yield.toFixed(2)) : undefined,
     brix: d.brix ? Number(d.brix.toFixed(2)) : undefined,
-  }))
+  }));
 
-  const yDomain: [number, number] = [4, 16]
-  const yTicks = [4, 6, 8, 10, 12, 14, 16]
+  const yDomain: [number, number] = [4, 16];
+  const yTicks = [4, 6, 8, 10, 12, 14, 16];
 
-  const showYield = viewType === 'yield' || viewType === 'both'
-  const showBrix = viewType === 'brix' || viewType === 'both'
+  const showYield = viewType === 'yield' || viewType === 'both';
+  const showBrix = viewType === 'brix' || viewType === 'both';
 
   return (
     <div className="space-y-2">
@@ -180,5 +180,5 @@ export function HistoryChart({ data, viewType, title }: HistoryChartProps) {
         )}
       </ChartContainer>
     </div>
-  )
+  );
 }

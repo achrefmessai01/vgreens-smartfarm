@@ -1,22 +1,24 @@
-import { 
+import {
   useGetRecentSystemErrorsQuery,
   useGetSystemErrorStatsQuery,
   useResolveSystemErrorMutation,
   GetRecentSystemErrorsQueryVariables,
   SystemError,
   ReportSeverity,
-  ErrorSource
+  ErrorSource,
 } from '@/generated/graphql';
 
 // Hook for fetching recent system errors
-export const useSystemErrors = (variables?: GetRecentSystemErrorsQueryVariables) => {
+export const useSystemErrors = (
+  variables?: GetRecentSystemErrorsQueryVariables,
+) => {
   return useGetRecentSystemErrorsQuery({
     variables: {
       limit: 50,
-      ...variables
+      ...variables,
     },
     pollInterval: 30000, // Poll every 30 seconds for new errors
-    errorPolicy: 'all'
+    errorPolicy: 'all',
   });
 };
 
@@ -25,14 +27,14 @@ export const useSystemErrorStats = (hours?: number) => {
   return useGetSystemErrorStatsQuery({
     variables: { hours },
     pollInterval: 60000, // Poll every minute for updated stats
-    errorPolicy: 'all'
+    errorPolicy: 'all',
   });
 };
 
 // Hook for resolving system errors (admin only)
 export const useResolveSystemError = () => {
   return useResolveSystemErrorMutation({
-    refetchQueries: ['GetRecentSystemErrors', 'GetSystemErrorStats']
+    refetchQueries: ['GetRecentSystemErrors', 'GetSystemErrorStats'],
   });
 };
 
@@ -47,7 +49,7 @@ export const useFilteredSystemErrors = (filters: {
     limit: filters.limit || 50,
     severity: filters.severity,
     source: filters.source,
-    isResolved: filters.isResolved
+    isResolved: filters.isResolved,
   });
 };
 
