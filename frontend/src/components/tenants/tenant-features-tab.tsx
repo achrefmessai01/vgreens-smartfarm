@@ -13,7 +13,10 @@ interface TenantFeaturesTabProps {
   active: boolean;
 }
 
-export function TenantFeaturesTab({ tenantId, active }: TenantFeaturesTabProps) {
+export function TenantFeaturesTab({
+  tenantId,
+  active,
+}: TenantFeaturesTabProps) {
   const {
     data: featuresData,
     loading: featuresLoading,

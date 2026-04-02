@@ -41,14 +41,16 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
     return <TableSkeleton columnCount={7} rowCount={6} showHeader />;
   }
 
-  const columnLabels: Record<(typeof SENSOR_CONFIG_FIELD_KEYS)[number], string> =
-    {
-      bay: sc.bay,
-      pole: sc.pole,
-      row: sc.row,
-      greenhouse: sc.greenhouse,
-      city: sc.city,
-    };
+  const columnLabels: Record<
+    (typeof SENSOR_CONFIG_FIELD_KEYS)[number],
+    string
+  > = {
+    bay: sc.bay,
+    pole: sc.pole,
+    row: sc.row,
+    greenhouse: sc.greenhouse,
+    city: sc.city,
+  };
 
   return (
     <>

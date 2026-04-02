@@ -208,12 +208,15 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
         <Separator />
 
         <div>
-          <p className="text-muted-foreground mb-3 text-xs font-medium uppercase tracking-wide">
+          <p className="text-muted-foreground mb-3 text-xs font-medium tracking-wide uppercase">
             Farm Layout
           </p>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="bayCount" className="flex items-center gap-1.5">
+              <FieldLabel
+                htmlFor="bayCount"
+                className="flex items-center gap-1.5"
+              >
                 <Columns2 className="text-muted-foreground h-3.5 w-3.5" />
                 Total Bays
               </FieldLabel>
@@ -244,7 +247,9 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                   id="chambersCount"
                   type="number"
                   min={1}
-                  value={formData.chambersCount ?? DEFAULT_FARM_CONFIG.chambersCount}
+                  value={
+                    formData.chambersCount ?? DEFAULT_FARM_CONFIG.chambersCount
+                  }
                   onChange={handleNumberChange('chambersCount')}
                   placeholder={String(DEFAULT_FARM_CONFIG.chambersCount)}
                   className="w-32"

@@ -502,8 +502,7 @@ export const en = {
           save: 'Save',
           saving: 'Saving…',
           cancel: 'Cancel',
-          noSensorsFound:
-            "No sensors found in this tenant's InfluxDB bucket.",
+          noSensorsFound: "No sensors found in this tenant's InfluxDB bucket.",
           sheetDescription:
             'Override the location tags for this sensor. Leave blank to use the values from InfluxDB.',
         },
@@ -546,6 +545,9 @@ export const en = {
         featureAccess: 'Feature Access',
         manageFeaturesSubtitle:
           'Manage which features are enabled for this tenant',
+        noFeaturesAvailable: 'No features available',
+        enabled: 'enabled',
+        of: 'of',
       },
       reports: {
         title: 'Error Reports Management',

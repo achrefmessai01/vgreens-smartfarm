@@ -106,8 +106,7 @@ export function SensorConfigForm({
   });
 
   const set =
-    (key: SensorConfigFieldKey) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (key: SensorConfigFieldKey) => (e: React.ChangeEvent<HTMLInputElement>) =>
       setValues((prev) => ({ ...prev, [key]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {

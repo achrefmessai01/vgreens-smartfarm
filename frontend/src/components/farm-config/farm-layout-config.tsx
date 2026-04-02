@@ -68,7 +68,8 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
     const bay = parseInt(values.bayCount, 10);
     const chambers = parseInt(values.chambersCount, 10);
     const poles = parseInt(values.polesMax, 10);
-    if ([bay, chambers, poles].some((n) => !Number.isFinite(n) || n < 1)) return;
+    if ([bay, chambers, poles].some((n) => !Number.isFinite(n) || n < 1))
+      return;
     setSaving(true);
     try {
       await upsert({
@@ -111,7 +112,7 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
                 <Icon className="h-3.5 w-3.5" />
               </div>
               <div>
-                <p className="text-sm font-medium leading-none">{label}</p>
+                <p className="text-sm leading-none font-medium">{label}</p>
                 <p className="text-muted-foreground mt-0.5 text-xs">{hint}</p>
               </div>
             </div>

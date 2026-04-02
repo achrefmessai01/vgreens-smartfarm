@@ -2,12 +2,7 @@
 
 import * as React from 'react';
 import { useParams } from 'next/navigation';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n';
 import { TenantFeaturesTab } from './tenant-features-tab';
 import { SensorConfigTable } from '@/components/sensor-config';

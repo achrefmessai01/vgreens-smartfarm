@@ -50,7 +50,8 @@ function buildBayRowToSlots(
 }
 
 export function ViewSensorMap(props: ViewSensorMapProps) {
-  const { parameter, selectedSlotId, onSelectSlot, className, farmLayout } = props;
+  const { parameter, selectedSlotId, onSelectSlot, className, farmLayout } =
+    props;
   const layout = farmLayout ?? DEFAULT_FARM_LAYOUT;
   const { bayCount, polesMax } = layout;
   const rowsPerBay = polesMax; // all poles visible (HIDDEN_POLE_ROWS is empty)
@@ -63,7 +64,12 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
         props.showOnlyFilledPositions ?? false,
         props.farmLayout,
       ),
-    [props.bay, props.parameter, props.showOnlyFilledPositions, props.farmLayout],
+    [
+      props.bay,
+      props.parameter,
+      props.showOnlyFilledPositions,
+      props.farmLayout,
+    ],
   );
 
   return (

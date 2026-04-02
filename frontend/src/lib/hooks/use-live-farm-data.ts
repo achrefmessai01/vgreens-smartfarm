@@ -8,7 +8,10 @@ import {
 import { useMemo } from 'react';
 import type { Bay } from '@/types/farm.types';
 import { generateFarm } from '@/lib/farm-data';
-import { influxRowsToBays, type SensorConfigOverride } from '@/lib/farm-data-live';
+import {
+  influxRowsToBays,
+  type SensorConfigOverride,
+} from '@/lib/farm-data-live';
 
 const BUCKET_START_DEFAULT = '-1h';
 const POLL_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes

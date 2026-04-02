@@ -135,7 +135,10 @@ export function getSlotPositionsFromBay(
         const poleNum = Number(rawPole);
         if (isPoleRowHidden(poleNum)) continue;
 
-        const visiblePole = Math.max(1, Math.min(polesMax, Math.round(poleNum)));
+        const visiblePole = Math.max(
+          1,
+          Math.min(polesMax, Math.round(poleNum)),
+        );
         const rowIndex = visiblePoles.indexOf(visiblePole);
         if (rowIndex < 0) continue;
 
@@ -148,9 +151,20 @@ export function getSlotPositionsFromBay(
           layout,
         );
         const type = getSensorTypeFromDeviceId(deviceId);
-        const bayIndex = Math.min(bayCount - 1, Math.max(0, Math.floor(bayNum) - 1));
+        const bayIndex = Math.min(
+          bayCount - 1,
+          Math.max(0, Math.floor(bayNum) - 1),
+        );
 
-        out.push({ slot, deviceId, leftPercent, topPercent, type, bayIndex, rowIndex });
+        out.push({
+          slot,
+          deviceId,
+          leftPercent,
+          topPercent,
+          type,
+          bayIndex,
+          rowIndex,
+        });
       }
     }
   }

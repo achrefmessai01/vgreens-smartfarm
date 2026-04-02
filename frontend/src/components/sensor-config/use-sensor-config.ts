@@ -15,17 +15,19 @@ export interface SensorRow {
 }
 
 export function useSensorConfig(tenantId: string) {
-  const { data: configsData, loading: configsLoading, refetch } =
-    useSensorConfigsQuery({
-      variables: { tenantId },
-      skip: !tenantId,
-    });
+  const {
+    data: configsData,
+    loading: configsLoading,
+    refetch,
+  } = useSensorConfigsQuery({
+    variables: { tenantId },
+    skip: !tenantId,
+  });
 
-  const { data: devicesData, loading: devicesLoading } =
-    useSensorDevicesQuery({
-      variables: { tenantId },
-      skip: !tenantId,
-    });
+  const { data: devicesData, loading: devicesLoading } = useSensorDevicesQuery({
+    variables: { tenantId },
+    skip: !tenantId,
+  });
 
   const [upsertConfig] = useUpsertSensorConfigMutation();
   const [deleteConfig] = useDeleteSensorConfigMutation();
@@ -36,10 +38,7 @@ export function useSensorConfig(tenantId: string) {
 
   const rows: SensorRow[] = React.useMemo(() => {
     const configMap = new Map(configs.map((c) => [c.device, c]));
-    const allDevices = new Set([
-      ...devices,
-      ...configs.map((c) => c.device),
-    ]);
+    const allDevices = new Set([...devices, ...configs.map((c) => c.device)]);
     return [...allDevices]
       .sort()
       .map((device) => ({ device, config: configMap.get(device) ?? null }));

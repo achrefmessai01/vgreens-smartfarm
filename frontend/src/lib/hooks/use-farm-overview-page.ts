@@ -15,7 +15,10 @@ import {
   type Tenant,
 } from '@/generated/graphql';
 import type { SensorConfigOverride } from '@/lib/farm-data-live';
-import { DEFAULT_FARM_LAYOUT, type FarmLayoutConfig } from '@/lib/sensor-map-positions';
+import {
+  DEFAULT_FARM_LAYOUT,
+  type FarmLayoutConfig,
+} from '@/lib/sensor-map-positions';
 import {
   ALLOWED_SINGLE_GREENHOUSE_PARAMETERS,
   PARAM_GREENHOUSE,
@@ -264,7 +267,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const greenhouseLabel = React.useMemo(() => {
     const idx = activeGreenhouseTab - 1;
     return ghLabels[idx] ?? `Greenhouse ${activeGreenhouseTab}`;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeGreenhouseTab, t.greenHouse1, t.greenHouse2]);
 
   const combinedGreenhouses = React.useMemo(() => {
@@ -273,7 +276,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       label: ghLabels[i] ?? `Greenhouse ${i + 1}`,
       bay: bays[i] ?? null,
     }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bays, farmLayout.chambersCount, t.greenHouse1, t.greenHouse2]);
 
   const getParameterLabel = React.useCallback(

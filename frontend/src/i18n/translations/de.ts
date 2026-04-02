@@ -625,6 +625,9 @@ export const de = {
         featureAccess: 'Funktionszugriff',
         manageFeaturesSubtitle:
           'Verwalten Sie, welche Funktionen für diesen Mandanten aktiviert sind',
+        noFeaturesAvailable: 'Keine Funktionen verfügbar',
+        enabled: 'aktiviert',
+        of: 'von',
       },
     },
     cameraLivestream: {
