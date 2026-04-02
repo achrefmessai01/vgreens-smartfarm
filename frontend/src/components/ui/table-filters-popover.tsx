@@ -99,7 +99,7 @@ export function TableFiltersPopover({
           variant="outline"
           size="sm"
           className={cn(
-            'border-border/60 bg-muted/30 hover:bg-muted/50 h-9 gap-1.5 rounded-full px-4',
+            'border-input bg-background hover:bg-muted/50 h-9 gap-1.5 rounded-full px-4',
             className,
           )}
         >

@@ -14,7 +14,7 @@ export function GreenhouseSelector({
   options,
 }: GreenhouseSelectorProps) {
   return (
-    <div className="border-border/40 bg-muted/10 grid w-full min-w-0 grid-cols-3 border-b sm:flex">
+    <div className="border-border/40 bg-muted/10 flex w-full min-w-0 flex-wrap border-b">
       {options.map((option, index) => {
         const isActive = value === index;
         return (

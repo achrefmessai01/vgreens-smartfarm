@@ -40,20 +40,22 @@ export default function FarmOverviewPage() {
             : 'bg-background flex h-full min-h-0 w-full min-w-0 flex-col gap-6 overflow-x-clip'
         }
       >
-        <PageHeader
-          title={t.pages.farmOverview.title}
-          subtitle={t.pages.farmOverview.subtitle}
-        />
-
-        {state.isVGreensAdmin && (
-          <TenantSelector
-            tenants={state.tenants}
-            selectedTenantId={state.tenantSelectorValue}
-            onTenantChange={state.handleTenantChange}
-            label={t.pages.admin.users.selectTenant || 'Select tenant'}
-            placeholder={t.pages.admin.users.selectTenant}
+        <div className="flex items-start justify-between gap-4">
+          <PageHeader
+            title={t.pages.farmOverview.title}
+            subtitle={t.pages.farmOverview.subtitle}
+            className="mb-0"
           />
-        )}
+          {state.isVGreensAdmin && (
+            <TenantSelector
+              tenants={state.tenants}
+              selectedTenantId={state.tenantSelectorValue}
+              onTenantChange={state.handleTenantChange}
+              label={t.pages.admin.users.selectTenant || 'Select tenant'}
+              placeholder={t.pages.admin.users.selectTenant}
+            />
+          )}
+        </div>
 
         <GreenhouseSelector
           value={state.activeGreenhouseTab}
@@ -93,6 +95,7 @@ export default function FarmOverviewPage() {
               noSensorLabel={state.labels.noSensor}
               noDataMessage={state.labels.noData}
               emptyForNowMessage={state.labels.emptyForNow}
+              farmLayout={state.farmLayout}
             />
           )}
         </div>

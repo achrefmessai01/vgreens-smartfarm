@@ -39,9 +39,6 @@ export const useAlertTableRow = (actionHandlers: ActionHandlers) => {
     return (
       <>
         <TableCell className={`font-medium ${cellClassName}`.trim()}>
-          {alert.sensorName}
-        </TableCell>
-        <TableCell className={cellClassName}>
           {formatFieldLabel(alert.field)}
         </TableCell>
         <TableCell className={cellClassName}>{alert.value}</TableCell>

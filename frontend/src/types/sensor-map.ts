@@ -1,4 +1,5 @@
 import type { Bay, ParameterType, PlantSlot } from '@/types/farm.types';
+import type { FarmLayoutConfig } from '@/lib/sensor-map-positions';
 
 export type SensorMapSensorType = 'air' | 'lux' | 'par' | 'soil';
 
@@ -10,6 +11,7 @@ export interface ViewSensorMapProps {
   bayLabel?: string;
   className?: string;
   showOnlyFilledPositions?: boolean;
+  farmLayout?: FarmLayoutConfig;
 }
 
 export interface BayRowPosition {

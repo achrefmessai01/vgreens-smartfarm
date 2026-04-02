@@ -7,10 +7,20 @@ import type { ParameterType } from '@/types/farm.types';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data';
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
-import { UserRole, useTenantsQuery, type Tenant } from '@/generated/graphql';
+import {
+  UserRole,
+  useTenantsQuery,
+  useSensorConfigsQuery,
+  useFarmConfigQuery,
+  type Tenant,
+} from '@/generated/graphql';
+import type { SensorConfigOverride } from '@/lib/farm-data-live';
+import {
+  DEFAULT_FARM_LAYOUT,
+  type FarmLayoutConfig,
+} from '@/lib/sensor-map-positions';
 import {
   ALLOWED_SINGLE_GREENHOUSE_PARAMETERS,
-  GREENHOUSE_LABEL_KEYS,
   PARAM_GREENHOUSE,
   PARAM_PARAMETER,
   PARAM_VIEW_MODE,
@@ -74,8 +84,55 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     ? (selectedTenantBucketName ?? null)
     : undefined;
 
+  // Fetch SensorConfig overrides from PostgreSQL.
+  // For VGreens admin, use the currently selected tenant; for tenant users the
+  // resolver resolves to their own tenant automatically (tenantId omitted).
+  const configQueryTenantId = isVGreensAdmin ? selectedTenantId : undefined;
+  const { data: sensorConfigData } = useSensorConfigsQuery({
+    variables: { tenantId: configQueryTenantId },
+    skip: isVGreensAdmin && !selectedTenantId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const sensorConfigMap = React.useMemo<Map<string, SensorConfigOverride>>(
+    () =>
+      new Map(
+        (sensorConfigData?.sensorConfigs ?? []).map((c) => [
+          c.device,
+          {
+            bay: c.bay ?? undefined,
+            pole: c.pole ?? undefined,
+            row: c.row ?? undefined,
+            greenhouse: c.greenhouse ?? undefined,
+            city: c.city ?? undefined,
+          },
+        ]),
+      ),
+    [sensorConfigData?.sensorConfigs],
+  );
+
+  const { data: farmConfigData } = useFarmConfigQuery({
+    variables: { tenantId: configQueryTenantId },
+    skip: isVGreensAdmin && !selectedTenantId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const farmLayout = React.useMemo<FarmLayoutConfig>(
+    () => ({
+      bayCount:
+        farmConfigData?.farmConfig?.bayCount ?? DEFAULT_FARM_LAYOUT.bayCount,
+      polesMax:
+        farmConfigData?.farmConfig?.polesMax ?? DEFAULT_FARM_LAYOUT.polesMax,
+      chambersCount:
+        farmConfigData?.farmConfig?.chambersCount ??
+        DEFAULT_FARM_LAYOUT.chambersCount,
+    }),
+    [farmConfigData?.farmConfig],
+  );
+
   const { bays, bucketFields, loading } = useLiveFarmData({
     tenantBucketName: tenantBucketNameOverride,
+    sensorConfigs: sensorConfigMap,
   });
 
   const tabFromUrl = parseGreenhouseTab(searchParams.get(PARAM_GREENHOUSE));
@@ -102,10 +159,17 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     );
   }, [activeGreenhouseTab, selectedParameter, viewMode]);
 
-  const greenhouseOptions = React.useMemo(
-    () => GREENHOUSE_LABEL_KEYS.map((key) => ({ key, label: t[key] })),
-    [t],
-  );
+  const greenhouseOptions = React.useMemo(() => {
+    const ghLabels = [t.greenHouse1, t.greenHouse2];
+    const options = [{ key: 'combined', label: t.combined }];
+    for (let i = 0; i < farmLayout.chambersCount; i++) {
+      options.push({
+        key: `greenhouse_${i + 1}`,
+        label: ghLabels[i] ?? `Greenhouse ${i + 1}`,
+      });
+    }
+    return options;
+  }, [t, farmLayout.chambersCount]);
 
   const parameterOptions = React.useMemo(() => {
     // Base options: all available fields
@@ -190,47 +254,30 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     setHistoryDrawerOpen(false);
   }, [activeGreenhouseTab]);
 
-  const greenhouseBays = React.useMemo(
-    () => [bays[0] ?? null, bays[1] ?? null] as const,
-    [bays],
-  );
-
   const selectedBays = React.useMemo(() => {
-    if (activeGreenhouseTab === 1) {
-      return greenhouseBays[0] ? [greenhouseBays[0]] : [];
-    }
-    if (activeGreenhouseTab === 2) {
-      return greenhouseBays[1] ? [greenhouseBays[1]] : [];
-    }
-    return bays;
-  }, [activeGreenhouseTab, greenhouseBays, bays]);
+    if (activeGreenhouseTab === 0) return bays; // combined
+    const bay = bays[activeGreenhouseTab - 1]; // 1-indexed → 0-indexed
+    return bay ? [bay] : [];
+  }, [activeGreenhouseTab, bays]);
 
-  // For now PAR data is only available for greenhouse_01 and light is shared,
-  // so use the same greenhouse id for both Green House 1 and 2 graphs.
   const greenhouseId = React.useMemo(() => 'greenhouse_01', []);
 
-  const greenhouseLabel = React.useMemo(
-    () => (activeGreenhouseTab === 1 ? t.greenHouse1 : t.greenHouse2),
-    [activeGreenhouseTab, t.greenHouse1, t.greenHouse2],
-  );
+  const ghLabels = [t.greenHouse1, t.greenHouse2];
+
+  const greenhouseLabel = React.useMemo(() => {
+    const idx = activeGreenhouseTab - 1;
+    return ghLabels[idx] ?? `Greenhouse ${activeGreenhouseTab}`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeGreenhouseTab, t.greenHouse1, t.greenHouse2]);
 
   const combinedGreenhouses = React.useMemo(() => {
-    const first = bays[0] ?? null;
-    const second = bays[1] ?? null;
-
-    return [
-      {
-        key: first?.id ?? 'greenHouse1',
-        label: t.greenHouse1,
-        bay: first,
-      },
-      {
-        key: second?.id ?? 'greenHouse2',
-        label: t.greenHouse2,
-        bay: second,
-      },
-    ];
-  }, [bays, t.greenHouse1, t.greenHouse2]);
+    return Array.from({ length: farmLayout.chambersCount }, (_, i) => ({
+      key: bays[i]?.id ?? `greenhouse_${i + 1}`,
+      label: ghLabels[i] ?? `Greenhouse ${i + 1}`,
+      bay: bays[i] ?? null,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bays, farmLayout.chambersCount, t.greenHouse1, t.greenHouse2]);
 
   const getParameterLabel = React.useCallback(
     (param: ParameterType) => formatFieldToLabel(param),
@@ -268,6 +315,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     combinedGreenhouses,
     getParameterLabel,
     tenantBucketNameOverride,
+    farmLayout,
     labels: {
       viewHeatmap: t.viewHeatmap,
       viewDiscrete: t.viewDiscrete,

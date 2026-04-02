@@ -14,14 +14,28 @@ export type SensorMapType = 'air' | 'lux' | 'par' | 'soil';
 
 // --- Dynamic layout: bay (column) + pole (row) only ---
 
-/** Max bays per greenhouse (1–13). */
-export const BAY_COUNT = 13;
+/** Farm layout configuration — can be overridden per tenant via the admin UI. */
+export interface FarmLayoutConfig {
+  bayCount: number;
+  polesMax: number;
+  chambersCount: number;
+}
 
-/** Total pole rows (vertical). Pole = which row to show. */
-export const POLES_MAX = 10;
+/** Default (hardcoded fallback) layout values. */
+export const DEFAULT_FARM_LAYOUT: FarmLayoutConfig = {
+  bayCount: 13,
+  polesMax: 10,
+  chambersCount: 2,
+};
+
+/** @deprecated Use DEFAULT_FARM_LAYOUT.bayCount — kept for backward compatibility. */
+export const BAY_COUNT = DEFAULT_FARM_LAYOUT.bayCount;
+
+/** @deprecated Use DEFAULT_FARM_LAYOUT.polesMax — kept for backward compatibility. */
+export const POLES_MAX = DEFAULT_FARM_LAYOUT.polesMax;
 
 /** Pole rows hidden from the UI. Values are 1-based to match InfluxDB metadata. */
-export const HIDDEN_POLE_ROWS = [5] as const;
+export const HIDDEN_POLE_ROWS = [] as const;
 
 const HIDDEN_POLE_ROW_SET = new Set<number>(HIDDEN_POLE_ROWS);
 
@@ -38,23 +52,35 @@ export function isPoleRowHidden(pole: number): boolean {
   return HIDDEN_POLE_ROW_SET.has(Math.round(pole));
 }
 
+/** Compute visible pole rows for a given polesMax, excluding hidden rows. */
+function getVisiblePoleRows(polesMax: number): number[] {
+  return Array.from({ length: polesMax }, (_, i) => i + 1).filter(
+    (p) => !HIDDEN_POLE_ROW_SET.has(p),
+  );
+}
+
 /**
- * Compute map position from bay and pole only.
- * bay = column (1–13), pole = row (1–10).
+ * Compute map position from bay and pole.
+ * Accepts an optional FarmLayoutConfig; falls back to DEFAULT_FARM_LAYOUT.
  */
 export function getPositionFromBayPole(
   bay: number,
   pole: number,
+  layout?: FarmLayoutConfig,
 ): { leftPercent: number; topPercent: number } {
-  const bay1 = Math.max(1, Math.min(BAY_COUNT, Math.round(bay)));
-  const pole1 = Math.max(1, Math.min(POLES_MAX, Math.round(pole)));
-  const visiblePoleIndex = VISIBLE_POLE_ROWS.indexOf(pole1);
+  const { bayCount, polesMax } = layout ?? DEFAULT_FARM_LAYOUT;
+  const visiblePoles = getVisiblePoleRows(polesMax);
+  const rowsPerBay = visiblePoles.length;
 
-  const leftPercent = ((bay1 - 0.5) / BAY_COUNT) * 100;
+  const bay1 = Math.max(1, Math.min(bayCount, Math.round(bay)));
+  const pole1 = Math.max(1, Math.min(polesMax, Math.round(pole)));
+  const visiblePoleIndex = visiblePoles.indexOf(pole1);
+
+  const leftPercent = ((bay1 - 0.5) / bayCount) * 100;
   const topPercent =
     visiblePoleIndex >= 0
-      ? ((visiblePoleIndex + 0.5) / ROWS_PER_BAY) * 100
-      : ((pole1 - 0.5) / POLES_MAX) * 100;
+      ? ((visiblePoleIndex + 0.5) / rowsPerBay) * 100
+      : ((pole1 - 0.5) / polesMax) * 100;
 
   return { leftPercent, topPercent };
 }
@@ -89,7 +115,13 @@ export interface SlotWithPosition {
  * Use this for dynamic layout when InfluxDB provides bay/pole.
  * Returns only slots that have valid meta.bay and meta.pole.
  */
-export function getSlotPositionsFromBay(bay: Bay): SlotWithPosition[] {
+export function getSlotPositionsFromBay(
+  bay: Bay,
+  layout?: FarmLayoutConfig,
+): SlotWithPosition[] {
+  const { bayCount, polesMax } = layout ?? DEFAULT_FARM_LAYOUT;
+  const visiblePoles = getVisiblePoleRows(polesMax);
+
   const out: SlotWithPosition[] = [];
   for (const row of bay.rows) {
     for (const col of row.columns) {
@@ -97,31 +129,33 @@ export function getSlotPositionsFromBay(bay: Bay): SlotWithPosition[] {
         if (!slot?.meta) continue;
         const rawBay = slot.meta.bay as number | undefined;
         const rawPole = slot.meta.pole as number | undefined;
-        if (!Number.isFinite(rawBay) || !Number.isFinite(rawPole)) {
-          continue;
-        }
+        if (!Number.isFinite(rawBay) || !Number.isFinite(rawPole)) continue;
+
         const bayNum = Number(rawBay);
         const poleNum = Number(rawPole);
         if (isPoleRowHidden(poleNum)) continue;
 
         const visiblePole = Math.max(
           1,
-          Math.min(POLES_MAX, Math.round(poleNum)),
+          Math.min(polesMax, Math.round(poleNum)),
         );
-        const rowIndex = VISIBLE_POLE_ROWS.indexOf(visiblePole);
+        const rowIndex = visiblePoles.indexOf(visiblePole);
         if (rowIndex < 0) continue;
 
         const deviceId = getDeviceIdFromSlotId(slot.id);
         if (!deviceId) continue;
+
         const { leftPercent, topPercent } = getPositionFromBayPole(
           bayNum,
           poleNum,
+          layout,
         );
         const type = getSensorTypeFromDeviceId(deviceId);
         const bayIndex = Math.min(
-          BAY_COUNT - 1,
+          bayCount - 1,
           Math.max(0, Math.floor(bayNum) - 1),
         );
+
         out.push({
           slot,
           deviceId,
