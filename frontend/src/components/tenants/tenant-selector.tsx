@@ -1,3 +1,4 @@
+import { Building2 } from 'lucide-react';
 import { StyledSelect } from '@/components/ui/styled-select';
 import type { Tenant } from '@/generated/graphql';
 
@@ -16,28 +17,24 @@ export function TenantSelector({
   label,
   placeholder,
 }: TenantSelectorProps) {
-  if (tenants.length === 0) {
-    return null;
-  }
+  if (tenants.length === 0) return null;
 
   return (
-    <div className="bg-muted/30 dark:bg-muted/20 border-border/40 dark:border-border/10 flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center">
-      <span className="text-foreground dark:text-foreground text-sm font-medium whitespace-nowrap">
-        {label}:
-      </span>
-      <div className="flex-1 sm:flex-initial">
-        <StyledSelect
-          value={selectedTenantId}
-          onValueChange={onTenantChange}
-          options={tenants.map((tenant) => ({
-            label: tenant.name,
-            value: tenant.id,
-          }))}
-          width="100%"
-          triggerClassName="w-full sm:w-[280px]"
-          placeholder={placeholder}
-        />
+    <div className="flex shrink-0 flex-col gap-1">
+      <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+        <Building2 className="h-3 w-3" />
+        {label}
       </div>
+      <StyledSelect
+        value={selectedTenantId}
+        onValueChange={onTenantChange}
+        options={tenants.map((tenant) => ({
+          label: tenant.name,
+          value: tenant.id,
+        }))}
+        triggerClassName="h-9 w-[200px] font-medium"
+        placeholder={placeholder}
+      />
     </div>
   );
 }
