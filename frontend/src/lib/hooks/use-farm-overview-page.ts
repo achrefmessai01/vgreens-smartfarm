@@ -36,7 +36,7 @@ import {
 export type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 
 export function useFarmOverviewPage(t: FarmOverviewTranslations) {
-  const { role } = useCurrentUser();
+  const { role, user } = useCurrentUser();
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
   const searchParams = useSearchParams();
   const initialTenantIdFromUrl = searchParams.get('tenantId') ?? '';
@@ -84,13 +84,15 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     ? (selectedTenantBucketName ?? null)
     : undefined;
 
-  // Fetch SensorConfig overrides from PostgreSQL.
-  // For VGreens admin, use the currently selected tenant; for tenant users the
-  // resolver resolves to their own tenant automatically (tenantId omitted).
-  const configQueryTenantId = isVGreensAdmin ? selectedTenantId : undefined;
+  // Explicit tenantId for all config queries.
+  // Admin → selected tenant; tenant user → from me.tenant.id (always a valid UUID).
+  const configQueryTenantId = isVGreensAdmin
+    ? selectedTenantId
+    : (user?.tenant?.id || undefined);
+
   const { data: sensorConfigData } = useSensorConfigsQuery({
     variables: { tenantId: configQueryTenantId },
-    skip: isVGreensAdmin && !selectedTenantId,
+    skip: !configQueryTenantId,
     fetchPolicy: 'cache-and-network',
   });
 
@@ -113,7 +115,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
 
   const { data: farmConfigData } = useFarmConfigQuery({
     variables: { tenantId: configQueryTenantId },
-    skip: isVGreensAdmin && !selectedTenantId,
+    skip: !configQueryTenantId,
     fetchPolicy: 'cache-and-network',
   });
 
