@@ -4,8 +4,6 @@ import * as React from 'react';
 import { Columns2, Rows3, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import {
   useFarmConfigQuery,
   useUpsertFarmConfigMutation,
@@ -20,25 +18,22 @@ const FIELDS = [
   {
     key: 'bayCount' as const,
     label: 'Bay Count',
-    hint: 'Number of bay columns per greenhouse',
+    hint: 'Columns per greenhouse',
     icon: Columns2,
-    defaultVal: DEFAULT_FARM_CONFIG.bayCount,
   },
   {
     key: 'chambersCount' as const,
-    label: 'Number of Greenhouses',
-    hint: 'Total number of greenhouse chambers',
+    label: 'Greenhouses',
+    hint: 'Total chambers',
     icon: Building,
-    defaultVal: DEFAULT_FARM_CONFIG.chambersCount,
   },
   {
     key: 'polesMax' as const,
     label: 'Pole Rows',
-    hint: 'Number of pole rows (vertical positions per bay)',
+    hint: 'Vertical positions',
     icon: Rows3,
-    defaultVal: DEFAULT_FARM_CONFIG.polesMax,
   },
-];
+] as const;
 
 type FieldKey = (typeof FIELDS)[number]['key'];
 
@@ -89,26 +84,37 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
   };
 
   return (
-    <div className="bg-card border-border/60 rounded-xl border p-6 shadow-sm">
-      <div className="mb-4">
-        <h3 className="text-base font-semibold">Farm Layout</h3>
-        <p className="text-muted-foreground mt-0.5 text-sm">
-          Configure the farm grid dimensions for the sensor map.
-        </p>
+    <div className="bg-card border-border/60 rounded-xl border shadow-sm">
+      <div className="border-border/40 flex items-center justify-between border-b px-6 py-4">
+        <div>
+          <h3 className="text-sm font-semibold">Farm Layout</h3>
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            Configure the grid dimensions for the sensor map
+          </p>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          disabled={saving}
+          className="min-w-16"
+          onClick={handleSubmit as unknown as React.MouseEventHandler}
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </Button>
       </div>
 
-      <Separator className="mb-5" />
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="grid grid-cols-3 divide-x">
         {FIELDS.map(({ key, label, hint, icon: Icon }) => (
-          <div key={key} className="flex flex-col gap-1.5">
-            <Label
-              htmlFor={`farm-${key}`}
-              className="flex items-center gap-1.5 text-sm font-medium"
-            >
-              <Icon className="text-muted-foreground h-3.5 w-3.5" />
-              {label}
-            </Label>
+          <div key={key} className="flex flex-col gap-3 px-6 py-5">
+            <div className="flex items-center gap-2">
+              <div className="bg-primary/10 text-primary flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                <Icon className="h-3.5 w-3.5" />
+              </div>
+              <div>
+                <p className="text-sm font-medium leading-none">{label}</p>
+                <p className="text-muted-foreground mt-0.5 text-xs">{hint}</p>
+              </div>
+            </div>
             <Input
               id={`farm-${key}`}
               type="number"
@@ -117,17 +123,10 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
               onChange={(e) =>
                 setValues((prev) => ({ ...prev, [key]: e.target.value }))
               }
-              className="h-9 w-32"
+              className="h-9"
             />
-            <p className="text-muted-foreground text-xs">{hint}</p>
           </div>
         ))}
-
-        <div className="mt-2 flex justify-end">
-          <Button type="submit" size="sm" disabled={saving} className="min-w-16">
-            {saving ? 'Saving…' : 'Save'}
-          </Button>
-        </div>
       </form>
     </div>
   );
