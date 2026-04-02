@@ -1,19 +1,20 @@
 'use client';
 
-import {
-  valueToHotColor,
-  getParameterUnit,
-  formatParameterDisplayValue,
-} from '@/lib/farm-data';
-import * as React from 'react';
-import { cn } from '@/lib/utils';
-import { useI18n } from '@/i18n';
-import { Card } from '@/components/ui/card';
+import { getLegendScale } from '@/components/farm-overview/parameter-color-legend';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Tooltip } from '@/components/ui/tooltip';
+import { useI18n } from '@/i18n';
+import {
+  formatParameterDisplayValue,
+  getParameterUnit,
+  valueToHotColor,
+} from '@/lib/farm-data';
 import { idwInterpolate } from '@/lib/heatmap-utils';
 import { useFullMapData } from '@/lib/hooks/use-full-map-data';
+import { cn } from '@/lib/utils';
 import type { ViewSingleBayProps } from '@/types/view-single-bay.types';
-import { getLegendScale } from '@/components/farm-overview/parameter-color-legend';
+import * as React from 'react';
 
 const HEATMAP_GRID_COLS = 80;
 const HEATMAP_GRID_ROWS = 40;
@@ -88,55 +89,55 @@ export function ViewSingleBay({
               const isSelected = slot && selectedSlotId === slot.id;
               const displayValue =
                 value != null ? formatParameterDisplayValue(value) : '--';
+              const tooltipContent =
+                slot && value != null
+                  ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
+                  : deviceId;
               return (
-                <Button
-                  key={positionKey}
-                  type="button"
-                  variant="ghost"
-                  onClick={() =>
-                    onSelectSlot(slot ? (isSelected ? null : slot.id) : null)
-                  }
-                  disabled={!slot}
-                  title={
-                    slot && value != null
-                      ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
-                      : deviceId
-                  }
-                  className={cn(
-                    'absolute inline-flex flex-col items-center justify-center px-0.5',
-                    'h-auto border-none bg-transparent hover:bg-transparent',
-                    'text-[10px] font-bold text-black tabular-nums sm:text-[14px]',
-                    'drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]',
-                    'focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-1',
-                    slot && 'cursor-pointer',
-                    isSelected && 'ring-primary rounded ring-2 ring-offset-1',
-                  )}
-                  style={{
-                    left: `${leftPercent}%`,
-                    top: `${topPercent}%`,
-                    transform: 'translate(-50%, -58%)',
-                  }}
-                  aria-label={
-                    slot && value != null
-                      ? `${displayValue} ${unit}`
-                      : t.pages.farmOverview.noSensor
-                  }
-                >
-                  {value != null ? (
-                    <>
-                      <span className="leading-tight tracking-tight">
-                        {displayValue}
-                      </span>
-                      {unit ? (
-                        <span className="text-[10px] leading-tight font-medium opacity-85">
-                          {unit}
+                <Tooltip key={positionKey} content={tooltipContent}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() =>
+                      onSelectSlot(slot ? (isSelected ? null : slot.id) : null)
+                    }
+                    disabled={!slot}
+                    className={cn(
+                      'absolute inline-flex flex-col items-center justify-center px-0.5',
+                      'h-auto border-none bg-transparent hover:bg-transparent',
+                      'text-[10px] font-bold text-black tabular-nums sm:text-[14px]',
+                      'drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]',
+                      'focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-1',
+                      slot && 'cursor-pointer',
+                      isSelected && 'ring-primary rounded ring-2 ring-offset-1',
+                    )}
+                    style={{
+                      left: `${leftPercent}%`,
+                      top: `${topPercent}%`,
+                      transform: 'translate(-50%, -58%)',
+                    }}
+                    aria-label={
+                      slot && value != null
+                        ? `${displayValue} ${unit}`
+                        : t.pages.farmOverview.noSensor
+                    }
+                  >
+                    {value != null ? (
+                      <>
+                        <span className="leading-tight tracking-tight">
+                          {displayValue}
                         </span>
-                      ) : null}
-                    </>
-                  ) : (
-                    <span>--</span>
-                  )}
-                </Button>
+                        {unit ? (
+                          <span className="text-[10px] leading-tight font-medium opacity-85">
+                            {unit}
+                          </span>
+                        ) : null}
+                      </>
+                    ) : (
+                      <span>--</span>
+                    )}
+                  </Button>
+                </Tooltip>
               );
             },
           )}
