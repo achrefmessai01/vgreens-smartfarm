@@ -92,10 +92,11 @@ export function UserMenu({ className }: UserMenuProps) {
                 alt={getUserDisplayName()}
                 className="object-cover"
               />
-            ) : null}
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-              {getUserInitials()}
-            </AvatarFallback>
+            ) : (
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+                {getUserInitials()}
+              </AvatarFallback>
+            )}
           </Avatar>
         </button>
       </DropdownMenuTrigger>
