@@ -27,12 +27,12 @@ export function DataTableTableView<T extends { id: string | number }>({
   return (
     <Table className="[&_td]:px-4 [&_td]:py-3">
       <TableHeader>
-        <TableRow className="border-b border-border/60 bg-muted/20 hover:bg-transparent">
+        <TableRow className="border-border/60 bg-muted/20 border-b hover:bg-transparent">
           {columns.map((col) => (
             <TableHead
               key={col.key}
               className={cn(
-                'h-11 px-4 font-semibold tracking-tight text-foreground',
+                'text-foreground h-11 px-4 font-semibold tracking-tight',
                 col.headerClassName,
               )}
             >
@@ -46,9 +46,9 @@ export function DataTableTableView<T extends { id: string | number }>({
           <TableRow
             key={item.id}
             className={cn(
-              'border-b border-border/40 transition-colors',
+              'border-border/40 border-b transition-colors',
               onRowClick &&
-                'cursor-pointer hover:bg-muted/40 active:bg-muted/50',
+                'hover:bg-muted/40 active:bg-muted/50 cursor-pointer',
             )}
             onClick={onRowClick ? () => onRowClick(item) : undefined}
           >

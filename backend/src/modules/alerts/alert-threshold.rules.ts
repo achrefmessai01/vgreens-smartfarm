@@ -61,6 +61,10 @@ export interface DeltaThresholdRule {
   clearMinutes: number;
   timeGate: TimeGate;
   rationale: string;
+  /** Optional: guard condition — an additional field that must satisfy op/value to trigger */
+  guardField?: string;
+  guardOp?: 'gt' | 'lt';
+  guardValue?: number;
 }
 
 export type ThresholdRule =
@@ -216,6 +220,9 @@ export const THRESHOLD_RULES: ThresholdRule[] = [
     clearMinutes: 60,
     timeGate: 'Day',
     rationale: 'Catches missed irrigation / clogged line',
+    guardField: INFLUX_FIELDS.vpd,
+    guardOp: 'gt',
+    guardValue: 2.3,
   },
   // 10. DLI: PAR > 20 mol/m2/day, P 20m, H > 70% median 20m — simplified as single PAR > 20
   {

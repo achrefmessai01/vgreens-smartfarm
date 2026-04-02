@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/context';
 import type { Bay, ParameterType } from '@/types/farm.types';
+import type { FarmLayoutConfig } from '@/lib/sensor-map-positions';
 import { EmptyState } from './empty-state';
 import { FarmDataDisplay } from './farm-view-container';
 import { ParameterColorLegendBar } from './parameter-color-legend';
@@ -28,6 +29,7 @@ export interface FarmOverviewCardProps {
   noDataMessage: string;
   emptyForNowMessage: string;
   entranceLabel?: string;
+  farmLayout?: FarmLayoutConfig;
 }
 
 export function FarmOverviewCard({
@@ -49,6 +51,7 @@ export function FarmOverviewCard({
   noDataMessage,
   emptyForNowMessage,
   entranceLabel,
+  farmLayout,
 }: FarmOverviewCardProps) {
   const { t } = useI18n();
 
@@ -59,9 +62,9 @@ export function FarmOverviewCard({
     effectiveParameter === 'par' || effectiveParameter === 'par_estimated';
 
   return (
-    <Card className="h-full min-h-0 flex flex-col gap-0 py-0 overflow-hidden dark:shadow-lg rounded-none">
-      <div className="shrink-0 flex flex-col bg-muted/10">
-        <div className="flex flex-col gap-3 border-b border-border/40 bg-background px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
+    <Card className="flex h-full min-h-0 flex-col gap-0 overflow-hidden rounded-none py-0 dark:shadow-lg">
+      <div className="bg-muted/10 flex shrink-0 flex-col">
+        <div className="border-border/40 bg-background flex flex-col gap-3 border-b px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
           <div className="w-full min-w-0 sm:w-auto sm:flex-1">
             <ParameterSelector
               value={effectiveParameter}
@@ -85,15 +88,15 @@ export function FarmOverviewCard({
         )}
       </div>
 
-      <div className="flex-1 min-h-0 flex bg-background dark:bg-background/50">
-        <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">
+      <div className="bg-background dark:bg-background/50 flex min-h-0 flex-1">
+        <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
           {showEmpty ? (
             <EmptyState
               message={emptyForNowMessage}
               icon={<EmptyState.GreenhouseIcon />}
             />
           ) : (
-            <div className="relative flex flex-1 flex-col min-h-0">
+            <div className="relative flex min-h-0 flex-1 flex-col">
               <FarmDataDisplay
                 bays={bays}
                 viewMode={viewMode}
@@ -105,14 +108,15 @@ export function FarmOverviewCard({
                 parameterLabel={parameterLabel}
                 noSensorLabel={noSensorLabel}
                 noDataMessage={noDataMessage}
+                farmLayout={farmLayout}
               />
               {viewMode !== 'graph' && (
                 <div
-                  className="absolute bottom-0 left-0 flex h-[5.75rem] w-4 items-center justify-center border bg-secondary text-secondary-foreground shadow-sm sm:h-[12.5rem] sm:w-8"
+                  className="bg-secondary text-secondary-foreground absolute bottom-0 left-0 flex h-[5.75rem] w-4 items-center justify-center border shadow-sm sm:h-[12.5rem] sm:w-8"
                   aria-label={entranceLabel}
                 >
                   <span
-                    className="whitespace-nowrap text-[7px] font-semibold uppercase tracking-[0.08em] sm:text-[12px] sm:tracking-[0.18em]"
+                    className="text-[7px] font-semibold tracking-[0.08em] whitespace-nowrap uppercase sm:text-[12px] sm:tracking-[0.18em]"
                     style={{
                       writingMode: 'vertical-rl',
                       transform: 'rotate(180deg)',

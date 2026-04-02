@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { CartesianGrid, Area, AreaChart, XAxis, YAxis } from 'recharts'
+import * as React from 'react';
+import { CartesianGrid, Area, AreaChart, XAxis, YAxis } from 'recharts';
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart'
-import { useI18n } from '@/i18n'
+} from '@/components/ui/chart';
+import { useI18n } from '@/i18n';
 
 export interface MonthData {
-  month: number
-  yield: number
+  month: number;
+  yield: number;
 }
 
 interface MonthChartProps {
-  data: MonthData[]
-  selectedMonth?: number
-  onMonthSelect?: (month: number) => void
+  data: MonthData[];
+  selectedMonth?: number;
+  onMonthSelect?: (month: number) => void;
 }
 
 const chartConfig = {
@@ -26,14 +26,14 @@ const chartConfig = {
     label: 'Yield',
     color: 'hsl(var(--primary))',
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function MonthChart({
   data,
   selectedMonth,
   onMonthSelect,
 }: MonthChartProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const monthNames = [
     t.pages.nextCyclePlanner.monthNames.january,
@@ -48,21 +48,21 @@ export function MonthChart({
     t.pages.nextCyclePlanner.monthNames.october,
     t.pages.nextCyclePlanner.monthNames.november,
     t.pages.nextCyclePlanner.monthNames.december,
-  ]
+  ];
 
   const chartData = data.map((d) => ({
     month: monthNames[d.month - 1],
     monthNum: d.month,
     yield: Number(d.yield.toFixed(2)),
-  }))
+  }));
 
   // Y-axis always set to 100 for all varieties
-  const yAxisMax = 100
-  const yDomain: [number, number] = [0, yAxisMax]
+  const yAxisMax = 100;
+  const yDomain: [number, number] = [0, yAxisMax];
   const yTicks = Array.from(
     { length: Math.floor(yAxisMax / 10) + 1 },
-    (_, i) => i * 10
-  )
+    (_, i) => i * 10,
+  );
 
   return (
     <ChartContainer config={chartConfig}>
@@ -117,14 +117,14 @@ export function MonthChart({
           strokeWidth={3}
           fill="url(#colorYield)"
           dot={(props: {
-            cx?: number
-            cy?: number
-            payload?: { monthNum: number; yield: number }
+            cx?: number;
+            cy?: number;
+            payload?: { monthNum: number; yield: number };
           }) => {
             if (!props.cx || !props.cy || !props.payload) {
-              return <g />
+              return <g />;
             }
-            const isSelected = selectedMonth === props.payload.monthNum
+            const isSelected = selectedMonth === props.payload.monthNum;
             return (
               <circle
                 cx={props.cx}
@@ -145,7 +145,7 @@ export function MonthChart({
                     : 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))',
                 }}
               />
-            )
+            );
           }}
           activeDot={{
             r: 6,
@@ -156,5 +156,5 @@ export function MonthChart({
         />
       </AreaChart>
     </ChartContainer>
-  )
+  );
 }

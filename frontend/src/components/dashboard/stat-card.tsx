@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { TiltCard } from './tilt-card'
+import * as React from 'react';
+import { TiltCard } from './tilt-card';
 
 export interface StatCardProps {
-  icon: React.ReactNode
-  title: string
-  value: string
-  subtitle?: string
-  className?: string
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  subtitle?: string;
+  className?: string;
 }
 
 export function StatCard({
@@ -24,10 +24,10 @@ export function StatCard({
         {icon}
         <h3 className="text-lg font-semibold">{title}</h3>
       </div>
-      <p className="text-2xl font-bold mt-3">{value}</p>
+      <p className="mt-3 text-2xl font-bold">{value}</p>
       {subtitle && (
-        <p className="text-sm text-muted-foreground mt-2">{subtitle}</p>
+        <p className="text-muted-foreground mt-2 text-sm">{subtitle}</p>
       )}
     </TiltCard>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   CartesianGrid,
   Line,
@@ -9,23 +9,23 @@ import {
   XAxis,
   YAxis,
   Legend,
-} from 'recharts'
+} from 'recharts';
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart'
+} from '@/components/ui/chart';
 
 export interface OpexRevenueData {
-  month: string
-  opex: number
-  revenue: number
+  month: string;
+  opex: number;
+  revenue: number;
 }
 
 interface OpexRevenueChartProps {
-  data: OpexRevenueData[]
-  title: string
+  data: OpexRevenueData[];
+  title: string;
 }
 
 const chartConfig = {
@@ -37,7 +37,7 @@ const chartConfig = {
     label: 'Revenue',
     color: '#016F7C',
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 const monthAbbreviations = [
   'Jan',
@@ -52,12 +52,12 @@ const monthAbbreviations = [
   'Oct',
   'Nov',
   'Dec',
-]
+];
 
 export function OpexRevenueChart({ data, title }: OpexRevenueChartProps) {
   const chartData = data.map((d) => {
-    const opex = Number(d.opex.toFixed(0))
-    const revenue = Number(d.revenue.toFixed(0))
+    const opex = Number(d.opex.toFixed(0));
+    const revenue = Number(d.revenue.toFixed(0));
     // For profit area: when revenue > opex, show area from opex to revenue
     // When revenue <= opex, set profitTop to opex (no visible area)
     return {
@@ -68,8 +68,8 @@ export function OpexRevenueChart({ data, title }: OpexRevenueChartProps) {
       profitTop: revenue > opex ? revenue : opex,
       // Profit area base value (always opex, but area only shows when revenue > opex)
       profitBase: opex,
-    }
-  })
+    };
+  });
 
   return (
     <div className="space-y-2">
@@ -111,7 +111,7 @@ export function OpexRevenueChart({ data, title }: OpexRevenueChartProps) {
             wrapperStyle={{ paddingTop: '20px' }}
             iconType="line"
             formatter={(value) => (
-              <span className="text-sm text-muted-foreground">{value}</span>
+              <span className="text-muted-foreground text-sm">{value}</span>
             )}
           />
           {/* Profit area - shaded between curves where revenue > opex */}
@@ -144,20 +144,20 @@ export function OpexRevenueChart({ data, title }: OpexRevenueChartProps) {
         </ComposedChart>
       </ChartContainer>
     </div>
-  )
+  );
 }
 
 // Helper function to generate monthly data
 export function generateOpexRevenueData(): OpexRevenueData[] {
   return monthAbbreviations.map((month, index) => {
     // Revenue peaks in August, then declines
-    const revenue = 3500 + Math.sin((index / 11) * Math.PI) * 22500
+    const revenue = 3500 + Math.sin((index / 11) * Math.PI) * 22500;
     // Opex is more stable, slightly increasing mid-year
-    const opex = 11000 + Math.sin((index / 11) * Math.PI) * 3000
+    const opex = 11000 + Math.sin((index / 11) * Math.PI) * 3000;
     return {
       month,
       opex: Math.max(0, opex),
       revenue: Math.max(0, revenue),
-    }
-  })
+    };
+  });
 }

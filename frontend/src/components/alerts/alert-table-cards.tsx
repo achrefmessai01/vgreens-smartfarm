@@ -47,9 +47,9 @@ export const useAlertTableCard = (
         {/* Custom-Header implementation */}
         <div className="flex flex-row items-center justify-between gap-2 border-b px-6 pb-2">
           <h3
-            className={cn('text-sm font-semibold leading-none', textClassName)}
+            className={cn('text-sm leading-none font-semibold', textClassName)}
           >
-            {alert.sensorName}
+            {formatFieldLabel(alert.field)}
           </h3>
           <div className="flex shrink-0 flex-wrap gap-2">
             {getStatusBadge(alert.status, t)}
@@ -58,16 +58,6 @@ export const useAlertTableCard = (
         </div>
 
         <CardContent className="space-y-2 text-xs">
-          {/* Field */}
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">
-              {t.pages.alerts.field ?? 'Parameter'}:
-            </span>
-            <span className={cn('font-medium', textClassName)}>
-              {formatFieldLabel(alert.field)}
-            </span>
-          </div>
-
           {/* Value */}
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">

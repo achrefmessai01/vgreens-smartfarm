@@ -1,29 +1,29 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   Sheet,
   SheetTitle,
   SheetHeader,
   SheetFooter,
   SheetContent,
-} from '@/components/ui/sheet'
-import { useI18n } from '@/i18n'
-import { Button } from '@/components/ui/button'
-import type { Alert } from '@/generated/graphql'
-import { AlertForm, type AlertFormRef } from './alert-form'
+} from '@/components/ui/sheet';
+import { useI18n } from '@/i18n';
+import { Button } from '@/components/ui/button';
+import type { Alert } from '@/generated/graphql';
+import { AlertForm, type AlertFormRef } from './alert-form';
 
 interface AlertFormSheetProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  alert: Alert | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  alert: Alert | null;
   onSubmit: (data: {
-    sensorName: string
-    value: string
-    description?: string
-  }) => void
-  onCancel: () => void
-  isLoading?: boolean
+    sensorName: string;
+    value: string;
+    description?: string;
+  }) => void;
+  onCancel: () => void;
+  isLoading?: boolean;
 }
 
 export function AlertFormSheet({
@@ -34,16 +34,16 @@ export function AlertFormSheet({
   onCancel,
   isLoading = false,
 }: AlertFormSheetProps) {
-  const { t } = useI18n()
-  const formRef = React.useRef<AlertFormRef>(null)
+  const { t } = useI18n();
+  const formRef = React.useRef<AlertFormRef>(null);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-lg flex flex-col p-0 gap-0"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
       >
-        <SheetHeader className="px-6 pt-6 pb-4 border-b dark:border-primary-foreground/30">
+        <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
           <SheetTitle className="dark:text-card-foreground">
             {alert ? t.pages.alerts.editAlert : t.pages.alerts.createAlert}
           </SheetTitle>
@@ -57,12 +57,12 @@ export function AlertFormSheet({
             isLoading={isLoading}
           />
         </div>
-        <SheetFooter className="flex-row gap-2 px-6 py-4 border-t dark:border-primary-foreground/30">
+        <SheetFooter className="dark:border-primary-foreground/30 flex-row gap-2 border-t px-6 py-4">
           <Button
             variant="outline"
             onClick={onCancel}
             disabled={isLoading}
-            className="flex-1 dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10"
+            className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 flex-1"
           >
             {t.pages.alerts.cancel}
           </Button>
@@ -74,11 +74,11 @@ export function AlertFormSheet({
             {isLoading
               ? '...'
               : alert
-              ? t.pages.alerts.updateAlert
-              : t.pages.alerts.createAlert}
+                ? t.pages.alerts.updateAlert
+                : t.pages.alerts.createAlert}
           </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

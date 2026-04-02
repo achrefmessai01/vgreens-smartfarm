@@ -4,16 +4,16 @@
  */
 
 export interface PaginationConfig {
-  defaultPageSize: number
-  pageSizeOptions: number[]
+  defaultPageSize: number;
+  pageSizeOptions: number[];
   paginationLabels: {
-    showing: string
-    of: string
-    results: string
-    perPage: string
-    previous: string
-    next: string
-  }
+    showing: string;
+    of: string;
+    results: string;
+    perPage: string;
+    previous: string;
+    next: string;
+  };
 }
 
 export const DEFAULT_PAGINATION_CONFIG: PaginationConfig = {
@@ -27,7 +27,7 @@ export const DEFAULT_PAGINATION_CONFIG: PaginationConfig = {
     previous: 'Previous',
     next: 'Next',
   },
-}
+};
 
 /**
  * Get pagination config with custom labels
@@ -35,9 +35,9 @@ export const DEFAULT_PAGINATION_CONFIG: PaginationConfig = {
 export function getPaginationConfig(
   labels?: Partial<PaginationConfig['paginationLabels']>,
   options?: {
-    defaultPageSize?: number
-    pageSizeOptions?: number[]
-  }
+    defaultPageSize?: number;
+    pageSizeOptions?: number[];
+  },
 ): PaginationConfig {
   return {
     defaultPageSize:
@@ -48,5 +48,5 @@ export function getPaginationConfig(
       ...DEFAULT_PAGINATION_CONFIG.paginationLabels,
       ...labels,
     },
-  }
+  };
 }

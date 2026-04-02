@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useI18n } from '@/i18n'
-import type { Alert } from '@/generated/graphql'
-import { ConfirmationDialog } from '@/components/users'
+import * as React from 'react';
+import { useI18n } from '@/i18n';
+import type { Alert } from '@/generated/graphql';
+import { ConfirmationDialog } from '@/components/users';
 
 interface AlertDeleteDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  alert: Alert | null
-  onConfirm: () => void
-  onCancel: () => void
-  isLoading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  alert: Alert | null;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isLoading?: boolean;
 }
 
 export function AlertDeleteDialog({
@@ -22,9 +22,9 @@ export function AlertDeleteDialog({
   onCancel,
   isLoading = false,
 }: AlertDeleteDialogProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
-  if (!alert) return null
+  if (!alert) return null;
 
   return (
     <ConfirmationDialog
@@ -39,15 +39,15 @@ export function AlertDeleteDialog({
       onCancel={onCancel}
     >
       <div className="space-y-4">
-        <div className="p-4 bg-muted rounded-lg dark:bg-primary-foreground/10 dark:border dark:border-primary-foreground/20">
-          <p className="font-medium dark:text-card-foreground">
+        <div className="bg-muted dark:bg-primary-foreground/10 dark:border-primary-foreground/20 rounded-lg p-4 dark:border">
+          <p className="dark:text-card-foreground font-medium">
             {alert.sensorName}
           </p>
-          <p className="text-sm text-muted-foreground dark:text-muted-foreground/80 mt-1">
+          <p className="text-muted-foreground dark:text-muted-foreground/80 mt-1 text-sm">
             {t.pages.alerts.value}: {alert.value}
           </p>
         </div>
       </div>
     </ConfirmationDialog>
-  )
+  );
 }

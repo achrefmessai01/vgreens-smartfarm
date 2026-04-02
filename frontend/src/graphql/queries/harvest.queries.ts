@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client';
 
 export const HARVESTS_QUERY = gql`
   query Harvests($filter: HarvestFilterInput) {
@@ -39,7 +39,7 @@ export const HARVESTS_QUERY = gql`
       }
     }
   }
-`
+`;
 
 export const HARVEST_QUERY = gql`
   query Harvest($id: ID!) {
@@ -80,7 +80,7 @@ export const HARVEST_QUERY = gql`
       }
     }
   }
-`
+`;
 
 export const HARVEST_IMAGES_QUERY = gql`
   query HarvestImages($folder: String) {
@@ -91,5 +91,4 @@ export const HARVEST_IMAGES_QUERY = gql`
       url
     }
   }
-`
-
+`;

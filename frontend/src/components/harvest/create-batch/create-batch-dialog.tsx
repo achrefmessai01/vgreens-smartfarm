@@ -48,7 +48,7 @@ export function CreateBatchDialog({
           <DialogTitle>
             {t.pages.harvest?.createNewBatch || 'Create New Batch'}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t.pages.harvest?.setUpNewBatch || 'Set up a new cultivation batch'}
           </p>
         </DialogHeader>

@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { Inbox } from 'lucide-react'
+import { Inbox } from 'lucide-react';
 
 export interface TableEmptyStateProps {
-  title: string
-  description?: string
-  action?: React.ReactNode
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
 }
 
 export function TableEmptyState({
@@ -14,17 +14,23 @@ export function TableEmptyState({
   action,
 }: TableEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-      <div className="rounded-full bg-muted/50 p-4 mb-4">
-        <Inbox className="h-8 w-8 text-muted-foreground" />
+    <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
+      <div className="relative mb-6">
+        <div className="from-primary/10 to-primary/5 absolute inset-0 rounded-full bg-gradient-to-br blur-2xl" />
+        <div className="border-border/40 bg-muted/40 relative rounded-full border p-6 shadow-inner backdrop-blur-sm">
+          <Inbox className="text-muted-foreground/50 h-10 w-10" />
+        </div>
       </div>
-      <p className="text-base font-medium text-foreground mb-1">{title}</p>
+
+      <h3 className="text-foreground mb-2 text-lg font-semibold">{title}</h3>
+
       {description && (
-        <p className="text-sm text-muted-foreground max-w-sm mb-6">
+        <p className="text-muted-foreground max-w-xs text-sm leading-relaxed">
           {description}
         </p>
       )}
-      {action && <div>{action}</div>}
+
+      {action && <div className="mt-6">{action}</div>}
     </div>
-  )
+  );
 }

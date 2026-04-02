@@ -500,6 +500,7 @@ export type Mutation = {
   deleteHarvest: Scalars['Boolean']['output'];
   /** Delete an image from Supabase Storage. Non-admins can only delete their tenant images. */
   deleteImage: Scalars['Boolean']['output'];
+  deleteSensorConfig: Scalars['Boolean']['output'];
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   logSystemError: SystemError;
@@ -517,6 +518,8 @@ export type Mutation = {
   updateUser: User;
   /** Upload an image file directly via GraphQL and store it in Supabase Storage. */
   uploadImage: ImageFile;
+  upsertFarmConfig: TenantFarmConfig;
+  upsertSensorConfig: SensorConfig;
 };
 
 
@@ -582,6 +585,12 @@ export type MutationDeleteHarvestArgs = {
 
 export type MutationDeleteImageArgs = {
   input: DeleteImageInput;
+};
+
+
+export type MutationDeleteSensorConfigArgs = {
+  id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -674,6 +683,18 @@ export type MutationUploadImageArgs = {
   input: UploadImageInput;
 };
 
+
+export type MutationUpsertFarmConfigArgs = {
+  input: UpsertFarmConfigInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationUpsertSensorConfigArgs = {
+  input: UpsertSensorConfigInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export enum OrderDirection {
   Asc = 'ASC',
   Desc = 'DESC'
@@ -691,6 +712,7 @@ export type Query = {
   alerts: Array<Alert>;
   errorReport?: Maybe<ErrorReport>;
   errorReports: Array<ErrorReport>;
+  farmConfig?: Maybe<TenantFarmConfig>;
   feature?: Maybe<Feature>;
   features: Array<Feature>;
   featuresWithTenantStatus: Array<FeatureWithTenantStatus>;
@@ -701,6 +723,7 @@ export type Query = {
   getParDliToday: Array<ParDliPoint>;
   getRecentSystemErrors: Array<SystemError>;
   getSystemErrorStats: Scalars['String']['output'];
+  greenhouseOptions: Array<Scalars['String']['output']>;
   harvest?: Maybe<Harvest>;
   harvestDashboard: HarvestDashboardMetrics;
   harvests: Array<Harvest>;
@@ -708,6 +731,8 @@ export type Query = {
   /** List images stored for the current tenant (or a specific tenant for admins). */
   images: Array<ImageFile>;
   me?: Maybe<User>;
+  sensorConfigs: Array<SensorConfig>;
+  sensorDevices: Array<Scalars['String']['output']>;
   /** Create a time-limited signed URL for viewing or downloading a private image. */
   signedImageUrl: SignedUrl;
   tenant?: Maybe<Tenant>;
@@ -737,6 +762,11 @@ export type QueryErrorReportArgs = {
 
 export type QueryErrorReportsArgs = {
   filter?: InputMaybe<ErrorReportsFilterInput>;
+};
+
+
+export type QueryFarmConfigArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -786,6 +816,11 @@ export type QueryGetSystemErrorStatsArgs = {
 };
 
 
+export type QueryGreenhouseOptionsArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type QueryHarvestArgs = {
   id: Scalars['ID']['input'];
 };
@@ -803,6 +838,16 @@ export type QueryHarvestsArgs = {
 
 export type QueryImagesArgs = {
   input?: InputMaybe<ListImagesInput>;
+};
+
+
+export type QuerySensorConfigsArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QuerySensorDevicesArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -840,6 +885,21 @@ export enum ReportStatus {
   Open = 'OPEN',
   Resolved = 'RESOLVED'
 }
+
+export type SensorConfig = {
+  __typename?: 'SensorConfig';
+  bay?: Maybe<Scalars['String']['output']>;
+  city?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  device: Scalars['String']['output'];
+  greenhouse?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  pole?: Maybe<Scalars['String']['output']>;
+  row?: Maybe<Scalars['String']['output']>;
+  tenant?: Maybe<Tenant>;
+  tenantId: Scalars['ID']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
 
 export type SignedUrl = {
   __typename?: 'SignedUrl';
@@ -901,6 +961,18 @@ export type Tenant = {
   timezone?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   users?: Maybe<Array<User>>;
+};
+
+export type TenantFarmConfig = {
+  __typename?: 'TenantFarmConfig';
+  bayCount: Scalars['Int']['output'];
+  chambersCount: Scalars['Int']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  polesMax: Scalars['Int']['output'];
+  tenant?: Maybe<Tenant>;
+  tenantId: Scalars['ID']['output'];
+  updatedAt: Scalars['DateTime']['output'];
 };
 
 export type TenantFeature = {
@@ -1010,6 +1082,21 @@ export type UploadImageInput = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type UpsertFarmConfigInput = {
+  bayCount?: InputMaybe<Scalars['Int']['input']>;
+  chambersCount?: InputMaybe<Scalars['Int']['input']>;
+  polesMax?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type UpsertSensorConfigInput = {
+  bay?: InputMaybe<Scalars['String']['input']>;
+  city?: InputMaybe<Scalars['String']['input']>;
+  device: Scalars['String']['input'];
+  greenhouse?: InputMaybe<Scalars['String']['input']>;
+  pole?: InputMaybe<Scalars['String']['input']>;
+  row?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type User = {
   __typename?: 'User';
   clerkUserId: Scalars['String']['output'];
@@ -1106,6 +1193,14 @@ export type GetUnresolvedErrorReportsCountQueryVariables = Exact<{ [key: string]
 
 export type GetUnresolvedErrorReportsCountQuery = { __typename?: 'Query', unresolvedErrorReportsCount: number };
 
+export type UpsertFarmConfigMutationVariables = Exact<{
+  input: UpsertFarmConfigInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type UpsertFarmConfigMutation = { __typename?: 'Mutation', upsertFarmConfig: { __typename?: 'TenantFarmConfig', id: string, tenantId: string, bayCount: number, polesMax: number, chambersCount: number, updatedAt: any } };
+
 export type CreateFeatureMutationVariables = Exact<{
   input: CreateFeatureInput;
 }>;
@@ -1170,6 +1265,22 @@ export type DeleteHarvestImageMutationVariables = Exact<{
 
 
 export type DeleteHarvestImageMutation = { __typename?: 'Mutation', deleteImage: boolean };
+
+export type UpsertSensorConfigMutationVariables = Exact<{
+  input: UpsertSensorConfigInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type UpsertSensorConfigMutation = { __typename?: 'Mutation', upsertSensorConfig: { __typename?: 'SensorConfig', id: string, tenantId: string, device: string, bay?: string | null, pole?: string | null, row?: string | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any } };
+
+export type DeleteSensorConfigMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DeleteSensorConfigMutation = { __typename?: 'Mutation', deleteSensorConfig: boolean };
 
 export type CreateTenantMutationVariables = Exact<{
   input: CreateTenantInput;
@@ -1289,6 +1400,13 @@ export type DeleteAlertMutationVariables = Exact<{
 
 
 export type DeleteAlertMutation = { __typename?: 'Mutation', deleteAlert: boolean };
+
+export type FarmConfigQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type FarmConfigQuery = { __typename?: 'Query', farmConfig?: { __typename?: 'TenantFarmConfig', id: string, tenantId: string, bayCount: number, polesMax: number, chambersCount: number, updatedAt: any } | null };
 
 export type FeaturesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1429,6 +1547,27 @@ export type GetParDliTodayQueryVariables = Exact<{
 
 
 export type GetParDliTodayQuery = { __typename?: 'Query', getParDliToday: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }> };
+
+export type SensorConfigsQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, bay?: string | null, pole?: string | null, row?: string | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any }> };
+
+export type SensorDevicesQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type SensorDevicesQuery = { __typename?: 'Query', sensorDevices: Array<string> };
+
+export type GreenhouseOptionsQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GreenhouseOptionsQuery = { __typename?: 'Query', greenhouseOptions: Array<string> };
 
 export type TenantsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1793,6 +1932,45 @@ export type GetUnresolvedErrorReportsCountQueryHookResult = ReturnType<typeof us
 export type GetUnresolvedErrorReportsCountLazyQueryHookResult = ReturnType<typeof useGetUnresolvedErrorReportsCountLazyQuery>;
 export type GetUnresolvedErrorReportsCountSuspenseQueryHookResult = ReturnType<typeof useGetUnresolvedErrorReportsCountSuspenseQuery>;
 export type GetUnresolvedErrorReportsCountQueryResult = Apollo.QueryResult<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>;
+export const UpsertFarmConfigDocument = gql`
+    mutation UpsertFarmConfig($input: UpsertFarmConfigInput!, $tenantId: ID) {
+  upsertFarmConfig(input: $input, tenantId: $tenantId) {
+    id
+    tenantId
+    bayCount
+    polesMax
+    chambersCount
+    updatedAt
+  }
+}
+    `;
+export type UpsertFarmConfigMutationFn = Apollo.MutationFunction<UpsertFarmConfigMutation, UpsertFarmConfigMutationVariables>;
+
+/**
+ * __useUpsertFarmConfigMutation__
+ *
+ * To run a mutation, you first call `useUpsertFarmConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertFarmConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertFarmConfigMutation, { data, loading, error }] = useUpsertFarmConfigMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useUpsertFarmConfigMutation(baseOptions?: Apollo.MutationHookOptions<UpsertFarmConfigMutation, UpsertFarmConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertFarmConfigMutation, UpsertFarmConfigMutationVariables>(UpsertFarmConfigDocument, options);
+      }
+export type UpsertFarmConfigMutationHookResult = ReturnType<typeof useUpsertFarmConfigMutation>;
+export type UpsertFarmConfigMutationResult = Apollo.MutationResult<UpsertFarmConfigMutation>;
+export type UpsertFarmConfigMutationOptions = Apollo.BaseMutationOptions<UpsertFarmConfigMutation, UpsertFarmConfigMutationVariables>;
 export const CreateFeatureDocument = gql`
     mutation CreateFeature($input: CreateFeatureInput!) {
   createFeature(input: $input) {
@@ -2171,6 +2349,81 @@ export function useDeleteHarvestImageMutation(baseOptions?: Apollo.MutationHookO
 export type DeleteHarvestImageMutationHookResult = ReturnType<typeof useDeleteHarvestImageMutation>;
 export type DeleteHarvestImageMutationResult = Apollo.MutationResult<DeleteHarvestImageMutation>;
 export type DeleteHarvestImageMutationOptions = Apollo.BaseMutationOptions<DeleteHarvestImageMutation, DeleteHarvestImageMutationVariables>;
+export const UpsertSensorConfigDocument = gql`
+    mutation UpsertSensorConfig($input: UpsertSensorConfigInput!, $tenantId: ID) {
+  upsertSensorConfig(input: $input, tenantId: $tenantId) {
+    id
+    tenantId
+    device
+    bay
+    pole
+    row
+    greenhouse
+    city
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type UpsertSensorConfigMutationFn = Apollo.MutationFunction<UpsertSensorConfigMutation, UpsertSensorConfigMutationVariables>;
+
+/**
+ * __useUpsertSensorConfigMutation__
+ *
+ * To run a mutation, you first call `useUpsertSensorConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertSensorConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertSensorConfigMutation, { data, loading, error }] = useUpsertSensorConfigMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useUpsertSensorConfigMutation(baseOptions?: Apollo.MutationHookOptions<UpsertSensorConfigMutation, UpsertSensorConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertSensorConfigMutation, UpsertSensorConfigMutationVariables>(UpsertSensorConfigDocument, options);
+      }
+export type UpsertSensorConfigMutationHookResult = ReturnType<typeof useUpsertSensorConfigMutation>;
+export type UpsertSensorConfigMutationResult = Apollo.MutationResult<UpsertSensorConfigMutation>;
+export type UpsertSensorConfigMutationOptions = Apollo.BaseMutationOptions<UpsertSensorConfigMutation, UpsertSensorConfigMutationVariables>;
+export const DeleteSensorConfigDocument = gql`
+    mutation DeleteSensorConfig($id: ID!, $tenantId: ID) {
+  deleteSensorConfig(id: $id, tenantId: $tenantId)
+}
+    `;
+export type DeleteSensorConfigMutationFn = Apollo.MutationFunction<DeleteSensorConfigMutation, DeleteSensorConfigMutationVariables>;
+
+/**
+ * __useDeleteSensorConfigMutation__
+ *
+ * To run a mutation, you first call `useDeleteSensorConfigMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteSensorConfigMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteSensorConfigMutation, { data, loading, error }] = useDeleteSensorConfigMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useDeleteSensorConfigMutation(baseOptions?: Apollo.MutationHookOptions<DeleteSensorConfigMutation, DeleteSensorConfigMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteSensorConfigMutation, DeleteSensorConfigMutationVariables>(DeleteSensorConfigDocument, options);
+      }
+export type DeleteSensorConfigMutationHookResult = ReturnType<typeof useDeleteSensorConfigMutation>;
+export type DeleteSensorConfigMutationResult = Apollo.MutationResult<DeleteSensorConfigMutation>;
+export type DeleteSensorConfigMutationOptions = Apollo.BaseMutationOptions<DeleteSensorConfigMutation, DeleteSensorConfigMutationVariables>;
 export const CreateTenantDocument = gql`
     mutation CreateTenant($input: CreateTenantInput!) {
   createTenant(input: $input) {
@@ -2925,6 +3178,54 @@ export function useDeleteAlertMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteAlertMutationHookResult = ReturnType<typeof useDeleteAlertMutation>;
 export type DeleteAlertMutationResult = Apollo.MutationResult<DeleteAlertMutation>;
 export type DeleteAlertMutationOptions = Apollo.BaseMutationOptions<DeleteAlertMutation, DeleteAlertMutationVariables>;
+export const FarmConfigDocument = gql`
+    query FarmConfig($tenantId: ID) {
+  farmConfig(tenantId: $tenantId) {
+    id
+    tenantId
+    bayCount
+    polesMax
+    chambersCount
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useFarmConfigQuery__
+ *
+ * To run a query within a React component, call `useFarmConfigQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFarmConfigQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFarmConfigQuery({
+ *   variables: {
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useFarmConfigQuery(baseOptions?: Apollo.QueryHookOptions<FarmConfigQuery, FarmConfigQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FarmConfigQuery, FarmConfigQueryVariables>(FarmConfigDocument, options);
+      }
+export function useFarmConfigLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FarmConfigQuery, FarmConfigQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FarmConfigQuery, FarmConfigQueryVariables>(FarmConfigDocument, options);
+        }
+// @ts-ignore
+export function useFarmConfigSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FarmConfigQuery, FarmConfigQueryVariables>): Apollo.UseSuspenseQueryResult<FarmConfigQuery, FarmConfigQueryVariables>;
+export function useFarmConfigSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FarmConfigQuery, FarmConfigQueryVariables>): Apollo.UseSuspenseQueryResult<FarmConfigQuery | undefined, FarmConfigQueryVariables>;
+export function useFarmConfigSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<FarmConfigQuery, FarmConfigQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<FarmConfigQuery, FarmConfigQueryVariables>(FarmConfigDocument, options);
+        }
+export type FarmConfigQueryHookResult = ReturnType<typeof useFarmConfigQuery>;
+export type FarmConfigLazyQueryHookResult = ReturnType<typeof useFarmConfigLazyQuery>;
+export type FarmConfigSuspenseQueryHookResult = ReturnType<typeof useFarmConfigSuspenseQuery>;
+export type FarmConfigQueryResult = Apollo.QueryResult<FarmConfigQuery, FarmConfigQueryVariables>;
 export const FeaturesDocument = gql`
     query Features {
   features {
@@ -3944,6 +4245,140 @@ export type GetParDliTodayQueryHookResult = ReturnType<typeof useGetParDliTodayQ
 export type GetParDliTodayLazyQueryHookResult = ReturnType<typeof useGetParDliTodayLazyQuery>;
 export type GetParDliTodaySuspenseQueryHookResult = ReturnType<typeof useGetParDliTodaySuspenseQuery>;
 export type GetParDliTodayQueryResult = Apollo.QueryResult<GetParDliTodayQuery, GetParDliTodayQueryVariables>;
+export const SensorConfigsDocument = gql`
+    query SensorConfigs($tenantId: ID) {
+  sensorConfigs(tenantId: $tenantId) {
+    id
+    tenantId
+    device
+    bay
+    pole
+    row
+    greenhouse
+    city
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useSensorConfigsQuery__
+ *
+ * To run a query within a React component, call `useSensorConfigsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSensorConfigsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSensorConfigsQuery({
+ *   variables: {
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useSensorConfigsQuery(baseOptions?: Apollo.QueryHookOptions<SensorConfigsQuery, SensorConfigsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SensorConfigsQuery, SensorConfigsQueryVariables>(SensorConfigsDocument, options);
+      }
+export function useSensorConfigsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SensorConfigsQuery, SensorConfigsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SensorConfigsQuery, SensorConfigsQueryVariables>(SensorConfigsDocument, options);
+        }
+// @ts-ignore
+export function useSensorConfigsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SensorConfigsQuery, SensorConfigsQueryVariables>): Apollo.UseSuspenseQueryResult<SensorConfigsQuery, SensorConfigsQueryVariables>;
+export function useSensorConfigsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SensorConfigsQuery, SensorConfigsQueryVariables>): Apollo.UseSuspenseQueryResult<SensorConfigsQuery | undefined, SensorConfigsQueryVariables>;
+export function useSensorConfigsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SensorConfigsQuery, SensorConfigsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SensorConfigsQuery, SensorConfigsQueryVariables>(SensorConfigsDocument, options);
+        }
+export type SensorConfigsQueryHookResult = ReturnType<typeof useSensorConfigsQuery>;
+export type SensorConfigsLazyQueryHookResult = ReturnType<typeof useSensorConfigsLazyQuery>;
+export type SensorConfigsSuspenseQueryHookResult = ReturnType<typeof useSensorConfigsSuspenseQuery>;
+export type SensorConfigsQueryResult = Apollo.QueryResult<SensorConfigsQuery, SensorConfigsQueryVariables>;
+export const SensorDevicesDocument = gql`
+    query SensorDevices($tenantId: ID) {
+  sensorDevices(tenantId: $tenantId)
+}
+    `;
+
+/**
+ * __useSensorDevicesQuery__
+ *
+ * To run a query within a React component, call `useSensorDevicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSensorDevicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSensorDevicesQuery({
+ *   variables: {
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useSensorDevicesQuery(baseOptions?: Apollo.QueryHookOptions<SensorDevicesQuery, SensorDevicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SensorDevicesQuery, SensorDevicesQueryVariables>(SensorDevicesDocument, options);
+      }
+export function useSensorDevicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SensorDevicesQuery, SensorDevicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SensorDevicesQuery, SensorDevicesQueryVariables>(SensorDevicesDocument, options);
+        }
+// @ts-ignore
+export function useSensorDevicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SensorDevicesQuery, SensorDevicesQueryVariables>): Apollo.UseSuspenseQueryResult<SensorDevicesQuery, SensorDevicesQueryVariables>;
+export function useSensorDevicesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SensorDevicesQuery, SensorDevicesQueryVariables>): Apollo.UseSuspenseQueryResult<SensorDevicesQuery | undefined, SensorDevicesQueryVariables>;
+export function useSensorDevicesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SensorDevicesQuery, SensorDevicesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SensorDevicesQuery, SensorDevicesQueryVariables>(SensorDevicesDocument, options);
+        }
+export type SensorDevicesQueryHookResult = ReturnType<typeof useSensorDevicesQuery>;
+export type SensorDevicesLazyQueryHookResult = ReturnType<typeof useSensorDevicesLazyQuery>;
+export type SensorDevicesSuspenseQueryHookResult = ReturnType<typeof useSensorDevicesSuspenseQuery>;
+export type SensorDevicesQueryResult = Apollo.QueryResult<SensorDevicesQuery, SensorDevicesQueryVariables>;
+export const GreenhouseOptionsDocument = gql`
+    query GreenhouseOptions($tenantId: ID) {
+  greenhouseOptions(tenantId: $tenantId)
+}
+    `;
+
+/**
+ * __useGreenhouseOptionsQuery__
+ *
+ * To run a query within a React component, call `useGreenhouseOptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGreenhouseOptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGreenhouseOptionsQuery({
+ *   variables: {
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useGreenhouseOptionsQuery(baseOptions?: Apollo.QueryHookOptions<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>(GreenhouseOptionsDocument, options);
+      }
+export function useGreenhouseOptionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>(GreenhouseOptionsDocument, options);
+        }
+// @ts-ignore
+export function useGreenhouseOptionsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>): Apollo.UseSuspenseQueryResult<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>;
+export function useGreenhouseOptionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>): Apollo.UseSuspenseQueryResult<GreenhouseOptionsQuery | undefined, GreenhouseOptionsQueryVariables>;
+export function useGreenhouseOptionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>(GreenhouseOptionsDocument, options);
+        }
+export type GreenhouseOptionsQueryHookResult = ReturnType<typeof useGreenhouseOptionsQuery>;
+export type GreenhouseOptionsLazyQueryHookResult = ReturnType<typeof useGreenhouseOptionsLazyQuery>;
+export type GreenhouseOptionsSuspenseQueryHookResult = ReturnType<typeof useGreenhouseOptionsSuspenseQuery>;
+export type GreenhouseOptionsQueryResult = Apollo.QueryResult<GreenhouseOptionsQuery, GreenhouseOptionsQueryVariables>;
 export const TenantsDocument = gql`
     query Tenants {
   tenants {

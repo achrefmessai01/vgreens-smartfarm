@@ -1,29 +1,29 @@
-'use client'
+'use client';
 
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 interface SidebarSkeletonProps {
-  className?: string
+  className?: string;
 }
 
 export function SidebarSkeleton({ className }: SidebarSkeletonProps) {
   return (
     <div
       className={cn(
-        'hidden lg:flex flex-col fixed left-0 top-0 h-screen w-64 z-40 border-r border-border dark:border-sidebar-border/70 bg-muted/30 dark:bg-background',
+        'border-border dark:border-sidebar-border/70 bg-muted/30 dark:bg-background fixed top-0 left-0 z-40 hidden h-screen w-64 flex-col border-r lg:flex',
         className,
       )}
       aria-label="Loading sidebar"
     >
       {/* Header */}
-      <div className="flex h-16 items-center justify-between border-b border-border dark:border-sidebar-border/70 px-4">
+      <div className="border-border dark:border-sidebar-border/70 flex h-16 items-center justify-between border-b px-4">
         <div className="flex items-center gap-2">
-          <Skeleton className="h-8 w-8 rounded-md shrink-0" />
+          <Skeleton className="h-8 w-8 shrink-0 rounded-md" />
           <Skeleton className="h-4 w-24" />
         </div>
-        <Skeleton className="h-8 w-8 rounded-md shrink-0" />
+        <Skeleton className="h-8 w-8 shrink-0 rounded-md" />
       </div>
 
       {/* Nav items */}
@@ -60,7 +60,7 @@ export function SidebarSkeleton({ className }: SidebarSkeletonProps) {
       </div>
 
       {/* User Profile */}
-      <div className="border-t border-border dark:border-sidebar-border/70 p-4">
+      <div className="border-border dark:border-sidebar-border/70 border-t p-4">
         <div className="flex items-center gap-3">
           <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
           <div className="flex flex-1 flex-col gap-1.5">
@@ -70,5 +70,5 @@ export function SidebarSkeleton({ className }: SidebarSkeletonProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

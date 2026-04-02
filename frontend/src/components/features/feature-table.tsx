@@ -69,7 +69,7 @@ export function FeatureTable({
         )}
       </TableCell>
       <TableCell className="max-w-md">
-        <p className="text-sm text-muted-foreground truncate">
+        <p className="text-muted-foreground truncate text-sm">
           {feature.description || '-'}
         </p>
       </TableCell>
@@ -95,7 +95,7 @@ export function FeatureTable({
             variant="ghost"
             size="icon"
             onClick={() => onDelete(feature)}
-            className="h-8 w-8 text-destructive hover:text-destructive"
+            className="text-destructive hover:text-destructive h-8 w-8"
             disabled={isLoading}
           >
             <Trash2 className="h-4 w-4" />
@@ -109,7 +109,7 @@ export function FeatureTable({
     <Card className="gap-2 overflow-hidden border py-2 shadow-none">
       {/* Custom-Header implementation - using card-header breaks ux */}
       <div className="flex flex-row items-center justify-between border-b px-6 pb-2">
-        <h3 className="text-sm font-semibold leading-none">{feature.name}</h3>
+        <h3 className="text-sm leading-none font-semibold">{feature.name}</h3>
         {/* Status */}
         <Badge
           variant={feature.isActive ? 'default' : 'secondary'}
@@ -127,7 +127,7 @@ export function FeatureTable({
           <span className="text-muted-foreground">
             {t.pages.admin.features.key}:
           </span>
-          <span className="break-all font-mono font-medium">{feature.key}</span>
+          <span className="font-mono font-medium break-all">{feature.key}</span>
         </div>
 
         {/* Category */}
@@ -169,7 +169,7 @@ export function FeatureTable({
             variant="ghost"
             size="icon"
             onClick={() => onDelete(feature)}
-            className="h-8 w-8 text-destructive hover:text-destructive"
+            className="text-destructive hover:text-destructive h-8 w-8"
             disabled={isLoading}
           >
             <Trash2 className="h-4 w-4" />
@@ -182,7 +182,7 @@ export function FeatureTable({
   return (
     <div
       className={
-        isMobile ? 'flex flex-col gap-4' : 'flex flex-col gap-4 h-full min-h-0'
+        isMobile ? 'flex flex-col gap-4' : 'flex h-full min-h-0 flex-col gap-4'
       }
     >
       <div className="flex justify-end">
@@ -191,7 +191,7 @@ export function FeatureTable({
           {t.pages.admin.features.createFeature}
         </Button>
       </div>
-      <div className={isMobile ? '' : 'flex-1 min-h-0'}>
+      <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <DataTable
           data={features}
           columns={columns}

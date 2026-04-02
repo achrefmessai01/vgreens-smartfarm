@@ -7,10 +7,24 @@ import {
 import { Cron } from '@nestjs/schedule';
 import { AlertsService } from './alerts.service';
 import { Injectable, Logger } from '@nestjs/common';
-import type { Alert } from './entities/alert.entity';
 import { isInTimeGate } from './alert-threshold-time';
 import { TenantsService } from '@modules/tenants/tenants.service';
 import { InfluxDBService } from '@modules/influxdb/influxdb.service';
+
+const FIELD_DISPLAY_NAMES: Record<string, string> = {
+  temperature: 'Air Temperature',
+  humidity: 'Humidity',
+  vpd: 'VPD',
+  soil_moisture: 'Soil Moisture',
+  soil_ec: 'Soil EC',
+  soil_temp: 'Root Temperature',
+  par: 'DLI / PAR',
+  co2: 'CO2',
+};
+
+function fieldDisplayName(field: string): string {
+  return FIELD_DISPLAY_NAMES[field] ?? field;
+}
 
 function parseTime(v: unknown): Date {
   if (v instanceof Date) return v;
@@ -51,7 +65,6 @@ function satisfiesOp(
   return op === 'gt' ? value > threshold : value < threshold;
 }
 
-/** Check that condition holds for all points in the last persistenceMinutes (best effort: we have discrete points) */
 function triggerHolds(
   points: { value: number; time: Date }[],
   op: 'gt' | 'lt',
@@ -156,6 +169,11 @@ export class AlertThresholdService {
       field: rule.field,
     });
     const byDevice = groupByDevice(rows);
+
+    const violating: {
+      device: string;
+      latest: { value: number; time: Date };
+    }[] = [];
     for (const [device, points] of byDevice) {
       if (
         triggerHolds(
@@ -165,49 +183,48 @@ export class AlertThresholdService {
           rule.persistenceMinutes,
         )
       ) {
-        const latest = points[points.length - 1];
-        const existing: Alert | null =
-          await this.alertsService.findOpenAlertForSensorAndRuleKey(
-            tenantId,
-            device,
-            rule.ruleKey,
-          );
-        if (existing) {
-          if (
-            clearHolds(points, rule.clearOp, rule.clearValue, rule.clearMinutes)
-          ) {
-            await this.alertsService.resolveAlertBySystem(
-              existing.id,
-              tenantId,
-            );
-          }
-          continue;
-        }
+        violating.push({ device, latest: points[points.length - 1] });
+      }
+    }
+
+    const existing = await this.alertsService.findOpenAlertForField(
+      tenantId,
+      rule.field,
+    );
+
+    if (violating.length > 0) {
+      if (!existing) {
+        const worst = violating.reduce((a, b) =>
+          rule.triggerOp === 'gt'
+            ? a.latest.value >= b.latest.value
+              ? a
+              : b
+            : a.latest.value <= b.latest.value
+              ? a
+              : b,
+        );
+        const deviceList = violating.map((v) => v.device).join(', ');
         await this.alertsService.createAlert(
           {
-            sensorName: device,
-            value: String(latest.value),
+            sensorName: fieldDisplayName(rule.field),
+            value: String(worst.latest.value),
             severity: rule.severity,
-            description: `${rule.parameter} ${rule.triggerOp === 'gt' ? '>' : '<'} ${rule.triggerValue}. ${rule.rationale}`,
-            timestamp: latest.time.toISOString(),
+            description: `${violating.length} sensor(s) affected: ${deviceList}. ${rule.parameter} ${rule.triggerOp === 'gt' ? '>' : '<'} ${rule.triggerValue}. ${rule.rationale}`,
+            timestamp: worst.latest.time.toISOString(),
             field: rule.field,
             ruleKey: rule.ruleKey,
           },
           tenantId,
         );
-      } else {
-        const existing: Alert | null =
-          await this.alertsService.findOpenAlertForSensorAndRuleKey(
-            tenantId,
-            device,
-            rule.ruleKey,
-          );
-        if (
-          existing &&
-          clearHolds(points, rule.clearOp, rule.clearValue, rule.clearMinutes)
-        ) {
-          await this.alertsService.resolveAlertBySystem(existing.id, tenantId);
-        }
+      }
+    } else if (existing) {
+      const allClear =
+        byDevice.size === 0 ||
+        [...byDevice.values()].every((points) =>
+          clearHolds(points, rule.clearOp, rule.clearValue, rule.clearMinutes),
+        );
+      if (allClear) {
+        await this.alertsService.resolveAlertBySystem(existing.id, tenantId);
       }
     }
   }
@@ -233,89 +250,68 @@ export class AlertThresholdService {
     const byDeviceA = groupByDevice(rowsA);
     const byDeviceB = groupByDevice(rowsB);
     const devices = new Set([...byDeviceA.keys(), ...byDeviceB.keys()]);
+
+    const violating: {
+      device: string;
+      latestA: { value: number; time: Date };
+    }[] = [];
     for (const device of devices) {
       const pointsA = byDeviceA.get(device) ?? [];
       const pointsB = byDeviceB.get(device) ?? [];
-      const triggerA = triggerHolds(
-        pointsA,
-        rule.opA,
-        rule.valueA,
-        rule.persistenceMinutes,
-      );
-      const triggerB = triggerHolds(
-        pointsB,
-        rule.opB,
-        rule.valueB,
-        rule.persistenceMinutes,
-      );
-      if (triggerA && triggerB && pointsA.length > 0) {
-        const latestA = pointsA[pointsA.length - 1];
-        const existing: Alert | null =
-          await this.alertsService.findOpenAlertForSensorAndRuleKey(
-            tenantId,
-            device,
-            rule.ruleKey,
-          );
-        if (existing) {
-          const clearA = clearHolds(
-            pointsA,
-            rule.clearOpA,
-            rule.clearValueA,
-            rule.clearMinutes,
-          );
-          const clearB = clearHolds(
-            pointsB,
-            rule.clearOpB,
-            rule.clearValueB,
-            rule.clearMinutes,
-          );
-          if (clearA || clearB) {
-            await this.alertsService.resolveAlertBySystem(
-              existing.id,
-              tenantId,
-            );
-          }
-          continue;
-        }
+      if (
+        triggerHolds(pointsA, rule.opA, rule.valueA, rule.persistenceMinutes) &&
+        triggerHolds(pointsB, rule.opB, rule.valueB, rule.persistenceMinutes) &&
+        pointsA.length > 0
+      ) {
+        violating.push({ device, latestA: pointsA[pointsA.length - 1] });
+      }
+    }
+
+    const existing = await this.alertsService.findOpenAlertForField(
+      tenantId,
+      rule.fieldA,
+    );
+
+    if (violating.length > 0) {
+      if (!existing) {
+        const deviceList = violating.map((v) => v.device).join(', ');
+        const first = violating[0];
         await this.alertsService.createAlert(
           {
-            sensorName: device,
-            value: `${rule.fieldA}=${latestA.value}`,
+            sensorName: fieldDisplayName(rule.fieldA),
+            value: `${rule.fieldA}=${first.latestA.value}`,
             severity: rule.severity,
-            description: `${rule.parameter}: ${rule.fieldA} ${rule.opA} ${rule.valueA} & ${rule.fieldB} ${rule.opB} ${rule.valueB}. ${rule.rationale}`,
-            timestamp: latestA.time.toISOString(),
+            description: `${violating.length} sensor(s) affected: ${deviceList}. ${rule.parameter}: ${rule.fieldA} ${rule.opA} ${rule.valueA} & ${rule.fieldB} ${rule.opB} ${rule.valueB}. ${rule.rationale}`,
+            timestamp: first.latestA.time.toISOString(),
             field: rule.fieldA,
             ruleKey: rule.ruleKey,
           },
           tenantId,
         );
-      } else {
-        const existing: Alert | null =
-          await this.alertsService.findOpenAlertForSensorAndRuleKey(
-            tenantId,
-            device,
-            rule.ruleKey,
+      }
+    } else if (existing) {
+      const allClear =
+        devices.size === 0 ||
+        [...devices].every((device) => {
+          const pointsA = byDeviceA.get(device) ?? [];
+          const pointsB = byDeviceB.get(device) ?? [];
+          return (
+            clearHolds(
+              pointsA,
+              rule.clearOpA,
+              rule.clearValueA,
+              rule.clearMinutes,
+            ) ||
+            clearHolds(
+              pointsB,
+              rule.clearOpB,
+              rule.clearValueB,
+              rule.clearMinutes,
+            )
           );
-        if (existing) {
-          const clearA = clearHolds(
-            pointsA,
-            rule.clearOpA,
-            rule.clearValueA,
-            rule.clearMinutes,
-          );
-          const clearB = clearHolds(
-            pointsB,
-            rule.clearOpB,
-            rule.clearValueB,
-            rule.clearMinutes,
-          );
-          if (clearA || clearB) {
-            await this.alertsService.resolveAlertBySystem(
-              existing.id,
-              tenantId,
-            );
-          }
-        }
+        });
+      if (allClear) {
+        await this.alertsService.resolveAlertBySystem(existing.id, tenantId);
       }
     }
   }
@@ -326,71 +322,96 @@ export class AlertThresholdService {
     rule: DeltaThresholdRule,
   ): Promise<void> {
     const windowMin = rule.windowMinutes + Math.max(rule.clearMinutes, 10);
-    const rows = await this.influxDBService.getBucketData(bucketName, {
-      start: `-${windowMin}m`,
-      limit: 500,
-      field: rule.field,
-    });
+    const [rows, guardRows] = await Promise.all([
+      this.influxDBService.getBucketData(bucketName, {
+        start: `-${windowMin}m`,
+        limit: 500,
+        field: rule.field,
+      }),
+      rule.guardField
+        ? this.influxDBService.getBucketData(bucketName, {
+            start: `-${windowMin}m`,
+            limit: 500,
+            field: rule.guardField,
+          })
+        : Promise.resolve([]),
+    ]);
     const byDevice = groupByDevice(rows);
+    const byDeviceGuard = rule.guardField
+      ? groupByDevice(guardRows)
+      : new Map<string, { value: number; time: Date }[]>();
+
+    const violating: {
+      device: string;
+      delta: number;
+      latest: { value: number; time: Date };
+    }[] = [];
+
     for (const [device, points] of byDevice) {
       if (points.length < 2) continue;
       const cutoff = new Date(Date.now() - rule.windowMinutes * 60 * 1000);
       const inWindow = points.filter((p) => p.time >= cutoff);
       if (inWindow.length < 2) continue;
-      const first = inWindow[0].value;
-      const last = inWindow[inWindow.length - 1].value;
-      const delta = last - first;
+      const delta = inWindow[inWindow.length - 1].value - inWindow[0].value;
       const triggered =
         rule.direction === 'drop'
           ? delta < -rule.threshold
           : delta > rule.threshold;
-      if (triggered) {
-        const existing: Alert | null =
-          await this.alertsService.findOpenAlertForSensorAndRuleKey(
-            tenantId,
-            device,
-            rule.ruleKey,
+      if (!triggered) continue;
+
+      // Check guard condition if defined (e.g. VPD > 2.3 for vwc_rapid_drydown)
+      if (rule.guardField && rule.guardOp !== undefined && rule.guardValue !== undefined) {
+        const guardPoints = byDeviceGuard.get(device) ?? [];
+        const guardInWindow = guardPoints.filter((p) => p.time >= cutoff);
+        const guardPasses =
+          guardInWindow.length > 0 &&
+          guardInWindow.every((p) =>
+            satisfiesOp(p.value, rule.guardOp!, rule.guardValue!),
           );
-        if (existing) {
-          const clearCutoff = new Date(
-            Date.now() - rule.clearMinutes * 60 * 1000,
-          );
-          const recent = points.filter((p) => p.time >= clearCutoff);
-          const deltaVal =
-            recent.length >= 2
-              ? recent[recent.length - 1].value - recent[0].value
-              : 0;
-          const stable =
-            recent.length >= 2 && Math.abs(deltaVal) <= rule.threshold * 0.5;
-          if (stable) {
-            await this.alertsService.resolveAlertBySystem(
-              existing.id,
-              tenantId,
-            );
-          }
-          continue;
-        }
-        const latest = inWindow[inWindow.length - 1];
+        if (!guardPasses) continue;
+      }
+
+      violating.push({
+        device,
+        delta,
+        latest: inWindow[inWindow.length - 1],
+      });
+    }
+
+    const existing = await this.alertsService.findOpenAlertForField(
+      tenantId,
+      rule.field,
+    );
+
+    if (violating.length > 0) {
+      if (!existing) {
+        const worst = violating.reduce((a, b) =>
+          rule.direction === 'drop'
+            ? a.delta <= b.delta
+              ? a
+              : b
+            : a.delta >= b.delta
+              ? a
+              : b,
+        );
+        const deviceList = violating.map((v) => v.device).join(', ');
         await this.alertsService.createAlert(
           {
-            sensorName: device,
-            value: String(latest.value),
+            sensorName: fieldDisplayName(rule.field),
+            value: String(worst.latest.value),
             severity: rule.severity,
-            description: `${rule.parameter}: ${rule.direction} ${Math.abs(delta).toFixed(3)} in ${rule.windowMinutes}m. ${rule.rationale}`,
-            timestamp: latest.time.toISOString(),
+            description: `${violating.length} sensor(s) affected: ${deviceList}. ${rule.parameter}: ${rule.direction} of ${Math.abs(worst.delta).toFixed(3)} in ${rule.windowMinutes}m. ${rule.rationale}`,
+            timestamp: worst.latest.time.toISOString(),
             field: rule.field,
             ruleKey: rule.ruleKey,
           },
           tenantId,
         );
-      } else {
-        const existing: Alert | null =
-          await this.alertsService.findOpenAlertForSensorAndRuleKey(
-            tenantId,
-            device,
-            rule.ruleKey,
-          );
-        if (existing) {
+      }
+    } else if (existing) {
+      const allStable =
+        byDevice.size === 0 ||
+        [...byDevice.values()].every((points) => {
           const clearCutoff = new Date(
             Date.now() - rule.clearMinutes * 60 * 1000,
           );
@@ -399,15 +420,12 @@ export class AlertThresholdService {
             recent.length >= 2
               ? recent[recent.length - 1].value - recent[0].value
               : 0;
-          const stable =
-            recent.length >= 2 && Math.abs(deltaVal) <= rule.threshold * 0.5;
-          if (stable) {
-            await this.alertsService.resolveAlertBySystem(
-              existing.id,
-              tenantId,
-            );
-          }
-        }
+          return (
+            recent.length >= 2 && Math.abs(deltaVal) <= rule.threshold * 0.5
+          );
+        });
+      if (allStable) {
+        await this.alertsService.resolveAlertBySystem(existing.id, tenantId);
       }
     }
   }

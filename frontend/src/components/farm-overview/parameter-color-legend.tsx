@@ -29,7 +29,9 @@ export const LEGEND_RANGES: Record<
 };
 
 /** Min/max scale for the top legend bar; use this to align heatmap colors with the bar. */
-export function getLegendScale(parameter: ParameterType): { min: number; max: number } | null {
+export function getLegendScale(
+  parameter: ParameterType,
+): { min: number; max: number } | null {
   const range = LEGEND_RANGES[parameter];
   return range ? { min: range.min, max: range.max } : null;
 }
@@ -57,8 +59,8 @@ export function ParameterColorLegend({
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <div className="flex h-full">
-        <div className="w-4 h-full rounded-sm shrink-0" style={gradientStyle} />
-        <div className="flex flex-col justify-between h-full ml-1 text-xs text-muted-foreground">
+        <div className="h-full w-4 shrink-0 rounded-sm" style={gradientStyle} />
+        <div className="text-muted-foreground ml-1 flex h-full flex-col justify-between text-xs">
           {labels.map((label, i) => (
             <div key={i} className="relative">
               <span className="absolute -top-1.5">{label}</span>
@@ -88,13 +90,10 @@ export function ParameterColorLegendBar({
 
   return (
     <div
-      className={`flex w-full flex-col gap-1 border-b border-border/40 bg-muted/20 px-3 py-2 sm:px-8 sm:py-1.5 ${className ?? ''}`}
+      className={`border-border/40 bg-muted/20 flex w-full flex-col gap-1 border-b px-3 py-2 sm:px-8 sm:py-1.5 ${className ?? ''}`}
     >
-      <div
-        className="h-3 w-full rounded-sm"
-        style={horizontalGradient}
-      />
-      <div className="flex w-full items-center justify-between text-[10px] text-muted-foreground tabular-nums sm:text-xs">
+      <div className="h-3 w-full rounded-sm" style={horizontalGradient} />
+      <div className="text-muted-foreground flex w-full items-center justify-between text-[10px] tabular-nums sm:text-xs">
         <span>
           {range.min}
           {range.unit}

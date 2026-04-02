@@ -41,7 +41,7 @@ export function GreenhouseField({
         }
       >
         <SelectTrigger
-          className={`w-full h-10 ${errors.sourceGreenhouseId ? 'border-destructive' : ''}`}
+          className={`h-10 w-full ${errors.sourceGreenhouseId ? 'border-destructive' : ''}`}
         >
           <SelectValue
             placeholder={h?.selectGreenhouse ?? 'Select greenhouse...'}
@@ -56,7 +56,7 @@ export function GreenhouseField({
         </SelectContent>
       </Select>
       {errors.sourceGreenhouseId && (
-        <p className="text-sm text-destructive">{errors.sourceGreenhouseId}</p>
+        <p className="text-destructive text-sm">{errors.sourceGreenhouseId}</p>
       )}
     </div>
   );
@@ -86,7 +86,7 @@ export function SpeciesField({
         className={`h-10 ${errors.species ? 'border-destructive' : ''}`}
       />
       {errors.species && (
-        <p className="text-sm text-destructive">{errors.species}</p>
+        <p className="text-destructive text-sm">{errors.species}</p>
       )}
     </div>
   );

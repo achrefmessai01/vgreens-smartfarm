@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ErrorReport } from '@/generated/graphql'
-import { ErrorReportSeverityBadge } from '@/components/error-reports'
-import { useI18n } from '@/i18n'
-import { FileText } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ErrorReport } from '@/generated/graphql';
+import { ErrorReportSeverityBadge } from '@/components/error-reports';
+import { useI18n } from '@/i18n';
+import { FileText } from 'lucide-react';
 
 interface ReportStatusDetailsProps {
-  report: ErrorReport
+  report: ErrorReport;
 }
 
 export function ReportStatusDetails({ report }: ReportStatusDetailsProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const details = [
     {
@@ -34,7 +34,7 @@ export function ReportStatusDetails({ report }: ReportStatusDetailsProps) {
       value: report.adminNotes,
       show: !!report.adminNotes,
     },
-  ].filter(item => item.show)
+  ].filter((item) => item.show);
 
   return (
     <Card>
@@ -46,10 +46,10 @@ export function ReportStatusDetails({ report }: ReportStatusDetailsProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">
+          <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
             {report.errorTitle}
           </h3>
-          <div className="flex gap-2 mb-4">
+          <div className="mb-4 flex gap-2">
             <ErrorReportSeverityBadge severity={report.severity} />
           </div>
         </div>
@@ -57,12 +57,16 @@ export function ReportStatusDetails({ report }: ReportStatusDetailsProps) {
         <div className="space-y-4">
           {details.map((detail, index) => (
             <div key={index} className="space-y-2">
-              <h4 className="font-medium text-gray-700 dark:text-gray-300">{detail.label}</h4>
-              <div className={`text-sm text-gray-900 dark:text-white p-4 rounded-lg whitespace-pre-wrap ${
-                detail.label === t.pages.reportStatus.details.adminNotes 
-                  ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
-                  : 'bg-gray-50 dark:bg-gray-800'
-              }`}>
+              <h4 className="font-medium text-gray-700 dark:text-gray-300">
+                {detail.label}
+              </h4>
+              <div
+                className={`rounded-lg p-4 text-sm whitespace-pre-wrap text-gray-900 dark:text-white ${
+                  detail.label === t.pages.reportStatus.details.adminNotes
+                    ? 'border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20'
+                    : 'bg-gray-50 dark:bg-gray-800'
+                }`}
+              >
                 {detail.value}
               </div>
             </div>
@@ -70,5 +74,5 @@ export function ReportStatusDetails({ report }: ReportStatusDetailsProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

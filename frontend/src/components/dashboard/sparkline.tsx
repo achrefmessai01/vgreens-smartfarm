@@ -1,12 +1,12 @@
-'use client'
+'use client';
 
-const W = 120
-const H = 28
+const W = 120;
+const H = 28;
 
 export interface SparklineProps {
-  data?: number[]
-  className?: string
-  strokeClassName?: string
+  data?: number[];
+  className?: string;
+  strokeClassName?: string;
 }
 
 export function Sparkline({
@@ -14,16 +14,16 @@ export function Sparkline({
   className,
   strokeClassName = 'stroke-cyan-500',
 }: SparklineProps) {
-  const max = Math.max(...data)
-  const min = Math.min(...data)
-  const range = max - min || 1
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
   const points = data
     .map((v, i) => {
-      const x = (i / (data.length - 1)) * W
-      const y = H - ((v - min) / range) * H
-      return `${x},${y}`
+      const x = (i / (data.length - 1)) * W;
+      const y = H - ((v - min) / range) * H;
+      return `${x},${y}`;
     })
-    .join(' ')
+    .join(' ');
   return (
     <svg width={W} height={H} className={className ?? 'block'} aria-hidden>
       <polyline
@@ -35,5 +35,5 @@ export function Sparkline({
         className={strokeClassName}
       />
     </svg>
-  )
+  );
 }

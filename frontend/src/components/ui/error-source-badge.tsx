@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { Badge } from '@/components/ui/badge'
-import { ErrorSource } from '@/generated/graphql'
+import { Badge } from '@/components/ui/badge';
+import { ErrorSource } from '@/generated/graphql';
 
 interface ErrorSourceBadgeProps {
-  source: ErrorSource
-  className?: string
+  source: ErrorSource;
+  className?: string;
 }
 
 export function ErrorSourceBadge({ source, className }: ErrorSourceBadgeProps) {
@@ -29,14 +29,14 @@ export function ErrorSourceBadge({ source, className }: ErrorSourceBadgeProps) {
     [ErrorSource.Infrastructure]: {
       label: 'Infrastructure',
       variant: 'secondary' as const,
-    }
-  }
+    },
+  };
 
-  const config = sourceConfig[source]
+  const config = sourceConfig[source];
 
   return (
     <Badge variant={config.variant} className={className}>
       {config.label}
     </Badge>
-  )
+  );
 }

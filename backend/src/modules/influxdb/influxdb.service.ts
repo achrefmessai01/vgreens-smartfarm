@@ -621,6 +621,54 @@ from(bucket: "${escapedBucket}")
     return orgID;
   }
 
+  /** Returns all unique values for a given tag in a bucket. */
+  private async getUniqueTagValues(
+    bucketName: string,
+    tag: string,
+  ): Promise<string[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.warn('InfluxDB client not initialized');
+      return [];
+    }
+
+    const escaped = bucketName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const flux = `import "influxdata/influxdb/schema"
+schema.tagValues(bucket: "${escaped}", tag: "${tag}")`;
+
+    const values: string[] = [];
+    const queryApi = this.queryApi;
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        queryApi.queryRows(flux, {
+          next: (row, tableMeta) => {
+            const o = tableMeta.toObject(row) as Record<string, unknown>;
+            const val = o['_value'];
+            if (typeof val === 'string' && val) values.push(val);
+          },
+          error: reject,
+          complete: resolve,
+        });
+      });
+    } catch (error) {
+      this.logger.warn(
+        `getUniqueTagValues("${tag}") failed for bucket "${bucketName}": ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+
+    return values.sort();
+  }
+
+  /** Returns all unique device tag values stored in the given bucket. */
+  async getUniqueDevices(bucketName: string): Promise<string[]> {
+    return this.getUniqueTagValues(bucketName, 'device');
+  }
+
+  /** Returns all unique greenhouse tag values stored in the given bucket. */
+  async getUniqueGreenhouses(bucketName: string): Promise<string[]> {
+    return this.getUniqueTagValues(bucketName, 'greenhouse');
+  }
+
   /**
    * Creates a bucket in InfluxDB via BucketsAPI.
    * Idempotent: if the bucket already exists (409), resolves successfully.

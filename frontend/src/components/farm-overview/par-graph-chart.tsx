@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useI18n } from '@/i18n';
 import {
@@ -38,8 +38,8 @@ export function ParGraphChart({
   const labels = t.pages.farmOverview.parGraph;
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col p-1.5 sm:p-3">
-      <div className="mb-2 shrink-0 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
+    <div className="flex min-h-0 flex-1 flex-col p-1.5 sm:p-3">
+      <div className="text-muted-foreground mb-2 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
         <span className="inline-flex items-center gap-1">
           <span className="inline-block w-4 border-t border-dashed border-slate-400" />
           {labels.legendAverage}
@@ -54,7 +54,7 @@ export function ParGraphChart({
         </span>
       </div>
 
-      <div className="flex-1 min-h-[10rem] sm:min-h-[14rem]">
+      <div className="min-h-[10rem] flex-1 sm:min-h-[14rem]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={curveData}
@@ -186,4 +186,3 @@ export function ParGraphChart({
     </div>
   );
 }
-

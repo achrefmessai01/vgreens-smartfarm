@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Lock } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { UserRole } from '@/generated/graphql'
-import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import * as React from 'react';
+import { Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { UserRole } from '@/generated/graphql';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 // import { ComingSoonCard } from '@/components/ui/coming-soon-card'
-import { ContentSkeleton } from '@/components/ui/content-skeleton'
-import { useTenantFeatures } from '@/lib/hooks/use-tenant-features'
+import { ContentSkeleton } from '@/components/ui/content-skeleton';
+import { useTenantFeatures } from '@/lib/hooks/use-tenant-features';
 
 interface FeatureGuardProps {
-  featureKey: string
-  children: React.ReactNode
-  fallback?: React.ReactNode
-  redirectTo?: string
-  skeleton?: React.ReactNode
+  featureKey: string;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  redirectTo?: string;
+  skeleton?: React.ReactNode;
 }
 
 export function FeatureGuard({
@@ -22,21 +22,21 @@ export function FeatureGuard({
   children,
   fallback,
   redirectTo,
-  skeleton
+  skeleton,
 }: FeatureGuardProps) {
-  const { role } = useCurrentUser()
-  const isVGreensAdmin = role === UserRole.VgreensAdmin
-  const { hasFeature, loading, dataLoaded } = useTenantFeatures()
-  const router = useRouter()
+  const { role } = useCurrentUser();
+  const isVGreensAdmin = role === UserRole.VgreensAdmin;
+  const { hasFeature, loading, dataLoaded } = useTenantFeatures();
+  const router = useRouter();
 
   React.useEffect(() => {
-    if (isVGreensAdmin) return
-    if (!dataLoaded || hasFeature(featureKey) || !redirectTo) return
-    router.push(redirectTo)
-  }, [dataLoaded, hasFeature, featureKey, redirectTo, router, isVGreensAdmin])
+    if (isVGreensAdmin) return;
+    if (!dataLoaded || hasFeature(featureKey) || !redirectTo) return;
+    router.push(redirectTo);
+  }, [dataLoaded, hasFeature, featureKey, redirectTo, router, isVGreensAdmin]);
 
   if (isVGreensAdmin) {
-    return <>{children}</>
+    return <>{children}</>;
   }
 
   // if (!dataLoaded || loading) {
@@ -45,7 +45,7 @@ export function FeatureGuard({
 
   if (!hasFeature(featureKey)) {
     if (fallback) {
-      return <>{fallback}</>
+      return <>{fallback}</>;
     }
 
     // return (
@@ -57,5 +57,5 @@ export function FeatureGuard({
     // )
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }

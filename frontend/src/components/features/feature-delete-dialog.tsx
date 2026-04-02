@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { useI18n } from '@/i18n'
-import { Badge } from '@/components/ui/badge'
-import type { Feature } from '@/generated/graphql'
-import { ConfirmationDialog } from '@/components/users'
+import { useI18n } from '@/i18n';
+import { Badge } from '@/components/ui/badge';
+import type { Feature } from '@/generated/graphql';
+import { ConfirmationDialog } from '@/components/users';
 
 interface FeatureDeleteDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  feature: Feature | null
-  onConfirm: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  feature: Feature | null;
+  onConfirm: () => void;
 }
 
 export function FeatureDeleteDialog({
@@ -18,8 +18,8 @@ export function FeatureDeleteDialog({
   feature,
   onConfirm,
 }: FeatureDeleteDialogProps) {
-  const { t } = useI18n()
-  if (!feature) return null
+  const { t } = useI18n();
+  if (!feature) return null;
 
   return (
     <ConfirmationDialog
@@ -34,9 +34,9 @@ export function FeatureDeleteDialog({
       onCancel={() => onOpenChange(false)}
     >
       <div className="space-y-4">
-        <div className="p-4 bg-muted rounded-lg dark:bg-primary-foreground/10 dark:border dark:border-primary-foreground/20">
-          <div className="flex items-center justify-between mb-2">
-            <p className="font-medium dark:text-card-foreground">
+        <div className="bg-muted dark:bg-primary-foreground/10 dark:border-primary-foreground/20 rounded-lg p-4 dark:border">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="dark:text-card-foreground font-medium">
               {feature.name}
             </p>
             <Badge variant={feature.isActive ? 'default' : 'secondary'}>
@@ -45,11 +45,11 @@ export function FeatureDeleteDialog({
                 : t.pages.admin.features.inactive}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground dark:text-muted-foreground/80 mt-1 font-mono">
+          <p className="text-muted-foreground dark:text-muted-foreground/80 mt-1 font-mono text-sm">
             {feature.key}
           </p>
           {feature.description && (
-            <p className="text-sm text-muted-foreground dark:text-muted-foreground/80 mt-2">
+            <p className="text-muted-foreground dark:text-muted-foreground/80 mt-2 text-sm">
               {feature.description}
             </p>
           )}
@@ -63,5 +63,5 @@ export function FeatureDeleteDialog({
         </div>
       </div>
     </ConfirmationDialog>
-  )
+  );
 }

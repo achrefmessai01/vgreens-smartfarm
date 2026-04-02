@@ -19,7 +19,11 @@ export function useAdminUsersPage() {
   const { role: currentUserRole } = useCurrentUser();
   const isVGreensAdmin = currentUserRole === UserRole.VgreensAdmin;
 
-  const { data: usersData, loading: usersLoading, refetch: refetchUsers } = useUsersQuery();
+  const {
+    data: usersData,
+    loading: usersLoading,
+    refetch: refetchUsers,
+  } = useUsersQuery();
   const { data: tenantsData, loading: tenantsLoading } = useTenantsQuery({
     skip: !isVGreensAdmin,
   });
@@ -77,7 +81,9 @@ export function useAdminUsersPage() {
       setIsLoading(true);
       try {
         if (editingUser) {
-          await updateUser({ variables: { id: editingUser.id, input: formData } });
+          await updateUser({
+            variables: { id: editingUser.id, input: formData },
+          });
         } else {
           const result = await createUser({
             variables: {

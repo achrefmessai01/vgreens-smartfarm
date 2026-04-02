@@ -40,11 +40,11 @@ export function SyncStatusBar({
   return (
     <div
       className={cn(
-        'flex items-center justify-between gap-4 flex-wrap',
+        'flex flex-wrap items-center justify-between gap-4',
         className,
       )}
     >
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-4 text-sm">
         {statusDots.map((d, i) => (
           <div key={i} className="flex items-center gap-2">
             <span

@@ -50,7 +50,7 @@ export function TableToolbar({
     (hasMultipleFilters && filterChips.length > 0 && clearAllFilters);
 
   return (
-    <div className="py-4 px-1">
+    <div className="px-1 py-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         {/* Search on its own row on mobile, inline on desktop */}
         {searchConfig && (
@@ -75,7 +75,7 @@ export function TableToolbar({
                 <button
                   type="button"
                   onClick={clearAllFilters}
-                  className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+                  className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm"
                 >
                   <X className="h-3.5 w-3.5" />
                   Clear
@@ -92,7 +92,7 @@ export function TableToolbar({
                 <button
                   type="button"
                   onClick={clearFilter}
-                  className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+                  className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm"
                 >
                   <X className="h-3.5 w-3.5" />
                   Clear
@@ -111,7 +111,7 @@ export function TableToolbar({
         </div>
 
         {headerActions && (
-          <div className="sm:ml-auto shrink-0">{headerActions}</div>
+          <div className="shrink-0 sm:ml-auto">{headerActions}</div>
         )}
       </div>
       {filterChips.length > 0 && (

@@ -1,13 +1,13 @@
 export interface Variety {
-  id: string
-  name: string
-  yield: number // in kg
-  shelfLife: number // 1-5 stars
-  taste: number // 1-5 stars
-  diseaseResistance: number // 1-5 stars
-  plantCycle: number // in months
-  baseYieldMultiplier: number // Multiplier for yield calculations
-  brixBase: number // Base Brix value for this variety
+  id: string;
+  name: string;
+  yield: number; // in kg
+  shelfLife: number; // 1-5 stars
+  taste: number; // 1-5 stars
+  diseaseResistance: number; // 1-5 stars
+  plantCycle: number; // in months
+  baseYieldMultiplier: number; // Multiplier for yield calculations
+  brixBase: number; // Base Brix value for this variety
 }
 
 export const varieties: Variety[] = [
@@ -55,12 +55,12 @@ export const varieties: Variety[] = [
     baseYieldMultiplier: 1.2,
     brixBase: 9.8,
   },
-]
+];
 
 export function getVarietyById(id: string): Variety | undefined {
-  return varieties.find((v) => v.id === id)
+  return varieties.find((v) => v.id === id);
 }
 
 export function getDefaultVariety(): Variety {
-  return varieties[0] // Favori
+  return varieties[0]; // Favori
 }

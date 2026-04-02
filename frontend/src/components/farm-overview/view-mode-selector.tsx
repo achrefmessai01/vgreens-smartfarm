@@ -33,7 +33,7 @@ export function ViewModeSelector({
   return (
     <div
       className={cn(
-        'grid w-full min-w-0 rounded-2xl bg-muted/40 p-1 dark:bg-muted/20 gap-1',
+        'bg-muted/40 dark:bg-muted/20 grid w-full min-w-0 gap-1 rounded-2xl p-1',
         visibleModes.length === 3 ? 'grid-cols-3' : 'grid-cols-2',
         'sm:inline-flex sm:w-auto sm:grid-cols-none sm:items-center sm:rounded-full sm:p-0.5',
       )}
@@ -47,7 +47,7 @@ export function ViewModeSelector({
             size="sm"
             variant={isActive ? 'default' : 'ghost'}
             onClick={() => onValueChange(mode.key)}
-            className="rounded-xl h-6 text-sm font-medium leading-tight"
+            className="h-6 rounded-xl text-sm leading-tight font-medium"
           >
             {mode.label}
           </Button>

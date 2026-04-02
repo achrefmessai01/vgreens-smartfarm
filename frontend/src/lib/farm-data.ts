@@ -6,7 +6,7 @@ import type {
   PlantSlot,
   Batch,
   ParameterValue,
-} from '@/types/farm.types'
+} from '@/types/farm.types';
 
 // =============================================================================
 // FARM STRUCTURE GENERATION (for development/testing)
@@ -14,62 +14,62 @@ import type {
 
 // Generate random parameter values (fallback when no live data) - empty; real data comes from bucket
 function generateParameterValue(): ParameterValue {
-  return {}
+  return {};
 }
 
 // Generate a plant slot
 function generatePlantSlot(
   rowIndex: number,
   columnIndex: number,
-  slotIndex: number
+  slotIndex: number,
 ): PlantSlot {
   return {
     id: `slot-${rowIndex}-${columnIndex}-${slotIndex}`,
     rowIndex,
     columnIndex,
     values: generateParameterValue(),
-  }
+  };
 }
 
 // Generate a column with plant slots
 function generateColumn(
   rowIndex: number,
   columnIndex: number,
-  slotsPerColumn: number = 10
+  slotsPerColumn: number = 10,
 ): Column {
-  const slots: PlantSlot[] = []
+  const slots: PlantSlot[] = [];
   for (let i = 0; i < slotsPerColumn; i++) {
-    slots.push(generatePlantSlot(rowIndex, columnIndex, i))
+    slots.push(generatePlantSlot(rowIndex, columnIndex, i));
   }
   return {
     id: `column-${rowIndex}-${columnIndex}`,
     index: columnIndex,
     slots,
-  }
+  };
 }
 
 // Generate a row with columns
 function generateRow(
   bayIndex: number,
   rowIndex: number,
-  columnsPerRow: number = 12
+  columnsPerRow: number = 12,
 ): Row {
-  const columns: Column[] = []
+  const columns: Column[] = [];
   for (let i = 0; i < columnsPerRow; i++) {
-    columns.push(generateColumn(rowIndex, i))
+    columns.push(generateColumn(rowIndex, i));
   }
   return {
     id: `row-${bayIndex}-${rowIndex}`,
     index: rowIndex,
     columns,
-  }
+  };
 }
 
 // Generate a bay with rows
 function generateBay(bayIndex: number, rowsPerBay: number = 70): Bay {
-  const rows: Row[] = []
+  const rows: Row[] = [];
   for (let i = 0; i < rowsPerBay; i++) {
-    rows.push(generateRow(bayIndex, i))
+    rows.push(generateRow(bayIndex, i));
   }
   return {
     id: `bay-${bayIndex}`,
@@ -77,26 +77,26 @@ function generateBay(bayIndex: number, rowsPerBay: number = 70): Bay {
     index: bayIndex,
     rows,
     batchId: null,
-  }
+  };
 }
 
 // Generate batches
 function generateBatches(): Batch[] {
-  const batches: Batch[] = []
-  const crops = ['HS03004', 'HSC', 'HS03005', 'HS03006']
-  const varieties = ['favori', 'karima', 'limore', 'florice']
+  const batches: Batch[] = [];
+  const crops = ['HS03004', 'HSC', 'HS03005', 'HS03006'];
+  const varieties = ['favori', 'karima', 'limore', 'florice'];
   const statuses: Array<'onTime' | 'delayed' | 'early'> = [
     'onTime',
     'onTime',
     'delayed',
     'early',
-  ]
+  ];
 
   for (let i = 0; i < 4; i++) {
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - i * 14) // Stagger start dates
-    const endDate = new Date(startDate)
-    endDate.setDate(endDate.getDate() + 90) // 90-day cycle
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - i * 14); // Stagger start dates
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 90); // 90-day cycle
 
     batches.push({
       id: `batch-${String(i + 1).padStart(3, '0')}`,
@@ -108,39 +108,39 @@ function generateBatches(): Batch[] {
       startDate,
       endDate,
       bayIds: [`bay-${i * 2}`, `bay-${i * 2 + 1}`], // Each batch uses 2 bays
-    })
+    });
   }
 
-  return batches
+  return batches;
 }
 
 // Generate the complete farm structure
 export function generateFarm(): Farm {
-  const bays: Bay[] = []
-  const numBays = 8
+  const bays: Bay[] = [];
+  const numBays = 8;
 
   // Generate 8 bays (4 batches × 2 bays each)
   for (let i = 0; i < numBays; i++) {
-    bays.push(generateBay(i))
+    bays.push(generateBay(i));
   }
 
   // Generate batches
-  const batches = generateBatches()
+  const batches = generateBatches();
 
   // Assign batches to bays
   batches.forEach((batch) => {
     batch.bayIds.forEach((bayId) => {
-      const bay = bays.find((b) => b.id === bayId)
+      const bay = bays.find((b) => b.id === bayId);
       if (bay) {
-        bay.batchId = batch.id
+        bay.batchId = batch.id;
       }
-    })
-  })
+    });
+  });
 
   return {
     bays,
     batches,
-  }
+  };
 }
 
 // =============================================================================
@@ -149,7 +149,7 @@ export function generateFarm(): Farm {
 
 // Get parameter value for a plant slot (parameter = _field name from bucket)
 export function getParameterValue(slot: PlantSlot, parameter: string): number {
-  return slot.values[parameter] ?? 0
+  return slot.values[parameter] ?? 0;
 }
 
 // =============================================================================
@@ -158,13 +158,13 @@ export function getParameterValue(slot: PlantSlot, parameter: string): number {
 
 /** Format numeric value for display (e.g. 6812 → 6.8k). */
 export function formatParameterDisplayValue(value: number): string {
-  const abs = Math.abs(value)
+  const abs = Math.abs(value);
   if (abs >= 1000) {
-    const k = value / 1000
-    const decimals = abs >= 10000 ? 0 : 1
-    return `${k.toFixed(decimals)}k`
+    const k = value / 1000;
+    const decimals = abs >= 10000 ? 0 : 1;
+    return `${k.toFixed(decimals)}k`;
   }
-  return value.toFixed(1)
+  return value.toFixed(1);
 }
 
 /** Unit string for a parameter (e.g. temperature → °C, co2 → ppm) */
@@ -187,8 +187,8 @@ export function getParameterUnit(parameter: string): string {
     pressure_mpa: 'MPa',
     rssi: 'dBm',
     snr: 'dB',
-  }
-  return units[parameter] ?? ''
+  };
+  return units[parameter] ?? '';
 }
 
 /** Format Influx _field name to display label (e.g. soil_conductivity -> Soil conductivity) */
@@ -210,11 +210,9 @@ export function formatFieldToLabel(field: string): string {
     voltage_v: 'Voltage (V)',
     rssi: 'RSSI',
     snr: 'SNR',
-  }
-  if (known[field]) return known[field]
-  return field
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  };
+  if (known[field]) return known[field];
+  return field.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // =============================================================================
@@ -226,71 +224,81 @@ function valueToGradient(
   value: number,
   min: number,
   max: number,
-  slotId?: string
+  slotId?: string,
 ): string {
-  const n = Math.max(0, Math.min(1, (value - min) / (max - min || 1)))
-  const hue = (1 - n) * 240 // blue (low) to red (high) - matches legend gradient
-  const c = 1
-  const x = c * (1 - Math.abs(((hue / 60) % 2) - 1))
-  const m = 1 - c
-  let r = 0, g = 0, b = 0
-  
+  const n = Math.max(0, Math.min(1, (value - min) / (max - min || 1)));
+  const hue = (1 - n) * 240; // blue (low) to red (high) - matches legend gradient
+  const c = 1;
+  const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
+  const m = 1 - c;
+  let r = 0,
+    g = 0,
+    b = 0;
+
   if (hue >= 0 && hue < 60) {
-    r = c; g = x; b = 0
+    r = c;
+    g = x;
+    b = 0;
   } else if (hue >= 60 && hue < 120) {
-    r = x; g = c; b = 0
+    r = x;
+    g = c;
+    b = 0;
   } else if (hue >= 120 && hue < 180) {
-    r = 0; g = c; b = x
+    r = 0;
+    g = c;
+    b = x;
   } else {
-    r = 0; g = x; b = c
+    r = 0;
+    g = x;
+    b = c;
   }
-  
+
   // Add deterministic noise for texture
-  const noise = slotId ? ((slotId.charCodeAt(0) % 10) - 5) * 2 : 0
-  r = Math.round((r + m) * 255) + noise
-  g = Math.round((g + m) * 255) + noise
-  b = Math.round((b + m) * 255) + noise
-  
-  return `rgb(${Math.max(0, Math.min(255, r))}, ${Math.max(0, Math.min(255, g))}, ${Math.max(0, Math.min(255, b))})`
+  const noise = slotId ? ((slotId.charCodeAt(0) % 10) - 5) * 2 : 0;
+  r = Math.round((r + m) * 255) + noise;
+  g = Math.round((g + m) * 255) + noise;
+  b = Math.round((b + m) * 255) + noise;
+
+  return `rgb(${Math.max(0, Math.min(255, r))}, ${Math.max(0, Math.min(255, g))}, ${Math.max(0, Math.min(255, b))})`;
 }
 
 // Get color for parameter value - maps to the color legend gradient
 export function getParameterColor(
   value: number,
   parameter: string,
-  slotId?: string
+  slotId?: string,
 ): string {
   switch (parameter) {
     case 'temperature':
     case 'soil_temp':
-      return valueToGradient(value, 15, 30, slotId)
+      return valueToGradient(value, 15, 30, slotId);
     case 'humidity':
     case 'soil_moisture':
-      return valueToGradient(value, 0, 100, slotId)
+      return valueToGradient(value, 0, 100, slotId);
     case 'co2':
-      return valueToGradient(value, 400, 1200, slotId)
+      return valueToGradient(value, 400, 1200, slotId);
     case 'vpd':
-      return valueToGradient(value, 0, 2, slotId)
+      return valueToGradient(value, 0, 2, slotId);
     case 'par':
     case 'par_estimated':
-      return valueToGradient(value, 0, 1000, slotId)
+      return valueToGradient(value, 0, 1000, slotId);
     case 'soilEC':
     case 'soil_conductivity':
-      return valueToGradient(value, 0, 3, slotId)
+      return valueToGradient(value, 0, 3, slotId);
     case 'battery_v':
     case 'voltage_v':
-      return valueToGradient(value, 0, 5, slotId)
+      return valueToGradient(value, 0, 5, slotId);
     case 'current_ma':
-      return valueToGradient(value, 0, 500, slotId)
+      return valueToGradient(value, 0, 500, slotId);
     case 'lux':
-      return valueToGradient(value, 0, 10000, slotId)
+      return valueToGradient(value, 0, 10000, slotId);
     case 'pressure_mpa':
-      return valueToGradient(value, 0, 0.5, slotId)
+      return valueToGradient(value, 0, 0.5, slotId);
     case 'rssi':
     case 'snr':
-      return valueToGradient(value, -120, 0, slotId)
+      return valueToGradient(value, -120, 0, slotId);
     default:
-      return valueToGradient(value, 0, 100, slotId)
+      return valueToGradient(value, 0, 100, slotId);
   }
 }
 
@@ -301,35 +309,35 @@ export function getParameterColor(
 // Normalize parameter value to 0-100 range for color mapping (supports dynamic _field names)
 export function normalizeParameterValue(
   value: number,
-  parameter: string
+  parameter: string,
 ): number {
   switch (parameter) {
     case 'temperature':
     case 'soil_temp':
-      return ((value - 15) / 15) * 100
+      return ((value - 15) / 15) * 100;
     case 'humidity':
     case 'soil_moisture':
-      return Math.max(0, Math.min(100, value))
+      return Math.max(0, Math.min(100, value));
     case 'co2':
-      return (value / 1200) * 100
+      return (value / 1200) * 100;
     case 'vpd':
-      return (value / 2) * 100
+      return (value / 2) * 100;
     case 'par':
     case 'par_estimated':
-      return (value / 1000) * 100
+      return (value / 1000) * 100;
     case 'soil_conductivity':
     case 'soilEC':
-      return (value / 3) * 100
+      return (value / 3) * 100;
     case 'battery_v':
     case 'voltage_v':
-      return (value / 5) * 100
+      return (value / 5) * 100;
     case 'lux':
-      return (value / 10000) * 100
+      return (value / 10000) * 100;
     case 'rssi':
     case 'snr':
-      return ((value + 120) / 120) * 100
+      return ((value + 120) / 120) * 100;
     default:
-      return Math.max(0, Math.min(100, value))
+      return Math.max(0, Math.min(100, value));
   }
 }
 
@@ -337,7 +345,11 @@ export function normalizeParameterValue(
  * Multicolor colormap for heatmap: blue (low) → red (high), matching the top legend bar.
  * value in [minV, maxV].
  */
-export function valueToHotColor(value: number, minV: number, maxV: number): string {
+export function valueToHotColor(
+  value: number,
+  minV: number,
+  maxV: number,
+): string {
   const n = Math.max(0, Math.min(1, (value - minV) / (maxV - minV || 1)));
 
   const stops = [
@@ -369,5 +381,3 @@ export function valueToHotColor(value: number, minV: number, maxV: number): stri
 
   return `rgb(${r}, ${g}, ${b})`;
 }
-
-

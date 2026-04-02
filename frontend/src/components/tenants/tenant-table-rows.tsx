@@ -58,7 +58,7 @@ export const useTenantRow = ({
             }}
             className="h-6 px-2"
           >
-            <Users className="h-4 w-4 mr-1" />
+            <Users className="mr-1 h-4 w-4" />
             {translations.viewUsers}
           </Button>
         ) : (
@@ -104,7 +104,7 @@ export const useTenantRow = ({
               e.stopPropagation();
               onDelete(tenant);
             }}
-            className="h-8 w-8 text-destructive hover:text-destructive"
+            className="text-destructive hover:text-destructive h-8 w-8"
           >
             <Trash2 className="h-4 w-4" />
           </Button>

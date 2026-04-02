@@ -36,7 +36,7 @@ export function VarietyField({
         className={`h-10 ${errors.variety ? 'border-destructive' : ''}`}
       />
       {errors.variety && (
-        <p className="text-sm text-destructive">{errors.variety}</p>
+        <p className="text-destructive text-sm">{errors.variety}</p>
       )}
     </div>
   );
@@ -66,7 +66,7 @@ export function PlantingDateField({
         className={`h-10 ${errors.plantingDate ? 'border-destructive' : ''}`}
       />
       {errors.plantingDate && (
-        <p className="text-sm text-destructive">{errors.plantingDate}</p>
+        <p className="text-destructive text-sm">{errors.plantingDate}</p>
       )}
     </div>
   );
@@ -102,7 +102,7 @@ export function CultivationAreaField({
         className={`h-10 ${errors.cultivationArea ? 'border-destructive' : ''}`}
       />
       {errors.cultivationArea && (
-        <p className="text-sm text-destructive">{errors.cultivationArea}</p>
+        <p className="text-destructive text-sm">{errors.cultivationArea}</p>
       )}
     </div>
   );

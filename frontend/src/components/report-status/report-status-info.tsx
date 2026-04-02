@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ErrorReport } from '@/generated/graphql'
-import { formatDateTime } from '@/lib/utils/error-report-utils'
-import { useI18n } from '@/i18n'
-import { User } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ErrorReport } from '@/generated/graphql';
+import { formatDateTime } from '@/lib/utils/error-report-utils';
+import { useI18n } from '@/i18n';
+import { User } from 'lucide-react';
 
 interface ReportStatusInfoProps {
-  report: ErrorReport
+  report: ErrorReport;
 }
 
 export function ReportStatusInfo({ report }: ReportStatusInfoProps) {
-  const { t } = useI18n()
+  const { t } = useI18n();
 
   const infoData = [
     {
@@ -27,11 +27,15 @@ export function ReportStatusInfo({ report }: ReportStatusInfoProps) {
       label: t.pages.reportStatus.info.lastUpdated,
       value: formatDateTime(report.updatedAt),
     },
-    ...(report.resolvedByUser ? [{
-      label: t.pages.reportStatus.info.resolvedBy,
-      value: `${report.resolvedByUser.firstName} ${report.resolvedByUser.lastName}`,
-    }] : []),
-  ]
+    ...(report.resolvedByUser
+      ? [
+          {
+            label: t.pages.reportStatus.info.resolvedBy,
+            value: `${report.resolvedByUser.firstName} ${report.resolvedByUser.lastName}`,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <Card>
@@ -48,7 +52,7 @@ export function ReportStatusInfo({ report }: ReportStatusInfoProps) {
               <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {item.label}
               </div>
-              <div className="text-sm text-gray-900 dark:text-white font-mono">
+              <div className="font-mono text-sm text-gray-900 dark:text-white">
                 {item.value}
               </div>
               {item.subtitle && (
@@ -59,5 +63,5 @@ export function ReportStatusInfo({ report }: ReportStatusInfoProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

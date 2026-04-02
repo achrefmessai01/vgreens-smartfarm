@@ -77,7 +77,7 @@ export function HarvestTable({
           </span>
         </TableCell>
         <TableCell className="font-medium">{harvest.avgBrix}°Bx</TableCell>
-        <TableCell className="text-center text-muted-foreground">
+        <TableCell className="text-muted-foreground text-center">
           {harvest.photos === 0 ? '-' : harvest.photos}
         </TableCell>
         <TableCell className="text-muted-foreground">
@@ -100,7 +100,7 @@ export function HarvestTable({
                 onSidebarEdit?.(harvest);
               }}
             >
-              <Eye className="h-4 w-4 text-muted-foreground" />
+              <Eye className="text-muted-foreground h-4 w-4" />
             </Button>
 
             <Button
@@ -112,7 +112,7 @@ export function HarvestTable({
                 onDelete?.(harvest);
               }}
             >
-              <Trash2 className="h-4 w-4 text-destructive" />
+              <Trash2 className="text-destructive h-4 w-4" />
             </Button>
           </div>
         </TableCell>
@@ -123,21 +123,21 @@ export function HarvestTable({
 
   const renderCard = React.useCallback(
     (harvest: HarvestItem) => (
-      <Card className="gap-0 border-3 border-border py-0 transition-all shadow-md hover:shadow-xl hover:border-border/80">
+      <Card className="border-border hover:border-border/80 gap-0 border-3 py-0 shadow-md transition-all hover:shadow-xl">
         <CardContent className="px-4 py-4">
           <div className="space-y-1">
             {/* Date Header */}
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Calendar className="text-muted-foreground h-4 w-4" />
               <span>{formatHarvestDate(harvest.date)}</span>
             </div>
 
             {/* Greenhouse and Batch */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2">
-                <Home className="h-4 w-4 text-muted-foreground" />
+                <Home className="text-muted-foreground h-4 w-4" />
                 <div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {h?.greenhouse ?? 'Greenhouse'}
                   </div>
                   <div className="text-sm font-medium text-blue-600">
@@ -146,9 +146,9 @@ export function HarvestTable({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-muted-foreground" />
+                <Package className="text-muted-foreground h-4 w-4" />
                 <div className="text-left">
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {h?.batch ?? 'Batch'}
                   </div>
                   <div className="text-sm font-medium">{harvest.batch}</div>
@@ -157,9 +157,9 @@ export function HarvestTable({
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid grid-cols-3 gap-3 rounded-lg bg-muted/30 p-3 text-center">
+            <div className="bg-muted/30 grid grid-cols-3 gap-3 rounded-lg p-3 text-center">
               <div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-muted-foreground text-xs">
                   {h?.classA ?? 'Class A'}
                 </div>
                 <div className="text-lg font-semibold text-green-600 dark:text-green-400">
@@ -168,7 +168,7 @@ export function HarvestTable({
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-muted-foreground text-xs">
                   {h?.waste ?? 'Waste'}
                 </div>
                 <div className="text-lg font-semibold text-red-600 dark:text-red-400">
@@ -177,7 +177,7 @@ export function HarvestTable({
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-muted-foreground text-xs">
                   {h?.avgBrix ?? 'Brix'}
                 </div>
                 <div className="text-lg font-semibold">
@@ -188,7 +188,7 @@ export function HarvestTable({
             </div>
 
             {/* Author and Photos */}
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="text-muted-foreground flex items-center justify-between text-xs">
               <div className="truncate">
                 {harvest.createdBy
                   ? harvest.createdBy.firstName || harvest.createdBy.lastName
@@ -224,7 +224,7 @@ export function HarvestTable({
               <Button
                 variant="destructive"
                 size="sm"
-                className="w-full hover:bg-destructive hover:text-destructive-foreground"
+                className="hover:bg-destructive hover:text-destructive-foreground w-full"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete?.(harvest);

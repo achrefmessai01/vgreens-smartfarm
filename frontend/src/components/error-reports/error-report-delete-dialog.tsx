@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,13 +9,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 
 interface ErrorReportDeleteDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => Promise<void>
-  reportTitle: string
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => Promise<void>;
+  reportTitle: string;
 }
 
 export function ErrorReportDeleteDialog({
@@ -24,19 +24,19 @@ export function ErrorReportDeleteDialog({
   onConfirm,
   reportTitle,
 }: ErrorReportDeleteDialogProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
     try {
-      setIsDeleting(true)
-      await onConfirm()
-      onClose()
+      setIsDeleting(true);
+      await onConfirm();
+      onClose();
     } catch (error) {
-      console.error('Failed to delete report:', error)
+      console.error('Failed to delete report:', error);
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -44,19 +44,16 @@ export function ErrorReportDeleteDialog({
         <DialogHeader>
           <DialogTitle>Delete Error Report</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete the report "{reportTitle}"? This action cannot be undone.
+            Are you sure you want to delete the report "{reportTitle}"? This
+            action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={onClose}
-            disabled={isDeleting}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isDeleting}>
             Cancel
           </Button>
-          <Button 
-            variant="destructive" 
+          <Button
+            variant="destructive"
             onClick={handleConfirm}
             disabled={isDeleting}
           >
@@ -65,5 +62,5 @@ export function ErrorReportDeleteDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

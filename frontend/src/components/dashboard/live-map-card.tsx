@@ -25,14 +25,14 @@ export function LiveMapCard({
   hintText = hintText ?? t.pages.admin.dashboard.liveMapComponentHint;
 
   return (
-    <Card className={cn('col-span-2 rounded-lg border bg-card p-6', className)}>
+    <Card className={cn('bg-card col-span-2 rounded-lg border p-6', className)}>
       <h3 className="text-lg font-semibold">{title}</h3>
       <CardContent className="p-0">
-        <div className="mt-4 h-48 rounded-md bg-gradient-to-br from-slate-800 to-slate-700 flex items-center justify-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground mt-4 flex h-48 items-center justify-center rounded-md bg-gradient-to-br from-slate-800 to-slate-700 text-sm">
           {placeholderText}
         </div>
         {hintText && (
-          <p className="text-xs text-muted-foreground mt-2">{hintText}</p>
+          <p className="text-muted-foreground mt-2 text-xs">{hintText}</p>
         )}
       </CardContent>
     </Card>

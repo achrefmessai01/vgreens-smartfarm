@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { cn } from '@/lib/utils'
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
-  value: number
-  max?: number
+  value: number;
+  max?: number;
 }
 
 function Progress({ value, max = 100, className, ...props }: ProgressProps) {
-  const percentage = Math.min(100, Math.max(0, (value / max) * 100))
+  const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 
   return (
     <div
       data-slot="progress"
       className={cn(
         'bg-muted relative h-2 w-full overflow-hidden rounded-full',
-        className
+        className,
       )}
       {...props}
     >
@@ -26,7 +26,7 @@ function Progress({ value, max = 100, className, ...props }: ProgressProps) {
         style={{ width: `${percentage}%` }}
       />
     </div>
-  )
+  );
 }
 
-export { Progress }
+export { Progress };

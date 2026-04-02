@@ -16,15 +16,15 @@ interface StatsProps {
 
 export function SystemErrorsStatsCards({ stats }: StatsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Last 24 Hours</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <TrendingUp className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.total}</div>
-          <p className="text-xs text-muted-foreground">Total errors</p>
+          <p className="text-muted-foreground text-xs">Total errors</p>
         </CardContent>
       </Card>
       <Card>
@@ -34,7 +34,7 @@ export function SystemErrorsStatsCards({ stats }: StatsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-600">{stats.active}</div>
-          <p className="text-xs text-muted-foreground">Unresolved issues</p>
+          <p className="text-muted-foreground text-xs">Unresolved issues</p>
         </CardContent>
       </Card>
       <Card>
@@ -46,7 +46,7 @@ export function SystemErrorsStatsCards({ stats }: StatsProps) {
           <div className="text-2xl font-bold text-green-600">
             {stats.resolved}
           </div>
-          <p className="text-xs text-muted-foreground">Fixed this period</p>
+          <p className="text-muted-foreground text-xs">Fixed this period</p>
         </CardContent>
       </Card>
       <Card>
@@ -58,7 +58,7 @@ export function SystemErrorsStatsCards({ stats }: StatsProps) {
           <div className="text-2xl font-bold text-orange-600">
             {stats.critical}
           </div>
-          <p className="text-xs text-muted-foreground">High priority issues</p>
+          <p className="text-muted-foreground text-xs">High priority issues</p>
         </CardContent>
       </Card>
     </div>
@@ -92,8 +92,8 @@ export function SystemErrorsFilters({
 }: FiltersProps) {
   return (
     <div className="flex flex-wrap items-end gap-3">
-      <div className="flex-1 min-w-[150px]">
-        <label className="text-xs font-medium mb-1.5 block text-muted-foreground">
+      <div className="min-w-[150px] flex-1">
+        <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
           Severity
         </label>
         <Select
@@ -117,8 +117,8 @@ export function SystemErrorsFilters({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex-1 min-w-[150px]">
-        <label className="text-xs font-medium mb-1.5 block text-muted-foreground">
+      <div className="min-w-[150px] flex-1">
+        <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
           Source
         </label>
         <Select
@@ -146,8 +146,8 @@ export function SystemErrorsFilters({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex-1 min-w-[150px]">
-        <label className="text-xs font-medium mb-1.5 block text-muted-foreground">
+      <div className="min-w-[150px] flex-1">
+        <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
           Status
         </label>
         <Select

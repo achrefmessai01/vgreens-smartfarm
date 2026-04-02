@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client';
 
 export const ME_QUERY = gql`
   query Me {
@@ -25,7 +25,7 @@ export const ME_QUERY = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const USERS_QUERY = gql`
   query Users {
@@ -51,7 +51,7 @@ export const USERS_QUERY = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const USER_QUERY = gql`
   query User($id: ID!) {
@@ -69,4 +69,4 @@ export const USER_QUERY = gql`
       updatedAt
     }
   }
-`
+`;

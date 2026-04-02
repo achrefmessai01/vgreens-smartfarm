@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client';
 
 export const CREATE_HARVEST_MUTATION = gql`
   mutation CreateHarvest($input: CreateHarvestInput!) {
@@ -33,7 +33,7 @@ export const CREATE_HARVEST_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const UPDATE_HARVEST_MUTATION = gql`
   mutation UpdateHarvest($id: ID!, $input: UpdateHarvestInput!) {
@@ -68,13 +68,13 @@ export const UPDATE_HARVEST_MUTATION = gql`
       updatedAt
     }
   }
-`
+`;
 
 export const DELETE_HARVEST_MUTATION = gql`
   mutation DeleteHarvest($id: ID!) {
     deleteHarvest(id: $id)
   }
-`
+`;
 
 export const UPLOAD_HARVEST_IMAGE_MUTATION = gql`
   mutation UploadHarvestImage($input: UploadImageInput!) {
@@ -86,11 +86,10 @@ export const UPLOAD_HARVEST_IMAGE_MUTATION = gql`
       url
     }
   }
-`
+`;
 
 export const DELETE_HARVEST_IMAGE_MUTATION = gql`
   mutation DeleteHarvestImage($path: String!) {
     deleteImage(input: { path: $path })
   }
-`
-
+`;

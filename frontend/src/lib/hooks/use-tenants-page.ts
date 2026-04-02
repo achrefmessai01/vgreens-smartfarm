@@ -6,6 +6,7 @@ import {
   useCreateTenantMutation,
   useUpdateTenantMutation,
   useDeleteTenantMutation,
+  useUpsertFarmConfigMutation,
   type Tenant,
 } from '@/generated/graphql';
 import { useRouter } from 'next/navigation';
@@ -17,6 +18,7 @@ export function useTenantsPage() {
   const [createTenant] = useCreateTenantMutation();
   const [updateTenant] = useUpdateTenantMutation();
   const [deleteTenant] = useDeleteTenantMutation();
+  const [upsertFarmConfig] = useUpsertFarmConfigMutation();
 
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
   const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null);
@@ -49,7 +51,7 @@ export function useTenantsPage() {
 
   const handleManageFeatures = React.useCallback(
     (tenant: Tenant) => {
-      router.push(`/admin/tenants/${tenant.id}/features`);
+      router.push(`/admin/tenants/${tenant.id}`);
     },
     [router],
   );
@@ -77,13 +79,32 @@ export function useTenantsPage() {
 
   const handleSubmit = React.useCallback(
     async (formData: TenantFormData) => {
+      const { bayCount, chambersCount, ...tenantInput } = formData;
       setIsLoading(true);
       try {
+        let savedTenantId: string;
+
         if (editingTenant) {
-          await updateTenant({ variables: { id: editingTenant.id, input: formData } });
+          await updateTenant({
+            variables: { id: editingTenant.id, input: tenantInput },
+          });
+          savedTenantId = editingTenant.id;
         } else {
-          await createTenant({ variables: { input: formData } });
+          const result = await createTenant({
+            variables: { input: tenantInput },
+          });
+          savedTenantId = result.data?.createTenant?.id ?? '';
         }
+
+        if (savedTenantId && (bayCount != null || chambersCount != null)) {
+          await upsertFarmConfig({
+            variables: {
+              input: { bayCount, chambersCount },
+              tenantId: savedTenantId,
+            },
+          });
+        }
+
         await refetch();
         setIsSheetOpen(false);
         setEditingTenant(null);
@@ -93,7 +114,7 @@ export function useTenantsPage() {
         setIsLoading(false);
       }
     },
-    [editingTenant, createTenant, updateTenant, refetch],
+    [editingTenant, createTenant, updateTenant, upsertFarmConfig, refetch],
   );
 
   return {
