@@ -1,5 +1,5 @@
 import type { Bay, ParameterType } from '@/types/farm.types';
-import type { FarmLayoutConfig } from '@/lib/sensor-map-positions';
+import type { FarmLayoutConfig, GreenhouseDimensions } from '@/lib/sensor-map-positions';
 import { EmptyState } from './empty-state';
 import { ParGraphSection } from './par-graph-section';
 import { ViewSensorMap } from './views/view-sensor-map';
@@ -17,6 +17,7 @@ interface FarmDataDisplayProps {
   noSensorLabel: string;
   noDataMessage: string;
   farmLayout?: FarmLayoutConfig;
+  greenhouseDimensions?: GreenhouseDimensions | null;
 }
 
 export function FarmDataDisplay({
@@ -31,11 +32,14 @@ export function FarmDataDisplay({
   noSensorLabel,
   noDataMessage,
   farmLayout,
+  greenhouseDimensions,
 }: FarmDataDisplayProps) {
   const showEmpty = bays.length === 0 && viewMode !== 'graph';
   if (showEmpty) {
     return <EmptyState message={noDataMessage} />;
   }
+
+  const dims = viewMode !== 'graph' ? greenhouseDimensions : null;
 
   return (
     <div
@@ -54,27 +58,45 @@ export function FarmDataDisplay({
           className="h-full w-full"
         />
       ) : viewMode === 'discrete' ? (
-        <ViewSensorMap
-          key={bays[0].id}
-          bay={bays[0]}
-          parameter={parameter}
-          selectedSlotId={selectedSlotId}
-          onSelectSlot={onSelectSlot}
-          className="min-h-0 flex-1"
-          showOnlyFilledPositions={false}
-          farmLayout={farmLayout}
-        />
+        <div className="relative min-h-0 flex-1">
+          <ViewSensorMap
+            key={bays[0].id}
+            bay={bays[0]}
+            parameter={parameter}
+            selectedSlotId={selectedSlotId}
+            onSelectSlot={onSelectSlot}
+            className="h-full w-full"
+            showOnlyFilledPositions={false}
+            farmLayout={farmLayout}
+            greenhouseDimensions={dims}
+          />
+          {dims && (
+            <div className="pointer-events-none absolute bottom-2 left-5 right-2 flex items-center justify-between text-[10px] tabular-nums text-white/50 sm:bottom-3 sm:left-10 sm:text-xs">
+              <span>← {dims.xDimension} m →</span>
+              <span>↕ {dims.yDimension} m</span>
+            </div>
+          )}
+        </div>
       ) : (
-        <ViewSingleBay
-          key={bays.map((b) => b.id).join('-')}
-          bays={bays}
-          parameter={parameter}
-          selectedSlotId={selectedSlotId}
-          onSelectSlot={onSelectSlot}
-          parameterLabel={parameterLabel}
-          noSensorLabel={noSensorLabel}
-          className="h-full"
-        />
+        <div className="relative h-full min-h-0">
+          <ViewSingleBay
+            key={bays.map((b) => b.id).join('-')}
+            bays={bays}
+            parameter={parameter}
+            selectedSlotId={selectedSlotId}
+            onSelectSlot={onSelectSlot}
+            parameterLabel={parameterLabel}
+            noSensorLabel={noSensorLabel}
+            className="h-full"
+            greenhouseDimensions={dims}
+          />
+          {dims && (
+            <div className="pointer-events-none absolute bottom-2 left-5 right-2 flex items-center justify-between text-[10px] tabular-nums text-white/50 sm:bottom-3 sm:left-10 sm:text-xs">
+              <span>← {dims.xDimension} m →</span>
+              <span>↕ {dims.yDimension} m</span>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

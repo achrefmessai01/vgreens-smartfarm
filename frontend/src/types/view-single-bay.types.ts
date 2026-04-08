@@ -1,4 +1,5 @@
 import type { HeatmapPoint } from '@/lib/heatmap-utils';
+import type { GreenhouseDimensions } from '@/lib/sensor-map-positions';
 import type { Bay, ParameterType, PlantSlot } from '@/types/farm.types';
 
 export interface ViewSingleBayProps {
@@ -11,6 +12,7 @@ export interface ViewSingleBayProps {
   noSensorLabel?: string;
   className?: string;
   showOnlyFilledPositions?: boolean;
+  greenhouseDimensions?: GreenhouseDimensions | null;
 }
 
 export interface SensorWithPosition {

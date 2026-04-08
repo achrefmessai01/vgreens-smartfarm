@@ -96,6 +96,7 @@ export default function FarmOverviewPage() {
               noDataMessage={state.labels.noData}
               emptyForNowMessage={state.labels.emptyForNow}
               farmLayout={state.farmLayout}
+              greenhouseDimensions={state.greenhouseDimensions}
             />
           )}
         </div>

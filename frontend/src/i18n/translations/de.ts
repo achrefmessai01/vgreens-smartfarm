@@ -582,6 +582,18 @@ export const de = {
           sheetDescription:
             'Überschreiben Sie die Standort-Tags für diesen Sensor. Lassen Sie das Feld leer, um die InfluxDB-Werte zu verwenden.',
         },
+        farmLayout: {
+          title: 'Farm-Layout',
+          subtitle: 'Gewächshausnamen und -abmessungen konfigurieren',
+          save: 'Speichern',
+          saving: 'Wird gespeichert…',
+          greenhouses: 'Gewächshäuser',
+          add: 'Hinzufügen',
+          noGreenhouses: 'Noch kein Gewächshaus konfiguriert.',
+          namePlaceholder: 'Gewächshausname',
+          xDimensionPlaceholder: 'X-Abmessung (m)',
+          yDimensionPlaceholder: 'Y-Abmessung (m)',
+        },
       },
       features: {
         title: 'Feature-Flag-Verwaltung',

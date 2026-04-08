@@ -8,13 +8,13 @@ import { useI18n } from '@/i18n';
 import {
   formatParameterDisplayValue,
   getParameterUnit,
-  valueToHotColor,
 } from '@/lib/farm-data';
 import { idwInterpolate } from '@/lib/heatmap-utils';
 import { useFullMapData } from '@/lib/hooks/use-full-map-data';
 import { cn } from '@/lib/utils';
 import type { ViewSingleBayProps } from '@/types/view-single-bay.types';
 import * as React from 'react';
+import { HeatmapBackground } from './heatmap-background';
 
 const HEATMAP_GRID_COLS = 80;
 const HEATMAP_GRID_ROWS = 40;
@@ -26,21 +26,26 @@ export function ViewSingleBay({
   onSelectSlot,
   className,
   showOnlyFilledPositions = false,
+  greenhouseDimensions,
 }: ViewSingleBayProps) {
   const { t } = useI18n();
   const unit = getParameterUnit(parameter);
   const { sensors, heatmapPoints, globalMin, globalMax, hasAnyData } =
-    useFullMapData(bays, parameter, showOnlyFilledPositions);
+    useFullMapData(bays, parameter, showOnlyFilledPositions, greenhouseDimensions);
 
   const heatmapGrid = React.useMemo(
-    () =>
-      idwInterpolate(HEATMAP_GRID_COLS, HEATMAP_GRID_ROWS, heatmapPoints, 2),
+    () => idwInterpolate(HEATMAP_GRID_COLS, HEATMAP_GRID_ROWS, heatmapPoints, 2),
     [heatmapPoints],
   );
 
   const scale = getLegendScale(parameter);
   const scaleMin = scale?.min ?? globalMin;
   const scaleMax = scale?.max ?? globalMax;
+
+  const hasRatio =
+    greenhouseDimensions &&
+    greenhouseDimensions.xDimension > 0 &&
+    greenhouseDimensions.yDimension > 0;
 
   return (
     <Card
@@ -55,46 +60,40 @@ export function ViewSingleBay({
           {t.pages.farmOverview.noData}
         </div>
       ) : (
-        <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
+        <div
+          className={cn(
+            'min-h-0 min-w-0 flex-1 overflow-hidden',
+            hasRatio ? 'flex items-start justify-start' : 'relative',
+          )}
+        >
           <div
-            className="absolute inset-0 grid h-full w-full"
-            style={{
-              gridTemplateColumns: `repeat(${HEATMAP_GRID_COLS}, 1fr)`,
-              gridTemplateRows: `repeat(${HEATMAP_GRID_ROWS}, 1fr)`,
-            }}
+            className="relative overflow-hidden"
+            style={
+              hasRatio
+                ? {
+                    height: '100%',
+                    aspectRatio: `${greenhouseDimensions.xDimension} / ${greenhouseDimensions.yDimension}`,
+                    maxWidth: '100%',
+                  }
+                : { position: 'absolute', inset: 0 }
+            }
           >
-            {heatmapGrid.map((row, i) =>
-              row.map((val, j) => (
-                <div
-                  key={`${i}-${j}`}
-                  className="min-h-0 min-w-0"
-                  style={{
-                    backgroundColor: Number.isNaN(val)
-                      ? 'rgb(240,240,240)'
-                      : valueToHotColor(val, scaleMin, scaleMax),
-                  }}
-                />
-              )),
-            )}
-          </div>
-          {sensors.map(
-            ({
-              slot,
-              deviceId,
-              value,
-              leftPercent,
-              topPercent,
-              positionKey,
-            }) => {
+            <HeatmapBackground
+              grid={heatmapGrid}
+              scaleMin={scaleMin}
+              scaleMax={scaleMax}
+              cols={HEATMAP_GRID_COLS}
+              rows={HEATMAP_GRID_ROWS}
+            />
+            {sensors.map(({ slot, deviceId, value, leftPercent, topPercent, positionKey }) => {
               const isSelected = slot && selectedSlotId === slot.id;
-              const displayValue =
-                value != null ? formatParameterDisplayValue(value) : '--';
-              const tooltipContent =
+              const displayValue = value != null ? formatParameterDisplayValue(value) : '--';
+              const tip =
                 slot && value != null
                   ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
                   : deviceId;
               return (
-                <Tooltip key={positionKey} content={tooltipContent}>
+                <Tooltip key={positionKey} content={tip}>
                   <Button
                     type="button"
                     variant="ghost"
@@ -124,9 +123,7 @@ export function ViewSingleBay({
                   >
                     {value != null ? (
                       <>
-                        <span className="leading-tight tracking-tight">
-                          {displayValue}
-                        </span>
+                        <span className="leading-tight tracking-tight">{displayValue}</span>
                         {unit ? (
                           <span className="text-[10px] leading-tight font-medium opacity-85">
                             {unit}
@@ -139,8 +136,8 @@ export function ViewSingleBay({
                   </Button>
                 </Tooltip>
               );
-            },
-          )}
+            })}
+          </div>
         </div>
       )}
     </Card>

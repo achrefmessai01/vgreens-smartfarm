@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/context';
 import type { Bay, ParameterType } from '@/types/farm.types';
-import type { FarmLayoutConfig } from '@/lib/sensor-map-positions';
+import type { FarmLayoutConfig, GreenhouseDimensions } from '@/lib/sensor-map-positions';
 import { EmptyState } from './empty-state';
 import { FarmDataDisplay } from './farm-view-container';
 import { ParameterColorLegendBar } from './parameter-color-legend';
@@ -30,6 +30,7 @@ export interface FarmOverviewCardProps {
   emptyForNowMessage: string;
   entranceLabel?: string;
   farmLayout?: FarmLayoutConfig;
+  greenhouseDimensions?: GreenhouseDimensions | null;
 }
 
 export function FarmOverviewCard({
@@ -52,6 +53,7 @@ export function FarmOverviewCard({
   emptyForNowMessage,
   entranceLabel,
   farmLayout,
+  greenhouseDimensions,
 }: FarmOverviewCardProps) {
   const { t } = useI18n();
 
@@ -72,6 +74,13 @@ export function FarmOverviewCard({
               options={parameterOptions}
             />
           </div>
+          {greenhouseDimensions && viewMode !== 'graph' && (
+            <div className="text-muted-foreground hidden items-center gap-1 text-xs tabular-nums sm:flex">
+              <span>{greenhouseDimensions.xDimension}m</span>
+              <span className="opacity-50">×</span>
+              <span>{greenhouseDimensions.yDimension}m</span>
+            </div>
+          )}
           <div className="w-full min-w-0 sm:w-auto sm:flex-none">
             <ViewModeSelector
               value={viewMode}
@@ -109,6 +118,7 @@ export function FarmOverviewCard({
                 noSensorLabel={noSensorLabel}
                 noDataMessage={noDataMessage}
                 farmLayout={farmLayout}
+                greenhouseDimensions={greenhouseDimensions}
               />
               {viewMode !== 'graph' && (
                 <div
