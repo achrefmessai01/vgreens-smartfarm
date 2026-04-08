@@ -200,6 +200,7 @@ export type CreateSystemErrorInput = {
 export type CreateTenantInput = {
   companyName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
+  greenhouses?: InputMaybe<Array<GreenhouseInput>>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
   phone?: InputMaybe<Scalars['String']['input']>;
@@ -368,6 +369,12 @@ export type GetSignedImageUrlInput = {
   expiresIn?: InputMaybe<Scalars['Int']['input']>;
   /** Full storage path of the image relative to the bucket (including tenant prefix). */
   path: Scalars['String']['input'];
+};
+
+export type GreenhouseInput = {
+  name: Scalars['String']['input'];
+  xDimension: Scalars['Float']['input'];
+  yDimension: Scalars['Float']['input'];
 };
 
 export type Harvest = {
@@ -951,6 +958,7 @@ export type Tenant = {
   companyName?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   email?: Maybe<Scalars['String']['output']>;
+  greenhouses?: Maybe<Array<TenantGreenhouse>>;
   id: Scalars['ID']['output'];
   influxBucketName?: Maybe<Scalars['String']['output']>;
   isActive: Scalars['Boolean']['output'];
@@ -984,6 +992,13 @@ export type TenantFeature = {
   id: Scalars['ID']['output'];
   tenantId: Scalars['ID']['output'];
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type TenantGreenhouse = {
+  __typename?: 'TenantGreenhouse';
+  name: Scalars['String']['output'];
+  xDimension: Scalars['Float']['output'];
+  yDimension: Scalars['Float']['output'];
 };
 
 export type ToggleTenantFeatureInput = {
@@ -1057,6 +1072,7 @@ export type UpdateHarvestInput = {
 export type UpdateTenantInput = {
   companyName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
+  greenhouses?: InputMaybe<Array<GreenhouseInput>>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
@@ -1287,7 +1303,7 @@ export type CreateTenantMutationVariables = Exact<{
 }>;
 
 
-export type CreateTenantMutation = { __typename?: 'Mutation', createTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any } };
+export type CreateTenantMutation = { __typename?: 'Mutation', createTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number }> | null } };
 
 export type UpdateTenantMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1295,7 +1311,7 @@ export type UpdateTenantMutationVariables = Exact<{
 }>;
 
 
-export type UpdateTenantMutation = { __typename?: 'Mutation', updateTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any } };
+export type UpdateTenantMutation = { __typename?: 'Mutation', updateTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number }> | null } };
 
 export type DeleteTenantMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1572,14 +1588,14 @@ export type GreenhouseOptionsQuery = { __typename?: 'Query', greenhouseOptions: 
 export type TenantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any }> };
+export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number }> | null }> };
 
 export type TenantQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
+export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
 
 export type GetTenantBucketQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2433,6 +2449,11 @@ export const CreateTenantDocument = gql`
     email
     phone
     isActive
+    greenhouses {
+      name
+      xDimension
+      yDimension
+    }
     createdAt
     updatedAt
   }
@@ -2473,6 +2494,11 @@ export const UpdateTenantDocument = gql`
     email
     phone
     isActive
+    greenhouses {
+      name
+      xDimension
+      yDimension
+    }
     createdAt
     updatedAt
   }
@@ -4388,6 +4414,11 @@ export const TenantsDocument = gql`
     email
     phone
     isActive
+    greenhouses {
+      name
+      xDimension
+      yDimension
+    }
     createdAt
     updatedAt
   }
@@ -4437,6 +4468,11 @@ export const TenantDocument = gql`
     email
     phone
     isActive
+    greenhouses {
+      name
+      xDimension
+      yDimension
+    }
     createdAt
     updatedAt
     users {

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Columns2, Building } from 'lucide-react';
+import { Columns2, Building, Plus, Trash2 } from 'lucide-react';
 import {
   Field,
   FieldError,
@@ -10,11 +10,18 @@ import {
   FieldContent,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import type { Tenant } from '@/generated/graphql';
 import { useFarmConfigQuery } from '@/generated/graphql';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DEFAULT_FARM_CONFIG } from '@/lib/farm-config-constants';
+
+export interface TenantGreenhouseFormData {
+  name: string;
+  xDimension?: number;
+  yDimension?: number;
+}
 
 export interface TenantFormData {
   name: string;
@@ -24,15 +31,23 @@ export interface TenantFormData {
   isActive: boolean;
   bayCount?: number;
   chambersCount?: number;
+  greenhouses: TenantGreenhouseFormData[];
 }
 
 export interface TenantFormErrors {
   name?: string;
   email?: string;
+  greenhouses?: string;
 }
 
 interface TenantFormProps {
-  initialData?: Partial<Tenant>;
+  initialData?: Partial<Tenant> & {
+    greenhouses?: Array<{
+      name?: string | null;
+      xDimension?: number | null;
+      yDimension?: number | null;
+    }> | null;
+  };
   tenantId?: string;
   onSubmit: (data: TenantFormData) => void;
   onCancel: () => void;
@@ -61,6 +76,12 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
       isActive: initialData?.isActive ?? true,
       bayCount: undefined,
       chambersCount: undefined,
+      greenhouses:
+        initialData?.greenhouses?.map((greenhouse) => ({
+          name: greenhouse.name ?? '',
+          xDimension: greenhouse.xDimension ?? undefined,
+          yDimension: greenhouse.yDimension ?? undefined,
+        })) ?? [],
     });
     const [errors, setErrors] = React.useState<TenantFormErrors>({});
 
@@ -73,6 +94,12 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           email: initialData.email ?? '',
           phone: initialData.phone ?? '',
           isActive: initialData.isActive ?? true,
+          greenhouses:
+            initialData.greenhouses?.map((greenhouse) => ({
+              name: greenhouse.name ?? '',
+              xDimension: greenhouse.xDimension ?? undefined,
+              yDimension: greenhouse.yDimension ?? undefined,
+            })) ?? [],
         }));
       }
     }, [initialData]);
@@ -93,6 +120,19 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
       if (!formData.name.trim()) newErrors.name = 'Name is required';
       if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
         newErrors.email = 'Invalid email format';
+      if (
+        formData.greenhouses.some(
+          (greenhouse) =>
+            !greenhouse.name.trim() ||
+            greenhouse.xDimension == null ||
+            greenhouse.yDimension == null ||
+            greenhouse.xDimension <= 0 ||
+            greenhouse.yDimension <= 0,
+        )
+      ) {
+        newErrors.greenhouses =
+          'Each greenhouse requires a name and positive X/Y dimensions';
+      }
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
     };
@@ -119,6 +159,53 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           ...prev,
           [field]: Number.isFinite(n) && n > 0 ? n : undefined,
         }));
+      };
+
+    const addGreenhouse = () => {
+      setFormData((prev) => ({
+        ...prev,
+        greenhouses: [
+          ...prev.greenhouses,
+          { name: '', xDimension: undefined, yDimension: undefined },
+        ],
+      }));
+      if (errors.greenhouses) {
+        setErrors((prev) => ({ ...prev, greenhouses: undefined }));
+      }
+    };
+
+    const removeGreenhouse = (index: number) => {
+      setFormData((prev) => ({
+        ...prev,
+        greenhouses: prev.greenhouses.filter((_, i) => i !== index),
+      }));
+      if (errors.greenhouses) {
+        setErrors((prev) => ({ ...prev, greenhouses: undefined }));
+      }
+    };
+
+    const handleGreenhouseChange =
+      (
+        index: number,
+        field: keyof TenantGreenhouseFormData,
+        isNumber = false,
+      ) =>
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = isNumber
+          ? (() => {
+              const n = parseFloat(e.target.value);
+              return Number.isFinite(n) ? n : undefined;
+            })()
+          : e.target.value;
+        setFormData((prev) => ({
+          ...prev,
+          greenhouses: prev.greenhouses.map((greenhouse, i) =>
+            i === index ? { ...greenhouse, [field]: value } : greenhouse,
+          ),
+        }));
+        if (errors.greenhouses) {
+          setErrors((prev) => ({ ...prev, greenhouses: undefined }));
+        }
       };
 
     React.useImperativeHandle(ref, () => ({
@@ -258,6 +345,79 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
               </FieldContent>
             </Field>
           </FieldGroup>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              Greenhouses
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addGreenhouse}
+              disabled={isLoading}
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              Add greenhouse
+            </Button>
+          </div>
+
+          {formData.greenhouses.length === 0 && (
+            <p className="text-muted-foreground text-sm">
+              No greenhouse added yet.
+            </p>
+          )}
+
+          <div className="space-y-3">
+            {formData.greenhouses.map((greenhouse, index) => (
+              <div key={`greenhouse-${index}`} className="rounded-md border p-3">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-medium">Greenhouse {index + 1}</p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeGreenhouse(index)}
+                    disabled={isLoading}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <Input
+                    type="text"
+                    value={greenhouse.name}
+                    onChange={handleGreenhouseChange(index, 'name')}
+                    placeholder="Greenhouse name"
+                    disabled={isLoading}
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.1"
+                    value={greenhouse.xDimension ?? ''}
+                    onChange={handleGreenhouseChange(index, 'xDimension', true)}
+                    placeholder="X dimension"
+                    disabled={isLoading}
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.1"
+                    value={greenhouse.yDimension ?? ''}
+                    onChange={handleGreenhouseChange(index, 'yDimension', true)}
+                    placeholder="Y dimension"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          {errors.greenhouses && <FieldError>{errors.greenhouses}</FieldError>}
         </div>
       </form>
     );
