@@ -1,8 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SensorConfig } from './entities/sensor-config.entity';
 import { UpsertSensorConfigInput } from './dto';
+import { SensorConfig } from './entities/sensor-config.entity';
 
 @Injectable()
 export class SensorConfigService {
@@ -37,9 +37,8 @@ export class SensorConfigService {
 
     if (existing) {
       Object.assign(existing, {
-        bay: input.bay ?? existing.bay,
-        pole: input.pole ?? existing.pole,
-        row: input.row ?? existing.row,
+        xDimension: input.xDimension ?? existing.xDimension,
+        yDimension: input.yDimension ?? existing.yDimension,
         greenhouse: input.greenhouse ?? existing.greenhouse,
         city: input.city ?? existing.city,
       });
