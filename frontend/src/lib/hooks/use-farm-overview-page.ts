@@ -12,12 +12,14 @@ import {
   useTenantsQuery,
   useSensorConfigsQuery,
   useFarmConfigQuery,
+  useTenantQuery,
   type Tenant,
 } from '@/generated/graphql';
 import type { SensorConfigOverride } from '@/lib/farm-data-live';
 import {
   DEFAULT_FARM_LAYOUT,
   type FarmLayoutConfig,
+  type GreenhouseDimensions,
 } from '@/lib/sensor-map-positions';
 import {
   ALLOWED_SINGLE_GREENHOUSE_PARAMETERS,
@@ -102,9 +104,8 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         (sensorConfigData?.sensorConfigs ?? []).map((c) => [
           c.device,
           {
-            bay: c.bay ?? undefined,
-            pole: c.pole ?? undefined,
-            row: c.row ?? undefined,
+            xPosition: c.xPosition ?? undefined,
+            yPosition: c.yPosition ?? undefined,
             greenhouse: c.greenhouse ?? undefined,
             city: c.city ?? undefined,
           },
@@ -118,6 +119,22 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     skip: !configQueryTenantId,
     fetchPolicy: 'cache-and-network',
   });
+
+  // For non-admin users, fetch their own tenant's greenhouse data.
+  // Admin users already have greenhouses via tenantsData.
+  const { data: tenantData } = useTenantQuery({
+    variables: { id: configQueryTenantId! },
+    skip: !configQueryTenantId || isVGreensAdmin,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const tenantGreenhouses = React.useMemo(() => {
+    if (isVGreensAdmin) {
+      const tenant = tenants.find((tn) => tn.id === selectedTenantId);
+      return tenant?.greenhouses ?? [];
+    }
+    return tenantData?.tenant?.greenhouses ?? [];
+  }, [isVGreensAdmin, tenants, selectedTenantId, tenantData?.tenant?.greenhouses]);
 
   const farmLayout = React.useMemo<FarmLayoutConfig>(
     () => ({
@@ -162,16 +179,21 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   }, [activeGreenhouseTab, selectedParameter, viewMode]);
 
   const greenhouseOptions = React.useMemo(() => {
+    const count =
+      tenantGreenhouses.length > 0
+        ? tenantGreenhouses.length
+        : farmLayout.chambersCount;
     const ghLabels = [t.greenHouse1, t.greenHouse2];
     const options = [{ key: 'combined', label: t.combined }];
-    for (let i = 0; i < farmLayout.chambersCount; i++) {
+    for (let i = 0; i < count; i++) {
       options.push({
         key: `greenhouse_${i + 1}`,
-        label: ghLabels[i] ?? `Greenhouse ${i + 1}`,
+        label:
+          tenantGreenhouses[i]?.name || ghLabels[i] || `Greenhouse ${i + 1}`,
       });
     }
     return options;
-  }, [t, farmLayout.chambersCount]);
+  }, [t, farmLayout.chambersCount, tenantGreenhouses]);
 
   const parameterOptions = React.useMemo(() => {
     // Base options: all available fields
@@ -268,18 +290,36 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
 
   const greenhouseLabel = React.useMemo(() => {
     const idx = activeGreenhouseTab - 1;
-    return ghLabels[idx] ?? `Greenhouse ${activeGreenhouseTab}`;
+    return (
+      tenantGreenhouses[idx]?.name ||
+      ghLabels[idx] ||
+      `Greenhouse ${activeGreenhouseTab}`
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeGreenhouseTab, t.greenHouse1, t.greenHouse2]);
+  }, [activeGreenhouseTab, tenantGreenhouses, t.greenHouse1, t.greenHouse2]);
 
   const combinedGreenhouses = React.useMemo(() => {
-    return Array.from({ length: farmLayout.chambersCount }, (_, i) => ({
+    const count =
+      tenantGreenhouses.length > 0
+        ? tenantGreenhouses.length
+        : farmLayout.chambersCount;
+    return Array.from({ length: count }, (_, i) => ({
       key: bays[i]?.id ?? `greenhouse_${i + 1}`,
-      label: ghLabels[i] ?? `Greenhouse ${i + 1}`,
+      label:
+        tenantGreenhouses[i]?.name || ghLabels[i] || `Greenhouse ${i + 1}`,
       bay: bays[i] ?? null,
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bays, farmLayout.chambersCount, t.greenHouse1, t.greenHouse2]);
+  }, [bays, farmLayout.chambersCount, tenantGreenhouses, t.greenHouse1, t.greenHouse2]);
+
+  const selectedGreenhouseDimensions =
+    React.useMemo<GreenhouseDimensions | null>(() => {
+      if (activeGreenhouseTab === 0 || tenantGreenhouses.length === 0)
+        return null;
+      const gh = tenantGreenhouses[activeGreenhouseTab - 1];
+      if (!gh || gh.xDimension <= 0 || gh.yDimension <= 0) return null;
+      return { xDimension: gh.xDimension, yDimension: gh.yDimension };
+    }, [tenantGreenhouses, activeGreenhouseTab]);
 
   const getParameterLabel = React.useCallback(
     (param: ParameterType) => formatFieldToLabel(param),
@@ -318,6 +358,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     getParameterLabel,
     tenantBucketNameOverride,
     farmLayout,
+    greenhouseDimensions: selectedGreenhouseDimensions,
     labels: {
       viewHeatmap: t.viewHeatmap,
       viewDiscrete: t.viewDiscrete,

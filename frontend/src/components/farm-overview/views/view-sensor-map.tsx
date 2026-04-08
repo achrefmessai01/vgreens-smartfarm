@@ -6,167 +6,103 @@ import {
   getParameterColor,
   getParameterUnit,
 } from '@/lib/farm-data';
-import { isParameterSupportedByType } from '@/lib/sensor-map-parameter';
-import {
-  bayHasDynamicPositions,
-  DEFAULT_FARM_LAYOUT,
-  getSlotPositionsFromBay,
-} from '@/lib/sensor-map-positions';
+import { useFullMapData } from '@/lib/hooks/use-full-map-data';
 import { cn } from '@/lib/utils';
-import type { ParameterType, PlantSlot } from '@/types/farm.types';
 import type { ViewSensorMapProps } from '@/types/sensor-map';
-import * as React from 'react';
-
-interface CellItem {
-  slot: PlantSlot | null;
-  deviceId: string;
-  value: number | null;
-}
-
-function buildBayRowToSlots(
-  bay: ViewSensorMapProps['bay'],
-  parameter: ParameterType,
-  showOnlyFilledPositions: boolean,
-  farmLayout: ViewSensorMapProps['farmLayout'],
-): Map<string, CellItem[]> {
-  const map = new Map<string, CellItem[]>();
-
-  if (bay && bayHasDynamicPositions(bay)) {
-    const positions = getSlotPositionsFromBay(bay, farmLayout);
-    for (const p of positions) {
-      if (!isParameterSupportedByType(parameter, p.type)) continue;
-      const value =
-        typeof p.slot.values?.[parameter] === 'number'
-          ? (p.slot.values[parameter] as number)
-          : null;
-      const numValue = value != null && !Number.isNaN(value) ? value : null;
-      if (showOnlyFilledPositions && numValue == null) continue;
-      const key = `${p.bayIndex}-${p.rowIndex}`;
-      const list = map.get(key) ?? [];
-      list.push({ slot: p.slot, deviceId: p.deviceId, value: numValue });
-      map.set(key, list);
-    }
-  }
-  return map;
-}
 
 export function ViewSensorMap(props: ViewSensorMapProps) {
-  const { parameter, selectedSlotId, onSelectSlot, className, farmLayout } =
-    props;
-  const layout = farmLayout ?? DEFAULT_FARM_LAYOUT;
-  const { bayCount, polesMax } = layout;
-  const rowsPerBay = polesMax; // all poles visible (HIDDEN_POLE_ROWS is empty)
+  const { parameter, selectedSlotId, onSelectSlot, className, greenhouseDimensions } = props;
   const unit = getParameterUnit(parameter);
-  const bayRowToSlots = React.useMemo(
-    () =>
-      buildBayRowToSlots(
-        props.bay,
-        props.parameter,
-        props.showOnlyFilledPositions ?? false,
-        props.farmLayout,
-      ),
-    [
-      props.bay,
-      props.parameter,
-      props.showOnlyFilledPositions,
-      props.farmLayout,
-    ],
+
+  const { sensors } = useFullMapData(
+    props.bay ? [props.bay] : [],
+    parameter,
+    props.showOnlyFilledPositions ?? false,
+    greenhouseDimensions,
   );
+
+  if (!greenhouseDimensions) {
+    return (
+      <div className={cn('border-border/40 bg-card flex h-full w-full flex-1 items-center justify-center rounded-xl border shadow-sm', className)}>
+        <p className="text-muted-foreground text-sm">Configure greenhouse dimensions to view layout</p>
+      </div>
+    );
+  }
+
+  const { xDimension, yDimension } = greenhouseDimensions;
 
   return (
     <div
       className={cn(
-        'border-border/40 bg-card flex h-full min-h-0 w-full flex-1 overflow-hidden rounded-xl border shadow-sm',
+        'border-border/40 bg-card flex min-h-0 w-full flex-1 items-start justify-start overflow-hidden rounded-xl border shadow-sm',
         className,
       )}
     >
-      <div className="flex h-full min-h-0 w-full min-w-0 px-0 pt-0 pb-0.5 sm:px-0.5 sm:pt-0 sm:pb-1.5">
-        {Array.from({ length: bayCount }, (_, bayIndex) => (
-          <div
-            key={bayIndex}
-            className={cn(
-              'border-border/40 flex min-w-0 flex-1 flex-col border-r last:border-r-0',
-            )}
-          >
-            {Array.from({ length: rowsPerBay }, (_, rowIndex) => {
-              const key = `${bayIndex}-${rowIndex}`;
-              const items = bayRowToSlots.get(key) ?? [];
-              return (
-                <div
-                  key={rowIndex}
-                  className="flex min-h-0 flex-1 flex-wrap items-center justify-center gap-0.5 p-0.5 sm:gap-1.5 sm:p-1.5 lg:gap-2 lg:p-2"
-                >
-                  {items.map(({ slot, deviceId, value }) => {
-                    const isSelected = slot
-                      ? selectedSlotId === slot.id
-                      : false;
-                    const glowColor = slot
-                      ? getParameterColor(value ?? 0, parameter, slot.id)
-                      : 'rgb(200, 200, 200)';
-                    const circleGlow = slot
+      {sensors.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No sensor data</p>
+      ) : (
+        // Canvas: flex child — height fills parent, width set by aspect-ratio
+        <div
+          className="relative overflow-hidden"
+          style={{
+            height: '100%',
+            aspectRatio: `${xDimension} / ${yDimension}`,
+            maxWidth: '100%',
+          }}
+        >
+          {sensors.map(({ slot, deviceId, value, leftPercent, topPercent, positionKey }) => {
+            const isSelected = slot ? selectedSlotId === slot.id : false;
+            const glowColor = slot
+              ? getParameterColor(value ?? 0, parameter, slot.id)
+              : 'rgb(200, 200, 200)';
+            const tip =
+              slot && value != null
+                ? `${deviceId}: ${formatParameterDisplayValue(value)}${unit}`
+                : deviceId;
+            return (
+              <Tooltip key={positionKey} content={tip}>
+                <button
+                  type="button"
+                  onClick={() =>
+                    onSelectSlot(slot ? (isSelected ? null : slot.id) : null)
+                  }
+                  className={cn(
+                    'absolute flex flex-col items-center justify-center rounded-full tabular-nums',
+                    'h-[clamp(1.875rem,0.9vw+1.3rem,2.25rem)] w-[clamp(1.875rem,0.9vw+1.3rem,2.25rem)]',
+                    'transition-transform duration-150',
+                    'focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-none',
+                    slot
+                      ? 'bg-cyan-300/90 text-slate-900 hover:scale-105 cursor-pointer'
+                      : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50',
+                    isSelected && 'scale-110',
+                  )}
+                  style={{
+                    left: `${leftPercent}%`,
+                    top: `${topPercent}%`,
+                    transform: 'translate(-50%, -50%)',
+                    boxShadow: slot
                       ? `0 0 14px ${glowColor}, 0 0 24px ${glowColor}`
-                      : 'none';
-                    const tooltipContent =
-                      slot && value != null
-                        ? `${deviceId}: ${formatParameterDisplayValue(value)}${unit}`
-                        : deviceId;
-                    return (
-                      <Tooltip key={deviceId} content={tooltipContent}>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            onSelectSlot(
-                              slot ? (isSelected ? null : slot.id) : null,
-                            )
-                          }
-                          disabled={!slot}
-                          className={cn(
-                            'relative flex min-w-0 items-center justify-center transition-transform duration-150',
-                            'focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-none',
-                            'disabled:cursor-not-allowed',
-                            'hover:scale-105',
-                            isSelected && 'scale-110',
-                            !slot && 'opacity-50',
-                            rowIndex === rowsPerBay - 1 &&
-                              '-translate-y-1 sm:-translate-y-[0.375rem]',
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              'flex h-5.5 w-5.5 shrink-0 flex-col items-center justify-center rounded-full px-0.5 tabular-nums sm:h-[clamp(1.875rem,0.9vw+1.3rem,2.25rem)] sm:w-[clamp(1.875rem,0.9vw+1.3rem,2.25rem)] sm:px-1',
-                              slot
-                                ? 'bg-cyan-300/90 text-slate-900'
-                                : 'bg-muted text-muted-foreground',
-                            )}
-                            style={{
-                              boxShadow: circleGlow,
-                            }}
-                          >
-                            {value != null ? (
-                              <>
-                                <span className="text-[7px] leading-tight font-semibold tracking-tight sm:text-[clamp(0.625rem,0.18vw+0.58rem,0.75rem)]">
-                                  {formatParameterDisplayValue(value)}
-                                </span>
-                                <span className="-mt-0.5 hidden text-[9px] font-medium sm:inline sm:text-[clamp(0.5rem,0.08vw+0.45rem,0.5625rem)]">
-                                  {unit}
-                                </span>
-                              </>
-                            ) : (
-                              <span className="text-[7px] sm:text-[clamp(0.5625rem,0.1vw+0.52rem,0.625rem)]">
-                                --
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+                      : 'none',
+                  }}
+                >
+                  {value != null ? (
+                    <>
+                      <span className="text-[clamp(0.625rem,0.18vw+0.58rem,0.75rem)] leading-tight font-semibold tracking-tight">
+                        {formatParameterDisplayValue(value)}
+                      </span>
+                      <span className="-mt-0.5 text-[clamp(0.5rem,0.08vw+0.45rem,0.5625rem)] font-medium">
+                        {unit}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-[clamp(0.5625rem,0.1vw+0.52rem,0.625rem)]">--</span>
+                  )}
+                </button>
+              </Tooltip>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

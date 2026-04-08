@@ -503,6 +503,18 @@ export const en = {
           sheetDescription:
             'Override the location tags for this sensor. Leave blank to use the values from InfluxDB.',
         },
+        farmLayout: {
+          title: 'Farm Layout',
+          subtitle: 'Configure greenhouse names and dimensions',
+          save: 'Save',
+          saving: 'Saving…',
+          greenhouses: 'Greenhouses',
+          add: 'Add',
+          noGreenhouses: 'No greenhouse configured yet.',
+          namePlaceholder: 'Greenhouse name',
+          xDimensionPlaceholder: 'X dimension (m)',
+          yDimensionPlaceholder: 'Y dimension (m)',
+        },
       },
       features: {
         title: 'Feature Flag Management',

@@ -1,5 +1,5 @@
 import type { Bay, ParameterType, PlantSlot } from '@/types/farm.types';
-import type { FarmLayoutConfig } from '@/lib/sensor-map-positions';
+import type { FarmLayoutConfig, GreenhouseDimensions } from '@/lib/sensor-map-positions';
 
 export type SensorMapSensorType = 'air' | 'lux' | 'par' | 'soil';
 
@@ -12,6 +12,7 @@ export interface ViewSensorMapProps {
   className?: string;
   showOnlyFilledPositions?: boolean;
   farmLayout?: FarmLayoutConfig;
+  greenhouseDimensions?: GreenhouseDimensions | null;
 }
 
 export interface BayRowPosition {
