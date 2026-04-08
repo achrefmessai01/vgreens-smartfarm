@@ -18,13 +18,13 @@ export class UpsertSensorConfigInput {
   @IsNumber()
   @IsOptional()
   @Min(0)
-  xDimension?: number;
+  xPosition?: number;
 
   @Field(() => Float, { defaultValue: 0 })
   @IsNumber()
   @IsOptional()
   @Min(0)
-  yDimension?: number;
+  yPosition?: number;
 
   @Field({ nullable: true })
   @IsString()

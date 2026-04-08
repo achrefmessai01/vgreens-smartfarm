@@ -33,11 +33,11 @@ export class SensorConfig extends BaseEntity {
 
   @Field({ nullable: true })
   @Column({ type: 'float', default: 0, nullable: true })
-  xDimension?: number;
+  xPosition?: number;
 
   @Field({ nullable: true })
   @Column({ type: 'float', default: 0, nullable: true })
-  yDimension?: number;
+  yPosition?: number;
 
   @Field({ nullable: true })
   @Column({ type: 'varchar', length: 128, nullable: true })

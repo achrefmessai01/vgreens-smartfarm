@@ -37,8 +37,8 @@ export class SensorConfigService {
 
     if (existing) {
       Object.assign(existing, {
-        xDimension: input.xDimension ?? existing.xDimension,
-        yDimension: input.yDimension ?? existing.yDimension,
+        xPosition: input.xPosition ?? existing.xPosition,
+        yPosition: input.yPosition ?? existing.yPosition,
         greenhouse: input.greenhouse ?? existing.greenhouse,
         city: input.city ?? existing.city,
       });
