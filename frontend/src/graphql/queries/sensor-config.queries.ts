@@ -6,9 +6,8 @@ export const SENSOR_CONFIGS_QUERY = gql`
       id
       tenantId
       device
-      bay
-      pole
-      row
+      xPosition
+      yPosition
       greenhouse
       city
       createdAt

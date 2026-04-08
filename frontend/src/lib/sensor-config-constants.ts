@@ -4,9 +4,8 @@
  */
 
 export const SENSOR_CONFIG_FIELD_KEYS = [
-  'bay',
-  'pole',
-  'row',
+  'xPosition',
+  'yPosition',
   'greenhouse',
   'city',
 ] as const;
