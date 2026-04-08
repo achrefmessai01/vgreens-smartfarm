@@ -895,17 +895,16 @@ export enum ReportStatus {
 
 export type SensorConfig = {
   __typename?: 'SensorConfig';
-  bay?: Maybe<Scalars['String']['output']>;
   city?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   device: Scalars['String']['output'];
   greenhouse?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  pole?: Maybe<Scalars['String']['output']>;
-  row?: Maybe<Scalars['String']['output']>;
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
   updatedAt: Scalars['DateTime']['output'];
+  xPosition?: Maybe<Scalars['Float']['output']>;
+  yPosition?: Maybe<Scalars['Float']['output']>;
 };
 
 export type SignedUrl = {
@@ -1105,12 +1104,11 @@ export type UpsertFarmConfigInput = {
 };
 
 export type UpsertSensorConfigInput = {
-  bay?: InputMaybe<Scalars['String']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   device: Scalars['String']['input'];
   greenhouse?: InputMaybe<Scalars['String']['input']>;
-  pole?: InputMaybe<Scalars['String']['input']>;
-  row?: InputMaybe<Scalars['String']['input']>;
+  xPosition?: Scalars['Float']['input'];
+  yPosition?: Scalars['Float']['input'];
 };
 
 export type User = {
@@ -1288,7 +1286,7 @@ export type UpsertSensorConfigMutationVariables = Exact<{
 }>;
 
 
-export type UpsertSensorConfigMutation = { __typename?: 'Mutation', upsertSensorConfig: { __typename?: 'SensorConfig', id: string, tenantId: string, device: string, bay?: string | null, pole?: string | null, row?: string | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any } };
+export type UpsertSensorConfigMutation = { __typename?: 'Mutation', upsertSensorConfig: { __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any } };
 
 export type DeleteSensorConfigMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1569,7 +1567,7 @@ export type SensorConfigsQueryVariables = Exact<{
 }>;
 
 
-export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, bay?: string | null, pole?: string | null, row?: string | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any }> };
+export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any }> };
 
 export type SensorDevicesQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -2371,9 +2369,8 @@ export const UpsertSensorConfigDocument = gql`
     id
     tenantId
     device
-    bay
-    pole
-    row
+    xPosition
+    yPosition
     greenhouse
     city
     createdAt
@@ -4277,9 +4274,8 @@ export const SensorConfigsDocument = gql`
     id
     tenantId
     device
-    bay
-    pole
-    row
+    xPosition
+    yPosition
     greenhouse
     city
     createdAt
