@@ -5,6 +5,18 @@ import { User } from '@modules/users/entities/user.entity';
 import { TenantFeature } from '@modules/features/entities/tenant-feature.entity';
 
 @ObjectType()
+export class TenantGreenhouse {
+  @Field()
+  name: string;
+
+  @Field()
+  xDimension: number;
+
+  @Field()
+  yDimension: number;
+}
+
+@ObjectType()
 @Entity('tenants')
 export class Tenant extends BaseEntity {
   @Field(() => ID)
@@ -48,6 +60,10 @@ export class Tenant extends BaseEntity {
 
   @Field(() => ID, { nullable: true })
   tenantId?: string;
+
+  @Field(() => [TenantGreenhouse], { nullable: true })
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  greenhouses: TenantGreenhouse[];
 
   @Field(() => Date)
   createdAt: Date;
