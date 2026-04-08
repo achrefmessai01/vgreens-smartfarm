@@ -1,15 +1,15 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Unique,
-} from 'typeorm';
 import { BaseEntity } from '@common/entities';
-import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @ObjectType()
 @Entity('sensor_configs')
@@ -32,16 +32,12 @@ export class SensorConfig extends BaseEntity {
   device: string;
 
   @Field({ nullable: true })
-  @Column({ type: 'varchar', length: 64, nullable: true })
-  bay?: string;
+  @Column({ type: 'float', default: 0, nullable: true })
+  xPosition?: number;
 
   @Field({ nullable: true })
-  @Column({ type: 'varchar', length: 64, nullable: true })
-  pole?: string;
-
-  @Field({ nullable: true })
-  @Column({ type: 'varchar', length: 64, nullable: true })
-  row?: string;
+  @Column({ type: 'float', default: 0, nullable: true })
+  yPosition?: number;
 
   @Field({ nullable: true })
   @Column({ type: 'varchar', length: 128, nullable: true })

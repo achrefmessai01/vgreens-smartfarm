@@ -1,5 +1,11 @@
-import { InputType, Field } from '@nestjs/graphql';
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { Field, Float, InputType } from '@nestjs/graphql';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 @InputType()
 export class UpsertSensorConfigInput {
@@ -8,20 +14,17 @@ export class UpsertSensorConfigInput {
   @IsNotEmpty()
   device: string;
 
-  @Field({ nullable: true })
-  @IsString()
+  @Field(() => Float, { defaultValue: 0 })
+  @IsNumber()
   @IsOptional()
-  bay?: string;
+  @Min(0)
+  xPosition?: number;
 
-  @Field({ nullable: true })
-  @IsString()
+  @Field(() => Float, { defaultValue: 0 })
+  @IsNumber()
   @IsOptional()
-  pole?: string;
-
-  @Field({ nullable: true })
-  @IsString()
-  @IsOptional()
-  row?: string;
+  @Min(0)
+  yPosition?: number;
 
   @Field({ nullable: true })
   @IsString()
