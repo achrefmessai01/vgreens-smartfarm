@@ -1125,8 +1125,8 @@ export type UpsertSensorConfigInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   device: Scalars['String']['input'];
   greenhouse?: InputMaybe<Scalars['String']['input']>;
-  xPosition?: Scalars['Float']['input'];
-  yPosition?: Scalars['Float']['input'];
+  xPosition?: InputMaybe<Scalars['Float']['input']>;
+  yPosition?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type User = {

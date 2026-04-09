@@ -76,8 +76,10 @@ function buildSlotsFromRows(
       bySlot.set(key, existing);
     }
 
-    const xPos = typeof config?.xPosition === 'number' ? config.xPosition : undefined;
-    const yPos = typeof config?.yPosition === 'number' ? config.yPosition : undefined;
+    const xPos =
+      typeof config?.xPosition === 'number' ? config.xPosition : undefined;
+    const yPos =
+      typeof config?.yPosition === 'number' ? config.yPosition : undefined;
 
     metaBySlot.set(key, {
       _start: (row._start as string) ?? undefined,
@@ -100,7 +102,10 @@ function buildSlotsFromRows(
     }
     const [chamberPart, devicePart, levelPart] = key.split('|');
     const meta = metaBySlot.get(key);
-    const id = `live_${chamberPart}|${devicePart}|${levelPart}`.replace(/\s/g, '_');
+    const id = `live_${chamberPart}|${devicePart}|${levelPart}`.replace(
+      /\s/g,
+      '_',
+    );
     slots.push({ id, rowIndex: 0, columnIndex: 0, values, meta });
   }
 
@@ -122,18 +127,30 @@ function buildBayFromSlots(
     const columns: Column[] = [];
     for (let ci = 0; ci < SENSOR_COLS; ci++) {
       const slot = slots.find((s) => s.rowIndex === ri && s.columnIndex === ci);
-      columns.push({ id: `col-${bayIndex}-${ri}-${ci}`, index: ci, slots: slot ? [slot] : [] });
+      columns.push({
+        id: `col-${bayIndex}-${ri}-${ci}`,
+        index: ci,
+        slots: slot ? [slot] : [],
+      });
     }
     rows.push({ id: `row-${bayIndex}-${ri}`, index: ri, columns });
   }
-  return { id: `bay-live-${bayIndex}`, name: chamberName, index: bayIndex, rows, batchId: null };
+  return {
+    id: `bay-live-${bayIndex}`,
+    name: chamberName,
+    index: bayIndex,
+    rows,
+    batchId: null,
+  };
 }
 
 export function influxRowsToBays(
   bucketDataRows: { data: Record<string, unknown> }[],
   sensorConfigs?: Map<string, SensorConfigOverride>,
 ): Bay[] {
-  const rows: InfluxDBRow[] = bucketDataRows.map((item) => item.data as InfluxDBRow);
+  const rows: InfluxDBRow[] = bucketDataRows.map(
+    (item) => item.data as InfluxDBRow,
+  );
   const allSlots = buildSlotsFromRows(rows, sensorConfigs);
 
   const byChamber = new Map<string, PlantSlot[]>();

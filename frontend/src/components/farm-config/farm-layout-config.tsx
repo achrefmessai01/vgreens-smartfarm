@@ -34,13 +34,23 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
         </Button>
       </div>
 
-      <form id="farm-layout-form" onSubmit={handleSubmit} className="space-y-3 p-6">
+      <form
+        id="farm-layout-form"
+        onSubmit={handleSubmit}
+        className="space-y-3 p-6"
+      >
         <div className="flex items-center justify-between">
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <Building className="h-4 w-4" />
             {fl.greenhouses}
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={addRow} disabled={saving}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addRow}
+            disabled={saving}
+          >
             <Plus className="mr-1 h-4 w-4" />
             {fl.add}
           </Button>

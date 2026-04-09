@@ -47,7 +47,8 @@ function buildBayRowToSlots(
 }
 
 export function SensorGridView(props: ViewSensorMapProps) {
-  const { parameter, selectedSlotId, onSelectSlot, className, farmLayout } = props;
+  const { parameter, selectedSlotId, onSelectSlot, className, farmLayout } =
+    props;
   const layout = farmLayout ?? DEFAULT_FARM_LAYOUT;
   const { bayCount, polesMax } = layout;
   const unit = getParameterUnit(parameter);
@@ -59,7 +60,12 @@ export function SensorGridView(props: ViewSensorMapProps) {
         props.showOnlyFilledPositions ?? false,
         props.farmLayout,
       ),
-    [props.bay, props.parameter, props.showOnlyFilledPositions, props.farmLayout],
+    [
+      props.bay,
+      props.parameter,
+      props.showOnlyFilledPositions,
+      props.farmLayout,
+    ],
   );
 
   return (
@@ -83,7 +89,9 @@ export function SensorGridView(props: ViewSensorMapProps) {
                   className="flex min-h-0 flex-1 flex-wrap items-center justify-center gap-0.5 p-0.5 sm:gap-1.5 sm:p-1.5 lg:gap-2 lg:p-2"
                 >
                   {items.map(({ slot, deviceId, value }) => {
-                    const isSelected = slot ? selectedSlotId === slot.id : false;
+                    const isSelected = slot
+                      ? selectedSlotId === slot.id
+                      : false;
                     const glowColor = slot
                       ? getParameterColor(value ?? 0, parameter, slot.id)
                       : 'rgb(200, 200, 200)';
@@ -96,22 +104,27 @@ export function SensorGridView(props: ViewSensorMapProps) {
                         <button
                           type="button"
                           onClick={() =>
-                            onSelectSlot(slot ? (isSelected ? null : slot.id) : null)
+                            onSelectSlot(
+                              slot ? (isSelected ? null : slot.id) : null,
+                            )
                           }
                           disabled={!slot}
                           className={cn(
                             'relative flex min-w-0 items-center justify-center transition-transform duration-150',
                             'focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-none',
-                            'disabled:cursor-not-allowed hover:scale-105',
+                            'hover:scale-105 disabled:cursor-not-allowed',
                             isSelected && 'scale-110',
                             !slot && 'opacity-50',
-                            rowIndex === polesMax - 1 && '-translate-y-1 sm:-translate-y-[0.375rem]',
+                            rowIndex === polesMax - 1 &&
+                              '-translate-y-1 sm:-translate-y-[0.375rem]',
                           )}
                         >
                           <div
                             className={cn(
                               'flex h-5.5 w-5.5 shrink-0 flex-col items-center justify-center rounded-full px-0.5 tabular-nums sm:h-[clamp(1.875rem,0.9vw+1.3rem,2.25rem)] sm:w-[clamp(1.875rem,0.9vw+1.3rem,2.25rem)] sm:px-1',
-                              slot ? 'bg-cyan-300/90 text-slate-900' : 'bg-muted text-muted-foreground',
+                              slot
+                                ? 'bg-cyan-300/90 text-slate-900'
+                                : 'bg-muted text-muted-foreground',
                             )}
                             style={{
                               boxShadow: slot

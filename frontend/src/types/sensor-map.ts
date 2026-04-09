@@ -1,5 +1,8 @@
 import type { Bay, ParameterType, PlantSlot } from '@/types/farm.types';
-import type { FarmLayoutConfig, GreenhouseDimensions } from '@/lib/sensor-map-positions';
+import type {
+  FarmLayoutConfig,
+  GreenhouseDimensions,
+} from '@/lib/sensor-map-positions';
 
 export type SensorMapSensorType = 'air' | 'lux' | 'par' | 'soil';
 

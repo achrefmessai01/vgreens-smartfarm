@@ -26,7 +26,7 @@ export function YieldPredictionCard() {
       </CardHeader>
       <CardContent className="flex flex-wrap items-end justify-between gap-4 pt-0">
         <div>
-          <p className="text-muted-foreground text-xs uppercase tracking-wide">
+          <p className="text-muted-foreground text-xs tracking-wide uppercase">
             {harvest?.predictedYieldLabel ?? 'Predicted Yield'}
           </p>
           <p className="text-2xl font-bold sm:text-3xl">

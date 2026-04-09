@@ -41,7 +41,9 @@ export function GreenhouseRow({
         step="0.1"
         placeholder={xPlaceholder}
         value={row.xDimension}
-        onChange={(e) => onChange(index, { xDimension: Number(e.target.value) })}
+        onChange={(e) =>
+          onChange(index, { xDimension: Number(e.target.value) })
+        }
       />
       <Input
         className="col-span-6 md:col-span-3"
@@ -50,7 +52,9 @@ export function GreenhouseRow({
         step="0.1"
         placeholder={yPlaceholder}
         value={row.yDimension}
-        onChange={(e) => onChange(index, { yDimension: Number(e.target.value) })}
+        onChange={(e) =>
+          onChange(index, { yDimension: Number(e.target.value) })
+        }
       />
       <Button
         type="button"

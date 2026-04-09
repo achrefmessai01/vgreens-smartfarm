@@ -95,16 +95,16 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     ? selectedTenantId
     : user?.tenant?.id || undefined;
 
-  const {
-    data: sensorConfigData,
-    refetch: refetchSensorConfigs,
-  } = useSensorConfigsQuery({
-    variables: { tenantId: configQueryTenantId },
-    skip: !configQueryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: sensorConfigData, refetch: refetchSensorConfigs } =
+    useSensorConfigsQuery({
+      variables: { tenantId: configQueryTenantId },
+      skip: !configQueryTenantId,
+      fetchPolicy: 'cache-and-network',
+    });
 
-  const persistedSensorConfigMap = React.useMemo<Map<string, SensorConfigOverride>>(
+  const persistedSensorConfigMap = React.useMemo<
+    Map<string, SensorConfigOverride>
+  >(
     () =>
       new Map(
         (sensorConfigData?.sensorConfigs ?? []).map((c) => [
@@ -123,11 +123,16 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const [upsertSensorConfig] = useUpsertSensorConfigMutation();
   const [optimisticPositionOverrides, setOptimisticPositionOverrides] =
     React.useState<Map<string, SensorConfigOverride>>(new Map());
-  const [savingDeviceId, setSavingDeviceId] = React.useState<string | null>(null);
-  const [positionErrorDeviceId, setPositionErrorDeviceId] =
-    React.useState<string | null>(null);
+  const [savingDeviceId, setSavingDeviceId] = React.useState<string | null>(
+    null,
+  );
+  const [positionErrorDeviceId, setPositionErrorDeviceId] = React.useState<
+    string | null
+  >(null);
 
-  const sensorConfigMap = React.useMemo<Map<string, SensorConfigOverride>>(() => {
+  const sensorConfigMap = React.useMemo<
+    Map<string, SensorConfigOverride>
+  >(() => {
     const merged = new Map(persistedSensorConfigMap);
     for (const [device, override] of optimisticPositionOverrides.entries()) {
       merged.set(device, {
@@ -263,9 +268,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         });
         throw error;
       } finally {
-        setSavingDeviceId((current) =>
-          current === deviceId ? null : current,
-        );
+        setSavingDeviceId((current) => (current === deviceId ? null : current));
       }
     },
     [

@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useI18n } from '@/i18n';
-import {
-  formatParameterDisplayValue,
-  getParameterUnit,
-} from '@/lib/farm-data';
+import { formatParameterDisplayValue, getParameterUnit } from '@/lib/farm-data';
 import { idwInterpolate } from '@/lib/heatmap-utils';
 import { useFullMapData } from '@/lib/hooks/use-full-map-data';
 import { cn } from '@/lib/utils';
@@ -31,10 +28,16 @@ export function ViewSingleBay({
   const { t } = useI18n();
   const unit = getParameterUnit(parameter);
   const { sensors, heatmapPoints, globalMin, globalMax, hasAnyData } =
-    useFullMapData(bays, parameter, showOnlyFilledPositions, greenhouseDimensions);
+    useFullMapData(
+      bays,
+      parameter,
+      showOnlyFilledPositions,
+      greenhouseDimensions,
+    );
 
   const heatmapGrid = React.useMemo(
-    () => idwInterpolate(HEATMAP_GRID_COLS, HEATMAP_GRID_ROWS, heatmapPoints, 2),
+    () =>
+      idwInterpolate(HEATMAP_GRID_COLS, HEATMAP_GRID_ROWS, heatmapPoints, 2),
     [heatmapPoints],
   );
 
@@ -56,9 +59,7 @@ export function ViewSingleBay({
         </div>
       ) : (
         <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
-          <div
-            className="relative h-full w-full overflow-hidden"
-          >
+          <div className="relative h-full w-full overflow-hidden">
             <HeatmapBackground
               grid={heatmapGrid}
               scaleMin={scaleMin}
@@ -66,58 +67,73 @@ export function ViewSingleBay({
               cols={HEATMAP_GRID_COLS}
               rows={HEATMAP_GRID_ROWS}
             />
-            {sensors.map(({ slot, deviceId, value, leftPercent, topPercent, positionKey }) => {
-              const isSelected = slot && selectedSlotId === slot.id;
-              const displayValue = value != null ? formatParameterDisplayValue(value) : '--';
-              const tip =
-                slot && value != null
-                  ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
-                  : deviceId;
-              return (
-                <Tooltip key={positionKey} content={tip}>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() =>
-                      onSelectSlot(slot ? (isSelected ? null : slot.id) : null)
-                    }
-                    disabled={!slot}
-                    className={cn(
-                      'absolute inline-flex flex-col items-center justify-center px-0.5',
-                      'h-auto border-none bg-transparent hover:bg-transparent',
-                      'text-[10px] font-bold text-black tabular-nums sm:text-[14px]',
-                      'drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]',
-                      'focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-1',
-                      slot && 'cursor-pointer',
-                      isSelected && 'ring-primary rounded ring-2 ring-offset-1',
-                    )}
-                    style={{
-                      left: `${leftPercent}%`,
-                      top: `${topPercent}%`,
-                      transform: 'translate(-50%, -58%)',
-                    }}
-                    aria-label={
-                      slot && value != null
-                        ? `${displayValue} ${unit}`
-                        : t.pages.farmOverview.noSensor
-                    }
-                  >
-                    {value != null ? (
-                      <>
-                        <span className="leading-tight tracking-tight">{displayValue}</span>
-                        {unit ? (
-                          <span className="text-[10px] leading-tight font-medium opacity-85">
-                            {unit}
+            {sensors.map(
+              ({
+                slot,
+                deviceId,
+                value,
+                leftPercent,
+                topPercent,
+                positionKey,
+              }) => {
+                const isSelected = slot && selectedSlotId === slot.id;
+                const displayValue =
+                  value != null ? formatParameterDisplayValue(value) : '--';
+                const tip =
+                  slot && value != null
+                    ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
+                    : deviceId;
+                return (
+                  <Tooltip key={positionKey} content={tip}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() =>
+                        onSelectSlot(
+                          slot ? (isSelected ? null : slot.id) : null,
+                        )
+                      }
+                      disabled={!slot}
+                      className={cn(
+                        'absolute inline-flex flex-col items-center justify-center px-0.5',
+                        'h-auto border-none bg-transparent hover:bg-transparent',
+                        'text-[10px] font-bold text-black tabular-nums sm:text-[14px]',
+                        'drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]',
+                        'focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-1',
+                        slot && 'cursor-pointer',
+                        isSelected &&
+                          'ring-primary rounded ring-2 ring-offset-1',
+                      )}
+                      style={{
+                        left: `${leftPercent}%`,
+                        top: `${topPercent}%`,
+                        transform: 'translate(-50%, -58%)',
+                      }}
+                      aria-label={
+                        slot && value != null
+                          ? `${displayValue} ${unit}`
+                          : t.pages.farmOverview.noSensor
+                      }
+                    >
+                      {value != null ? (
+                        <>
+                          <span className="leading-tight tracking-tight">
+                            {displayValue}
                           </span>
-                        ) : null}
-                      </>
-                    ) : (
-                      <span>--</span>
-                    )}
-                  </Button>
-                </Tooltip>
-              );
-            })}
+                          {unit ? (
+                            <span className="text-[10px] leading-tight font-medium opacity-85">
+                              {unit}
+                            </span>
+                          ) : null}
+                        </>
+                      ) : (
+                        <span>--</span>
+                      )}
+                    </Button>
+                  </Tooltip>
+                );
+              },
+            )}
           </div>
         </div>
       )}

@@ -131,7 +131,8 @@ function SensorPill({
     isSelected && 'ring-2 ring-white/80 ring-offset-0',
     isDraggingThis && 'z-30 scale-110 cursor-grabbing',
     isSaving && 'ring-2 ring-cyan-500/60 animate-pulse',
-    hasPersistError && 'ring-2 ring-destructive/70 bg-destructive/15 text-destructive',
+    hasPersistError &&
+      'ring-2 ring-destructive/70 bg-destructive/15 text-destructive',
     (isInvalidPreview || isInvalidFlash) &&
       'ring-2 ring-destructive/80 bg-destructive/15 text-destructive',
   );
@@ -155,7 +156,9 @@ function SensorPill({
     <button
       ref={setNodeRef}
       type="button"
-      onClick={() => onSuppressibleClick(slot ? (isSelected ? null : slot.id) : null)}
+      onClick={() =>
+        onSuppressibleClick(slot ? (isSelected ? null : slot.id) : null)
+      }
       className={pillBaseClasses}
       style={{
         ...baseStyle,
@@ -271,7 +274,9 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
       const next = new Map(current);
 
       for (const [slotId, override] of current.entries()) {
-        const persistedSensor = sensors.find((sensor) => sensor.slot?.id === slotId);
+        const persistedSensor = sensors.find(
+          (sensor) => sensor.slot?.id === slotId,
+        );
         if (!persistedSensor) {
           next.delete(slotId);
           didChange = true;
@@ -473,10 +478,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
             void handleDragEnd(event);
           }}
         >
-          <div
-            ref={mapRef}
-            className="relative h-full w-full overflow-hidden"
-          >
+          <div ref={mapRef} className="relative h-full w-full overflow-hidden">
             {resolvedSensors.map((sensor) => (
               <SensorPill
                 key={sensor.slotId}

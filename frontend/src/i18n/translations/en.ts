@@ -496,7 +496,8 @@ export const en = {
           city: 'City',
           actions: 'Actions',
           xPositionHint: 'Horizontal position in meters from the entrance side',
-          yPositionHint: 'Vertical position in meters from the greenhouse origin',
+          yPositionHint:
+            'Vertical position in meters from the greenhouse origin',
           greenhouseHint: 'Greenhouse identifier',
           cityHint: 'Location city',
           xPositionPlaceholder: 'e.g. 5.25',

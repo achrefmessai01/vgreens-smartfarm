@@ -162,9 +162,19 @@ export function SensorConfigForm({
               ) : (
                 <Input
                   id={`field-${key}`}
-                  type={key === 'xPosition' || key === 'yPosition' ? 'number' : 'text'}
-                  step={key === 'xPosition' || key === 'yPosition' ? '0.01' : undefined}
-                  min={key === 'xPosition' || key === 'yPosition' ? '0' : undefined}
+                  type={
+                    key === 'xPosition' || key === 'yPosition'
+                      ? 'number'
+                      : 'text'
+                  }
+                  step={
+                    key === 'xPosition' || key === 'yPosition'
+                      ? '0.01'
+                      : undefined
+                  }
+                  min={
+                    key === 'xPosition' || key === 'yPosition' ? '0' : undefined
+                  }
                   value={values[key]}
                   onChange={set(key)}
                   placeholder={placeholderKey[key]}

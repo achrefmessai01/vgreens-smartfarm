@@ -575,7 +575,8 @@ export const de = {
           city: 'Stadt',
           actions: 'Aktionen',
           xPositionHint: 'Horizontale Position in Metern von der Eingangsseite',
-          yPositionHint: 'Vertikale Position in Metern vom Gewächshaus-Ursprung',
+          yPositionHint:
+            'Vertikale Position in Metern vom Gewächshaus-Ursprung',
           greenhouseHint: 'Gewächshaus-Kennung',
           cityHint: 'Standortstadt',
           xPositionPlaceholder: 'z.B. 5,25',

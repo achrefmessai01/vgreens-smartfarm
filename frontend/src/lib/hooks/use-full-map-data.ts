@@ -29,7 +29,11 @@ export function useFullMapData(
 
     if (useDynamic) {
       for (const bay of bays) {
-        const positions = getSlotPositionsFromBay(bay, undefined, greenhouseDimensions ?? undefined);
+        const positions = getSlotPositionsFromBay(
+          bay,
+          undefined,
+          greenhouseDimensions ?? undefined,
+        );
         for (const p of positions) {
           if (!isParameterSupportedByType(parameter, p.type)) continue;
           const value =

@@ -23,13 +23,16 @@ export function useFarmLayoutConfig(tenantId: string) {
   }, [data?.tenant]);
 
   const addRow = React.useCallback(
-    () => setRows((prev) => [...prev, { name: '', xDimension: 0, yDimension: 0 }]),
+    () =>
+      setRows((prev) => [...prev, { name: '', xDimension: 0, yDimension: 0 }]),
     [],
   );
 
   const updateRow = React.useCallback(
     (index: number, patch: Partial<GreenhouseInput>) =>
-      setRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r))),
+      setRows((prev) =>
+        prev.map((r, i) => (i === index ? { ...r, ...patch } : r)),
+      ),
     [],
   );
 
@@ -50,7 +53,9 @@ export function useFarmLayoutConfig(tenantId: string) {
     if (payload.some((r) => r.xDimension <= 0 || r.yDimension <= 0)) return;
     setSaving(true);
     try {
-      await updateTenant({ variables: { id: tenantId, input: { greenhouses: payload } } });
+      await updateTenant({
+        variables: { id: tenantId, input: { greenhouses: payload } },
+      });
       await refetch();
     } finally {
       setSaving(false);
