@@ -244,6 +244,22 @@ export type DeleteImageInput = {
   path: Scalars['String']['input'];
 };
 
+/** Door position types */
+export enum DoorPosition {
+  BottomCenter = 'BOTTOM_CENTER',
+  BottomLeft = 'BOTTOM_LEFT',
+  BottomRight = 'BOTTOM_RIGHT',
+  LeftBottom = 'LEFT_BOTTOM',
+  LeftCenter = 'LEFT_CENTER',
+  LeftTop = 'LEFT_TOP',
+  RightBottom = 'RIGHT_BOTTOM',
+  RightCenter = 'RIGHT_CENTER',
+  RightTop = 'RIGHT_TOP',
+  TopCenter = 'TOP_CENTER',
+  TopLeft = 'TOP_LEFT',
+  TopRight = 'TOP_RIGHT'
+}
+
 export type ErrorReport = {
   __typename?: 'ErrorReport';
   adminNotes?: Maybe<Scalars['String']['output']>;
@@ -372,6 +388,7 @@ export type GetSignedImageUrlInput = {
 };
 
 export type GreenhouseInput = {
+  doorPosition?: InputMaybe<DoorPosition>;
   name: Scalars['String']['input'];
   xDimension: Scalars['Float']['input'];
   yDimension: Scalars['Float']['input'];
@@ -995,6 +1012,7 @@ export type TenantFeature = {
 
 export type TenantGreenhouse = {
   __typename?: 'TenantGreenhouse';
+  doorPosition?: Maybe<DoorPosition>;
   name: Scalars['String']['output'];
   xDimension: Scalars['Float']['output'];
   yDimension: Scalars['Float']['output'];
@@ -1301,7 +1319,7 @@ export type CreateTenantMutationVariables = Exact<{
 }>;
 
 
-export type CreateTenantMutation = { __typename?: 'Mutation', createTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number }> | null } };
+export type CreateTenantMutation = { __typename?: 'Mutation', createTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number }> | null } };
 
 export type UpdateTenantMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1309,7 +1327,7 @@ export type UpdateTenantMutationVariables = Exact<{
 }>;
 
 
-export type UpdateTenantMutation = { __typename?: 'Mutation', updateTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number }> | null } };
+export type UpdateTenantMutation = { __typename?: 'Mutation', updateTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number }> | null } };
 
 export type DeleteTenantMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1586,14 +1604,14 @@ export type GreenhouseOptionsQuery = { __typename?: 'Query', greenhouseOptions: 
 export type TenantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number }> | null }> };
+export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number }> | null }> };
 
 export type TenantQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
+export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
 
 export type GetTenantBucketQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2448,6 +2466,7 @@ export const CreateTenantDocument = gql`
     isActive
     greenhouses {
       name
+      doorPosition
       xDimension
       yDimension
     }
@@ -2493,6 +2512,7 @@ export const UpdateTenantDocument = gql`
     isActive
     greenhouses {
       name
+      doorPosition
       xDimension
       yDimension
     }
@@ -4412,6 +4432,7 @@ export const TenantsDocument = gql`
     isActive
     greenhouses {
       name
+      doorPosition
       xDimension
       yDimension
     }
@@ -4466,6 +4487,7 @@ export const TenantDocument = gql`
     isActive
     greenhouses {
       name
+      doorPosition
       xDimension
       yDimension
     }

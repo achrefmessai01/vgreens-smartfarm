@@ -4,6 +4,7 @@
  * of dimensions (xDimension × yDimension).
  */
 
+import type { DoorPosition } from '@/generated/graphql';
 import type { Bay, PlantSlot } from '@/types/farm.types';
 
 export type SensorMapType = 'air' | 'lux' | 'par' | 'soil';
@@ -19,6 +20,7 @@ export interface FarmLayoutConfig {
 export interface GreenhouseDimensions {
   xDimension: number;
   yDimension: number;
+  doorPosition?: DoorPosition | null;
 }
 
 /** Default layout values — chambersCount used for greenhouse tabs. */

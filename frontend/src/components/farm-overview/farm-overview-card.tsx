@@ -2,9 +2,13 @@
 
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/context';
+import type {
+  FarmLayoutConfig,
+  GreenhouseDimensions,
+} from '@/lib/sensor-map-positions';
 import type { Bay, ParameterType } from '@/types/farm.types';
-import type { FarmLayoutConfig, GreenhouseDimensions } from '@/lib/sensor-map-positions';
 import { EmptyState } from './empty-state';
+import { EntranceLabel } from './entrance-label';
 import { FarmDataDisplay } from './farm-view-container';
 import { ParameterColorLegendBar } from './parameter-color-legend';
 import { ParameterSelector } from './parameter-selector';
@@ -121,20 +125,10 @@ export function FarmOverviewCard({
                 greenhouseDimensions={greenhouseDimensions}
               />
               {viewMode !== 'graph' && (
-                <div
-                  className="bg-secondary text-secondary-foreground absolute bottom-0 left-0 flex h-[5.75rem] w-4 items-center justify-center border shadow-sm sm:h-[12.5rem] sm:w-8"
-                  aria-label={entranceLabel}
-                >
-                  <span
-                    className="text-[7px] font-semibold tracking-[0.08em] whitespace-nowrap uppercase sm:text-[12px] sm:tracking-[0.18em]"
-                    style={{
-                      writingMode: 'vertical-rl',
-                      transform: 'rotate(180deg)',
-                    }}
-                  >
-                    {entranceLabel}
-                  </span>
-                </div>
+                <EntranceLabel
+                  label={entranceLabel}
+                  doorPosition={greenhouseDimensions?.doorPosition}
+                />
               )}
             </div>
           )}

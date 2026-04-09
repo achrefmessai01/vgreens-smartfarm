@@ -1,13 +1,17 @@
+import { DoorPosition } from '@/common/enums/door-position.enum';
 import { BaseEntity } from '@common/entities';
-import { Entity, Column, OneToMany } from 'typeorm';
-import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { User } from '@modules/users/entities/user.entity';
 import { TenantFeature } from '@modules/features/entities/tenant-feature.entity';
+import { User } from '@modules/users/entities/user.entity';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @ObjectType()
 export class TenantGreenhouse {
   @Field()
   name: string;
+
+  @Field(() => DoorPosition, { nullable: true })
+  doorPosition?: DoorPosition;
 
   @Field()
   xDimension: number;

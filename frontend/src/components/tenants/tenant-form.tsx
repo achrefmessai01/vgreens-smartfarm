@@ -1,24 +1,47 @@
 'use client';
 
-import * as React from 'react';
-import { Columns2, Building, Plus, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Field,
+  FieldContent,
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldContent,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import type { Tenant } from '@/generated/graphql';
-import { useFarmConfigQuery } from '@/generated/graphql';
-import { Checkbox } from '@/components/ui/checkbox';
+import type { DoorPosition, Tenant } from '@/generated/graphql';
+import {
+  DoorPosition as DoorPositionEnum,
+  useFarmConfigQuery,
+} from '@/generated/graphql';
 import { DEFAULT_FARM_CONFIG } from '@/lib/farm-config-constants';
+import { Building, Columns2, Plus, Trash2 } from 'lucide-react';
+import * as React from 'react';
+
+// Convert enum key to human-readable label (e.g., "BottomLeft" -> "Bottom Left")
+const formatDoorPositionLabel = (key: string): string => {
+  return key.replace(/([A-Z])/g, ' $1').trim();
+};
+
+const DOOR_POSITION_OPTIONS = Object.entries(DoorPositionEnum).map(
+  ([key, value]) => ({
+    value,
+    label: formatDoorPositionLabel(key),
+  }),
+);
 
 export interface TenantGreenhouseFormData {
   name: string;
+  doorPosition?: DoorPosition;
   xDimension?: number;
   yDimension?: number;
 }
@@ -44,6 +67,7 @@ interface TenantFormProps {
   initialData?: Partial<Tenant> & {
     greenhouses?: Array<{
       name?: string | null;
+      doorPosition?: DoorPosition | null;
       xDimension?: number | null;
       yDimension?: number | null;
     }> | null;
@@ -79,6 +103,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
       greenhouses:
         initialData?.greenhouses?.map((greenhouse) => ({
           name: greenhouse.name ?? '',
+          doorPosition: greenhouse.doorPosition ?? undefined,
           xDimension: greenhouse.xDimension ?? undefined,
           yDimension: greenhouse.yDimension ?? undefined,
         })) ?? [],
@@ -97,6 +122,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           greenhouses:
             initialData.greenhouses?.map((greenhouse) => ({
               name: greenhouse.name ?? '',
+              doorPosition: greenhouse.doorPosition ?? undefined,
               xDimension: greenhouse.xDimension ?? undefined,
               yDimension: greenhouse.yDimension ?? undefined,
             })) ?? [],
@@ -166,7 +192,12 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
         ...prev,
         greenhouses: [
           ...prev.greenhouses,
-          { name: '', xDimension: undefined, yDimension: undefined },
+          {
+            name: '',
+            doorPosition: undefined,
+            xDimension: undefined,
+            yDimension: undefined,
+          },
         ],
       }));
       if (errors.greenhouses) {
@@ -374,7 +405,10 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
 
           <div className="space-y-3">
             {formData.greenhouses.map((greenhouse, index) => (
-              <div key={`greenhouse-${index}`} className="rounded-md border p-3">
+              <div
+                key={`greenhouse-${index}`}
+                className="rounded-md border p-3"
+              >
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-sm font-medium">Greenhouse {index + 1}</p>
                   <Button
@@ -387,7 +421,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <Input
                     type="text"
                     value={greenhouse.name}
@@ -413,6 +447,37 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                     placeholder="Y dimension"
                     disabled={isLoading}
                   />
+                  <Select
+                    value={greenhouse.doorPosition ?? ''}
+                    onValueChange={(value) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        greenhouses: prev.greenhouses.map((gh, i) =>
+                          i === index
+                            ? { ...gh, doorPosition: value as DoorPosition }
+                            : gh,
+                        ),
+                      }));
+                      if (errors.greenhouses) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          greenhouses: undefined,
+                        }));
+                      }
+                    }}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Door position" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DOOR_POSITION_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             ))}

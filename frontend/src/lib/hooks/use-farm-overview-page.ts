@@ -1,38 +1,38 @@
 'use client';
 
-import * as React from 'react';
-import { useSearchParams } from 'next/navigation';
-import { formatFieldToLabel } from '@/lib/farm-data';
-import type { ParameterType } from '@/types/farm.types';
-import { useCurrentUser } from '@/lib/hooks/use-current-user';
-import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data';
-import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
 import {
-  UserRole,
-  useTenantsQuery,
-  useSensorConfigsQuery,
   useFarmConfigQuery,
+  UserRole,
+  useSensorConfigsQuery,
+  useTenantsQuery,
   type Tenant,
 } from '@/generated/graphql';
+import { formatFieldToLabel } from '@/lib/farm-data';
 import type { SensorConfigOverride } from '@/lib/farm-data-live';
-import {
-  DEFAULT_FARM_LAYOUT,
-  type FarmLayoutConfig,
-  type GreenhouseDimensions,
-} from '@/lib/sensor-map-positions';
 import {
   ALLOWED_SINGLE_GREENHOUSE_PARAMETERS,
   PARAM_GREENHOUSE,
   PARAM_PARAMETER,
   PARAM_VIEW_MODE,
 } from '@/lib/farm-overview-constants';
-import type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 import {
   parseGreenhouseTab,
   parseParameter,
   parseViewMode,
   syncFarmOverviewStateToUrl,
 } from '@/lib/farm-overview-utils';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data';
+import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
+import {
+  DEFAULT_FARM_LAYOUT,
+  type FarmLayoutConfig,
+  type GreenhouseDimensions,
+} from '@/lib/sensor-map-positions';
+import type { FarmOverviewTranslations } from '@/types/farm-overview.types';
+import type { ParameterType } from '@/types/farm.types';
+import { useSearchParams } from 'next/navigation';
+import * as React from 'react';
 
 export type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 
@@ -89,7 +89,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   // Admin → selected tenant; tenant user → from me.tenant.id (always a valid UUID).
   const configQueryTenantId = isVGreensAdmin
     ? selectedTenantId
-    : (user?.tenant?.id || undefined);
+    : user?.tenant?.id || undefined;
 
   const { data: sensorConfigData } = useSensorConfigsQuery({
     variables: { tenantId: configQueryTenantId },
@@ -298,12 +298,17 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         : farmLayout.chambersCount;
     return Array.from({ length: count }, (_, i) => ({
       key: bays[i]?.id ?? `greenhouse_${i + 1}`,
-      label:
-        tenantGreenhouses[i]?.name || ghLabels[i] || `Greenhouse ${i + 1}`,
+      label: tenantGreenhouses[i]?.name || ghLabels[i] || `Greenhouse ${i + 1}`,
       bay: bays[i] ?? null,
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bays, farmLayout.chambersCount, tenantGreenhouses, t.greenHouse1, t.greenHouse2]);
+  }, [
+    bays,
+    farmLayout.chambersCount,
+    tenantGreenhouses,
+    t.greenHouse1,
+    t.greenHouse2,
+  ]);
 
   const selectedGreenhouseDimensions =
     React.useMemo<GreenhouseDimensions | null>(() => {
@@ -311,7 +316,11 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         return null;
       const gh = tenantGreenhouses[activeGreenhouseTab - 1];
       if (!gh || gh.xDimension <= 0 || gh.yDimension <= 0) return null;
-      return { xDimension: gh.xDimension, yDimension: gh.yDimension };
+      return {
+        xDimension: gh.xDimension,
+        yDimension: gh.yDimension,
+        doorPosition: gh.doorPosition ?? null,
+      };
     }, [tenantGreenhouses, activeGreenhouseTab]);
 
   const getParameterLabel = React.useCallback(

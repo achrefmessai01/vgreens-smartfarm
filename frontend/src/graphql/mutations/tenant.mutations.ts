@@ -11,6 +11,7 @@ export const CREATE_TENANT_MUTATION = gql`
       isActive
       greenhouses {
         name
+        doorPosition
         xDimension
         yDimension
       }
@@ -31,6 +32,7 @@ export const UPDATE_TENANT_MUTATION = gql`
       isActive
       greenhouses {
         name
+        doorPosition
         xDimension
         yDimension
       }
