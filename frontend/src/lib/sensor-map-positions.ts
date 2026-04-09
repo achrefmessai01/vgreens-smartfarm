@@ -128,9 +128,23 @@ export function bayHasDynamicPositions(bay: Bay): boolean {
   return false;
 }
 
-export function getDeviceIdFromSlotId(slotId: string): string {
+export interface ParsedLiveSensorSlotId {
+  greenhouse: string;
+  device: string;
+  level: string;
+}
+
+export function parseLiveSensorSlotId(slotId: string): ParsedLiveSensorSlotId {
   const parts = slotId.replace(/^live_/, '').split('|');
-  return parts[1] ?? '';
+  return {
+    greenhouse: parts[0] ?? '',
+    device: parts[1] ?? '',
+    level: parts[2] ?? '',
+  };
+}
+
+export function getDeviceIdFromSlotId(slotId: string): string {
+  return parseLiveSensorSlotId(slotId).device;
 }
 
 /**

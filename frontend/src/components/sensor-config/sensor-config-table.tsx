@@ -83,27 +83,27 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
                 >
                   <TableCell className="font-medium">{device}</TableCell>
                   <TableCell>
-                    {config?.xPosition ? (
+                    {config?.xPosition != null ? (
                       <Badge variant="secondary">{config.xPosition}</Badge>
                     ) : (
-                      <span className="text-muted-foreground text-sm">—</span>
+                      <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    {config?.yPosition ? (
+                    {config?.yPosition != null ? (
                       <Badge variant="secondary">{config.yPosition}</Badge>
                     ) : (
-                      <span className="text-muted-foreground text-sm">—</span>
+                      <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </TableCell>
                   <TableCell>
                     {config?.greenhouse ?? (
-                      <span className="text-muted-foreground text-sm">—</span>
+                      <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </TableCell>
                   <TableCell>
                     {config?.city ?? (
-                      <span className="text-muted-foreground text-sm">—</span>
+                      <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
