@@ -449,7 +449,6 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
     );
   }
 
-  const { xDimension, yDimension } = greenhouseDimensions;
   const showTooltip = activeDragId == null;
   const showInvalidCanvasState =
     invalidPreviewId != null || canvasInvalidFlash || invalidFlashId != null;
@@ -476,12 +475,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
         >
           <div
             ref={mapRef}
-            className="relative overflow-hidden"
-            style={{
-              height: '100%',
-              aspectRatio: `${xDimension} / ${yDimension}`,
-              maxWidth: '100%',
-            }}
+            className="relative h-full w-full overflow-hidden"
           >
             {resolvedSensors.map((sensor) => (
               <SensorPill
