@@ -211,7 +211,7 @@ export const en = {
       timeLabel: 'Time',
       startLabel: 'Start',
       stopLabel: 'Stop',
-      entranceLabel: '↓ Entrance',
+      entranceLabel: 'Entrance',
       emptyHistoryDrawerPlaceholder:
         'No history data for this sensor in the selected range.',
       parGraph: {

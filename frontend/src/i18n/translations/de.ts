@@ -210,7 +210,7 @@ export const de = {
       timeLabel: 'Zeit',
       startLabel: 'Start',
       stopLabel: 'Ende',
-      entranceLabel: '↓ Eingang',
+      entranceLabel: 'Eingang',
       emptyHistoryDrawerPlaceholder:
         'Keine Verlaufsdaten für diesen Sensor im ausgewählten Zeitraum.',
       parGraph: {

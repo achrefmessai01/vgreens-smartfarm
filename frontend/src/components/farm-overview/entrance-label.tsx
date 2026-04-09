@@ -1,6 +1,7 @@
 'use client';
 
 import type { DoorPosition } from '@/generated/graphql';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
 import * as React from 'react';
 
 interface EntranceLabelProps {
@@ -102,9 +103,46 @@ function isVerticalEntrance(doorPosition?: DoorPosition | null): boolean {
   ].includes(doorPosition);
 }
 
+function getDirectionIcon(doorPosition?: DoorPosition | null) {
+  const position = doorPosition ?? 'BOTTOM_LEFT';
+  const iconClass = 'h-3 w-3 sm:h-4 sm:w-4';
+
+  switch (position) {
+    // Bottom edge: arrow points up (into greenhouse)
+    case 'BOTTOM_LEFT':
+    case 'BOTTOM_CENTER':
+    case 'BOTTOM_RIGHT':
+      return <ArrowUp className={iconClass} />;
+
+    // Top edge: arrow points down (into greenhouse)
+    case 'TOP_LEFT':
+    case 'TOP_CENTER':
+    case 'TOP_RIGHT':
+      return <ArrowDown className={iconClass} />;
+
+    // Left edge: arrow points right (into greenhouse)
+    // Note: Text is rotated 180deg, so use LEFT arrow which becomes RIGHT after rotation
+    case 'LEFT_BOTTOM':
+    case 'LEFT_CENTER':
+    case 'LEFT_TOP':
+      return <ArrowLeft className={iconClass} />;
+
+    // Right edge: arrow points left (into greenhouse)
+    // Note: Text is vertical-rl (no 180deg rotation), so use RIGHT arrow which becomes LEFT
+    case 'RIGHT_BOTTOM':
+    case 'RIGHT_CENTER':
+    case 'RIGHT_TOP':
+      return <ArrowRight className={iconClass} />;
+
+    default:
+      return <ArrowRight className={iconClass} />;
+  }
+}
+
 export function EntranceLabel({ label, doorPosition }: EntranceLabelProps) {
   const entrancePos = getEntrancePosition(doorPosition);
   const isVertical = isVerticalEntrance(doorPosition);
+  const directionIcon = getDirectionIcon(doorPosition);
 
   return (
     <div
@@ -113,7 +151,7 @@ export function EntranceLabel({ label, doorPosition }: EntranceLabelProps) {
       aria-label={label}
     >
       <span
-        className="text-[7px] font-semibold tracking-[0.08em] whitespace-nowrap uppercase sm:text-[12px] sm:tracking-[0.18em]"
+        className="flex items-center gap-1 text-[7px] font-semibold tracking-[0.08em] whitespace-nowrap uppercase sm:text-[12px] sm:tracking-[0.18em]"
         style={
           isVertical
             ? {
@@ -124,6 +162,7 @@ export function EntranceLabel({ label, doorPosition }: EntranceLabelProps) {
         }
       >
         {label}
+        {directionIcon}
       </span>
     </div>
   );
