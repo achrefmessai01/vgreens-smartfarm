@@ -45,7 +45,12 @@ export class SensorConfigService {
       return this.repo.save(existing);
     }
 
-    const config = this.repo.create({ ...input, tenantId });
+    const config = this.repo.create({
+      ...input,
+      tenantId,
+      xPosition: input.xPosition ?? null,
+      yPosition: input.yPosition ?? null,
+    });
     return this.repo.save(config);
   }
 

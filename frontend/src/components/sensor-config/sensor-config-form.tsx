@@ -98,8 +98,10 @@ export function SensorConfigForm({
     e.preventDefault();
     await onSave({
       device: row.device,
-      xPosition: values.xPosition ? Number(values.xPosition) : undefined,
-      yPosition: values.yPosition ? Number(values.yPosition) : undefined,
+      xPosition:
+        values.xPosition.trim() === '' ? undefined : Number(values.xPosition),
+      yPosition:
+        values.yPosition.trim() === '' ? undefined : Number(values.yPosition),
       greenhouse: (values.greenhouse as string) || undefined,
       city: (values.city as string) || undefined,
     });
@@ -161,6 +163,8 @@ export function SensorConfigForm({
                 <Input
                   id={`field-${key}`}
                   type={key === 'xPosition' || key === 'yPosition' ? 'number' : 'text'}
+                  step={key === 'xPosition' || key === 'yPosition' ? '0.01' : undefined}
+                  min={key === 'xPosition' || key === 'yPosition' ? '0' : undefined}
                   value={values[key]}
                   onChange={set(key)}
                   placeholder={placeholderKey[key]}

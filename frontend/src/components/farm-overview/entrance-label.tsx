@@ -140,6 +140,10 @@ function getDirectionIcon(doorPosition?: DoorPosition | null) {
 }
 
 export function EntranceLabel({ label, doorPosition }: EntranceLabelProps) {
+  if (!doorPosition) {
+    return null;
+  }
+
   const entrancePos = getEntrancePosition(doorPosition);
   const isVertical = isVerticalEntrance(doorPosition);
   const directionIcon = getDirectionIcon(doorPosition);

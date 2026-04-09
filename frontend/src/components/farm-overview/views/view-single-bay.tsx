@@ -42,11 +42,6 @@ export function ViewSingleBay({
   const scaleMin = scale?.min ?? globalMin;
   const scaleMax = scale?.max ?? globalMax;
 
-  const hasRatio =
-    greenhouseDimensions &&
-    greenhouseDimensions.xDimension > 0 &&
-    greenhouseDimensions.yDimension > 0;
-
   return (
     <Card
       className={cn(
@@ -60,23 +55,9 @@ export function ViewSingleBay({
           {t.pages.farmOverview.noData}
         </div>
       ) : (
-        <div
-          className={cn(
-            'min-h-0 min-w-0 flex-1 overflow-hidden',
-            hasRatio ? 'flex items-start justify-start' : 'relative',
-          )}
-        >
+        <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
           <div
-            className="relative overflow-hidden"
-            style={
-              hasRatio
-                ? {
-                    height: '100%',
-                    aspectRatio: `${greenhouseDimensions.xDimension} / ${greenhouseDimensions.yDimension}`,
-                    maxWidth: '100%',
-                  }
-                : { position: 'absolute', inset: 0 }
-            }
+            className="relative h-full w-full overflow-hidden"
           >
             <HeatmapBackground
               grid={heatmapGrid}
