@@ -11,6 +11,7 @@ export const TENANTS_QUERY = gql`
       isActive
       greenhouses {
         name
+        doorPosition
         xDimension
         yDimension
       }
@@ -31,6 +32,7 @@ export const TENANT_QUERY = gql`
       isActive
       greenhouses {
         name
+        doorPosition
         xDimension
         yDimension
       }
