@@ -12,7 +12,6 @@ import {
   useTenantsQuery,
   useSensorConfigsQuery,
   useFarmConfigQuery,
-  useTenantQuery,
   type Tenant,
 } from '@/generated/graphql';
 import type { SensorConfigOverride } from '@/lib/farm-data-live';
@@ -120,21 +119,15 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     fetchPolicy: 'cache-and-network',
   });
 
-  // For non-admin users, fetch their own tenant's greenhouse data.
-  // Admin users already have greenhouses via tenantsData.
-  const { data: tenantData } = useTenantQuery({
-    variables: { id: configQueryTenantId! },
-    skip: !configQueryTenantId || isVGreensAdmin,
-    fetchPolicy: 'cache-and-network',
-  });
-
   const tenantGreenhouses = React.useMemo(() => {
     if (isVGreensAdmin) {
       const tenant = tenants.find((tn) => tn.id === selectedTenantId);
       return tenant?.greenhouses ?? [];
     }
-    return tenantData?.tenant?.greenhouses ?? [];
-  }, [isVGreensAdmin, tenants, selectedTenantId, tenantData?.tenant?.greenhouses]);
+    // For tenant users, greenhouses come from the `me` query (tenant relation).
+    // The `tenant(id)` resolver is admin-only, so we use the already-loaded user.tenant.
+    return user?.tenant?.greenhouses ?? [];
+  }, [isVGreensAdmin, tenants, selectedTenantId, user?.tenant?.greenhouses]);
 
   const farmLayout = React.useMemo<FarmLayoutConfig>(
     () => ({

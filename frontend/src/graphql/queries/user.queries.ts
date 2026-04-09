@@ -18,6 +18,11 @@ export const ME_QUERY = gql`
         createdAt
         isActive
         updatedAt
+        greenhouses {
+          name
+          xDimension
+          yDimension
+        }
       }
       isActive
       status
