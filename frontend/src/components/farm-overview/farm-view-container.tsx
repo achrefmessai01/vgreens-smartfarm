@@ -1,5 +1,8 @@
+import type {
+  FarmLayoutConfig,
+  GreenhouseDimensions,
+} from '@/lib/sensor-map-positions';
 import type { Bay, ParameterType } from '@/types/farm.types';
-import type { FarmLayoutConfig, GreenhouseDimensions } from '@/lib/sensor-map-positions';
 import { EmptyState } from './empty-state';
 import { ParGraphSection } from './par-graph-section';
 import { ViewSensorMap } from './views/view-sensor-map';
@@ -71,7 +74,7 @@ export function FarmDataDisplay({
             greenhouseDimensions={dims}
           />
           {dims && (
-            <div className="pointer-events-none absolute bottom-2 left-5 right-2 flex items-center justify-between text-[10px] tabular-nums text-white/50 sm:bottom-3 sm:left-10 sm:text-xs">
+            <div className="pointer-events-none absolute right-8 bottom-6 left-5 flex items-center justify-between text-[10px] text-white/50 tabular-nums sm:right-12 sm:bottom-12 sm:left-10 sm:text-xs">
               <span>← {dims.xDimension} m →</span>
               <span>↕ {dims.yDimension} m</span>
             </div>
@@ -91,7 +94,7 @@ export function FarmDataDisplay({
             greenhouseDimensions={dims}
           />
           {dims && (
-            <div className="pointer-events-none absolute bottom-2 left-5 right-2 flex items-center justify-between text-[10px] tabular-nums text-white/50 sm:bottom-3 sm:left-10 sm:text-xs">
+            <div className="pointer-events-none absolute right-8 bottom-6 left-5 flex items-center justify-between text-[10px] text-white/50 tabular-nums sm:right-12 sm:bottom-12 sm:left-10 sm:text-xs">
               <span>← {dims.xDimension} m →</span>
               <span>↕ {dims.yDimension} m</span>
             </div>
