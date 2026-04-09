@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useToast } from '@/components/ui/toast-provider';
 import { useSearchParams } from 'next/navigation';
 import { formatFieldToLabel } from '@/lib/farm-data';
 import type { ParameterType } from '@/types/farm.types';
@@ -12,6 +13,7 @@ import {
   useTenantsQuery,
   useSensorConfigsQuery,
   useFarmConfigQuery,
+  useUpsertSensorConfigMutation,
   type Tenant,
 } from '@/generated/graphql';
 import type { SensorConfigOverride } from '@/lib/farm-data-live';
@@ -33,10 +35,12 @@ import {
   parseViewMode,
   syncFarmOverviewStateToUrl,
 } from '@/lib/farm-overview-utils';
+import type { SensorPositionCommit } from '@/types/sensor-map';
 
 export type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 
 export function useFarmOverviewPage(t: FarmOverviewTranslations) {
+  const { toast } = useToast();
   const { role, user } = useCurrentUser();
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
   const searchParams = useSearchParams();
@@ -91,13 +95,16 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     ? selectedTenantId
     : (user?.tenant?.id || undefined);
 
-  const { data: sensorConfigData } = useSensorConfigsQuery({
+  const {
+    data: sensorConfigData,
+    refetch: refetchSensorConfigs,
+  } = useSensorConfigsQuery({
     variables: { tenantId: configQueryTenantId },
     skip: !configQueryTenantId,
     fetchPolicy: 'cache-and-network',
   });
 
-  const sensorConfigMap = React.useMemo<Map<string, SensorConfigOverride>>(
+  const persistedSensorConfigMap = React.useMemo<Map<string, SensorConfigOverride>>(
     () =>
       new Map(
         (sensorConfigData?.sensorConfigs ?? []).map((c) => [
@@ -112,6 +119,60 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       ),
     [sensorConfigData?.sensorConfigs],
   );
+
+  const [upsertSensorConfig] = useUpsertSensorConfigMutation();
+  const [optimisticPositionOverrides, setOptimisticPositionOverrides] =
+    React.useState<Map<string, SensorConfigOverride>>(new Map());
+  const [savingDeviceId, setSavingDeviceId] = React.useState<string | null>(null);
+  const [positionErrorDeviceId, setPositionErrorDeviceId] =
+    React.useState<string | null>(null);
+
+  const sensorConfigMap = React.useMemo<Map<string, SensorConfigOverride>>(() => {
+    const merged = new Map(persistedSensorConfigMap);
+    for (const [device, override] of optimisticPositionOverrides.entries()) {
+      merged.set(device, {
+        ...(merged.get(device) ?? {}),
+        ...override,
+      });
+    }
+    return merged;
+  }, [optimisticPositionOverrides, persistedSensorConfigMap]);
+
+  React.useEffect(() => {
+    setOptimisticPositionOverrides((current) => {
+      if (current.size === 0) return current;
+
+      let didChange = false;
+      const next = new Map(current);
+
+      for (const [device, override] of current.entries()) {
+        const persisted = persistedSensorConfigMap.get(device);
+        if (
+          persisted &&
+          persisted.xPosition === override.xPosition &&
+          persisted.yPosition === override.yPosition &&
+          persisted.greenhouse === override.greenhouse
+        ) {
+          next.delete(device);
+          didChange = true;
+        }
+      }
+
+      return didChange ? next : current;
+    });
+  }, [persistedSensorConfigMap]);
+
+  React.useEffect(() => {
+    if (!positionErrorDeviceId) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setPositionErrorDeviceId((current) =>
+        current === positionErrorDeviceId ? null : current,
+      );
+    }, 1800);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [positionErrorDeviceId]);
 
   const { data: farmConfigData } = useFarmConfigQuery({
     variables: { tenantId: configQueryTenantId },
@@ -146,6 +207,77 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     tenantBucketName: tenantBucketNameOverride,
     sensorConfigs: sensorConfigMap,
   });
+
+  const handleSensorPositionCommit = React.useCallback(
+    async ({
+      deviceId,
+      greenhouse,
+      xPosition,
+      yPosition,
+    }: SensorPositionCommit) => {
+      if (!configQueryTenantId) {
+        throw new Error('Missing tenant context for sensor position update');
+      }
+
+      const nextX = Number(xPosition.toFixed(2));
+      const nextY = Number(yPosition.toFixed(2));
+      const persisted = persistedSensorConfigMap.get(deviceId);
+
+      setSavingDeviceId(deviceId);
+      setPositionErrorDeviceId(null);
+      setOptimisticPositionOverrides((current) => {
+        const next = new Map(current);
+        next.set(deviceId, {
+          ...(persisted ?? {}),
+          xPosition: nextX,
+          yPosition: nextY,
+          greenhouse: greenhouse || persisted?.greenhouse,
+        });
+        return next;
+      });
+
+      try {
+        await upsertSensorConfig({
+          variables: {
+            input: {
+              device: deviceId,
+              greenhouse: greenhouse || persisted?.greenhouse || undefined,
+              xPosition: nextX,
+              yPosition: nextY,
+            },
+            tenantId: configQueryTenantId,
+          },
+        });
+        await refetchSensorConfigs();
+      } catch (error) {
+        setOptimisticPositionOverrides((current) => {
+          const next = new Map(current);
+          next.delete(deviceId);
+          return next;
+        });
+        setPositionErrorDeviceId(deviceId);
+        toast({
+          title: t.positionSaveFailedTitle,
+          description: t.positionSaveFailedDescription,
+          variant: 'destructive',
+        });
+        throw error;
+      } finally {
+        setSavingDeviceId((current) =>
+          current === deviceId ? null : current,
+        );
+      }
+    },
+    [
+      configQueryTenantId,
+      persistedSensorConfigMap,
+      refetchSensorConfigs,
+      t.positionSaveFailedDescription,
+      t.positionSaveFailedTitle,
+      toast,
+      upsertSensorConfig,
+    ],
+  );
 
   const tabFromUrl = parseGreenhouseTab(searchParams.get(PARAM_GREENHOUSE));
   const paramFromUrl = parseParameter(searchParams.get(PARAM_PARAMETER));
@@ -349,6 +481,9 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     greenhouseLabel,
     combinedGreenhouses,
     getParameterLabel,
+    handleSensorPositionCommit,
+    savingDeviceId,
+    positionErrorDeviceId,
     tenantBucketNameOverride,
     farmLayout,
     greenhouseDimensions: selectedGreenhouseDimensions,
@@ -359,6 +494,8 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       emptyForNow: t.emptyForNow ?? 'Empty for now',
       noSensor: t.noSensor,
       noData: t.noData,
+      invalidDropTitle: t.invalidDropTitle,
+      invalidDropDescription: t.invalidDropDescription,
       combined: t.combined,
       greenHouse1: t.greenHouse1,
       greenHouse2: t.greenHouse2,

@@ -1,5 +1,6 @@
 import type { Bay, ParameterType } from '@/types/farm.types';
 import type { FarmLayoutConfig, GreenhouseDimensions } from '@/lib/sensor-map-positions';
+import type { SensorPositionCommit } from '@/types/sensor-map';
 import { EmptyState } from './empty-state';
 import { ParGraphSection } from './par-graph-section';
 import { ViewSensorMap } from './views/view-sensor-map';
@@ -18,6 +19,13 @@ interface FarmDataDisplayProps {
   noDataMessage: string;
   farmLayout?: FarmLayoutConfig;
   greenhouseDimensions?: GreenhouseDimensions | null;
+  onSensorPositionCommit: (
+    payload: SensorPositionCommit,
+  ) => Promise<void> | void;
+  savingDeviceId?: string | null;
+  positionErrorDeviceId?: string | null;
+  invalidDropTitle?: string;
+  invalidDropDescription?: string;
 }
 
 export function FarmDataDisplay({
@@ -33,6 +41,11 @@ export function FarmDataDisplay({
   noDataMessage,
   farmLayout,
   greenhouseDimensions,
+  onSensorPositionCommit,
+  savingDeviceId,
+  positionErrorDeviceId,
+  invalidDropTitle,
+  invalidDropDescription,
 }: FarmDataDisplayProps) {
   const showEmpty = bays.length === 0 && viewMode !== 'graph';
   if (showEmpty) {
@@ -66,6 +79,11 @@ export function FarmDataDisplay({
             selectedSlotId={selectedSlotId}
             onSelectSlot={onSelectSlot}
             className="h-full w-full"
+            onSensorPositionCommit={onSensorPositionCommit}
+            savingDeviceId={savingDeviceId}
+            positionErrorDeviceId={positionErrorDeviceId}
+            invalidDropTitle={invalidDropTitle}
+            invalidDropDescription={invalidDropDescription}
             showOnlyFilledPositions={false}
             farmLayout={farmLayout}
             greenhouseDimensions={dims}

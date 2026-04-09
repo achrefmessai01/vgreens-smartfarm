@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/context';
 import type { Bay, ParameterType } from '@/types/farm.types';
 import type { FarmLayoutConfig, GreenhouseDimensions } from '@/lib/sensor-map-positions';
+import type { SensorPositionCommit } from '@/types/sensor-map';
 import { EmptyState } from './empty-state';
 import { FarmDataDisplay } from './farm-view-container';
 import { ParameterColorLegendBar } from './parameter-color-legend';
@@ -31,6 +32,13 @@ export interface FarmOverviewCardProps {
   entranceLabel?: string;
   farmLayout?: FarmLayoutConfig;
   greenhouseDimensions?: GreenhouseDimensions | null;
+  onSensorPositionCommit: (
+    payload: SensorPositionCommit,
+  ) => Promise<void> | void;
+  savingDeviceId?: string | null;
+  positionErrorDeviceId?: string | null;
+  invalidDropTitle?: string;
+  invalidDropDescription?: string;
 }
 
 export function FarmOverviewCard({
@@ -54,6 +62,11 @@ export function FarmOverviewCard({
   entranceLabel,
   farmLayout,
   greenhouseDimensions,
+  onSensorPositionCommit,
+  savingDeviceId,
+  positionErrorDeviceId,
+  invalidDropTitle,
+  invalidDropDescription,
 }: FarmOverviewCardProps) {
   const { t } = useI18n();
 
@@ -117,6 +130,11 @@ export function FarmOverviewCard({
                 parameterLabel={parameterLabel}
                 noSensorLabel={noSensorLabel}
                 noDataMessage={noDataMessage}
+                onSensorPositionCommit={onSensorPositionCommit}
+                savingDeviceId={savingDeviceId}
+                positionErrorDeviceId={positionErrorDeviceId}
+                invalidDropTitle={invalidDropTitle}
+                invalidDropDescription={invalidDropDescription}
                 farmLayout={farmLayout}
                 greenhouseDimensions={greenhouseDimensions}
               />
