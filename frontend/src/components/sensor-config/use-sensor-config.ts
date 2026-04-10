@@ -50,7 +50,6 @@ export function useSensorConfig(tenantId: string) {
       xPosition?: number;
       yPosition?: number;
       greenhouse?: string;
-      city?: string;
     }) => {
       setSaving(true);
       try {

@@ -18,7 +18,7 @@ import {
   type SensorConfigFieldKey,
 } from '@/lib/sensor-config-constants';
 import { cn } from '@/lib/utils';
-import { Building2, Globe, Layers, Navigation, Trash2 } from 'lucide-react';
+import { Building2, Layers, Navigation, Trash2 } from 'lucide-react';
 import * as React from 'react';
 import type { SensorRow } from './use-sensor-config';
 
@@ -30,7 +30,6 @@ interface SensorConfigFormProps {
     xPosition?: number;
     yPosition?: number;
     greenhouse?: string;
-    city?: string;
   }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   saving: boolean;
@@ -41,7 +40,6 @@ const FIELD_ICONS: Record<SensorConfigFieldKey, React.ElementType> = {
   xPosition: Layers,
   yPosition: Navigation,
   greenhouse: Building2,
-  city: Globe,
 };
 
 export function SensorConfigForm({
@@ -66,28 +64,24 @@ export function SensorConfigForm({
     xPosition: sc.xPositionHint,
     yPosition: sc.yPositionHint,
     greenhouse: sc.greenhouseHint,
-    city: sc.cityHint,
   };
 
   const placeholderKey: Record<SensorConfigFieldKey, string> = {
     xPosition: sc.xPositionPlaceholder,
     yPosition: sc.yPositionPlaceholder,
     greenhouse: sc.greenhousePlaceholder,
-    city: sc.cityPlaceholder,
   };
 
   const labelKey: Record<SensorConfigFieldKey, string> = {
     xPosition: sc.xPosition,
     yPosition: sc.yPosition,
     greenhouse: sc.greenhouse,
-    city: sc.city,
   };
 
   const [values, setValues] = React.useState({
     xPosition: row.config?.xPosition?.toString() ?? '',
     yPosition: row.config?.yPosition?.toString() ?? '',
     greenhouse: row.config?.greenhouse ?? '',
-    city: row.config?.city ?? '',
   });
 
   const set =
@@ -103,7 +97,6 @@ export function SensorConfigForm({
       yPosition:
         values.yPosition.trim() === '' ? undefined : Number(values.yPosition),
       greenhouse: (values.greenhouse as string) || undefined,
-      city: (values.city as string) || undefined,
     });
     onClose();
   };

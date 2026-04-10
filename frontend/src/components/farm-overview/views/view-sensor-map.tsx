@@ -57,6 +57,7 @@ interface SensorPillProps {
   savingDeviceId?: string | null;
   positionErrorDeviceId?: string | null;
   showTooltip: boolean;
+  readOnly?: boolean;
 }
 
 function SensorPillContent({
@@ -96,6 +97,7 @@ function SensorPill({
   savingDeviceId,
   positionErrorDeviceId,
   showTooltip,
+  readOnly,
 }: SensorPillProps) {
   const { slot, deviceId, value, leftPercent, topPercent, slotId } = sensor;
   const isSelected = slot ? selectedSlotId === slot.id : false;
@@ -115,7 +117,7 @@ function SensorPill({
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: slotId,
-      disabled: !slot || isSaving,
+      disabled: !slot || isSaving || !!readOnly,
     });
 
   const translate = transform ? CSS.Translate.toString(transform) : '';
@@ -127,7 +129,7 @@ function SensorPill({
     slot
       ? 'border-white/30 bg-cyan-300/90 text-slate-900'
       : 'border-border bg-muted text-muted-foreground cursor-not-allowed opacity-50',
-    slot && !isDraggingThis && !isSaving && 'cursor-grab hover:scale-105',
+    slot && !isDraggingThis && !isSaving && !readOnly && 'cursor-grab hover:scale-105',
     isSelected && 'ring-2 ring-white/80 ring-offset-0',
     isDraggingThis && 'z-30 scale-110 cursor-grabbing',
     isSaving && 'ring-2 ring-cyan-500/60 animate-pulse',
@@ -214,6 +216,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
     positionErrorDeviceId,
     invalidDropTitle = 'Invalid position',
     invalidDropDescription = 'Drop the sensor inside the greenhouse layout.',
+    readOnly,
   } = props;
   const unit = getParameterUnit(parameter);
   const { toast } = useToast();
@@ -494,6 +497,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                 savingDeviceId={savingDeviceId}
                 positionErrorDeviceId={positionErrorDeviceId}
                 showTooltip={showTooltip}
+                readOnly={readOnly}
               />
             ))}
           </div>

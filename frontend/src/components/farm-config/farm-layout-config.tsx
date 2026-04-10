@@ -65,9 +65,15 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
               row={row}
               index={index}
               disabled={saving}
+              greenhouseLabel={fl.greenhouseLabel}
+              nameLabel={fl.nameLabel}
+              xLabel={fl.xLabel}
+              yLabel={fl.yLabel}
+              doorLabel={fl.doorLabel}
               namePlaceholder={fl.namePlaceholder}
               xPlaceholder={fl.xDimensionPlaceholder}
               yPlaceholder={fl.yDimensionPlaceholder}
+              doorPositionPlaceholder={fl.doorPositionPlaceholder}
               onChange={updateRow}
               onRemove={removeRow}
             />

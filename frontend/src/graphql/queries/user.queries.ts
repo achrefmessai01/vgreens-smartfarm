@@ -22,6 +22,7 @@ export const ME_QUERY = gql`
           name
           xDimension
           yDimension
+          doorPosition
         }
       }
       isActive

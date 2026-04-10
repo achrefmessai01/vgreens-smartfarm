@@ -31,6 +31,7 @@ export interface ViewSensorMapProps {
   positionErrorDeviceId?: string | null;
   invalidDropTitle?: string;
   invalidDropDescription?: string;
+  readOnly?: boolean;
 }
 
 export interface BayRowPosition {

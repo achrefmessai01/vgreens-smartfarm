@@ -7,7 +7,6 @@ export const SENSOR_CONFIG_FIELD_KEYS = [
   'xPosition',
   'yPosition',
   'greenhouse',
-  'city',
 ] as const;
 
 export type SensorConfigFieldKey = (typeof SENSOR_CONFIG_FIELD_KEYS)[number];

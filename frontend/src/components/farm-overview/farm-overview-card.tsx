@@ -43,6 +43,7 @@ export interface FarmOverviewCardProps {
   positionErrorDeviceId?: string | null;
   invalidDropTitle?: string;
   invalidDropDescription?: string;
+  readOnly?: boolean;
 }
 
 export function FarmOverviewCard({
@@ -71,6 +72,7 @@ export function FarmOverviewCard({
   positionErrorDeviceId,
   invalidDropTitle,
   invalidDropDescription,
+  readOnly,
 }: FarmOverviewCardProps) {
   const { t } = useI18n();
 
@@ -141,6 +143,7 @@ export function FarmOverviewCard({
                 invalidDropDescription={invalidDropDescription}
                 farmLayout={farmLayout}
                 greenhouseDimensions={greenhouseDimensions}
+                readOnly={readOnly}
               />
               {viewMode !== 'graph' && (
                 <EntranceLabel

@@ -29,6 +29,7 @@ interface FarmDataDisplayProps {
   positionErrorDeviceId?: string | null;
   invalidDropTitle?: string;
   invalidDropDescription?: string;
+  readOnly?: boolean;
 }
 
 export function FarmDataDisplay({
@@ -49,6 +50,7 @@ export function FarmDataDisplay({
   positionErrorDeviceId,
   invalidDropTitle,
   invalidDropDescription,
+  readOnly,
 }: FarmDataDisplayProps) {
   const showEmpty = bays.length === 0 && viewMode !== 'graph';
   if (showEmpty) {
@@ -87,6 +89,7 @@ export function FarmDataDisplay({
             positionErrorDeviceId={positionErrorDeviceId}
             invalidDropTitle={invalidDropTitle}
             invalidDropDescription={invalidDropDescription}
+            readOnly={readOnly}
             showOnlyFilledPositions={false}
             farmLayout={farmLayout}
             greenhouseDimensions={dims}

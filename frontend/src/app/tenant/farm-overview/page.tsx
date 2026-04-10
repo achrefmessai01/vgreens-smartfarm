@@ -102,6 +102,7 @@ export default function FarmOverviewPage() {
               invalidDropDescription={state.labels.invalidDropDescription}
               farmLayout={state.farmLayout}
               greenhouseDimensions={state.greenhouseDimensions}
+              readOnly={!state.isVGreensAdmin}
             />
           )}
         </div>

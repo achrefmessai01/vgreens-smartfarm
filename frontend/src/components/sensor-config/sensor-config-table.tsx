@@ -38,7 +38,7 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
   const [editingRow, setEditingRow] = React.useState<SensorRow | null>(null);
 
   if (loading) {
-    return <TableSkeleton columnCount={7} rowCount={6} showHeader />;
+    return <TableSkeleton columnCount={5} rowCount={6} showHeader />;
   }
 
   const columnLabels: Record<
@@ -48,7 +48,6 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
     xPosition: sc.xPosition,
     yPosition: sc.yPosition,
     greenhouse: sc.greenhouse,
-    city: sc.city,
   };
 
   return (
@@ -68,7 +67,7 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
             {rows.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={5}
                   className="text-muted-foreground py-10 text-center text-sm"
                 >
                   {sc.noSensorsFound}
@@ -98,11 +97,6 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
                   </TableCell>
                   <TableCell>
                     {config?.greenhouse ?? (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {config?.city ?? (
                       <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </TableCell>
