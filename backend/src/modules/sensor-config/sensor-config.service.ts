@@ -1,8 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SensorConfig } from './entities/sensor-config.entity';
 import { UpsertSensorConfigInput } from './dto';
+import { SensorConfig } from './entities/sensor-config.entity';
 
 @Injectable()
 export class SensorConfigService {
@@ -37,16 +37,20 @@ export class SensorConfigService {
 
     if (existing) {
       Object.assign(existing, {
-        bay: input.bay ?? existing.bay,
-        pole: input.pole ?? existing.pole,
-        row: input.row ?? existing.row,
+        xPosition: input.xPosition ?? existing.xPosition,
+        yPosition: input.yPosition ?? existing.yPosition,
         greenhouse: input.greenhouse ?? existing.greenhouse,
         city: input.city ?? existing.city,
       });
       return this.repo.save(existing);
     }
 
-    const config = this.repo.create({ ...input, tenantId });
+    const config = this.repo.create({
+      ...input,
+      tenantId,
+      xPosition: input.xPosition ?? null,
+      yPosition: input.yPosition ?? null,
+    });
     return this.repo.save(config);
   }
 

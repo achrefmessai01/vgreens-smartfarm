@@ -15,4 +15,8 @@ export interface FarmOverviewTranslations {
   emptyForNow?: string;
   noSensor: string;
   noData: string;
+  invalidDropTitle: string;
+  invalidDropDescription: string;
+  positionSaveFailedTitle: string;
+  positionSaveFailedDescription: string;
 }

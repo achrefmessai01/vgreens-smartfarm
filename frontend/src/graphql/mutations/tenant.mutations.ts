@@ -9,6 +9,12 @@ export const CREATE_TENANT_MUTATION = gql`
       email
       phone
       isActive
+      greenhouses {
+        name
+        doorPosition
+        xDimension
+        yDimension
+      }
       createdAt
       updatedAt
     }
@@ -24,6 +30,12 @@ export const UPDATE_TENANT_MUTATION = gql`
       email
       phone
       isActive
+      greenhouses {
+        name
+        doorPosition
+        xDimension
+        yDimension
+      }
       createdAt
       updatedAt
     }

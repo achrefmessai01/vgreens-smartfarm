@@ -1,13 +1,13 @@
 'use client';
 
-import * as React from 'react';
 import {
+  useDeleteSensorConfigMutation,
   useSensorConfigsQuery,
   useSensorDevicesQuery,
   useUpsertSensorConfigMutation,
-  useDeleteSensorConfigMutation,
   type SensorConfig,
 } from '@/generated/graphql';
+import * as React from 'react';
 
 export interface SensorRow {
   device: string;
@@ -47,11 +47,9 @@ export function useSensorConfig(tenantId: string) {
   const handleSave = React.useCallback(
     async (input: {
       device: string;
-      bay?: string;
-      pole?: string;
-      row?: string;
+      xPosition?: number;
+      yPosition?: number;
       greenhouse?: string;
-      city?: string;
     }) => {
       setSaving(true);
       try {

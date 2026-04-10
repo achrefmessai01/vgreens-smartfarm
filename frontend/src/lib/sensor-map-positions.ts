@@ -1,94 +1,54 @@
 /**
- * Sensor map layout: positions as percentage of width (left) and height (top).
- * topPercent: 0 = top of map, 100 = bottom.
- *
- * Layout uses bay (1–13) and pole (1–10) from InfluxDB slot meta.
- * - bay = column (horizontal position)
- * - pole = row (vertical position); 10 rows total.
- * Device IDs vary per greenhouse (e.g. A_01–A_12, A_13–A_24).
+ * Sensor map positioning using x/y coordinates (in meters).
+ * Sensors are placed at (xPosition, yPosition) within a greenhouse
+ * of dimensions (xDimension × yDimension).
  */
 
+import type { DoorPosition } from '@/generated/graphql';
 import type { Bay, PlantSlot } from '@/types/farm.types';
 
 export type SensorMapType = 'air' | 'lux' | 'par' | 'soil';
 
-// --- Dynamic layout: bay (column) + pole (row) only ---
-
-/** Farm layout configuration — can be overridden per tenant via the admin UI. */
+/** Farm layout configuration — used for chambersCount and fallback bay grid. */
 export interface FarmLayoutConfig {
   bayCount: number;
   polesMax: number;
   chambersCount: number;
 }
 
-/** Default (hardcoded fallback) layout values. */
+/** Greenhouse physical dimensions in meters. */
+export interface GreenhouseDimensions {
+  xDimension: number;
+  yDimension: number;
+  doorPosition?: DoorPosition | null;
+  bayCount?: number | null;
+}
+
+/** Default layout values — chambersCount used for greenhouse tabs. */
 export const DEFAULT_FARM_LAYOUT: FarmLayoutConfig = {
   bayCount: 13,
   polesMax: 10,
   chambersCount: 2,
 };
 
-/** @deprecated Use DEFAULT_FARM_LAYOUT.bayCount — kept for backward compatibility. */
-export const BAY_COUNT = DEFAULT_FARM_LAYOUT.bayCount;
-
-/** @deprecated Use DEFAULT_FARM_LAYOUT.polesMax — kept for backward compatibility. */
-export const POLES_MAX = DEFAULT_FARM_LAYOUT.polesMax;
-
-/** Pole rows hidden from the UI. Values are 1-based to match InfluxDB metadata. */
-export const HIDDEN_POLE_ROWS = [] as const;
-
-const HIDDEN_POLE_ROW_SET = new Set<number>(HIDDEN_POLE_ROWS);
-
-/** Pole rows that remain visible after filtering hidden rows. */
-export const VISIBLE_POLE_ROWS = Array.from(
-  { length: POLES_MAX },
-  (_, index) => index + 1,
-).filter((pole) => !HIDDEN_POLE_ROW_SET.has(pole));
-
-/** Rows per bay for discrete grid after hidden pole rows are removed. */
-export const ROWS_PER_BAY = VISIBLE_POLE_ROWS.length;
-
-export function isPoleRowHidden(pole: number): boolean {
-  return HIDDEN_POLE_ROW_SET.has(Math.round(pole));
-}
-
-/** Compute visible pole rows for a given polesMax, excluding hidden rows. */
-function getVisiblePoleRows(polesMax: number): number[] {
-  return Array.from({ length: polesMax }, (_, i) => i + 1).filter(
-    (p) => !HIDDEN_POLE_ROW_SET.has(p),
-  );
-}
-
 /**
- * Compute map position from bay and pole.
- * Accepts an optional FarmLayoutConfig; falls back to DEFAULT_FARM_LAYOUT.
+ * Convert an x/y coordinate (in meters) to percentage positions on the canvas.
+ * leftPercent: 0 = left edge, 100 = right edge.
+ * topPercent: 0 = top edge, 100 = bottom edge.
  */
-export function getPositionFromBayPole(
-  bay: number,
-  pole: number,
-  layout?: FarmLayoutConfig,
+export function getPositionFromXY(
+  x: number,
+  y: number,
+  dims: GreenhouseDimensions,
 ): { leftPercent: number; topPercent: number } {
-  const { bayCount, polesMax } = layout ?? DEFAULT_FARM_LAYOUT;
-  const visiblePoles = getVisiblePoleRows(polesMax);
-  const rowsPerBay = visiblePoles.length;
-
-  const bay1 = Math.max(1, Math.min(bayCount, Math.round(bay)));
-  const pole1 = Math.max(1, Math.min(polesMax, Math.round(pole)));
-  const visiblePoleIndex = visiblePoles.indexOf(pole1);
-
-  const leftPercent = ((bay1 - 0.5) / bayCount) * 100;
-  const topPercent =
-    visiblePoleIndex >= 0
-      ? ((visiblePoleIndex + 0.5) / rowsPerBay) * 100
-      : ((pole1 - 0.5) / polesMax) * 100;
-
-  return { leftPercent, topPercent };
+  return {
+    leftPercent: Math.max(0, Math.min(100, (x / dims.xDimension) * 100)),
+    // y=0 is bottom-left (entrance); invert so y increases upward
+    topPercent: Math.max(0, Math.min(100, (1 - y / dims.yDimension) * 100)),
+  };
 }
 
-/**
- * Derive sensor type from device id (e.g. Air_02 -> air, Soil_01 -> soil, Lux_01 -> lux).
- * Works for any greenhouse (A_13, A_14, etc.).
- */
+/** Derive sensor type from device id (e.g. Air_02 → air, Soil_01 → soil). */
 export function getSensorTypeFromDeviceId(deviceId: string): SensorMapType {
   const normalized = getMapDeviceId(deviceId);
   if (/^Lux_/i.test(normalized) || /^Light_/i.test(deviceId)) return 'lux';
@@ -97,73 +57,53 @@ export function getSensorTypeFromDeviceId(deviceId: string): SensorMapType {
   return 'air';
 }
 
-/** Slot with computed position (from meta.bay, meta.pole). */
+/** Slot with computed canvas position. */
 export interface SlotWithPosition {
   slot: PlantSlot;
   deviceId: string;
   leftPercent: number;
   topPercent: number;
   type: SensorMapType;
-  /** bay index 0-based for grid key */
   bayIndex: number;
-  /** row index (pole) 0-based for grid key */
   rowIndex: number;
 }
 
 /**
- * Build list of slot positions from bay data using bay and pole in slot.meta.
- * Use this for dynamic layout when InfluxDB provides bay/pole.
- * Returns only slots that have valid meta.bay and meta.pole.
+ * Build list of slot positions using x/y coordinates from slot.meta.
+ * Only returns slots that have valid xPosition and yPosition values.
+ * dims is required — without greenhouse dimensions there is no canvas to place sensors on.
  */
 export function getSlotPositionsFromBay(
   bay: Bay,
-  layout?: FarmLayoutConfig,
+  _layout?: FarmLayoutConfig,
+  dims?: GreenhouseDimensions,
 ): SlotWithPosition[] {
-  const { bayCount, polesMax } = layout ?? DEFAULT_FARM_LAYOUT;
-  const visiblePoles = getVisiblePoleRows(polesMax);
+  if (!dims) return [];
 
   const out: SlotWithPosition[] = [];
   for (const row of bay.rows) {
     for (const col of row.columns) {
       for (const slot of col.slots) {
         if (!slot?.meta) continue;
-        const rawBay = slot.meta.bay as number | undefined;
-        const rawPole = slot.meta.pole as number | undefined;
-        if (!Number.isFinite(rawBay) || !Number.isFinite(rawPole)) continue;
 
-        const bayNum = Number(rawBay);
-        const poleNum = Number(rawPole);
-        if (isPoleRowHidden(poleNum)) continue;
-
-        const visiblePole = Math.max(
-          1,
-          Math.min(polesMax, Math.round(poleNum)),
-        );
-        const rowIndex = visiblePoles.indexOf(visiblePole);
-        if (rowIndex < 0) continue;
+        const x = slot.meta.xPosition as number | undefined;
+        const y = slot.meta.yPosition as number | undefined;
+        // Skip if not set or if both are 0 (database default — means "not positioned")
+        if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+        if (x === 0 && y === 0) continue;
 
         const deviceId = getDeviceIdFromSlotId(slot.id);
         if (!deviceId) continue;
 
-        const { leftPercent, topPercent } = getPositionFromBayPole(
-          bayNum,
-          poleNum,
-          layout,
-        );
-        const type = getSensorTypeFromDeviceId(deviceId);
-        const bayIndex = Math.min(
-          bayCount - 1,
-          Math.max(0, Math.floor(bayNum) - 1),
-        );
-
+        const { leftPercent, topPercent } = getPositionFromXY(x!, y!, dims);
         out.push({
           slot,
           deviceId,
           leftPercent,
           topPercent,
-          type,
-          bayIndex,
-          rowIndex,
+          type: getSensorTypeFromDeviceId(deviceId),
+          bayIndex: 0,
+          rowIndex: 0,
         });
       }
     }
@@ -171,15 +111,15 @@ export function getSlotPositionsFromBay(
   return out;
 }
 
-/** Check if a bay has any slots with dynamic position meta (bay, pole). */
+/** Check if a bay has any slots with x/y position metadata. */
 export function bayHasDynamicPositions(bay: Bay): boolean {
   for (const r of bay.rows) {
     for (const c of r.columns) {
       for (const slot of c.slots) {
         if (
           slot?.meta &&
-          Number.isFinite(slot.meta.bay) &&
-          Number.isFinite(slot.meta.pole)
+          Number.isFinite(slot.meta.xPosition) &&
+          Number.isFinite(slot.meta.yPosition)
         ) {
           return true;
         }
@@ -189,16 +129,28 @@ export function bayHasDynamicPositions(bay: Bay): boolean {
   return false;
 }
 
-export const SENSOR_MAP_ASPECT_RATIO = 115 / 40;
+export interface ParsedLiveSensorSlotId {
+  greenhouse: string;
+  device: string;
+  level: string;
+}
+
+export function parseLiveSensorSlotId(slotId: string): ParsedLiveSensorSlotId {
+  const parts = slotId.replace(/^live_/, '').split('|');
+  return {
+    greenhouse: parts[0] ?? '',
+    device: parts[1] ?? '',
+    level: parts[2] ?? '',
+  };
+}
 
 export function getDeviceIdFromSlotId(slotId: string): string {
-  const parts = slotId.replace(/^live_/, '').split('|');
-  return parts[1] ?? '';
+  return parseLiveSensorSlotId(slotId).device;
 }
 
 /**
- * Canonical device id for map lookup. Normalizes digits (Air_1 -> Air_01)
- * and maps Light_XX -> Lux_XX so backend light sensors show at Lux positions.
+ * Canonical device id for map lookup. Normalizes digits (Air_1 → Air_01)
+ * and maps Light_XX → Lux_XX.
  */
 export function getMapDeviceId(device: string): string {
   const match = device.match(/^(.+)_(\d+)$/i);

@@ -6,6 +6,7 @@ import type {
 import {
   bayHasDynamicPositions,
   getSlotPositionsFromBay,
+  type GreenhouseDimensions,
 } from '@/lib/sensor-map-positions';
 import type { HeatmapPoint } from '@/lib/heatmap-utils';
 import type { Bay, ParameterType } from '@/types/farm.types';
@@ -15,6 +16,7 @@ export function useFullMapData(
   bays: Bay[],
   parameter: ParameterType,
   showOnlyFilledPositions: boolean,
+  greenhouseDimensions?: GreenhouseDimensions | null,
 ): FullMapDataResult {
   return React.useMemo(() => {
     const sensors: SensorWithPosition[] = [];
@@ -27,7 +29,11 @@ export function useFullMapData(
 
     if (useDynamic) {
       for (const bay of bays) {
-        const positions = getSlotPositionsFromBay(bay);
+        const positions = getSlotPositionsFromBay(
+          bay,
+          undefined,
+          greenhouseDimensions ?? undefined,
+        );
         for (const p of positions) {
           if (!isParameterSupportedByType(parameter, p.type)) continue;
           const value =
@@ -75,5 +81,5 @@ export function useFullMapData(
       globalMax,
       hasAnyData,
     };
-  }, [bays, parameter, showOnlyFilledPositions]);
+  }, [bays, parameter, showOnlyFilledPositions, greenhouseDimensions]);
 }
