@@ -9,6 +9,13 @@ export const TENANTS_QUERY = gql`
       email
       phone
       isActive
+      greenhouses {
+        name
+        doorPosition
+        xDimension
+        yDimension
+        bayCount
+      }
       createdAt
       updatedAt
     }
@@ -24,6 +31,13 @@ export const TENANT_QUERY = gql`
       email
       phone
       isActive
+      greenhouses {
+        name
+        doorPosition
+        xDimension
+        yDimension
+        bayCount
+      }
       createdAt
       updatedAt
       users {

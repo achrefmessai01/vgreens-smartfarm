@@ -95,7 +95,14 @@ export default function FarmOverviewPage() {
               noSensorLabel={state.labels.noSensor}
               noDataMessage={state.labels.noData}
               emptyForNowMessage={state.labels.emptyForNow}
+              onSensorPositionCommit={state.handleSensorPositionCommit}
+              savingDeviceId={state.savingDeviceId}
+              positionErrorDeviceId={state.positionErrorDeviceId}
+              invalidDropTitle={state.labels.invalidDropTitle}
+              invalidDropDescription={state.labels.invalidDropDescription}
               farmLayout={state.farmLayout}
+              greenhouseDimensions={state.greenhouseDimensions}
+              readOnly={!state.isVGreensAdmin}
             />
           )}
         </div>

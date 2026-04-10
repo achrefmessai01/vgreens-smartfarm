@@ -1,18 +1,8 @@
 'use client';
 
-import * as React from 'react';
-import {
-  MapPin,
-  Navigation,
-  Layers,
-  Building2,
-  Globe,
-  Trash2,
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -20,13 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useI18n } from '@/i18n';
-import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 import { useGreenhouseOptionsQuery } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 import {
   SENSOR_CONFIG_FIELD_KEYS,
   type SensorConfigFieldKey,
 } from '@/lib/sensor-config-constants';
+import { cn } from '@/lib/utils';
+import { Building2, Layers, Navigation, Trash2 } from 'lucide-react';
+import * as React from 'react';
 import type { SensorRow } from './use-sensor-config';
 
 interface SensorConfigFormProps {
@@ -34,11 +27,9 @@ interface SensorConfigFormProps {
   tenantId: string;
   onSave: (input: {
     device: string;
-    bay?: string;
-    pole?: string;
-    row?: string;
+    xPosition?: number;
+    yPosition?: number;
     greenhouse?: string;
-    city?: string;
   }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   saving: boolean;
@@ -46,11 +37,9 @@ interface SensorConfigFormProps {
 }
 
 const FIELD_ICONS: Record<SensorConfigFieldKey, React.ElementType> = {
-  bay: Layers,
-  pole: Navigation,
-  row: MapPin,
+  xPosition: Layers,
+  yPosition: Navigation,
   greenhouse: Building2,
-  city: Globe,
 };
 
 export function SensorConfigForm({
@@ -72,37 +61,27 @@ export function SensorConfigForm({
   const greenhouseOptions = greenhouseData?.greenhouseOptions ?? [];
 
   const hintKey: Record<SensorConfigFieldKey, string> = {
-    bay: sc.bayHint,
-    pole: sc.poleHint,
-    row: sc.rowHint,
+    xPosition: sc.xPositionHint,
+    yPosition: sc.yPositionHint,
     greenhouse: sc.greenhouseHint,
-    city: sc.cityHint,
   };
 
   const placeholderKey: Record<SensorConfigFieldKey, string> = {
-    bay: sc.bayPlaceholder,
-    pole: sc.polePlaceholder,
-    row: sc.rowPlaceholder,
+    xPosition: sc.xPositionPlaceholder,
+    yPosition: sc.yPositionPlaceholder,
     greenhouse: sc.greenhousePlaceholder,
-    city: sc.cityPlaceholder,
   };
 
   const labelKey: Record<SensorConfigFieldKey, string> = {
-    bay: sc.bay,
-    pole: sc.pole,
-    row: sc.row,
+    xPosition: sc.xPosition,
+    yPosition: sc.yPosition,
     greenhouse: sc.greenhouse,
-    city: sc.city,
   };
 
-  const [values, setValues] = React.useState<
-    Record<SensorConfigFieldKey, string>
-  >({
-    bay: row.config?.bay ?? '',
-    pole: row.config?.pole ?? '',
-    row: row.config?.row ?? '',
+  const [values, setValues] = React.useState({
+    xPosition: row.config?.xPosition?.toString() ?? '',
+    yPosition: row.config?.yPosition?.toString() ?? '',
     greenhouse: row.config?.greenhouse ?? '',
-    city: row.config?.city ?? '',
   });
 
   const set =
@@ -113,11 +92,11 @@ export function SensorConfigForm({
     e.preventDefault();
     await onSave({
       device: row.device,
-      bay: values.bay || undefined,
-      pole: values.pole || undefined,
-      row: values.row || undefined,
-      greenhouse: values.greenhouse || undefined,
-      city: values.city || undefined,
+      xPosition:
+        values.xPosition.trim() === '' ? undefined : Number(values.xPosition),
+      yPosition:
+        values.yPosition.trim() === '' ? undefined : Number(values.yPosition),
+      greenhouse: (values.greenhouse as string) || undefined,
     });
     onClose();
   };
@@ -156,7 +135,7 @@ export function SensorConfigForm({
 
               {key === 'greenhouse' ? (
                 <Select
-                  value={values.greenhouse}
+                  value={values.greenhouse as string}
                   onValueChange={(val) =>
                     setValues((prev) => ({ ...prev, greenhouse: val }))
                   }
@@ -176,6 +155,19 @@ export function SensorConfigForm({
               ) : (
                 <Input
                   id={`field-${key}`}
+                  type={
+                    key === 'xPosition' || key === 'yPosition'
+                      ? 'number'
+                      : 'text'
+                  }
+                  step={
+                    key === 'xPosition' || key === 'yPosition'
+                      ? '0.01'
+                      : undefined
+                  }
+                  min={
+                    key === 'xPosition' || key === 'yPosition' ? '0' : undefined
+                  }
                   value={values[key]}
                   onChange={set(key)}
                   placeholder={placeholderKey[key]}

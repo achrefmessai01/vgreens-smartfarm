@@ -1,42 +1,47 @@
 'use client';
 
 import * as React from 'react';
+import { useToast } from '@/components/ui/toast-provider';
 import { useSearchParams } from 'next/navigation';
 import { formatFieldToLabel } from '@/lib/farm-data';
-import type { ParameterType } from '@/types/farm.types';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data';
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
 import {
-  UserRole,
-  useTenantsQuery,
-  useSensorConfigsQuery,
   useFarmConfigQuery,
+  UserRole,
+  useSensorConfigsQuery,
+  useTenantsQuery,
+  useUpsertSensorConfigMutation,
   type Tenant,
 } from '@/generated/graphql';
 import type { SensorConfigOverride } from '@/lib/farm-data-live';
 import {
   DEFAULT_FARM_LAYOUT,
   type FarmLayoutConfig,
+  type GreenhouseDimensions,
 } from '@/lib/sensor-map-positions';
+import type { FarmOverviewTranslations } from '@/types/farm-overview.types';
+import type { ParameterType } from '@/types/farm.types';
 import {
   ALLOWED_SINGLE_GREENHOUSE_PARAMETERS,
   PARAM_GREENHOUSE,
   PARAM_PARAMETER,
   PARAM_VIEW_MODE,
 } from '@/lib/farm-overview-constants';
-import type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 import {
   parseGreenhouseTab,
   parseParameter,
   parseViewMode,
   syncFarmOverviewStateToUrl,
 } from '@/lib/farm-overview-utils';
+import type { SensorPositionCommit } from '@/types/sensor-map';
 
 export type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 
 export function useFarmOverviewPage(t: FarmOverviewTranslations) {
-  const { role } = useCurrentUser();
+  const { toast } = useToast();
+  const { role, user } = useCurrentUser();
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
   const searchParams = useSearchParams();
   const initialTenantIdFromUrl = searchParams.get('tenantId') ?? '';
@@ -84,25 +89,29 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     ? (selectedTenantBucketName ?? null)
     : undefined;
 
-  // Fetch SensorConfig overrides from PostgreSQL.
-  // For VGreens admin, use the currently selected tenant; for tenant users the
-  // resolver resolves to their own tenant automatically (tenantId omitted).
-  const configQueryTenantId = isVGreensAdmin ? selectedTenantId : undefined;
-  const { data: sensorConfigData } = useSensorConfigsQuery({
-    variables: { tenantId: configQueryTenantId },
-    skip: isVGreensAdmin && !selectedTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+  // Explicit tenantId for all config queries.
+  // Admin → selected tenant; tenant user → from me.tenant.id (always a valid UUID).
+  const configQueryTenantId = isVGreensAdmin
+    ? selectedTenantId
+    : user?.tenant?.id || undefined;
 
-  const sensorConfigMap = React.useMemo<Map<string, SensorConfigOverride>>(
+  const { data: sensorConfigData, refetch: refetchSensorConfigs } =
+    useSensorConfigsQuery({
+      variables: { tenantId: configQueryTenantId },
+      skip: !configQueryTenantId,
+      fetchPolicy: 'cache-and-network',
+    });
+
+  const persistedSensorConfigMap = React.useMemo<
+    Map<string, SensorConfigOverride>
+  >(
     () =>
       new Map(
         (sensorConfigData?.sensorConfigs ?? []).map((c) => [
           c.device,
           {
-            bay: c.bay ?? undefined,
-            pole: c.pole ?? undefined,
-            row: c.row ?? undefined,
+            xPosition: c.xPosition ?? undefined,
+            yPosition: c.yPosition ?? undefined,
             greenhouse: c.greenhouse ?? undefined,
             city: c.city ?? undefined,
           },
@@ -111,11 +120,80 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     [sensorConfigData?.sensorConfigs],
   );
 
+  const [upsertSensorConfig] = useUpsertSensorConfigMutation();
+  const [optimisticPositionOverrides, setOptimisticPositionOverrides] =
+    React.useState<Map<string, SensorConfigOverride>>(new Map());
+  const [savingDeviceId, setSavingDeviceId] = React.useState<string | null>(
+    null,
+  );
+  const [positionErrorDeviceId, setPositionErrorDeviceId] = React.useState<
+    string | null
+  >(null);
+
+  const sensorConfigMap = React.useMemo<
+    Map<string, SensorConfigOverride>
+  >(() => {
+    const merged = new Map(persistedSensorConfigMap);
+    for (const [device, override] of optimisticPositionOverrides.entries()) {
+      merged.set(device, {
+        ...(merged.get(device) ?? {}),
+        ...override,
+      });
+    }
+    return merged;
+  }, [optimisticPositionOverrides, persistedSensorConfigMap]);
+
+  React.useEffect(() => {
+    setOptimisticPositionOverrides((current) => {
+      if (current.size === 0) return current;
+
+      let didChange = false;
+      const next = new Map(current);
+
+      for (const [device, override] of current.entries()) {
+        const persisted = persistedSensorConfigMap.get(device);
+        if (
+          persisted &&
+          persisted.xPosition === override.xPosition &&
+          persisted.yPosition === override.yPosition &&
+          persisted.greenhouse === override.greenhouse
+        ) {
+          next.delete(device);
+          didChange = true;
+        }
+      }
+
+      return didChange ? next : current;
+    });
+  }, [persistedSensorConfigMap]);
+
+  React.useEffect(() => {
+    if (!positionErrorDeviceId) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setPositionErrorDeviceId((current) =>
+        current === positionErrorDeviceId ? null : current,
+      );
+    }, 1800);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [positionErrorDeviceId]);
+
   const { data: farmConfigData } = useFarmConfigQuery({
     variables: { tenantId: configQueryTenantId },
-    skip: isVGreensAdmin && !selectedTenantId,
+    skip: !configQueryTenantId,
     fetchPolicy: 'cache-and-network',
   });
+
+  const tenantGreenhouses = React.useMemo(() => {
+    if (isVGreensAdmin) {
+      const tenant = tenants.find((tn) => tn.id === selectedTenantId);
+      return tenant?.greenhouses ?? [];
+    }
+    // For tenant users, greenhouses come from the `me` query (tenant relation).
+    // The `tenant(id)` resolver is admin-only, so we use the already-loaded user.tenant.
+    return user?.tenant?.greenhouses ?? [];
+  }, [isVGreensAdmin, tenants, selectedTenantId, user?.tenant?.greenhouses]);
 
   const farmLayout = React.useMemo<FarmLayoutConfig>(
     () => ({
@@ -134,6 +212,75 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     tenantBucketName: tenantBucketNameOverride,
     sensorConfigs: sensorConfigMap,
   });
+
+  const handleSensorPositionCommit = React.useCallback(
+    async ({
+      deviceId,
+      greenhouse,
+      xPosition,
+      yPosition,
+    }: SensorPositionCommit) => {
+      if (!configQueryTenantId) {
+        throw new Error('Missing tenant context for sensor position update');
+      }
+
+      const nextX = Number(xPosition.toFixed(2));
+      const nextY = Number(yPosition.toFixed(2));
+      const persisted = persistedSensorConfigMap.get(deviceId);
+
+      setSavingDeviceId(deviceId);
+      setPositionErrorDeviceId(null);
+      setOptimisticPositionOverrides((current) => {
+        const next = new Map(current);
+        next.set(deviceId, {
+          ...(persisted ?? {}),
+          xPosition: nextX,
+          yPosition: nextY,
+          greenhouse: greenhouse || persisted?.greenhouse,
+        });
+        return next;
+      });
+
+      try {
+        await upsertSensorConfig({
+          variables: {
+            input: {
+              device: deviceId,
+              greenhouse: greenhouse || persisted?.greenhouse || undefined,
+              xPosition: nextX,
+              yPosition: nextY,
+            },
+            tenantId: configQueryTenantId,
+          },
+        });
+        await refetchSensorConfigs();
+      } catch (error) {
+        setOptimisticPositionOverrides((current) => {
+          const next = new Map(current);
+          next.delete(deviceId);
+          return next;
+        });
+        setPositionErrorDeviceId(deviceId);
+        toast({
+          title: t.positionSaveFailedTitle,
+          description: t.positionSaveFailedDescription,
+          variant: 'destructive',
+        });
+        throw error;
+      } finally {
+        setSavingDeviceId((current) => (current === deviceId ? null : current));
+      }
+    },
+    [
+      configQueryTenantId,
+      persistedSensorConfigMap,
+      refetchSensorConfigs,
+      t.positionSaveFailedDescription,
+      t.positionSaveFailedTitle,
+      toast,
+      upsertSensorConfig,
+    ],
+  );
 
   const tabFromUrl = parseGreenhouseTab(searchParams.get(PARAM_GREENHOUSE));
   const paramFromUrl = parseParameter(searchParams.get(PARAM_PARAMETER));
@@ -160,16 +307,21 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   }, [activeGreenhouseTab, selectedParameter, viewMode]);
 
   const greenhouseOptions = React.useMemo(() => {
+    const count =
+      tenantGreenhouses.length > 0
+        ? tenantGreenhouses.length
+        : farmLayout.chambersCount;
     const ghLabels = [t.greenHouse1, t.greenHouse2];
     const options = [{ key: 'combined', label: t.combined }];
-    for (let i = 0; i < farmLayout.chambersCount; i++) {
+    for (let i = 0; i < count; i++) {
       options.push({
         key: `greenhouse_${i + 1}`,
-        label: ghLabels[i] ?? `Greenhouse ${i + 1}`,
+        label:
+          tenantGreenhouses[i]?.name || ghLabels[i] || `Greenhouse ${i + 1}`,
       });
     }
     return options;
-  }, [t, farmLayout.chambersCount]);
+  }, [t, farmLayout.chambersCount, tenantGreenhouses]);
 
   const parameterOptions = React.useMemo(() => {
     // Base options: all available fields
@@ -266,18 +418,46 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
 
   const greenhouseLabel = React.useMemo(() => {
     const idx = activeGreenhouseTab - 1;
-    return ghLabels[idx] ?? `Greenhouse ${activeGreenhouseTab}`;
+    return (
+      tenantGreenhouses[idx]?.name ||
+      ghLabels[idx] ||
+      `Greenhouse ${activeGreenhouseTab}`
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeGreenhouseTab, t.greenHouse1, t.greenHouse2]);
+  }, [activeGreenhouseTab, tenantGreenhouses, t.greenHouse1, t.greenHouse2]);
 
   const combinedGreenhouses = React.useMemo(() => {
-    return Array.from({ length: farmLayout.chambersCount }, (_, i) => ({
+    const count =
+      tenantGreenhouses.length > 0
+        ? tenantGreenhouses.length
+        : farmLayout.chambersCount;
+    return Array.from({ length: count }, (_, i) => ({
       key: bays[i]?.id ?? `greenhouse_${i + 1}`,
-      label: ghLabels[i] ?? `Greenhouse ${i + 1}`,
+      label: tenantGreenhouses[i]?.name || ghLabels[i] || `Greenhouse ${i + 1}`,
       bay: bays[i] ?? null,
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bays, farmLayout.chambersCount, t.greenHouse1, t.greenHouse2]);
+  }, [
+    bays,
+    farmLayout.chambersCount,
+    tenantGreenhouses,
+    t.greenHouse1,
+    t.greenHouse2,
+  ]);
+
+  const selectedGreenhouseDimensions =
+    React.useMemo<GreenhouseDimensions | null>(() => {
+      if (activeGreenhouseTab === 0 || tenantGreenhouses.length === 0)
+        return null;
+      const gh = tenantGreenhouses[activeGreenhouseTab - 1];
+      if (!gh || gh.xDimension <= 0 || gh.yDimension <= 0) return null;
+      return {
+        xDimension: gh.xDimension,
+        yDimension: gh.yDimension,
+        doorPosition: gh.doorPosition ?? null,
+        bayCount: gh.bayCount ?? null,
+      };
+    }, [tenantGreenhouses, activeGreenhouseTab]);
 
   const getParameterLabel = React.useCallback(
     (param: ParameterType) => formatFieldToLabel(param),
@@ -314,8 +494,12 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     greenhouseLabel,
     combinedGreenhouses,
     getParameterLabel,
+    handleSensorPositionCommit,
+    savingDeviceId,
+    positionErrorDeviceId,
     tenantBucketNameOverride,
     farmLayout,
+    greenhouseDimensions: selectedGreenhouseDimensions,
     labels: {
       viewHeatmap: t.viewHeatmap,
       viewDiscrete: t.viewDiscrete,
@@ -323,6 +507,8 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       emptyForNow: t.emptyForNow ?? 'Empty for now',
       noSensor: t.noSensor,
       noData: t.noData,
+      invalidDropTitle: t.invalidDropTitle,
+      invalidDropDescription: t.invalidDropDescription,
       combined: t.combined,
       greenHouse1: t.greenHouse1,
       greenHouse2: t.greenHouse2,

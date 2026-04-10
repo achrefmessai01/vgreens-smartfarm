@@ -6,9 +6,8 @@ export const UPSERT_SENSOR_CONFIG_MUTATION = gql`
       id
       tenantId
       device
-      bay
-      pole
-      row
+      xPosition
+      yPosition
       greenhouse
       city
       createdAt

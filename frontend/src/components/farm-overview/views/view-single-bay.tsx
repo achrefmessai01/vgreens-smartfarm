@@ -1,19 +1,17 @@
 'use client';
 
-import {
-  valueToHotColor,
-  getParameterUnit,
-  formatParameterDisplayValue,
-} from '@/lib/farm-data';
-import * as React from 'react';
-import { cn } from '@/lib/utils';
-import { useI18n } from '@/i18n';
-import { Card } from '@/components/ui/card';
+import { getLegendScale } from '@/components/farm-overview/parameter-color-legend';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Tooltip } from '@/components/ui/tooltip';
+import { useI18n } from '@/i18n';
+import { formatParameterDisplayValue, getParameterUnit } from '@/lib/farm-data';
 import { idwInterpolate } from '@/lib/heatmap-utils';
 import { useFullMapData } from '@/lib/hooks/use-full-map-data';
+import { cn } from '@/lib/utils';
 import type { ViewSingleBayProps } from '@/types/view-single-bay.types';
-import { getLegendScale } from '@/components/farm-overview/parameter-color-legend';
+import * as React from 'react';
+import { HeatmapBackground } from './heatmap-background';
 
 const HEATMAP_GRID_COLS = 80;
 const HEATMAP_GRID_ROWS = 40;
@@ -25,11 +23,17 @@ export function ViewSingleBay({
   onSelectSlot,
   className,
   showOnlyFilledPositions = false,
+  greenhouseDimensions,
 }: ViewSingleBayProps) {
   const { t } = useI18n();
   const unit = getParameterUnit(parameter);
   const { sensors, heatmapPoints, globalMin, globalMax, hasAnyData } =
-    useFullMapData(bays, parameter, showOnlyFilledPositions);
+    useFullMapData(
+      bays,
+      parameter,
+      showOnlyFilledPositions,
+      greenhouseDimensions,
+    );
 
   const heatmapGrid = React.useMemo(
     () =>
@@ -55,91 +59,94 @@ export function ViewSingleBay({
         </div>
       ) : (
         <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
-          <div
-            className="absolute inset-0 grid h-full w-full"
-            style={{
-              gridTemplateColumns: `repeat(${HEATMAP_GRID_COLS}, 1fr)`,
-              gridTemplateRows: `repeat(${HEATMAP_GRID_ROWS}, 1fr)`,
-            }}
-          >
-            {heatmapGrid.map((row, i) =>
-              row.map((val, j) => (
+          <div className="relative h-full w-full overflow-hidden">
+            {greenhouseDimensions?.bayCount != null &&
+              greenhouseDimensions.bayCount > 1 &&
+              Array.from({ length: greenhouseDimensions.bayCount - 1 }, (_, i) => (
                 <div
-                  key={`${i}-${j}`}
-                  className="min-h-0 min-w-0"
+                  key={`bay-line-${i}`}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-y-0 z-10 w-px bg-foreground/15"
                   style={{
-                    backgroundColor: Number.isNaN(val)
-                      ? 'rgb(240,240,240)'
-                      : valueToHotColor(val, scaleMin, scaleMax),
+                    left: `${((i + 1) / greenhouseDimensions.bayCount!) * 100}%`,
                   }}
                 />
-              )),
+              ))}
+            <HeatmapBackground
+              grid={heatmapGrid}
+              scaleMin={scaleMin}
+              scaleMax={scaleMax}
+              cols={HEATMAP_GRID_COLS}
+              rows={HEATMAP_GRID_ROWS}
+            />
+            {sensors.map(
+              ({
+                slot,
+                deviceId,
+                value,
+                leftPercent,
+                topPercent,
+                positionKey,
+              }) => {
+                const isSelected = slot && selectedSlotId === slot.id;
+                const displayValue =
+                  value != null ? formatParameterDisplayValue(value) : '--';
+                const tip =
+                  slot && value != null
+                    ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
+                    : deviceId;
+                return (
+                  <Tooltip key={positionKey} content={tip}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() =>
+                        onSelectSlot(
+                          slot ? (isSelected ? null : slot.id) : null,
+                        )
+                      }
+                      disabled={!slot}
+                      className={cn(
+                        'absolute inline-flex flex-col items-center justify-center px-0.5',
+                        'h-auto border-none bg-transparent hover:bg-transparent',
+                        'text-[10px] font-bold text-black tabular-nums sm:text-[14px]',
+                        'drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]',
+                        'focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-1',
+                        slot && 'cursor-pointer',
+                        isSelected &&
+                          'ring-primary rounded ring-2 ring-offset-1',
+                      )}
+                      style={{
+                        left: `${leftPercent}%`,
+                        top: `${topPercent}%`,
+                        transform: 'translate(-50%, -58%)',
+                      }}
+                      aria-label={
+                        slot && value != null
+                          ? `${displayValue} ${unit}`
+                          : t.pages.farmOverview.noSensor
+                      }
+                    >
+                      {value != null ? (
+                        <>
+                          <span className="leading-tight tracking-tight">
+                            {displayValue}
+                          </span>
+                          {unit ? (
+                            <span className="text-[10px] leading-tight font-medium opacity-85">
+                              {unit}
+                            </span>
+                          ) : null}
+                        </>
+                      ) : (
+                        <span>--</span>
+                      )}
+                    </Button>
+                  </Tooltip>
+                );
+              },
             )}
           </div>
-          {sensors.map(
-            ({
-              slot,
-              deviceId,
-              value,
-              leftPercent,
-              topPercent,
-              positionKey,
-            }) => {
-              const isSelected = slot && selectedSlotId === slot.id;
-              const displayValue =
-                value != null ? formatParameterDisplayValue(value) : '--';
-              return (
-                <Button
-                  key={positionKey}
-                  type="button"
-                  variant="ghost"
-                  onClick={() =>
-                    onSelectSlot(slot ? (isSelected ? null : slot.id) : null)
-                  }
-                  disabled={!slot}
-                  title={
-                    slot && value != null
-                      ? `${deviceId}: ${displayValue}${unit ? ` ${unit}` : ''}`
-                      : deviceId
-                  }
-                  className={cn(
-                    'absolute inline-flex flex-col items-center justify-center px-0.5',
-                    'h-auto border-none bg-transparent hover:bg-transparent',
-                    'text-[10px] font-bold text-black tabular-nums sm:text-[14px]',
-                    'drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]',
-                    'focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-1',
-                    slot && 'cursor-pointer',
-                    isSelected && 'ring-primary rounded ring-2 ring-offset-1',
-                  )}
-                  style={{
-                    left: `${leftPercent}%`,
-                    top: `${topPercent}%`,
-                    transform: 'translate(-50%, -58%)',
-                  }}
-                  aria-label={
-                    slot && value != null
-                      ? `${displayValue} ${unit}`
-                      : t.pages.farmOverview.noSensor
-                  }
-                >
-                  {value != null ? (
-                    <>
-                      <span className="leading-tight tracking-tight">
-                        {displayValue}
-                      </span>
-                      {unit ? (
-                        <span className="text-[10px] leading-tight font-medium opacity-85">
-                          {unit}
-                        </span>
-                      ) : null}
-                    </>
-                  ) : (
-                    <span>--</span>
-                  )}
-                </Button>
-              );
-            },
-          )}
         </div>
       )}
     </Card>

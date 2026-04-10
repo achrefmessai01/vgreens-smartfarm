@@ -68,7 +68,7 @@ export default function TenantsPage() {
       <Sheet open={page.isSheetOpen} onOpenChange={page.setIsSheetOpen}>
         <SheetContent
           side="right"
-          className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
+          className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl"
         >
           <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
             <SheetTitle className="dark:text-card-foreground">

@@ -34,6 +34,7 @@ export class TenantsService {
     const tenant = this.tenantRepository.create({
       ...createTenantInput,
       isActive: createTenantInput.isActive ?? true,
+      greenhouses: createTenantInput.greenhouses ?? [],
     });
 
     const savedTenant = await this.tenantRepository.save(tenant);

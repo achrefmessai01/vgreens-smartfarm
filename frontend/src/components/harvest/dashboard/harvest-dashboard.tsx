@@ -10,6 +10,7 @@ import { DashboardChartsGrid } from './dashboard-charts-grid';
 import { DashboardMetricsGrid } from './dashboard-metrics-grid';
 import { DashboardFilters } from './harvest-dashboard-filters';
 import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
+import { YieldPredictionCard } from './yield-prediction-card';
 
 interface HarvestDashboardProps {
   className?: string;
@@ -105,6 +106,7 @@ export function HarvestDashboard({
       </div>
 
       <DashboardMetricsGrid data={data} filterLabel={String(filterLabel)} />
+      <YieldPredictionCard />
       <DashboardChartsGrid data={data} />
     </div>
   );

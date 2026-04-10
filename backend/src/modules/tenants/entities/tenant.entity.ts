@@ -1,8 +1,27 @@
+import { DoorPosition } from '@/common/enums/door-position.enum';
 import { BaseEntity } from '@common/entities';
-import { Entity, Column, OneToMany } from 'typeorm';
-import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { User } from '@modules/users/entities/user.entity';
 import { TenantFeature } from '@modules/features/entities/tenant-feature.entity';
+import { User } from '@modules/users/entities/user.entity';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Column, Entity, OneToMany } from 'typeorm';
+
+@ObjectType()
+export class TenantGreenhouse {
+  @Field()
+  name: string;
+
+  @Field(() => DoorPosition, { nullable: true })
+  doorPosition?: DoorPosition;
+
+  @Field()
+  xDimension: number;
+
+  @Field()
+  yDimension: number;
+
+  @Field(() => Int, { nullable: true })
+  bayCount?: number;
+}
 
 @ObjectType()
 @Entity('tenants')
@@ -48,6 +67,10 @@ export class Tenant extends BaseEntity {
 
   @Field(() => ID, { nullable: true })
   tenantId?: string;
+
+  @Field(() => [TenantGreenhouse], { nullable: true })
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  greenhouses: TenantGreenhouse[];
 
   @Field(() => Date)
   createdAt: Date;

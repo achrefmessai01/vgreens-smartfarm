@@ -1,9 +1,7 @@
 'use client';
 
-import * as React from 'react';
-import { Pencil } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -22,6 +20,8 @@ import {
 import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { useI18n } from '@/i18n';
 import { SENSOR_CONFIG_FIELD_KEYS } from '@/lib/sensor-config-constants';
+import { Pencil } from 'lucide-react';
+import * as React from 'react';
 import { SensorConfigForm } from './sensor-config-form';
 import { useSensorConfig, type SensorRow } from './use-sensor-config';
 
@@ -38,18 +38,16 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
   const [editingRow, setEditingRow] = React.useState<SensorRow | null>(null);
 
   if (loading) {
-    return <TableSkeleton columnCount={7} rowCount={6} showHeader />;
+    return <TableSkeleton columnCount={5} rowCount={6} showHeader />;
   }
 
   const columnLabels: Record<
     (typeof SENSOR_CONFIG_FIELD_KEYS)[number],
     string
   > = {
-    bay: sc.bay,
-    pole: sc.pole,
-    row: sc.row,
+    xPosition: sc.xPosition,
+    yPosition: sc.yPosition,
     greenhouse: sc.greenhouse,
-    city: sc.city,
   };
 
   return (
@@ -69,7 +67,7 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
             {rows.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={5}
                   className="text-muted-foreground py-10 text-center text-sm"
                 >
                   {sc.noSensorsFound}
@@ -84,30 +82,22 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
                 >
                   <TableCell className="font-medium">{device}</TableCell>
                   <TableCell>
-                    {config?.bay ? (
-                      <Badge variant="secondary">{config.bay}</Badge>
+                    {config?.xPosition != null ? (
+                      <Badge variant="secondary">{config.xPosition}</Badge>
                     ) : (
-                      <span className="text-muted-foreground text-sm">—</span>
+                      <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </TableCell>
                   <TableCell>
-                    {config?.pole ?? (
-                      <span className="text-muted-foreground text-sm">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {config?.row ?? (
-                      <span className="text-muted-foreground text-sm">—</span>
+                    {config?.yPosition != null ? (
+                      <Badge variant="secondary">{config.yPosition}</Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </TableCell>
                   <TableCell>
                     {config?.greenhouse ?? (
-                      <span className="text-muted-foreground text-sm">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {config?.city ?? (
-                      <span className="text-muted-foreground text-sm">—</span>
+                      <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">

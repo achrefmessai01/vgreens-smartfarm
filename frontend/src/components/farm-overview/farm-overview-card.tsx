@@ -2,9 +2,14 @@
 
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/context';
+import type {
+  FarmLayoutConfig,
+  GreenhouseDimensions,
+} from '@/lib/sensor-map-positions';
 import type { Bay, ParameterType } from '@/types/farm.types';
-import type { FarmLayoutConfig } from '@/lib/sensor-map-positions';
+import type { SensorPositionCommit } from '@/types/sensor-map';
 import { EmptyState } from './empty-state';
+import { EntranceLabel } from './entrance-label';
 import { FarmDataDisplay } from './farm-view-container';
 import { ParameterColorLegendBar } from './parameter-color-legend';
 import { ParameterSelector } from './parameter-selector';
@@ -30,6 +35,15 @@ export interface FarmOverviewCardProps {
   emptyForNowMessage: string;
   entranceLabel?: string;
   farmLayout?: FarmLayoutConfig;
+  greenhouseDimensions?: GreenhouseDimensions | null;
+  onSensorPositionCommit: (
+    payload: SensorPositionCommit,
+  ) => Promise<void> | void;
+  savingDeviceId?: string | null;
+  positionErrorDeviceId?: string | null;
+  invalidDropTitle?: string;
+  invalidDropDescription?: string;
+  readOnly?: boolean;
 }
 
 export function FarmOverviewCard({
@@ -52,6 +66,13 @@ export function FarmOverviewCard({
   emptyForNowMessage,
   entranceLabel,
   farmLayout,
+  greenhouseDimensions,
+  onSensorPositionCommit,
+  savingDeviceId,
+  positionErrorDeviceId,
+  invalidDropTitle,
+  invalidDropDescription,
+  readOnly,
 }: FarmOverviewCardProps) {
   const { t } = useI18n();
 
@@ -72,6 +93,13 @@ export function FarmOverviewCard({
               options={parameterOptions}
             />
           </div>
+          {greenhouseDimensions && viewMode !== 'graph' && (
+            <div className="text-muted-foreground hidden items-center gap-1 text-xs tabular-nums sm:flex">
+              <span>{greenhouseDimensions.xDimension}m</span>
+              <span className="opacity-50">×</span>
+              <span>{greenhouseDimensions.yDimension}m</span>
+            </div>
+          )}
           <div className="w-full min-w-0 sm:w-auto sm:flex-none">
             <ViewModeSelector
               value={viewMode}
@@ -108,23 +136,20 @@ export function FarmOverviewCard({
                 parameterLabel={parameterLabel}
                 noSensorLabel={noSensorLabel}
                 noDataMessage={noDataMessage}
+                onSensorPositionCommit={onSensorPositionCommit}
+                savingDeviceId={savingDeviceId}
+                positionErrorDeviceId={positionErrorDeviceId}
+                invalidDropTitle={invalidDropTitle}
+                invalidDropDescription={invalidDropDescription}
                 farmLayout={farmLayout}
+                greenhouseDimensions={greenhouseDimensions}
+                readOnly={readOnly}
               />
               {viewMode !== 'graph' && (
-                <div
-                  className="bg-secondary text-secondary-foreground absolute bottom-0 left-0 flex h-[5.75rem] w-4 items-center justify-center border shadow-sm sm:h-[12.5rem] sm:w-8"
-                  aria-label={entranceLabel}
-                >
-                  <span
-                    className="text-[7px] font-semibold tracking-[0.08em] whitespace-nowrap uppercase sm:text-[12px] sm:tracking-[0.18em]"
-                    style={{
-                      writingMode: 'vertical-rl',
-                      transform: 'rotate(180deg)',
-                    }}
-                  >
-                    {entranceLabel}
-                  </span>
-                </div>
+                <EntranceLabel
+                  label={entranceLabel}
+                  doorPosition={greenhouseDimensions?.doorPosition}
+                />
               )}
             </div>
           )}

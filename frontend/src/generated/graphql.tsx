@@ -200,6 +200,7 @@ export type CreateSystemErrorInput = {
 export type CreateTenantInput = {
   companyName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
+  greenhouses?: InputMaybe<Array<GreenhouseInput>>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
   phone?: InputMaybe<Scalars['String']['input']>;
@@ -242,6 +243,22 @@ export type DeleteImageInput = {
   /** Full storage path of the image relative to the bucket (including tenant prefix). */
   path: Scalars['String']['input'];
 };
+
+/** Door position types */
+export enum DoorPosition {
+  BottomCenter = 'BOTTOM_CENTER',
+  BottomLeft = 'BOTTOM_LEFT',
+  BottomRight = 'BOTTOM_RIGHT',
+  LeftBottom = 'LEFT_BOTTOM',
+  LeftCenter = 'LEFT_CENTER',
+  LeftTop = 'LEFT_TOP',
+  RightBottom = 'RIGHT_BOTTOM',
+  RightCenter = 'RIGHT_CENTER',
+  RightTop = 'RIGHT_TOP',
+  TopCenter = 'TOP_CENTER',
+  TopLeft = 'TOP_LEFT',
+  TopRight = 'TOP_RIGHT'
+}
 
 export type ErrorReport = {
   __typename?: 'ErrorReport';
@@ -368,6 +385,14 @@ export type GetSignedImageUrlInput = {
   expiresIn?: InputMaybe<Scalars['Int']['input']>;
   /** Full storage path of the image relative to the bucket (including tenant prefix). */
   path: Scalars['String']['input'];
+};
+
+export type GreenhouseInput = {
+  bayCount?: InputMaybe<Scalars['Int']['input']>;
+  doorPosition?: InputMaybe<DoorPosition>;
+  name: Scalars['String']['input'];
+  xDimension: Scalars['Float']['input'];
+  yDimension: Scalars['Float']['input'];
 };
 
 export type Harvest = {
@@ -888,17 +913,16 @@ export enum ReportStatus {
 
 export type SensorConfig = {
   __typename?: 'SensorConfig';
-  bay?: Maybe<Scalars['String']['output']>;
   city?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   device: Scalars['String']['output'];
   greenhouse?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  pole?: Maybe<Scalars['String']['output']>;
-  row?: Maybe<Scalars['String']['output']>;
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
   updatedAt: Scalars['DateTime']['output'];
+  xPosition?: Maybe<Scalars['Float']['output']>;
+  yPosition?: Maybe<Scalars['Float']['output']>;
 };
 
 export type SignedUrl = {
@@ -951,6 +975,7 @@ export type Tenant = {
   companyName?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   email?: Maybe<Scalars['String']['output']>;
+  greenhouses?: Maybe<Array<TenantGreenhouse>>;
   id: Scalars['ID']['output'];
   influxBucketName?: Maybe<Scalars['String']['output']>;
   isActive: Scalars['Boolean']['output'];
@@ -984,6 +1009,15 @@ export type TenantFeature = {
   id: Scalars['ID']['output'];
   tenantId: Scalars['ID']['output'];
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type TenantGreenhouse = {
+  __typename?: 'TenantGreenhouse';
+  bayCount?: Maybe<Scalars['Int']['output']>;
+  doorPosition?: Maybe<DoorPosition>;
+  name: Scalars['String']['output'];
+  xDimension: Scalars['Float']['output'];
+  yDimension: Scalars['Float']['output'];
 };
 
 export type ToggleTenantFeatureInput = {
@@ -1057,6 +1091,7 @@ export type UpdateHarvestInput = {
 export type UpdateTenantInput = {
   companyName?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
+  greenhouses?: InputMaybe<Array<GreenhouseInput>>;
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
@@ -1089,12 +1124,11 @@ export type UpsertFarmConfigInput = {
 };
 
 export type UpsertSensorConfigInput = {
-  bay?: InputMaybe<Scalars['String']['input']>;
   city?: InputMaybe<Scalars['String']['input']>;
   device: Scalars['String']['input'];
   greenhouse?: InputMaybe<Scalars['String']['input']>;
-  pole?: InputMaybe<Scalars['String']['input']>;
-  row?: InputMaybe<Scalars['String']['input']>;
+  xPosition?: InputMaybe<Scalars['Float']['input']>;
+  yPosition?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type User = {
@@ -1272,7 +1306,7 @@ export type UpsertSensorConfigMutationVariables = Exact<{
 }>;
 
 
-export type UpsertSensorConfigMutation = { __typename?: 'Mutation', upsertSensorConfig: { __typename?: 'SensorConfig', id: string, tenantId: string, device: string, bay?: string | null, pole?: string | null, row?: string | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any } };
+export type UpsertSensorConfigMutation = { __typename?: 'Mutation', upsertSensorConfig: { __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any } };
 
 export type DeleteSensorConfigMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1287,7 +1321,7 @@ export type CreateTenantMutationVariables = Exact<{
 }>;
 
 
-export type CreateTenantMutation = { __typename?: 'Mutation', createTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any } };
+export type CreateTenantMutation = { __typename?: 'Mutation', createTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number }> | null } };
 
 export type UpdateTenantMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1295,7 +1329,7 @@ export type UpdateTenantMutationVariables = Exact<{
 }>;
 
 
-export type UpdateTenantMutation = { __typename?: 'Mutation', updateTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any } };
+export type UpdateTenantMutation = { __typename?: 'Mutation', updateTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number }> | null } };
 
 export type DeleteTenantMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1553,7 +1587,7 @@ export type SensorConfigsQueryVariables = Exact<{
 }>;
 
 
-export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, bay?: string | null, pole?: string | null, row?: string | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any }> };
+export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any }> };
 
 export type SensorDevicesQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -1572,14 +1606,14 @@ export type GreenhouseOptionsQuery = { __typename?: 'Query', greenhouseOptions: 
 export type TenantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any }> };
+export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null }> | null }> };
 
 export type TenantQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
+export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
 
 export type GetTenantBucketQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1591,7 +1625,7 @@ export type GetTenantBucketQuery = { __typename?: 'Query', tenant?: { __typename
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null }> | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2355,9 +2389,8 @@ export const UpsertSensorConfigDocument = gql`
     id
     tenantId
     device
-    bay
-    pole
-    row
+    xPosition
+    yPosition
     greenhouse
     city
     createdAt
@@ -2433,6 +2466,12 @@ export const CreateTenantDocument = gql`
     email
     phone
     isActive
+    greenhouses {
+      name
+      doorPosition
+      xDimension
+      yDimension
+    }
     createdAt
     updatedAt
   }
@@ -2473,6 +2512,12 @@ export const UpdateTenantDocument = gql`
     email
     phone
     isActive
+    greenhouses {
+      name
+      doorPosition
+      xDimension
+      yDimension
+    }
     createdAt
     updatedAt
   }
@@ -4251,9 +4296,8 @@ export const SensorConfigsDocument = gql`
     id
     tenantId
     device
-    bay
-    pole
-    row
+    xPosition
+    yPosition
     greenhouse
     city
     createdAt
@@ -4388,6 +4432,13 @@ export const TenantsDocument = gql`
     email
     phone
     isActive
+    greenhouses {
+      name
+      doorPosition
+      xDimension
+      yDimension
+      bayCount
+    }
     createdAt
     updatedAt
   }
@@ -4437,6 +4488,13 @@ export const TenantDocument = gql`
     email
     phone
     isActive
+    greenhouses {
+      name
+      doorPosition
+      xDimension
+      yDimension
+      bayCount
+    }
     createdAt
     updatedAt
     users {
@@ -4548,6 +4606,13 @@ export const MeDocument = gql`
       createdAt
       isActive
       updatedAt
+      greenhouses {
+        name
+        xDimension
+        yDimension
+        doorPosition
+        bayCount
+      }
     }
     isActive
     status
