@@ -607,6 +607,8 @@ export const de = {
           xLabel: 'Breite (m)',
           yLabel: 'Länge (m)',
           doorLabel: 'Türposition',
+          bayCountLabel: 'Reihen',
+          bayCountPlaceholder: '0',
           namePlaceholder: 'z. B. Erdbeer-Halle',
           xDimensionPlaceholder: '0,0',
           yDimensionPlaceholder: '0,0',

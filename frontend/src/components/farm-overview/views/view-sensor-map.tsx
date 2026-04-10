@@ -482,6 +482,18 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
           }}
         >
           <div ref={mapRef} className="relative h-full w-full overflow-hidden">
+            {greenhouseDimensions.bayCount != null &&
+              greenhouseDimensions.bayCount > 1 &&
+              Array.from({ length: greenhouseDimensions.bayCount - 1 }, (_, i) => (
+                <div
+                  key={`bay-line-${i}`}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-y-0 w-px bg-foreground/15"
+                  style={{
+                    left: `${((i + 1) / greenhouseDimensions.bayCount!) * 100}%`,
+                  }}
+                />
+              ))}
             {resolvedSensors.map((sensor) => (
               <SensorPill
                 key={sensor.slotId}

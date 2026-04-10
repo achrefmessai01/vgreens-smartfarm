@@ -21,6 +21,7 @@ export interface GreenhouseDimensions {
   xDimension: number;
   yDimension: number;
   doorPosition?: DoorPosition | null;
+  bayCount?: number | null;
 }
 
 /** Default layout values — chambersCount used for greenhouse tabs. */

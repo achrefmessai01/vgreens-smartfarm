@@ -31,10 +31,12 @@ interface GreenhouseRowProps {
   xLabel: string;
   yLabel: string;
   doorLabel: string;
+  bayCountLabel: string;
   namePlaceholder: string;
   xPlaceholder: string;
   yPlaceholder: string;
   doorPositionPlaceholder: string;
+  bayCountPlaceholder: string;
   onChange: (index: number, patch: Partial<GreenhouseInput>) => void;
   onRemove: (index: number) => void;
 }
@@ -48,10 +50,12 @@ export function GreenhouseRow({
   xLabel,
   yLabel,
   doorLabel,
+  bayCountLabel,
   namePlaceholder,
   xPlaceholder,
   yPlaceholder,
   doorPositionPlaceholder,
+  bayCountPlaceholder,
   onChange,
   onRemove,
 }: GreenhouseRowProps) {
@@ -73,7 +77,7 @@ export function GreenhouseRow({
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-5">
         <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
           <label className="text-muted-foreground text-xs font-medium">
             {nameLabel}
@@ -116,6 +120,25 @@ export function GreenhouseRow({
             disabled={disabled}
             onChange={(e) =>
               onChange(index, { yDimension: Number(e.target.value) })
+            }
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-muted-foreground text-xs font-medium">
+            {bayCountLabel}
+          </label>
+          <Input
+            type="number"
+            min={1}
+            step="1"
+            placeholder={bayCountPlaceholder}
+            value={row.bayCount ?? ''}
+            disabled={disabled}
+            onChange={(e) =>
+              onChange(index, {
+                bayCount: e.target.value === '' ? undefined : Number(e.target.value),
+              })
             }
           />
         </div>

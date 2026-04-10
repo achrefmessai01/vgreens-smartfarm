@@ -1,6 +1,6 @@
 import { DoorPosition } from '@/common/enums/door-position.enum';
-import { Field, Float, InputType } from '@nestjs/graphql';
-import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { Field, Float, InputType, Int } from '@nestjs/graphql';
+import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 @InputType()
 export class GreenhouseInput {
@@ -22,4 +22,10 @@ export class GreenhouseInput {
   @IsNumber()
   @Min(0)
   yDimension: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  bayCount?: number;
 }

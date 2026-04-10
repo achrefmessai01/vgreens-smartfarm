@@ -44,6 +44,7 @@ export interface TenantGreenhouseFormData {
   doorPosition?: DoorPosition;
   xDimension?: number;
   yDimension?: number;
+  bayCount?: number;
 }
 
 export interface TenantFormData {
@@ -70,6 +71,7 @@ interface TenantFormProps {
       doorPosition?: DoorPosition | null;
       xDimension?: number | null;
       yDimension?: number | null;
+      bayCount?: number | null;
     }> | null;
   };
   tenantId?: string;
@@ -106,6 +108,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           doorPosition: greenhouse.doorPosition ?? undefined,
           xDimension: greenhouse.xDimension ?? undefined,
           yDimension: greenhouse.yDimension ?? undefined,
+          bayCount: greenhouse.bayCount ?? undefined,
         })) ?? [],
     });
     const [errors, setErrors] = React.useState<TenantFormErrors>({});
@@ -125,6 +128,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
               doorPosition: greenhouse.doorPosition ?? undefined,
               xDimension: greenhouse.xDimension ?? undefined,
               yDimension: greenhouse.yDimension ?? undefined,
+              bayCount: greenhouse.bayCount ?? undefined,
             })) ?? [],
         }));
       }
@@ -197,6 +201,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
             doorPosition: undefined,
             xDimension: undefined,
             yDimension: undefined,
+            bayCount: undefined,
           },
         ],
       }));
@@ -325,65 +330,10 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
 
         <Separator />
 
-        <div>
-          <p className="text-muted-foreground mb-3 text-xs font-medium tracking-wide uppercase">
-            Farm Layout
-          </p>
-          <FieldGroup>
-            <Field>
-              <FieldLabel
-                htmlFor="bayCount"
-                className="flex items-center gap-1.5"
-              >
-                <Columns2 className="text-muted-foreground h-3.5 w-3.5" />
-                Total Bays
-              </FieldLabel>
-              <FieldContent>
-                <Input
-                  id="bayCount"
-                  type="number"
-                  min={1}
-                  value={formData.bayCount ?? DEFAULT_FARM_CONFIG.bayCount}
-                  onChange={handleNumberChange('bayCount')}
-                  placeholder={String(DEFAULT_FARM_CONFIG.bayCount)}
-                  className="w-32"
-                  disabled={isLoading}
-                />
-              </FieldContent>
-            </Field>
-
-            <Field>
-              <FieldLabel
-                htmlFor="chambersCount"
-                className="flex items-center gap-1.5"
-              >
-                <Building className="text-muted-foreground h-3.5 w-3.5" />
-                Number of Greenhouses
-              </FieldLabel>
-              <FieldContent>
-                <Input
-                  id="chambersCount"
-                  type="number"
-                  min={1}
-                  value={
-                    formData.chambersCount ?? DEFAULT_FARM_CONFIG.chambersCount
-                  }
-                  onChange={handleNumberChange('chambersCount')}
-                  placeholder={String(DEFAULT_FARM_CONFIG.chambersCount)}
-                  className="w-32"
-                  disabled={isLoading}
-                />
-              </FieldContent>
-            </Field>
-          </FieldGroup>
-        </div>
-
-        <Separator />
-
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              Greenhouses
+              Farm Layout
             </p>
             <Button
               type="button"
@@ -421,7 +371,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
                   <Input
                     type="text"
                     value={greenhouse.name}
@@ -445,6 +395,15 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                     value={greenhouse.yDimension ?? ''}
                     onChange={handleGreenhouseChange(index, 'yDimension', true)}
                     placeholder="Y dimension"
+                    disabled={isLoading}
+                  />
+                  <Input
+                    type="number"
+                    min={1}
+                    step="1"
+                    value={greenhouse.bayCount ?? ''}
+                    onChange={handleGreenhouseChange(index, 'bayCount', true)}
+                    placeholder="Number of bays"
                     disabled={isLoading}
                   />
                   <Select

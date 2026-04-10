@@ -14,6 +14,7 @@ export const TENANTS_QUERY = gql`
         doorPosition
         xDimension
         yDimension
+        bayCount
       }
       createdAt
       updatedAt
@@ -35,6 +36,7 @@ export const TENANT_QUERY = gql`
         doorPosition
         xDimension
         yDimension
+        bayCount
       }
       createdAt
       updatedAt

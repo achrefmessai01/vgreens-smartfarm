@@ -60,6 +60,18 @@ export function ViewSingleBay({
       ) : (
         <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
           <div className="relative h-full w-full overflow-hidden">
+            {greenhouseDimensions?.bayCount != null &&
+              greenhouseDimensions.bayCount > 1 &&
+              Array.from({ length: greenhouseDimensions.bayCount - 1 }, (_, i) => (
+                <div
+                  key={`bay-line-${i}`}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-y-0 z-10 w-px bg-foreground/15"
+                  style={{
+                    left: `${((i + 1) / greenhouseDimensions.bayCount!) * 100}%`,
+                  }}
+                />
+              ))}
             <HeatmapBackground
               grid={heatmapGrid}
               scaleMin={scaleMin}

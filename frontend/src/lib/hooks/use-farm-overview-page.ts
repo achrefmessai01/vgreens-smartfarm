@@ -455,6 +455,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         xDimension: gh.xDimension,
         yDimension: gh.yDimension,
         doorPosition: gh.doorPosition ?? null,
+        bayCount: gh.bayCount ?? null,
       };
     }, [tenantGreenhouses, activeGreenhouseTab]);
 

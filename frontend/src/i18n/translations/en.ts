@@ -527,6 +527,8 @@ export const en = {
           xLabel: 'Width (m)',
           yLabel: 'Length (m)',
           doorLabel: 'Door Position',
+          bayCountLabel: 'Bays',
+          bayCountPlaceholder: '0',
           namePlaceholder: 'e.g. Strawberry Hall',
           xDimensionPlaceholder: '0.0',
           yDimensionPlaceholder: '0.0',

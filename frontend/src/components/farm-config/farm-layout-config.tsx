@@ -70,10 +70,12 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
               xLabel={fl.xLabel}
               yLabel={fl.yLabel}
               doorLabel={fl.doorLabel}
+              bayCountLabel={fl.bayCountLabel}
               namePlaceholder={fl.namePlaceholder}
               xPlaceholder={fl.xDimensionPlaceholder}
               yPlaceholder={fl.yDimensionPlaceholder}
               doorPositionPlaceholder={fl.doorPositionPlaceholder}
+              bayCountPlaceholder={fl.bayCountPlaceholder}
               onChange={updateRow}
               onRemove={removeRow}
             />

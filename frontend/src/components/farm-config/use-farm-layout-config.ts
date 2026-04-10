@@ -49,6 +49,7 @@ export function useFarmLayoutConfig(tenantId: string) {
         xDimension: Number(r.xDimension),
         yDimension: Number(r.yDimension),
         doorPosition: r.doorPosition ?? null,
+        bayCount: r.bayCount ?? null,
       }))
       .filter((r) => r.name.length > 0);
     if (payload.some((r) => r.xDimension <= 0 || r.yDimension <= 0)) return;
