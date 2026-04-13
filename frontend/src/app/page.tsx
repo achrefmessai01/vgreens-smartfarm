@@ -26,11 +26,11 @@ export default function Home() {
       return;
     }
 
-    // Check user role and redirect to appropriate dashboard
+    // Redirect to first meaningful page per role (dashboard not yet implemented)
     if (role === UserRole.VgreensAdmin) {
-      router.push('/admin/dashboard');
+      router.push('/admin/tenants');
     } else {
-      router.push('/tenant/dashboard');
+      router.push('/tenant/farm-overview');
     }
   }, [isSignedIn, isLoaded, router, role, userLoading]);
 

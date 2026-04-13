@@ -8,7 +8,6 @@ import {
   Clock,
   ClipboardList,
   Flag,
-  LayoutDashboard,
   Settings,
   Sprout,
   Users,
@@ -26,11 +25,6 @@ export interface NavItem {
 
 // Admin navigation items
 export const adminNavItems: NavItem[] = [
-  {
-    label: 'Dashboard',
-    href: '/admin/dashboard',
-    icon: LayoutDashboard,
-  },
   {
     label: 'Tenants',
     href: '/admin/tenants',
