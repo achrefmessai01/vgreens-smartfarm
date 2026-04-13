@@ -41,7 +41,7 @@ export type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 
 export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const { toast } = useToast();
-  const { role, user } = useCurrentUser();
+  const { role, user, loading: currentUserLoading } = useCurrentUser();
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
   const searchParams = useSearchParams();
   const initialTenantIdFromUrl = searchParams.get('tenantId') ?? '';
@@ -82,9 +82,8 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     }
   }, []);
 
-  const { bucketName: selectedTenantBucketName } = useTenantBucketName(
-    isVGreensAdmin ? selectedTenantId : undefined,
-  );
+  const { bucketName: selectedTenantBucketName, loading: tenantBucketLoading } =
+    useTenantBucketName(isVGreensAdmin ? selectedTenantId : undefined);
   const tenantBucketNameOverride = isVGreensAdmin
     ? (selectedTenantBucketName ?? null)
     : undefined;
@@ -475,7 +474,10 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     selectedTenantId,
     handleTenantChange,
     tenantSelectorValue,
-    loading,
+    loading:
+      loading ||
+      currentUserLoading ||
+      (isVGreensAdmin && !!selectedTenantId && tenantBucketLoading),
     greenhouseOptions,
     parameterOptions,
     effectiveParameter,
