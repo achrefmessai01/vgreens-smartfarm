@@ -33,3 +33,29 @@ export const ME_QUERY = gql`
     }
   }
 `;
+
+export const USERS_QUERY = gql`
+  query Users {
+    users {
+      id
+      clerkUserId
+      email
+      firstName
+      lastName
+      imageUrl
+      role
+      tenantId
+      tenant {
+        id
+        name
+        createdAt
+        isActive
+        updatedAt
+      }
+      isActive
+      status
+      createdAt
+      updatedAt
+    }
+  }
+`;

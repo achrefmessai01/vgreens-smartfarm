@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Scissors,
   Bell,
+  Users,
   Settings,
 } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
@@ -53,6 +54,15 @@ export default function TabsLayout() {
           title: 'Alerts',
           tabBarIcon: ({ color, size }) => (
             <Bell size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="users"
+        options={{
+          title: 'Users',
+          tabBarIcon: ({ color, size }) => (
+            <Users size={size} color={color} />
           ),
         }}
       />
