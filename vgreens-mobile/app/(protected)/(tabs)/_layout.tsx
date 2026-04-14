@@ -52,18 +52,14 @@ export default function TabsLayout() {
         name="alerts"
         options={{
           title: 'Alerts',
-          tabBarIcon: ({ color, size }) => (
-            <Bell size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Bell size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="users"
         options={{
           title: 'Users',
-          tabBarIcon: ({ color, size }) => (
-            <Users size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
         }}
       />
       <Tabs.Screen

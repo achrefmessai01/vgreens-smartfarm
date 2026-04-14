@@ -10,4 +10,5 @@ export {
 export { Input } from './input';
 export { Badge } from './badge';
 export { Separator } from './separator';
+export { Select, type SelectOption } from './select';
 export { Switch } from './switch';

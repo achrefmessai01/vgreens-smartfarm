@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plus } from 'lucide-react-native';
+import { Plus, Users } from 'lucide-react-native';
 import { Button } from '@/components/ui/button';
 import { UserCard } from '@/components/users/user-card';
 import { useTenantUsers } from '@/lib/hooks/use-tenant-users';
@@ -52,12 +52,14 @@ export default function UsersScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
-      <View className="flex-1 px-4 pt-2">
-        <View className="mb-4 flex-row items-center justify-between">
+      <View className="flex-1 px-4 pt-4">
+        <View className="mb-5 flex-row items-center justify-between">
           <View>
-            <Text className="text-xl font-bold text-foreground">Users</Text>
-            <Text className="text-sm text-muted-foreground">
-              Manage your tenant users
+            <Text className="text-2xl font-bold text-foreground">Users</Text>
+            <Text className="mt-0.5 text-sm text-muted-foreground">
+              {users.length > 0
+                ? `${users.length} team member${users.length !== 1 ? 's' : ''}`
+                : 'Manage your team'}
             </Text>
           </View>
           <Button
@@ -65,22 +67,26 @@ export default function UsersScreen() {
             size="sm"
             onPress={handleCreate}
             disabled={isSubmitting}
-            className="flex-row items-center gap-1.5"
+            className="flex-row items-center gap-1.5 rounded-xl px-4"
           >
             <Plus size={16} color="#ffffff" />
-            <Text className="text-sm font-medium text-primary-foreground">
+            <Text className="text-sm font-semibold text-primary-foreground">
               Add User
             </Text>
           </Button>
         </View>
 
         {users.length === 0 ? (
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-base font-medium text-muted-foreground">
-              No users found
+          <View className="flex-1 items-center justify-center gap-3 pb-20">
+            <View className="items-center justify-center rounded-full bg-muted p-5">
+              <Users size={32} color="#8ba5ad" />
+            </View>
+            <Text className="text-base font-semibold text-foreground">
+              No team members yet
             </Text>
-            <Text className="mt-1 text-sm text-muted-foreground">
-              Tap &quot;Add User&quot; to invite someone
+            <Text className="max-w-[250px] text-center text-sm text-muted-foreground">
+              Invite people to join your tenant by tapping &quot;Add User&quot;
+              above
             </Text>
           </View>
         ) : (
@@ -95,7 +101,7 @@ export default function UsersScreen() {
                 disabled={isSubmitting}
               />
             )}
-            contentContainerClassName="gap-3 pb-4"
+            contentContainerClassName="gap-3 pb-6"
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}

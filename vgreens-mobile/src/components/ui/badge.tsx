@@ -1,12 +1,18 @@
 import { View, Text } from 'react-native';
 import { cn } from '@/lib/utils';
 
-type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+type BadgeVariant =
+  | 'default'
+  | 'secondary'
+  | 'destructive'
+  | 'outline'
+  | 'success';
 
 interface BadgeProps {
   variant?: BadgeVariant;
   label: string;
   className?: string;
+  textClassName?: string;
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
@@ -14,6 +20,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   secondary: 'bg-secondary',
   destructive: 'bg-destructive',
   outline: 'border border-border bg-transparent',
+  success: 'bg-emerald-500',
 };
 
 const variantTextStyles: Record<BadgeVariant, string> = {
@@ -21,9 +28,15 @@ const variantTextStyles: Record<BadgeVariant, string> = {
   secondary: 'text-secondary-foreground',
   destructive: 'text-white',
   outline: 'text-foreground',
+  success: 'text-white',
 };
 
-export function Badge({ variant = 'default', label, className }: BadgeProps) {
+export function Badge({
+  variant = 'default',
+  label,
+  className,
+  textClassName,
+}: BadgeProps) {
   return (
     <View
       className={cn(
@@ -33,7 +46,11 @@ export function Badge({ variant = 'default', label, className }: BadgeProps) {
       )}
     >
       <Text
-        className={cn('text-xs font-medium', variantTextStyles[variant])}
+        className={cn(
+          'text-xs font-medium',
+          variantTextStyles[variant],
+          textClassName,
+        )}
       >
         {label}
       </Text>

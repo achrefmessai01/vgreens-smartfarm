@@ -28,7 +28,9 @@ export function useTenantUsers() {
 
   const users = useMemo(() => {
     if (!data?.users) return [];
-    return data.users.filter((u) => u.tenantId === tenantId);
+    return data.users.filter(
+      (u) => u.tenantId === tenantId && u.role !== 'VGREENS_ADMIN',
+    );
   }, [data?.users, tenantId]);
 
   const handleCreate = useCallback(

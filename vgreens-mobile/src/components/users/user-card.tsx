@@ -1,7 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
-import { Edit2, Trash2 } from 'lucide-react-native';
+import { Pencil, Trash2 } from 'lucide-react-native';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import type { User } from '@/types/user';
 import { ROLE_LABELS } from '@/types/user';
 
@@ -12,13 +11,23 @@ interface UserCardProps {
   disabled?: boolean;
 }
 
+function getInitials(firstName?: string, lastName?: string, email?: string) {
+  if (firstName && lastName) {
+    return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  }
+  if (firstName) return firstName[0].toUpperCase();
+  if (email) return email[0].toUpperCase();
+  return '?';
+}
+
 export function UserCard({ user, onEdit, onDelete, disabled }: UserCardProps) {
   const fullName =
     [user.firstName, user.lastName].filter(Boolean).join(' ') || 'No name';
+  const initials = getInitials(user.firstName, user.lastName, user.email);
 
   const statusVariant =
-    user.status === 'ACTIVE'
-      ? 'default'
+    user.status === 'ACTIVE' || user.isActive
+      ? 'success'
       : user.status === 'PENDING'
         ? 'outline'
         : 'secondary';
@@ -31,49 +40,48 @@ export function UserCard({ user, onEdit, onDelete, disabled }: UserCardProps) {
         : 'Inactive';
 
   return (
-    <View className="rounded-lg border border-border bg-card">
-      <View className="flex-row items-center justify-between px-4 py-3">
-        <Text className="text-sm font-semibold text-card-foreground">
-          {fullName}
-        </Text>
-        <Badge
-          variant="outline"
-          label={ROLE_LABELS[user.role] ?? user.role}
-        />
-      </View>
+    <View className="rounded-xl border border-border bg-card px-4 py-3.5 shadow-sm">
+      <View className="flex-row items-start gap-3">
+        <View className="h-11 w-11 items-center justify-center rounded-full bg-primary">
+          <Text className="text-sm font-bold text-white">{initials}</Text>
+        </View>
 
-      <Separator />
-
-      <View className="gap-2 px-4 py-3">
-        <View className="flex-row items-center gap-2">
-          <Text className="text-xs text-muted-foreground">Email:</Text>
-          <Text className="flex-1 text-xs font-medium text-card-foreground">
+        <View className="flex-1 gap-0.5">
+          <Text className="text-[15px] font-semibold text-card-foreground">
+            {fullName}
+          </Text>
+          <Text className="text-[13px] text-muted-foreground" numberOfLines={1}>
             {user.email || '—'}
           </Text>
         </View>
 
-        <View className="flex-row items-center gap-2">
-          <Text className="text-xs text-muted-foreground">Status:</Text>
+        <View className="items-end gap-1.5">
+          <Badge
+            variant="outline"
+            label={ROLE_LABELS[user.role] ?? user.role}
+            className="border-primary/30 bg-primary/5"
+            textClassName="text-primary"
+          />
           <Badge variant={statusVariant} label={statusLabel} />
         </View>
       </View>
 
-      <Separator />
-
-      <View className="flex-row gap-2 px-4 py-2">
+      <View className="mt-3 flex-row items-center justify-end gap-2">
         <Pressable
           onPress={() => onEdit(user)}
           disabled={disabled}
-          className="rounded-md p-2 active:bg-muted"
+          className="flex-row items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 active:bg-muted"
         >
-          <Edit2 size={16} color="#016f7c" />
+          <Pencil size={13} color="#016f7c" />
+          <Text className="text-xs font-medium text-primary">Edit</Text>
         </Pressable>
         <Pressable
           onPress={() => onDelete(user)}
           disabled={disabled}
-          className="rounded-md p-2 active:bg-muted"
+          className="flex-row items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 active:bg-muted"
         >
-          <Trash2 size={16} color="#ef4444" />
+          <Trash2 size={13} color="#ef4444" />
+          <Text className="text-xs font-medium text-destructive">Delete</Text>
         </Pressable>
       </View>
     </View>

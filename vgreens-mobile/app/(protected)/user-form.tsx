@@ -41,7 +41,7 @@ export default function UserFormScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      title: isEdit ? 'Edit User' : 'Create User',
+      title: isEdit ? 'Edit User' : 'New User',
       headerBackTitle: 'Users',
     });
   }, [navigation, isEdit]);
@@ -101,8 +101,9 @@ export default function UserFormScreen() {
         className="flex-1"
       >
         <ScrollView
-          contentContainerClassName="px-4 py-6 gap-5"
+          contentContainerClassName="px-5 py-6 gap-7"
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <UserFormFields
             email={email} setEmail={setEmail}
@@ -115,19 +116,19 @@ export default function UserFormScreen() {
           />
         </ScrollView>
 
-        <View className="flex-row gap-3 border-t border-border px-4 py-4">
+        <View className="flex-row gap-3 border-t border-border px-5 py-4">
           <Button
             variant="outline"
             label="Cancel"
             onPress={() => router.back()}
             disabled={isSubmitting}
-            className="flex-1"
+            className="flex-1 rounded-xl"
           />
           <Button
-            label={isSubmitting ? undefined : isEdit ? 'Update' : 'Create'}
+            label={isSubmitting ? undefined : isEdit ? 'Save Changes' : 'Create User'}
             onPress={handleSubmit}
             disabled={isSubmitting}
-            className="flex-1"
+            className="flex-1 rounded-xl"
           >
             {isSubmitting ? (
               <ActivityIndicator size="small" color="#ffffff" />
