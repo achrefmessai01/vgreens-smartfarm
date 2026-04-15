@@ -762,6 +762,7 @@ export type Query = {
   signedImageUrl: SignedUrl;
   tenant?: Maybe<Tenant>;
   tenantFeatures: Array<TenantFeature>;
+  tenantGreenhouses: Array<Scalars['String']['output']>;
   tenants: Array<Tenant>;
   testInfluxDBConnection: Scalars['String']['output'];
   unresolvedErrorReportsCount: Scalars['Int']['output'];
@@ -887,6 +888,11 @@ export type QueryTenantArgs = {
 
 
 export type QueryTenantFeaturesArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryTenantGreenhousesArgs = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -1621,6 +1627,13 @@ export type GetTenantBucketQueryVariables = Exact<{
 
 
 export type GetTenantBucketQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null } | null };
+
+export type TenantGreenhousesQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: Array<string> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4588,6 +4601,47 @@ export type GetTenantBucketQueryHookResult = ReturnType<typeof useGetTenantBucke
 export type GetTenantBucketLazyQueryHookResult = ReturnType<typeof useGetTenantBucketLazyQuery>;
 export type GetTenantBucketSuspenseQueryHookResult = ReturnType<typeof useGetTenantBucketSuspenseQuery>;
 export type GetTenantBucketQueryResult = Apollo.QueryResult<GetTenantBucketQuery, GetTenantBucketQueryVariables>;
+export const TenantGreenhousesDocument = gql`
+    query TenantGreenhouses($tenantId: ID) {
+  tenantGreenhouses(tenantId: $tenantId)
+}
+    `;
+
+/**
+ * __useTenantGreenhousesQuery__
+ *
+ * To run a query within a React component, call `useTenantGreenhousesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTenantGreenhousesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTenantGreenhousesQuery({
+ *   variables: {
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useTenantGreenhousesQuery(baseOptions?: Apollo.QueryHookOptions<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>(TenantGreenhousesDocument, options);
+      }
+export function useTenantGreenhousesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>(TenantGreenhousesDocument, options);
+        }
+// @ts-ignore
+export function useTenantGreenhousesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>): Apollo.UseSuspenseQueryResult<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>;
+export function useTenantGreenhousesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>): Apollo.UseSuspenseQueryResult<TenantGreenhousesQuery | undefined, TenantGreenhousesQueryVariables>;
+export function useTenantGreenhousesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>(TenantGreenhousesDocument, options);
+        }
+export type TenantGreenhousesQueryHookResult = ReturnType<typeof useTenantGreenhousesQuery>;
+export type TenantGreenhousesLazyQueryHookResult = ReturnType<typeof useTenantGreenhousesLazyQuery>;
+export type TenantGreenhousesSuspenseQueryHookResult = ReturnType<typeof useTenantGreenhousesSuspenseQuery>;
+export type TenantGreenhousesQueryResult = Apollo.QueryResult<TenantGreenhousesQuery, TenantGreenhousesQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
