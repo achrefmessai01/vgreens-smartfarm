@@ -1,27 +1,44 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@clerk/clerk-expo';
+import { useAppTheme } from '@/lib/theme-preference';
+import { SettingsAppearance } from '@/components/settings/settings-appearance';
 
 export default function SettingsScreen() {
   const { signOut } = useAuth();
+  const { colors } = useAppTheme();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
-      <View className="flex-1 items-center justify-center px-6">
-        <Text className="text-lg font-semibold text-foreground">
-          Settings
+    <SafeAreaView
+      className="flex-1 bg-background"
+      edges={['bottom']}
+      style={{ backgroundColor: colors.background }}
+    >
+      <View className="flex-1 px-4 pt-2">
+        <Text className="text-2xl font-bold text-foreground">Settings</Text>
+        <Text className="mt-1 text-sm text-muted-foreground">
+          Appearance and account
         </Text>
-        <Text className="mt-2 text-sm text-muted-foreground">
-          User settings will be built here
-        </Text>
+
+        <SettingsAppearance />
 
         <Pressable
           onPress={() => signOut()}
-          className="mt-8 rounded-lg bg-destructive px-6 py-3"
+          style={[styles.signOut, { backgroundColor: colors.destructive }]}
         >
-          <Text className="font-medium text-white">Sign Out</Text>
+          <Text style={styles.signOutText}>Sign Out</Text>
         </Pressable>
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  signOut: {
+    marginTop: 32,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  signOutText: { fontSize: 16, fontWeight: '700', color: '#ffffff' },
+});

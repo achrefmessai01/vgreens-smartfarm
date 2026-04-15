@@ -6,13 +6,10 @@ import {
   Users,
   Settings,
 } from 'lucide-react-native';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from 'react-native';
+import { useAppTheme } from '@/lib/theme-preference';
 
 export default function TabsLayout() {
-  const rawScheme = useColorScheme();
-  const colorScheme = rawScheme === 'dark' ? 'dark' : 'light';
-  const colors = Colors[colorScheme];
+  const { colors } = useAppTheme();
 
   return (
     <Tabs

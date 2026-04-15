@@ -9,3 +9,9 @@ export type {
 } from './user';
 
 export { ROLE_LABELS, TENANT_ALLOWED_ROLES } from './user';
+
+export type {
+  HarvestSummary,
+  BatchFormData,
+  BatchFormErrors,
+} from './harvest';

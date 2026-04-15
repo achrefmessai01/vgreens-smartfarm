@@ -12,10 +12,12 @@ import { Plus, Users } from 'lucide-react-native';
 import { Button } from '@/components/ui/button';
 import { UserCard } from '@/components/users/user-card';
 import { useTenantUsers } from '@/lib/hooks/use-tenant-users';
+import { useAppTheme } from '@/lib/theme-preference';
 import type { User } from '@/types/user';
 
 export default function UsersScreen() {
   const router = useRouter();
+  const { colors } = useAppTheme();
   const { users, loading, isSubmitting, handleDelete, refetch } =
     useTenantUsers();
   const [refreshing, setRefreshing] = useState(false);
@@ -42,16 +44,24 @@ export default function UsersScreen() {
 
   if (loading && users.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
+      <SafeAreaView
+        className="flex-1 bg-background"
+        edges={['bottom']}
+        style={{ backgroundColor: colors.background }}
+      >
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#016f7c" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
+    <SafeAreaView
+      className="flex-1 bg-background"
+      edges={['bottom']}
+      style={{ backgroundColor: colors.background }}
+    >
       <View className="flex-1 px-4 pt-4">
         <View className="mb-5 flex-row items-center justify-between">
           <View>
@@ -79,7 +89,7 @@ export default function UsersScreen() {
         {users.length === 0 ? (
           <View className="flex-1 items-center justify-center gap-3 pb-20">
             <View className="items-center justify-center rounded-full bg-muted p-5">
-              <Users size={32} color="#8ba5ad" />
+              <Users size={32} color={colors.mutedForeground} />
             </View>
             <Text className="text-base font-semibold text-foreground">
               No team members yet
@@ -106,7 +116,7 @@ export default function UsersScreen() {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={onRefresh}
-                tintColor="#016f7c"
+                tintColor={colors.primary}
               />
             }
             showsVerticalScrollIndicator={false}
