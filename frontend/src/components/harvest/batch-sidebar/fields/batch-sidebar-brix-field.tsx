@@ -29,7 +29,7 @@ export function BrixMeasurementsField({
     return (
       <div className="space-y-4">
         <div className="bg-muted h-5 animate-pulse rounded" />
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="space-y-2">
               <div className="bg-muted h-4 animate-pulse rounded" />
@@ -57,18 +57,18 @@ export function BrixMeasurementsField({
         {h?.qualityMetrics ?? 'Quality Metrics'}
       </p>
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-medium">
             {h?.brixMeasurements ?? 'Brix Measurements'}
           </p>
           <span className="text-muted-foreground text-sm">
             {h?.average ?? 'Average'}:{' '}
             <span className="text-lg font-medium text-orange-500">
-              {avgBrix > 0 ? avgBrix.toFixed(1) : '0.0'}°Bx
+              {avgBrix > 0 ? avgBrix.toFixed(1) : '0.0'}&deg;Bx
             </span>
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           {brixEntries.map((entry, index) => (
             <Field key={index}>
               <FieldLabel htmlFor={`brix-${index + 1}`}>

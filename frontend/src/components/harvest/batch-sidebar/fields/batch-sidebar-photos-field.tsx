@@ -75,7 +75,7 @@ export function PhotosField({
     <div className="space-y-4">
       <h3 className="font-medium">{h?.photos ?? 'Photos'}</h3>
       <div
-        className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-all duration-200 ${
+        className={`cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-all duration-200 sm:p-8 ${
           isDragOver
             ? 'border-primary bg-primary/5 scale-105'
             : 'border-muted-foreground/25 hover:border-muted-foreground/50'
@@ -115,7 +115,7 @@ export function PhotosField({
       />
 
       {photos.length > 0 && (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {photos.map((photo, index) => (
             <div
               key={index}
@@ -126,14 +126,14 @@ export function PhotosField({
                 alt={`${h?.photoAlt ?? 'Photo'} ${index + 1}`}
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 33vw, 100px"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 100px"
                 unoptimized
               />
               {onRemove && (
                 <button
                   type="button"
                   onClick={() => onRemove(index)}
-                  className="absolute top-1 right-1 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
+                  className="absolute top-1 right-1 rounded-full bg-red-500 p-1 text-white opacity-100 transition-opacity hover:bg-red-600 sm:opacity-0 sm:group-hover:opacity-100"
                 >
                   <X className="h-3 w-3" />
                 </button>

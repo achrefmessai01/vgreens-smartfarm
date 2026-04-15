@@ -67,10 +67,10 @@ export function BatchSidebar({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl"
+        className="flex w-full max-w-full flex-col gap-0 p-0 sm:max-w-2xl"
       >
-        <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
-          <SheetTitle className="dark:text-card-foreground">
+        <SheetHeader className="dark:border-primary-foreground/30 border-b px-4 pt-5 pb-4 sm:px-6 sm:pt-6">
+          <SheetTitle className="dark:text-card-foreground break-words pr-8 text-left leading-tight">
             {currentData?.greenhouse?.name
               ? `${h?.batchDetails ?? 'Batch Details'} for ${currentData.greenhouse.name}`
               : (h?.batchDetails ?? 'Batch Details')}
@@ -80,7 +80,7 @@ export function BatchSidebar({
         <div className="flex min-h-0 flex-1 flex-col">
           {currentData ? (
             <>
-              <div className="dark:border-primary-foreground/30 from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 shrink-0 space-y-6 border-b bg-gradient-to-r px-6 py-4">
+              <div className="dark:border-primary-foreground/30 from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 shrink-0 space-y-6 border-b bg-gradient-to-r px-4 py-4 sm:px-6">
                 <BatchHeaderField
                   name={currentData.name}
                   species={currentData.species}
@@ -95,7 +95,7 @@ export function BatchSidebar({
                 />
               </div>
 
-              <div className="min-h-0 flex-1 space-y-6 overflow-y-scroll px-6 py-6">
+              <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
                 <YieldDataField
                   marketable={currentData.todaysHarvest.marketable}
                   waste={currentData.todaysHarvest.waste}
@@ -125,7 +125,7 @@ export function BatchSidebar({
           )}
         </div>
 
-        <SheetFooter className="dark:border-primary-foreground/30 border-t px-6 py-4">
+        <SheetFooter className="dark:border-primary-foreground/30 border-t px-4 py-4 sm:px-6">
           <Button
             onClick={handleSave}
             disabled={busy || !harvestId}
