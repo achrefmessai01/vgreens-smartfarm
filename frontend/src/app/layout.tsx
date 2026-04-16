@@ -1,6 +1,7 @@
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ErrorMonitoringInitializer } from '@/components/error-monitoring-initializer';
 import { NetworkStatusMonitor } from '@/components/network-status-monitor';
+import { RegisterSW } from '@/components/register-sw';
 import { ToastProvider } from '@/components/ui/toast-provider';
 import { I18nProvider } from '@/i18n';
 import { ApolloProvider } from '@/lib/apollo-provider';
@@ -83,6 +84,7 @@ export default function RootLayout({
                     <ErrorMonitoringInitializer />
                     <ToastProvider>
                       <NetworkStatusMonitor />
+                      <RegisterSW />
                       {children}
                     </ToastProvider>
                   </ThemeProvider>
