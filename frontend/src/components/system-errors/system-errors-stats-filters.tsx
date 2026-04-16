@@ -16,10 +16,12 @@ interface StatsProps {
 
 export function SystemErrorsStatsCards({ stats }: StatsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Last 24 Hours</CardTitle>
+        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+          <CardTitle className="min-w-0 text-sm font-medium break-words">
+            Last 24 Hours
+          </CardTitle>
           <TrendingUp className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
@@ -28,8 +30,10 @@ export function SystemErrorsStatsCards({ stats }: StatsProps) {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Active Errors</CardTitle>
+        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+          <CardTitle className="min-w-0 text-sm font-medium break-words">
+            Active Errors
+          </CardTitle>
           <AlertCircle className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>
@@ -38,7 +42,7 @@ export function SystemErrorsStatsCards({ stats }: StatsProps) {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Resolved</CardTitle>
           <CheckCircle2 className="h-4 w-4 text-green-500" />
         </CardHeader>
@@ -50,7 +54,7 @@ export function SystemErrorsStatsCards({ stats }: StatsProps) {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Critical</CardTitle>
           <AlertCircle className="h-4 w-4 text-orange-500" />
         </CardHeader>
@@ -91,8 +95,8 @@ export function SystemErrorsFilters({
   activeFiltersCount,
 }: FiltersProps) {
   return (
-    <div className="flex flex-wrap items-end gap-3">
-      <div className="min-w-[150px] flex-1">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+      <div className="min-w-0">
         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
           Severity
         </label>
@@ -104,7 +108,7 @@ export function SystemErrorsFilters({
             )
           }
         >
-          <SelectTrigger className="h-9">
+          <SelectTrigger className="h-9 w-full">
             <SelectValue placeholder="All severities" />
           </SelectTrigger>
           <SelectContent>
@@ -117,7 +121,7 @@ export function SystemErrorsFilters({
           </SelectContent>
         </Select>
       </div>
-      <div className="min-w-[150px] flex-1">
+      <div className="min-w-0">
         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
           Source
         </label>
@@ -129,7 +133,7 @@ export function SystemErrorsFilters({
             )
           }
         >
-          <SelectTrigger className="h-9">
+          <SelectTrigger className="h-9 w-full">
             <SelectValue placeholder="All sources" />
           </SelectTrigger>
           <SelectContent>
@@ -146,7 +150,7 @@ export function SystemErrorsFilters({
           </SelectContent>
         </Select>
       </div>
-      <div className="min-w-[150px] flex-1">
+      <div className="min-w-0">
         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
           Status
         </label>
@@ -160,7 +164,7 @@ export function SystemErrorsFilters({
             )
           }
         >
-          <SelectTrigger className="h-9">
+          <SelectTrigger className="h-9 w-full">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
@@ -170,13 +174,13 @@ export function SystemErrorsFilters({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row sm:flex-wrap sm:items-center 2xl:col-span-1 2xl:justify-end">
         {activeFiltersCount > 0 && (
           <Button
             variant="outline"
             size="sm"
             onClick={clearFilters}
-            className="h-9"
+            className="h-9 w-full sm:w-auto"
           >
             Clear All ({activeFiltersCount})
           </Button>
@@ -186,7 +190,7 @@ export function SystemErrorsFilters({
           size="sm"
           onClick={handleRefresh}
           disabled={loading}
-          className="h-9"
+          className="h-9 w-full sm:w-auto"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
         </Button>
