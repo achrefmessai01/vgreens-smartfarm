@@ -129,7 +129,7 @@ export function FeatureNotAvailableCard({
               <Button
                 onClick={onRedirect}
                 size="lg"
-                className="group relative overflow-hidden px-8 py-6 text-base font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+                className="group relative overflow-hidden px-8 py-6 text-base font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   {redirectLabel}

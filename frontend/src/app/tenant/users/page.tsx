@@ -40,101 +40,103 @@ export default function TenantUsersPage() {
     <FeatureGuard featureKey="user_management">
       <div
         className={
-          isMobile ? 'flex flex-col gap-6' : 'flex h-full min-h-0 flex-col gap-6'
+          isMobile
+            ? 'flex flex-col gap-6'
+            : 'flex h-full min-h-0 flex-col gap-6'
         }
       >
-      <PageHeader
-        title="User Management"
-        subtitle="Manage users for your tenant"
-      />
-
-      <div className={isMobile ? '' : 'min-h-0 flex-1'}>
-        <UserManagementTable
-          users={page.users}
-          onEdit={page.handleEdit}
-          onDelete={page.handleDelete}
-          onCreate={page.handleCreate}
-          isLoading={page.isLoading}
-          hideTenantColumn={true}
+        <PageHeader
+          title="User Management"
+          subtitle="Manage users for your tenant"
         />
-      </div>
 
-      <Sheet open={page.isSheetOpen} onOpenChange={page.setIsSheetOpen}>
-        <SheetContent
-          side="right"
-          className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
+        <div className={isMobile ? '' : 'min-h-0 flex-1'}>
+          <UserManagementTable
+            users={page.users}
+            onEdit={page.handleEdit}
+            onDelete={page.handleDelete}
+            onCreate={page.handleCreate}
+            isLoading={page.isLoading}
+            hideTenantColumn={true}
+          />
+        </div>
+
+        <Sheet open={page.isSheetOpen} onOpenChange={page.setIsSheetOpen}>
+          <SheetContent
+            side="right"
+            className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
+          >
+            <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
+              <SheetTitle className="dark:text-card-foreground">
+                {page.editingUser ? 'Edit User' : 'Create User'}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <UserManagementForm
+                ref={formRef}
+                initialData={page.editingUser || undefined}
+                onSubmit={page.handleSubmit}
+                onCancel={page.handleCancel}
+                isLoading={page.isLoading}
+                allowedRoles={page.allowedRoles}
+                hideTenantSelection={true}
+              />
+            </div>
+            <SheetFooter className="dark:border-primary-foreground/30 flex-row gap-2 border-t px-6 py-4">
+              <Button
+                variant="outline"
+                onClick={page.handleCancel}
+                disabled={page.isLoading}
+                className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => formRef.current?.submit()}
+                disabled={page.isLoading}
+                className="flex-1"
+              >
+                {page.isLoading
+                  ? '...'
+                  : page.editingUser
+                    ? 'Update User'
+                    : 'Create User'}
+              </Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
+
+        <ConfirmationDialog
+          open={page.deleteConfirmation.isOpen}
+          onOpenChange={(open) =>
+            page.setDeleteConfirmation({ user: null, isOpen: open })
+          }
+          title="Delete User"
+          description="Are you sure you want to delete this user? This action cannot be undone."
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          variant="destructive"
+          onConfirm={page.confirmDelete}
+          onCancel={() =>
+            page.setDeleteConfirmation({ user: null, isOpen: false })
+          }
         >
-          <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
-            <SheetTitle className="dark:text-card-foreground">
-              {page.editingUser ? 'Edit User' : 'Create User'}
-            </SheetTitle>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            <UserManagementForm
-              ref={formRef}
-              initialData={page.editingUser || undefined}
-              onSubmit={page.handleSubmit}
-              onCancel={page.handleCancel}
-              isLoading={page.isLoading}
-              allowedRoles={page.allowedRoles}
-              hideTenantSelection={true}
-            />
-          </div>
-          <SheetFooter className="dark:border-primary-foreground/30 flex-row gap-2 border-t px-6 py-4">
-            <Button
-              variant="outline"
-              onClick={page.handleCancel}
-              disabled={page.isLoading}
-              className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => formRef.current?.submit()}
-              disabled={page.isLoading}
-              className="flex-1"
-            >
-              {page.isLoading
-                ? '...'
-                : page.editingUser
-                  ? 'Update User'
-                  : 'Create User'}
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-
-      <ConfirmationDialog
-        open={page.deleteConfirmation.isOpen}
-        onOpenChange={(open) =>
-          page.setDeleteConfirmation({ user: null, isOpen: open })
-        }
-        title="Delete User"
-        description="Are you sure you want to delete this user? This action cannot be undone."
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        variant="destructive"
-        onConfirm={page.confirmDelete}
-        onCancel={() =>
-          page.setDeleteConfirmation({ user: null, isOpen: false })
-        }
-      >
-        {page.deleteConfirmation.user && (
-          <div className="bg-muted dark:bg-primary-foreground/10 dark:border-primary-foreground/20 rounded-lg p-4 dark:border">
-            <p className="dark:text-card-foreground font-medium">
-              {page.deleteConfirmation.user.firstName &&
-              page.deleteConfirmation.user.lastName
-                ? `${page.deleteConfirmation.user.firstName} ${page.deleteConfirmation.user.lastName}`
-                : page.deleteConfirmation.user.email || 'Unknown User'}
-            </p>
-            {page.deleteConfirmation.user.email && (
-              <p className="text-muted-foreground mt-1 text-sm">
-                {page.deleteConfirmation.user.email}
+          {page.deleteConfirmation.user && (
+            <div className="bg-muted dark:bg-primary-foreground/10 dark:border-primary-foreground/20 rounded-lg p-4 dark:border">
+              <p className="dark:text-card-foreground font-medium">
+                {page.deleteConfirmation.user.firstName &&
+                page.deleteConfirmation.user.lastName
+                  ? `${page.deleteConfirmation.user.firstName} ${page.deleteConfirmation.user.lastName}`
+                  : page.deleteConfirmation.user.email || 'Unknown User'}
               </p>
-            )}
-          </div>
-        )}
-      </ConfirmationDialog>
+              {page.deleteConfirmation.user.email && (
+                <p className="text-muted-foreground mt-1 text-sm">
+                  {page.deleteConfirmation.user.email}
+                </p>
+              )}
+            </div>
+          )}
+        </ConfirmationDialog>
       </div>
     </FeatureGuard>
   );
