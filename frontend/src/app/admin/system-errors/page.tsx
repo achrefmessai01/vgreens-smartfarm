@@ -9,8 +9,6 @@ import {
 } from '@/components/system-errors';
 import { Badge } from '@/components/ui/badge';
 import { ErrorSource, ReportSeverity, SystemError } from '@/generated/graphql';
-import { useI18n } from '@/i18n';
-import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import {
   useResolveSystemError,
   useSystemErrors,
@@ -21,8 +19,6 @@ import { useState } from 'react';
 // ...existing code...
 
 export default function AdminSystemErrorsPage() {
-  const { t } = useI18n();
-  const { isMobile } = useResponsiveBreakpoint('lg');
   const [selectedError, setSelectedError] = useState<SystemError | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -41,13 +37,13 @@ export default function AdminSystemErrorsPage() {
     limit: Infinity, // fetch all errors
   });
 
-  const { data: statsData } = useSystemErrorStats(24); // Last 24 hours
+  useSystemErrorStats(24); // Last 24 hours
   const [resolveError, { loading: isResolving }] = useResolveSystemError();
 
   const errors = data?.getRecentSystemErrors || [];
 
   // Parse stats
-  let stats = {
+  const stats = {
     total: errors.length,
     active: errors.filter((e) => !e.isResolved).length,
     resolved: errors.filter((e) => e.isResolved).length,
@@ -95,20 +91,18 @@ export default function AdminSystemErrorsPage() {
     resolvedFilter,
   ].filter(Boolean).length;
 
-  // Use dynamic layout for mobile, fixed height for desktop
-  const containerClassName = isMobile
-    ? 'flex flex-col gap-6'
-    : 'flex flex-col gap-6 h-full min-h-0';
+  const containerClassName =
+    'flex w-full min-w-0 flex-col gap-4 lg:h-full lg:min-h-0 xl:gap-6';
 
-  const listContainerClassName = isMobile
-    ? 'flex flex-col gap-4'
-    : 'flex-1 min-h-0 flex flex-col gap-4';
+  const listContainerClassName =
+    'flex min-w-0 flex-col gap-3 lg:min-h-0 lg:flex-1 xl:gap-4';
 
   return (
     <div className={containerClassName}>
       <PageHeader
         title="System Error History"
         subtitle="Monitor and manage application errors and exceptions"
+        className="mb-4 lg:mb-5 xl:mb-6"
       />
 
       {/* Stats Cards */}
@@ -116,10 +110,10 @@ export default function AdminSystemErrorsPage() {
 
       {/* Error List */}
       <div className={listContainerClassName}>
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Error History</h3>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h3 className="break-words text-lg font-semibold">Error History</h3>
           {activeFiltersCount > 0 && (
-            <Badge variant="outline">
+            <Badge variant="outline" className="w-fit">
               {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''}{' '}
               active
             </Badge>
@@ -140,7 +134,7 @@ export default function AdminSystemErrorsPage() {
           activeFiltersCount={activeFiltersCount}
         />
 
-        <div className={isMobile ? '' : 'min-h-0 flex-1'}>
+        <div className="min-w-0 lg:min-h-0 lg:flex-1">
           <SystemErrorsTable
             errors={errors}
             isLoading={loading}
