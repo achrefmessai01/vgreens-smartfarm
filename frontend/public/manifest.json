@@ -2,7 +2,7 @@
   "name": "vGreens Lab - Smart Farm Management",
   "short_name": "vGreens Lab",
   "description": "vGreens Lab is a platform for managing and analyzing greenhouse data",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
   "background_color": "#030712",
   "theme_color": "#10b981",
