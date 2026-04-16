@@ -58,7 +58,11 @@ export class ClerkAuthGuard implements CanActivate {
       const session = await clerkClient.verifyToken(token, {
         // Extract the instance ID from the publishable key (format: pk_test_<instance>_<key>)
         authorizedParties: process.env.FRONTEND_APP_URL
-          ? [process.env.FRONTEND_APP_URL, 'http://localhost:8081']
+          ? [
+              process.env.FRONTEND_APP_URL,
+              'http://localhost:8081',
+              'http://192.168.1.6:8081',
+            ]
           : undefined,
       });
       request.clerkSession = session;

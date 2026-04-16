@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { View, useColorScheme as useRNColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { colorScheme } from 'nativewind';
 import { Colors } from '@/constants/theme';
 
 const STORAGE_KEY = 'vgreens-theme-preference';
@@ -63,6 +64,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [preference, setPreference, resolvedScheme, hydrated],
   );
 
+  useEffect(() => {
+    colorScheme.set(resolvedScheme);
+  }, [resolvedScheme]);
+
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
@@ -88,13 +93,7 @@ export function useResolvedColorScheme(): 'light' | 'dark' {
 }
 
 export function ThemedRoot({ children }: { children: ReactNode }) {
-  const { resolvedScheme } = useAppTheme();
   return (
-    <View
-      className={`flex-1 ${resolvedScheme === 'dark' ? 'dark' : ''}`}
-      style={{ flex: 1 }}
-    >
-      {children}
-    </View>
+    <View className="flex-1" style={{ flex: 1 }}>{children}</View>
   );
 }

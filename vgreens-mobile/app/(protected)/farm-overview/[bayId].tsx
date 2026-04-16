@@ -1,7 +1,6 @@
 import { useLayoutEffect } from 'react';
 import { View, Text } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { useNavigation } from '@react-navigation/native';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BayDetailScreen() {
