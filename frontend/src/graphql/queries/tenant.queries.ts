@@ -60,3 +60,9 @@ export const GET_TENANT_BUCKET_QUERY = gql`
     }
   }
 `;
+
+export const TENANT_GREENHOUSES_QUERY = gql`
+  query TenantGreenhouses($tenantId: ID) {
+    tenantGreenhouses(tenantId: $tenantId)
+  }
+`;
