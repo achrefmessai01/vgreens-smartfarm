@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
       'vGreens Lab is a platform for managing and analyzing greenhouse data',
     start_url: '/?source=pwa',
     display: 'standalone',
-    display_override: ['standalone', 'minimal-ui'],
+    display_override: ['standalone'],
     background_color: '#030712',
     theme_color: '#10b981',
     orientation: 'portrait',
