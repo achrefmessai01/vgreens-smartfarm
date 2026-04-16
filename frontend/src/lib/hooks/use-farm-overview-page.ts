@@ -41,8 +41,15 @@ export type { FarmOverviewTranslations } from '@/types/farm-overview.types';
 
 export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const { toast } = useToast();
-  const { role, user, loading: currentUserLoading } = useCurrentUser();
+  const {
+    role,
+    user,
+    loading: currentUserLoading,
+    isTenantAdmin,
+  } = useCurrentUser();
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
+  const canEditSensorPositions =
+    role === UserRole.VgreensAdmin || isTenantAdmin;
   const searchParams = useSearchParams();
   const initialTenantIdFromUrl = searchParams.get('tenantId') ?? '';
 
@@ -219,6 +226,12 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       xPosition,
       yPosition,
     }: SensorPositionCommit) => {
+      if (!canEditSensorPositions) {
+        throw new Error(
+          'Current user is not allowed to update sensor positions',
+        );
+      }
+
       if (!configQueryTenantId) {
         throw new Error('Missing tenant context for sensor position update');
       }
@@ -271,6 +284,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       }
     },
     [
+      canEditSensorPositions,
       configQueryTenantId,
       persistedSensorConfigMap,
       refetchSensorConfigs,
@@ -470,6 +484,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
 
   return {
     isVGreensAdmin,
+    canEditSensorPositions,
     tenants,
     selectedTenantId,
     handleTenantChange,

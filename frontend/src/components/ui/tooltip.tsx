@@ -9,6 +9,8 @@ interface TooltipProps {
   side?: 'top' | 'right' | 'bottom' | 'left';
   align?: 'start' | 'center' | 'end';
   delayDuration?: number;
+  hideDelayDuration?: number;
+  interactive?: boolean;
   className?: string;
 }
 
@@ -18,11 +20,18 @@ export function Tooltip({
   side = 'top',
   align = 'center',
   delayDuration = 200,
+  hideDelayDuration = 120,
+  interactive = false,
   className,
 }: TooltipProps) {
   const [isVisible, setIsVisible] = React.useState(false);
   const [position, setPosition] = React.useState({ top: 0, left: 0 });
-  const timeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
+  const openTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const closeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const triggerRef = React.useRef<HTMLElement | null>(null);
   const tooltipRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -76,21 +85,106 @@ export function Tooltip({
     setPosition({ top, left });
   }, [side, align]);
 
-  const handleMouseEnter = React.useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+  const clearOpenTimeout = React.useCallback(() => {
+    if (openTimeoutRef.current) {
+      clearTimeout(openTimeoutRef.current);
+      openTimeoutRef.current = null;
     }
-    timeoutRef.current = setTimeout(() => {
+  }, []);
+
+  const clearCloseTimeout = React.useCallback(() => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  }, []);
+
+  const openTooltip = React.useCallback(() => {
+    clearCloseTimeout();
+    clearOpenTimeout();
+    openTimeoutRef.current = setTimeout(() => {
       setIsVisible(true);
+      openTimeoutRef.current = null;
     }, delayDuration);
-  }, [delayDuration]);
+  }, [clearCloseTimeout, clearOpenTimeout, delayDuration]);
+
+  const closeTooltip = React.useCallback(
+    (delay = interactive ? hideDelayDuration : 0) => {
+      clearOpenTimeout();
+      clearCloseTimeout();
+
+      if (delay <= 0) {
+        setIsVisible(false);
+        return;
+      }
+
+      closeTimeoutRef.current = setTimeout(() => {
+        setIsVisible(false);
+        closeTimeoutRef.current = null;
+      }, delay);
+    },
+    [clearCloseTimeout, clearOpenTimeout, hideDelayDuration, interactive],
+  );
+
+  const handleMouseEnter = React.useCallback(() => {
+    if (isVisible) {
+      clearCloseTimeout();
+      return;
+    }
+
+    openTooltip();
+  }, [clearCloseTimeout, isVisible, openTooltip]);
 
   const handleMouseLeave = React.useCallback(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+    closeTooltip();
+  }, [closeTooltip]);
+
+  const handleTooltipMouseEnter = React.useCallback(() => {
+    if (!interactive) return;
+    clearOpenTimeout();
+    clearCloseTimeout();
+    setIsVisible(true);
+  }, [clearCloseTimeout, clearOpenTimeout, interactive]);
+
+  const handleTooltipMouseLeave = React.useCallback(() => {
+    if (!interactive) return;
+    closeTooltip(hideDelayDuration);
+  }, [closeTooltip, hideDelayDuration, interactive]);
+
+  const handleFocus = React.useCallback(() => {
+    if (isVisible) {
+      clearCloseTimeout();
+      return;
     }
-    setIsVisible(false);
-  }, []);
+
+    openTooltip();
+  }, [clearCloseTimeout, isVisible, openTooltip]);
+
+  const handleBlur = React.useCallback(
+    (event: React.FocusEvent<HTMLDivElement>) => {
+      const nextFocused = event.relatedTarget as Node | null;
+      if (interactive && tooltipRef.current?.contains(nextFocused)) {
+        return;
+      }
+
+      closeTooltip();
+    },
+    [closeTooltip, interactive],
+  );
+
+  const handleTooltipBlur = React.useCallback(
+    (event: React.FocusEvent<HTMLDivElement>) => {
+      if (!interactive) return;
+
+      const nextFocused = event.relatedTarget as Node | null;
+      if (triggerRef.current?.contains(nextFocused)) {
+        return;
+      }
+
+      closeTooltip(hideDelayDuration);
+    },
+    [closeTooltip, hideDelayDuration, interactive],
+  );
 
   const wrapperRef = React.useCallback((node: HTMLDivElement | null) => {
     if (node) {
@@ -101,18 +195,27 @@ export function Tooltip({
   }, []);
 
   React.useEffect(() => {
-    if (isVisible) {
-      updatePosition();
-    }
-  }, [isVisible, updatePosition]);
+    if (!isVisible) return;
+
+    const frameId = window.requestAnimationFrame(updatePosition);
+    const handleViewportChange = () => updatePosition();
+
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('scroll', handleViewportChange, true);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('scroll', handleViewportChange, true);
+    };
+  }, [content, isVisible, updatePosition]);
 
   React.useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      clearOpenTimeout();
+      clearCloseTimeout();
     };
-  }, []);
+  }, [clearCloseTimeout, clearOpenTimeout]);
 
   return (
     <>
@@ -120,8 +223,8 @@ export function Tooltip({
         ref={wrapperRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        onFocus={handleMouseEnter}
-        onBlur={handleMouseLeave}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         style={{ display: 'contents' }}
       >
         {children}
@@ -130,9 +233,14 @@ export function Tooltip({
         <div
           ref={tooltipRef}
           role="tooltip"
+          onMouseEnter={handleTooltipMouseEnter}
+          onMouseLeave={handleTooltipMouseLeave}
+          onFocus={handleTooltipMouseEnter}
+          onBlur={handleTooltipBlur}
           className={cn(
-            'animate-in fade-in-0 zoom-in-95 pointer-events-none fixed z-50',
+            'animate-in fade-in-0 zoom-in-95 fixed z-50',
             'border-border bg-popover text-popover-foreground rounded-md border px-3 py-1.5 text-sm shadow-md',
+            interactive ? 'pointer-events-auto' : 'pointer-events-none',
             className,
           )}
           style={{
