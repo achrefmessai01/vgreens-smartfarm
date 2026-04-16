@@ -12,15 +12,21 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/toast-provider';
+import { useI18n } from '@/i18n';
 import {
   formatParameterDisplayValue,
   getParameterColor,
   getParameterUnit,
 } from '@/lib/farm-data';
 import { useFullMapData } from '@/lib/hooks/use-full-map-data';
-import { parseLiveSensorSlotId } from '@/lib/sensor-map-positions';
+import {
+  type GreenhouseDimensions,
+  parseLiveSensorSlotId,
+} from '@/lib/sensor-map-positions';
 import { cn } from '@/lib/utils';
 import type { ViewSensorMapProps } from '@/types/sensor-map';
 import type { SensorWithPosition } from '@/types/view-single-bay.types';
@@ -48,9 +54,10 @@ interface SensorPillProps {
   sensor: ResolvedSensor;
   parameter: string;
   unit: string;
+  greenhouseDimensions: GreenhouseDimensions;
   selectedSlotId: string | null;
-  onSelectSlot: (slotId: string | null) => void;
   onSuppressibleClick: (slotId: string | null) => void;
+  onSensorPositionCommit: ViewSensorMapProps['onSensorPositionCommit'];
   activeDragId: string | null;
   invalidPreviewId: string | null;
   invalidFlashId: string | null;
@@ -58,6 +65,225 @@ interface SensorPillProps {
   positionErrorDeviceId?: string | null;
   showTooltip: boolean;
   readOnly?: boolean;
+}
+
+function roundPosition(value: number) {
+  return Number(value.toFixed(2));
+}
+
+function formatPositionValue(value: number) {
+  return `${value.toFixed(2)} m`;
+}
+
+function formatPositionInputValue(value: number) {
+  return `${roundPosition(value)}`;
+}
+
+function parsePositionInputValue(value: string) {
+  return value.trim() === '' ? Number.NaN : Number(value);
+}
+
+function getPositionFromPercents(
+  leftPercent: number,
+  topPercent: number,
+  greenhouseDimensions: GreenhouseDimensions,
+) {
+  return {
+    xPosition: roundPosition(
+      (leftPercent / 100) * greenhouseDimensions.xDimension,
+    ),
+    yPosition: roundPosition(
+      (1 - topPercent / 100) * greenhouseDimensions.yDimension,
+    ),
+  };
+}
+
+interface SensorPositionTooltipContentProps {
+  deviceId: string;
+  currentXPosition: number;
+  currentYPosition: number;
+  greenhouseDimensions: GreenhouseDimensions;
+  readOnly?: boolean;
+  saving?: boolean;
+  onSave?: (xPosition: number, yPosition: number) => Promise<void>;
+}
+
+function SensorPositionTooltipContent({
+  deviceId,
+  currentXPosition,
+  currentYPosition,
+  greenhouseDimensions,
+  readOnly,
+  saving,
+  onSave,
+}: SensorPositionTooltipContentProps) {
+  const { t } = useI18n();
+  const sensorConfigT = t.pages.admin.tenants.sensorConfig;
+  const [xValue, setXValue] = React.useState(
+    formatPositionInputValue(currentXPosition),
+  );
+  const [yValue, setYValue] = React.useState(
+    formatPositionInputValue(currentYPosition),
+  );
+
+  React.useEffect(() => {
+    setXValue(formatPositionInputValue(currentXPosition));
+    setYValue(formatPositionInputValue(currentYPosition));
+  }, [currentXPosition, currentYPosition]);
+
+  const parsedXValue = parsePositionInputValue(xValue);
+  const parsedYValue = parsePositionInputValue(yValue);
+  const hasValidNumbers =
+    Number.isFinite(parsedXValue) && Number.isFinite(parsedYValue);
+  const nextRoundedX = hasValidNumbers ? roundPosition(parsedXValue) : null;
+  const nextRoundedY = hasValidNumbers ? roundPosition(parsedYValue) : null;
+  const isWithinBounds =
+    nextRoundedX != null &&
+    nextRoundedY != null &&
+    nextRoundedX >= 0 &&
+    nextRoundedX <= greenhouseDimensions.xDimension &&
+    nextRoundedY >= 0 &&
+    nextRoundedY <= greenhouseDimensions.yDimension;
+  const isDirty =
+    nextRoundedX !== roundPosition(currentXPosition) ||
+    nextRoundedY !== roundPosition(currentYPosition);
+  const disableSave =
+    readOnly || saving || !hasValidNumbers || !isWithinBounds || !isDirty;
+
+  const handleReset = React.useCallback(() => {
+    setXValue(formatPositionInputValue(currentXPosition));
+    setYValue(formatPositionInputValue(currentYPosition));
+  }, [currentXPosition, currentYPosition]);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (
+      !onSave ||
+      disableSave ||
+      nextRoundedX == null ||
+      nextRoundedY == null
+    ) {
+      return;
+    }
+
+    await onSave(nextRoundedX, nextRoundedY);
+  }
+
+  const xInvalid =
+    xValue !== '' &&
+    (!Number.isFinite(parsedXValue) ||
+      parsedXValue < 0 ||
+      parsedXValue > greenhouseDimensions.xDimension);
+  const yInvalid =
+    yValue !== '' &&
+    (!Number.isFinite(parsedYValue) ||
+      parsedYValue < 0 ||
+      parsedYValue > greenhouseDimensions.yDimension);
+
+  return (
+    <div className="w-56 space-y-2.5">
+      <div className="space-y-1">
+        <div className="text-muted-foreground text-[10px] font-medium tracking-[0.14em] uppercase">
+          {sensorConfigT.device}
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="truncate text-sm font-semibold">{deviceId}</span>
+          {saving ? (
+            <span className="text-muted-foreground text-[10px] font-medium">
+              {sensorConfigT.saving}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {readOnly ? (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <div className="text-muted-foreground text-[10px] font-medium tracking-[0.08em] uppercase">
+              {sensorConfigT.xPosition}
+            </div>
+            <div className="text-sm font-semibold tabular-nums">
+              {formatPositionValue(currentXPosition)}
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-muted-foreground text-[10px] font-medium tracking-[0.08em] uppercase">
+              {sensorConfigT.yPosition}
+            </div>
+            <div className="text-sm font-semibold tabular-nums">
+              {formatPositionValue(currentYPosition)}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <form
+          className="space-y-2.5"
+          onSubmit={(event) => void handleSubmit(event)}
+        >
+          <div className="grid grid-cols-2 gap-2">
+            <label className="space-y-1">
+              <span className="text-muted-foreground text-[10px] font-medium tracking-[0.08em] uppercase">
+                {sensorConfigT.xPosition}
+              </span>
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0"
+                max={greenhouseDimensions.xDimension}
+                value={xValue}
+                onChange={(event) => setXValue(event.target.value)}
+                aria-invalid={xInvalid}
+                className="h-8 px-2 text-xs tabular-nums"
+              />
+              <div className="text-muted-foreground text-[10px] tabular-nums">
+                0.00 - {formatPositionValue(greenhouseDimensions.xDimension)}
+              </div>
+            </label>
+            <label className="space-y-1">
+              <span className="text-muted-foreground text-[10px] font-medium tracking-[0.08em] uppercase">
+                {sensorConfigT.yPosition}
+              </span>
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0"
+                max={greenhouseDimensions.yDimension}
+                value={yValue}
+                onChange={(event) => setYValue(event.target.value)}
+                aria-invalid={yInvalid}
+                className="h-8 px-2 text-xs tabular-nums"
+              />
+              <div className="text-muted-foreground text-[10px] tabular-nums">
+                0.00 - {formatPositionValue(greenhouseDimensions.yDimension)}
+              </div>
+            </label>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={saving || !isDirty}
+              onClick={handleReset}
+              className="h-7 px-2 text-xs"
+            >
+              {sensorConfigT.cancel}
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={disableSave}
+              className="h-7 px-2 text-xs"
+            >
+              {saving ? sensorConfigT.saving : sensorConfigT.save}
+            </Button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
 }
 
 function SensorPillContent({
@@ -89,8 +315,10 @@ function SensorPill({
   sensor,
   parameter,
   unit,
+  greenhouseDimensions,
   selectedSlotId,
   onSuppressibleClick,
+  onSensorPositionCommit,
   activeDragId,
   invalidPreviewId,
   invalidFlashId,
@@ -106,13 +334,43 @@ function SensorPill({
   const isInvalidFlash = invalidFlashId === slotId;
   const isSaving = savingDeviceId === deviceId;
   const hasPersistError = positionErrorDeviceId === deviceId;
+  const { xPosition, yPosition } = getPositionFromPercents(
+    leftPercent,
+    topPercent,
+    greenhouseDimensions,
+  );
   const glowColor = slot
     ? getParameterColor(value ?? 0, parameter, slot.id)
     : 'rgb(200, 200, 200)';
   const tooltipContent =
-    slot && value != null
-      ? `${deviceId}: ${formatParameterDisplayValue(value)}${unit}`
-      : deviceId;
+    slot != null ? (
+      <SensorPositionTooltipContent
+        deviceId={deviceId}
+        currentXPosition={xPosition}
+        currentYPosition={yPosition}
+        greenhouseDimensions={greenhouseDimensions}
+        readOnly={readOnly}
+        saving={isSaving}
+        onSave={
+          readOnly
+            ? undefined
+            : async (nextXPosition, nextYPosition) => {
+                const parsedSlot = parseLiveSensorSlotId(slot.id);
+                await Promise.resolve(
+                  onSensorPositionCommit({
+                    slotId: slot.id,
+                    deviceId: parsedSlot.device || deviceId,
+                    greenhouse: parsedSlot.greenhouse,
+                    xPosition: nextXPosition,
+                    yPosition: nextYPosition,
+                  }),
+                );
+              }
+        }
+      />
+    ) : (
+      deviceId
+    );
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -129,7 +387,11 @@ function SensorPill({
     slot
       ? 'border-white/30 bg-cyan-300/90 text-slate-900'
       : 'border-border bg-muted text-muted-foreground cursor-not-allowed opacity-50',
-    slot && !isDraggingThis && !isSaving && !readOnly && 'cursor-grab hover:scale-105',
+    slot &&
+      !isDraggingThis &&
+      !isSaving &&
+      !readOnly &&
+      'cursor-grab hover:scale-105',
     isSelected && 'ring-2 ring-white/80 ring-offset-0',
     isDraggingThis && 'z-30 scale-110 cursor-grabbing',
     isSaving && 'ring-2 ring-cyan-500/60 animate-pulse',
@@ -196,7 +458,13 @@ function SensorPill({
         </div>
       )}
       {showTooltip ? (
-        <Tooltip content={tooltipContent}>{button}</Tooltip>
+        <Tooltip
+          content={tooltipContent}
+          interactive={slot != null && !readOnly}
+          className={slot ? 'px-3 py-2' : undefined}
+        >
+          {button}
+        </Tooltip>
       ) : (
         button
       )}
@@ -484,25 +752,29 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
           <div ref={mapRef} className="relative h-full w-full overflow-hidden">
             {greenhouseDimensions.bayCount != null &&
               greenhouseDimensions.bayCount > 1 &&
-              Array.from({ length: greenhouseDimensions.bayCount - 1 }, (_, i) => (
-                <div
-                  key={`bay-line-${i}`}
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-y-0 w-px bg-foreground/15"
-                  style={{
-                    left: `${((i + 1) / greenhouseDimensions.bayCount!) * 100}%`,
-                  }}
-                />
-              ))}
+              Array.from(
+                { length: greenhouseDimensions.bayCount - 1 },
+                (_, i) => (
+                  <div
+                    key={`bay-line-${i}`}
+                    aria-hidden="true"
+                    className="bg-foreground/15 pointer-events-none absolute inset-y-0 w-px"
+                    style={{
+                      left: `${((i + 1) / greenhouseDimensions.bayCount!) * 100}%`,
+                    }}
+                  />
+                ),
+              )}
             {resolvedSensors.map((sensor) => (
               <SensorPill
                 key={sensor.slotId}
                 sensor={sensor}
                 parameter={parameter}
                 unit={unit}
+                greenhouseDimensions={greenhouseDimensions}
                 selectedSlotId={selectedSlotId}
-                onSelectSlot={onSelectSlot}
                 onSuppressibleClick={handleSuppressibleClick}
+                onSensorPositionCommit={onSensorPositionCommit}
                 activeDragId={activeDragId}
                 invalidPreviewId={invalidPreviewId}
                 invalidFlashId={invalidFlashId}
