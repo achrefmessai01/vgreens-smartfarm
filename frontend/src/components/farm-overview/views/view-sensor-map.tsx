@@ -155,6 +155,24 @@ function SensorPositionTooltipContent({
     setYValue(formatPositionInputValue(currentYPosition));
   }, [currentXPosition, currentYPosition]);
 
+  const handleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (
+          !onSave ||
+          disableSave ||
+          nextRoundedX == null ||
+          nextRoundedY == null
+        ) {
+          return;
+        }
+        void onSave(nextRoundedX, nextRoundedY);
+      }
+    },
+    [onSave, disableSave, nextRoundedX, nextRoundedY],
+  );
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (
@@ -233,6 +251,7 @@ function SensorPositionTooltipContent({
                 max={greenhouseDimensions.xDimension}
                 value={xValue}
                 onChange={(event) => setXValue(event.target.value)}
+                onKeyDown={handleKeyDown}
                 aria-invalid={xInvalid}
                 className="h-8 px-2 text-xs tabular-nums"
               />
@@ -252,6 +271,7 @@ function SensorPositionTooltipContent({
                 max={greenhouseDimensions.yDimension}
                 value={yValue}
                 onChange={(event) => setYValue(event.target.value)}
+                onKeyDown={handleKeyDown}
                 aria-invalid={yInvalid}
                 className="h-8 px-2 text-xs tabular-nums"
               />
