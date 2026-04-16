@@ -1,14 +1,15 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import { I18nProvider } from '@/i18n';
-import { ThemeProvider } from 'next-themes';
-import { ClerkProvider } from '@clerk/nextjs';
-import { Geist, Geist_Mono } from 'next/font/google';
-import { ApolloProvider } from '@/lib/apollo-provider';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ErrorMonitoringInitializer } from '@/components/error-monitoring-initializer';
-import { PostHogProvider } from './providers';
+import { NetworkStatusMonitor } from '@/components/network-status-monitor';
 import { ToastProvider } from '@/components/ui/toast-provider';
+import { I18nProvider } from '@/i18n';
+import { ApolloProvider } from '@/lib/apollo-provider';
+import { ClerkProvider } from '@clerk/nextjs';
+import type { Metadata } from 'next';
+import { ThemeProvider } from 'next-themes';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import { PostHogProvider } from './providers';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -24,10 +25,35 @@ export const metadata: Metadata = {
   title: 'vGreens Lab',
   description:
     'vGreens Lab is a platform for managing and analyzing greenhouse data',
+  manifest: '/manifest.json',
   icons: {
     icon: '/vGreens.svg',
     shortcut: '/vGreens.svg',
-    apple: '/vGreens.svg',
+    apple: [
+      { url: '/icons/ios/120.png', sizes: '120x120', type: 'image/png' },
+      { url: '/icons/ios/152.png', sizes: '152x152', type: 'image/png' },
+      { url: '/icons/ios/167.png', sizes: '167x167', type: 'image/png' },
+      { url: '/icons/ios/180.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'vGreens Lab',
+  },
+  applicationName: 'vGreens Lab',
+  formatDetection: {
+    telephone: false,
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#10b981' },
+    { media: '(prefers-color-scheme: dark)', color: '#10b981' },
+  ],
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
   },
 };
 
@@ -53,7 +79,10 @@ export default function RootLayout({
                     disableTransitionOnChange
                   >
                     <ErrorMonitoringInitializer />
-                    <ToastProvider>{children}</ToastProvider>
+                    <ToastProvider>
+                      <NetworkStatusMonitor />
+                      {children}
+                    </ToastProvider>
                   </ThemeProvider>
                 </I18nProvider>
               </ApolloProvider>

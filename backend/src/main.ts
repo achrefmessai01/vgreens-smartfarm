@@ -14,6 +14,7 @@ async function bootstrap() {
       process.env.FRONTEND_APP_URL,
       process.env.FRONTEND_PROD_APP_URL,
       'http://localhost:3000',
+      'http://192.168.0.132:3000',
       'https://embeddable-sandbox.netlify.app',
       'https://studio.apollographql.com',
     ].filter(Boolean),
