@@ -5,7 +5,7 @@ import { ToastProvider } from '@/components/ui/toast-provider';
 import { I18nProvider } from '@/i18n';
 import { ApolloProvider } from '@/lib/apollo-provider';
 import { ClerkProvider } from '@clerk/nextjs';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from 'next-themes';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: 'vGreens Lab',
   description:
     'vGreens Lab is a platform for managing and analyzing greenhouse data',
-  manifest: '/manifest.json',
+  manifest: '/manifest.webmanifest',
   icons: {
     icon: '/vGreens.svg',
     shortcut: '/vGreens.svg',
@@ -45,16 +45,14 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#10b981' },
-    { media: '(prefers-color-scheme: dark)', color: '#10b981' },
-  ],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#10b981',
 };
 
 export default function RootLayout({
