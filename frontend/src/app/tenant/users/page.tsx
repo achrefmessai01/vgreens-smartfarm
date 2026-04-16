@@ -17,6 +17,7 @@ import {
   UserManagementTable,
   type UserManagementFormRef,
 } from '@/components/users';
+import { FeatureGuard } from '@/components/features/feature-guard';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { useTenantUsersPage } from '@/lib/hooks/use-tenant-users-page';
 import * as React from 'react';
@@ -36,11 +37,12 @@ export default function TenantUsersPage() {
   }
 
   return (
-    <div
-      className={
-        isMobile ? 'flex flex-col gap-6' : 'flex h-full min-h-0 flex-col gap-6'
-      }
-    >
+    <FeatureGuard featureKey="user_management">
+      <div
+        className={
+          isMobile ? 'flex flex-col gap-6' : 'flex h-full min-h-0 flex-col gap-6'
+        }
+      >
       <PageHeader
         title="User Management"
         subtitle="Manage users for your tenant"
@@ -133,6 +135,7 @@ export default function TenantUsersPage() {
           </div>
         )}
       </ConfirmationDialog>
-    </div>
+      </div>
+    </FeatureGuard>
   );
 }

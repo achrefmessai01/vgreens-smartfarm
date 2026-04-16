@@ -1,13 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { UserRole } from '@/generated/graphql';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
-// import { ComingSoonCard } from '@/components/ui/coming-soon-card'
-import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features';
+import { findFallbackRoute, getRouteDisplayName } from '@/lib/utils/feature-routes';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
+import { FeatureNotAvailableCard } from '@/components/ui/feature-not-available-card';
 
 interface FeatureGuardProps {
   featureKey: string;
@@ -26,36 +26,45 @@ export function FeatureGuard({
 }: FeatureGuardProps) {
   const { role } = useCurrentUser();
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
-  const { hasFeature, loading, dataLoaded } = useTenantFeatures();
+  const { hasFeature, enabledFeatures, dataLoaded } = useTenantFeatures();
   const router = useRouter();
 
-  React.useEffect(() => {
-    if (isVGreensAdmin) return;
-    if (!dataLoaded || hasFeature(featureKey) || !redirectTo) return;
-    router.push(redirectTo);
-  }, [dataLoaded, hasFeature, featureKey, redirectTo, router, isVGreensAdmin]);
-
+  // VGreens admins can access everything
   if (isVGreensAdmin) {
     return <>{children}</>;
   }
 
-  // if (!dataLoaded || loading) {
-  //   return <ContentSkeleton showHeader={false} lines={5} />
-  // }
+  // Show loading state while features are being loaded
+  if (!dataLoaded) {
+    return skeleton || <PageSkeleton />;
+  }
 
+  // If feature is not enabled, show "Feature Not Available" card
   if (!hasFeature(featureKey)) {
     if (fallback) {
       return <>{fallback}</>;
     }
 
-    // return (
-    //   <ComingSoonCard
-    //     icon={Lock}
-    //     title="Feature Not Available"
-    //     description="This feature is not enabled for your tenant. Please contact your administrator."
-    //   />
-    // )
+    // Find the best fallback route
+    const targetRoute =
+      redirectTo || findFallbackRoute(enabledFeatures) || '/tenant/dashboard';
+    const targetRouteName = getRouteDisplayName(targetRoute);
+
+    const handleRedirect = () => {
+      router.push(targetRoute);
+    };
+
+    return (
+      <FeatureNotAvailableCard
+        title="Feature Not Available"
+        description="This feature is not enabled for your tenant. Please contact your administrator to request access to this feature."
+        badgeText="Not Available"
+        onRedirect={handleRedirect}
+        redirectLabel={`Go to ${targetRouteName}`}
+      />
+    );
   }
 
+  // Feature is enabled - render children
   return <>{children}</>;
 }
