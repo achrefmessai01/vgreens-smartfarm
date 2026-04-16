@@ -114,10 +114,7 @@ function getAllFeatureRouteConfigs(): FeatureRouteConfig[] {
  * Routes without feature keys (always accessible) get lowest priority for fallback
  * Feature-based routes get priority based on their order
  */
-function computePriority(
-  route: FeatureRouteConfig,
-  index: number,
-): number {
+function computePriority(route: FeatureRouteConfig, index: number): number {
   // Dashboard and other always-accessible routes get very low priority
   if (route.featureKey === null) {
     return 1000 + index;
@@ -132,7 +129,7 @@ function computePriority(
  */
 export function getFeatureRoutes(): FeatureRoute[] {
   const configs = getAllFeatureRouteConfigs();
-  
+
   return configs.map((config, index) => ({
     ...config,
     priority: computePriority(config, index),
@@ -170,9 +167,7 @@ export function getAccessibleRoutes(
  * Prioritizes enabled features over the dashboard
  * Returns the first accessible feature route, or dashboard as last resort
  */
-export function findFallbackRoute(
-  enabledFeatures: Set<string>,
-): string | null {
+export function findFallbackRoute(enabledFeatures: Set<string>): string | null {
   const accessibleRoutes = getAccessibleRoutes(enabledFeatures);
 
   if (accessibleRoutes.length === 0) {
@@ -182,11 +177,13 @@ export function findFallbackRoute(
 
   // Sort by priority
   const sortedRoutes = accessibleRoutes.sort((a, b) => a.priority - b.priority);
-  
+
   // Prioritize enabled features over dashboard
   // Find the first route that requires a feature (not null featureKey)
-  const firstFeatureRoute = sortedRoutes.find((route) => route.featureKey !== null);
-  
+  const firstFeatureRoute = sortedRoutes.find(
+    (route) => route.featureKey !== null,
+  );
+
   // If we found an enabled feature, use that; otherwise use the first accessible route (likely dashboard)
   return firstFeatureRoute ? firstFeatureRoute.path : sortedRoutes[0].path;
 }
@@ -215,11 +212,11 @@ export function canAccessRoute(
  */
 export function getRouteDisplayName(path: string): string {
   const route = getFeatureRoutes().find((r) => r.path === path);
-  
+
   // For dashboard, return generic label
   if (path === '/tenant/dashboard') {
     return 'Available Page';
   }
-  
+
   return route?.name ?? 'Available Page';
 }

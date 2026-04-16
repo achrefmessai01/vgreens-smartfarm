@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation';
 import { UserRole } from '@/generated/graphql';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features';
-import { findFallbackRoute, getRouteDisplayName } from '@/lib/utils/feature-routes';
+import {
+  findFallbackRoute,
+  getRouteDisplayName,
+} from '@/lib/utils/feature-routes';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { FeatureNotAvailableCard } from '@/components/ui/feature-not-available-card';
 
