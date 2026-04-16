@@ -34,7 +34,7 @@ export function YieldDataField({
     return (
       <div className="space-y-4">
         <div className="bg-muted h-5 animate-pulse rounded" />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="bg-muted h-16 animate-pulse rounded" />
           <div className="bg-muted h-16 animate-pulse rounded" />
         </div>
@@ -44,7 +44,7 @@ export function YieldDataField({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="font-medium">{h?.todaysHarvest ?? "Today's Harvest"}</h3>
         <span className="text-2xl font-bold text-teal-600">
           {marketable.toFixed(1)} kg
@@ -54,7 +54,7 @@ export function YieldDataField({
         <p className="text-muted-foreground text-sm font-medium">
           {h?.yieldData ?? 'Yield Data'}
         </p>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2 text-center">
             <p className="text-muted-foreground text-sm">
               {h?.marketable ?? 'Marketable'}
@@ -70,7 +70,7 @@ export function YieldDataField({
                   onYieldChange?.('marketable', parseFloat(e.target.value) || 0)
                 }
                 onKeyDown={(e) => handleKeyDown(e, 'waste')}
-                className="h-16 pr-12 text-center text-2xl font-light"
+                className="h-16 pr-12 text-center text-xl font-light sm:text-2xl"
                 placeholder={
                   h?.enterMarketableYield ?? 'Enter marketable yield'
                 }
@@ -95,7 +95,7 @@ export function YieldDataField({
                   onYieldChange?.('waste', parseFloat(e.target.value) || 0)
                 }
                 onKeyDown={(e) => handleKeyDown(e, 'brix1')}
-                className="h-16 pr-12 text-center text-2xl font-light"
+                className="h-16 pr-12 text-center text-xl font-light sm:text-2xl"
                 placeholder={h?.enterWasteAmount ?? 'Enter waste amount'}
               />
               <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">

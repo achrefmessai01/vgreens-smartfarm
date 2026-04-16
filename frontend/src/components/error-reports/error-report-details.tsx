@@ -78,26 +78,30 @@ export function ErrorReportDetails({
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="overflow-y-auto px-6 py-6 sm:max-w-2xl">
+      <SheetContent className="w-full max-w-full overflow-y-auto px-4 py-5 sm:max-w-2xl sm:px-6 sm:py-6">
         <SheetHeader className="space-y-3 pb-4">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <SheetTitle className="text-xl">Error Report Details</SheetTitle>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0 space-y-1">
+              <SheetTitle className="break-words text-xl">
+                Error Report Details
+              </SheetTitle>
               <SheetDescription>
                 Review and update error report information
               </SheetDescription>
             </div>
-            <ErrorReportStatusBadge status={report.status} />
+            <div className="shrink-0">
+              <ErrorReportStatusBadge status={report.status} />
+            </div>
           </div>
         </SheetHeader>
 
-        <div className="space-y-6 py-6">
+        <div className="space-y-6 py-4 sm:py-6">
           {/* Report Overview Card */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <MessageSquare className="h-4 w-4" />
-                {report.errorTitle}
+              <CardTitle className="flex items-start gap-2 text-base">
+                <MessageSquare className="mt-0.5 h-4 w-4 shrink-0" />
+                <span className="break-words">{report.errorTitle}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -112,14 +116,14 @@ export function ErrorReportDetails({
                 </Badge>
               </div>
 
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <User className="h-4 w-4" />
-                <div>
-                  <span className="font-medium">
+              <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <User className="mt-0.5 h-4 w-4 shrink-0" />
+                <div className="min-w-0">
+                  <span className="block font-medium">
                     {report.user.firstName} {report.user.lastName}
                   </span>
-                  <span className="ml-2 text-gray-500">
-                    ({report.userEmail})
+                  <span className="block break-all text-gray-500">
+                    {report.userEmail}
                   </span>
                 </div>
               </div>
@@ -134,7 +138,7 @@ export function ErrorReportDetails({
             </h4>
             <Card>
               <CardContent className="pt-6">
-                <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-900 dark:text-white">
+                <p className="text-sm leading-relaxed whitespace-pre-wrap break-words text-gray-900 dark:text-white">
                   {report.errorDetails}
                 </p>
               </CardContent>
@@ -149,7 +153,7 @@ export function ErrorReportDetails({
               </h4>
               <Card>
                 <CardContent className="pt-6">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-900 dark:text-white">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words text-gray-900 dark:text-white">
                     {report.reproductionSteps}
                   </p>
                 </CardContent>
@@ -165,7 +169,7 @@ export function ErrorReportDetails({
               </h4>
               <Card>
                 <CardContent className="pt-6">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-900 dark:text-white">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words text-gray-900 dark:text-white">
                     {report.expectedVsActual}
                   </p>
                 </CardContent>
@@ -224,10 +228,10 @@ export function ErrorReportDetails({
           </Card>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row">
             <Button
               onClick={handleUpdate}
-              className="flex flex-1 items-center gap-2"
+              className="flex w-full items-center gap-2 sm:flex-1"
               disabled={isUpdating}
             >
               <Save className="h-4 w-4" />
@@ -237,7 +241,7 @@ export function ErrorReportDetails({
               variant="outline"
               onClick={onClose}
               disabled={isUpdating}
-              className="flex items-center gap-2"
+              className="flex w-full items-center gap-2 sm:w-auto"
             >
               <X className="h-4 w-4" />
               Cancel

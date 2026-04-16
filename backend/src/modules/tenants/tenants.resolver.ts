@@ -1,11 +1,12 @@
+import { CurrentUser, Roles } from '@common/decorators';
 import { UserRole } from '@common/enums';
-import { Roles } from '@common/decorators';
+import { ClerkAuthGuard, RolesGuard } from '@common/guards';
+import { User } from '@modules/users/entities/user.entity';
 import { UseGuards } from '@nestjs/common';
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { CreateTenantInput, UpdateTenantInput } from './dto';
 import { Tenant } from './entities/tenant.entity';
 import { TenantsService } from './tenants.service';
-import { ClerkAuthGuard, RolesGuard } from '@common/guards';
-import { CreateTenantInput, UpdateTenantInput } from './dto';
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 
 @Resolver(() => Tenant)
 @UseGuards(ClerkAuthGuard, RolesGuard)
@@ -24,6 +25,20 @@ export class TenantsResolver {
     @Args('id', { type: () => ID }) id: string,
   ): Promise<Tenant | null> {
     return this.tenantsService.findOne(id);
+  }
+
+  @Query(() => [String], { name: 'tenantGreenhouses' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  async tenantGreenhouses(
+    @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true }) tenantId?: string,
+  ): Promise<string[]> {
+    const targetTenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? (tenantId ?? currentUser.tenantId)
+        : currentUser.tenantId;
+    const tenant = await this.tenantsService.findOne(targetTenantId);
+    return tenant?.greenhouses.map((gh) => gh.name) ?? [];
   }
 
   @Mutation(() => Tenant)

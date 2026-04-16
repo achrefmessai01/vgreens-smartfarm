@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { useGreenhouseOptionsQuery } from '@/generated/graphql';
+import { useTenantGreenhousesQuery } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import {
   SENSOR_CONFIG_FIELD_KEYS,
@@ -54,11 +54,11 @@ export function SensorConfigForm({
   const sc = t.pages.admin.tenants.sensorConfig;
 
   const { data: greenhouseData, loading: greenhouseLoading } =
-    useGreenhouseOptionsQuery({
+    useTenantGreenhousesQuery({
       variables: { tenantId },
       skip: !tenantId,
     });
-  const greenhouseOptions = greenhouseData?.greenhouseOptions ?? [];
+  const greenhouseOptions = greenhouseData?.tenantGreenhouses ?? [];
 
   const hintKey: Record<SensorConfigFieldKey, string> = {
     xPosition: sc.xPositionHint,
