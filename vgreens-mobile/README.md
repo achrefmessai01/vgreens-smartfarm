@@ -32,7 +32,7 @@ npm start
 
 ## GraphQL Codegen
 
-This app shares the same GraphQL backend as the web app. Queries and mutations go in `src/graphql/` and codegen generates typed hooks in `src/generated/graphql.tsx`.
+This app shares GraphQL operation documents with the web app. Source documents live in `../frontend/src/graphql/` and mobile codegen generates typed hooks in `src/generated/graphql.tsx`.
 
 ```bash
 # Run codegen (requires backend running)
@@ -53,7 +53,6 @@ app/                    # Expo Router screens
 src/
   components/ui/        # Reusable UI primitives (Button, Card, etc.)
   generated/            # Auto-generated GraphQL hooks — DO NOT EDIT
-  graphql/              # GraphQL query/mutation documents
   lib/                  # Utilities, Apollo client, auth helpers
   constants/            # Theme tokens, app constants
   types/                # Shared TypeScript types

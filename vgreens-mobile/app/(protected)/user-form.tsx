@@ -7,12 +7,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useQuery } from '@apollo/client';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
 import { UserFormFields } from '@/components/users/user-form-fields';
+import { UserRole as GqlUserRole, useUsersQuery } from '@/generated/graphql';
 import { useTenantUsers } from '@/lib/hooks/use-tenant-users';
-import { USERS_QUERY } from '@/graphql/queries/user.queries';
 import type { User, UserRole, UserFormData, UserFormErrors } from '@/types/user';
 
 export default function UserFormScreen() {
@@ -23,7 +22,7 @@ export default function UserFormScreen() {
 
   const { handleCreate, handleUpdate, isSubmitting } = useTenantUsers();
 
-  const { data: usersData } = useQuery<{ users: User[] }>(USERS_QUERY);
+  const { data: usersData } = useUsersQuery();
   const editingUser = useMemo(
     () => usersData?.users?.find((u) => u.id === params.userId) ?? null,
     [usersData, params.userId],
@@ -49,7 +48,13 @@ export default function UserFormScreen() {
     setEmail(editingUser.email || '');
     setFirstName(editingUser.firstName || '');
     setLastName(editingUser.lastName || '');
-    setRole(editingUser.role);
+    setRole(
+      editingUser.role === GqlUserRole.TenantAdmin
+        ? 'TENANT_ADMIN'
+        : editingUser.role === GqlUserRole.TenantUser
+          ? 'TENANT_USER'
+          : 'VGREENS_ADMIN',
+    );
     setIsActive(editingUser.isActive ?? true);
     setInitialized(true);
   }

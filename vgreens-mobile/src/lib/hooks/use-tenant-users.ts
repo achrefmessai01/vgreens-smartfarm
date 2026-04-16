@@ -1,28 +1,37 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { useMutation, useQuery } from '@apollo/client';
-import { USERS_QUERY } from '@/graphql/queries/user.queries';
 import {
-  CREATE_USER_MUTATION,
-  UPDATE_USER_MUTATION,
-  DELETE_USER_MUTATION,
-} from '@/graphql/mutations/user.mutations';
+  UserRole as GqlUserRole,
+  useCreateUserMutation,
+  useDeleteUserMutation,
+  useUpdateUserMutation,
+  useUsersQuery,
+} from '@/generated/graphql';
 import { useCurrentUser } from './use-current-user';
 import type { User, UserFormData } from '@/types/user';
 import { TENANT_ALLOWED_ROLES } from '@/types/user';
 
-interface UsersQueryData {
-  users: User[];
-}
+const toGqlUserRole = (role?: UserFormData['role']): GqlUserRole | undefined => {
+  switch (role) {
+    case 'TENANT_ADMIN':
+      return GqlUserRole.TenantAdmin;
+    case 'TENANT_USER':
+      return GqlUserRole.TenantUser;
+    case 'VGREENS_ADMIN':
+      return GqlUserRole.VgreensAdmin;
+    default:
+      return undefined;
+  }
+};
 
 export function useTenantUsers() {
   const { user: currentUser } = useCurrentUser();
   const tenantId = currentUser?.tenantId;
 
-  const { data, loading, refetch } = useQuery<UsersQueryData>(USERS_QUERY);
-  const [createUser] = useMutation(CREATE_USER_MUTATION);
-  const [updateUser] = useMutation(UPDATE_USER_MUTATION);
-  const [deleteUser] = useMutation(DELETE_USER_MUTATION);
+  const { data, loading, refetch } = useUsersQuery();
+  const [createUser] = useCreateUserMutation();
+  const [updateUser] = useUpdateUserMutation();
+  const [deleteUser] = useDeleteUserMutation();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,7 +53,7 @@ export function useTenantUsers() {
               firstName: formData.firstName,
               lastName: formData.lastName,
               imageUrl: formData.imageUrl,
-              role: formData.role,
+              role: toGqlUserRole(formData.role),
               tenantId,
             },
           },
@@ -67,7 +76,13 @@ export function useTenantUsers() {
       setIsSubmitting(true);
       try {
         await updateUser({
-          variables: { id: userId, input: formData },
+          variables: {
+            id: userId,
+            input: {
+              ...formData,
+              role: toGqlUserRole(formData.role),
+            },
+          },
         });
         await refetch();
         return true;
