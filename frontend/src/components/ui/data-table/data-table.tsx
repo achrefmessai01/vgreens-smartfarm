@@ -100,11 +100,10 @@ export function DataTable<T extends { id: string | number }>({
 
   // Determine which view to show based on screen size and card availability
   const hasCardView = !!renderCard;
-  const { isMobile, isInitialized } =
-    useResponsiveBreakpoint(
-      responsiveBreakpoint,
-      responsiveMode === 'container' ? responsiveContainer : null,
-    );
+  const { isMobile, isInitialized } = useResponsiveBreakpoint(
+    responsiveBreakpoint,
+    responsiveMode === 'container' ? responsiveContainer : null,
+  );
   const showCardView = hasCardView && isMobile;
   const showTableView = !hasCardView || !isMobile;
 

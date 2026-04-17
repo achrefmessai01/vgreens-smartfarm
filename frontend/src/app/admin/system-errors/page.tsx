@@ -111,7 +111,7 @@ export default function AdminSystemErrorsPage() {
       {/* Error List */}
       <div className={listContainerClassName}>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h3 className="break-words text-lg font-semibold">Error History</h3>
+          <h3 className="text-lg font-semibold break-words">Error History</h3>
           {activeFiltersCount > 0 && (
             <Badge variant="outline" className="w-fit">
               {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''}{' '}

@@ -82,7 +82,7 @@ export function ErrorReportDetails({
         <SheetHeader className="space-y-3 pb-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-1">
-              <SheetTitle className="break-words text-xl">
+              <SheetTitle className="text-xl break-words">
                 Error Report Details
               </SheetTitle>
               <SheetDescription>
@@ -138,7 +138,7 @@ export function ErrorReportDetails({
             </h4>
             <Card>
               <CardContent className="pt-6">
-                <p className="text-sm leading-relaxed whitespace-pre-wrap break-words text-gray-900 dark:text-white">
+                <p className="text-sm leading-relaxed break-words whitespace-pre-wrap text-gray-900 dark:text-white">
                   {report.errorDetails}
                 </p>
               </CardContent>
@@ -153,7 +153,7 @@ export function ErrorReportDetails({
               </h4>
               <Card>
                 <CardContent className="pt-6">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words text-gray-900 dark:text-white">
+                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap text-gray-900 dark:text-white">
                     {report.reproductionSteps}
                   </p>
                 </CardContent>
@@ -169,7 +169,7 @@ export function ErrorReportDetails({
               </h4>
               <Card>
                 <CardContent className="pt-6">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words text-gray-900 dark:text-white">
+                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap text-gray-900 dark:text-white">
                     {report.expectedVsActual}
                   </p>
                 </CardContent>

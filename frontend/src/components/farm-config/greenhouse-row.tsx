@@ -137,7 +137,8 @@ export function GreenhouseRow({
             disabled={disabled}
             onChange={(e) =>
               onChange(index, {
-                bayCount: e.target.value === '' ? undefined : Number(e.target.value),
+                bayCount:
+                  e.target.value === '' ? undefined : Number(e.target.value),
               })
             }
           />

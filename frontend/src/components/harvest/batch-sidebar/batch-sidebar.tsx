@@ -70,7 +70,7 @@ export function BatchSidebar({
         className="flex w-full max-w-full flex-col gap-0 p-0 sm:max-w-2xl"
       >
         <SheetHeader className="dark:border-primary-foreground/30 border-b px-4 pt-5 pb-4 sm:px-6 sm:pt-6">
-          <SheetTitle className="dark:text-card-foreground break-words pr-8 text-left leading-tight">
+          <SheetTitle className="dark:text-card-foreground pr-8 text-left leading-tight break-words">
             {currentData?.greenhouse?.name
               ? `${h?.batchDetails ?? 'Batch Details'} for ${currentData.greenhouse.name}`
               : (h?.batchDetails ?? 'Batch Details')}

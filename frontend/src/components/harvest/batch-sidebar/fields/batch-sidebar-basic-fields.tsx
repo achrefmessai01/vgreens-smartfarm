@@ -54,7 +54,7 @@ export function BatchHeaderField({
   return (
     <div className="space-y-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="break-words text-lg font-semibold">{name}</h2>
+        <h2 className="text-lg font-semibold break-words">{name}</h2>
         <Badge
           variant={STATUS_VARIANT[status] ?? 'outline'}
           className={`${STATUS_COLOR[status] ?? 'bg-gray-500'} w-fit`}
@@ -62,7 +62,7 @@ export function BatchHeaderField({
           {STATUS_LABEL[status] ?? status} {h?.batchSuffix ?? 'Batch'}
         </Badge>
       </div>
-      <p className="text-muted-foreground break-words text-sm">
+      <p className="text-muted-foreground text-sm break-words">
         {species} • {variety}
       </p>
     </div>

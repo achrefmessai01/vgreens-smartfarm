@@ -35,7 +35,7 @@ export const useSystemErrorsCard = ({
       <Card className="gap-0 overflow-hidden border py-0 shadow-sm">
         {/* Custom-Header implementation - using card-header breaks ux */}
         <div className="flex flex-col gap-3 border-b px-3 py-3 sm:px-4 xl:flex-row xl:items-start xl:justify-between xl:px-5">
-          <h3 className="min-w-0 line-clamp-4 text-sm leading-snug font-semibold break-words">
+          <h3 className="line-clamp-4 min-w-0 text-sm leading-snug font-semibold break-words">
             {error.errorMessage}
           </h3>
           <div className="shrink-0 self-start">
@@ -51,7 +51,9 @@ export const useSystemErrorsCard = ({
           {/* Component */}
           <div className="flex min-w-0 flex-col gap-1">
             <span className="text-muted-foreground shrink-0">Component:</span>
-            <span className="font-medium break-words">{error.component || '-'}</span>
+            <span className="font-medium break-words">
+              {error.component || '-'}
+            </span>
           </div>
 
           {/* Type */}
