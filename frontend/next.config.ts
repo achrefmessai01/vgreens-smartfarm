@@ -1,6 +1,13 @@
 import type { NextConfig } from 'next';
 import withPWA from 'next-pwa';
 
+const posthogHost =
+  process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://eu.i.posthog.com';
+const isEuPosthog = posthogHost.includes('eu.i.posthog.com');
+const posthogAssetsHost = isEuPosthog
+  ? 'https://eu-assets.i.posthog.com'
+  : 'https://us-assets.i.posthog.com';
+
 const nextConfig: NextConfig = {
   output: 'standalone',
   poweredByHeader: false,
@@ -27,11 +34,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/ingest/static/:path*',
-        destination: 'https://us-assets.i.posthog.com/static/:path*',
+        destination: `${posthogAssetsHost}/static/:path*`,
       },
       {
         source: '/ingest/:path*',
-        destination: 'https://us.i.posthog.com/:path*',
+        destination: `${posthogHost}/:path*`,
       },
     ];
   },
