@@ -32,13 +32,13 @@ export const useSystemErrorsCard = ({
       : '-';
 
     return (
-      <Card className="gap-2 overflow-hidden border py-2 shadow-none">
+      <Card className="gap-0 overflow-hidden border py-0 shadow-sm">
         {/* Custom-Header implementation - using card-header breaks ux */}
-        <div className="flex flex-row items-center justify-between border-b px-6 pb-2">
-          <h3 className="line-clamp-2 pr-2 text-sm leading-none font-semibold">
+        <div className="flex flex-col gap-3 border-b px-3 py-3 sm:px-4 xl:flex-row xl:items-start xl:justify-between xl:px-5">
+          <h3 className="line-clamp-4 min-w-0 text-sm leading-snug font-semibold break-words">
             {error.errorMessage}
           </h3>
-          <div className="shrink-0">
+          <div className="shrink-0 self-start">
             {error.isResolved ? (
               <Badge variant="secondary">Resolved</Badge>
             ) : (
@@ -47,60 +47,62 @@ export const useSystemErrorsCard = ({
           </div>
         </div>
 
-        <CardContent className="space-y-2 text-xs">
+        <CardContent className="grid gap-3 px-3 py-3 text-sm sm:px-4 lg:grid-cols-2 xl:px-5">
           {/* Component */}
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Component:</span>
-            <span className="font-medium">{error.component || '-'}</span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="text-muted-foreground shrink-0">Component:</span>
+            <span className="font-medium break-words">
+              {error.component || '-'}
+            </span>
           </div>
 
           {/* Type */}
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Type:</span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="text-muted-foreground shrink-0">Type:</span>
             <ErrorTypeBadge errorType={error.errorType} />
           </div>
 
           {/* Source */}
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Source:</span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="text-muted-foreground shrink-0">Source:</span>
             <ErrorSourceBadge source={error.source} />
           </div>
 
           {/* Severity */}
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Severity:</span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="text-muted-foreground shrink-0">Severity:</span>
             <ErrorReportSeverityBadge severity={error.severity} />
           </div>
 
           {/* Count */}
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Count:</span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="text-muted-foreground shrink-0">Count:</span>
             <span className="font-medium">{error.occurrenceCount ?? 1}</span>
           </div>
 
           {/* Created */}
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Created:</span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="text-muted-foreground shrink-0">Created:</span>
             <span className="font-medium">
               {formatDistanceToNow(new Date(error.createdAt))} ago
             </span>
           </div>
 
           {/* User */}
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">User:</span>
-            <span className="font-medium">{userName}</span>
+          <div className="flex min-w-0 flex-col gap-1 lg:col-span-2">
+            <span className="text-muted-foreground shrink-0">User:</span>
+            <span className="font-medium break-words">{userName}</span>
           </div>
         </CardContent>
 
         {/* Custom-Footer implementation - using card-footer breaks ux */}
-        <div className="flex items-center border-t px-6 pt-2">
-          <div className="flex gap-2">
+        <div className="border-t px-3 py-3 sm:px-4 xl:px-5">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onViewDetails(error)}
-              className="h-8"
+              className="h-9 w-full justify-center"
               disabled={isLoading}
             >
               <Eye className="mr-2 h-4 w-4" />
@@ -111,7 +113,7 @@ export const useSystemErrorsCard = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => onResolve(error)}
-                className="h-8"
+                className="h-9 w-full justify-center"
                 disabled={isLoading || isResolving}
               >
                 <CheckCircle2 className="mr-2 h-4 w-4" />

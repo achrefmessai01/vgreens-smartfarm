@@ -17,7 +17,6 @@ import {
   ClipboardList,
   Clock,
   Flag,
-  LayoutDashboard,
   Menu,
   Settings,
   Sprout,
@@ -109,11 +108,6 @@ export function Sidebar({
 
   // Admin navigation items
   const adminNavItems: NavItem[] = [
-    {
-      label: 'Dashboard',
-      href: '/admin/dashboard',
-      icon: LayoutDashboard,
-    },
     {
       label: 'Tenants',
       href: '/admin/tenants',

@@ -56,6 +56,7 @@ export function SystemErrorsTable({
       renderRow={renderRow}
       renderCard={renderCard}
       responsiveBreakpoint="lg"
+      responsiveMode="container"
       isLoading={isLoading}
       defaultPageSize={paginationConfig.defaultPageSize}
       pageSizeOptions={paginationConfig.pageSizeOptions}

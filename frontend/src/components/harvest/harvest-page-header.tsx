@@ -22,10 +22,12 @@ export function HarvestPageHeader({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight break-words sm:text-3xl">
+            {title}
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             {summary.totalHarvests}{' '}
             {t.pages.harvest?.harvestsLogged || 'harvests logged'}
           </p>
@@ -35,7 +37,7 @@ export function HarvestPageHeader({
           <Button
             onClick={onCreateBatch}
             disabled={isLoading}
-            className="bg-green-500 text-white hover:bg-green-600"
+            className="w-full bg-green-500 text-white hover:bg-green-600 sm:w-auto"
           >
             <Plus className="mr-2 h-4 w-4" />
             {t.pages.harvest?.createBatch || 'Create Batch'}
