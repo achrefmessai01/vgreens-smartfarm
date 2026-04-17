@@ -243,6 +243,7 @@ export function ErrorReportTable({
       columns={columns}
       renderRow={renderRow}
       renderCard={renderCard}
+      responsiveBreakpoint="xl"
       isLoading={isLoading}
       searchConfig={{
         placeholder: 'Search reports by title, user email...',

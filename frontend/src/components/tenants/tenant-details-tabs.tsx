@@ -16,31 +16,48 @@ export function TenantDetailsTabs() {
   const [activeTab, setActiveTab] = React.useState('features');
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <TabsList>
-        <TabsTrigger value="features">{tabs.features}</TabsTrigger>
-        <TabsTrigger value="alerts">{tabs.alertConfiguration}</TabsTrigger>
-        <TabsTrigger value="farm-overview">
+    <Tabs
+      value={activeTab}
+      onValueChange={setActiveTab}
+      className="w-full min-w-0"
+    >
+      <TabsList className="w-full min-w-0 items-stretch gap-1 group-data-[orientation=horizontal]/tabs:h-auto group-data-[orientation=horizontal]/tabs:flex-col sm:items-center sm:gap-0 sm:group-data-[orientation=horizontal]/tabs:h-9 sm:group-data-[orientation=horizontal]/tabs:flex-row">
+        <TabsTrigger
+          value="features"
+          className="h-auto w-full min-w-0 px-3 py-2 text-center leading-tight break-words whitespace-normal sm:h-[calc(100%-1px)] sm:w-auto sm:whitespace-nowrap"
+        >
+          {tabs.features}
+        </TabsTrigger>
+        <TabsTrigger
+          value="alerts"
+          className="h-auto w-full min-w-0 px-3 py-2 text-center leading-tight break-words whitespace-normal sm:h-[calc(100%-1px)] sm:w-auto sm:whitespace-nowrap"
+        >
+          {tabs.alertConfiguration}
+        </TabsTrigger>
+        <TabsTrigger
+          value="farm-overview"
+          className="h-auto w-full min-w-0 px-3 py-2 text-center leading-tight break-words whitespace-normal sm:h-[calc(100%-1px)] sm:w-auto sm:whitespace-nowrap"
+        >
           {tabs.farmOverviewConfiguration}
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="features" className="mt-4">
+      <TabsContent value="features" className="mt-4 w-full min-w-0">
         <TenantFeaturesTab
           tenantId={tenantId}
           active={activeTab === 'features'}
         />
       </TabsContent>
 
-      <TabsContent value="alerts" className="mt-4">
+      <TabsContent value="alerts" className="mt-4 w-full min-w-0">
         <div className="bg-card rounded-lg border p-6">
           <h2 className="text-lg font-semibold">{tabs.alertConfiguration}</h2>
         </div>
       </TabsContent>
 
-      <TabsContent value="farm-overview" className="mt-4">
+      <TabsContent value="farm-overview" className="mt-4 w-full min-w-0">
         {activeTab === 'farm-overview' && (
-          <div className="flex flex-col gap-6">
+          <div className="flex min-w-0 flex-col gap-6">
             <FarmLayoutConfig tenantId={tenantId} />
             <SensorConfigTable tenantId={tenantId} />
           </div>

@@ -66,7 +66,8 @@ export interface DataTableProps<T> {
   defaultPageSize?: number;
   pageSizeOptions?: number[];
   isLoading?: boolean;
-  responsiveBreakpoint?: 'md' | 'lg' | 'xl';
+  responsiveBreakpoint?: 'md' | 'lg' | 'xl' | '2xl';
+  responsiveMode?: 'viewport' | 'container';
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -89,15 +90,20 @@ export function DataTable<T extends { id: string | number }>({
   pageSizeOptions = [5, 10, 20, 50],
   isLoading = false,
   responsiveBreakpoint = 'md',
+  responsiveMode = 'viewport',
 }: DataTableProps<T>) {
   const [internalSearch, setInternalSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(defaultPageSize);
+  const [responsiveContainer, setResponsiveContainer] =
+    React.useState<HTMLDivElement | null>(null);
 
   // Determine which view to show based on screen size and card availability
   const hasCardView = !!renderCard;
-  const { isMobile, isInitialized } =
-    useResponsiveBreakpoint(responsiveBreakpoint);
+  const { isMobile, isInitialized } = useResponsiveBreakpoint(
+    responsiveBreakpoint,
+    responsiveMode === 'container' ? responsiveContainer : null,
+  );
   const showCardView = hasCardView && isMobile;
   const showTableView = !hasCardView || !isMobile;
 
@@ -201,6 +207,7 @@ export function DataTable<T extends { id: string | number }>({
 
   return (
     <div
+      ref={setResponsiveContainer}
       className={
         showCardView
           ? 'flex w-full min-w-0 flex-col' // Mobile: grow naturally

@@ -16,26 +16,18 @@ import { useHarvestPage } from '@/lib/hooks/use-harvest-page';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { BarChart3, History } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 export default function HarvestPage() {
   const { t } = useI18n();
   const { isMobile } = useResponsiveBreakpoint('lg');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<string>(
-    searchParams.get('tab') || 'dashboard',
-  );
-
-  useEffect(() => {
-    const tabFromUrl = searchParams.get('tab');
-    if (tabFromUrl === 'dashboard' || tabFromUrl === 'history') {
-      setActiveTab(tabFromUrl);
-    }
-  }, [searchParams]);
+  const activeTab =
+    searchParams.get('tab') === 'history' ? 'history' : 'dashboard';
 
   const handleTabChange = (newTab: string) => {
-    setActiveTab(newTab);
+    if (newTab === activeTab) return;
+
     const params = new URLSearchParams(searchParams.toString());
     params.set('tab', newTab);
     router.replace(`?${params.toString()}`, { scroll: false });
@@ -70,7 +62,9 @@ export default function HarvestPage() {
     <FeatureGuard featureKey="harvest_management">
       <div
         className={
-          isMobile ? 'flex flex-col sm:px-6' : 'flex h-full min-h-0 flex-col'
+          isMobile
+            ? 'flex w-full min-w-0 flex-col sm:px-6'
+            : 'flex h-full min-h-0 w-full min-w-0 flex-col'
         }
       >
         <Tabs
@@ -78,14 +72,14 @@ export default function HarvestPage() {
           onValueChange={handleTabChange}
           className={
             isMobile
-              ? 'flex w-full flex-col'
-              : 'flex h-full min-h-0 w-full flex-col'
+              ? 'flex w-full min-w-0 flex-col'
+              : 'flex h-full min-h-0 w-full min-w-0 flex-col'
           }
         >
-          <TabsList className="bg-muted text-muted-foreground inline-flex h-9 w-full items-center justify-center rounded-lg p-1">
+          <TabsList className="bg-muted text-muted-foreground inline-flex h-9 w-full items-center justify-center rounded-lg p-1 lg:h-auto lg:w-auto lg:min-w-0 lg:justify-start lg:gap-3 lg:bg-transparent lg:p-0">
             <TabsTrigger
               value="dashboard"
-              className="flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4"
+              className="lg:border-border/60 lg:bg-background/80 lg:text-foreground/70 lg:hover:border-border lg:hover:bg-background lg:hover:text-foreground flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4 lg:h-11 lg:min-w-[11rem] lg:flex-none lg:justify-start lg:gap-3 lg:rounded-xl lg:border lg:px-5 lg:text-sm lg:font-semibold lg:shadow-sm lg:backdrop-blur-sm lg:transition-all lg:after:hidden lg:hover:-translate-y-0.5 lg:data-[state=active]:border-emerald-500/30 lg:data-[state=active]:bg-emerald-500/10 lg:data-[state=active]:text-emerald-950 lg:data-[state=active]:shadow-[0_14px_30px_-18px_rgba(16,185,129,0.9)] dark:lg:data-[state=active]:text-emerald-100"
             >
               <BarChart3 className="h-4 w-4" />
               <span className="text-xs sm:text-sm">
@@ -94,7 +88,7 @@ export default function HarvestPage() {
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4"
+              className="lg:border-border/60 lg:bg-background/80 lg:text-foreground/70 lg:hover:border-border lg:hover:bg-background lg:hover:text-foreground flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4 lg:h-11 lg:min-w-[11rem] lg:flex-none lg:justify-start lg:gap-3 lg:rounded-xl lg:border lg:px-5 lg:text-sm lg:font-semibold lg:shadow-sm lg:backdrop-blur-sm lg:transition-all lg:after:hidden lg:hover:-translate-y-0.5 lg:data-[state=active]:border-emerald-500/30 lg:data-[state=active]:bg-emerald-500/10 lg:data-[state=active]:text-emerald-950 lg:data-[state=active]:shadow-[0_14px_30px_-18px_rgba(16,185,129,0.9)] dark:lg:data-[state=active]:text-emerald-100"
             >
               <History className="h-4 w-4" />
               <span className="text-xs sm:text-sm">
@@ -114,15 +108,15 @@ export default function HarvestPage() {
             value="history"
             className={
               isMobile
-                ? 'mt-4 flex flex-col sm:mt-6'
-                : 'mt-6 flex min-h-0 flex-1 flex-col'
+                ? 'mt-4 flex min-w-0 flex-col sm:mt-6'
+                : 'mt-6 flex min-h-0 min-w-0 flex-1 flex-col'
             }
           >
             <div
               className={
                 isMobile
-                  ? 'flex flex-col gap-4 sm:gap-6'
-                  : 'flex h-full min-h-0 flex-col gap-6'
+                  ? 'flex min-w-0 flex-col gap-4 sm:gap-6'
+                  : 'flex h-full min-h-0 min-w-0 flex-col gap-6'
               }
             >
               <HarvestPageHeader

@@ -1,9 +1,9 @@
+import { AppModule } from '@modules/app';
+import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import 'dotenv/config';
 import type { Express } from 'express';
-import { AppModule } from '@modules/app';
-import { NestFactory } from '@nestjs/core';
 import { graphqlUploadExpress } from 'graphql-upload-ts';
-import { ValidationPipe, BadRequestException, Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +14,7 @@ async function bootstrap() {
       process.env.FRONTEND_APP_URL,
       process.env.FRONTEND_PROD_APP_URL,
       'http://localhost:3000',
+      // 'http://192.168.0.132:3000', add your local IP if testing on a mobile device
       'https://embeddable-sandbox.netlify.app',
       'https://studio.apollographql.com',
     ].filter(Boolean),

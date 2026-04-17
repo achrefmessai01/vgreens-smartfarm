@@ -8,11 +8,21 @@ import { TableCell } from '@/components/ui/table';
 import type { HarvestsQuery } from '@/generated/graphql';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
-import { Calendar, Eye, Home, Package, Scale, Trash2 } from 'lucide-react';
+import { Calendar, Camera, Eye, Home, Package, Trash2 } from 'lucide-react';
 import { formatHarvestDate, getGreenhouseLabel } from '@/lib/harvest-utils';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
+
+function getCreatedByLabel(harvest: HarvestItem) {
+  if (!harvest.createdBy) return '-';
+
+  const fullName = [harvest.createdBy.firstName, harvest.createdBy.lastName]
+    .filter(Boolean)
+    .join(' ');
+
+  return fullName || harvest.createdBy.email || '-';
+}
 
 interface HarvestTableProps {
   harvests: HarvestItem[];
@@ -76,18 +86,12 @@ export function HarvestTable({
             {harvest.waste}
           </span>
         </TableCell>
-        <TableCell className="font-medium">{harvest.avgBrix}°Bx</TableCell>
+        <TableCell className="font-medium">{harvest.avgBrix}&deg;Bx</TableCell>
         <TableCell className="text-muted-foreground text-center">
           {harvest.photos === 0 ? '-' : harvest.photos}
         </TableCell>
-        <TableCell className="text-muted-foreground">
-          {harvest.createdBy
-            ? harvest.createdBy.firstName || harvest.createdBy.lastName
-              ? [harvest.createdBy.firstName, harvest.createdBy.lastName]
-                  .filter(Boolean)
-                  .join(' ')
-              : harvest.createdBy.email || '-'
-            : '-'}
+        <TableCell className="text-muted-foreground max-w-[220px] truncate">
+          {getCreatedByLabel(harvest)}
         </TableCell>
         <TableCell className="text-right">
           <div className="flex items-center justify-end gap-1">
@@ -123,41 +127,42 @@ export function HarvestTable({
 
   const renderCard = React.useCallback(
     (harvest: HarvestItem) => (
-      <Card className="border-border hover:border-border/80 gap-0 border-3 py-0 shadow-md transition-all hover:shadow-xl">
-        <CardContent className="px-4 py-4">
-          <div className="space-y-1">
-            {/* Date Header */}
-            <div className="flex items-center gap-2 text-sm font-medium">
+      <Card className="border-border/60 hover:border-border gap-0 overflow-hidden border py-0 shadow-sm transition-all hover:shadow-md">
+        <CardContent className="px-4 py-4 sm:px-5">
+          <div className="space-y-4">
+            <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
               <Calendar className="text-muted-foreground h-4 w-4" />
-              <span>{formatHarvestDate(harvest.date)}</span>
+              <span className="truncate">
+                {formatHarvestDate(harvest.date)}
+              </span>
             </div>
 
-            {/* Greenhouse and Batch */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Home className="text-muted-foreground h-4 w-4" />
-                <div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="bg-muted/20 flex min-w-0 items-start gap-3 rounded-lg border p-3">
+                <Home className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
+                <div className="min-w-0">
                   <div className="text-muted-foreground text-xs">
                     {h?.greenhouse ?? 'Greenhouse'}
                   </div>
-                  <div className="text-sm font-medium text-blue-600">
+                  <div className="truncate text-sm font-medium text-blue-600">
                     {getGreenhouseLabel(harvest.greenhouse)}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Package className="text-muted-foreground h-4 w-4" />
-                <div className="text-left">
+              <div className="bg-muted/20 flex min-w-0 items-start gap-3 rounded-lg border p-3">
+                <Package className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
+                <div className="min-w-0">
                   <div className="text-muted-foreground text-xs">
                     {h?.batch ?? 'Batch'}
                   </div>
-                  <div className="text-sm font-medium">{harvest.batch}</div>
+                  <div className="truncate text-sm font-medium">
+                    {harvest.batch}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Metrics Grid */}
-            <div className="bg-muted/30 grid grid-cols-3 gap-3 rounded-lg p-3 text-center">
+            <div className="bg-muted/30 grid grid-cols-2 gap-3 rounded-lg p-3 text-center sm:grid-cols-3">
               <div>
                 <div className="text-muted-foreground text-xs">
                   {h?.classA ?? 'Class A'}
@@ -176,61 +181,59 @@ export function HarvestTable({
                   <span className="text-xs font-normal">kg</span>
                 </div>
               </div>
-              <div>
+              <div className="col-span-2 sm:col-span-1">
                 <div className="text-muted-foreground text-xs">
                   {h?.avgBrix ?? 'Brix'}
                 </div>
                 <div className="text-lg font-semibold">
                   {harvest.avgBrix}
-                  <span className="text-xs font-normal">°Bx</span>
+                  <span className="text-xs font-normal">&deg;Bx</span>
                 </div>
               </div>
             </div>
 
-            {/* Author and Photos */}
-            <div className="text-muted-foreground flex items-center justify-between text-xs">
-              <div className="truncate">
-                {harvest.createdBy
-                  ? harvest.createdBy.firstName || harvest.createdBy.lastName
-                    ? [harvest.createdBy.firstName, harvest.createdBy.lastName]
-                        .filter(Boolean)
-                        .join(' ')
-                    : harvest.createdBy.email || '-'
-                  : '-'}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="bg-muted/15 min-w-0 rounded-lg border p-3">
+                <div className="text-muted-foreground text-xs">
+                  {h?.createdBy ?? 'Created By'}
+                </div>
+                <div className="truncate text-sm font-medium">
+                  {getCreatedByLabel(harvest)}
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Scale className="h-3 w-3" />
-                <span>
-                  {harvest.photos === 0
-                    ? 'No photos'
-                    : `${harvest.photos} photo${harvest.photos === 1 ? '' : 's'}`}
-                </span>
+              <div className="bg-muted/15 rounded-lg border p-3">
+                <div className="text-muted-foreground text-xs">
+                  {h?.photos ?? 'Photos'}
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Camera className="text-muted-foreground h-4 w-4" />
+                  <span>{harvest.photos}</span>
+                </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Button
-                variant="default"
+                variant="outline"
                 size="sm"
-                className="w-full"
+                className="h-auto min-h-10 w-full px-4 py-2 text-center whitespace-normal"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSidebarEdit?.(harvest);
                 }}
               >
-                View
+                {h?.viewDetails ?? 'View Details'}
               </Button>
               <Button
                 variant="destructive"
                 size="sm"
-                className="hover:bg-destructive hover:text-destructive-foreground w-full"
+                className="hover:bg-destructive hover:text-destructive-foreground h-auto min-h-10 w-full px-4 py-2 text-center whitespace-normal"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete?.(harvest);
                 }}
               >
-                Delete
+                {h?.deleteHarvest ?? 'Delete Harvest'}
               </Button>
             </div>
           </div>
@@ -253,7 +256,7 @@ export function HarvestTable({
       pageSizeOptions={paginationConfig.pageSizeOptions}
       paginationLabels={paginationConfig.paginationLabels}
       isLoading={isLoading}
-      responsiveBreakpoint="lg"
+      responsiveBreakpoint="xl"
     />
   );
 }
