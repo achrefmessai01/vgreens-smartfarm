@@ -7,7 +7,8 @@ export function useCurrentUser() {
   const { isSignedIn } = useAuth();
 
   const { data, loading, error } = useMeQuery({
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-first',
+    nextFetchPolicy: 'cache-first',
     skip: !isSignedIn,
   });
 

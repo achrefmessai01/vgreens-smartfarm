@@ -12,7 +12,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
     if (!key) return;
     posthog.init(key, {
-      api_host: 'https://us.posthog.com',
+      // Route ingestion/flags through Next.js rewrites to avoid ad-block/proxy issues.
+      api_host: '/ingest',
+      ui_host: 'https://us.posthog.com',
       person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well
       defaults: '2025-05-24',
     });
