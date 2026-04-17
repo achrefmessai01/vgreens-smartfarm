@@ -21,7 +21,7 @@ declare module 'next-pwa' {
     cacheStartUrl?: boolean;
     dynamicStartUrl?: boolean;
     dynamicStartUrlRedirect?: string;
-    runtimeCaching?: any[];
+    runtimeCaching?: unknown[];
     customWorkerDir?: string;
   }
 
