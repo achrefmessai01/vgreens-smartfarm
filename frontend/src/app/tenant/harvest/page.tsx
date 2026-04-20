@@ -79,7 +79,7 @@ export default function HarvestPage() {
           <TabsList className="bg-muted text-muted-foreground inline-flex h-9 w-full items-center justify-center rounded-lg p-1 lg:h-auto lg:w-auto lg:min-w-0 lg:justify-start lg:gap-3 lg:bg-transparent lg:p-0">
             <TabsTrigger
               value="dashboard"
-              className="flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4 lg:h-11 lg:min-w-[11rem] lg:flex-none lg:justify-start lg:gap-3 lg:rounded-xl lg:border lg:border-border/60 lg:bg-background/80 lg:px-5 lg:text-sm lg:font-semibold lg:text-foreground/70 lg:shadow-sm lg:backdrop-blur-sm lg:transition-all lg:hover:-translate-y-0.5 lg:hover:border-border lg:hover:bg-background lg:hover:text-foreground lg:data-[state=active]:border-emerald-500/30 lg:data-[state=active]:bg-emerald-500/10 lg:data-[state=active]:text-emerald-950 lg:data-[state=active]:shadow-[0_14px_30px_-18px_rgba(16,185,129,0.9)] lg:after:hidden dark:lg:data-[state=active]:text-emerald-100"
+              className="lg:border-border/60 lg:bg-background/80 lg:text-foreground/70 lg:hover:border-border lg:hover:bg-background lg:hover:text-foreground flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4 lg:h-11 lg:min-w-[11rem] lg:flex-none lg:justify-start lg:gap-3 lg:rounded-xl lg:border lg:px-5 lg:text-sm lg:font-semibold lg:shadow-sm lg:backdrop-blur-sm lg:transition-all lg:after:hidden lg:hover:-translate-y-0.5 lg:data-[state=active]:border-emerald-500/30 lg:data-[state=active]:bg-emerald-500/10 lg:data-[state=active]:text-emerald-950 lg:data-[state=active]:shadow-[0_14px_30px_-18px_rgba(16,185,129,0.9)] dark:lg:data-[state=active]:text-emerald-100"
             >
               <BarChart3 className="h-4 w-4" />
               <span className="text-xs sm:text-sm">
@@ -88,7 +88,7 @@ export default function HarvestPage() {
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4 lg:h-11 lg:min-w-[11rem] lg:flex-none lg:justify-start lg:gap-3 lg:rounded-xl lg:border lg:border-border/60 lg:bg-background/80 lg:px-5 lg:text-sm lg:font-semibold lg:text-foreground/70 lg:shadow-sm lg:backdrop-blur-sm lg:transition-all lg:hover:-translate-y-0.5 lg:hover:border-border lg:hover:bg-background lg:hover:text-foreground lg:data-[state=active]:border-emerald-500/30 lg:data-[state=active]:bg-emerald-500/10 lg:data-[state=active]:text-emerald-950 lg:data-[state=active]:shadow-[0_14px_30px_-18px_rgba(16,185,129,0.9)] lg:after:hidden dark:lg:data-[state=active]:text-emerald-100"
+              className="lg:border-border/60 lg:bg-background/80 lg:text-foreground/70 lg:hover:border-border lg:hover:bg-background lg:hover:text-foreground flex flex-1 items-center justify-center gap-2 px-3 py-1 sm:px-4 lg:h-11 lg:min-w-[11rem] lg:flex-none lg:justify-start lg:gap-3 lg:rounded-xl lg:border lg:px-5 lg:text-sm lg:font-semibold lg:shadow-sm lg:backdrop-blur-sm lg:transition-all lg:after:hidden lg:hover:-translate-y-0.5 lg:data-[state=active]:border-emerald-500/30 lg:data-[state=active]:bg-emerald-500/10 lg:data-[state=active]:text-emerald-950 lg:data-[state=active]:shadow-[0_14px_30px_-18px_rgba(16,185,129,0.9)] dark:lg:data-[state=active]:text-emerald-100"
             >
               <History className="h-4 w-4" />
               <span className="text-xs sm:text-sm">

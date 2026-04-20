@@ -21,22 +21,22 @@ export function TenantDetailsTabs() {
       onValueChange={setActiveTab}
       className="w-full min-w-0"
     >
-      <TabsList className="w-full min-w-0 items-stretch gap-1 group-data-[orientation=horizontal]/tabs:h-auto group-data-[orientation=horizontal]/tabs:flex-col sm:gap-0 sm:group-data-[orientation=horizontal]/tabs:h-9 sm:group-data-[orientation=horizontal]/tabs:flex-row sm:items-center">
+      <TabsList className="w-full min-w-0 items-stretch gap-1 group-data-[orientation=horizontal]/tabs:h-auto group-data-[orientation=horizontal]/tabs:flex-col sm:items-center sm:gap-0 sm:group-data-[orientation=horizontal]/tabs:h-9 sm:group-data-[orientation=horizontal]/tabs:flex-row">
         <TabsTrigger
           value="features"
-          className="h-auto w-full min-w-0 px-3 py-2 text-center leading-tight whitespace-normal break-words sm:h-[calc(100%-1px)] sm:w-auto sm:whitespace-nowrap"
+          className="h-auto w-full min-w-0 px-3 py-2 text-center leading-tight break-words whitespace-normal sm:h-[calc(100%-1px)] sm:w-auto sm:whitespace-nowrap"
         >
           {tabs.features}
         </TabsTrigger>
         <TabsTrigger
           value="alerts"
-          className="h-auto w-full min-w-0 px-3 py-2 text-center leading-tight whitespace-normal break-words sm:h-[calc(100%-1px)] sm:w-auto sm:whitespace-nowrap"
+          className="h-auto w-full min-w-0 px-3 py-2 text-center leading-tight break-words whitespace-normal sm:h-[calc(100%-1px)] sm:w-auto sm:whitespace-nowrap"
         >
           {tabs.alertConfiguration}
         </TabsTrigger>
         <TabsTrigger
           value="farm-overview"
-          className="h-auto w-full min-w-0 px-3 py-2 text-center leading-tight whitespace-normal break-words sm:h-[calc(100%-1px)] sm:w-auto sm:whitespace-nowrap"
+          className="h-auto w-full min-w-0 px-3 py-2 text-center leading-tight break-words whitespace-normal sm:h-[calc(100%-1px)] sm:w-auto sm:whitespace-nowrap"
         >
           {tabs.farmOverviewConfiguration}
         </TabsTrigger>

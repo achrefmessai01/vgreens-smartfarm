@@ -34,7 +34,7 @@ export function SystemErrorDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="!left-0 !top-0 !flex !h-[100dvh] !max-h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 !flex-col !gap-0 !overflow-hidden !rounded-none !border-0 !p-0 sm:!max-w-none 2xl:!top-[50%] 2xl:!left-[50%] 2xl:!h-auto 2xl:!max-h-[calc(100vh-2rem)] 2xl:!w-full 2xl:!max-w-2xl 2xl:!translate-x-[-50%] 2xl:!translate-y-[-50%] 2xl:!rounded-lg 2xl:!border">
+      <DialogContent className="!top-0 !left-0 !flex !h-[100dvh] !max-h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 !flex-col !gap-0 !overflow-hidden !rounded-none !border-0 !p-0 sm:!max-w-none 2xl:!top-[50%] 2xl:!left-[50%] 2xl:!h-auto 2xl:!max-h-[calc(100vh-2rem)] 2xl:!w-full 2xl:!max-w-2xl 2xl:!translate-x-[-50%] 2xl:!translate-y-[-50%] 2xl:!rounded-lg 2xl:!border">
         <DialogHeader className="border-b px-4 py-3 text-left sm:px-5 sm:py-3 2xl:px-6 2xl:py-4">
           <DialogTitle className="flex items-start gap-2 pr-8 leading-tight">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
@@ -111,7 +111,7 @@ export function SystemErrorDetailsDialog({
           <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
             <div className="min-w-0">
               <div className="mb-1 font-medium">User/Tenant</div>
-              <div className="text-gray-600 break-words">
+              <div className="break-words text-gray-600">
                 {error.user ? (
                   <span>
                     {error.user.firstName} {error.user.lastName}

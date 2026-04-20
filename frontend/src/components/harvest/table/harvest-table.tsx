@@ -86,9 +86,7 @@ export function HarvestTable({
             {harvest.waste}
           </span>
         </TableCell>
-        <TableCell className="font-medium">
-          {harvest.avgBrix}&deg;Bx
-        </TableCell>
+        <TableCell className="font-medium">{harvest.avgBrix}&deg;Bx</TableCell>
         <TableCell className="text-muted-foreground text-center">
           {harvest.photos === 0 ? '-' : harvest.photos}
         </TableCell>
@@ -129,12 +127,14 @@ export function HarvestTable({
 
   const renderCard = React.useCallback(
     (harvest: HarvestItem) => (
-      <Card className="border-border/60 gap-0 overflow-hidden border py-0 shadow-sm transition-all hover:border-border hover:shadow-md">
+      <Card className="border-border/60 hover:border-border gap-0 overflow-hidden border py-0 shadow-sm transition-all hover:shadow-md">
         <CardContent className="px-4 py-4 sm:px-5">
           <div className="space-y-4">
             <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
               <Calendar className="text-muted-foreground h-4 w-4" />
-              <span className="truncate">{formatHarvestDate(harvest.date)}</span>
+              <span className="truncate">
+                {formatHarvestDate(harvest.date)}
+              </span>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
@@ -216,7 +216,7 @@ export function HarvestTable({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center"
+                className="h-auto min-h-10 w-full px-4 py-2 text-center whitespace-normal"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSidebarEdit?.(harvest);
@@ -227,7 +227,7 @@ export function HarvestTable({
               <Button
                 variant="destructive"
                 size="sm"
-                className="hover:bg-destructive hover:text-destructive-foreground h-auto min-h-10 w-full whitespace-normal px-4 py-2 text-center"
+                className="hover:bg-destructive hover:text-destructive-foreground h-auto min-h-10 w-full px-4 py-2 text-center whitespace-normal"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete?.(harvest);

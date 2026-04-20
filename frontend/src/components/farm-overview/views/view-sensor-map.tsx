@@ -22,6 +22,7 @@ import {
   getParameterColor,
   getParameterUnit,
 } from '@/lib/farm-data';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useFullMapData } from '@/lib/hooks/use-full-map-data';
 import {
   type GreenhouseDimensions,
@@ -155,23 +156,20 @@ function SensorPositionTooltipContent({
     setYValue(formatPositionInputValue(currentYPosition));
   }, [currentXPosition, currentYPosition]);
 
-  const handleKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        if (
-          !onSave ||
-          disableSave ||
-          nextRoundedX == null ||
-          nextRoundedY == null
-        ) {
-          return;
-        }
-        void onSave(nextRoundedX, nextRoundedY);
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      if (
+        !onSave ||
+        disableSave ||
+        nextRoundedX == null ||
+        nextRoundedY == null
+      ) {
+        return;
       }
-    },
-    [onSave, disableSave, nextRoundedX, nextRoundedY],
-  );
+      void onSave(nextRoundedX, nextRoundedY);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -506,6 +504,8 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
     invalidDropDescription = 'Drop the sensor inside the greenhouse layout.',
     readOnly,
   } = props;
+  const { isVGreensAdmin } = useCurrentUser();
+  const isReadOnly = readOnly || !isVGreensAdmin;
   const unit = getParameterUnit(parameter);
   const { toast } = useToast();
   const sensorsConfig = useSensors(
@@ -801,7 +801,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                 savingDeviceId={savingDeviceId}
                 positionErrorDeviceId={positionErrorDeviceId}
                 showTooltip={showTooltip}
-                readOnly={readOnly}
+                readOnly={isReadOnly}
               />
             ))}
           </div>
