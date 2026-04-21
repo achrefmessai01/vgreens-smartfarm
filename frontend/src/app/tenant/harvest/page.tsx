@@ -48,14 +48,19 @@ export default function HarvestPage() {
     handleSidebarCompleted,
     handleSidebarEdit,
     handleLogEntry,
+    handleBatchView,
+    handleBatchEdit,
     editOpen,
     setEditOpen,
+    editReadOnly,
     editHarvest,
     deleteOpen,
     setDeleteOpen,
     deleteLoading,
     handleDeleteConfirm,
     handleDeleteRequest,
+    handleBatchDeleteRequest,
+    isBatchDelete,
   } = useHarvestPage();
 
   return (
@@ -129,6 +134,9 @@ export default function HarvestPage() {
                 onDelete={handleDeleteRequest}
                 onSidebarEdit={handleSidebarEdit}
                 onLogEntry={handleLogEntry}
+                onViewBatch={handleBatchView}
+                onEditBatch={handleBatchEdit}
+                onDeleteBatch={handleBatchDeleteRequest}
                 isLoading={loading}
               />
             </div>
@@ -150,6 +158,7 @@ export default function HarvestPage() {
           loading={editHarvest.loading}
           onSubmit={editHarvest.handleSubmit}
           onReset={editHarvest.reset}
+          readOnly={editReadOnly}
         />
 
         <DeleteHarvestDialog
@@ -157,6 +166,12 @@ export default function HarvestPage() {
           onOpenChange={setDeleteOpen}
           onConfirm={handleDeleteConfirm}
           loading={deleteLoading}
+          title={isBatchDelete ? 'Delete Batch' : undefined}
+          description={
+            isBatchDelete
+              ? 'Are you sure you want to delete this batch and all linked harvest entries? This action cannot be undone.'
+              : undefined
+          }
         />
 
         <BatchSidebar
