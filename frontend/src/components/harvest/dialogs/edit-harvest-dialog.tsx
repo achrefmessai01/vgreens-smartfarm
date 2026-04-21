@@ -22,6 +22,7 @@ interface EditHarvestDialogProps {
   loading: boolean;
   onSubmit: (e: React.FormEvent) => void;
   onReset: () => void;
+  readOnly?: boolean;
 }
 
 export function EditHarvestDialog({
@@ -33,6 +34,7 @@ export function EditHarvestDialog({
   loading,
   onSubmit,
   onReset,
+  readOnly = false,
 }: EditHarvestDialogProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -49,9 +51,15 @@ export function EditHarvestDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{h?.editHarvest ?? 'Edit Harvest'}</DialogTitle>
+          <DialogTitle>
+            {readOnly
+              ? (h?.batchDetails ?? 'Batch Details')
+              : (h?.editHarvest ?? 'Edit Harvest')}
+          </DialogTitle>
           <DialogDescription>
-            {h?.editHarvestDescription ?? 'Update the harvest record details.'}
+            {readOnly
+              ? 'View batch form details.'
+              : (h?.editHarvestDescription ?? 'Update the harvest record details.')}
           </DialogDescription>
         </DialogHeader>
 
@@ -60,6 +68,7 @@ export function EditHarvestDialog({
             formData={formData}
             setFormData={setFormData}
             errors={errors}
+            disabled={readOnly}
           />
 
           <div className="flex justify-end space-x-2">
@@ -69,13 +78,15 @@ export function EditHarvestDialog({
               onClick={() => handleOpenChange(false)}
               disabled={loading}
             >
-              {h?.cancel ?? 'Cancel'}
+              {readOnly ? (h?.close ?? 'Close') : (h?.cancel ?? 'Cancel')}
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading
-                ? (h?.updating ?? 'Updating...')
-                : (h?.update ?? 'Update')}
-            </Button>
+            {!readOnly && (
+              <Button type="submit" disabled={loading}>
+                {loading
+                  ? (h?.updating ?? 'Updating...')
+                  : (h?.update ?? 'Update')}
+              </Button>
+            )}
           </div>
         </form>
       </DialogContent>

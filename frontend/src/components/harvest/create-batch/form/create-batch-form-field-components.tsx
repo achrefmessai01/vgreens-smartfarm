@@ -10,12 +10,14 @@ interface FormFieldProps {
   formData: BatchFormData;
   setFormData: React.Dispatch<React.SetStateAction<BatchFormData>>;
   errors: BatchFormErrors;
+  disabled?: boolean;
 }
 
 export function GreenhouseField({
   formData,
   setFormData,
   errors,
+  disabled = false,
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -34,6 +36,7 @@ export function GreenhouseField({
         onChange={(e) =>
           setFormData((prev) => ({ ...prev, sourceGreenhouse: e.target.value }))
         }
+        disabled={disabled}
         className={`h-10 ${errors.sourceGreenhouse ? 'border-destructive' : ''}`}
       />
       {errors.sourceGreenhouse && (
@@ -47,6 +50,7 @@ export function SpeciesField({
   formData,
   setFormData,
   errors,
+  disabled = false,
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -64,6 +68,7 @@ export function SpeciesField({
         onChange={(e) =>
           setFormData((prev) => ({ ...prev, species: e.target.value }))
         }
+        disabled={disabled}
         className={`h-10 ${errors.species ? 'border-destructive' : ''}`}
       />
       {errors.species && (
