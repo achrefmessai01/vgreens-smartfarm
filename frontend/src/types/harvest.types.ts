@@ -35,7 +35,8 @@ export interface HarvestLike {
   rowSpacing: number;
   classA: number;
   waste: number;
-  numberOfRowsHarvested: number;
+  rowX: number;
+  rowY: number;
   avgBrix: number;
   brix1: number;
   brix2: number;

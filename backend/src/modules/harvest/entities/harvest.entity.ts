@@ -124,7 +124,21 @@ export class Harvest {
 
   @Field(() => Int)
   @Column({ type: 'int', default: 0 })
-  numberOfRowsHarvested: number;
+  rowX: number;
+
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  rowY: number;
+
+  @Field(() => Int, {
+    deprecationReason: 'Use rowX and rowY instead.',
+  })
+  get numberOfRowsHarvested(): number {
+    if (this.rowX > 0 && this.rowY >= this.rowX) {
+      return this.rowY - this.rowX + 1;
+    }
+    return 0;
+  }
 
   // --- Brix measurements (10 individual readings) ---
 

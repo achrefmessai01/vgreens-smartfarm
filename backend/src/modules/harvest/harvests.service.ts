@@ -52,7 +52,8 @@ export class HarvestsService extends BaseService<Harvest> {
       harvest.classA === 0 &&
       harvest.waste === 0 &&
       harvest.avgBrix === 0 &&
-      harvest.numberOfRowsHarvested === 0 &&
+      harvest.rowX === 0 &&
+      harvest.rowY === 0 &&
       harvest.photos === 0
     );
   }
@@ -194,7 +195,16 @@ export class HarvestsService extends BaseService<Harvest> {
         classA: input.classA ?? 0,
         waste: input.waste ?? 0,
         avgBrix: input.avgBrix ?? 0,
-        numberOfRowsHarvested: input.numberOfRowsHarvested ?? 0,
+        rowX:
+          input.rowX ??
+          (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
+            ? 1
+            : 0),
+        rowY:
+          input.rowY ??
+          (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
+            ? input.numberOfRowsHarvested
+            : 0),
         brix1: input.brix1 ?? 0,
         brix2: input.brix2 ?? 0,
         brix3: input.brix3 ?? 0,
@@ -276,8 +286,16 @@ export class HarvestsService extends BaseService<Harvest> {
       if (input.classA !== undefined) harvest.classA = input.classA;
       if (input.waste !== undefined) harvest.waste = input.waste;
       if (input.avgBrix !== undefined) harvest.avgBrix = input.avgBrix;
-      if (input.numberOfRowsHarvested !== undefined) {
-        harvest.numberOfRowsHarvested = input.numberOfRowsHarvested;
+      if (input.rowX !== undefined) harvest.rowX = input.rowX;
+      if (input.rowY !== undefined) harvest.rowY = input.rowY;
+      if (
+        input.numberOfRowsHarvested !== undefined &&
+        input.rowX === undefined &&
+        input.rowY === undefined
+      ) {
+        harvest.rowX = input.numberOfRowsHarvested > 0 ? 1 : 0;
+        harvest.rowY =
+          input.numberOfRowsHarvested > 0 ? input.numberOfRowsHarvested : 0;
       }
       if (input.brix1 !== undefined) harvest.brix1 = input.brix1;
       if (input.brix2 !== undefined) harvest.brix2 = input.brix2;
