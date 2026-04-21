@@ -65,10 +65,7 @@ export function useBatchSidebar({
   );
 
   const handleYieldChange = React.useCallback(
-    (
-      field: 'marketable' | 'waste' | 'numberOfRowsHarvested',
-      value: number,
-    ) => {
+    (field: 'marketable' | 'waste' | 'rowX' | 'rowY', value: number) => {
       setLocalData((prev) =>
         prev
           ? {
@@ -138,8 +135,8 @@ export function useBatchSidebar({
               classA: currentData.todaysHarvest.marketable,
               waste: currentData.todaysHarvest.waste,
               avgBrix: computeAvgBrix(brix),
-              numberOfRowsHarvested:
-                currentData.todaysHarvest.numberOfRowsHarvested,
+              rowX: currentData.todaysHarvest.rowX,
+              rowY: currentData.todaysHarvest.rowY,
               ...brix,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,
@@ -156,8 +153,8 @@ export function useBatchSidebar({
               classA: currentData.todaysHarvest.marketable,
               waste: currentData.todaysHarvest.waste,
               avgBrix: computeAvgBrix(brix),
-              numberOfRowsHarvested:
-                currentData.todaysHarvest.numberOfRowsHarvested,
+              rowX: currentData.todaysHarvest.rowX,
+              rowY: currentData.todaysHarvest.rowY,
               ...brix,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,

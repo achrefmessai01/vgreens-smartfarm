@@ -12,7 +12,6 @@ import {
   PlantsPerMeterField,
   PlantingDateField,
   RowLengthField,
-  RowSpacingField,
   VarietyField,
 } from './create-batch-more-field-components';
 
@@ -74,12 +73,6 @@ export function CreateBatchFormFields({
         disabled={disabled}
       />
       <PlantsPerMeterField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-      />
-      <RowSpacingField
         formData={formData}
         setFormData={setFormData}
         errors={errors}

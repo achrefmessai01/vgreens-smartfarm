@@ -46,7 +46,7 @@ export function CreateBatchDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {t.pages.harvest?.createNewBatch || 'Create New Batch'}
+            {t.pages.harvest?.addBatchTitle || 'Add Batch'}
           </DialogTitle>
           <p className="text-muted-foreground text-sm">
             {t.pages.harvest?.setUpNewBatch || 'Set up a new cultivation batch'}
@@ -73,7 +73,7 @@ export function CreateBatchDialog({
             <Button type="submit" className="flex-1" disabled={loading}>
               {loading
                 ? t.pages.harvest?.creating || 'Creating...'
-                : t.pages.harvest?.createBatch || 'Create Batch'}
+                : t.pages.harvest?.addBatchTitle || 'Add Batch'}
             </Button>
           </div>
         </form>

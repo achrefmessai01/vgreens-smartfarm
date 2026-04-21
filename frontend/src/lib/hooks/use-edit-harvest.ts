@@ -9,6 +9,12 @@ import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
 
+function computeRowSpacing(data: BatchFormData): number {
+  const denominator = data.numberOfRows * data.rowLength;
+  if (denominator <= 0) return 0;
+  return Number((data.cultivationArea / denominator).toFixed(4));
+}
+
 function harvestToFormData(harvest: HarvestItem): BatchFormData {
   return {
     species: harvest.species,
@@ -93,6 +99,7 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
       if (Object.keys(validationErrors).length > 0 || !harvestId) return;
 
       try {
+        const rowSpacing = computeRowSpacing(formData);
         await updateHarvest({
           variables: {
             id: harvestId,
@@ -105,7 +112,7 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               numberOfRows: formData.numberOfRows,
               rowLength: formData.rowLength,
               plantsPerMeter: formData.plantsPerMeter,
-              rowSpacing: formData.rowSpacing,
+              rowSpacing,
               batch: `${formData.species} - ${formData.variety}`,
             },
           },

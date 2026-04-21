@@ -113,6 +113,21 @@ export class CreateHarvestInput {
   @IsOptional()
   @IsInt()
   @Min(0)
+  rowX?: number;
+
+  @Field(() => Int, { defaultValue: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  rowY?: number;
+
+  @Field(() => Int, {
+    defaultValue: 0,
+    deprecationReason: 'Use rowX and rowY instead.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
   numberOfRowsHarvested?: number;
 
   // --- Brix measurements ---

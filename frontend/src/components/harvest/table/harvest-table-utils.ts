@@ -25,7 +25,8 @@ export function isAutoDraftPlaceholder(entry: HarvestItem): boolean {
     entry.classA === 0 &&
     entry.waste === 0 &&
     entry.avgBrix === 0 &&
-    entry.numberOfRowsHarvested === 0 &&
+    entry.rowX === 0 &&
+    entry.rowY === 0 &&
     entry.photos === 0
   );
 }

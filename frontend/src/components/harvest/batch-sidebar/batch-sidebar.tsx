@@ -110,9 +110,8 @@ export function BatchSidebar({
                   <YieldDataField
                     marketable={currentData.todaysHarvest.marketable}
                     waste={currentData.todaysHarvest.waste}
-                    numberOfRowsHarvested={
-                      currentData.todaysHarvest.numberOfRowsHarvested
-                    }
+                    rowX={currentData.todaysHarvest.rowX}
+                    rowY={currentData.todaysHarvest.rowY}
                     onYieldChange={handleYieldChange}
                     isLoading={busy}
                   />

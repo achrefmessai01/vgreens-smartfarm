@@ -78,6 +78,7 @@ export function HarvestBatchGroup({
                 className="h-8 w-8"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   onViewBatch?.(group.root);
                 }}
                 aria-label={h?.viewDetails ?? 'View Batch'}
@@ -90,6 +91,7 @@ export function HarvestBatchGroup({
                 className="h-8 w-8"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   onEditBatch?.(group.root);
                 }}
                 aria-label={h?.editBatch ?? 'Edit Batch'}
@@ -102,6 +104,7 @@ export function HarvestBatchGroup({
                 className="h-8 w-8"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   onDeleteBatch?.(group.root, visibleEntries);
                 }}
                 aria-label={h?.deleteBatch ?? 'Delete Batch'}
@@ -114,6 +117,7 @@ export function HarvestBatchGroup({
                 className="h-8 w-8"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   onLogEntry?.(group.root);
                 }}
                 aria-label={h?.logEntry ?? 'Log Entry'}

@@ -22,7 +22,8 @@ export const CREATE_HARVEST_MUTATION = gql`
       classA
       waste
       avgBrix
-      numberOfRowsHarvested
+      rowX
+      rowY
       brix1
       brix2
       brix3
@@ -63,7 +64,8 @@ export const UPDATE_HARVEST_MUTATION = gql`
       classA
       waste
       avgBrix
-      numberOfRowsHarvested
+      rowX
+      rowY
       brix1
       brix2
       brix3
