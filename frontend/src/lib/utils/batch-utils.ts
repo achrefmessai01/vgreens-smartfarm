@@ -3,13 +3,7 @@ import type { BatchFormData } from '@/types/batch.types';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 
 export function getGreenhouseName(greenhouseId: string): string {
-  const greenhouseMap: Record<string, string> = {
-    gh1: 'Green House 1',
-    gh2: 'Green House 2',
-  };
-  return (
-    greenhouseMap[greenhouseId] || `Green House ${greenhouseId.toUpperCase()}`
-  );
+  return greenhouseId.trim() || '-';
 }
 
 export function createBatchDetailsFromForm(
@@ -28,15 +22,20 @@ export function createBatchDetailsFromForm(
     variety: formData.variety,
     status: HarvestStatus.Draft,
     greenhouse: {
-      id: formData.sourceGreenhouseId,
-      name: getGreenhouseName(formData.sourceGreenhouseId),
+      id: formData.sourceGreenhouse,
+      name: getGreenhouseName(formData.sourceGreenhouse),
     },
     daysAfterPlanting: Math.max(0, daysAfterPlanting),
     area: formData.cultivationArea,
+    numberOfRows: formData.numberOfRows,
+    rowLength: formData.rowLength,
+    plantsPerMeter: formData.plantsPerMeter,
+    rowSpacing: formData.rowSpacing,
     plantingDate: formData.plantingDate,
     todaysHarvest: {
       marketable: 0,
       waste: 0,
+      numberOfRowsHarvested: 0,
     },
     brixMeasurements: {
       brix1: 0,

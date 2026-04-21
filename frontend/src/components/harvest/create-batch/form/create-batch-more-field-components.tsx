@@ -12,6 +12,11 @@ interface FormFieldProps {
   errors: BatchFormErrors;
 }
 
+function parsePositiveNumber(value: string): number {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
 export function VarietyField({
   formData,
   setFormData,
@@ -96,7 +101,7 @@ export function CultivationAreaField({
         onChange={(e) =>
           setFormData((prev) => ({
             ...prev,
-            cultivationArea: parseFloat(e.target.value) || 0,
+            cultivationArea: parsePositiveNumber(e.target.value),
           }))
         }
         className={`h-10 ${errors.cultivationArea ? 'border-destructive' : ''}`}
@@ -104,6 +109,148 @@ export function CultivationAreaField({
       {errors.cultivationArea && (
         <p className="text-destructive text-sm">{errors.cultivationArea}</p>
       )}
+    </div>
+  );
+}
+
+export function NumberOfRowsField({
+  formData,
+  setFormData,
+  errors,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="numberOfRows" className="text-sm font-medium">
+        {h?.numberOfRows ?? 'Number of Rows'}{' '}
+        <span className="text-destructive">*</span>
+      </Label>
+      <Input
+        id="numberOfRows"
+        type="number"
+        min="1"
+        step="1"
+        value={formData.numberOfRows || ''}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            numberOfRows: Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+          }))
+        }
+        className={`h-10 ${errors.numberOfRows ? 'border-destructive' : ''}`}
+      />
+      {errors.numberOfRows && (
+        <p className="text-destructive text-sm">{errors.numberOfRows}</p>
+      )}
+    </div>
+  );
+}
+
+export function RowLengthField({
+  formData,
+  setFormData,
+  errors,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="rowLength" className="text-sm font-medium">
+        {h?.rowLength ?? 'Row Length (m)'}{' '}
+        <span className="text-destructive">*</span>
+      </Label>
+      <Input
+        id="rowLength"
+        type="number"
+        min="0"
+        step="0.1"
+        value={formData.rowLength || ''}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            rowLength: parsePositiveNumber(e.target.value),
+          }))
+        }
+        className={`h-10 ${errors.rowLength ? 'border-destructive' : ''}`}
+      />
+      {errors.rowLength && (
+        <p className="text-destructive text-sm">{errors.rowLength}</p>
+      )}
+    </div>
+  );
+}
+
+export function PlantsPerMeterField({
+  formData,
+  setFormData,
+  errors,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="plantsPerMeter" className="text-sm font-medium">
+        {h?.plantsPerMeter ?? 'Plants per Meter'}{' '}
+        <span className="text-destructive">*</span>
+      </Label>
+      <Input
+        id="plantsPerMeter"
+        type="number"
+        min="0"
+        step="0.1"
+        value={formData.plantsPerMeter || ''}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            plantsPerMeter: parsePositiveNumber(e.target.value),
+          }))
+        }
+        className={`h-10 ${errors.plantsPerMeter ? 'border-destructive' : ''}`}
+      />
+      {errors.plantsPerMeter && (
+        <p className="text-destructive text-sm">{errors.plantsPerMeter}</p>
+      )}
+    </div>
+  );
+}
+
+export function RowSpacingField({ formData, setFormData }: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  React.useEffect(() => {
+    const denominator = formData.numberOfRows * formData.rowLength;
+    const nextRowSpacing =
+      denominator > 0
+        ? Number((formData.cultivationArea / denominator).toFixed(4))
+        : 0;
+    if (nextRowSpacing !== formData.rowSpacing) {
+      setFormData((prev) => ({ ...prev, rowSpacing: nextRowSpacing }));
+    }
+  }, [
+    formData.cultivationArea,
+    formData.numberOfRows,
+    formData.rowLength,
+    formData.rowSpacing,
+    setFormData,
+  ]);
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="rowSpacing" className="text-sm font-medium">
+        {h?.rowSpacing ?? 'Row Spacing (Auto-calculated)'}
+      </Label>
+      <Input
+        id="rowSpacing"
+        type="number"
+        readOnly
+        value={formData.rowSpacing || 0}
+        className="bg-muted/40 h-10"
+      />
     </div>
   );
 }

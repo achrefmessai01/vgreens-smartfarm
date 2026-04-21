@@ -19,6 +19,11 @@ export class CreateHarvestInput {
   @IsUUID()
   tenantId?: string;
 
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsUUID()
+  parentBatchId?: string;
+
   // --- Batch creation fields (dialog) ---
 
   @Field()
@@ -51,6 +56,27 @@ export class CreateHarvestInput {
   @Min(0)
   cultivationArea: number;
 
+  @Field(() => Int)
+  @IsInt()
+  @Min(1)
+  numberOfRows: number;
+
+  @Field(() => Float)
+  @IsNumber()
+  @Min(0.01)
+  rowLength: number;
+
+  @Field(() => Float)
+  @IsNumber()
+  @Min(0.01)
+  plantsPerMeter: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  rowSpacing?: number;
+
   @Field(() => HarvestStatus, {
     nullable: true,
     defaultValue: HarvestStatus.ACTIVE,
@@ -82,6 +108,12 @@ export class CreateHarvestInput {
   @IsNumber()
   @Min(0)
   avgBrix?: number;
+
+  @Field(() => Int, { defaultValue: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  numberOfRowsHarvested?: number;
 
   // --- Brix measurements ---
 
