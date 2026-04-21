@@ -323,6 +323,7 @@ export const en = {
       noBatchSelected: 'No batch selected',
       close: 'Close',
       editBatch: 'Edit',
+      deleteBatch: 'Delete Batch',
       completeBatch: 'Complete Batch',
       logHarvest: 'Log Harvest',
       logEntry: 'Log Entry',

@@ -16,6 +16,9 @@ interface DeleteHarvestDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
   loading?: boolean;
+  title?: string;
+  description?: string;
+  confirmLabel?: string;
 }
 
 export function DeleteHarvestDialog({
@@ -23,6 +26,9 @@ export function DeleteHarvestDialog({
   onOpenChange,
   onConfirm,
   loading = false,
+  title,
+  description,
+  confirmLabel,
 }: DeleteHarvestDialogProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -32,10 +38,11 @@ export function DeleteHarvestDialog({
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>
-            {h?.deleteHarvestTitle ?? 'Delete Harvest Record'}
+            {title ?? h?.deleteHarvestTitle ?? 'Delete Harvest Record'}
           </DialogTitle>
           <DialogDescription>
-            {h?.deleteHarvestDescription ??
+            {description ??
+              h?.deleteHarvestDescription ??
               'Are you sure you want to delete this harvest record? This action cannot be undone.'}
           </DialogDescription>
         </DialogHeader>
@@ -51,7 +58,7 @@ export function DeleteHarvestDialog({
           <Button variant="destructive" onClick={onConfirm} disabled={loading}>
             {loading
               ? (h?.deleting ?? 'Deleting...')
-              : (h?.confirmDelete ?? 'Delete')}
+                : (confirmLabel ?? h?.confirmDelete ?? 'Delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

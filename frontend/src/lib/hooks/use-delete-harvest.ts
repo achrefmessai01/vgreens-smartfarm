@@ -7,14 +7,18 @@ interface UseDeleteHarvestOptions {
   onSuccess?: () => void;
 }
 
+interface DeleteHarvestOptions {
+  skipSuccess?: boolean;
+}
+
 export function useDeleteHarvest({ onSuccess }: UseDeleteHarvestOptions = {}) {
   const [deleteHarvest, { loading }] = useDeleteHarvestMutation();
 
   const handleDelete = React.useCallback(
-    async (id: string) => {
+    async (id: string, options?: DeleteHarvestOptions) => {
       try {
         await deleteHarvest({ variables: { id } });
-        onSuccess?.();
+        if (!options?.skipSuccess) onSuccess?.();
       } catch (err) {
         console.error('Failed to delete harvest:', err);
       }
