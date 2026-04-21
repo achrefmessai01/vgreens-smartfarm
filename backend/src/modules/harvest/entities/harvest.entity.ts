@@ -31,6 +31,15 @@ export class Harvest {
   @Column({ type: 'uuid' })
   tenantId: string;
 
+  @Field(() => ID, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  parentBatchId: string | null;
+
+  @Field(() => Harvest, { nullable: true })
+  @ManyToOne(() => Harvest, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'parentBatchId' })
+  parentBatch?: Harvest | null;
+
   @Field(() => Tenant, { nullable: true })
   @ManyToOne(() => Tenant, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'tenantId' })
@@ -71,6 +80,22 @@ export class Harvest {
   @Column({ type: 'float', default: 0 })
   cultivationArea: number;
 
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  numberOfRows: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
+  rowLength: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
+  plantsPerMeter: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
+  rowSpacing: number;
+
   @Field(() => HarvestStatus)
   @Column({
     type: 'enum',
@@ -96,6 +121,10 @@ export class Harvest {
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
   avgBrix: number;
+
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  numberOfRowsHarvested: number;
 
   // --- Brix measurements (10 individual readings) ---
 

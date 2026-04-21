@@ -15,8 +15,18 @@ const INITIAL_FORM_DATA: BatchFormData = {
   variety: '',
   plantingDate: new Date().toISOString().split('T')[0],
   cultivationArea: 0,
-  sourceGreenhouseId: '',
+  sourceGreenhouse: '',
+  numberOfRows: 0,
+  rowLength: 0,
+  plantsPerMeter: 0,
+  rowSpacing: 0,
 };
+
+function computeRowSpacing(data: BatchFormData): number {
+  const denominator = data.numberOfRows * data.rowLength;
+  if (denominator <= 0) return 0;
+  return Number((data.cultivationArea / denominator).toFixed(4));
+}
 
 function validateBatchForm(data: BatchFormData): BatchFormErrors {
   const errors: BatchFormErrors = {};
@@ -25,8 +35,14 @@ function validateBatchForm(data: BatchFormData): BatchFormErrors {
   if (!data.plantingDate) errors.plantingDate = 'Planting date is required';
   if (!data.cultivationArea || data.cultivationArea <= 0)
     errors.cultivationArea = 'Valid cultivation area is required';
-  if (!data.sourceGreenhouseId)
-    errors.sourceGreenhouseId = 'Greenhouse selection is required';
+  if (!data.sourceGreenhouse.trim())
+    errors.sourceGreenhouse = 'Greenhouse is required';
+  if (!data.numberOfRows || data.numberOfRows <= 0)
+    errors.numberOfRows = 'Number of rows must be greater than 0';
+  if (!data.rowLength || data.rowLength <= 0)
+    errors.rowLength = 'Row length must be greater than 0';
+  if (!data.plantsPerMeter || data.plantsPerMeter <= 0)
+    errors.plantsPerMeter = 'Plants per meter must be greater than 0';
   return errors;
 }
 
@@ -58,6 +74,7 @@ export function useCreateBatchForm({
       if (Object.keys(validationErrors).length > 0) return;
 
       try {
+        const rowSpacing = computeRowSpacing(formData);
         const { data } = await createHarvest({
           variables: {
             input: {
@@ -65,7 +82,11 @@ export function useCreateBatchForm({
               variety: formData.variety,
               plantingDate: formData.plantingDate,
               cultivationArea: formData.cultivationArea,
-              greenhouse: formData.sourceGreenhouseId,
+              greenhouse: formData.sourceGreenhouse.trim(),
+              numberOfRows: formData.numberOfRows,
+              rowLength: formData.rowLength,
+              plantsPerMeter: formData.plantsPerMeter,
+              rowSpacing,
               date: new Date().toISOString(),
               status: HarvestStatus.Draft,
             },

@@ -9,14 +9,20 @@ export const HARVESTS_QUERY = gql`
       species
       variety
       batch
+      parentBatchId
       greenhouse
       plantingDate
       cultivationArea
+      numberOfRows
+      rowLength
+      plantsPerMeter
+      rowSpacing
       status
       date
       classA
       waste
       avgBrix
+      numberOfRowsHarvested
       brix1
       brix2
       brix3
@@ -50,14 +56,20 @@ export const HARVEST_QUERY = gql`
       species
       variety
       batch
+      parentBatchId
       greenhouse
       plantingDate
       cultivationArea
+      numberOfRows
+      rowLength
+      plantsPerMeter
+      rowSpacing
       status
       date
       classA
       waste
       avgBrix
+      numberOfRowsHarvested
       brix1
       brix2
       brix3

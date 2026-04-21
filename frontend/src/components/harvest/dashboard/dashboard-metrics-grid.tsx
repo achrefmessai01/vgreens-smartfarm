@@ -11,7 +11,6 @@ import { MetricCard } from './metric-card/metric-card';
 
 interface DashboardMetricsGridProps {
   data: HarvestDashboardData;
-  filterLabel: string;
 }
 
 export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {

@@ -8,6 +8,7 @@ import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
 export function YieldDataField({
   marketable,
   waste,
+  numberOfRowsHarvested,
   onYieldChange,
   isLoading = false,
 }: YieldDataFieldProps) {
@@ -34,9 +35,10 @@ export function YieldDataField({
     return (
       <div className="space-y-4">
         <div className="bg-muted h-5 animate-pulse rounded" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="bg-muted h-16 animate-pulse rounded" />
-          <div className="bg-muted h-16 animate-pulse rounded" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="bg-muted h-10 animate-pulse rounded" />
+          <div className="bg-muted h-10 animate-pulse rounded" />
+          <div className="bg-muted h-10 animate-pulse rounded" />
         </div>
       </div>
     );
@@ -54,8 +56,8 @@ export function YieldDataField({
         <p className="text-muted-foreground text-sm font-medium">
           {h?.yieldData ?? 'Yield Data'}
         </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2 text-center">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+          <div className="col-span-2 space-y-2 text-left sm:col-span-1">
             <p className="text-muted-foreground text-sm">
               {h?.marketable ?? 'Marketable'}
             </p>
@@ -70,7 +72,7 @@ export function YieldDataField({
                   onYieldChange?.('marketable', parseFloat(e.target.value) || 0)
                 }
                 onKeyDown={(e) => handleKeyDown(e, 'waste')}
-                className="h-16 pr-12 text-center text-xl font-light sm:text-2xl"
+                className="h-10 pr-12 text-left text-base"
                 placeholder={
                   h?.enterMarketableYield ?? 'Enter marketable yield'
                 }
@@ -80,7 +82,7 @@ export function YieldDataField({
               </span>
             </div>
           </div>
-          <div className="space-y-2 text-center">
+          <div className="col-span-2 space-y-2 text-left sm:col-span-1">
             <p className="text-muted-foreground text-sm">
               {h?.waste ?? 'Waste'}
             </p>
@@ -95,11 +97,39 @@ export function YieldDataField({
                   onYieldChange?.('waste', parseFloat(e.target.value) || 0)
                 }
                 onKeyDown={(e) => handleKeyDown(e, 'brix1')}
-                className="h-16 pr-12 text-center text-xl font-light sm:text-2xl"
+                className="h-10 pr-12 text-left text-base"
                 placeholder={h?.enterWasteAmount ?? 'Enter waste amount'}
               />
               <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
                 kg
+              </span>
+            </div>
+          </div>
+          <div className="col-span-2 space-y-2 text-left lg:col-span-1">
+            <p className="text-muted-foreground text-sm">
+              {h?.numberOfRowsHarvested ?? 'Number of Rows Harvested'}
+            </p>
+            <div className="relative">
+              <Input
+                type="number"
+                min="0"
+                step="1"
+                value={
+                  numberOfRowsHarvested === 0
+                    ? ''
+                    : numberOfRowsHarvested.toString()
+                }
+                onChange={(e) =>
+                  onYieldChange?.(
+                    'numberOfRowsHarvested',
+                    Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+                  )
+                }
+                className="h-10 pr-12 text-left text-base"
+                placeholder={h?.enterRowsHarvested ?? 'Rows harvested'}
+              />
+              <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
+                rows
               </span>
             </div>
           </div>
