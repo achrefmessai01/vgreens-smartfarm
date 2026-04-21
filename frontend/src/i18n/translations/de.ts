@@ -327,6 +327,7 @@ export const de = {
       noBatchSelected: 'Kein Batch ausgewählt',
       close: 'Schließen',
       editBatch: 'Bearbeiten',
+      deleteBatch: 'Batch löschen',
       completeBatch: 'Batch abschließen',
       logHarvest: 'Ernte protokollieren',
       logEntry: 'Eintrag protokollieren',
