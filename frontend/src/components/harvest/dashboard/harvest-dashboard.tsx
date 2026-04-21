@@ -33,12 +33,11 @@ export function HarvestDashboard({
   variety,
 }: HarvestDashboardProps) {
   const { t } = useI18n();
+  const h = t.pages.harvest;
   const [currentFilter, setCurrentFilter] = useState<DateFilter>('thisMonth');
 
   const { data, loading, error, refetch } = useHarvestDashboard(
-    currentFilter === 'total'
-      ? undefined
-      : { dateFilter: currentFilter, species, variety },
+    { dateFilter: currentFilter, species, variety },
   );
 
   const filterLabel =
@@ -70,7 +69,7 @@ export function HarvestDashboard({
     );
   }
 
-  if (!data) {
+  if (!data || data.harvestCount === 0) {
     return (
       <div
         className={`flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px] ${className}`}
@@ -78,7 +77,7 @@ export function HarvestDashboard({
         <div className="max-w-md text-center">
           <Package className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
           <p className="text-muted-foreground text-sm sm:text-base">
-            No harvest data available
+            {h?.noHarvestsYet ?? 'No harvest data available'}
           </p>
         </div>
       </div>
@@ -87,25 +86,28 @@ export function HarvestDashboard({
 
   return (
     <div className={className}>
-      <div className="mb-6 flex flex-row items-center justify-between gap-4 sm:mb-8">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
-            {t.pages.harvest?.performanceDashboard ?? 'Performance Dashboard'}
-          </h1>
-          <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
-            {data.harvestCount}{' '}
-            {t.pages.harvest?.harvestsLogged ?? 'harvests logged'} for{' '}
-            {filterLabel}
-          </p>
+      <div className="bg-card mb-5 rounded-xl border p-3 sm:mb-6 sm:p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
+              {h?.performanceDashboard ?? 'Performance Dashboard'}
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              {data.harvestCount}{' '}
+              {h?.harvestsLogged ?? 'harvests logged'} for {filterLabel}
+            </p>
+          </div>
+          <DashboardFilters
+            onFilterChange={(f) =>
+              f.dateFilter && setCurrentFilter(f.dateFilter)
+            }
+            className="ml-auto w-40 shrink-0"
+            defaultValue={currentFilter}
+          />
         </div>
-        <DashboardFilters
-          onFilterChange={(f) => f.dateFilter && setCurrentFilter(f.dateFilter)}
-          className="w-32 sm:w-40"
-          defaultValue={currentFilter}
-        />
       </div>
 
-      <DashboardMetricsGrid data={data} filterLabel={String(filterLabel)} />
+      <DashboardMetricsGrid data={data} />
       <YieldPredictionCard />
       <DashboardChartsGrid data={data} />
     </div>
