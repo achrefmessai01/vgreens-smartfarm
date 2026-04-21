@@ -110,6 +110,21 @@ export class UpdateHarvestInput {
   @IsOptional()
   @IsInt()
   @Min(0)
+  rowX?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  rowY?: number;
+
+  @Field(() => Int, {
+    nullable: true,
+    deprecationReason: 'Use rowX and rowY instead.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
   numberOfRowsHarvested?: number;
 
   // --- Brix measurements ---

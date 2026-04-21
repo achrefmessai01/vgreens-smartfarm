@@ -8,7 +8,8 @@ import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
 export function YieldDataField({
   marketable,
   waste,
-  numberOfRowsHarvested,
+  rowX,
+  rowY,
   onYieldChange,
   isLoading = false,
 }: YieldDataFieldProps) {
@@ -35,7 +36,8 @@ export function YieldDataField({
     return (
       <div className="space-y-4">
         <div className="bg-muted h-5 animate-pulse rounded" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-muted h-10 animate-pulse rounded" />
           <div className="bg-muted h-10 animate-pulse rounded" />
           <div className="bg-muted h-10 animate-pulse rounded" />
           <div className="bg-muted h-10 animate-pulse rounded" />
@@ -56,8 +58,8 @@ export function YieldDataField({
         <p className="text-muted-foreground text-sm font-medium">
           {h?.yieldData ?? 'Yield Data'}
         </p>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-          <div className="col-span-2 space-y-2 text-left sm:col-span-1">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2 text-left">
             <p className="text-muted-foreground text-sm">
               {h?.marketable ?? 'Marketable'}
             </p>
@@ -82,7 +84,7 @@ export function YieldDataField({
               </span>
             </div>
           </div>
-          <div className="col-span-2 space-y-2 text-left sm:col-span-1">
+          <div className="space-y-2 text-left">
             <p className="text-muted-foreground text-sm">
               {h?.waste ?? 'Waste'}
             </p>
@@ -105,28 +107,48 @@ export function YieldDataField({
               </span>
             </div>
           </div>
-          <div className="col-span-2 space-y-2 text-left lg:col-span-1">
+          <div className="space-y-2 text-left">
             <p className="text-muted-foreground text-sm">
-              {h?.numberOfRowsHarvested ?? 'Number of Rows Harvested'}
+              {h?.rowX ?? 'Row X'}
             </p>
             <div className="relative">
               <Input
                 type="number"
                 min="0"
                 step="1"
-                value={
-                  numberOfRowsHarvested === 0
-                    ? ''
-                    : numberOfRowsHarvested.toString()
-                }
+                value={rowX === 0 ? '' : rowX.toString()}
                 onChange={(e) =>
                   onYieldChange?.(
-                    'numberOfRowsHarvested',
+                    'rowX',
                     Math.max(0, Number.parseInt(e.target.value, 10) || 0),
                   )
                 }
                 className="h-10 pr-12 text-left text-base"
-                placeholder={h?.enterRowsHarvested ?? 'Rows harvested'}
+                placeholder={h?.enterRowX ?? 'Start row'}
+              />
+              <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
+                rows
+              </span>
+            </div>
+          </div>
+          <div className="space-y-2 text-left">
+            <p className="text-muted-foreground text-sm">
+              {h?.rowY ?? 'Row Y'}
+            </p>
+            <div className="relative">
+              <Input
+                type="number"
+                min="0"
+                step="1"
+                value={rowY === 0 ? '' : rowY.toString()}
+                onChange={(e) =>
+                  onYieldChange?.(
+                    'rowY',
+                    Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+                  )
+                }
+                className="h-10 pr-12 text-left text-base"
+                placeholder={h?.enterRowY ?? 'End row'}
               />
               <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
                 rows

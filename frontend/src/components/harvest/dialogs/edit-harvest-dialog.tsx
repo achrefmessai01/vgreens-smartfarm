@@ -54,12 +54,12 @@ export function EditHarvestDialog({
           <DialogTitle>
             {readOnly
               ? (h?.batchDetails ?? 'Batch Details')
-              : (h?.editHarvest ?? 'Edit Harvest')}
+              : (h?.editBatchTitle ?? 'Edit Batch')}
           </DialogTitle>
           <DialogDescription>
             {readOnly
               ? 'View batch form details.'
-              : (h?.editHarvestDescription ?? 'Update the harvest record details.')}
+              : (h?.editBatchDescription ?? 'Update batch details.')}
           </DialogDescription>
         </DialogHeader>
 
