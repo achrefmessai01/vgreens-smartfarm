@@ -17,7 +17,11 @@ function harvestToFormData(harvest: HarvestItem): BatchFormData {
       ? new Date(harvest.plantingDate).toISOString().split('T')[0]
       : '',
     cultivationArea: harvest.cultivationArea,
-    sourceGreenhouseId: harvest.greenhouse ?? '',
+    sourceGreenhouse: harvest.greenhouse ?? '',
+    numberOfRows: harvest.numberOfRows,
+    rowLength: harvest.rowLength,
+    plantsPerMeter: harvest.plantsPerMeter,
+    rowSpacing: harvest.rowSpacing,
   };
 }
 
@@ -28,8 +32,13 @@ function validateEditForm(data: BatchFormData): BatchFormErrors {
   if (!data.plantingDate) errors.plantingDate = 'Planting date is required';
   if (!data.cultivationArea || data.cultivationArea <= 0)
     errors.cultivationArea = 'Valid cultivation area is required';
-  if (!data.sourceGreenhouseId)
-    errors.sourceGreenhouseId = 'Greenhouse selection is required';
+  if (!data.sourceGreenhouse.trim()) errors.sourceGreenhouse = 'Greenhouse is required';
+  if (!data.numberOfRows || data.numberOfRows <= 0)
+    errors.numberOfRows = 'Number of rows must be greater than 0';
+  if (!data.rowLength || data.rowLength <= 0)
+    errors.rowLength = 'Row length must be greater than 0';
+  if (!data.plantsPerMeter || data.plantsPerMeter <= 0)
+    errors.plantsPerMeter = 'Plants per meter must be greater than 0';
   return errors;
 }
 
@@ -43,7 +52,11 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
     variety: '',
     plantingDate: '',
     cultivationArea: 0,
-    sourceGreenhouseId: '',
+    sourceGreenhouse: '',
+    numberOfRows: 0,
+    rowLength: 0,
+    plantsPerMeter: 0,
+    rowSpacing: 0,
   });
   const [errors, setErrors] = React.useState<BatchFormErrors>({});
   const [harvestId, setHarvestId] = React.useState<string | null>(null);
@@ -62,7 +75,11 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
       variety: '',
       plantingDate: '',
       cultivationArea: 0,
-      sourceGreenhouseId: '',
+      sourceGreenhouse: '',
+      numberOfRows: 0,
+      rowLength: 0,
+      plantsPerMeter: 0,
+      rowSpacing: 0,
     });
     setErrors({});
   }, []);
@@ -83,7 +100,11 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               variety: formData.variety,
               plantingDate: formData.plantingDate,
               cultivationArea: formData.cultivationArea,
-              greenhouse: formData.sourceGreenhouseId,
+              greenhouse: formData.sourceGreenhouse.trim(),
+              numberOfRows: formData.numberOfRows,
+              rowLength: formData.rowLength,
+              plantsPerMeter: formData.plantsPerMeter,
+              rowSpacing: formData.rowSpacing,
               batch: `${formData.species} - ${formData.variety}`,
             },
           },

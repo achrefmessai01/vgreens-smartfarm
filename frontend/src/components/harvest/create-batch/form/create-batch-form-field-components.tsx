@@ -1,17 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { greenhouseOptions } from '../create-batch-data';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 interface FormFieldProps {
@@ -34,29 +26,18 @@ export function GreenhouseField({
         {h?.greenhouse ?? 'Greenhouse'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Select
-        value={formData.sourceGreenhouseId}
-        onValueChange={(value) =>
-          setFormData((prev) => ({ ...prev, sourceGreenhouseId: value }))
+      <Input
+        id="sourceGreenhouse"
+        type="text"
+        placeholder={h?.enterGreenhouse ?? 'Enter greenhouse...'}
+        value={formData.sourceGreenhouse}
+        onChange={(e) =>
+          setFormData((prev) => ({ ...prev, sourceGreenhouse: e.target.value }))
         }
-      >
-        <SelectTrigger
-          className={`h-10 w-full ${errors.sourceGreenhouseId ? 'border-destructive' : ''}`}
-        >
-          <SelectValue
-            placeholder={h?.selectGreenhouse ?? 'Select greenhouse...'}
-          />
-        </SelectTrigger>
-        <SelectContent>
-          {greenhouseOptions.map((greenhouse) => (
-            <SelectItem key={greenhouse.value} value={greenhouse.value}>
-              {greenhouse.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {errors.sourceGreenhouseId && (
-        <p className="text-destructive text-sm">{errors.sourceGreenhouseId}</p>
+        className={`h-10 ${errors.sourceGreenhouse ? 'border-destructive' : ''}`}
+      />
+      {errors.sourceGreenhouse && (
+        <p className="text-destructive text-sm">{errors.sourceGreenhouse}</p>
       )}
     </div>
   );
@@ -73,12 +54,12 @@ export function SpeciesField({
   return (
     <div className="space-y-2">
       <Label htmlFor="species" className="text-sm font-medium">
-        {h?.species ?? 'Species'} <span className="text-destructive">*</span>
+        {h?.crop ?? 'Crop'} <span className="text-destructive">*</span>
       </Label>
       <Input
         id="species"
         type="text"
-        placeholder={h?.enterSpecies ?? 'Enter species...'}
+        placeholder={h?.enterCrop ?? 'Enter crop...'}
         value={formData.species}
         onChange={(e) =>
           setFormData((prev) => ({ ...prev, species: e.target.value }))

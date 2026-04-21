@@ -2,6 +2,7 @@
 
 import {
   HarvestStatus,
+  useCreateHarvestMutation,
   useDeleteHarvestImageMutation,
   useUpdateHarvestMutation,
 } from '@/generated/graphql';
@@ -28,6 +29,7 @@ export function useBatchSidebar({
   const [localData, setLocalData] = React.useState<BatchDetailsData | null>(
     null,
   );
+  const [createHarvest, { loading: createLoading }] = useCreateHarvestMutation();
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
   const { uploadPhotos, uploading } = useHarvestPhotosUpload(harvestId);
   const [deleteHarvestImage] = useDeleteHarvestImageMutation();
@@ -37,14 +39,13 @@ export function useBatchSidebar({
   }, [batchData]);
 
   React.useEffect(() => {
+    const photos = localData?.photos ?? [];
     return () => {
-      if (localData?.photos) {
-        localData.photos.forEach((url) => {
-          if (url.startsWith('blob:')) URL.revokeObjectURL(url);
-        });
-      }
+      photos.forEach((url) => {
+        if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+      });
     };
-  }, []);
+  }, [localData?.photos]);
 
   const currentData = localData ?? batchData;
 
@@ -63,7 +64,10 @@ export function useBatchSidebar({
   );
 
   const handleYieldChange = React.useCallback(
-    (field: 'marketable' | 'waste', value: number) => {
+    (
+      field: 'marketable' | 'waste' | 'numberOfRowsHarvested',
+      value: number,
+    ) => {
       setLocalData((prev) =>
         prev
           ? {
@@ -113,33 +117,62 @@ export function useBatchSidebar({
   const handleSave = React.useCallback(async () => {
     if (!harvestId || !currentData) return;
     const brix = currentData.brixMeasurements;
-    const status =
-      mode === 'edit' ? currentData.status : HarvestStatus.Completed;
     try {
-      await updateHarvest({
-        variables: {
-          id: harvestId,
-          input: {
-            classA: currentData.todaysHarvest.marketable,
-            waste: currentData.todaysHarvest.waste,
-            avgBrix: computeAvgBrix(brix),
-            ...brix,
-            photos: currentData.photos.length,
-            photoUrls: currentData.photos,
-            date: mode === 'edit' ? undefined : new Date().toISOString(),
-            status,
+      if (mode === 'create') {
+        await createHarvest({
+          variables: {
+            input: {
+              parentBatchId: harvestId,
+              species: currentData.species,
+              variety: currentData.variety,
+              batch: currentData.name,
+              greenhouse: currentData.greenhouse.id || currentData.greenhouse.name,
+              plantingDate: currentData.plantingDate,
+              cultivationArea: currentData.area,
+              numberOfRows: currentData.numberOfRows,
+              rowLength: currentData.rowLength,
+              plantsPerMeter: currentData.plantsPerMeter,
+              rowSpacing: currentData.rowSpacing,
+              classA: currentData.todaysHarvest.marketable,
+              waste: currentData.todaysHarvest.waste,
+              avgBrix: computeAvgBrix(brix),
+              numberOfRowsHarvested:
+                currentData.todaysHarvest.numberOfRowsHarvested,
+              ...brix,
+              photos: currentData.photos.length,
+              photoUrls: currentData.photos,
+              date: new Date().toISOString(),
+              status: HarvestStatus.Completed,
+            },
           },
-        },
-      });
+        });
+      } else {
+        await updateHarvest({
+          variables: {
+            id: harvestId,
+            input: {
+              classA: currentData.todaysHarvest.marketable,
+              waste: currentData.todaysHarvest.waste,
+              avgBrix: computeAvgBrix(brix),
+              numberOfRowsHarvested:
+                currentData.todaysHarvest.numberOfRowsHarvested,
+              ...brix,
+              photos: currentData.photos.length,
+              photoUrls: currentData.photos,
+              status: currentData.status,
+            },
+          },
+        });
+      }
       onCompleted?.();
     } catch (err) {
       console.error('Failed to save harvest:', err);
     }
-  }, [harvestId, currentData, mode, updateHarvest, onCompleted]);
+  }, [harvestId, currentData, mode, updateHarvest, createHarvest, onCompleted]);
 
   return {
     currentData,
-    loading: loading || uploading,
+    loading: loading || createLoading || uploading,
     mode,
     handleBrixChange,
     handleYieldChange,

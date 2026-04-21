@@ -47,10 +47,10 @@ export default function HarvestPage() {
     handleBatchCreated,
     handleSidebarCompleted,
     handleSidebarEdit,
+    handleLogEntry,
     editOpen,
     setEditOpen,
     editHarvest,
-    handleEditRequest,
     deleteOpen,
     setDeleteOpen,
     deleteLoading,
@@ -92,7 +92,7 @@ export default function HarvestPage() {
             >
               <History className="h-4 w-4" />
               <span className="text-xs sm:text-sm">
-                {t.navigation?.history || 'History'}
+                {t.pages.harvest?.harvestEntryTab || 'Harvest Entry'}
               </span>
             </TabsTrigger>
           </TabsList>
@@ -121,14 +121,14 @@ export default function HarvestPage() {
             >
               <HarvestPageHeader
                 summary={summary}
-                title={t.pages.harvest?.historyTitle || 'Harvest History'}
+                title={t.pages.harvest?.harvestEntryTitle || 'Harvest Entry'}
                 onCreateBatch={handleCreateBatch}
               />
               <HarvestTable
                 harvests={harvests ?? []}
-                onEdit={handleEditRequest}
                 onDelete={handleDeleteRequest}
                 onSidebarEdit={handleSidebarEdit}
+                onLogEntry={handleLogEntry}
                 isLoading={loading}
               />
             </div>

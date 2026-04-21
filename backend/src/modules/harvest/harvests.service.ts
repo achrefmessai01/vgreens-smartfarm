@@ -35,6 +35,16 @@ export class HarvestsService extends BaseService<Harvest> {
 
   private readonly harvestRelations = ['tenant', 'createdBy'] as const;
 
+  private computeRowSpacing(
+    cultivationArea: number,
+    numberOfRows: number,
+    rowLength: number,
+  ): number {
+    const denominator = numberOfRows * rowLength;
+    if (denominator <= 0) return 0;
+    return cultivationArea / denominator;
+  }
+
   async findAllFiltered(
     tenantId: string | undefined,
     filter?: HarvestFilterInput | null,
@@ -149,6 +159,7 @@ export class HarvestsService extends BaseService<Harvest> {
 
       const harvest = this.harvestRepository.create({
         tenantId,
+        parentBatchId: input.parentBatchId ?? null,
         createdById,
         species: input.species,
         variety: input.variety,
@@ -156,11 +167,22 @@ export class HarvestsService extends BaseService<Harvest> {
         greenhouse: input.greenhouse ?? undefined,
         plantingDate: new Date(input.plantingDate),
         cultivationArea: input.cultivationArea,
+        numberOfRows: input.numberOfRows,
+        rowLength: input.rowLength,
+        plantsPerMeter: input.plantsPerMeter,
+        rowSpacing:
+          input.rowSpacing ??
+          this.computeRowSpacing(
+            input.cultivationArea,
+            input.numberOfRows,
+            input.rowLength,
+          ),
         status: input.status ?? HarvestStatus.ACTIVE,
         date: new Date(input.date),
         classA: input.classA ?? 0,
         waste: input.waste ?? 0,
         avgBrix: input.avgBrix ?? 0,
+        numberOfRowsHarvested: input.numberOfRowsHarvested ?? 0,
         brix1: input.brix1 ?? 0,
         brix2: input.brix2 ?? 0,
         brix3: input.brix3 ?? 0,
@@ -209,17 +231,42 @@ export class HarvestsService extends BaseService<Harvest> {
       if (input.species !== undefined) harvest.species = input.species;
       if (input.variety !== undefined) harvest.variety = input.variety;
       if (input.batch !== undefined) harvest.batch = input.batch;
+      if (input.parentBatchId !== undefined) {
+        harvest.parentBatchId = input.parentBatchId;
+      }
       if (input.greenhouse !== undefined) harvest.greenhouse = input.greenhouse;
       if (input.plantingDate !== undefined) {
         harvest.plantingDate = new Date(input.plantingDate);
       }
       if (input.cultivationArea !== undefined)
         harvest.cultivationArea = input.cultivationArea;
+      if (input.numberOfRows !== undefined)
+        harvest.numberOfRows = input.numberOfRows;
+      if (input.rowLength !== undefined) harvest.rowLength = input.rowLength;
+      if (input.plantsPerMeter !== undefined) {
+        harvest.plantsPerMeter = input.plantsPerMeter;
+      }
+      if (input.rowSpacing !== undefined) {
+        harvest.rowSpacing = input.rowSpacing;
+      } else if (
+        input.cultivationArea !== undefined ||
+        input.numberOfRows !== undefined ||
+        input.rowLength !== undefined
+      ) {
+        harvest.rowSpacing = this.computeRowSpacing(
+          harvest.cultivationArea,
+          harvest.numberOfRows,
+          harvest.rowLength,
+        );
+      }
       if (input.status !== undefined) harvest.status = input.status;
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.classA !== undefined) harvest.classA = input.classA;
       if (input.waste !== undefined) harvest.waste = input.waste;
       if (input.avgBrix !== undefined) harvest.avgBrix = input.avgBrix;
+      if (input.numberOfRowsHarvested !== undefined) {
+        harvest.numberOfRowsHarvested = input.numberOfRowsHarvested;
+      }
       if (input.brix1 !== undefined) harvest.brix1 = input.brix1;
       if (input.brix2 !== undefined) harvest.brix2 = input.brix2;
       if (input.brix3 !== undefined) harvest.brix3 = input.brix3;
