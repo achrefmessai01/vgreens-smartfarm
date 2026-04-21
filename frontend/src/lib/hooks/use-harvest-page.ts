@@ -85,6 +85,13 @@ export function useHarvestPage() {
     setBatchSidebarOpen(true);
   }, []);
 
+  const handleLogEntry = React.useCallback((harvest: HarvestItem) => {
+    const details = harvestToBatchDetails(harvest);
+    setPendingBatch({ id: harvest.id, details });
+    setSidebarMode('create');
+    setBatchSidebarOpen(true);
+  }, []);
+
   const handleDeleteRequest = React.useCallback((harvest: HarvestItem) => {
     setDeleteTarget(harvest);
     setDeleteOpen(true);
@@ -108,6 +115,7 @@ export function useHarvestPage() {
     handleBatchCreated,
     handleSidebarCompleted,
     handleSidebarEdit,
+    handleLogEntry,
     editOpen,
     setEditOpen,
     editHarvest,

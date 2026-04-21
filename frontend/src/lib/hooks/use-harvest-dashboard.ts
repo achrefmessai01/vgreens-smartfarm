@@ -22,10 +22,7 @@ interface DashboardFilter {
   dateFilter?: DateFilter;
 }
 
-export interface HarvestDashboardData extends Omit<
-  HarvestDashboardMetrics,
-  '__typename'
-> {}
+export type HarvestDashboardData = Omit<HarvestDashboardMetrics, '__typename'>;
 
 function getDateRange(filter: DateFilter): {
   dateFrom?: string;
@@ -168,6 +165,6 @@ export function useHarvestDashboard(filter?: DashboardFilter) {
     data: data?.harvestDashboard,
     loading,
     error,
-    refetch,
+    refetch: () => refetch(),
   };
 }
