@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Eye, Plus, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { formatHarvestDate, getGreenhouseLabel } from '@/lib/harvest-utils';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import {
@@ -33,6 +33,9 @@ interface HarvestBatchGroupProps {
   onDelete?: (harvest: HarvestItem) => void;
   onSidebarEdit?: (harvest: HarvestItem) => void;
   onLogEntry?: (harvest: HarvestItem) => void;
+  onViewBatch?: (batch: HarvestItem) => void;
+  onEditBatch?: (batch: HarvestItem) => void;
+  onDeleteBatch?: (batch: HarvestItem, entries: HarvestItem[]) => void;
 }
 
 export function HarvestBatchGroup({
@@ -40,6 +43,9 @@ export function HarvestBatchGroup({
   onDelete,
   onSidebarEdit,
   onLogEntry,
+  onViewBatch,
+  onEditBatch,
+  onDeleteBatch,
 }: HarvestBatchGroupProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -58,23 +64,64 @@ export function HarvestBatchGroup({
         value={group.key}
         className="bg-card rounded-xl border px-3 pb-2 shadow-sm sm:px-4"
       >
-        <div className="flex items-center justify-between gap-3 pt-3">
-          <AccordionTrigger className="min-w-0 flex-1 py-0 hover:no-underline">
-            <p className="truncate text-base font-semibold sm:text-lg">
-              {group.root.batch}
-            </p>
-          </AccordionTrigger>
-          <Button
-            size="sm"
-            className="shrink-0"
-            onClick={(e) => {
-              e.preventDefault();
-              onLogEntry?.(group.root);
-            }}
-          >
-            <Plus className="mr-1 h-4 w-4" />
-            {h?.logEntry ?? 'Log Entry'}
-          </Button>
+        <div className="pt-3">
+          <div className="flex items-center justify-between gap-2">
+            <AccordionTrigger className="min-w-0 flex-1 py-0 hover:no-underline">
+              <p className="truncate text-base font-semibold sm:text-lg">
+                {group.root.batch}
+              </p>
+            </AccordionTrigger>
+            <div className="flex shrink-0 items-center gap-1">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onViewBatch?.(group.root);
+                }}
+                aria-label={h?.viewDetails ?? 'View Batch'}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onEditBatch?.(group.root);
+                }}
+                aria-label={h?.editBatch ?? 'Edit Batch'}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onDeleteBatch?.(group.root, visibleEntries);
+                }}
+                aria-label={h?.deleteBatch ?? 'Delete Batch'}
+              >
+                <Trash2 className="text-destructive h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onLogEntry?.(group.root);
+                }}
+                aria-label={h?.logEntry ?? 'Log Entry'}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
         <div className="text-muted-foreground mt-1 mb-2 flex flex-wrap items-center gap-2 pl-6 text-xs">
           <Badge variant="secondary" className="text-[10px]">

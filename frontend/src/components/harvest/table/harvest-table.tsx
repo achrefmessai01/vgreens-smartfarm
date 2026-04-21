@@ -2,7 +2,10 @@
 
 import * as React from 'react';
 import { useI18n } from '@/i18n';
-import { groupByBatch, type HarvestItem } from './harvest-table-utils';
+import {
+  groupByBatch,
+  type HarvestItem,
+} from './harvest-table-utils';
 import { HarvestTableSkeleton } from './harvest-table-skeleton';
 import { HarvestBatchGroup } from './harvest-batch-group';
 
@@ -11,6 +14,9 @@ interface HarvestTableProps {
   onDelete?: (harvest: HarvestItem) => void;
   onSidebarEdit?: (harvest: HarvestItem) => void;
   onLogEntry?: (harvest: HarvestItem) => void;
+  onViewBatch?: (batch: HarvestItem) => void;
+  onEditBatch?: (batch: HarvestItem) => void;
+  onDeleteBatch?: (batch: HarvestItem, entries: HarvestItem[]) => void;
   isLoading?: boolean;
 }
 
@@ -19,6 +25,9 @@ export function HarvestTable({
   onDelete,
   onSidebarEdit,
   onLogEntry,
+  onViewBatch,
+  onEditBatch,
+  onDeleteBatch,
   isLoading = false,
 }: HarvestTableProps) {
   const { t } = useI18n();
@@ -48,6 +57,9 @@ export function HarvestTable({
           onDelete={onDelete}
           onSidebarEdit={onSidebarEdit}
           onLogEntry={onLogEntry}
+          onViewBatch={onViewBatch}
+          onEditBatch={onEditBatch}
+          onDeleteBatch={onDeleteBatch}
         />
       ))}
     </div>

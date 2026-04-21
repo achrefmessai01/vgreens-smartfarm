@@ -10,6 +10,7 @@ interface FormFieldProps {
   formData: BatchFormData;
   setFormData: React.Dispatch<React.SetStateAction<BatchFormData>>;
   errors: BatchFormErrors;
+  disabled?: boolean;
 }
 
 function parsePositiveNumber(value: string): number {
@@ -21,6 +22,7 @@ export function VarietyField({
   formData,
   setFormData,
   errors,
+  disabled = false,
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -38,6 +40,7 @@ export function VarietyField({
         onChange={(e) =>
           setFormData((prev) => ({ ...prev, variety: e.target.value }))
         }
+        disabled={disabled}
         className={`h-10 ${errors.variety ? 'border-destructive' : ''}`}
       />
       {errors.variety && (
@@ -51,6 +54,7 @@ export function PlantingDateField({
   formData,
   setFormData,
   errors,
+  disabled = false,
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -68,6 +72,7 @@ export function PlantingDateField({
         onChange={(e) =>
           setFormData((prev) => ({ ...prev, plantingDate: e.target.value }))
         }
+        disabled={disabled}
         className={`h-10 ${errors.plantingDate ? 'border-destructive' : ''}`}
       />
       {errors.plantingDate && (
@@ -81,6 +86,7 @@ export function CultivationAreaField({
   formData,
   setFormData,
   errors,
+  disabled = false,
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -104,6 +110,7 @@ export function CultivationAreaField({
             cultivationArea: parsePositiveNumber(e.target.value),
           }))
         }
+        disabled={disabled}
         className={`h-10 ${errors.cultivationArea ? 'border-destructive' : ''}`}
       />
       {errors.cultivationArea && (
@@ -117,6 +124,7 @@ export function NumberOfRowsField({
   formData,
   setFormData,
   errors,
+  disabled = false,
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -139,6 +147,7 @@ export function NumberOfRowsField({
             numberOfRows: Math.max(0, Number.parseInt(e.target.value, 10) || 0),
           }))
         }
+        disabled={disabled}
         className={`h-10 ${errors.numberOfRows ? 'border-destructive' : ''}`}
       />
       {errors.numberOfRows && (
@@ -152,6 +161,7 @@ export function RowLengthField({
   formData,
   setFormData,
   errors,
+  disabled = false,
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -174,6 +184,7 @@ export function RowLengthField({
             rowLength: parsePositiveNumber(e.target.value),
           }))
         }
+        disabled={disabled}
         className={`h-10 ${errors.rowLength ? 'border-destructive' : ''}`}
       />
       {errors.rowLength && (
@@ -187,6 +198,7 @@ export function PlantsPerMeterField({
   formData,
   setFormData,
   errors,
+  disabled = false,
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -209,6 +221,7 @@ export function PlantsPerMeterField({
             plantsPerMeter: parsePositiveNumber(e.target.value),
           }))
         }
+        disabled={disabled}
         className={`h-10 ${errors.plantsPerMeter ? 'border-destructive' : ''}`}
       />
       {errors.plantsPerMeter && (
@@ -218,7 +231,11 @@ export function PlantsPerMeterField({
   );
 }
 
-export function RowSpacingField({ formData, setFormData }: FormFieldProps) {
+export function RowSpacingField({
+  formData,
+  setFormData,
+  disabled = false,
+}: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
 
@@ -249,6 +266,7 @@ export function RowSpacingField({ formData, setFormData }: FormFieldProps) {
         type="number"
         readOnly
         value={formData.rowSpacing || 0}
+        disabled={disabled}
         className="bg-muted/40 h-10"
       />
     </div>
