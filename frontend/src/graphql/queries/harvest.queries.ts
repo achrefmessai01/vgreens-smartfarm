@@ -22,7 +22,8 @@ export const HARVESTS_QUERY = gql`
       classA
       waste
       avgBrix
-      numberOfRowsHarvested
+      rowX
+      rowY
       brix1
       brix2
       brix3
@@ -69,7 +70,8 @@ export const HARVEST_QUERY = gql`
       classA
       waste
       avgBrix
-      numberOfRowsHarvested
+      rowX
+      rowY
       brix1
       brix2
       brix3

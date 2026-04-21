@@ -118,7 +118,8 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
     todaysHarvest: {
       marketable: h.classA,
       waste: h.waste,
-      numberOfRowsHarvested: h.numberOfRowsHarvested,
+      rowX: h.rowX,
+      rowY: h.rowY,
     },
     brixMeasurements: {
       brix1: h.brix1,
