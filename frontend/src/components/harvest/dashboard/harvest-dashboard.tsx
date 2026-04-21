@@ -36,9 +36,11 @@ export function HarvestDashboard({
   const h = t.pages.harvest;
   const [currentFilter, setCurrentFilter] = useState<DateFilter>('thisMonth');
 
-  const { data, loading, error, refetch } = useHarvestDashboard(
-    { dateFilter: currentFilter, species, variety },
-  );
+  const { data, loading, error, refetch } = useHarvestDashboard({
+    dateFilter: currentFilter,
+    species,
+    variety,
+  });
 
   const filterLabel =
     t.common?.[FILTER_LABEL_KEYS[currentFilter] as keyof typeof t.common] ??
@@ -93,8 +95,8 @@ export function HarvestDashboard({
               {h?.performanceDashboard ?? 'Performance Dashboard'}
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              {data.harvestCount}{' '}
-              {h?.harvestsLogged ?? 'harvests logged'} for {filterLabel}
+              {data.harvestCount} {h?.harvestsLogged ?? 'harvests logged'} for{' '}
+              {filterLabel}
             </p>
           </div>
           <DashboardFilters

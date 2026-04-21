@@ -110,7 +110,9 @@ export function HarvestBatchGroup({
                         <TableCell className="text-green-600">
                           {entry.classA}
                         </TableCell>
-                        <TableCell className="text-red-500">{entry.waste}</TableCell>
+                        <TableCell className="text-red-500">
+                          {entry.waste}
+                        </TableCell>
                         <TableCell>{entry.avgBrix}&deg;Bx</TableCell>
                         <TableCell className="max-w-[220px] truncate">
                           {getCreatedByLabel(entry)}
@@ -150,7 +152,7 @@ export function HarvestBatchGroup({
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-muted-foreground text-[11px] uppercase tracking-wide">
+                          <p className="text-muted-foreground text-[11px] tracking-wide uppercase">
                             {h?.date ?? 'Date'}
                           </p>
                           <span className="text-sm font-semibold">
@@ -161,7 +163,7 @@ export function HarvestBatchGroup({
                           <p className="text-muted-foreground text-[10px] uppercase">
                             {h?.avgBrix ?? 'Avg Brix'}
                           </p>
-                          <span className="text-sm font-semibold leading-none">
+                          <span className="text-sm leading-none font-semibold">
                             {entry.avgBrix}&deg;Bx
                           </span>
                         </div>
@@ -188,7 +190,7 @@ export function HarvestBatchGroup({
 
                       <div className="border-border/70 mt-1 border-t px-0.5 pt-3">
                         <div className="min-w-0">
-                          <p className="text-muted-foreground text-[11px] uppercase tracking-wide">
+                          <p className="text-muted-foreground text-[11px] tracking-wide uppercase">
                             {h?.createdBy ?? 'Created By'}
                           </p>
                           <span className="text-muted-foreground truncate text-xs">

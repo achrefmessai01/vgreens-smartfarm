@@ -148,7 +148,11 @@ export function NumberOfRowsField({
   );
 }
 
-export function RowLengthField({ formData, setFormData, errors }: FormFieldProps) {
+export function RowLengthField({
+  formData,
+  setFormData,
+  errors,
+}: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
 

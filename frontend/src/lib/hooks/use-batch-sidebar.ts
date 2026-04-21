@@ -29,7 +29,8 @@ export function useBatchSidebar({
   const [localData, setLocalData] = React.useState<BatchDetailsData | null>(
     null,
   );
-  const [createHarvest, { loading: createLoading }] = useCreateHarvestMutation();
+  const [createHarvest, { loading: createLoading }] =
+    useCreateHarvestMutation();
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
   const { uploadPhotos, uploading } = useHarvestPhotosUpload(harvestId);
   const [deleteHarvestImage] = useDeleteHarvestImageMutation();
@@ -126,7 +127,8 @@ export function useBatchSidebar({
               species: currentData.species,
               variety: currentData.variety,
               batch: currentData.name,
-              greenhouse: currentData.greenhouse.id || currentData.greenhouse.name,
+              greenhouse:
+                currentData.greenhouse.id || currentData.greenhouse.name,
               plantingDate: currentData.plantingDate,
               cultivationArea: currentData.area,
               numberOfRows: currentData.numberOfRows,

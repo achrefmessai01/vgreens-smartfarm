@@ -32,7 +32,8 @@ function validateEditForm(data: BatchFormData): BatchFormErrors {
   if (!data.plantingDate) errors.plantingDate = 'Planting date is required';
   if (!data.cultivationArea || data.cultivationArea <= 0)
     errors.cultivationArea = 'Valid cultivation area is required';
-  if (!data.sourceGreenhouse.trim()) errors.sourceGreenhouse = 'Greenhouse is required';
+  if (!data.sourceGreenhouse.trim())
+    errors.sourceGreenhouse = 'Greenhouse is required';
   if (!data.numberOfRows || data.numberOfRows <= 0)
     errors.numberOfRows = 'Number of rows must be greater than 0';
   if (!data.rowLength || data.rowLength <= 0)

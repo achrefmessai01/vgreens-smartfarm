@@ -2,10 +2,7 @@
 
 import * as React from 'react';
 import { useI18n } from '@/i18n';
-import {
-  groupByBatch,
-  type HarvestItem,
-} from './harvest-table-utils';
+import { groupByBatch, type HarvestItem } from './harvest-table-utils';
 import { HarvestTableSkeleton } from './harvest-table-skeleton';
 import { HarvestBatchGroup } from './harvest-batch-group';
 
