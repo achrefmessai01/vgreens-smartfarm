@@ -1,11 +1,15 @@
 import {
   ApolloClient,
   ApolloLink,
-  HttpLink,
   InMemoryCache,
   Observable,
   type FetchResult,
 } from '@apollo/client';
+// Use upload link so the `uploadImage` mutation can send multipart/form-data files.
+// The .mjs path is required to pick up the ESM build that re-exports createUploadLink.
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore — no bundled types for the sub-path export.
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 
 export const createApolloClient = (
   getToken: () => Promise<string | null>,
@@ -18,9 +22,10 @@ export const createApolloClient = (
     );
   }
 
-  const httpLink = new HttpLink({
+  const httpLink = createUploadLink({
     uri: graphqlEndpoint,
-  });
+    headers: { 'apollo-require-preflight': 'true' },
+  }) as unknown as ApolloLink;
 
   const authLink = new ApolloLink((operation, forward) => {
     return new Observable<FetchResult>((observer) => {

@@ -4,104 +4,86 @@ import {
   Text,
   Image,
   Pressable,
-  StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
-import { ImageIcon, X } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { ImageIcon, Upload, X } from 'lucide-react-native';
 import { useAppTheme } from '@/lib/theme-preference';
+import { createBatchSheetPhotosStyles } from './batch-sheet-photos.styles';
 
 interface BatchSheetPhotosProps {
   photos: string[];
   disabled?: boolean;
+  uploading?: boolean;
+  onUpload: (assets: ImagePicker.ImagePickerAsset[]) => void | Promise<void>;
   onRemove: (index: number) => void;
 }
 
 export function BatchSheetPhotos({
   photos,
   disabled,
+  uploading,
+  onUpload,
   onRemove,
 }: BatchSheetPhotosProps) {
   const { colors } = useAppTheme();
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        wrap: { gap: 10 },
-        title: { fontSize: 15, fontWeight: '700', color: colors.foreground },
-        empty: {
-          alignItems: 'center',
-          gap: 6,
-          paddingVertical: 18,
-          paddingHorizontal: 14,
-          borderRadius: 12,
-          borderWidth: StyleSheet.hairlineWidth,
-          borderColor: colors.border,
-          borderStyle: 'dashed',
-          backgroundColor: colors.muted,
-        },
-        emptyTitle: { fontSize: 13, color: colors.mutedForeground },
-        emptyHint: {
-          fontSize: 11,
-          color: colors.mutedForeground,
-          textAlign: 'center',
-        },
-        grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-        tile: {
-          width: '31%',
-          aspectRatio: 1,
-          borderRadius: 10,
-          overflow: 'hidden',
-          backgroundColor: colors.muted,
-        },
-        image: { width: '100%', height: '100%' },
-        remove: {
-          position: 'absolute',
-          top: 4,
-          right: 4,
-          width: 22,
-          height: 22,
-          borderRadius: 11,
-          backgroundColor: '#b91c1c',
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-      }),
-    [colors],
-  );
+  const styles = useMemo(() => createBatchSheetPhotosStyles(colors), [colors]);
 
-  if (photos.length === 0) {
-    return (
-      <View style={styles.wrap}>
-        <Text style={styles.title}>Photos</Text>
-        <View style={styles.empty}>
-          <ImageIcon size={22} color={colors.mutedForeground} />
-          <Text style={styles.emptyTitle}>No photos yet</Text>
-          <Text style={styles.emptyHint}>
-            Photos for this harvest can be added from the web app.
-          </Text>
-        </View>
-      </View>
-    );
-  }
+  const handlePick = async () => {
+    if (disabled) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      selectionLimit: 6,
+      quality: 0.85,
+    });
+    if (!result.canceled) await onUpload(result.assets);
+  };
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>Photos</Text>
-      <View style={styles.grid}>
-        {photos.map((uri, index) => (
-          <View key={`${uri}-${index}`} style={styles.tile}>
-            <Image source={{ uri }} style={styles.image} resizeMode="cover" />
-            {!disabled && (
-              <Pressable
-                onPress={() => onRemove(index)}
-                style={styles.remove}
-                hitSlop={8}
-                accessibilityLabel="Remove photo"
-              >
-                <X size={12} color="#fff" />
-              </Pressable>
-            )}
-          </View>
-        ))}
+      <View style={styles.header}>
+        <Text style={styles.title}>Photos</Text>
+        <Pressable
+          onPress={handlePick}
+          style={[styles.uploadBtn, disabled && styles.disabled]}
+          disabled={disabled}
+        >
+          {uploading ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : (
+            <Upload size={14} color={colors.primary} />
+          )}
+          <Text style={styles.uploadText}>
+            {uploading ? 'Uploading…' : 'Add photos'}
+          </Text>
+        </Pressable>
       </View>
+
+      {photos.length === 0 ? (
+        <View style={styles.empty}>
+          <ImageIcon size={22} color={colors.mutedForeground} />
+          <Text style={styles.emptyTitle}>No photos yet</Text>
+          <Text style={styles.emptyHint}>Add photos from your camera roll.</Text>
+        </View>
+      ) : (
+        <View style={styles.grid}>
+          {photos.map((uri, index) => (
+            <View key={`${uri}-${index}`} style={styles.tile}>
+              <Image source={{ uri }} style={styles.image} resizeMode="cover" />
+              {!disabled && (
+                <Pressable
+                  onPress={() => onRemove(index)}
+                  style={styles.remove}
+                  hitSlop={8}
+                >
+                  <X size={12} color="#fff" />
+                </Pressable>
+              )}
+            </View>
+          ))}
+        </View>
+      )}
     </View>
   );
 }

@@ -1,34 +1,9 @@
 import { HarvestStatus } from '@/generated/graphql';
 import type { HarvestSummary } from '@/types/harvest';
-import type {
-  BatchDetailsData,
-  BrixMeasurements,
-} from '@/types/batch-sheet';
+import type { HarvestLike } from '@/types/harvest-like';
+import type { BatchDetailsData, BrixMeasurements } from '@/types/batch-sheet';
 
-export interface HarvestLike {
-  id: string;
-  batch: string;
-  species: string;
-  variety: string;
-  greenhouse?: string | null;
-  plantingDate: string;
-  cultivationArea: number;
-  status?: HarvestStatus | null;
-  classA: number;
-  waste: number;
-  avgBrix: number;
-  brix1: number;
-  brix2: number;
-  brix3: number;
-  brix4: number;
-  brix5: number;
-  brix6: number;
-  brix7: number;
-  brix8: number;
-  brix9: number;
-  brix10: number;
-  photoUrls?: string[] | null;
-}
+export type { HarvestLike };
 
 export function getGreenhouseLabel(greenhouse?: string | null): string {
   if (!greenhouse) return '—';
@@ -76,18 +51,7 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
 }
 
 export function computeAvgBrix(brix: BrixMeasurements): number {
-  const values = [
-    brix.brix1,
-    brix.brix2,
-    brix.brix3,
-    brix.brix4,
-    brix.brix5,
-    brix.brix6,
-    brix.brix7,
-    brix.brix8,
-    brix.brix9,
-    brix.brix10,
-  ].filter((v) => v > 0);
+  const values = Object.values(brix).filter((v) => v > 0);
   if (values.length === 0) return 0;
   return (
     Math.round((values.reduce((s, v) => s + v, 0) / values.length) * 10) / 10
@@ -127,8 +91,17 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
     },
     daysAfterPlanting: days,
     area: h.cultivationArea,
+    numberOfRows: h.numberOfRows,
+    rowLength: h.rowLength,
+    plantsPerMeter: h.plantsPerMeter,
+    rowSpacing: h.rowSpacing,
     plantingDate: h.plantingDate,
-    todaysHarvest: { marketable: h.classA, waste: h.waste },
+    todaysHarvest: {
+      marketable: h.classA,
+      waste: h.waste,
+      rowX: h.rowX,
+      rowY: h.rowY,
+    },
     brixMeasurements: {
       brix1: h.brix1,
       brix2: h.brix2,

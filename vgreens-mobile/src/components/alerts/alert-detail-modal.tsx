@@ -9,14 +9,15 @@ import {
 } from 'react-native';
 import { X } from 'lucide-react-native';
 import type { Alert } from '@/generated/graphql';
-import { useAppTheme } from '@/lib/theme-preference';
 import {
   formatAlertTimestamp,
   formatAlertUserName,
   getAlertActionFlags,
-  severityLabel,
-  statusLabel,
+  getSeverityPalette,
+  getStatusPalette,
 } from '@/lib/alert-utils';
+import { useAppTheme } from '@/lib/theme-preference';
+import { createAlertDetailStyles } from './alert-detail-modal.styles';
 
 interface AlertDetailModalProps {
   visible: boolean;
@@ -28,15 +29,27 @@ interface AlertDetailModalProps {
   onDelete: (a: Alert) => void;
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <View className="mb-3">
-      <Text className="text-xs font-semibold uppercase text-muted-foreground">
-        {label}
-      </Text>
-      <Text className="mt-0.5 text-sm text-foreground">{value}</Text>
-    </View>
-  );
+function getRows(alert: Alert): { label: string; value: string }[] {
+  const valueStr = alert.value
+    ? `${alert.value}${alert.measurement ? ' ' + alert.measurement : ''}`
+    : '—';
+  const rows: { label: string; value: string }[] = [
+    { label: 'Field', value: alert.field?.trim() || '—' },
+    { label: 'Sensor', value: alert.sensorName || '—' },
+    { label: 'Value', value: valueStr },
+    { label: 'When', value: formatAlertTimestamp(alert.timestamp) },
+  ];
+  if (alert.description)
+    rows.push({ label: 'Description', value: alert.description });
+  rows.push({
+    label: 'Acknowledged by',
+    value: formatAlertUserName(alert.acknowledgedBy),
+  });
+  rows.push({
+    label: 'Resolved by',
+    value: formatAlertUserName(alert.resolvedBy),
+  });
+  return rows;
 }
 
 export function AlertDetailModal({
@@ -49,94 +62,76 @@ export function AlertDetailModal({
   onDelete,
 }: AlertDetailModalProps) {
   const { colors } = useAppTheme();
+  const styles = useMemo(() => createAlertDetailStyles(colors), [colors]);
   const flags = useMemo(() => getAlertActionFlags(alert), [alert]);
 
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        overlay: {
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          justifyContent: 'flex-end',
-        },
-        sheet: {
-          maxHeight: '92%',
-          backgroundColor: colors.card,
-          borderTopLeftRadius: 16,
-          borderTopRightRadius: 16,
-          borderWidth: 1,
-          borderColor: colors.border,
-        },
-      }),
-    [colors],
-  );
-
   if (!alert) return null;
+  const stat = getStatusPalette(alert.status);
+  const sev = getSeverityPalette(alert.severity);
+  const rows = getRows(alert);
 
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View style={styles.overlay}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={styles.sheet}>
-          <View className="flex-row items-center justify-between border-b border-border px-4 py-3">
-            <Text className="flex-1 text-lg font-bold text-foreground">
-              Alert details
-            </Text>
+          <View style={styles.header}>
+            <Text style={styles.title}>Alert details</Text>
             <Pressable onPress={onClose} hitSlop={12}>
               <X size={22} color={colors.mutedForeground} />
             </Pressable>
           </View>
+
+          <View style={styles.pillRow}>
+            <View style={[styles.pill, { backgroundColor: stat.bg }]}>
+              <Text style={[styles.pillText, { color: stat.color }]}>
+                {stat.label}
+              </Text>
+            </View>
+            <View style={[styles.pill, { backgroundColor: sev.bg }]}>
+              <Text style={[styles.pillText, { color: sev.color }]}>
+                {sev.label}
+              </Text>
+            </View>
+          </View>
+
           <ScrollView
-            className="px-4 pt-3"
-            contentContainerStyle={{ paddingBottom: 28 }}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
           >
-            <Row label="Status" value={statusLabel(alert.status)} />
-            <Row label="Severity" value={severityLabel(alert.severity)} />
-            <Row label="Field" value={alert.field?.trim() || '—'} />
-            <Row label="Sensor" value={alert.sensorName || '—'} />
-            <Row label="Value" value={alert.value || '—'} />
-            <Row label="When" value={formatAlertTimestamp(alert.timestamp)} />
-            {!!alert.description && (
-              <Row label="Description" value={alert.description} />
-            )}
-            <Row
-              label="Acknowledged by"
-              value={formatAlertUserName(alert.acknowledgedBy)}
-            />
-            <Row
-              label="Resolved by"
-              value={formatAlertUserName(alert.resolvedBy)}
-            />
+            {rows.map((r) => (
+              <View key={r.label} style={styles.row}>
+                <Text style={styles.label}>{r.label}</Text>
+                <Text style={styles.value}>{r.value}</Text>
+              </View>
+            ))}
           </ScrollView>
-          <View className="flex-row flex-wrap gap-2 border-t border-border px-4 py-3">
-            {flags.canAcknowledge && (
+
+          <View style={styles.footer}>
+            {flags.canAcknowledge ? (
               <Pressable
-                className="flex-1 min-w-[120px] items-center rounded-xl bg-primary py-3 active:opacity-80"
+                style={[styles.btn, styles.btnPrimary]}
                 disabled={loading}
                 onPress={() => onAcknowledge(alert)}
               >
-                <Text className="font-bold text-primary-foreground">
-                  Acknowledge
-                </Text>
+                <Text style={styles.btnPrimaryText}>Acknowledge</Text>
               </Pressable>
-            )}
-            {flags.canResolve && (
+            ) : null}
+            {flags.canResolve ? (
               <Pressable
-                className="flex-1 min-w-[120px] items-center rounded-xl bg-primary py-3 active:opacity-80"
+                style={[styles.btn, styles.btnPrimary]}
                 disabled={loading}
                 onPress={() => onResolve(alert)}
               >
-                <Text className="font-bold text-primary-foreground">
-                  Resolve
-                </Text>
+                <Text style={styles.btnPrimaryText}>Resolve</Text>
               </Pressable>
-            )}
+            ) : null}
             <Pressable
-              className="flex-1 min-w-[120px] items-center rounded-xl border border-destructive py-3 active:opacity-80"
+              style={[styles.btn, styles.btnOutline]}
               disabled={loading}
               onPress={() => onDelete(alert)}
             >
-              <Text className="font-bold text-destructive">Delete</Text>
+              <Text style={styles.btnOutlineText}>Delete</Text>
             </Pressable>
           </View>
         </View>

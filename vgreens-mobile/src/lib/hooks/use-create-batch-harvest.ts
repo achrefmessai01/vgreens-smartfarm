@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   HarvestStatus,
   useCreateHarvestMutation,
@@ -13,7 +13,11 @@ const initialForm = (): BatchFormData => ({
   variety: '',
   plantingDate: new Date().toISOString().split('T')[0],
   cultivationArea: 0,
-  sourceGreenhouseId: '',
+  sourceGreenhouse: '',
+  numberOfRows: 0,
+  rowLength: 0,
+  plantsPerMeter: 0,
+  rowSpacing: 0,
 });
 
 function validate(data: BatchFormData): BatchFormErrors {
@@ -23,15 +27,34 @@ function validate(data: BatchFormData): BatchFormErrors {
   if (!data.plantingDate) errors.plantingDate = 'Planting date is required';
   if (!data.cultivationArea || data.cultivationArea <= 0)
     errors.cultivationArea = 'Valid cultivation area is required';
-  if (!data.sourceGreenhouseId)
-    errors.sourceGreenhouseId = 'Greenhouse is required';
+  if (!data.sourceGreenhouse.trim())
+    errors.sourceGreenhouse = 'Greenhouse is required';
+  if (!data.numberOfRows || data.numberOfRows <= 0)
+    errors.numberOfRows = 'Number of rows must be greater than 0';
+  if (!data.rowLength || data.rowLength <= 0)
+    errors.rowLength = 'Row length must be greater than 0';
+  if (!data.plantsPerMeter || data.plantsPerMeter <= 0)
+    errors.plantsPerMeter = 'Plants per meter must be greater than 0';
   return errors;
+}
+
+function computeRowSpacing(data: BatchFormData): number {
+  const denom = data.numberOfRows * data.rowLength;
+  return denom > 0 ? Number((data.cultivationArea / denom).toFixed(4)) : 0;
 }
 
 export function useCreateBatchHarvest(onSuccess?: (h: CreatedHarvest) => void) {
   const [formData, setFormData] = useState<BatchFormData>(initialForm);
   const [errors, setErrors] = useState<BatchFormErrors>({});
   const [createHarvest, { loading }] = useCreateHarvestMutation();
+
+  // Auto-compute rowSpacing whenever dependencies change.
+  useEffect(() => {
+    setFormData((prev) => {
+      const next = computeRowSpacing(prev);
+      return next === prev.rowSpacing ? prev : { ...prev, rowSpacing: next };
+    });
+  }, [formData.cultivationArea, formData.numberOfRows, formData.rowLength]);
 
   const reset = useCallback(() => {
     setFormData(initialForm());
@@ -49,7 +72,11 @@ export function useCreateBatchHarvest(onSuccess?: (h: CreatedHarvest) => void) {
           variety: formData.variety,
           plantingDate: formData.plantingDate,
           cultivationArea: formData.cultivationArea,
-          greenhouse: formData.sourceGreenhouseId,
+          greenhouse: formData.sourceGreenhouse.trim(),
+          numberOfRows: formData.numberOfRows,
+          rowLength: formData.rowLength,
+          plantsPerMeter: formData.plantsPerMeter,
+          rowSpacing: formData.rowSpacing,
           date: new Date().toISOString(),
           status: HarvestStatus.Draft,
         },

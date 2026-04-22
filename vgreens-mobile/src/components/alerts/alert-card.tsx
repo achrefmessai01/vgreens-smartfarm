@@ -1,66 +1,91 @@
+import { memo, useMemo } from 'react';
 import { View, Text, Pressable } from 'react-native';
-import type { Alert } from '@/generated/graphql';
+import { AlertTriangle, CheckCircle2, Eye } from 'lucide-react-native';
+import { AlertStatus, type Alert } from '@/generated/graphql';
 import {
-  formatAlertTimestamp,
-  severityLabel,
-  statusLabel,
+  formatRelativeTime,
+  getSeverityPalette,
+  getStatusPalette,
 } from '@/lib/alert-utils';
+import { useAppTheme } from '@/lib/theme-preference';
+import { createAlertCardStyles } from './alert-card.styles';
 
 interface AlertCardProps {
   alert: Alert;
   onPress: (alert: Alert) => void;
 }
 
-export function AlertCard({ alert, onPress }: AlertCardProps) {
+function statusIcon(status: AlertStatus | null | undefined, color: string) {
+  if (status === AlertStatus.Resolved)
+    return <CheckCircle2 size={12} color={color} />;
+  if (status === AlertStatus.Acknowledged)
+    return <Eye size={12} color={color} />;
+  return <AlertTriangle size={12} color={color} />;
+}
+
+function AlertCardBase({ alert, onPress }: AlertCardProps) {
+  const { colors } = useAppTheme();
+  const sev = getSeverityPalette(alert.severity);
+  const stat = getStatusPalette(alert.status);
+  const styles = useMemo(
+    () => createAlertCardStyles(colors, sev, stat),
+    [colors, sev, stat],
+  );
+
   const title = alert.field?.trim() || alert.sensorName || 'Alert';
-  const subtitle = alert.measurement
-    ? `${alert.sensorName} · ${alert.measurement}`
-    : alert.sensorName;
+  const subtitle = alert.sensorName;
 
   return (
     <Pressable
       onPress={() => onPress(alert)}
-      className="rounded-xl border border-border bg-card px-4 py-3.5 active:opacity-90"
+      style={({ pressed }) => [styles.cardWrap, pressed && { opacity: 0.85 }]}
     >
-      <View className="flex-row items-start justify-between gap-2">
-        <View className="min-w-0 flex-1">
-          <Text
-            className="text-[15px] font-semibold text-card-foreground"
-            numberOfLines={2}
-          >
-            {title}
-          </Text>
-          {!!subtitle && (
-            <Text
-              className="mt-0.5 text-[13px] text-muted-foreground"
-              numberOfLines={1}
-            >
-              {subtitle}
+      <View style={styles.card}>
+        <View style={styles.bar} />
+        <View style={styles.body}>
+        <View style={styles.topRow}>
+          <View style={styles.titleCol}>
+            <Text style={styles.title} numberOfLines={1}>
+              {title}
             </Text>
-          )}
-          <Text className="mt-1 text-xs text-muted-foreground">
-            {formatAlertTimestamp(alert.timestamp)}
-          </Text>
-        </View>
-        <View className="items-end gap-1">
-          <View className="rounded-md bg-muted px-2 py-0.5">
-            <Text className="text-[11px] font-semibold text-foreground">
-              {statusLabel(alert.status)}
-            </Text>
+            {subtitle ? (
+              <Text style={styles.subtitle} numberOfLines={1}>
+                {subtitle}
+              </Text>
+            ) : null}
           </View>
-          <Text className="text-[11px] font-medium text-destructive">
-            {severityLabel(alert.severity)}
+          <View style={styles.pill}>
+            {statusIcon(alert.status, stat.color)}
+            <Text style={styles.pillText}>{stat.label}</Text>
+          </View>
+        </View>
+
+        {alert.value ? (
+          <View style={styles.valueRow}>
+            <Text style={styles.value}>{alert.value}</Text>
+            {alert.measurement ? (
+              <Text style={styles.measurement}>{alert.measurement}</Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {alert.description ? (
+          <Text style={styles.description} numberOfLines={2}>
+            {alert.description}
           </Text>
+        ) : null}
+
+        <View style={styles.footer}>
+          <View style={styles.sevChip}>
+            <Text style={styles.sevText}>{sev.label.toUpperCase()}</Text>
+          </View>
+          <Text style={styles.time}>{formatRelativeTime(alert.timestamp)}</Text>
+        </View>
         </View>
       </View>
-      {!!alert.description && (
-        <Text
-          className="mt-2 text-[13px] text-muted-foreground"
-          numberOfLines={2}
-        >
-          {alert.description}
-        </Text>
-      )}
     </Pressable>
   );
 }
+
+export const AlertCard = memo(AlertCardBase);
+AlertCard.displayName = 'AlertCard';

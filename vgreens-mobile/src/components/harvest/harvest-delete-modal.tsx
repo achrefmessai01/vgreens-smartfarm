@@ -13,6 +13,7 @@ interface HarvestDeleteModalProps {
   visible: boolean;
   loading: boolean;
   batchLabel: string;
+  title?: string;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -21,6 +22,7 @@ export function HarvestDeleteModal({
   visible,
   loading,
   batchLabel,
+  title,
   onClose,
   onConfirm,
 }: HarvestDeleteModalProps) {
@@ -76,10 +78,11 @@ export function HarvestDeleteModal({
       <View style={styles.overlay}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={styles.sheet}>
-          <Text style={styles.title}>Delete harvest?</Text>
+          <Text style={styles.title}>{title ?? 'Delete harvest?'}</Text>
           <Text style={styles.body}>
-            This will permanently remove the record for{' '}
-            <Text style={styles.bold}>{batchLabel}</Text>.
+            This will permanently remove{' '}
+            <Text style={styles.bold}>{batchLabel}</Text>. This cannot be
+            undone.
           </Text>
           <View style={styles.row}>
             <Pressable style={styles.cancel} onPress={onClose}>

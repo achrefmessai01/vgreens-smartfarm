@@ -11,7 +11,11 @@ export interface BatchFormData {
   variety: string;
   plantingDate: string;
   cultivationArea: number;
-  sourceGreenhouseId: string;
+  sourceGreenhouse: string;
+  numberOfRows: number;
+  rowLength: number;
+  plantsPerMeter: number;
+  rowSpacing: number;
 }
 
 export interface BatchFormErrors {
@@ -19,5 +23,8 @@ export interface BatchFormErrors {
   variety?: string;
   plantingDate?: string;
   cultivationArea?: string;
-  sourceGreenhouseId?: string;
+  sourceGreenhouse?: string;
+  numberOfRows?: string;
+  rowLength?: string;
+  plantsPerMeter?: string;
 }

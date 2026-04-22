@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { BarChart3, History } from 'lucide-react-native';
+import { BarChart3, ClipboardList } from 'lucide-react-native';
 import { useAppTheme } from '@/lib/theme-preference';
 
 export type HarvestSubTab = 'dashboard' | 'history';
@@ -68,12 +68,12 @@ export function HarvestTabSwitch({ value, onChange }: HarvestTabSwitchProps) {
         style={[styles.btn, value === 'history' && styles.active]}
         onPress={() => onChange('history')}
       >
-        <History
+        <ClipboardList
           size={16}
           color={value === 'history' ? activeIcon : inactiveIcon}
         />
         <Text style={[styles.text, value === 'history' && styles.textActive]}>
-          History
+          Harvest Entry
         </Text>
       </Pressable>
     </View>

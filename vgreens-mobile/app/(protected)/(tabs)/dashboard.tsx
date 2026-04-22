@@ -8,7 +8,7 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView
       className="flex-1 bg-background"
-      edges={['bottom']}
+      edges={['top', 'bottom']}
       style={{ backgroundColor: colors.background }}
     >
       <View className="flex-1 items-center justify-center px-6">

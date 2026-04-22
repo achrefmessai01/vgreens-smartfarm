@@ -14,17 +14,15 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
+        // Each tab screen renders its own in-body title, so suppress the
+        // navigator's header to avoid a duplicate heading.
+        headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.mutedForeground,
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: colors.border,
         },
-        headerStyle: {
-          backgroundColor: colors.background,
-        },
-        headerTintColor: colors.foreground,
-        headerShadowVisible: false,
       }}
     >
       <Tabs.Screen

@@ -1,129 +1,112 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { useMemo } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import type { BatchFormData, BatchFormErrors } from '@/types/harvest';
-import { Select } from '@/components/ui/select';
-import { useAppTheme } from '@/lib/theme-preference';
-
-const GH = [
-  { value: 'gh1', label: 'GH1' },
-  { value: 'gh2', label: 'GH2' },
-];
+import { HarvestBatchField } from './harvest-batch-field';
+import { HarvestFormSection } from './harvest-form-section';
 
 interface HarvestBatchFormProps {
   formData: BatchFormData;
   setFormData: Dispatch<SetStateAction<BatchFormData>>;
   errors: BatchFormErrors;
+  readOnly?: boolean;
 }
+
+const num = (n: number) => (n ? String(n) : '');
+const parseF = (s: string) => {
+  const v = parseFloat(s.replace(',', '.'));
+  return Number.isFinite(v) && v > 0 ? v : 0;
+};
+const parseI = (s: string) => {
+  const v = parseInt(s, 10);
+  return Number.isFinite(v) && v > 0 ? v : 0;
+};
 
 export function HarvestBatchForm({
   formData,
   setFormData,
   errors,
+  readOnly,
 }: HarvestBatchFormProps) {
-  const { colors } = useAppTheme();
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        wrap: { gap: 14 },
-        field: { gap: 6 },
-        label: { fontSize: 13, fontWeight: '600', color: colors.foreground },
-        input: {
-          borderWidth: 1,
-          borderColor: colors.border,
-          borderRadius: 10,
-          paddingHorizontal: 12,
-          paddingVertical: 12,
-          fontSize: 15,
-          color: colors.foreground,
-          backgroundColor: colors.muted,
-        },
-        inputErr: { borderColor: colors.destructive },
-        err: { fontSize: 12, color: colors.destructive },
-      }),
-    [colors],
-  );
-
-  const ph = colors.mutedForeground;
+  const styles = useMemo(() => StyleSheet.create({ wrap: { gap: 14 } }), []);
+  const s = useMemo(() => {
+    const text = (k: keyof BatchFormData) => (t: string) =>
+      setFormData((p) => ({ ...p, [k]: t }));
+    const numSet = (k: keyof BatchFormData, p: (s: string) => number) =>
+      (t: string) => setFormData((prev) => ({ ...prev, [k]: p(t) }));
+    return {
+      sourceGreenhouse: text('sourceGreenhouse'),
+      species: text('species'),
+      variety: text('variety'),
+      plantingDate: text('plantingDate'),
+      cultivationArea: numSet('cultivationArea', parseF),
+      numberOfRows: numSet('numberOfRows', parseI),
+      rowLength: numSet('rowLength', parseF),
+      plantsPerMeter: numSet('plantsPerMeter', parseF),
+    };
+  }, [setFormData]);
 
   return (
     <View style={styles.wrap}>
-      <View style={styles.field}>
-        <Text style={styles.label}>Greenhouse *</Text>
-        <Select
-          value={formData.sourceGreenhouseId}
-          onValueChange={(v) =>
-            setFormData((p) => ({ ...p, sourceGreenhouseId: v }))
-          }
-          options={GH}
-          placeholder="Select greenhouse"
-          title="Greenhouse"
-          hasError={!!errors.sourceGreenhouseId}
+      <HarvestFormSection
+        step={1}
+        title="Batch identity"
+        description="Where the batch lives and what's growing in it."
+      >
+        <HarvestBatchField
+          label="Greenhouse" required readOnly={readOnly}
+          value={formData.sourceGreenhouse} onChangeText={s.sourceGreenhouse}
+          placeholder="e.g. GH1" error={errors.sourceGreenhouse}
         />
-        {errors.sourceGreenhouseId ? (
-          <Text style={styles.err}>{errors.sourceGreenhouseId}</Text>
-        ) : null}
-      </View>
+        <HarvestBatchField
+          label="Crop" required readOnly={readOnly}
+          value={formData.species} onChangeText={s.species}
+          placeholder="e.g. Strawberry" error={errors.species}
+        />
+        <HarvestBatchField
+          label="Variety" required readOnly={readOnly}
+          value={formData.variety} onChangeText={s.variety}
+          placeholder="Variety name" error={errors.variety}
+        />
+        <HarvestBatchField
+          label="Planting date" required readOnly={readOnly}
+          autoCapitalize="none"
+          value={formData.plantingDate} onChangeText={s.plantingDate}
+          placeholder="YYYY-MM-DD" error={errors.plantingDate}
+        />
+      </HarvestFormSection>
 
-      <View style={styles.field}>
-        <Text style={styles.label}>Species *</Text>
-        <TextInput
-          style={[styles.input, errors.species && styles.inputErr]}
-          value={formData.species}
-          onChangeText={(t) => setFormData((p) => ({ ...p, species: t }))}
-          placeholder="e.g. Lettuce"
-          placeholderTextColor={ph}
+      <HarvestFormSection
+        step={2}
+        title="Plant layout"
+        description="Used to compute planting density and yield per m²."
+      >
+        <HarvestBatchField
+          label="Cultivation area" required readOnly={readOnly}
+          autoCapitalize="none" keyboardType="decimal-pad" suffix="m²"
+          value={num(formData.cultivationArea)} onChangeText={s.cultivationArea}
+          placeholder="0" error={errors.cultivationArea}
         />
-        {errors.species ? <Text style={styles.err}>{errors.species}</Text> : null}
-      </View>
-
-      <View style={styles.field}>
-        <Text style={styles.label}>Variety *</Text>
-        <TextInput
-          style={[styles.input, errors.variety && styles.inputErr]}
-          value={formData.variety}
-          onChangeText={(t) => setFormData((p) => ({ ...p, variety: t }))}
-          placeholder="Variety name"
-          placeholderTextColor={ph}
+        <HarvestBatchField
+          label="Number of rows" required readOnly={readOnly}
+          autoCapitalize="none" keyboardType="number-pad" suffix="rows"
+          value={num(formData.numberOfRows)} onChangeText={s.numberOfRows}
+          placeholder="0" error={errors.numberOfRows}
         />
-        {errors.variety ? <Text style={styles.err}>{errors.variety}</Text> : null}
-      </View>
-
-      <View style={styles.field}>
-        <Text style={styles.label}>Planting date *</Text>
-        <TextInput
-          style={[styles.input, errors.plantingDate && styles.inputErr]}
-          value={formData.plantingDate}
-          onChangeText={(t) => setFormData((p) => ({ ...p, plantingDate: t }))}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor={ph}
+        <HarvestBatchField
+          label="Row length" required readOnly={readOnly}
+          autoCapitalize="none" keyboardType="decimal-pad" suffix="m"
+          value={num(formData.rowLength)} onChangeText={s.rowLength}
+          placeholder="0" error={errors.rowLength}
         />
-        {errors.plantingDate ? (
-          <Text style={styles.err}>{errors.plantingDate}</Text>
-        ) : null}
-      </View>
-
-      <View style={styles.field}>
-        <Text style={styles.label}>Cultivation area (m²) *</Text>
-        <TextInput
-          style={[styles.input, errors.cultivationArea && styles.inputErr]}
-          value={
-            formData.cultivationArea ? String(formData.cultivationArea) : ''
-          }
-          onChangeText={(t) =>
-            setFormData((p) => ({
-              ...p,
-              cultivationArea: parseFloat(t) || 0,
-            }))
-          }
-          keyboardType="decimal-pad"
-          placeholder="0"
-          placeholderTextColor={ph}
+        <HarvestBatchField
+          label="Plants per meter" required readOnly={readOnly}
+          autoCapitalize="none" keyboardType="decimal-pad" suffix="/ m"
+          returnKeyType="done"
+          value={num(formData.plantsPerMeter)} onChangeText={s.plantsPerMeter}
+          placeholder="0" error={errors.plantsPerMeter}
         />
-        {errors.cultivationArea ? (
-          <Text style={styles.err}>{errors.cultivationArea}</Text>
-        ) : null}
-      </View>
+      </HarvestFormSection>
     </View>
   );
 }

@@ -14,6 +14,8 @@ export type BrixField =
 
 export type BrixMeasurements = Record<BrixField, number>;
 
+export type YieldField = 'marketable' | 'waste' | 'rowX' | 'rowY';
+
 export interface BatchDetailsData {
   id: string;
   name: string;
@@ -23,8 +25,17 @@ export interface BatchDetailsData {
   greenhouse: { id: string; name: string };
   daysAfterPlanting: number;
   area: number;
+  numberOfRows: number;
+  rowLength: number;
+  plantsPerMeter: number;
+  rowSpacing: number;
   plantingDate: string;
-  todaysHarvest: { marketable: number; waste: number };
+  todaysHarvest: {
+    marketable: number;
+    waste: number;
+    rowX: number;
+    rowY: number;
+  };
   brixMeasurements: BrixMeasurements;
   photos: string[];
 }

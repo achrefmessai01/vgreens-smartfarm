@@ -1,14 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { ImagePickerAsset } from 'expo-image-picker';
 import {
-  HarvestStatus,
+  useCreateHarvestMutation,
   useDeleteHarvestImageMutation,
   useUpdateHarvestMutation,
 } from '@/generated/graphql';
-import { computeAvgBrix, extractStoragePathFromUrl } from '@/lib/harvest-utils';
+import { extractStoragePathFromUrl } from '@/lib/harvest-utils';
+import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
+import {
+  buildCreateEntryInput,
+  buildUpdateEntryInput,
+} from '@/lib/hooks/use-batch-sheet-inputs';
 import type {
   BatchDetailsData,
   BatchSheetMode,
   BrixField,
+  YieldField,
 } from '@/types/batch-sheet';
 
 interface UseBatchSheetOptions {
@@ -25,8 +32,10 @@ export function useBatchSheet({
   onCompleted,
 }: UseBatchSheetOptions) {
   const [localData, setLocalData] = useState<BatchDetailsData | null>(null);
-  const [updateHarvest, { loading }] = useUpdateHarvestMutation();
+  const [createHarvest, { loading: creating }] = useCreateHarvestMutation();
+  const [updateHarvest, { loading: updating }] = useUpdateHarvestMutation();
   const [deleteHarvestImage] = useDeleteHarvestImageMutation();
+  const { uploadPhotos, uploading } = useHarvestPhotosUpload(harvestId);
 
   useEffect(() => {
     setLocalData(batchData);
@@ -37,38 +46,37 @@ export function useBatchSheet({
   const handleBrixChange = useCallback((field: BrixField, value: number) => {
     setLocalData((prev) =>
       prev
-        ? {
-            ...prev,
-            brixMeasurements: { ...prev.brixMeasurements, [field]: value },
-          }
+        ? { ...prev, brixMeasurements: { ...prev.brixMeasurements, [field]: value } }
         : prev,
     );
   }, []);
 
-  const handleYieldChange = useCallback(
-    (field: 'marketable' | 'waste', value: number) => {
+  const handleYieldChange = useCallback((field: YieldField, value: number) => {
+    setLocalData((prev) =>
+      prev
+        ? { ...prev, todaysHarvest: { ...prev.todaysHarvest, [field]: value } }
+        : prev,
+    );
+  }, []);
+
+  const handlePhotoUpload = useCallback(
+    async (assets: ImagePickerAsset[]) => {
+      const urls = await uploadPhotos(assets);
+      if (urls.length === 0) return;
       setLocalData((prev) =>
-        prev
-          ? {
-              ...prev,
-              todaysHarvest: { ...prev.todaysHarvest, [field]: value },
-            }
-          : prev,
+        prev ? { ...prev, photos: [...prev.photos, ...urls] } : prev,
       );
     },
-    [],
+    [uploadPhotos],
   );
 
   const handleRemovePhoto = useCallback(
-    async (indexToRemove: number) => {
+    async (index: number) => {
       let urlToRemove: string | undefined;
       setLocalData((prev) => {
         if (!prev) return prev;
-        urlToRemove = prev.photos[indexToRemove];
-        return {
-          ...prev,
-          photos: prev.photos.filter((_, i) => i !== indexToRemove),
-        };
+        urlToRemove = prev.photos[index];
+        return { ...prev, photos: prev.photos.filter((_, i) => i !== index) };
       });
       if (!urlToRemove) return;
       const path = extractStoragePathFromUrl(urlToRemove);
@@ -84,37 +92,30 @@ export function useBatchSheet({
 
   const handleSave = useCallback(async () => {
     if (!harvestId || !currentData) return;
-    const brix = currentData.brixMeasurements;
-    const status =
-      mode === 'edit' ? currentData.status : HarvestStatus.Completed;
     try {
-      await updateHarvest({
-        variables: {
-          id: harvestId,
-          input: {
-            classA: currentData.todaysHarvest.marketable,
-            waste: currentData.todaysHarvest.waste,
-            avgBrix: computeAvgBrix(brix),
-            ...brix,
-            photos: currentData.photos.length,
-            photoUrls: currentData.photos,
-            date: mode === 'edit' ? undefined : new Date().toISOString(),
-            status,
-          },
-        },
-      });
+      if (mode === 'create') {
+        await createHarvest({
+          variables: { input: buildCreateEntryInput(harvestId, currentData) },
+        });
+      } else {
+        await updateHarvest({
+          variables: { id: harvestId, input: buildUpdateEntryInput(currentData) },
+        });
+      }
       onCompleted?.();
     } catch (error) {
       console.error('Failed to save harvest:', error);
     }
-  }, [harvestId, currentData, mode, updateHarvest, onCompleted]);
+  }, [harvestId, currentData, mode, createHarvest, updateHarvest, onCompleted]);
 
   return {
     currentData,
-    loading,
+    loading: creating || updating || uploading,
+    uploading,
     mode,
     handleBrixChange,
     handleYieldChange,
+    handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
   };

@@ -1,16 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
   FlatList,
   ActivityIndicator,
+  Pressable,
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, Users } from 'lucide-react-native';
-import { Button } from '@/components/ui/button';
 import { UserCard } from '@/components/users/user-card';
+import { createUsersScreenStyles } from '@/components/users/users-screen.styles';
 import { useTenantUsers } from '@/lib/hooks/use-tenant-users';
 import { useAppTheme } from '@/lib/theme-preference';
 import type { User } from '@/types/user';
@@ -21,6 +22,7 @@ export default function UsersScreen() {
   const { users, loading, isSubmitting, handleDelete, refetch } =
     useTenantUsers();
   const [refreshing, setRefreshing] = useState(false);
+  const styles = useMemo(() => createUsersScreenStyles(colors), [colors]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -44,12 +46,8 @@ export default function UsersScreen() {
 
   if (loading && users.length === 0) {
     return (
-      <SafeAreaView
-        className="flex-1 bg-background"
-        edges={['bottom']}
-        style={{ backgroundColor: colors.background }}
-      >
-        <View className="flex-1 items-center justify-center">
+      <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+        <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
@@ -57,71 +55,61 @@ export default function UsersScreen() {
   }
 
   return (
-    <SafeAreaView
-      className="flex-1 bg-background"
-      edges={['bottom']}
-      style={{ backgroundColor: colors.background }}
-    >
-      <View className="flex-1 px-4 pt-4">
-        <View className="mb-5 flex-row items-center justify-between">
-          <View>
-            <Text className="text-2xl font-bold text-foreground">Users</Text>
-            <Text className="mt-0.5 text-sm text-muted-foreground">
+    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+      <View style={styles.body}>
+        <View style={styles.head}>
+          <View style={styles.headText}>
+            <Text style={styles.h1} numberOfLines={1}>
+              Users
+            </Text>
+            <Text style={styles.sub} numberOfLines={1}>
               {users.length > 0
                 ? `${users.length} team member${users.length !== 1 ? 's' : ''}`
                 : 'Manage your team'}
             </Text>
           </View>
-          <Button
-            variant="default"
-            size="sm"
+          <Pressable
+            style={styles.cta}
             onPress={handleCreate}
             disabled={isSubmitting}
-            className="flex-row items-center gap-1.5 rounded-xl px-4"
           >
-            <Plus size={16} color="#ffffff" />
-            <Text className="text-sm font-semibold text-primary-foreground">
-              Add User
-            </Text>
-          </Button>
+            <Plus size={16} color={colors.primaryForeground} />
+            <Text style={styles.ctaText}>New</Text>
+          </Pressable>
         </View>
 
-        {users.length === 0 ? (
-          <View className="flex-1 items-center justify-center gap-3 pb-20">
-            <View className="items-center justify-center rounded-full bg-muted p-5">
-              <Users size={32} color={colors.mutedForeground} />
+        <FlatList
+          data={users}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (
+            <UserCard
+              user={item}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              disabled={isSubmitting}
+            />
+          )}
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <View style={styles.emptyIconWrap}>
+                <Users size={30} color={colors.mutedForeground} />
+              </View>
+              <Text style={styles.emptyTitle}>No team members yet</Text>
+              <Text style={styles.emptySub}>
+                Invite teammates to collaborate on your farm.
+              </Text>
             </View>
-            <Text className="text-base font-semibold text-foreground">
-              No team members yet
-            </Text>
-            <Text className="max-w-[250px] text-center text-sm text-muted-foreground">
-              Invite people to join your tenant by tapping &quot;Add User&quot;
-              above
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            data={users}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <UserCard
-                user={item}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                disabled={isSubmitting}
-              />
-            )}
-            contentContainerClassName="gap-3 pb-6"
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor={colors.primary}
-              />
-            }
-            showsVerticalScrollIndicator={false}
-          />
-        )}
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+        />
       </View>
     </SafeAreaView>
   );

@@ -1,15 +1,15 @@
-import { View, Text } from 'react-native';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Select, type SelectOption } from '@/components/ui/select';
-import { FormSection, FormField } from '@/components/ui/form-helpers';
-import type { UserRole, UserFormErrors } from '@/types/user';
-import { ROLE_LABELS, TENANT_ALLOWED_ROLES } from '@/types/user';
-
-const ROLE_OPTIONS: SelectOption[] = TENANT_ALLOWED_ROLES.map((r) => ({
-  value: r,
-  label: ROLE_LABELS[r],
-}));
+import { memo, useMemo } from 'react';
+import { View, Text, Switch } from 'react-native';
+import { HarvestBatchField } from '@/components/harvest/harvest-batch-field';
+import { HarvestFormSection } from '@/components/harvest/harvest-form-section';
+import { useAppTheme } from '@/lib/theme-preference';
+import { RolePicker } from './role-picker';
+import { createUserFormFieldsStyles } from './user-form-fields.styles';
+import {
+  TENANT_ALLOWED_ROLES,
+  type UserFormErrors,
+  type UserRole,
+} from '@/types/user';
 
 interface UserFormFieldsProps {
   email: string;
@@ -23,12 +23,12 @@ interface UserFormFieldsProps {
   isActive: boolean;
   setIsActive: (v: boolean) => void;
   errors: UserFormErrors;
-  setErrors: React.Dispatch<React.SetStateAction<UserFormErrors>>;
+  clearError: (key: keyof UserFormErrors) => void;
   isEdit: boolean;
   isSubmitting: boolean;
 }
 
-export function UserFormFields({
+function UserFormFieldsBase({
   email,
   setEmail,
   firstName,
@@ -40,88 +40,93 @@ export function UserFormFields({
   isActive,
   setIsActive,
   errors,
-  setErrors,
+  clearError,
   isEdit,
   isSubmitting,
 }: UserFormFieldsProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createUserFormFieldsStyles(colors), [colors]);
+
+  const handleEmail = (v: string) => {
+    setEmail(v);
+    if (errors.email) clearError('email');
+  };
+  const handleRole = (v: UserRole) => {
+    setRole(v);
+    if (errors.role) clearError('role');
+  };
+
   return (
-    <>
-      <FormSection title="Account">
-        <FormField label="Email" error={errors.email}>
-          <Input
-            value={email}
-            onChangeText={(v) => {
-              setEmail(v);
-              if (errors.email) setErrors((e) => ({ ...e, email: undefined }));
-            }}
-            placeholder="user@example.com"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            textContentType="emailAddress"
-            editable={!isEdit}
-            className={`rounded-xl bg-card ${isEdit ? 'opacity-50' : ''}`}
-          />
-          {isEdit ? (
-            <Text className="text-xs text-muted-foreground">
-              Email cannot be changed after creation
-            </Text>
-          ) : null}
-        </FormField>
-      </FormSection>
+    <View style={styles.wrap}>
+      <HarvestFormSection
+        step={1}
+        title="Account"
+        description="How they'll sign in to vGreens."
+      >
+        <HarvestBatchField
+          label="Email"
+          required
+          value={email}
+          onChangeText={handleEmail}
+          placeholder="user@example.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          error={errors.email}
+          hint={isEdit ? 'Email cannot be changed after creation' : undefined}
+          readOnly={isEdit}
+        />
+      </HarvestFormSection>
 
-      <FormSection title="Personal Info">
-        <FormField label="First Name">
-          <Input
-            value={firstName}
-            onChangeText={setFirstName}
-            placeholder="First name"
-            textContentType="givenName"
-            className="rounded-xl bg-card"
-          />
-        </FormField>
+      <HarvestFormSection
+        step={2}
+        title="Personal info"
+        description="Optional — shown in the team list."
+      >
+        <HarvestBatchField
+          label="First name"
+          value={firstName}
+          onChangeText={setFirstName}
+          placeholder="First name"
+        />
+        <HarvestBatchField
+          label="Last name"
+          value={lastName}
+          onChangeText={setLastName}
+          placeholder="Last name"
+        />
+      </HarvestFormSection>
 
-        <FormField label="Last Name">
-          <Input
-            value={lastName}
-            onChangeText={setLastName}
-            placeholder="Last name"
-            textContentType="familyName"
-            className="rounded-xl bg-card"
-          />
-        </FormField>
-      </FormSection>
+      <HarvestFormSection
+        step={3}
+        title="Permissions"
+        description="Role controls what the user can see and change."
+      >
+        <RolePicker
+          value={role}
+          onChange={handleRole}
+          allowedRoles={TENANT_ALLOWED_ROLES}
+          disabled={isSubmitting}
+        />
 
-      <FormSection title="Permissions">
-        <FormField label="Role" error={errors.role}>
-          <Select
-            value={role}
-            onValueChange={(v) => {
-              setRole(v as UserRole);
-              if (errors.role) setErrors((e) => ({ ...e, role: undefined }));
-            }}
-            options={ROLE_OPTIONS}
-            placeholder="Select a role..."
-            disabled={isSubmitting}
-            hasError={!!errors.role}
-          />
-        </FormField>
-
-        <View className="flex-row items-center justify-between rounded-xl border border-input bg-card px-4 py-3.5">
-          <View>
-            <Text className="text-[15px] font-medium text-foreground">
-              Active
-            </Text>
-            <Text className="text-xs text-muted-foreground">
-              Inactive users cannot sign in
+        <View style={styles.toggleRow}>
+          <View style={styles.toggleText}>
+            <Text style={styles.toggleLabel}>Active</Text>
+            <Text style={styles.toggleHint}>
+              Inactive users cannot sign in to the app.
             </Text>
           </View>
           <Switch
-            checked={isActive}
-            onCheckedChange={setIsActive}
+            value={isActive}
+            onValueChange={setIsActive}
             disabled={isSubmitting}
+            trackColor={{ false: colors.border, true: colors.primary }}
+            thumbColor="#ffffff"
           />
         </View>
-      </FormSection>
-    </>
+      </HarvestFormSection>
+    </View>
   );
 }
+
+export const UserFormFields = memo(UserFormFieldsBase);
+UserFormFields.displayName = 'UserFormFields';

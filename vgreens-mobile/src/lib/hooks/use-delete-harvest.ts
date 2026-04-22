@@ -1,13 +1,17 @@
 import { useCallback } from 'react';
 import { useDeleteHarvestMutation } from '@/generated/graphql';
 
+interface DeleteOptions {
+  skipSuccess?: boolean;
+}
+
 export function useDeleteHarvest(onSuccess?: () => void) {
   const [deleteHarvest, { loading }] = useDeleteHarvestMutation();
 
   const handleDelete = useCallback(
-    async (id: string) => {
+    async (id: string, options?: DeleteOptions) => {
       await deleteHarvest({ variables: { id } });
-      onSuccess?.();
+      if (!options?.skipSuccess) onSuccess?.();
     },
     [deleteHarvest, onSuccess],
   );

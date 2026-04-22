@@ -1,12 +1,15 @@
 import { useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { useAppTheme } from '@/lib/theme-preference';
+import type { YieldField } from '@/types/batch-sheet';
 
 interface BatchSheetYieldProps {
   marketable: number;
   waste: number;
+  rowX: number;
+  rowY: number;
   disabled?: boolean;
-  onYieldChange: (field: 'marketable' | 'waste', value: number) => void;
+  onYieldChange: (field: YieldField, value: number) => void;
 }
 
 function parseValue(raw: string): number {
@@ -17,6 +20,8 @@ function parseValue(raw: string): number {
 export function BatchSheetYield({
   marketable,
   waste,
+  rowX,
+  rowY,
   disabled,
   onYieldChange,
 }: BatchSheetYieldProps) {
@@ -46,8 +51,7 @@ export function BatchSheetYield({
           color: colors.mutedForeground,
           textAlign: 'center',
         },
-        inputWrap: { position: 'relative' },
-        input: {
+        inputBig: {
           height: 56,
           borderRadius: 12,
           borderWidth: 1,
@@ -57,16 +61,17 @@ export function BatchSheetYield({
           fontSize: 22,
           textAlign: 'center',
           paddingHorizontal: 8,
-          paddingRight: 36,
         },
-        suffix: {
-          position: 'absolute',
-          right: 10,
-          top: 0,
-          bottom: 0,
-          textAlignVertical: 'center',
-          color: colors.mutedForeground,
-          fontSize: 13,
+        inputSmall: {
+          height: 44,
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.background,
+          color: colors.foreground,
+          fontSize: 16,
+          textAlign: 'center',
+          paddingHorizontal: 8,
         },
       }),
     [colors],
@@ -81,34 +86,56 @@ export function BatchSheetYield({
       <Text style={styles.sectionLabel}>Yield Data</Text>
       <View style={styles.grid}>
         <View style={styles.cell}>
-          <Text style={styles.cellLabel}>Marketable</Text>
-          <View style={styles.inputWrap}>
-            <TextInput
-              style={styles.input}
-              value={marketable === 0 ? '' : String(marketable)}
-              onChangeText={(t) => onYieldChange('marketable', parseValue(t))}
-              keyboardType="decimal-pad"
-              placeholder="0"
-              placeholderTextColor={colors.mutedForeground}
-              editable={!disabled}
-            />
-            <Text style={styles.suffix}>kg</Text>
-          </View>
+          <Text style={styles.cellLabel}>Marketable (kg)</Text>
+          <TextInput
+            style={styles.inputBig}
+            value={marketable === 0 ? '' : String(marketable)}
+            onChangeText={(t) => onYieldChange('marketable', parseValue(t))}
+            keyboardType="decimal-pad"
+            placeholder="0"
+            placeholderTextColor={colors.mutedForeground}
+            editable={!disabled}
+          />
         </View>
         <View style={styles.cell}>
-          <Text style={styles.cellLabel}>Waste</Text>
-          <View style={styles.inputWrap}>
-            <TextInput
-              style={styles.input}
-              value={waste === 0 ? '' : String(waste)}
-              onChangeText={(t) => onYieldChange('waste', parseValue(t))}
-              keyboardType="decimal-pad"
-              placeholder="0"
-              placeholderTextColor={colors.mutedForeground}
-              editable={!disabled}
-            />
-            <Text style={styles.suffix}>kg</Text>
-          </View>
+          <Text style={styles.cellLabel}>Waste (kg)</Text>
+          <TextInput
+            style={styles.inputBig}
+            value={waste === 0 ? '' : String(waste)}
+            onChangeText={(t) => onYieldChange('waste', parseValue(t))}
+            keyboardType="decimal-pad"
+            placeholder="0"
+            placeholderTextColor={colors.mutedForeground}
+            editable={!disabled}
+          />
+        </View>
+      </View>
+
+      <Text style={styles.sectionLabel}>Row range harvested</Text>
+      <View style={styles.grid}>
+        <View style={styles.cell}>
+          <Text style={styles.cellLabel}>Row X (from)</Text>
+          <TextInput
+            style={styles.inputSmall}
+            value={rowX === 0 ? '' : String(rowX)}
+            onChangeText={(t) => onYieldChange('rowX', parseValue(t))}
+            keyboardType="number-pad"
+            placeholder="0"
+            placeholderTextColor={colors.mutedForeground}
+            editable={!disabled}
+          />
+        </View>
+        <View style={styles.cell}>
+          <Text style={styles.cellLabel}>Row Y (to)</Text>
+          <TextInput
+            style={styles.inputSmall}
+            value={rowY === 0 ? '' : String(rowY)}
+            onChangeText={(t) => onYieldChange('rowY', parseValue(t))}
+            keyboardType="number-pad"
+            placeholder="0"
+            placeholderTextColor={colors.mutedForeground}
+            editable={!disabled}
+          />
         </View>
       </View>
     </View>

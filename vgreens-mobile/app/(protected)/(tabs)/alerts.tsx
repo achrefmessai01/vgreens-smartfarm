@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/lib/theme-preference';
 import { useAlertsPage } from '@/lib/hooks/use-alerts-page';
@@ -26,14 +26,12 @@ export default function AlertsScreen() {
     page.deleteConfirmation.alert?.sensorName ||
     'this alert';
 
+  const screenStyle = { flex: 1, backgroundColor: colors.background };
+
   if (page.loading && page.alerts.length === 0 && !page.error) {
     return (
-      <SafeAreaView
-        className="flex-1 bg-background"
-        edges={['bottom']}
-        style={{ backgroundColor: colors.background }}
-      >
-        <View className="flex-1 items-center justify-center">
+      <SafeAreaView style={screenStyle} edges={['top', 'bottom']}>
+        <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaView>
@@ -41,22 +39,13 @@ export default function AlertsScreen() {
   }
 
   return (
-    <SafeAreaView
-      className="flex-1 bg-background"
-      edges={['bottom']}
-      style={{ backgroundColor: colors.background }}
-    >
+    <SafeAreaView style={screenStyle} edges={['top', 'bottom']}>
       <AlertsFeed
         alerts={page.alerts}
         filter={page.filter}
         error={page.error}
         openAlertsCount={page.openAlertsCount}
         refreshing={refreshing}
-        colors={{
-          primary: colors.primary,
-          destructive: colors.destructive,
-          mutedForeground: colors.mutedForeground,
-        }}
         onFilterChange={page.onFilterChange}
         onSelect={(a) => page.setSelectedAlert(a)}
         onRefresh={onRefresh}
@@ -108,3 +97,7 @@ export default function AlertsScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+});

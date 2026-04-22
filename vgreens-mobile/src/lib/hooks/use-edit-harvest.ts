@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   useUpdateHarvestMutation,
   type HarvestsQuery,
@@ -7,57 +7,79 @@ import type { BatchFormData, BatchFormErrors } from '@/types/harvest';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
 
-function toForm(harvest: HarvestItem): BatchFormData {
+const emptyForm = (): BatchFormData => ({
+  species: '',
+  variety: '',
+  plantingDate: '',
+  cultivationArea: 0,
+  sourceGreenhouse: '',
+  numberOfRows: 0,
+  rowLength: 0,
+  plantsPerMeter: 0,
+  rowSpacing: 0,
+});
+
+function toForm(h: HarvestItem): BatchFormData {
   return {
-    species: harvest.species,
-    variety: harvest.variety,
-    plantingDate: harvest.plantingDate
-      ? new Date(harvest.plantingDate).toISOString().split('T')[0]
+    species: h.species,
+    variety: h.variety,
+    plantingDate: h.plantingDate
+      ? new Date(h.plantingDate).toISOString().split('T')[0]
       : '',
-    cultivationArea: harvest.cultivationArea,
-    sourceGreenhouseId: harvest.greenhouse ?? '',
+    cultivationArea: h.cultivationArea,
+    sourceGreenhouse: h.greenhouse ?? '',
+    numberOfRows: h.numberOfRows,
+    rowLength: h.rowLength,
+    plantsPerMeter: h.plantsPerMeter,
+    rowSpacing: h.rowSpacing,
   };
 }
 
-function validate(data: BatchFormData): BatchFormErrors {
+function validate(d: BatchFormData): BatchFormErrors {
   const errors: BatchFormErrors = {};
-  if (!data.species) errors.species = 'Species is required';
-  if (!data.variety) errors.variety = 'Variety is required';
-  if (!data.plantingDate) errors.plantingDate = 'Planting date is required';
-  if (!data.cultivationArea || data.cultivationArea <= 0)
+  if (!d.species) errors.species = 'Species is required';
+  if (!d.variety) errors.variety = 'Variety is required';
+  if (!d.plantingDate) errors.plantingDate = 'Planting date is required';
+  if (!d.cultivationArea || d.cultivationArea <= 0)
     errors.cultivationArea = 'Valid cultivation area is required';
-  if (!data.sourceGreenhouseId)
-    errors.sourceGreenhouseId = 'Greenhouse is required';
+  if (!d.sourceGreenhouse.trim())
+    errors.sourceGreenhouse = 'Greenhouse is required';
+  if (!d.numberOfRows || d.numberOfRows <= 0)
+    errors.numberOfRows = 'Number of rows must be greater than 0';
+  if (!d.rowLength || d.rowLength <= 0)
+    errors.rowLength = 'Row length must be greater than 0';
+  if (!d.plantsPerMeter || d.plantsPerMeter <= 0)
+    errors.plantsPerMeter = 'Plants per meter must be greater than 0';
   return errors;
 }
 
+function computeRowSpacing(d: BatchFormData): number {
+  const denom = d.numberOfRows * d.rowLength;
+  return denom > 0 ? Number((d.cultivationArea / denom).toFixed(4)) : 0;
+}
+
 export function useEditHarvest(onSuccess?: () => void) {
-  const [formData, setFormData] = useState<BatchFormData>({
-    species: '',
-    variety: '',
-    plantingDate: '',
-    cultivationArea: 0,
-    sourceGreenhouseId: '',
-  });
+  const [formData, setFormData] = useState<BatchFormData>(emptyForm);
   const [errors, setErrors] = useState<BatchFormErrors>({});
   const [harvestId, setHarvestId] = useState<string | null>(null);
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
 
-  const populate = useCallback((harvest: HarvestItem) => {
-    setHarvestId(harvest.id);
-    setFormData(toForm(harvest));
+  useEffect(() => {
+    setFormData((prev) => {
+      const next = computeRowSpacing(prev);
+      return next === prev.rowSpacing ? prev : { ...prev, rowSpacing: next };
+    });
+  }, [formData.cultivationArea, formData.numberOfRows, formData.rowLength]);
+
+  const populate = useCallback((h: HarvestItem) => {
+    setHarvestId(h.id);
+    setFormData(toForm(h));
     setErrors({});
   }, []);
 
   const reset = useCallback(() => {
     setHarvestId(null);
-    setFormData({
-      species: '',
-      variety: '',
-      plantingDate: '',
-      cultivationArea: 0,
-      sourceGreenhouseId: '',
-    });
+    setFormData(emptyForm());
     setErrors({});
   }, []);
 
@@ -73,7 +95,11 @@ export function useEditHarvest(onSuccess?: () => void) {
           variety: formData.variety,
           plantingDate: formData.plantingDate,
           cultivationArea: formData.cultivationArea,
-          greenhouse: formData.sourceGreenhouseId,
+          greenhouse: formData.sourceGreenhouse.trim(),
+          numberOfRows: formData.numberOfRows,
+          rowLength: formData.rowLength,
+          plantsPerMeter: formData.plantsPerMeter,
+          rowSpacing: formData.rowSpacing,
           batch: `${formData.species} - ${formData.variety}`,
         },
       },

@@ -1,6 +1,8 @@
-import { useLayoutEffect, useState, useCallback, useMemo } from 'react';
+import { useCallback, useLayoutEffect, useMemo } from 'react';
 import {
   View,
+  Text,
+  Pressable,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -8,136 +10,116 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button } from '@/components/ui/button';
+import { useAppTheme } from '@/lib/theme-preference';
 import { UserFormFields } from '@/components/users/user-form-fields';
-import { UserRole as GqlUserRole, useUsersQuery } from '@/generated/graphql';
+import { createUserFormStyles } from '@/components/users/user-form-screen.styles';
+import { useUsersQuery } from '@/generated/graphql';
 import { useTenantUsers } from '@/lib/hooks/use-tenant-users';
-import type { User, UserRole, UserFormData, UserFormErrors } from '@/types/user';
+import { useUserFormState } from '@/lib/hooks/use-user-form-state';
+import type { UserFormData } from '@/types/user';
 
 export default function UserFormScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { colors } = useAppTheme();
   const params = useLocalSearchParams<{ userId?: string }>();
   const isEdit = !!params.userId;
+  const styles = useMemo(() => createUserFormStyles(colors), [colors]);
 
   const { handleCreate, handleUpdate, isSubmitting } = useTenantUsers();
-
   const { data: usersData } = useUsersQuery();
   const editingUser = useMemo(
     () => usersData?.users?.find((u) => u.id === params.userId) ?? null,
     [usersData, params.userId],
   );
 
-  const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [role, setRole] = useState<UserRole | undefined>(undefined);
-  const [isActive, setIsActive] = useState(true);
-  const [errors, setErrors] = useState<UserFormErrors>({});
-  const [initialized, setInitialized] = useState(false);
+  const f = useUserFormState(isEdit, editingUser);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      title: isEdit ? 'Edit User' : 'New User',
+      title: isEdit ? 'Edit user' : 'New user',
       headerBackTitle: 'Users',
     });
   }, [navigation, isEdit]);
 
-  if (isEdit && editingUser && !initialized) {
-    setEmail(editingUser.email || '');
-    setFirstName(editingUser.firstName || '');
-    setLastName(editingUser.lastName || '');
-    setRole(
-      editingUser.role === GqlUserRole.TenantAdmin
-        ? 'TENANT_ADMIN'
-        : editingUser.role === GqlUserRole.TenantUser
-          ? 'TENANT_USER'
-          : 'VGREENS_ADMIN',
-    );
-    setIsActive(editingUser.isActive ?? true);
-    setInitialized(true);
-  }
-
-  const validate = useCallback((): boolean => {
-    const newErrors: UserFormErrors = {};
-    if (!isEdit && !email.trim()) newErrors.email = 'Email is required';
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      newErrors.email = 'Invalid email address';
-    if (!role) newErrors.role = 'Role is required';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [email, role, isEdit]);
-
   const handleSubmit = useCallback(async () => {
-    if (!validate()) return;
-
-    const formData: UserFormData = {
-      email,
-      firstName: firstName || undefined,
-      lastName: lastName || undefined,
-      role,
-      isActive,
+    if (!f.validate()) return;
+    const form: UserFormData = {
+      email: f.email,
+      firstName: f.firstName || undefined,
+      lastName: f.lastName || undefined,
+      role: f.role,
+      isActive: f.isActive,
     };
-
-    const success = isEdit && params.userId
-      ? await handleUpdate(params.userId, formData)
-      : await handleCreate(formData);
-
-    if (success) router.back();
-  }, [
-    validate, email, firstName, lastName, role, isActive,
-    isEdit, params.userId, handleCreate, handleUpdate, router,
-  ]);
+    const ok = isEdit && params.userId
+      ? await handleUpdate(params.userId, form)
+      : await handleCreate(form);
+    if (ok) router.back();
+  }, [f, isEdit, params.userId, handleCreate, handleUpdate, router]);
 
   if (isEdit && !editingUser) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#016f7c" />
+      <SafeAreaView style={styles.screen}>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
+    <SafeAreaView style={styles.screen} edges={['bottom']}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
+        style={styles.kb}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
-          contentContainerClassName="px-5 py-6 gap-7"
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
           <UserFormFields
-            email={email} setEmail={setEmail}
-            firstName={firstName} setFirstName={setFirstName}
-            lastName={lastName} setLastName={setLastName}
-            role={role} setRole={setRole}
-            isActive={isActive} setIsActive={setIsActive}
-            errors={errors} setErrors={setErrors}
-            isEdit={isEdit} isSubmitting={isSubmitting}
+            email={f.email}
+            setEmail={f.setEmail}
+            firstName={f.firstName}
+            setFirstName={f.setFirstName}
+            lastName={f.lastName}
+            setLastName={f.setLastName}
+            role={f.role}
+            setRole={f.setRole}
+            isActive={f.isActive}
+            setIsActive={f.setIsActive}
+            errors={f.errors}
+            clearError={f.clearError}
+            isEdit={isEdit}
+            isSubmitting={isSubmitting}
           />
         </ScrollView>
 
-        <View className="flex-row gap-3 border-t border-border px-5 py-4">
-          <Button
-            variant="outline"
-            label="Cancel"
+        <View style={styles.footer}>
+          <Pressable
             onPress={() => router.back()}
             disabled={isSubmitting}
-            className="flex-1 rounded-xl"
-          />
-          <Button
-            label={isSubmitting ? undefined : isEdit ? 'Save Changes' : 'Create User'}
-            onPress={handleSubmit}
+            style={[styles.btn, styles.btnOutline, isSubmitting && styles.btnDisabled]}
+          >
+            <Text style={styles.btnOutlineText}>Cancel</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => void handleSubmit()}
             disabled={isSubmitting}
-            className="flex-1 rounded-xl"
+            style={[styles.btn, styles.btnPrimary, isSubmitting && styles.btnDisabled]}
           >
             {isSubmitting ? (
-              <ActivityIndicator size="small" color="#ffffff" />
-            ) : null}
-          </Button>
+              <ActivityIndicator color={colors.primaryForeground} />
+            ) : (
+              <Text style={styles.btnPrimaryText}>
+                {isEdit ? 'Save changes' : 'Create user'}
+              </Text>
+            )}
+          </Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

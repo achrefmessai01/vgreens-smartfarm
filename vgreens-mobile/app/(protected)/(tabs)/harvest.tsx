@@ -5,8 +5,8 @@ import {
   BatchSheet,
   HarvestDashboardTab,
   HarvestDeleteModal,
+  HarvestEntryTab,
   HarvestFormModal,
-  HarvestHistoryTab,
   HarvestTabSwitch,
   type HarvestSubTab,
 } from '@/components/harvest';
@@ -51,24 +51,32 @@ export default function HarvestScreen() {
     page.editHarvest.reset();
   }, [page]);
 
+  const deleteLabel = page.isBatchDelete
+    ? 'this batch and all entries'
+    : (page.deleteTarget?.batch ?? 'this harvest');
+  const deleteTitle = page.isBatchDelete ? 'Delete batch?' : 'Delete harvest?';
+
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
+    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
       <HarvestTabSwitch value={subTab} onChange={setSubTab} />
 
       <View style={styles.body}>
         {subTab === 'dashboard' ? (
           <HarvestDashboardTab />
         ) : (
-          <HarvestHistoryTab
+          <HarvestEntryTab
             harvests={page.harvests}
             summary={page.summary}
             loading={page.loading}
             refreshing={refreshing}
             onRefresh={onRefresh}
             onCreatePress={() => page.setCreateOpen(true)}
-            onEdit={page.handleEditRequest}
-            onDelete={page.handleDeleteRequest}
-            onComplete={page.handleCompleteRequest}
+            onViewBatch={page.handleBatchView}
+            onEditBatch={page.handleBatchEdit}
+            onDeleteBatch={page.handleBatchDeleteRequest}
+            onLogEntry={page.handleLogEntry}
+            onViewEntry={page.handleCompleteRequest}
+            onDeleteEntry={page.handleDeleteRequest}
           />
         )}
       </View>
@@ -87,12 +95,13 @@ export default function HarvestScreen() {
 
       <HarvestFormModal
         visible={page.editOpen}
-        title="Edit harvest"
+        title={page.editReadOnly ? 'Batch details' : 'Edit batch'}
         submitLabel="Save changes"
         formData={page.editHarvest.formData}
         setFormData={page.editHarvest.setFormData}
         errors={page.editHarvest.errors}
         loading={page.editHarvest.loading}
+        readOnly={page.editReadOnly}
         onClose={handleEditClose}
         onSubmit={() => void page.editHarvest.submit()}
       />
@@ -100,7 +109,8 @@ export default function HarvestScreen() {
       <HarvestDeleteModal
         visible={page.deleteOpen}
         loading={page.deleteLoading}
-        batchLabel={page.deleteTarget?.batch ?? 'this harvest'}
+        title={deleteTitle}
+        batchLabel={deleteLabel}
         onClose={() => page.setDeleteOpen(false)}
         onConfirm={page.handleDeleteConfirm}
       />

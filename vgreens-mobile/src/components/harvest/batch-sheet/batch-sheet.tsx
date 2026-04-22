@@ -45,8 +45,10 @@ export function BatchSheet({
   const {
     currentData,
     loading,
+    uploading,
     handleBrixChange,
     handleYieldChange,
+    handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
   } = useBatchSheet({ harvestId, batchData, mode, onCompleted });
@@ -101,6 +103,8 @@ export function BatchSheet({
               <BatchSheetYield
                 marketable={currentData.todaysHarvest.marketable}
                 waste={currentData.todaysHarvest.waste}
+                rowX={currentData.todaysHarvest.rowX}
+                rowY={currentData.todaysHarvest.rowY}
                 disabled={loading}
                 onYieldChange={handleYieldChange}
               />
@@ -112,6 +116,8 @@ export function BatchSheet({
               <BatchSheetPhotos
                 photos={currentData.photos}
                 disabled={loading}
+                uploading={uploading}
+                onUpload={handlePhotoUpload}
                 onRemove={handleRemovePhoto}
               />
             </ScrollView>
