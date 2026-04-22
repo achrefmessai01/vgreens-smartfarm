@@ -8,6 +8,7 @@ import {
   HarvestEntryTab,
   HarvestFormModal,
   HarvestTabSwitch,
+  HarvestTopStrip,
   type HarvestSubTab,
 } from '@/components/harvest';
 import { useCreateBatchHarvest } from '@/lib/hooks/use-create-batch-harvest';
@@ -58,6 +59,7 @@ export default function HarvestScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+      <HarvestTopStrip hasNotifications={(page.summary.totalHarvests ?? 0) > 0} />
       <HarvestTabSwitch value={subTab} onChange={setSubTab} />
 
       <View style={styles.body}>

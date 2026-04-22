@@ -8,28 +8,32 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useAppTheme } from '@/lib/theme-preference';
+import { HarvestProgressRing } from './dashboard/harvest-progress-ring';
 
 interface HarvestMetricCardProps {
   title: string;
   value: string | number;
+  unit?: string;
   subtitle: string;
   Icon: ComponentType<{ size?: number; color?: string }>;
   accent: string;
-  emphasis?: 'default' | 'hero';
+  ringValue?: number; // 0..1 if provided shows a mini ring
+  ringGradientId?: string;
   style?: StyleProp<ViewStyle>;
 }
 
 export function HarvestMetricCard({
   title,
   value,
+  unit,
   subtitle,
   Icon,
   accent,
-  emphasis = 'default',
+  ringValue,
+  ringGradientId,
   style,
 }: HarvestMetricCardProps) {
   const { colors } = useAppTheme();
-  const hero = emphasis === 'hero';
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -37,12 +41,12 @@ export function HarvestMetricCard({
           backgroundColor: colors.card,
           borderRadius: 16,
           paddingHorizontal: 14,
-          paddingTop: hero ? 18 : 14,
+          paddingTop: 14,
           paddingBottom: 14,
           borderWidth: StyleSheet.hairlineWidth,
           borderColor: colors.border,
           overflow: 'hidden',
-          gap: hero ? 10 : 6,
+          gap: 8,
         },
         accentBand: {
           position: 'absolute',
@@ -54,42 +58,42 @@ export function HarvestMetricCard({
         },
         topRow: {
           flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 8,
         },
         iconChip: {
-          width: hero ? 36 : 30,
-          height: hero ? 36 : 30,
+          width: 32,
+          height: 32,
           borderRadius: 10,
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: `${accent}1f`,
         },
         title: {
-          flex: 1,
-          minWidth: 0,
           fontSize: 10,
-          fontWeight: '700',
+          fontWeight: '800',
           color: colors.mutedForeground,
           textTransform: 'uppercase',
           letterSpacing: 0.6,
-          lineHeight: 13,
         },
+        valueRow: { flexDirection: 'row', alignItems: 'baseline', gap: 3 },
         value: {
-          fontSize: hero ? 30 : 24,
+          fontSize: 24,
           fontWeight: '800',
           color: colors.foreground,
           fontVariant: ['tabular-nums'],
           letterSpacing: -0.5,
         },
+        unit: { fontSize: 12, fontWeight: '700', color: colors.mutedForeground },
         subtitle: {
           fontSize: 11,
           color: colors.mutedForeground,
-          lineHeight: 15,
           marginTop: 'auto',
+          lineHeight: 15,
         },
       }),
-    [colors, hero, accent],
+    [colors, accent],
   );
 
   return (
@@ -97,20 +101,34 @@ export function HarvestMetricCard({
       <View style={styles.accentBand} />
       <View style={styles.topRow}>
         <View style={styles.iconChip}>
-          <Icon size={hero ? 18 : 15} color={accent} />
+          <Icon size={16} color={accent} />
         </View>
-        <Text style={styles.title} numberOfLines={2}>
-          {title}
-        </Text>
+        {ringValue != null && ringGradientId ? (
+          <HarvestProgressRing
+            value={ringValue}
+            size={36}
+            strokeWidth={4}
+            colorFrom={accent}
+            colorTo={accent}
+            trackColor={`${colors.mutedForeground}33`}
+            gradientId={ringGradientId}
+          />
+        ) : null}
       </View>
-      <Text
-        style={styles.value}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.7}
-      >
-        {value}
+      <Text style={styles.title} numberOfLines={2}>
+        {title}
       </Text>
+      <View style={styles.valueRow}>
+        <Text
+          style={styles.value}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
+        >
+          {value}
+        </Text>
+        {unit ? <Text style={styles.unit}>{unit}</Text> : null}
+      </View>
       <Text style={styles.subtitle} numberOfLines={2}>
         {subtitle}
       </Text>

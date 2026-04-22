@@ -1,6 +1,12 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-import { AlertTriangle, Leaf, Package, Sprout } from 'lucide-react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
+import { AlertTriangle, Package } from 'lucide-react-native';
 import {
   useHarvestDashboard,
   type DateFilter,
@@ -8,17 +14,12 @@ import {
 import { useAppTheme } from '@/lib/theme-preference';
 import { HarvestDashboardCharts } from './harvest-dashboard-charts';
 import { HarvestDashboardMetrics } from './harvest-dashboard-metrics';
-import { HarvestDateFilter } from './harvest-date-filter';
+import { HarvestHeroCard } from './dashboard/harvest-hero-card';
+import { HarvestPeriodFilter } from './dashboard/harvest-period-filter';
 import { createDashboardTabStyles } from './harvest-dashboard-tab.styles';
 
-const FILTER_LABELS: Record<DateFilter, string> = {
-  today: 'today',
-  thisWeek: 'this week',
-  lastWeek: 'last week',
-  thisMonth: 'this month',
-  lastMonth: 'last month',
-  total: 'all time',
-};
+// Season goal — tunable later per tenant.
+const SEASON_GOAL_KG = 2600;
 
 export function HarvestDashboardTab() {
   const { colors } = useAppTheme();
@@ -64,24 +65,17 @@ export function HarvestDashboardTab() {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.hero}>
-        <View style={styles.heroIcon}>
-          <Leaf size={22} color={colors.primary} />
-        </View>
-        <View style={styles.heroText}>
-          <Text style={styles.h1}>
-            {data.variety || data.species || 'Performance'}
-          </Text>
-          <Text style={styles.sub}>
-            {data.harvestCount} harvests · {FILTER_LABELS[filter]}
-          </Text>
-        </View>
-        <Sprout size={22} color={colors.primary} />
-      </View>
+      <HarvestHeroCard
+        totalYield={data.totalYield ?? 0}
+        goal={SEASON_GOAL_KG}
+        harvestCount={data.harvestCount}
+        daysActive={data.daysActive ?? 0}
+        trendPercent={null}
+      />
 
-      <HarvestDateFilter value={filter} onChange={setFilter} />
+      <HarvestPeriodFilter value={filter} onChange={setFilter} />
 
-      <HarvestDashboardMetrics data={data} harvestCount={data.harvestCount} />
+      <HarvestDashboardMetrics data={data} />
 
       <HarvestDashboardCharts data={data} />
     </ScrollView>
