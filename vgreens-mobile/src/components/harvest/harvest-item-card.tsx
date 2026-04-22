@@ -1,6 +1,13 @@
 import { useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { Calendar, Home, Scale, Trash2, Pencil } from 'lucide-react-native';
+import {
+  Calendar,
+  ClipboardCheck,
+  Home,
+  Pencil,
+  Scale,
+  Trash2,
+} from 'lucide-react-native';
 import type { HarvestItem } from '@/lib/hooks/use-harvest-page';
 import { formatHarvestDate, getGreenhouseLabel } from '@/lib/harvest-utils';
 import { useAppTheme } from '@/lib/theme-preference';
@@ -9,12 +16,14 @@ interface HarvestItemCardProps {
   harvest: HarvestItem;
   onEdit: () => void;
   onDelete: () => void;
+  onComplete: () => void;
 }
 
 export function HarvestItemCard({
   harvest,
   onEdit,
   onDelete,
+  onComplete,
 }: HarvestItemCardProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(
@@ -67,8 +76,11 @@ export function HarvestItemCard({
           borderRadius: 10,
           backgroundColor: colors.muted,
         },
-        btnEdit: { fontSize: 13, fontWeight: '600', color: colors.primary },
-        btnDel: { fontSize: 13, fontWeight: '600', color: colors.destructive },
+        btnPrimary: { backgroundColor: colors.primary },
+        btnText: { fontSize: 13, fontWeight: '600' },
+        btnTextEdit: { color: colors.primary },
+        btnTextDelete: { color: colors.destructive },
+        btnTextPrimary: { color: colors.primaryForeground },
       }),
     [colors],
   );
@@ -94,11 +106,15 @@ export function HarvestItemCard({
       <View style={styles.stats}>
         <View style={styles.stat}>
           <Home size={12} color={colors.mutedForeground} />
-          <Text style={styles.statVal}>{getGreenhouseLabel(harvest.greenhouse)}</Text>
+          <Text style={styles.statVal}>
+            {getGreenhouseLabel(harvest.greenhouse)}
+          </Text>
         </View>
         <View style={styles.stat}>
           <Scale size={12} color="#10b981" />
-          <Text style={[styles.statVal, styles.classA]}>{harvest.classA} kg</Text>
+          <Text style={[styles.statVal, styles.classA]}>
+            {harvest.classA} kg
+          </Text>
         </View>
         <View style={styles.stat}>
           <Text style={styles.wasteLabel}>Waste</Text>
@@ -112,13 +128,19 @@ export function HarvestItemCard({
       <Text style={styles.author}>Logged by {author}</Text>
 
       <View style={styles.actions}>
+        <Pressable style={[styles.btn, styles.btnPrimary]} onPress={onComplete}>
+          <ClipboardCheck size={16} color={colors.primaryForeground} />
+          <Text style={[styles.btnText, styles.btnTextPrimary]}>
+            Log harvest
+          </Text>
+        </Pressable>
         <Pressable style={styles.btn} onPress={onEdit}>
           <Pencil size={16} color={colors.primary} />
-          <Text style={styles.btnEdit}>Edit</Text>
+          <Text style={[styles.btnText, styles.btnTextEdit]}>Edit</Text>
         </Pressable>
         <Pressable style={styles.btn} onPress={onDelete}>
           <Trash2 size={16} color={colors.destructive} />
-          <Text style={styles.btnDel}>Delete</Text>
+          <Text style={[styles.btnText, styles.btnTextDelete]}>Delete</Text>
         </Pressable>
       </View>
     </View>

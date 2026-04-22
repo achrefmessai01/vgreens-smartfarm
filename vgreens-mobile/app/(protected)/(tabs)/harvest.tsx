@@ -1,63 +1,38 @@
-import { useState, useCallback, useMemo } from 'react';
-import { View, Pressable, Text, StyleSheet } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BarChart3, History } from 'lucide-react-native';
-import { useHarvestPage } from '@/lib/hooks/use-harvest-page';
-import { useCreateBatchHarvest } from '@/lib/hooks/use-create-batch-harvest';
-import { useAppTheme } from '@/lib/theme-preference';
 import {
+  BatchSheet,
   HarvestDashboardTab,
-  HarvestHistoryTab,
-  HarvestFormModal,
   HarvestDeleteModal,
+  HarvestFormModal,
+  HarvestHistoryTab,
+  HarvestTabSwitch,
+  type HarvestSubTab,
 } from '@/components/harvest';
-
-type SubTab = 'dashboard' | 'history';
+import { useCreateBatchHarvest } from '@/lib/hooks/use-create-batch-harvest';
+import { useHarvestPage } from '@/lib/hooks/use-harvest-page';
+import { useAppTheme } from '@/lib/theme-preference';
 
 export default function HarvestScreen() {
   const { colors } = useAppTheme();
-  const [subTab, setSubTab] = useState<SubTab>('dashboard');
+  const [subTab, setSubTab] = useState<HarvestSubTab>('dashboard');
   const [refreshing, setRefreshing] = useState(false);
 
   const styles = useMemo(
     () =>
       StyleSheet.create({
         screen: { flex: 1, backgroundColor: colors.background },
-        segment: {
-          flexDirection: 'row',
-          marginHorizontal: 16,
-          marginTop: 8,
-          marginBottom: 4,
-          backgroundColor: colors.muted,
-          borderRadius: 12,
-          padding: 4,
-          gap: 4,
-        },
-        segBtn: {
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          paddingVertical: 10,
-          borderRadius: 10,
-        },
-        segActive: { backgroundColor: colors.primary },
-        segText: {
-          fontSize: 13,
-          fontWeight: '600',
-          color: colors.mutedForeground,
-        },
-        segTextActive: { color: colors.primaryForeground },
         body: { flex: 1 },
       }),
     [colors],
   );
 
   const page = useHarvestPage();
-  const createBatch = useCreateBatchHarvest(() => {
+
+  const createBatch = useCreateBatchHarvest((harvest) => {
     page.setCreateOpen(false);
-    void page.refetch();
+    page.handleBatchCreated(harvest);
   });
 
   const onRefresh = useCallback(async () => {
@@ -66,41 +41,19 @@ export default function HarvestScreen() {
     setRefreshing(false);
   }, [page]);
 
-  const inactiveIcon = colors.mutedForeground;
-  const activeIcon = colors.primaryForeground;
+  const handleCreateClose = useCallback(() => {
+    createBatch.reset();
+    page.setCreateOpen(false);
+  }, [createBatch, page]);
+
+  const handleEditClose = useCallback(() => {
+    page.setEditOpen(false);
+    page.editHarvest.reset();
+  }, [page]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <View style={styles.segment}>
-        <Pressable
-          style={[styles.segBtn, subTab === 'dashboard' && styles.segActive]}
-          onPress={() => setSubTab('dashboard')}
-        >
-          <BarChart3
-            size={16}
-            color={subTab === 'dashboard' ? activeIcon : inactiveIcon}
-          />
-          <Text
-            style={[styles.segText, subTab === 'dashboard' && styles.segTextActive]}
-          >
-            Dashboard
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[styles.segBtn, subTab === 'history' && styles.segActive]}
-          onPress={() => setSubTab('history')}
-        >
-          <History
-            size={16}
-            color={subTab === 'history' ? activeIcon : inactiveIcon}
-          />
-          <Text
-            style={[styles.segText, subTab === 'history' && styles.segTextActive]}
-          >
-            History
-          </Text>
-        </Pressable>
-      </View>
+      <HarvestTabSwitch value={subTab} onChange={setSubTab} />
 
       <View style={styles.body}>
         {subTab === 'dashboard' ? (
@@ -115,6 +68,7 @@ export default function HarvestScreen() {
             onCreatePress={() => page.setCreateOpen(true)}
             onEdit={page.handleEditRequest}
             onDelete={page.handleDeleteRequest}
+            onComplete={page.handleCompleteRequest}
           />
         )}
       </View>
@@ -127,10 +81,7 @@ export default function HarvestScreen() {
         setFormData={createBatch.setFormData}
         errors={createBatch.errors}
         loading={createBatch.loading}
-        onClose={() => {
-          createBatch.reset();
-          page.setCreateOpen(false);
-        }}
+        onClose={handleCreateClose}
         onSubmit={() => void createBatch.submit()}
       />
 
@@ -142,10 +93,7 @@ export default function HarvestScreen() {
         setFormData={page.editHarvest.setFormData}
         errors={page.editHarvest.errors}
         loading={page.editHarvest.loading}
-        onClose={() => {
-          page.setEditOpen(false);
-          page.editHarvest.reset();
-        }}
+        onClose={handleEditClose}
         onSubmit={() => void page.editHarvest.submit()}
       />
 
@@ -155,6 +103,15 @@ export default function HarvestScreen() {
         batchLabel={page.deleteTarget?.batch ?? 'this harvest'}
         onClose={() => page.setDeleteOpen(false)}
         onConfirm={page.handleDeleteConfirm}
+      />
+
+      <BatchSheet
+        visible={page.sheetOpen}
+        harvestId={page.pendingBatch?.id ?? null}
+        batchData={page.pendingBatch?.details ?? null}
+        mode={page.sheetMode}
+        onClose={page.handleSheetClose}
+        onCompleted={page.handleSheetCompleted}
       />
     </SafeAreaView>
   );

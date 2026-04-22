@@ -1,21 +1,15 @@
-import { useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
-import { AlertTriangle, Package, Sprout } from 'lucide-react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { AlertTriangle, Leaf, Package, Sprout } from 'lucide-react-native';
 import {
   useHarvestDashboard,
   type DateFilter,
 } from '@/lib/hooks/use-harvest-dashboard';
 import { useAppTheme } from '@/lib/theme-preference';
-import { HarvestDateFilter } from './harvest-date-filter';
-import { HarvestDashboardMetrics } from './harvest-dashboard-metrics';
 import { HarvestDashboardCharts } from './harvest-dashboard-charts';
+import { HarvestDashboardMetrics } from './harvest-dashboard-metrics';
+import { HarvestDateFilter } from './harvest-date-filter';
+import { createDashboardTabStyles } from './harvest-dashboard-tab.styles';
 
 const FILTER_LABELS: Record<DateFilter, string> = {
   today: 'today',
@@ -32,53 +26,7 @@ export function HarvestDashboardTab() {
   const { data, loading, error, refetch } = useHarvestDashboard(
     filter === 'total' ? undefined : { dateFilter: filter },
   );
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        scroll: { flex: 1, backgroundColor: colors.background },
-        content: { padding: 16, paddingBottom: 32, gap: 14 },
-        centered: {
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 24,
-          gap: 8,
-          backgroundColor: colors.background,
-        },
-        hero: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-          marginBottom: 4,
-        },
-        heroText: { flex: 1 },
-        h1: {
-          fontSize: 22,
-          fontWeight: '800',
-          color: colors.foreground,
-          letterSpacing: -0.3,
-        },
-        sub: { fontSize: 13, color: colors.mutedForeground, marginTop: 2 },
-        section: { marginTop: 4 },
-        muted: { fontSize: 14, color: colors.mutedForeground, marginTop: 8 },
-        err: {
-          fontSize: 14,
-          color: colors.destructive,
-          textAlign: 'center',
-          marginTop: 8,
-        },
-        retry: {
-          marginTop: 12,
-          paddingHorizontal: 20,
-          paddingVertical: 10,
-          backgroundColor: colors.primary,
-          borderRadius: 10,
-        },
-        retryText: { color: colors.primaryForeground, fontWeight: '600' },
-      }),
-    [colors],
-  );
+  const styles = useMemo(() => createDashboardTabStyles(colors), [colors]);
 
   if (loading && !data) {
     return (
@@ -110,8 +58,6 @@ export function HarvestDashboardTab() {
     );
   }
 
-  const filterLabel = FILTER_LABELS[filter];
-
   return (
     <ScrollView
       style={styles.scroll}
@@ -119,23 +65,23 @@ export function HarvestDashboardTab() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.hero}>
-        <Sprout size={22} color={colors.primary} />
+        <View style={styles.heroIcon}>
+          <Leaf size={22} color={colors.primary} />
+        </View>
         <View style={styles.heroText}>
-          <Text style={styles.h1}>Performance</Text>
+          <Text style={styles.h1}>
+            {data.variety || data.species || 'Performance'}
+          </Text>
           <Text style={styles.sub}>
-            {data.harvestCount} harvests logged · {filterLabel}
+            {data.harvestCount} harvests · {FILTER_LABELS[filter]}
           </Text>
         </View>
+        <Sprout size={22} color={colors.primary} />
       </View>
 
       <HarvestDateFilter value={filter} onChange={setFilter} />
 
-      <View style={styles.section}>
-        <HarvestDashboardMetrics
-          data={data}
-          harvestCount={data.harvestCount}
-        />
-      </View>
+      <HarvestDashboardMetrics data={data} harvestCount={data.harvestCount} />
 
       <HarvestDashboardCharts data={data} />
     </ScrollView>

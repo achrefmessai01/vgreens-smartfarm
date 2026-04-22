@@ -23,6 +23,7 @@ interface HarvestHistoryTabProps {
   onCreatePress: () => void;
   onEdit: (h: HarvestItem) => void;
   onDelete: (h: HarvestItem) => void;
+  onComplete: (h: HarvestItem) => void;
 }
 
 export function HarvestHistoryTab({
@@ -34,6 +35,7 @@ export function HarvestHistoryTab({
   onCreatePress,
   onEdit,
   onDelete,
+  onComplete,
 }: HarvestHistoryTabProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(
@@ -95,6 +97,7 @@ export function HarvestHistoryTab({
             harvest={item}
             onEdit={() => onEdit(item)}
             onDelete={() => onDelete(item)}
+            onComplete={() => onComplete(item)}
           />
         )}
       />

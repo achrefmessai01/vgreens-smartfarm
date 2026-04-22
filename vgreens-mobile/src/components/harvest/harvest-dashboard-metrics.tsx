@@ -1,11 +1,11 @@
 import { View, StyleSheet } from 'react-native';
 import {
-  TrendingUp,
-  Target,
-  Package,
-  Trash2,
-  AlertTriangle,
   Activity,
+  AlertTriangle,
+  Package,
+  Target,
+  TrendingUp,
+  Trash2,
 } from 'lucide-react-native';
 import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
 import { HarvestMetricCard } from './harvest-metric-card';
@@ -16,57 +16,61 @@ interface Props {
 }
 
 export function HarvestDashboardMetrics({ data, harvestCount }: Props) {
-  const kg = (data.totalYield ?? 0) - (data.wasteTotal ?? 0);
+  const totalYield = data.totalYield ?? 0;
+  const wasteTotal = data.wasteTotal ?? 0;
+  const netKg = Math.max(0, totalYield - wasteTotal);
+  const avgBrix = data.averageBrix ?? 0;
+
   return (
-    <View style={styles.grid}>
-      <View style={styles.half}>
+    <View style={styles.wrap}>
+      <HarvestMetricCard
+        title="Total Yield"
+        value={`${totalYield.toFixed(1)} kg`}
+        subtitle={`${harvestCount} harvests · ${netKg.toFixed(1)} kg net`}
+        Icon={TrendingUp}
+        accent="#3b82f6"
+        emphasis="hero"
+      />
+      <HarvestMetricCard
+        title="Average Brix"
+        value={`${avgBrix.toFixed(1)} °Bx`}
+        subtitle="Quality indicator across harvests"
+        Icon={Target}
+        accent="#8b5cf6"
+        emphasis="hero"
+      />
+
+      <View style={styles.row}>
         <HarvestMetricCard
-          title="Total yield"
-          value={`${(data.totalYield ?? 0).toFixed(2)} kg`}
-          subtitle={`Across ${harvestCount} harvests`}
-          Icon={TrendingUp}
-          accent="#3b82f6"
-        />
-      </View>
-      <View style={styles.half}>
-        <HarvestMetricCard
-          title="Average Brix"
-          value={`${(data.averageBrix ?? 0).toFixed(1)}°Bx`}
-          subtitle="Quality indicator"
-          Icon={Target}
-          accent="#8b5cf6"
-        />
-      </View>
-      <View style={styles.half}>
-        <HarvestMetricCard
-          title="Marketable %"
+          style={styles.cell}
+          title="Marketable"
           value={`${(data.marketablePercent ?? 0).toFixed(1)}%`}
-          subtitle={`${kg.toFixed(2)} kg net`}
+          subtitle={`${netKg.toFixed(1)} kg net`}
           Icon={Package}
           accent="#10b981"
         />
-      </View>
-      <View style={styles.half}>
         <HarvestMetricCard
-          title="Waste %"
+          style={styles.cell}
+          title="Waste"
           value={`${(data.wastePercent ?? 0).toFixed(1)}%`}
-          subtitle={`${(data.wasteTotal ?? 0).toFixed(2)} kg`}
+          subtitle={`${wasteTotal.toFixed(1)} kg total`}
           Icon={Trash2}
           accent="#ef4444"
         />
       </View>
-      <View style={styles.half}>
+
+      <View style={styles.row}>
         <HarvestMetricCard
-          title="Critical alerts"
+          style={styles.cell}
+          title="Critical Alerts"
           value={data.criticalAlerts ?? 0}
           subtitle="Requires attention"
           Icon={AlertTriangle}
           accent="#f59e0b"
         />
-      </View>
-      <View style={styles.half}>
         <HarvestMetricCard
-          title="Days active"
+          style={styles.cell}
+          title="Days Active"
           value={data.daysActive ?? 0}
           subtitle="Since planting window"
           Icon={Activity}
@@ -78,11 +82,11 @@ export function HarvestDashboardMetrics({ data, harvestCount }: Props) {
 }
 
 const styles = StyleSheet.create({
-  grid: {
+  wrap: { gap: 10 },
+  row: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'stretch',
     gap: 10,
-    justifyContent: 'space-between',
   },
-  half: { width: '48%' },
+  cell: { flex: 1 },
 });

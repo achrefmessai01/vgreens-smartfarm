@@ -1,15 +1,33 @@
+import { HarvestStatus } from '@/generated/graphql';
 import type { HarvestSummary } from '@/types/harvest';
+import type {
+  BatchDetailsData,
+  BrixMeasurements,
+} from '@/types/batch-sheet';
 
 export interface HarvestLike {
   id: string;
   batch: string;
   species: string;
   variety: string;
+  greenhouse?: string | null;
   plantingDate: string;
   cultivationArea: number;
+  status?: HarvestStatus | null;
   classA: number;
   waste: number;
   avgBrix: number;
+  brix1: number;
+  brix2: number;
+  brix3: number;
+  brix4: number;
+  brix5: number;
+  brix6: number;
+  brix7: number;
+  brix8: number;
+  brix9: number;
+  brix10: number;
+  photoUrls?: string[] | null;
 }
 
 export function getGreenhouseLabel(greenhouse?: string | null): string {
@@ -54,5 +72,75 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
     totalClassA: Math.round(totalClassA * 10) / 10,
     totalWaste: Math.round(totalWaste * 10) / 10,
     avgBrix: Math.round(avgBrix * 10) / 10,
+  };
+}
+
+export function computeAvgBrix(brix: BrixMeasurements): number {
+  const values = [
+    brix.brix1,
+    brix.brix2,
+    brix.brix3,
+    brix.brix4,
+    brix.brix5,
+    brix.brix6,
+    brix.brix7,
+    brix.brix8,
+    brix.brix9,
+    brix.brix10,
+  ].filter((v) => v > 0);
+  if (values.length === 0) return 0;
+  return (
+    Math.round((values.reduce((s, v) => s + v, 0) / values.length) * 10) / 10
+  );
+}
+
+export function extractStoragePathFromUrl(
+  url: string | null | undefined,
+): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    const match = parsed.pathname.match(
+      /\/storage\/v1\/object\/public\/[^/]+\/(.+)/,
+    );
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
+  const plantingDate = new Date(h.plantingDate);
+  const days = Math.max(
+    0,
+    Math.floor((Date.now() - plantingDate.getTime()) / 86_400_000),
+  );
+  return {
+    id: h.id,
+    name: h.batch,
+    species: h.species,
+    variety: h.variety,
+    status: h.status ?? HarvestStatus.Draft,
+    greenhouse: {
+      id: h.greenhouse ?? '',
+      name: getGreenhouseLabel(h.greenhouse),
+    },
+    daysAfterPlanting: days,
+    area: h.cultivationArea,
+    plantingDate: h.plantingDate,
+    todaysHarvest: { marketable: h.classA, waste: h.waste },
+    brixMeasurements: {
+      brix1: h.brix1,
+      brix2: h.brix2,
+      brix3: h.brix3,
+      brix4: h.brix4,
+      brix5: h.brix5,
+      brix6: h.brix6,
+      brix7: h.brix7,
+      brix8: h.brix8,
+      brix9: h.brix9,
+      brix10: h.brix10,
+    },
+    photos: h.photoUrls ?? [],
   };
 }
