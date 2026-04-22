@@ -26,10 +26,15 @@ export function useHarvestPage() {
   const [batchSidebarOpen, setBatchSidebarOpen] = React.useState(false);
   const [sidebarMode, setSidebarMode] = React.useState<SidebarMode>('create');
   const [editOpen, setEditOpen] = React.useState(false);
+  const [editReadOnly, setEditReadOnly] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState<HarvestItem | null>(
     null,
   );
+  const [deleteBatchTargetIds, setDeleteBatchTargetIds] = React.useState<
+    string[]
+  >([]);
+  const [isBatchDelete, setIsBatchDelete] = React.useState(false);
   const [pendingBatch, setPendingBatch] = React.useState<{
     id: string;
     details: BatchDetailsData;
@@ -72,6 +77,25 @@ export function useHarvestPage() {
 
   const handleEditRequest = React.useCallback(
     (harvest: HarvestItem) => {
+      setEditReadOnly(false);
+      editHarvest.populate(harvest);
+      setEditOpen(true);
+    },
+    [editHarvest],
+  );
+
+  const handleBatchView = React.useCallback(
+    (harvest: HarvestItem) => {
+      setEditReadOnly(true);
+      editHarvest.populate(harvest);
+      setEditOpen(true);
+    },
+    [editHarvest],
+  );
+
+  const handleBatchEdit = React.useCallback(
+    (harvest: HarvestItem) => {
+      setEditReadOnly(false);
       editHarvest.populate(harvest);
       setEditOpen(true);
     },
@@ -85,14 +109,43 @@ export function useHarvestPage() {
     setBatchSidebarOpen(true);
   }, []);
 
+  const handleLogEntry = React.useCallback((harvest: HarvestItem) => {
+    const details = harvestToBatchDetails(harvest);
+    setPendingBatch({ id: harvest.id, details });
+    setSidebarMode('create');
+    setBatchSidebarOpen(true);
+  }, []);
+
   const handleDeleteRequest = React.useCallback((harvest: HarvestItem) => {
+    setIsBatchDelete(false);
+    setDeleteBatchTargetIds([]);
     setDeleteTarget(harvest);
     setDeleteOpen(true);
   }, []);
 
-  const handleDeleteConfirm = React.useCallback(() => {
+  const handleBatchDeleteRequest = React.useCallback(
+    (_batch: HarvestItem, entries: HarvestItem[]) => {
+      setIsBatchDelete(true);
+      setDeleteTarget(null);
+      setDeleteBatchTargetIds(entries.map((entry) => entry.id));
+      setDeleteOpen(true);
+    },
+    [],
+  );
+
+  const handleDeleteConfirm = React.useCallback(async () => {
+    if (isBatchDelete) {
+      for (const id of deleteBatchTargetIds) {
+        await handleDelete(id, { skipSuccess: true });
+      }
+      setDeleteOpen(false);
+      setDeleteBatchTargetIds([]);
+      setIsBatchDelete(false);
+      refetch();
+      return;
+    }
     if (deleteTarget) handleDelete(deleteTarget.id);
-  }, [deleteTarget, handleDelete]);
+  }, [isBatchDelete, deleteBatchTargetIds, deleteTarget, handleDelete, refetch]);
 
   return {
     harvests,
@@ -108,14 +161,20 @@ export function useHarvestPage() {
     handleBatchCreated,
     handleSidebarCompleted,
     handleSidebarEdit,
+    handleLogEntry,
+    handleBatchView,
+    handleBatchEdit,
     editOpen,
     setEditOpen,
+    editReadOnly,
     editHarvest,
     handleEditRequest,
     deleteOpen,
     setDeleteOpen,
     deleteLoading,
     handleDeleteRequest,
+    handleBatchDeleteRequest,
+    isBatchDelete,
     handleDeleteConfirm,
   };
 }

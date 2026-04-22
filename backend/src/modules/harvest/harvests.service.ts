@@ -35,6 +35,29 @@ export class HarvestsService extends BaseService<Harvest> {
 
   private readonly harvestRelations = ['tenant', 'createdBy'] as const;
 
+  private computeRowSpacing(
+    cultivationArea: number,
+    numberOfRows: number,
+    rowLength: number,
+  ): number {
+    const denominator = numberOfRows * rowLength;
+    if (denominator <= 0) return 0;
+    return cultivationArea / denominator;
+  }
+
+  private isDashboardPlaceholder(harvest: Harvest): boolean {
+    return (
+      harvest.status === HarvestStatus.DRAFT &&
+      harvest.parentBatchId == null &&
+      harvest.classA === 0 &&
+      harvest.waste === 0 &&
+      harvest.avgBrix === 0 &&
+      harvest.rowX === 0 &&
+      harvest.rowY === 0 &&
+      harvest.photos === 0
+    );
+  }
+
   async findAllFiltered(
     tenantId: string | undefined,
     filter?: HarvestFilterInput | null,
@@ -149,6 +172,7 @@ export class HarvestsService extends BaseService<Harvest> {
 
       const harvest = this.harvestRepository.create({
         tenantId,
+        parentBatchId: input.parentBatchId ?? null,
         createdById,
         species: input.species,
         variety: input.variety,
@@ -156,11 +180,31 @@ export class HarvestsService extends BaseService<Harvest> {
         greenhouse: input.greenhouse ?? undefined,
         plantingDate: new Date(input.plantingDate),
         cultivationArea: input.cultivationArea,
+        numberOfRows: input.numberOfRows,
+        rowLength: input.rowLength,
+        plantsPerMeter: input.plantsPerMeter,
+        rowSpacing:
+          input.rowSpacing ??
+          this.computeRowSpacing(
+            input.cultivationArea,
+            input.numberOfRows,
+            input.rowLength,
+          ),
         status: input.status ?? HarvestStatus.ACTIVE,
         date: new Date(input.date),
         classA: input.classA ?? 0,
         waste: input.waste ?? 0,
         avgBrix: input.avgBrix ?? 0,
+        rowX:
+          input.rowX ??
+          (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
+            ? 1
+            : 0),
+        rowY:
+          input.rowY ??
+          (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
+            ? input.numberOfRowsHarvested
+            : 0),
         brix1: input.brix1 ?? 0,
         brix2: input.brix2 ?? 0,
         brix3: input.brix3 ?? 0,
@@ -209,17 +253,50 @@ export class HarvestsService extends BaseService<Harvest> {
       if (input.species !== undefined) harvest.species = input.species;
       if (input.variety !== undefined) harvest.variety = input.variety;
       if (input.batch !== undefined) harvest.batch = input.batch;
+      if (input.parentBatchId !== undefined) {
+        harvest.parentBatchId = input.parentBatchId;
+      }
       if (input.greenhouse !== undefined) harvest.greenhouse = input.greenhouse;
       if (input.plantingDate !== undefined) {
         harvest.plantingDate = new Date(input.plantingDate);
       }
       if (input.cultivationArea !== undefined)
         harvest.cultivationArea = input.cultivationArea;
+      if (input.numberOfRows !== undefined)
+        harvest.numberOfRows = input.numberOfRows;
+      if (input.rowLength !== undefined) harvest.rowLength = input.rowLength;
+      if (input.plantsPerMeter !== undefined) {
+        harvest.plantsPerMeter = input.plantsPerMeter;
+      }
+      if (input.rowSpacing !== undefined) {
+        harvest.rowSpacing = input.rowSpacing;
+      } else if (
+        input.cultivationArea !== undefined ||
+        input.numberOfRows !== undefined ||
+        input.rowLength !== undefined
+      ) {
+        harvest.rowSpacing = this.computeRowSpacing(
+          harvest.cultivationArea,
+          harvest.numberOfRows,
+          harvest.rowLength,
+        );
+      }
       if (input.status !== undefined) harvest.status = input.status;
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.classA !== undefined) harvest.classA = input.classA;
       if (input.waste !== undefined) harvest.waste = input.waste;
       if (input.avgBrix !== undefined) harvest.avgBrix = input.avgBrix;
+      if (input.rowX !== undefined) harvest.rowX = input.rowX;
+      if (input.rowY !== undefined) harvest.rowY = input.rowY;
+      if (
+        input.numberOfRowsHarvested !== undefined &&
+        input.rowX === undefined &&
+        input.rowY === undefined
+      ) {
+        harvest.rowX = input.numberOfRowsHarvested > 0 ? 1 : 0;
+        harvest.rowY =
+          input.numberOfRowsHarvested > 0 ? input.numberOfRowsHarvested : 0;
+      }
       if (input.brix1 !== undefined) harvest.brix1 = input.brix1;
       if (input.brix2 !== undefined) harvest.brix2 = input.brix2;
       if (input.brix3 !== undefined) harvest.brix3 = input.brix3;
@@ -321,8 +398,11 @@ export class HarvestsService extends BaseService<Harvest> {
 
       qb.orderBy('harvest.date', OrderDirection.ASC);
       const harvests = await qb.getMany();
+      const metricsHarvests = harvests.filter(
+        (harvest) => !this.isDashboardPlaceholder(harvest),
+      );
 
-      if (harvests.length === 0) {
+      if (metricsHarvests.length === 0) {
         return this.getEmptyDashboardMetrics();
       }
 
@@ -330,7 +410,7 @@ export class HarvestsService extends BaseService<Harvest> {
       const speciesMap = new Map<string, number>();
       const varietyMap = new Map<string, number>();
 
-      harvests.forEach((h) => {
+      metricsHarvests.forEach((h) => {
         speciesMap.set(h.species, (speciesMap.get(h.species) || 0) + 1);
         varietyMap.set(h.variety, (varietyMap.get(h.variety) || 0) + 1);
       });
@@ -343,8 +423,11 @@ export class HarvestsService extends BaseService<Harvest> {
       )[0][0];
 
       // Calculate metrics
-      const totalMarketable = harvests.reduce((sum, h) => sum + h.classA, 0);
-      const totalWaste = harvests.reduce((sum, h) => sum + h.waste, 0);
+      const totalMarketable = metricsHarvests.reduce(
+        (sum, h) => sum + h.classA,
+        0,
+      );
+      const totalWaste = metricsHarvests.reduce((sum, h) => sum + h.waste, 0);
       const totalYield = totalMarketable + totalWaste;
 
       const marketablePercent =
@@ -352,7 +435,7 @@ export class HarvestsService extends BaseService<Harvest> {
       const wastePercent = totalYield > 0 ? (totalWaste / totalYield) * 100 : 0;
 
       // Calculate average brix
-      const validBrixHarvests = harvests.filter((h) => h.avgBrix > 0);
+      const validBrixHarvests = metricsHarvests.filter((h) => h.avgBrix > 0);
       const averageBrix =
         validBrixHarvests.length > 0
           ? validBrixHarvests.reduce((sum, h) => sum + h.avgBrix, 0) /
@@ -360,8 +443,10 @@ export class HarvestsService extends BaseService<Harvest> {
           : 0;
 
       // Calculate days active (from earliest planting date to latest harvest date)
-      const plantingDates = harvests.map((h) => new Date(h.plantingDate));
-      const harvestDates = harvests.map((h) => new Date(h.date));
+      const plantingDates = metricsHarvests.map(
+        (h) => new Date(h.plantingDate),
+      );
+      const harvestDates = metricsHarvests.map((h) => new Date(h.date));
       const earliestPlanting = new Date(
         Math.min(...plantingDates.map((d) => d.getTime())),
       );
@@ -374,20 +459,21 @@ export class HarvestsService extends BaseService<Harvest> {
       );
 
       // Critical alerts (harvests with low brix or high waste percentage)
-      const criticalAlerts = harvests.filter(
+      const criticalAlerts = metricsHarvests.filter(
         (h) => h.avgBrix < 6.0 || h.waste / (h.classA + h.waste) > 0.15,
       ).length;
 
       // Generate time series data
-      const yieldOverTime = this.generateYieldOverTimeData(harvests);
-      const classDistribution = this.generateClassDistributionData(harvests);
-      const brixTrend = this.generateBrixTrendData(harvests);
-      const cumulativeYield = this.generateCumulativeYieldData(harvests);
+      const yieldOverTime = this.generateYieldOverTimeData(metricsHarvests);
+      const classDistribution =
+        this.generateClassDistributionData(metricsHarvests);
+      const brixTrend = this.generateBrixTrendData(metricsHarvests);
+      const cumulativeYield = this.generateCumulativeYieldData(metricsHarvests);
 
       return {
         species: primarySpecies,
         variety: primaryVariety,
-        harvestCount: harvests.length,
+        harvestCount: metricsHarvests.length,
         totalYield: Math.round(totalYield * 10) / 10,
         averageBrix: Math.round(averageBrix * 10) / 10,
         marketablePercent: Math.round(marketablePercent * 10) / 10,

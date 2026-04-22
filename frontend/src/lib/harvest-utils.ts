@@ -110,8 +110,17 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
     },
     daysAfterPlanting: days,
     area: h.cultivationArea,
+    numberOfRows: h.numberOfRows,
+    rowLength: h.rowLength,
+    plantsPerMeter: h.plantsPerMeter,
+    rowSpacing: h.rowSpacing,
     plantingDate: h.plantingDate,
-    todaysHarvest: { marketable: h.classA, waste: h.waste },
+    todaysHarvest: {
+      marketable: h.classA,
+      waste: h.waste,
+      rowX: h.rowX,
+      rowY: h.rowY,
+    },
     brixMeasurements: {
       brix1: h.brix1,
       brix2: h.brix2,

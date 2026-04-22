@@ -12,10 +12,16 @@ export interface BatchDetailsData {
   };
   daysAfterPlanting: number;
   area: number;
+  numberOfRows: number;
+  rowLength: number;
+  plantsPerMeter: number;
+  rowSpacing: number;
   plantingDate: string;
   todaysHarvest: {
     marketable: number;
     waste: number;
+    rowX: number;
+    rowY: number;
   };
   brixMeasurements: {
     brix1: number;
@@ -49,7 +55,9 @@ export interface BatchStatsFieldProps {
 export interface YieldDataFieldProps {
   marketable: number;
   waste: number;
-  onYieldChange?: (field: 'marketable' | 'waste', value: number) => void;
+  rowX: number;
+  rowY: number;
+  onYieldChange?: (field: 'marketable' | 'waste' | 'rowX' | 'rowY', value: number) => void;
   isLoading?: boolean;
 }
 

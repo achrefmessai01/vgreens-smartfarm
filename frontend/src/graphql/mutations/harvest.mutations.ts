@@ -9,14 +9,21 @@ export const CREATE_HARVEST_MUTATION = gql`
       species
       variety
       batch
+      parentBatchId
       greenhouse
       plantingDate
       cultivationArea
+      numberOfRows
+      rowLength
+      plantsPerMeter
+      rowSpacing
       status
       date
       classA
       waste
       avgBrix
+      rowX
+      rowY
       brix1
       brix2
       brix3
@@ -44,14 +51,21 @@ export const UPDATE_HARVEST_MUTATION = gql`
       species
       variety
       batch
+      parentBatchId
       greenhouse
       plantingDate
       cultivationArea
+      numberOfRows
+      rowLength
+      plantsPerMeter
+      rowSpacing
       status
       date
       classA
       waste
       avgBrix
+      rowX
+      rowY
       brix1
       brix2
       brix3

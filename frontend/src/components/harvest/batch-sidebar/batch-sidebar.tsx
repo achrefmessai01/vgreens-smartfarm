@@ -1,6 +1,7 @@
 'use client';
 
 import { useI18n } from '@/i18n';
+import { Badge } from '@/components/ui/badge';
 import {
   Sheet,
   SheetTitle,
@@ -17,6 +18,7 @@ import {
   BatchHeaderField,
 } from './fields/batch-sidebar-basic-fields';
 import { Button } from '@/components/ui/button';
+import { Sparkles } from 'lucide-react';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { YieldDataField } from './fields/batch-sidebar-yield-field';
@@ -67,9 +69,17 @@ export function BatchSidebar({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full max-w-full flex-col gap-0 p-0 sm:max-w-2xl"
+        className="bg-background/95 flex w-full max-w-full flex-col gap-0 p-0 backdrop-blur-sm sm:max-w-2xl lg:max-w-3xl"
       >
-        <SheetHeader className="dark:border-primary-foreground/30 border-b px-4 pt-5 pb-4 sm:px-6 sm:pt-6">
+        <SheetHeader className="from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 dark:border-primary-foreground/30 border-b bg-gradient-to-r px-4 pt-5 pb-4 sm:px-6 sm:pt-6">
+          <div className="mb-2 flex items-center gap-2">
+            <Sparkles className="text-primary h-4 w-4" />
+            <Badge variant="secondary" className="text-[10px] uppercase">
+              {mode === 'edit'
+                ? (h?.editHarvest ?? 'Edit Harvest')
+                : (h?.logHarvest ?? 'Log Harvest')}
+            </Badge>
+          </div>
           <SheetTitle className="dark:text-card-foreground pr-8 text-left leading-tight break-words">
             {currentData?.greenhouse?.name
               ? `${h?.batchDetails ?? 'Batch Details'} for ${currentData.greenhouse.name}`
@@ -80,7 +90,7 @@ export function BatchSidebar({
         <div className="flex min-h-0 flex-1 flex-col">
           {currentData ? (
             <>
-              <div className="dark:border-primary-foreground/30 from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 shrink-0 space-y-6 border-b bg-gradient-to-r px-4 py-4 sm:px-6">
+              <div className="dark:border-primary-foreground/30 shrink-0 space-y-6 border-b px-4 py-4 sm:px-6">
                 <BatchHeaderField
                   name={currentData.name}
                   species={currentData.species}
@@ -95,24 +105,32 @@ export function BatchSidebar({
                 />
               </div>
 
-              <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
-                <YieldDataField
-                  marketable={currentData.todaysHarvest.marketable}
-                  waste={currentData.todaysHarvest.waste}
-                  onYieldChange={handleYieldChange}
-                  isLoading={busy}
-                />
-                <BrixMeasurementsField
-                  measurements={currentData.brixMeasurements}
-                  onMeasurementChange={handleBrixChange}
-                  isLoading={busy}
-                />
-                <PhotosField
-                  photos={currentData.photos}
-                  onUpload={handlePhotoUpload}
-                  onRemove={handleRemovePhoto}
-                  isLoading={busy}
-                />
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
+                <div className="bg-card rounded-xl border p-3 shadow-sm">
+                  <YieldDataField
+                    marketable={currentData.todaysHarvest.marketable}
+                    waste={currentData.todaysHarvest.waste}
+                    rowX={currentData.todaysHarvest.rowX}
+                    rowY={currentData.todaysHarvest.rowY}
+                    onYieldChange={handleYieldChange}
+                    isLoading={busy}
+                  />
+                </div>
+                <div className="bg-card rounded-xl border p-3 shadow-sm">
+                  <BrixMeasurementsField
+                    measurements={currentData.brixMeasurements}
+                    onMeasurementChange={handleBrixChange}
+                    isLoading={busy}
+                  />
+                </div>
+                <div className="bg-card rounded-xl border p-3 shadow-sm">
+                  <PhotosField
+                    photos={currentData.photos}
+                    onUpload={handlePhotoUpload}
+                    onRemove={handleRemovePhoto}
+                    isLoading={busy}
+                  />
+                </div>
                 <div className="h-16" />
               </div>
             </>
@@ -125,11 +143,11 @@ export function BatchSidebar({
           )}
         </div>
 
-        <SheetFooter className="dark:border-primary-foreground/30 border-t px-4 py-4 sm:px-6">
+        <SheetFooter className="bg-background/95 dark:border-primary-foreground/30 border-t px-4 py-4 backdrop-blur-sm sm:px-6">
           <Button
             onClick={handleSave}
             disabled={busy || !harvestId}
-            className="h-12 w-full text-lg font-semibold"
+            className="h-12 w-full text-base font-semibold shadow-sm sm:text-lg"
             size="lg"
           >
             {buttonLabel}

@@ -29,8 +29,14 @@ export interface HarvestLike {
   greenhouse?: string | null;
   plantingDate: string;
   cultivationArea: number;
+  numberOfRows: number;
+  rowLength: number;
+  plantsPerMeter: number;
+  rowSpacing: number;
   classA: number;
   waste: number;
+  rowX: number;
+  rowY: number;
   avgBrix: number;
   brix1: number;
   brix2: number;

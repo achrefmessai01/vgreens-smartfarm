@@ -1,4 +1,5 @@
 import {
+  IsUUID,
   IsString,
   IsNumber,
   IsInt,
@@ -13,6 +14,11 @@ import { HarvestStatus } from '@/common/enums/harvest-status.enum';
 
 @InputType()
 export class UpdateHarvestInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsUUID()
+  parentBatchId?: string;
+
   // --- Batch fields ---
 
   @Field({ nullable: true })
@@ -46,6 +52,30 @@ export class UpdateHarvestInput {
   @Min(0)
   cultivationArea?: number;
 
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  numberOfRows?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0.01)
+  rowLength?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0.01)
+  plantsPerMeter?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  rowSpacing?: number;
+
   @Field(() => HarvestStatus, { nullable: true })
   @IsOptional()
   @IsEnum(HarvestStatus)
@@ -75,6 +105,27 @@ export class UpdateHarvestInput {
   @IsNumber()
   @Min(0)
   avgBrix?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  rowX?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  rowY?: number;
+
+  @Field(() => Int, {
+    nullable: true,
+    deprecationReason: 'Use rowX and rowY instead.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  numberOfRowsHarvested?: number;
 
   // --- Brix measurements ---
 

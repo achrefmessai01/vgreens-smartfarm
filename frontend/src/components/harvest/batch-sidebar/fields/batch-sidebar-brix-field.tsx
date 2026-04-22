@@ -29,7 +29,7 @@ export function BrixMeasurementsField({
     return (
       <div className="space-y-4">
         <div className="bg-muted h-5 animate-pulse rounded" />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3">
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="space-y-2">
               <div className="bg-muted h-4 animate-pulse rounded" />
@@ -68,7 +68,7 @@ export function BrixMeasurementsField({
             </span>
           </span>
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           {brixEntries.map((entry, index) => (
             <Field key={index}>
               <FieldLabel htmlFor={`brix-${index + 1}`}>
