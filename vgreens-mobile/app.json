@@ -35,6 +35,19 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b231e713-84bd-4bb1-a19e-9d6713c7d4ca"
+      }
+    },
+    "owner": "bangash11",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b231e713-84bd-4bb1-a19e-9d6713c7d4ca"
     }
   }
 }
