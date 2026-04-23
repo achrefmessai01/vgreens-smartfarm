@@ -14,7 +14,6 @@ import { UsersHeader } from '@/components/users/users-header';
 import { UsersStats } from '@/components/users/users-stats';
 import { UsersSearch } from '@/components/users/users-search';
 import { UsersRoleFilter } from '@/components/users/users-role-filter';
-import { UserActionMenu } from '@/components/users/user-action-menu';
 import { createUsersScreenStyles } from '@/components/users/users-screen.styles';
 import { useTenantUsers } from '@/lib/hooks/use-tenant-users';
 import { useUserFilters } from '@/lib/hooks/use-user-filters';
@@ -24,10 +23,10 @@ import type { User } from '@/types/user';
 export default function UsersScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
-  const { users, loading, isSubmitting, handleToggleActive, refetch } =
+  const { users, loading, isSubmitting, handleDelete, refetch } =
     useTenantUsers();
   const [refreshing, setRefreshing] = useState(false);
-  const [menuUser, setMenuUser] = useState<User | null>(null);
+  const [revealedId, setRevealedId] = useState<string | null>(null);
   const styles = useMemo(() => createUsersScreenStyles(colors), [colors]);
 
   const {
@@ -53,6 +52,26 @@ export default function UsersScreen() {
           : '/(protected)/user-form',
       ),
     [router],
+  );
+
+  const onToggleReveal = useCallback((user: User) => {
+    setRevealedId((prev) => (prev === user.id ? null : user.id));
+  }, []);
+
+  const onEdit = useCallback(
+    (user: User) => {
+      setRevealedId(null);
+      openForm(user.id);
+    },
+    [openForm],
+  );
+
+  const onDelete = useCallback(
+    (user: User) => {
+      setRevealedId(null);
+      handleDelete(user);
+    },
+    [handleDelete],
   );
 
   const adminsCount = users.filter((u) => u.role === 'TENANT_ADMIN').length;
@@ -93,8 +112,15 @@ export default function UsersScreen() {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        onScrollBeginDrag={() => setRevealedId(null)}
         renderItem={({ item }) => (
-          <UserCard user={item} onMenuPress={setMenuUser} />
+          <UserCard
+            user={item}
+            revealed={revealedId === item.id}
+            onToggleReveal={onToggleReveal}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -115,15 +141,6 @@ export default function UsersScreen() {
           />
         }
         showsVerticalScrollIndicator={false}
-      />
-
-      <UserActionMenu
-        visible={menuUser !== null}
-        user={menuUser}
-        onClose={() => setMenuUser(null)}
-        onView={(u) => openForm(u.id)}
-        onEdit={(u) => openForm(u.id)}
-        onToggleActive={(u) => void handleToggleActive(u)}
       />
     </SafeAreaView>
   );

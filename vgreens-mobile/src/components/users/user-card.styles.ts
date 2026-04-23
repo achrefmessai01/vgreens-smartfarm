@@ -3,11 +3,18 @@ import { Colors } from '@/constants/theme';
 
 type SemanticColors = (typeof Colors)[keyof typeof Colors];
 
+export const REVEAL_WIDTH = 176;
+
 export function createUserCardStyles(colors: SemanticColors, accent: string) {
   return StyleSheet.create({
-    wrap: {
+    // Outer shell owns the rounded shape + border + shadow.
+    // Both the action strip and the sliding card live inside it.
+    outer: {
       borderRadius: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
       backgroundColor: colors.card,
+      overflow: 'hidden',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05,
@@ -15,14 +22,33 @@ export function createUserCardStyles(colors: SemanticColors, accent: string) {
       elevation: 2,
       marginHorizontal: 1,
     },
+    actionsStrip: {
+      ...StyleSheet.absoluteFillObject,
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'stretch',
+      paddingRight: 8,
+      gap: 8,
+      paddingVertical: 8,
+    },
+    actionBtn: {
+      width: (REVEAL_WIDTH - 24) / 2,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+    },
+    actionEdit: { backgroundColor: 'rgba(16,185,129,0.22)' },
+    actionEditText: { fontSize: 13, fontWeight: '800', color: '#10b981' },
+    actionDelete: { backgroundColor: 'rgba(239,68,68,0.22)' },
+    actionDeleteText: { fontSize: 13, fontWeight: '800', color: '#ef4444' },
+    // Sliding card: flat (no border/radius/shadow) so it moves cleanly under the outer shell.
+    cardWrap: { backgroundColor: colors.card },
     card: {
       flexDirection: 'row',
       alignItems: 'center',
       padding: 12,
       gap: 12,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: colors.border,
       backgroundColor: colors.card,
     },
     info: { flex: 1, minWidth: 0, gap: 4 },
