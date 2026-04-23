@@ -200,8 +200,8 @@ function RegistrationForm({
   return (
     <>
       <View className="gap-4">
-        <OAuthButton strategy="oauth_google" label="Continue with Google" />
-        <OAuthButton strategy="oauth_apple" label="Continue with Apple" />
+        <OAuthButton provider="google" label="Continue with Google" />
+        <OAuthButton provider="microsoft" label="Continue with Microsoft" />
       </View>
 
       <View className="my-6 flex-row items-center gap-3">

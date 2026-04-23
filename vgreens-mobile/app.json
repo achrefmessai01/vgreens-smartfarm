@@ -22,7 +22,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#016f7c"
       },
-      "package": "com.vgreens.smartfarm"
+      "package": "com.vgreens.smartfarm",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "bundler": "metro",
