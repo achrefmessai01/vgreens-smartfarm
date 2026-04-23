@@ -74,12 +74,16 @@ export const createApolloClient = (
     link: ApolloLink.from([errorLink, authLink, httpLink]),
     cache: new InMemoryCache(),
     defaultOptions: {
+      // Returns cached data immediately then re-fetches in background —
+      // screens feel instant on re-visit while still staying fresh.
       watchQuery: {
         fetchPolicy: 'cache-and-network',
         errorPolicy: 'all',
       },
+      // cache-first: avoids a network round-trip when the data is already
+      // in the InMemoryCache. Only hits the network on a cache miss.
       query: {
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'cache-first',
         errorPolicy: 'all',
       },
       mutate: {
