@@ -54,6 +54,17 @@ export function getRoleAccent(role: UserRole): string {
   }
 }
 
+export function getRoleGradient(role: UserRole): [string, string] {
+  switch (role) {
+    case 'TENANT_ADMIN':
+      return ['#8b5cf6', '#ec4899'];
+    case 'TENANT_USER':
+      return ['#0ea5e9', '#ec4899'];
+    case 'VGREENS_ADMIN':
+      return ['#f59e0b', '#ef4444'];
+  }
+}
+
 export function getStatusPalette(
   status: UserStatus | null | undefined,
   isActive: boolean,

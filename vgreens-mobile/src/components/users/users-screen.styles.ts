@@ -37,7 +37,11 @@ export function createUsersScreenStyles(colors: SemanticColors) {
       fontWeight: '700',
       color: colors.primaryForeground,
     },
-    listContent: { gap: 10, paddingBottom: 24 },
+    listContent: {
+      gap: 10,
+      paddingHorizontal: 16,
+      paddingBottom: 12,
+    },
     empty: {
       alignItems: 'center',
       gap: 10,

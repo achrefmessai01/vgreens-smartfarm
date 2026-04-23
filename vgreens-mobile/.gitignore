@@ -25,7 +25,10 @@ android/
 .env.production.local
 
 # Generated
-src/generated/
+# NOTE: we intentionally commit src/generated/graphql.tsx so EAS Build
+# (which clones a fresh working tree) can bundle the app without running
+# codegen against the live backend. Re-run `npm run codegen` after any
+# GraphQL document or schema change.
 
 # Debug
 npm-debug.*

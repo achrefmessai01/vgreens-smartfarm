@@ -1,28 +1,15 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Alert } from 'react-native';
 import {
-  UserRole as GqlUserRole,
   useCreateUserMutation,
   useDeleteUserMutation,
   useUpdateUserMutation,
   useUsersQuery,
 } from '@/generated/graphql';
 import { useCurrentUser } from './use-current-user';
+import { toGqlUserRole } from '@/lib/user-role-mapper';
 import type { User, UserFormData } from '@/types/user';
 import { TENANT_ALLOWED_ROLES } from '@/types/user';
-
-const toGqlUserRole = (role?: UserFormData['role']): GqlUserRole | undefined => {
-  switch (role) {
-    case 'TENANT_ADMIN':
-      return GqlUserRole.TenantAdmin;
-    case 'TENANT_USER':
-      return GqlUserRole.TenantUser;
-    case 'VGREENS_ADMIN':
-      return GqlUserRole.VgreensAdmin;
-    default:
-      return undefined;
-  }
-};
 
 export function useTenantUsers() {
   const { user: currentUser } = useCurrentUser();
@@ -100,37 +87,50 @@ export function useTenantUsers() {
   const handleDelete = useCallback(
     (user: User) => {
       const name =
-        [user.firstName, user.lastName].filter(Boolean).join(' ') ||
-        user.email;
-
+        [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+      const confirm = async () => {
+        setIsSubmitting(true);
+        try {
+          await deleteUser({ variables: { id: user.id } });
+          await refetch();
+        } catch (error) {
+          console.error('Error deleting user:', error);
+          Alert.alert('Error', 'Failed to delete user. Please try again.');
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
       Alert.alert(
         'Delete User',
         `Are you sure you want to delete ${name}? This action cannot be undone.`,
         [
           { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: async () => {
-              setIsSubmitting(true);
-              try {
-                await deleteUser({ variables: { id: user.id } });
-                await refetch();
-              } catch (error) {
-                console.error('Error deleting user:', error);
-                Alert.alert(
-                  'Error',
-                  'Failed to delete user. Please try again.',
-                );
-              } finally {
-                setIsSubmitting(false);
-              }
-            },
-          },
+          { text: 'Delete', style: 'destructive', onPress: confirm },
         ],
       );
     },
     [deleteUser, refetch],
+  );
+
+  const handleToggleActive = useCallback(
+    async (user: User) => {
+      setIsSubmitting(true);
+      try {
+        await updateUser({
+          variables: {
+            id: user.id,
+            input: { isActive: !user.isActive },
+          },
+        });
+        await refetch();
+      } catch (error) {
+        console.error('Error toggling user active state:', error);
+        Alert.alert('Error', 'Failed to update user. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [updateUser, refetch],
   );
 
   return {
@@ -141,6 +141,7 @@ export function useTenantUsers() {
     handleCreate,
     handleUpdate,
     handleDelete,
+    handleToggleActive,
     refetch,
   };
 }

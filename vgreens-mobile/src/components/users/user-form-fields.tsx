@@ -1,9 +1,9 @@
 import { memo, useMemo } from 'react';
 import { View, Text, Switch } from 'react-native';
 import { HarvestBatchField } from '@/components/harvest/harvest-batch-field';
-import { HarvestFormSection } from '@/components/harvest/harvest-form-section';
 import { useAppTheme } from '@/lib/theme-preference';
-import { RolePicker } from './role-picker';
+import { RoleCard } from './role-card';
+import { UserFormGroup } from './user-form-group';
 import { createUserFormFieldsStyles } from './user-form-fields.styles';
 import {
   TENANT_ALLOWED_ROLES,
@@ -28,46 +28,37 @@ interface UserFormFieldsProps {
   isSubmitting: boolean;
 }
 
+const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
+  TENANT_ADMIN: 'Full access — manage users, farms, data, and settings.',
+  TENANT_USER: 'Standard access — view and record farm data, no admin tools.',
+  VGREENS_ADMIN: 'Platform-level access — reserved for vGreens staff.',
+};
+
 function UserFormFieldsBase({
-  email,
-  setEmail,
-  firstName,
-  setFirstName,
-  lastName,
-  setLastName,
-  role,
-  setRole,
-  isActive,
-  setIsActive,
-  errors,
-  clearError,
-  isEdit,
-  isSubmitting,
+  email, setEmail, firstName, setFirstName, lastName, setLastName,
+  role, setRole, isActive, setIsActive, errors, clearError,
+  isEdit, isSubmitting,
 }: UserFormFieldsProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createUserFormFieldsStyles(colors), [colors]);
 
-  const handleEmail = (v: string) => {
+  const onEmailChange = (v: string) => {
     setEmail(v);
     if (errors.email) clearError('email');
   };
-  const handleRole = (v: UserRole) => {
+  const onRoleChange = (v: UserRole) => {
     setRole(v);
     if (errors.role) clearError('role');
   };
 
   return (
     <View style={styles.wrap}>
-      <HarvestFormSection
-        step={1}
-        title="Account"
-        description="How they'll sign in to vGreens."
-      >
+      <UserFormGroup label="Account">
         <HarvestBatchField
           label="Email"
           required
           value={email}
-          onChangeText={handleEmail}
+          onChangeText={onEmailChange}
           placeholder="user@example.com"
           keyboardType="email-address"
           autoCapitalize="none"
@@ -75,13 +66,9 @@ function UserFormFieldsBase({
           hint={isEdit ? 'Email cannot be changed after creation' : undefined}
           readOnly={isEdit}
         />
-      </HarvestFormSection>
+      </UserFormGroup>
 
-      <HarvestFormSection
-        step={2}
-        title="Personal info"
-        description="Optional — shown in the team list."
-      >
+      <UserFormGroup label="Profile">
         <HarvestBatchField
           label="First name"
           value={firstName}
@@ -94,19 +81,19 @@ function UserFormFieldsBase({
           onChangeText={setLastName}
           placeholder="Last name"
         />
-      </HarvestFormSection>
+      </UserFormGroup>
 
-      <HarvestFormSection
-        step={3}
-        title="Permissions"
-        description="Role controls what the user can see and change."
-      >
-        <RolePicker
-          value={role}
-          onChange={handleRole}
-          allowedRoles={TENANT_ALLOWED_ROLES}
-          disabled={isSubmitting}
-        />
+      <UserFormGroup label="Role & access">
+        {TENANT_ALLOWED_ROLES.map((r) => (
+          <RoleCard
+            key={r}
+            role={r}
+            description={ROLE_DESCRIPTIONS[r]}
+            selected={role === r}
+            disabled={isSubmitting}
+            onSelect={onRoleChange}
+          />
+        ))}
 
         <View style={styles.toggleRow}>
           <View style={styles.toggleText}>
@@ -123,7 +110,7 @@ function UserFormFieldsBase({
             thumbColor="#ffffff"
           />
         </View>
-      </HarvestFormSection>
+      </UserFormGroup>
     </View>
   );
 }

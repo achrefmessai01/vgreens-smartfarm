@@ -5,7 +5,7 @@ type SemanticColors = (typeof Colors)[keyof typeof Colors];
 
 export function createUserFormFieldsStyles(colors: SemanticColors) {
   return StyleSheet.create({
-    wrap: { gap: 14 },
+    wrap: { gap: 22 },
     toggleRow: {
       flexDirection: 'row',
       alignItems: 'center',

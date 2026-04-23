@@ -11,7 +11,9 @@ import {
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/lib/theme-preference';
+import { InvitePreviewCard } from '@/components/users/invite-preview-card';
 import { UserFormFields } from '@/components/users/user-form-fields';
+import { UserFormHeader } from '@/components/users/user-form-header';
 import { createUserFormStyles } from '@/components/users/user-form-screen.styles';
 import { useUsersQuery } from '@/generated/graphql';
 import { useTenantUsers } from '@/lib/hooks/use-tenant-users';
@@ -36,12 +38,8 @@ export default function UserFormScreen() {
   const f = useUserFormState(isEdit, editingUser);
 
   useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: true,
-      title: isEdit ? 'Edit user' : 'New user',
-      headerBackTitle: 'Users',
-    });
-  }, [navigation, isEdit]);
+    navigation.setOptions({ headerShown: false });
+  }, [navigation]);
 
   const handleSubmit = useCallback(async () => {
     if (!f.validate()) return;
@@ -60,7 +58,7 @@ export default function UserFormScreen() {
 
   if (isEdit && !editingUser) {
     return (
-      <SafeAreaView style={styles.screen}>
+      <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -68,12 +66,15 @@ export default function UserFormScreen() {
     );
   }
 
+  const title = isEdit ? 'Edit User' : 'Invite User';
+
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
+    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         style={styles.kb}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
+        <UserFormHeader title={title} onBack={() => router.back()} />
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.content}
@@ -81,6 +82,12 @@ export default function UserFormScreen() {
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
+          {!isEdit ? (
+            <InvitePreviewCard
+              name={[f.firstName, f.lastName].filter(Boolean).join(' ')}
+              email={f.email}
+            />
+          ) : null}
           <UserFormFields
             email={f.email}
             setEmail={f.setEmail}
