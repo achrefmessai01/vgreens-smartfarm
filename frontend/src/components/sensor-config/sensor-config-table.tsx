@@ -74,47 +74,84 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              rows.map(({ device, config }) => (
-                <TableRow
-                  key={device}
-                  className="cursor-pointer"
-                  onClick={() => setEditingRow({ device, config })}
-                >
-                  <TableCell className="font-medium">{device}</TableCell>
-                  <TableCell>
-                    {config?.xPosition != null ? (
-                      <Badge variant="secondary">{config.xPosition}</Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {config?.yPosition != null ? (
-                      <Badge variant="secondary">{config.yPosition}</Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {config?.greenhouse ?? (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingRow({ device, config });
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              rows.map((row) => {
+                const { device, config, defaultPosition } = row;
+                // Legacy seed rows often have xPosition === 0 AND yPosition === 0
+                // — treat that combo as "no real override" and fall back to the
+                // dynamic default so the table never shows zero/zero placeholders.
+                const isLegacyZero =
+                  config?.xPosition === 0 && config?.yPosition === 0;
+                const hasXOverride =
+                  config?.xPosition != null && !isLegacyZero;
+                const hasYOverride =
+                  config?.yPosition != null && !isLegacyZero;
+                return (
+                  <TableRow
+                    key={device}
+                    className="cursor-pointer"
+                    onClick={() => setEditingRow(row)}
+                  >
+                    <TableCell className="font-medium">{device}</TableCell>
+                    <TableCell>
+                      {hasXOverride ? (
+                        <Badge variant="secondary">{config!.xPosition}</Badge>
+                      ) : defaultPosition ? (
+                        <Badge
+                          variant="outline"
+                          className="text-muted-foreground border-dashed"
+                          title="Auto-generated default"
+                        >
+                          {defaultPosition.xPosition}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {hasYOverride ? (
+                        <Badge variant="secondary">{config!.yPosition}</Badge>
+                      ) : defaultPosition ? (
+                        <Badge
+                          variant="outline"
+                          className="text-muted-foreground border-dashed"
+                          title="Auto-generated default"
+                        >
+                          {defaultPosition.yPosition}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {config?.greenhouse ? (
+                        <span>{config.greenhouse}</span>
+                      ) : row.defaultGreenhouse ? (
+                        <span
+                          className="text-muted-foreground text-sm italic"
+                          title="Default from InfluxDB tag"
+                        >
+                          {row.defaultGreenhouse}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingRow(row);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

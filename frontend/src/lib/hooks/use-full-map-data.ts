@@ -42,7 +42,10 @@ export function useFullMapData(
               : null;
           const numValue = value != null && !Number.isNaN(value) ? value : null;
           if (!p.slot && showOnlyFilledPositions) continue;
-          if (showOnlyFilledPositions && numValue == null) continue;
+          // Always hide sensors that have no reading for the selected
+          // parameter — rendering a "--" dot just adds visual noise to the
+          // map. The previous `showOnlyFilledPositions` gate is now implicit.
+          if (numValue == null) continue;
 
           const positionKey = `${p.slot.id}-${p.leftPercent}-${p.topPercent}`;
           sensors.push({

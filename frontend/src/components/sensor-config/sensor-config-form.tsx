@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { useTenantGreenhousesQuery } from '@/generated/graphql';
+import { useGreenhouseOptionsQuery } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import {
   SENSOR_CONFIG_FIELD_KEYS,
@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { Building2, Layers, Navigation, Trash2 } from 'lucide-react';
 import * as React from 'react';
 import type { SensorRow } from './use-sensor-config';
+import type { DefaultPosition } from '@/lib/sensor-default-positions';
 
 interface SensorConfigFormProps {
   row: SensorRow;
@@ -53,12 +54,23 @@ export function SensorConfigForm({
   const { t } = useI18n();
   const sc = t.pages.admin.tenants.sensorConfig;
 
+  // Greenhouse identifiers come from InfluxDB tag values via the
+  // `greenhouseOptions` query — that's what sensor data is actually tagged
+  // with (e.g. "greenhouse_01"). Also include the current override value so
+  // legacy entries always have a matching option.
   const { data: greenhouseData, loading: greenhouseLoading } =
-    useTenantGreenhousesQuery({
+    useGreenhouseOptionsQuery({
       variables: { tenantId },
       skip: !tenantId,
     });
-  const greenhouseOptions = greenhouseData?.tenantGreenhouses ?? [];
+  const influxGreenhouses = greenhouseData?.greenhouseOptions ?? [];
+  const currentValue = row.config?.greenhouse ?? '';
+  const greenhouseOptions = React.useMemo(() => {
+    const set = new Set<string>(influxGreenhouses);
+    if (currentValue) set.add(currentValue);
+    return [...set].sort();
+  }, [influxGreenhouses, currentValue]);
+  const hasNoInfluxGreenhouses = influxGreenhouses.length === 0;
 
   const hintKey: Record<SensorConfigFieldKey, string> = {
     xPosition: sc.xPositionHint,
@@ -66,10 +78,18 @@ export function SensorConfigForm({
     greenhouse: sc.greenhouseHint,
   };
 
+  // When the sensor has no override, fall back to the dynamically computed
+  // default position as the input placeholder. The user can leave the input
+  // blank to keep tracking the dynamic default, or type a value to lock in
+  // a specific position.
+  const def: DefaultPosition | null = row.defaultPosition;
+  const defaultGreenhouse = row.defaultGreenhouse ?? '';
   const placeholderKey: Record<SensorConfigFieldKey, string> = {
-    xPosition: sc.xPositionPlaceholder,
-    yPosition: sc.yPositionPlaceholder,
-    greenhouse: sc.greenhousePlaceholder,
+    xPosition: def ? `Default: ${def.xPosition}` : sc.xPositionPlaceholder,
+    yPosition: def ? `Default: ${def.yPosition}` : sc.yPositionPlaceholder,
+    greenhouse: defaultGreenhouse
+      ? `Default: ${defaultGreenhouse}`
+      : sc.greenhousePlaceholder,
   };
 
   const labelKey: Record<SensorConfigFieldKey, string> = {
@@ -78,10 +98,26 @@ export function SensorConfigForm({
     greenhouse: sc.greenhouse,
   };
 
+  // Pre-select the InfluxDB-tagged greenhouse when there is no override so the
+  // user sees the effective value already chosen. They can still pick a
+  // different greenhouse, or "Reset to defaults" wipes the override entirely.
+  //
+  // Treat (0, 0) overrides as "no real position set" — those are typically
+  // legacy seed values, not deliberate placements at the origin. Leaving the
+  // inputs blank lets the user keep the dynamic default by simply hitting Save
+  // without typing.
+  const isLegacyZero =
+    row.config?.xPosition === 0 && row.config?.yPosition === 0;
   const [values, setValues] = React.useState({
-    xPosition: row.config?.xPosition?.toString() ?? '',
-    yPosition: row.config?.yPosition?.toString() ?? '',
-    greenhouse: row.config?.greenhouse ?? '',
+    xPosition:
+      isLegacyZero || row.config?.xPosition == null
+        ? ''
+        : row.config.xPosition.toString(),
+    yPosition:
+      isLegacyZero || row.config?.yPosition == null
+        ? ''
+        : row.config.yPosition.toString(),
+    greenhouse: row.config?.greenhouse ?? defaultGreenhouse,
   });
 
   const set =
@@ -141,15 +177,23 @@ export function SensorConfigForm({
                   }
                   disabled={greenhouseLoading}
                 >
-                  <SelectTrigger id="field-greenhouse" className="h-9">
+                  <SelectTrigger id="field-greenhouse" className="h-9 w-full">
                     <SelectValue placeholder={placeholderKey.greenhouse} />
                   </SelectTrigger>
                   <SelectContent>
-                    {greenhouseOptions.map((gh) => (
-                      <SelectItem key={gh} value={gh}>
-                        {gh}
-                      </SelectItem>
-                    ))}
+                    {greenhouseOptions.length === 0 ? (
+                      <div className="text-muted-foreground px-2 py-1.5 text-xs">
+                        {hasNoInfluxGreenhouses
+                          ? 'No greenhouse tags found in InfluxDB for this tenant.'
+                          : '—'}
+                      </div>
+                    ) : (
+                      greenhouseOptions.map((gh) => (
+                        <SelectItem key={gh} value={gh}>
+                          {gh}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               ) : (
