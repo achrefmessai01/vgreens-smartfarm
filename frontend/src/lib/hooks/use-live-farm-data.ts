@@ -12,6 +12,7 @@ import {
   influxRowsToBays,
   type SensorConfigOverride,
 } from '@/lib/farm-data-live';
+import type { GreenhouseLayout } from '@/lib/sensor-default-positions';
 
 const BUCKET_START_DEFAULT = '-1h';
 const POLL_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
@@ -36,6 +37,11 @@ export interface LiveFarmDataOptions {
   tenantBucketName?: string | null;
   /** PostgreSQL SensorConfig overrides keyed by device name */
   sensorConfigs?: Map<string, SensorConfigOverride>;
+  /**
+   * Configured greenhouse layouts for the tenant. Used to compute fallback
+   * x/y positions for sensors that don't have a saved override.
+   */
+  greenhouseLayouts?: GreenhouseLayout[];
 }
 
 export function useLiveFarmData(
@@ -59,6 +65,11 @@ export function useLiveFarmData(
 
   const sensorConfigs =
     options && 'sensorConfigs' in options ? options.sensorConfigs : undefined;
+
+  const greenhouseLayouts =
+    options && 'greenhouseLayouts' in options
+      ? options.greenhouseLayouts
+      : undefined;
 
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-first',
@@ -134,7 +145,11 @@ export function useLiveFarmData(
       bucketData.getBucketData.length > 0
     ) {
       try {
-        const bays = influxRowsToBays(bucketData.getBucketData, sensorConfigs);
+        const bays = influxRowsToBays(
+          bucketData.getBucketData,
+          sensorConfigs,
+          greenhouseLayouts,
+        );
         if (bays.length > 0) {
           return {
             bays,
@@ -170,5 +185,6 @@ export function useLiveFarmData(
     bucketError,
     bucketFields,
     sensorConfigs,
+    greenhouseLayouts,
   ]);
 }

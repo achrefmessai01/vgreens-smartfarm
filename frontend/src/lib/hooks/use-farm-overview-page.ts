@@ -217,6 +217,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const { bays, bucketFields, loading } = useLiveFarmData({
     tenantBucketName: tenantBucketNameOverride,
     sensorConfigs: sensorConfigMap,
+    greenhouseLayouts: tenantGreenhouses,
   });
 
   const handleSensorPositionCommit = React.useCallback(

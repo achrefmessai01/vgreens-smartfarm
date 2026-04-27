@@ -5,6 +5,10 @@ import type {
   Row,
   Column,
 } from '@/types/farm.types';
+import {
+  computeDefaultSensorPositions,
+  type GreenhouseLayout,
+} from '@/lib/sensor-default-positions';
 
 /**
  * PostgreSQL SensorConfig override values for a single device.
@@ -36,7 +40,26 @@ const GRID_SIZE = SENSOR_COLS * SENSOR_ROWS;
 function buildSlotsFromRows(
   rows: InfluxDBRow[],
   sensorConfigs?: Map<string, SensorConfigOverride>,
+  greenhouseLayouts?: GreenhouseLayout[],
 ): PlantSlot[] {
+  // Compute fallback positions from the configured greenhouse layouts so
+  // unconfigured sensors still appear at sensible coordinates on the map.
+  // Override values from sensorConfigs always win.
+  const defaultPositions = (() => {
+    if (!greenhouseLayouts || greenhouseLayouts.length === 0)
+      return new Map<string, { xPosition: number; yPosition: number }>();
+    const deviceGreenhouse = new Map<string, string | undefined | null>();
+    for (const row of rows) {
+      const device = (row.device as string) ?? '';
+      if (!device) continue;
+      const override = sensorConfigs?.get(device);
+      const ghTag =
+        (row.greenhouse as string) ?? (row.chamber as string) ?? undefined;
+      deviceGreenhouse.set(device, override?.greenhouse ?? ghTag ?? null);
+    }
+    return computeDefaultSensorPositions(deviceGreenhouse, greenhouseLayouts);
+  })();
+
   type SlotKey = string;
   type FieldValues = Record<string, { value: number; time: string }>;
   type SlotMeta = {
@@ -76,10 +99,20 @@ function buildSlotsFromRows(
       bySlot.set(key, existing);
     }
 
+    const fallback = device ? defaultPositions.get(device) : undefined;
+    // Treat (0, 0) as a legacy/seed value rather than a deliberate placement
+    // at the greenhouse origin — fall back to the computed default so those
+    // sensors don't pile up in one corner of the map.
+    const isLegacyZero =
+      config?.xPosition === 0 && config?.yPosition === 0;
     const xPos =
-      typeof config?.xPosition === 'number' ? config.xPosition : undefined;
+      typeof config?.xPosition === 'number' && !isLegacyZero
+        ? config.xPosition
+        : fallback?.xPosition;
     const yPos =
-      typeof config?.yPosition === 'number' ? config.yPosition : undefined;
+      typeof config?.yPosition === 'number' && !isLegacyZero
+        ? config.yPosition
+        : fallback?.yPosition;
 
     metaBySlot.set(key, {
       _start: (row._start as string) ?? undefined,
@@ -147,11 +180,12 @@ function buildBayFromSlots(
 export function influxRowsToBays(
   bucketDataRows: { data: Record<string, unknown> }[],
   sensorConfigs?: Map<string, SensorConfigOverride>,
+  greenhouseLayouts?: GreenhouseLayout[],
 ): Bay[] {
   const rows: InfluxDBRow[] = bucketDataRows.map(
     (item) => item.data as InfluxDBRow,
   );
-  const allSlots = buildSlotsFromRows(rows, sensorConfigs);
+  const allSlots = buildSlotsFromRows(rows, sensorConfigs, greenhouseLayouts);
 
   const byChamber = new Map<string, PlantSlot[]>();
   for (const slot of allSlots) {
