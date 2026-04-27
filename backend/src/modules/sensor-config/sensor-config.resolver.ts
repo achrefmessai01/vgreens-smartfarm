@@ -108,10 +108,12 @@ export class SensorConfigResolver {
     const tenant = await this.tenantsService.findOne(tenantId);
     const greenhouse = this.resolveGreenhouseConfig(tenant, greenhouseName);
 
+    // Greenhouse may not be in the tenant's farm layout yet — sensors can be
+    // tagged with legacy InfluxDB identifiers (e.g. "greenhouse_01") that don't
+    // map to a configured greenhouse. Skip bounds validation in that case
+    // rather than blocking the save.
     if (!greenhouse) {
-      throw new BadRequestException(
-        `Greenhouse "${greenhouseName}" is not configured for this tenant`,
-      );
+      return;
     }
 
     if (input.xPosition != null && input.xPosition > greenhouse.xDimension) {
