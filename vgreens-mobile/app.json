@@ -1,13 +1,15 @@
 {
   "expo": {
-    "name": "vGreens",
-    "slug": "vgreens-mobile",
+    "name": "vGreens Lab",
+    "slug": "vgreens-lab",
     "version": "0.1.0",
+    "description": "Smart greenhouse operations — log harvests, monitor crops, and track team activity in real time.",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "scheme": "vgreens",
+    "primaryColor": "#016f7c",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -15,7 +17,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.vgreens.smartfarm"
+      "bundleIdentifier": "com.vgreens.smartfarm",
+      "infoPlist": {
+        "CFBundleDisplayName": "vGreens",
+        "NSCameraUsageDescription": "vGreens uses the camera to capture harvest photos for your batch logs.",
+        "NSPhotoLibraryUsageDescription": "vGreens accesses your photo library so you can attach images to harvest entries."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -30,25 +37,22 @@
       "output": "static",
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-secure-store"
-    ],
+    "plugins": ["expo-router", "expo-secure-store"],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "b231e713-84bd-4bb1-a19e-9d6713c7d4ca"
+        "projectId": "c2287eb3-7ce0-49f3-9455-61cfa074d7fb"
       }
     },
-    "owner": "bangash11",
+    "owner": "vgreens",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/b231e713-84bd-4bb1-a19e-9d6713c7d4ca"
+      "url": "https://u.expo.dev/c2287eb3-7ce0-49f3-9455-61cfa074d7fb"
     }
   }
 }

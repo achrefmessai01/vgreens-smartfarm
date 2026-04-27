@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useSignIn } from '@clerk/clerk-expo';
 
-type Stage = 'email' | 'otp' | 'totp';
+type Stage = 'password' | 'otp' | 'totp';
 
 function describe(status: string | null): string {
   switch (status) {
@@ -23,22 +23,33 @@ function toMessage(err: unknown, fallback: string): string {
   return e.errors?.[0]?.message ?? fallback;
 }
 
+type EmailCodeFactor = { strategy: string; emailAddressId?: string };
+
+function findEmailFactor(
+  factors: EmailCodeFactor[] | null | undefined,
+): EmailCodeFactor | undefined {
+  return factors?.find((f) => f.strategy === 'email_code');
+}
+
 export function useSignInFlow() {
   const { signIn, setActive, isLoaded } = useSignIn();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otpCode, setOtpCode] = useState('');
-  const [stage, setStage] = useState<Stage>('email');
+  const [stage, setStage] = useState<Stage>('password');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  // tracks whether the pending OTP is a second factor (post-password) or first factor
+  const [otpIsSecondFactor, setOtpIsSecondFactor] = useState(false);
 
   const clearError = useCallback(() => setError(''), []);
 
   const reset = useCallback(() => {
     setOtpCode('');
-    setStage('email');
+    setStage('password');
     setError('');
+    setOtpIsSecondFactor(false);
   }, []);
 
   const signInWithPassword = useCallback(async () => {
@@ -47,14 +58,49 @@ export function useSignInFlow() {
     setLoading(true);
     try {
       const result = await signIn.create({ identifier: email, password });
+
       if (result.status === 'complete' && result.createdSessionId) {
         await setActive({ session: result.createdSessionId });
-      } else if (result.status === 'needs_second_factor') {
-        setStage('totp');
-        setError('Enter your authenticator code to complete sign-in.');
-      } else {
-        setError(describe(result.status));
+        return;
       }
+
+      if (result.status === 'needs_second_factor') {
+        // Password accepted — now handle the required 2FA step.
+        const emailFactor = findEmailFactor(
+          result.supportedSecondFactors as EmailCodeFactor[] | undefined,
+        );
+        if (emailFactor?.emailAddressId) {
+          // Send OTP to email as the second factor.
+          await signIn.prepareSecondFactor({
+            strategy: 'email_code',
+            emailAddressId: emailFactor.emailAddressId,
+          });
+          setOtpIsSecondFactor(true);
+          setStage('otp');
+          return;
+        }
+        // Fall back to TOTP authenticator app.
+        setStage('totp');
+        return;
+      }
+
+      if (result.status === 'needs_first_factor') {
+        // Clerk instance requires email OTP before (or instead of) password.
+        const emailFactor = findEmailFactor(
+          result.supportedFirstFactors as EmailCodeFactor[] | undefined,
+        );
+        if (emailFactor?.emailAddressId) {
+          await signIn.prepareFirstFactor({
+            strategy: 'email_code',
+            emailAddressId: emailFactor.emailAddressId,
+          });
+          setOtpIsSecondFactor(false);
+          setStage('otp');
+          return;
+        }
+      }
+
+      setError(describe(result.status));
     } catch (err) {
       setError(toMessage(err, 'Invalid email or password.'));
     } finally {
@@ -62,6 +108,7 @@ export function useSignInFlow() {
     }
   }, [isLoaded, signIn, email, password, setActive]);
 
+  // "Forgot password?" — send email OTP directly without a password.
   const sendEmailCode = useCallback(async () => {
     if (!isLoaded || !signIn || !email.trim()) return;
     setError('');
@@ -71,9 +118,9 @@ export function useSignInFlow() {
         strategy: 'email_code',
         identifier: email.trim(),
       });
-      const factor = result.supportedFirstFactors?.find(
-        (f) => f.strategy === 'email_code',
-      ) as { emailAddressId?: string } | undefined;
+      const factor = findEmailFactor(
+        result.supportedFirstFactors as EmailCodeFactor[] | undefined,
+      );
       if (!factor?.emailAddressId) {
         setError('Email code is not enabled for this account.');
         return;
@@ -82,6 +129,7 @@ export function useSignInFlow() {
         strategy: 'email_code',
         emailAddressId: factor.emailAddressId,
       });
+      setOtpIsSecondFactor(false);
       setStage('otp');
     } catch (err) {
       setError(toMessage(err, 'Could not send email code.'));
@@ -95,10 +143,17 @@ export function useSignInFlow() {
     setError('');
     setLoading(true);
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: 'email_code',
-        code: otpCode.trim(),
-      });
+      // Use the correct Clerk method depending on whether this is 1FA or 2FA.
+      const result = otpIsSecondFactor
+        ? await signIn.attemptSecondFactor({
+            strategy: 'email_code',
+            code: otpCode.trim(),
+          })
+        : await signIn.attemptFirstFactor({
+            strategy: 'email_code',
+            code: otpCode.trim(),
+          });
+
       if (result.status === 'complete' && result.createdSessionId) {
         await setActive({ session: result.createdSessionId });
       } else {
@@ -109,7 +164,7 @@ export function useSignInFlow() {
     } finally {
       setLoading(false);
     }
-  }, [isLoaded, signIn, otpCode, setActive]);
+  }, [isLoaded, signIn, otpCode, otpIsSecondFactor, setActive]);
 
   const verifyTotp = useCallback(async () => {
     if (!isLoaded || !signIn || !otpCode.trim()) return;

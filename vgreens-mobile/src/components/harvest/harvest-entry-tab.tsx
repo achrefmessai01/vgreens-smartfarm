@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -22,11 +22,10 @@ interface HarvestEntryTabProps {
   refreshing: boolean;
   onRefresh: () => void;
   onCreatePress: () => void;
-  onViewBatch: (batch: HarvestItem) => void;
   onEditBatch: (batch: HarvestItem) => void;
   onDeleteBatch: (batch: HarvestItem, entries: HarvestItem[]) => void;
   onLogEntry: (batch: HarvestItem) => void;
-  onViewEntry: (entry: HarvestItem) => void;
+  onEditEntry: (entry: HarvestItem) => void;
   onDeleteEntry: (entry: HarvestItem) => void;
 }
 
@@ -37,19 +36,31 @@ export function HarvestEntryTab({
   refreshing,
   onRefresh,
   onCreatePress,
-  onViewBatch,
   onEditBatch,
   onDeleteBatch,
   onLogEntry,
-  onViewEntry,
+  onEditEntry,
   onDeleteEntry,
 }: HarvestEntryTabProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createHarvestHistoryStyles(colors), [colors]);
+  const [revealedId, setRevealedId] = useState<string | null>(null);
+  const [openBatches, setOpenBatches] = useState<Record<string, boolean>>({});
 
   const groups = useMemo<BatchGroup<HarvestItem>[]>(
     () => groupByBatch(harvests ?? []),
     [harvests],
+  );
+
+  const handleToggleReveal = useCallback(
+    (id: string) => setRevealedId((prev) => (prev === id ? null : id)),
+    [],
+  );
+
+  const handleToggleOpen = useCallback(
+    (key: string) =>
+      setOpenBatches((prev) => ({ ...prev, [key]: prev[key] === false })),
+    [],
   );
 
   if (loading && groups.length === 0) {
@@ -69,7 +80,8 @@ export function HarvestEntryTab({
             Harvest Entry
           </Text>
           <Text style={styles.sub} numberOfLines={1}>
-            {summary.totalHarvests} harvests · {groups.length} batches
+            {summary.totalHarvests} harvests · {groups.length} batches ·{' '}
+            {summary.totalClassA}kg total
           </Text>
         </View>
         <Pressable
@@ -86,6 +98,7 @@ export function HarvestEntryTab({
         data={groups}
         keyExtractor={(g) => g.key}
         contentContainerStyle={styles.list}
+        onScrollBeginDrag={() => setRevealedId(null)}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -108,11 +121,14 @@ export function HarvestEntryTab({
         renderItem={({ item }) => (
           <HarvestBatchGroup
             group={item}
-            onViewBatch={onViewBatch}
+            open={openBatches[item.key] !== false}
+            onToggleOpen={() => handleToggleOpen(item.key)}
+            revealedId={revealedId}
+            onToggleReveal={handleToggleReveal}
             onEditBatch={onEditBatch}
             onDeleteBatch={onDeleteBatch}
             onLogEntry={onLogEntry}
-            onViewEntry={onViewEntry}
+            onEditEntry={onEditEntry}
             onDeleteEntry={onDeleteEntry}
           />
         )}

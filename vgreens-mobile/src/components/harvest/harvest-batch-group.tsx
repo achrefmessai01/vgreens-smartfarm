@@ -1,47 +1,59 @@
-import { useMemo, useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
-import {
-  ChevronDown,
-  ChevronUp,
-  Eye,
-  Pencil,
-  Plus,
-  Trash2,
-} from 'lucide-react-native';
+import { useEffect, useMemo, useRef } from 'react';
+import { View, Text, Pressable, Animated, Easing } from 'react-native';
+import { Pencil, Trash2 } from 'lucide-react-native';
 import type { HarvestItem } from '@/lib/hooks/use-harvest-page';
-import { getGreenhouseLabel } from '@/lib/harvest-utils';
 import {
   isAutoDraftPlaceholder,
   type BatchGroup,
 } from '@/lib/harvest-grouping';
 import { useAppTheme } from '@/lib/theme-preference';
-import { HarvestEntryCard } from './harvest-entry-card';
-import { createBatchGroupStyles } from './harvest-batch-group.styles';
+import { HarvestBatchSummary } from './harvest-batch-summary';
+import { HarvestBatchLogs } from './harvest-batch-logs';
+import {
+  REVEAL_WIDTH,
+  createBatchGroupStyles,
+} from './harvest-batch-group.styles';
 
 interface HarvestBatchGroupProps {
   group: BatchGroup<HarvestItem>;
-  defaultOpen?: boolean;
-  onViewBatch: (batch: HarvestItem) => void;
+  open: boolean;
+  onToggleOpen: () => void;
+  revealedId: string | null;
+  onToggleReveal: (id: string) => void;
   onEditBatch: (batch: HarvestItem) => void;
   onDeleteBatch: (batch: HarvestItem, entries: HarvestItem[]) => void;
   onLogEntry: (batch: HarvestItem) => void;
-  onViewEntry: (entry: HarvestItem) => void;
+  onEditEntry: (entry: HarvestItem) => void;
   onDeleteEntry: (entry: HarvestItem) => void;
 }
 
 export function HarvestBatchGroup({
   group,
-  defaultOpen = true,
-  onViewBatch,
+  open,
+  onToggleOpen,
+  revealedId,
+  onToggleReveal,
   onEditBatch,
   onDeleteBatch,
   onLogEntry,
-  onViewEntry,
+  onEditEntry,
   onDeleteEntry,
 }: HarvestBatchGroupProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createBatchGroupStyles(colors), [colors]);
-  const [open, setOpen] = useState(defaultOpen);
+
+  const batchRevealKey = `batch:${group.root.id}`;
+  const revealed = revealedId === batchRevealKey;
+  const translateX = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(translateX, {
+      toValue: revealed ? -REVEAL_WIDTH : 0,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [revealed, translateX]);
 
   const visibleEntries = useMemo(
     () =>
@@ -51,88 +63,65 @@ export function HarvestBatchGroup({
     [group.entries],
   );
 
+  const totals = useMemo(() => {
+    const a = visibleEntries.reduce((s, e) => s + e.classA, 0);
+    const w = visibleEntries.reduce((s, e) => s + e.waste, 0);
+    const pct = a + w > 0 ? Math.round((a / (a + w)) * 100) : 0;
+    return { classA: Math.round(a), waste: Math.round(w), marketable: pct };
+  }, [visibleEntries]);
+
+  const days = useMemo(() => {
+    const d = new Date(group.root.plantingDate);
+    if (Number.isNaN(d.getTime())) return 0;
+    return Math.max(0, Math.floor((Date.now() - d.getTime()) / 86_400_000));
+  }, [group.root.plantingDate]);
+
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
+    <View style={styles.outer}>
+      <View style={styles.headerClip}>
+        <View style={styles.actionsStrip}>
           <Pressable
-            style={styles.chevronBtn}
-            onPress={() => setOpen((v) => !v)}
-            hitSlop={8}
+            style={[styles.actionBtn, styles.actionEdit]}
+            onPress={() => onEditBatch(group.root)}
+            accessibilityLabel="Edit batch"
           >
-            {open ? (
-              <ChevronUp size={18} color={colors.mutedForeground} />
-            ) : (
-              <ChevronDown size={18} color={colors.mutedForeground} />
-            )}
+            <Pencil size={18} color="#10b981" />
+            <Text style={styles.actionEditText}>Edit</Text>
           </Pressable>
-          <Text style={styles.title} numberOfLines={1}>
-            {group.root.batch}
-          </Text>
-          <View style={styles.actionsRow}>
-            <Pressable
-              style={[styles.iconBtn, styles.iconBtnMuted]}
-              onPress={() => onViewBatch(group.root)}
-              accessibilityLabel="View batch"
-            >
-              <Eye size={16} color={colors.foreground} />
-            </Pressable>
-            <Pressable
-              style={[styles.iconBtn, styles.iconBtnMuted]}
-              onPress={() => onEditBatch(group.root)}
-              accessibilityLabel="Edit batch"
-            >
-              <Pencil size={16} color={colors.foreground} />
-            </Pressable>
-            <Pressable
-              style={[styles.iconBtn, styles.iconBtnMuted]}
-              onPress={() => onDeleteBatch(group.root, visibleEntries)}
-              accessibilityLabel="Delete batch"
-            >
-              <Trash2 size={16} color={colors.destructive} />
-            </Pressable>
-            <Pressable
-              style={[styles.iconBtn, styles.iconBtnPrimary]}
-              onPress={() => onLogEntry(group.root)}
-              accessibilityLabel="Log entry"
-            >
-              <Plus size={16} color={colors.primary} />
-            </Pressable>
-          </View>
+          <Pressable
+            style={[styles.actionBtn, styles.actionDelete]}
+            onPress={() => onDeleteBatch(group.root, visibleEntries)}
+            accessibilityLabel="Delete batch"
+          >
+            <Trash2 size={18} color="#ef4444" />
+            <Text style={styles.actionDeleteText}>Delete</Text>
+          </Pressable>
         </View>
 
-        <View style={styles.metaRow}>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>
-              {visibleEntries.length} LOGGED
-            </Text>
-          </View>
-          <Text style={styles.metaText}>
-            {getGreenhouseLabel(group.root.greenhouse)}
-          </Text>
-        </View>
+        <Animated.View
+          style={[styles.headerWrap, { transform: [{ translateX }] }]}
+        >
+          <HarvestBatchSummary
+            batch={group.root}
+            open={open}
+            onToggleOpen={onToggleOpen}
+            onToggleMenu={() => onToggleReveal(batchRevealKey)}
+            totals={totals}
+            days={days}
+          />
+        </Animated.View>
       </View>
 
       {open ? (
-        <View style={styles.body}>
-          {visibleEntries.length === 0 ? (
-            <View style={styles.emptyBody}>
-              <Text style={styles.emptyText}>No entries yet</Text>
-              <Text style={styles.emptyHint}>
-                Tap the + icon above to log the first harvest entry.
-              </Text>
-            </View>
-          ) : (
-            visibleEntries.map((entry) => (
-              <HarvestEntryCard
-                key={entry.id}
-                entry={entry}
-                onView={() => onViewEntry(entry)}
-                onDelete={() => onDeleteEntry(entry)}
-              />
-            ))
-          )}
-        </View>
+        <HarvestBatchLogs
+          batch={group.root}
+          entries={visibleEntries}
+          revealedId={revealedId}
+          onToggleReveal={onToggleReveal}
+          onLogEntry={onLogEntry}
+          onEditEntry={onEditEntry}
+          onDeleteEntry={onDeleteEntry}
+        />
       ) : null}
     </View>
   );

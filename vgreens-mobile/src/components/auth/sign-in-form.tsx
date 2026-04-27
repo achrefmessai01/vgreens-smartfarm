@@ -32,6 +32,7 @@ export function SignInForm({ onRequestAccess, version }: SignInFormProps) {
   const isOtp = flow.stage === 'otp';
   const isTotp = flow.stage === 'totp';
   const isCode = isOtp || isTotp;
+  const isPassword = flow.stage === 'password';
 
   const submit = isOtp
     ? flow.verifyEmailCode
@@ -57,7 +58,7 @@ export function SignInForm({ onRequestAccess, version }: SignInFormProps) {
         {isCode ? 'Enter the code we sent to your email.' : 'Access your farm dashboard'}
       </Text>
 
-      {!isCode ? (
+      {isPassword ? (
         <>
           <View style={styles.oauthRow}>
             <OAuthButton provider="google" label="Google" disabled={flow.loading} />

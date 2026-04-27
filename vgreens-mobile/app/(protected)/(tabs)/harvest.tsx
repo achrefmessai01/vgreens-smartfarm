@@ -8,7 +8,6 @@ import {
   HarvestEntryTab,
   HarvestFormModal,
   HarvestTabSwitch,
-  HarvestTopStrip,
   type HarvestSubTab,
 } from '@/components/harvest';
 import { useCreateBatchHarvest } from '@/lib/hooks/use-create-batch-harvest';
@@ -58,8 +57,7 @@ export default function HarvestScreen() {
   const deleteTitle = page.isBatchDelete ? 'Delete batch?' : 'Delete harvest?';
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
-      <HarvestTopStrip hasNotifications={(page.summary.totalHarvests ?? 0) > 0} />
+    <SafeAreaView style={styles.screen} edges={['top']}>
       <HarvestTabSwitch value={subTab} onChange={setSubTab} />
 
       <View style={styles.body}>
@@ -73,11 +71,10 @@ export default function HarvestScreen() {
             refreshing={refreshing}
             onRefresh={onRefresh}
             onCreatePress={() => page.setCreateOpen(true)}
-            onViewBatch={page.handleBatchView}
             onEditBatch={page.handleBatchEdit}
             onDeleteBatch={page.handleBatchDeleteRequest}
             onLogEntry={page.handleLogEntry}
-            onViewEntry={page.handleCompleteRequest}
+            onEditEntry={page.handleCompleteRequest}
             onDeleteEntry={page.handleDeleteRequest}
           />
         )}
