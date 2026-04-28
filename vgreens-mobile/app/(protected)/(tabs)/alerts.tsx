@@ -30,7 +30,7 @@ export default function AlertsScreen() {
 
   if (page.loading && page.alerts.length === 0 && !page.error) {
     return (
-      <SafeAreaView style={screenStyle} edges={['top', 'bottom']}>
+      <SafeAreaView style={screenStyle} edges={['top']}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -39,7 +39,7 @@ export default function AlertsScreen() {
   }
 
   return (
-    <SafeAreaView style={screenStyle} edges={['top', 'bottom']}>
+    <SafeAreaView style={screenStyle} edges={['top']}>
       <AlertsFeed
         alerts={page.alerts}
         filter={page.filter}

@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import type { Alert } from '@/generated/graphql';
 import {
@@ -62,6 +63,7 @@ export function AlertDetailModal({
   onDelete,
 }: AlertDetailModalProps) {
   const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createAlertDetailStyles(colors), [colors]);
   const flags = useMemo(() => getAlertActionFlags(alert), [alert]);
 
@@ -107,7 +109,12 @@ export function AlertDetailModal({
             ))}
           </ScrollView>
 
-          <View style={styles.footer}>
+          <View
+            style={[
+              styles.footer,
+              { paddingBottom: 14 + Math.max(insets.bottom, 0) },
+            ]}
+          >
             {flags.canAcknowledge ? (
               <Pressable
                 style={[styles.btn, styles.btnPrimary]}

@@ -61,7 +61,7 @@ export class ClerkAuthGuard implements CanActivate {
           ? [
               process.env.FRONTEND_APP_URL,
               'http://localhost:8081',
-              'http://192.168.1.9:8081',
+              'http://192.168.1.11:8081',
             ]
           : undefined,
       });
