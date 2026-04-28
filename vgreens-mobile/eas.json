@@ -1,0 +1,47 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_YXBwYXJlbnQtc2NvcnBpb24tNDMuY2xlcmsuYWNjb3VudHMuZGV2JA",
+        "EXPO_PUBLIC_GRAPHQL_ENDPOINT": "http://192.168.1.9:3001/graphql",
+        "EXPO_PUBLIC_API_URL": "http://192.168.1.9:3001"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      },
+      "env": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_YXBwYXJlbnQtc2NvcnBpb24tNDMuY2xlcmsuYWNjb3VudHMuZGV2JA",
+        "EXPO_PUBLIC_GRAPHQL_ENDPOINT": "https://vgreens-backend.fly.dev/graphql",
+        "EXPO_PUBLIC_API_URL": "https://vgreens-backend.fly.dev"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_YXBwYXJlbnQtc2NvcnBpb24tNDMuY2xlcmsuYWNjb3VudHMuZGV2JA",
+        "EXPO_PUBLIC_GRAPHQL_ENDPOINT": "https://vgreens-backend.fly.dev/graphql",
+        "EXPO_PUBLIC_API_URL": "https://vgreens-backend.fly.dev"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

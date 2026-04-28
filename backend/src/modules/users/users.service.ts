@@ -176,8 +176,14 @@ export class UsersService extends BaseService<User> {
       throw new NotFoundException('User not found');
     }
 
-    // Role change restrictions
-    if (updateUserInput.role) {
+    // Role change restrictions — only enforce when the role is actually
+    // changing. Clients commonly send the user's existing role on every
+    // update (firstName/lastName/etc.), and we shouldn't block those edits
+    // unless the role itself differs.
+    const isRoleChanging =
+      updateUserInput.role != null && updateUserInput.role !== user.role;
+
+    if (isRoleChanging) {
       // Only vGreens admins can change roles
       if (currentUser.role !== UserRole.VGREENS_ADMIN) {
         throw new ForbiddenException(
@@ -186,7 +192,7 @@ export class UsersService extends BaseService<User> {
       }
 
       // Prevent changing own role
-      if (currentUser.id === id && updateUserInput.role !== currentUser.role) {
+      if (currentUser.id === id) {
         throw new ForbiddenException('Cannot change your own role');
       }
 

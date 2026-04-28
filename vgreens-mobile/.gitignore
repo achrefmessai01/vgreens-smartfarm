@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native builds
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Generated
+# NOTE: we intentionally commit src/generated/graphql.tsx so EAS Build
+# (which clones a fresh working tree) can bundle the app without running
+# codegen against the live backend. Re-run `npm run codegen` after any
+# GraphQL document or schema change.
+
+# Debug
+npm-debug.*
+*.log
+
+# macOS
+.DS_Store
+*.pem
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
