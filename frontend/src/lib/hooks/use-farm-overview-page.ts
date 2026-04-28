@@ -371,14 +371,14 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       }
     }
 
-    // In combined view show all fields; in single greenhouse views, restrict to key climate sensors
-    if (activeGreenhouseTab === 0) {
-      return allOptions;
-    }
+    // Restrict to the four key climate sensors (Humidity / Temperature / VPD /
+    // PAR) in every view. The Combined view previously surfaced every bucket
+    // field — including diagnostic ones like Battery, RSSI, Missing — which
+    // cluttered the per-greenhouse summary cards.
     return allOptions.filter((opt) =>
       ALLOWED_SINGLE_GREENHOUSE_PARAMETERS.includes(opt.value as ParameterType),
     );
-  }, [bucketFields, t, activeGreenhouseTab]);
+  }, [bucketFields, t]);
 
   const effectiveParameter =
     selectedParameter && bucketFields.includes(selectedParameter)

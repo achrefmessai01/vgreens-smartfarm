@@ -58,7 +58,11 @@ export class ClerkAuthGuard implements CanActivate {
       const session = await clerkClient.verifyToken(token, {
         // Extract the instance ID from the publishable key (format: pk_test_<instance>_<key>)
         authorizedParties: process.env.FRONTEND_APP_URL
-          ? [process.env.FRONTEND_APP_URL] // Add local ip like this: 'http://192.168.0.132:3000' if testing on a mobile device
+          ? [
+              process.env.FRONTEND_APP_URL,
+              'http://localhost:8081',
+              'http://192.168.1.11:8081',
+            ]
           : undefined,
       });
       request.clerkSession = session;

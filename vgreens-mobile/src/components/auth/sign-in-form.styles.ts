@@ -1,0 +1,112 @@
+import { StyleSheet } from 'react-native';
+import { Colors } from '@/constants/theme';
+
+type SemanticColors = (typeof Colors)[keyof typeof Colors];
+
+export function createSignInFormStyles(colors: SemanticColors) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      paddingHorizontal: 22,
+      paddingTop: 16,
+      paddingBottom: 32,
+      gap: 14,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      shadowColor: '#000',
+      shadowOpacity: 0.18,
+      shadowRadius: 24,
+      shadowOffset: { width: 0, height: -4 },
+      elevation: 16,
+    },
+    handle: {
+      alignSelf: 'center',
+      width: 40,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.border,
+      marginBottom: 4,
+    },
+    heading: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: colors.foreground,
+      letterSpacing: -0.4,
+    },
+    sub: { fontSize: 13, color: colors.mutedForeground, marginTop: -6 },
+    oauthRow: { flexDirection: 'row', gap: 10, marginTop: 2 },
+    dividerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginVertical: 2,
+    },
+    dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
+    dividerText: {
+      fontSize: 10,
+      fontWeight: '800',
+      color: colors.mutedForeground,
+      letterSpacing: 1.2,
+    },
+    rememberRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    rememberLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    checkbox: {
+      width: 20,
+      height: 20,
+      borderRadius: 6,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.card,
+    },
+    checkboxActive: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primary,
+    },
+    rememberText: { fontSize: 13, color: colors.foreground, fontWeight: '600' },
+    forgot: { fontSize: 13, color: colors.primary, fontWeight: '700' },
+    cta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      height: 52,
+      borderRadius: 14,
+      backgroundColor: colors.primary,
+      shadowColor: colors.primary,
+      shadowOpacity: 0.45,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 8,
+      marginTop: 2,
+    },
+    ctaDisabled: { opacity: 0.5, shadowOpacity: 0.1 },
+    ctaText: {
+      fontSize: 16,
+      fontWeight: '800',
+      color: colors.primaryForeground,
+      letterSpacing: 0.2,
+    },
+    helperCenter: {
+      textAlign: 'center',
+      fontSize: 13,
+      color: colors.mutedForeground,
+    },
+    helperLink: { color: colors.primary, fontWeight: '700' },
+    footer: {
+      textAlign: 'center',
+      fontSize: 11,
+      color: colors.mutedForeground,
+      marginTop: 2,
+      letterSpacing: 0.2,
+    },
+    errorText: { fontSize: 13, color: colors.destructive, textAlign: 'center' },
+  });
+}

@@ -1,0 +1,58 @@
+import { StyleSheet } from 'react-native';
+
+export const heroStyles = StyleSheet.create({
+  wrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 38,
+    paddingBottom: 32,
+    gap: 20,
+    overflow: 'hidden',
+    minHeight: 250,
+  },
+  blob1: {
+    position: 'absolute',
+    width: 230,
+    height: 230,
+    borderRadius: 115,
+    top: -75,
+    right: -55,
+    opacity: 0.11,
+  },
+  blob2: {
+    position: 'absolute',
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    bottom: -35,
+    left: -45,
+    opacity: 0.08,
+  },
+  logoOuter: {
+    width: 96,
+    height: 96,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glowRing: {
+    position: 'absolute',
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+  },
+  logoCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#016f7c',
+    shadowOpacity: 0.6,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 10,
+  },
+  textBlock: { alignItems: 'center', gap: 5 },
+  title: { fontSize: 34, fontWeight: '800', letterSpacing: -0.5 },
+  tagline: { fontSize: 13.5, textAlign: 'center' },
+});

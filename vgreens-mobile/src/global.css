@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Semantic tokens for NativeWind. Keep in sync with `src/constants/theme.ts`.
+ * Tab chrome uses `useAppTheme().colors` directly; screen content uses these
+ * CSS variables so `className="bg-background"` etc. follow light/dark.
+ */
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #1a1a1a;
+    --card: #ffffff;
+    --card-foreground: #1a1a1a;
+    --secondary: #f5f5f5;
+    --secondary-foreground: #333333;
+    --muted: #f5f5f5;
+    --muted-foreground: #737373;
+    --border: #e5e5e5;
+    --input: #e5e5e5;
+    --ring: #016f7c;
+  }
+
+  .dark {
+    --background: #0a1419;
+    --foreground: #e8f0f2;
+    --card: #111d24;
+    --card-foreground: #e8f0f2;
+    --secondary: #1a2c32;
+    --secondary-foreground: #d1e3e8;
+    --muted: #162328;
+    --muted-foreground: #8ba5ad;
+    --border: #1f3640;
+    --input: #1a2c32;
+    --ring: #016f7c;
+  }
+}
