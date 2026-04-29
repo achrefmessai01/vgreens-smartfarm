@@ -5,6 +5,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { BaseEntity } from '@common/entities';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
@@ -14,6 +15,14 @@ import { Tenant } from '@modules/tenants/entities/tenant.entity';
 
 @ObjectType()
 @Entity('alerts')
+// Composite indexes covering the hot query patterns:
+//   - The list view: WHERE tenantId = ? ORDER BY timestamp DESC
+//   - Status filters: WHERE tenantId = ? AND status = ?
+//   - Open-alert lookups by sensor (used by the alert generation cron):
+//     WHERE tenantId = ? AND sensorName = ? AND status = 'OPEN'
+@Index('idx_alerts_tenant_timestamp', ['tenantId', 'timestamp'])
+@Index('idx_alerts_tenant_status', ['tenantId', 'status'])
+@Index('idx_alerts_tenant_sensor_status', ['tenantId', 'sensorName', 'status'])
 export class Alert extends BaseEntity {
   @Field(() => ID)
   id: string;

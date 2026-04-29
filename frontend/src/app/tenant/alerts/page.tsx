@@ -23,7 +23,10 @@ export default function AlertsPage() {
   const users = usersData?.users ?? [];
   const page = useAlertsPage();
 
-  if (page.loading && page.alerts.length === 0) {
+  // Only show the full-page skeleton on the very first load. Subsequent
+  // refetches (search, filter changes, polling) keep the previous data on
+  // screen and rely on the in-table skeleton via `tableLoading` below.
+  if (page.firstLoad) {
     return (
       <div className="space-y-6">
         <ContentSkeleton showHeader lines={0} className="min-h-0 py-0" />

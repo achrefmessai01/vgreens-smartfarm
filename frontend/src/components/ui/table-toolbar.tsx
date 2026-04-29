@@ -20,6 +20,8 @@ export interface TableToolbarProps {
   searchConfig?: { placeholder: string };
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  /** Fires on Enter / blur — see TableSearch.onCommit. */
+  onSearchCommit?: (value: string) => void;
   filterConfig?: TableFilterConfig;
   filterConfigs?: TableFilterConfig[];
   dateRangeConfig?: DateRangeConfig;
@@ -34,6 +36,7 @@ export function TableToolbar({
   searchConfig,
   searchQuery,
   onSearchChange,
+  onSearchCommit,
   filterConfig,
   filterConfigs,
   dateRangeConfig,
@@ -59,6 +62,7 @@ export function TableToolbar({
               placeholder={searchConfig.placeholder}
               value={searchQuery}
               onChange={onSearchChange}
+              onCommit={onSearchCommit}
             />
           </div>
         )}

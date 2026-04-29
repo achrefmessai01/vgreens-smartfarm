@@ -3,6 +3,7 @@
 import * as React from 'react';
 import {
   HarvestStatus,
+  HarvestsDocument,
   useCreateHarvestMutation,
   type CreateHarvestMutation,
 } from '@/generated/graphql';
@@ -91,6 +92,10 @@ export function useCreateBatchForm({
               status: HarvestStatus.Draft,
             },
           },
+          // Re-fetch the harvest list after creating so the table reflects the
+          // new row immediately without a manual page refresh.
+          refetchQueries: [{ query: HarvestsDocument }],
+          awaitRefetchQueries: true,
         });
         if (data?.createHarvest) {
           reset();
