@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertStatus } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
-import { Pencil, Trash2 } from 'lucide-react';
+import { BadgeCheck, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
 
 /**
  * Alert table action logic and button rendering
@@ -37,9 +37,7 @@ export const renderPrimaryActions = (
   if (!canAcknowledge && !canResolve) return null;
 
   return (
-    <div
-      className={cn('flex gap-2', stacked ? 'flex-col sm:flex-row' : 'flex-1')}
-    >
+    <div className={cn('flex gap-2', stacked && 'flex-col sm:flex-row')}>
       {canAcknowledge && (
         <Button
           variant="outline"
@@ -49,8 +47,12 @@ export const renderPrimaryActions = (
             onAcknowledge(alert);
           }}
           disabled={isLoading}
-          className={cn('h-8 gap-1.5', stacked ? 'w-full sm:w-auto' : 'flex-1')}
+          className={cn(
+            'h-8 gap-1.5 border-amber-500/60 text-amber-600 hover:bg-amber-500/10 dark:text-amber-300',
+            stacked && 'w-full sm:w-auto',
+          )}
         >
+          <BadgeCheck className="h-4 w-4" />
           {t.pages.alerts.acknowledge}
         </Button>
       )}
@@ -63,8 +65,9 @@ export const renderPrimaryActions = (
             onResolve(alert);
           }}
           disabled={isLoading}
-          className={cn('h-8', stacked ? 'w-full sm:w-auto' : 'flex-1')}
+          className={cn('h-8 gap-1.5 px-3', stacked && 'w-full sm:w-auto')}
         >
+          <CheckCircle2 className="h-4 w-4" />
           {t.pages.alerts.resolve}
         </Button>
       )}

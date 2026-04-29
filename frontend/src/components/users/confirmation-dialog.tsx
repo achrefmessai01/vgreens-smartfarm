@@ -64,7 +64,7 @@ export function ConfirmationDialog({
 
         {children && <div className="py-4">{children}</div>}
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-3">
           <Button
             variant="outline"
             onClick={handleCancel}

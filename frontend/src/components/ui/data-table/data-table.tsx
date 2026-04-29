@@ -45,6 +45,12 @@ export interface DataTableProps<T> {
   };
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  /**
+   * Optional commit handler. When set, the search input fires this on Enter
+   * or blur (in addition to onSearchChange firing on every keystroke). Use
+   * this when committing the search triggers an expensive network refetch.
+   */
+  onSearchCommit?: (value: string) => void;
   filterConfig?: FilterConfigOption;
   filterConfigs?: FilterConfigOption[];
   dateRangeConfig?: DateRangeConfig;
@@ -79,6 +85,7 @@ export function DataTable<T extends { id: string | number }>({
   searchConfig,
   searchValue,
   onSearchChange,
+  onSearchCommit,
   filterConfig,
   filterConfigs,
   dateRangeConfig,
@@ -221,6 +228,7 @@ export function DataTable<T extends { id: string | number }>({
           }
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          onSearchCommit={onSearchCommit}
           filterConfig={filterConfig}
           filterConfigs={filterConfigs}
           dateRangeConfig={dateRangeConfig}

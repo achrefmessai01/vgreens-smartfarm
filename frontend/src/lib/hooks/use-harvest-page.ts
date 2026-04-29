@@ -7,6 +7,7 @@ import type { SidebarMode } from '@/lib/hooks/use-batch-sidebar';
 import { useDeleteHarvest } from '@/lib/hooks/use-delete-harvest';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { computeSummary, harvestToBatchDetails } from '@/lib/harvest-utils';
+import { isAutoDraftPlaceholder } from '@/components/harvest/table/harvest-table-utils';
 import { useHarvestsQuery, type HarvestsQuery } from '@/generated/graphql';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
@@ -17,8 +18,14 @@ export function useHarvestPage() {
   });
 
   const harvests = data?.harvests;
+  // Exclude the auto-draft placeholder rows from the summary count. Each new
+  // batch creates an empty draft entry in the DB; counting it would
+  // overstate the harvest total by 1 per batch.
   const summary: HarvestSummary = React.useMemo(
-    () => computeSummary(harvests || []),
+    () =>
+      computeSummary(
+        (harvests || []).filter((h) => !isAutoDraftPlaceholder(h)),
+      ),
     [harvests],
   );
 

@@ -58,11 +58,13 @@ export const useAlertTableRow = (actionHandlers: ActionHandlers) => {
           {formatUser(alert.resolvedBy)}
         </TableCell>
         <TableCell className={`text-right ${cellClassName}`.trim()}>
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-3">
             {renderPrimaryActions(alert, actionHandlers, t)}
-            {hasSecondaryActions
-              ? renderSecondaryActions(alert, actionHandlers)
-              : null}
+            {hasSecondaryActions ? (
+              <div className="flex items-center gap-1.5">
+                {renderSecondaryActions(alert, actionHandlers)}
+              </div>
+            ) : null}
           </div>
         </TableCell>
       </>
