@@ -9,6 +9,7 @@ import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features';
 import { cn } from '@/lib/utils';
 import { useClerk } from '@clerk/nextjs';
+import { useApolloClient } from '@apollo/client/react';
 import {
   AlertTriangle,
   Apple,
@@ -34,6 +35,12 @@ interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   featureKey?: string; // Optional feature key to check if item should be shown
+  /**
+   * Optional list of allowed roles. When set, the nav item is only rendered
+   * if the current user's role is in this list. Used to hide pages like
+   * "User management" from regular tenant users.
+   */
+  allowedRoles?: UserRole[];
 }
 
 interface SidebarProps {
@@ -53,6 +60,7 @@ export function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useClerk();
+  const apolloClient = useApolloClient();
   const [internalIsCollapsed, setInternalIsCollapsed] = React.useState(false);
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const { theme, setTheme } = useTheme();
@@ -61,19 +69,21 @@ export function Sidebar({
   const { user: currentUser, role, loading: userLoading } = useCurrentUser();
   const { hasFeature, loading: featuresLoading } = useTenantFeatures();
 
-  // Handle logout
+  // Handle logout — clear the Apollo cache before sign-out so the next user
+  // who logs in on the same browser doesn't briefly see the previous user's
+  // data while their own queries are in flight.
   const handleLogout = React.useCallback(async () => {
     try {
+      await apolloClient.clearStore();
       await signOut();
       router.push('/login');
-      // Call custom onLogout if provided
       if (onLogout) {
         onLogout();
       }
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  }, [signOut, router, onLogout]);
+  }, [apolloClient, signOut, router, onLogout]);
 
   // Use current user if available, otherwise fall back to prop
   const user = currentUser || propUser;
@@ -158,7 +168,9 @@ export function Sidebar({
       label: t.navigation.users,
       href: '/tenant/users',
       icon: Users,
-      featureKey: 'user_management', // Always show user management
+      featureKey: 'user_management',
+      // Regular tenant users shouldn't be able to manage other users.
+      allowedRoles: [UserRole.VgreensAdmin, UserRole.TenantAdmin],
     },
     {
       label: t.navigation.warnings,
@@ -186,13 +198,15 @@ export function Sidebar({
     },
   ];
 
-  // Filter navigation items based on enabled features
+  // Filter navigation items based on enabled features and allowed roles.
   const tenantNavItems: NavItem[] = allTenantNavItems.filter((item) => {
-    // Always show items without featureKey or if feature is enabled
+    // Role gate runs first — admins can see everything but tenant users only
+    // see items their role is explicitly allowed to access.
+    if (item.allowedRoles && role && !item.allowedRoles.includes(role)) {
+      return false;
+    }
     if (!item.featureKey) return true;
-    // For admin users, show all items
     if (isVGreensAdmin) return true;
-    // For tenant users, check if feature is enabled
     return hasFeature(item.featureKey);
   });
 

@@ -2,6 +2,7 @@
 
 import {
   HarvestStatus,
+  HarvestsDocument,
   useCreateHarvestMutation,
   useDeleteHarvestImageMutation,
   useUpdateHarvestMutation,
@@ -115,6 +116,13 @@ export function useBatchSidebar({
   const handleSave = React.useCallback(async () => {
     if (!harvestId || !currentData) return;
     const brix = currentData.brixMeasurements;
+    // Re-fetch the harvest list after every save so the entry tab updates
+    // immediately. awaitRefetchQueries makes the mutation promise resolve only
+    // after the refetch lands, so onCompleted fires against fresh data.
+    const refetchOptions = {
+      refetchQueries: [{ query: HarvestsDocument }],
+      awaitRefetchQueries: true,
+    };
     try {
       if (mode === 'create') {
         await createHarvest({
@@ -144,6 +152,7 @@ export function useBatchSidebar({
               status: HarvestStatus.Completed,
             },
           },
+          ...refetchOptions,
         });
       } else {
         await updateHarvest({
@@ -161,6 +170,7 @@ export function useBatchSidebar({
               status: currentData.status,
             },
           },
+          ...refetchOptions,
         });
       }
       onCompleted?.();

@@ -65,6 +65,42 @@ export function AlertTable({
     [alerts],
   );
 
+  // Local search state buffers keystrokes. The parent filter (which triggers
+  // a network refetch) only updates after a short debounce of inactivity OR
+  // when the user explicitly commits via Enter / blur. This gives the
+  // "search-as-you-type" feel without firing one query per keystroke.
+  const SEARCH_DEBOUNCE_MS = 350;
+  const [searchDraft, setSearchDraft] = React.useState(filter.search ?? '');
+
+  // Re-sync the input when the parent filter changes from elsewhere (e.g.
+  // chip removal) — but skip when the user is mid-typing.
+  const lastCommittedRef = React.useRef(filter.search ?? '');
+  React.useEffect(() => {
+    const incoming = filter.search ?? '';
+    if (incoming !== lastCommittedRef.current) {
+      lastCommittedRef.current = incoming;
+      setSearchDraft(incoming);
+    }
+  }, [filter.search]);
+
+  const commitSearch = React.useCallback(
+    (value: string) => {
+      const next = value.trim();
+      if (next === (filter.search ?? '')) return;
+      lastCommittedRef.current = next;
+      onFilterChange({ search: next || undefined });
+    },
+    [filter.search, onFilterChange],
+  );
+
+  // Debounced commit: schedule a commit after the user stops typing.
+  React.useEffect(() => {
+    const handle = window.setTimeout(() => {
+      commitSearch(searchDraft);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => window.clearTimeout(handle);
+  }, [searchDraft, commitSearch]);
+
   const alertsT = t.pages.alerts as typeof t.pages.alerts & {
     searchPlaceholder?: string;
     dateRangePlaceholder?: string;
@@ -82,8 +118,9 @@ export function AlertTable({
           alertsT.searchPlaceholder ??
           'Search by sensor name, acknowledged by, resolved by...',
       }}
-      searchValue={filter.search ?? ''}
-      onSearchChange={(value) => onFilterChange({ search: value || undefined })}
+      searchValue={searchDraft}
+      onSearchChange={(value) => setSearchDraft(value)}
+      onSearchCommit={commitSearch}
       filterConfigs={filterConfigs}
       dateRangeConfig={{
         dateFrom: filter.dateFrom ? new Date(filter.dateFrom) : null,

@@ -24,9 +24,19 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
     () => toAlertsFilterVariables(filter),
     [filter],
   );
-  const { data, loading, refetch } = useAlertsQuery({
+  const { data, previousData, loading, refetch } = useAlertsQuery({
     variables: variables as { filter?: AlertsFilterInput },
+    notifyOnNetworkStatusChange: true,
   });
+
+  // `firstLoad` is true only while the very first request is in flight (no
+  // data ever received yet). Subsequent refetches — caused by filter changes
+  // or polling — keep the previous data on screen via Apollo's `previousData`,
+  // so the consumer can render a smaller in-table loader instead of the
+  // full-page skeleton it would otherwise show whenever `data?.alerts` is
+  // briefly undefined.
+  const hasEverLoaded = data !== undefined || previousData !== undefined;
+  const firstLoad = loading && !hasEverLoaded;
   const [createAlert] = useCreateAlertMutation();
   const [updateAlert] = useUpdateAlertMutation();
   const [deleteAlert] = useDeleteAlertMutation();
@@ -35,7 +45,9 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
 
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const alerts = (data?.alerts || []) as Alert[];
+  // Prefer fresh data; fall back to the previous result while a refetch is
+  // in flight so the table doesn't flicker to empty + loading state.
+  const alerts = ((data?.alerts ?? previousData?.alerts) || []) as Alert[];
   const openAlertsCount = alerts.filter((a) => a.status === 'OPEN').length;
 
   const handleCreate = async (formData: AlertFormData) => {
@@ -128,6 +140,7 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
   return {
     alerts,
     loading,
+    firstLoad,
     isLoading,
     openAlertsCount,
     handleCreate,
