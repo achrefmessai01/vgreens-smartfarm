@@ -29,21 +29,34 @@ export const createApolloClient = (
 
   const authLink = new ApolloLink((operation, forward) => {
     return new Observable<FetchResult>((observer) => {
+      // Track the inner forward() subscription + a cancellation flag so that
+      // when an Apollo subscriber unsubscribes (e.g. component unmounts while
+      // the token request is still in flight) we don't leak a downstream
+      // network request that nobody is reading from.
+      let innerSub: { unsubscribe: () => void } | undefined;
+      let cancelled = false;
+
       getToken()
         .then((token) => {
+          if (cancelled) return;
           operation.setContext(({ headers = {} }) => ({
             headers: {
               ...headers,
               authorization: token ? `Bearer ${token}` : '',
             },
           }));
-          const subscription = forward(operation).subscribe(observer);
-          return subscription;
+          innerSub = forward(operation).subscribe(observer);
         })
         .catch((error) => {
+          if (cancelled) return;
           console.error('[Apollo Auth] Failed to get token:', error);
           observer.error(error);
         });
+
+      return () => {
+        cancelled = true;
+        innerSub?.unsubscribe();
+      };
     });
   });
 

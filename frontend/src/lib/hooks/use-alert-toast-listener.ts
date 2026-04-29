@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
 import {
   AlertStatus,
   type AlertsQuery,
@@ -45,7 +44,6 @@ function formatAlertDescription(alert: ToastableAlert, fallback: string) {
 }
 
 export function useAlertToastListener(user?: User): void {
-  const router = useRouter();
   const { t } = useI18n();
   const { toast } = useToast();
   const seenAlertIdsRef = React.useRef<Set<string>>(new Set());
@@ -123,6 +121,10 @@ export function useAlertToastListener(user?: User): void {
     unseenAlerts.forEach((alert) => {
       seenAlertIdsRef.current.add(alert.id);
 
+      // Notification-only toast: shorter duration and no action button so it
+      // can't accidentally navigate the user away from a form they're filling
+      // in (e.g. a harvest entry). They can always open the Alerts page from
+      // the sidebar when they're ready.
       toast({
         id: `alert-${alert.id}`,
         title: `${t.pages.alerts.toastTitle}: ${alert.sensorName}`,
@@ -131,11 +133,7 @@ export function useAlertToastListener(user?: User): void {
           t.pages.alerts.toastFallbackDescription,
         ),
         variant: 'destructive',
-        duration: 12000,
-        action: {
-          label: t.pages.alerts.toastViewAction,
-          onClick: () => router.push('/tenant/alerts'),
-        },
+        duration: 5000,
       });
     });
 
@@ -144,5 +142,5 @@ export function useAlertToastListener(user?: User): void {
         Array.from(seenAlertIdsRef.current).slice(-MAX_TRACKED_ALERTS),
       );
     }
-  }, [canWatchAlerts, data, router, t.pages.alerts, toast]);
+  }, [canWatchAlerts, data, t.pages.alerts, toast]);
 }

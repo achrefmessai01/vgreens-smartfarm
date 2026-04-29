@@ -36,6 +36,7 @@ export class AlertsService extends BaseService<Alert> {
         where: { tenantId },
         order: { timestamp: OrderDirection.DESC },
         relations: [...this.alertRelations],
+        take: AlertsService.MAX_ALERTS_PER_FETCH,
       });
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
@@ -47,6 +48,14 @@ export class AlertsService extends BaseService<Alert> {
     }
   }
 
+  /**
+   * Hard cap on the number of alerts returned in a single fetch. The UI never
+   * needs more than a few hundred recent alerts at a time, and without this
+   * cap the query can stream tens of thousands of rows + their joined user
+   * records over the network — easily a 30–60 s response on mobile.
+   */
+  private static readonly MAX_ALERTS_PER_FETCH = 500;
+
   async findAllFiltered(
     tenantId: string | undefined,
     filter?: AlertsFilterInput | null,
@@ -57,7 +66,8 @@ export class AlertsService extends BaseService<Alert> {
         .leftJoinAndSelect('alert.tenant', 'tenant')
         .leftJoinAndSelect('alert.acknowledgedBy', 'acknowledgedBy')
         .leftJoinAndSelect('alert.resolvedBy', 'resolvedBy')
-        .orderBy('alert.timestamp', 'DESC');
+        .orderBy('alert.timestamp', 'DESC')
+        .take(AlertsService.MAX_ALERTS_PER_FETCH);
 
       if (tenantId !== undefined) {
         qb.andWhere('alert.tenantId = :tenantId', { tenantId });

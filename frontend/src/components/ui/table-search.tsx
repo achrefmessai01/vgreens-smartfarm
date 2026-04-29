@@ -9,6 +9,12 @@ export interface TableSearchProps {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
+  /**
+   * Optional commit handler. When set, the input only "commits" the search on
+   * Enter or blur (instead of every keystroke). Useful when committing
+   * triggers an expensive network refetch.
+   */
+  onCommit?: (value: string) => void;
   className?: string;
 }
 
@@ -16,6 +22,7 @@ export function TableSearch({
   placeholder,
   value,
   onChange,
+  onCommit,
   className,
 }: TableSearchProps) {
   const { t } = useI18n();
@@ -32,6 +39,13 @@ export function TableSearch({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={(e) => onCommit?.(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && onCommit) {
+            e.preventDefault();
+            onCommit((e.target as HTMLInputElement).value);
+          }
+        }}
         className="border-border/60 bg-background focus-visible:ring-primary/20 h-9 rounded-lg pl-9 focus-visible:ring-2"
       />
     </div>

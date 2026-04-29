@@ -60,6 +60,7 @@ export class ClerkAuthGuard implements CanActivate {
         authorizedParties: process.env.FRONTEND_APP_URL
           ? [
               process.env.FRONTEND_APP_URL,
+              'http://localhost:3002',
               'http://localhost:8081',
               'http://192.168.1.11:8081',
             ]
