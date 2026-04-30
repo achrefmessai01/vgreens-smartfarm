@@ -15,7 +15,7 @@ interface FeatureTableProps {
   features: Feature[];
   onEdit: (feature: Feature) => void;
   onDelete: (feature: Feature) => void;
-  onCreate: () => void;
+  onCreate?: () => void;
   isLoading?: boolean;
 }
 
@@ -185,12 +185,14 @@ export function FeatureTable({
         isMobile ? 'flex flex-col gap-4' : 'flex h-full min-h-0 flex-col gap-4'
       }
     >
-      <div className="flex justify-end">
-        <Button onClick={onCreate} disabled={isLoading}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t.pages.admin.features.createFeature}
-        </Button>
-      </div>
+      {onCreate ? (
+        <div className="flex justify-end">
+          <Button onClick={onCreate} disabled={isLoading}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t.pages.admin.features.createFeature}
+          </Button>
+        </div>
+      ) : null}
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <DataTable
           data={features}
