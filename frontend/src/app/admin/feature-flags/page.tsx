@@ -5,10 +5,11 @@ import { FeatureDeleteDialog } from '@/components/features/feature-delete-dialog
 import { FeatureFlagsPageSkeleton } from '@/components/features/feature-flags-page-skeleton';
 import { FeatureFormSheet } from '@/components/features/feature-form-sheet';
 import { PageHeader } from '@/components/layout';
+import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { useFeatureManagement } from '@/lib/hooks/use-feature-management';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
-import { Flag } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export default function FeatureFlagsPage() {
   const { t } = useI18n();
@@ -39,22 +40,26 @@ export default function FeatureFlagsPage() {
         isMobile ? 'flex flex-col gap-6' : 'flex h-full min-h-0 flex-col gap-6'
       }
     >
-      <div className="flex items-center gap-3">
-        <div className="bg-primary/10 rounded-lg p-2">
-          <Flag className="text-primary h-5 w-5" />
-        </div>
-        <PageHeader
-          title={t.pages.admin.features.title}
-          subtitle={t.pages.admin.features.subtitle}
-        />
-      </div>
+      <PageHeader
+        title={t.pages.admin.features.title}
+        subtitle={t.pages.admin.features.subtitle}
+        actions={
+          <Button
+            onClick={handleCreate}
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            {t.pages.admin.features.createFeature}
+          </Button>
+        }
+      />
 
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <FeatureTable
           features={features}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onCreate={handleCreate}
           isLoading={isLoading}
         />
       </div>

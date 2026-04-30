@@ -16,7 +16,7 @@ interface StatsProps {
 
 export function SystemErrorsStatsCards({ stats }: StatsProps) {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
           <CardTitle className="min-w-0 text-sm font-medium break-words">
@@ -95,7 +95,7 @@ export function SystemErrorsFilters({
   activeFiltersCount,
 }: FiltersProps) {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div className="min-w-0">
         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
           Severity
@@ -174,7 +174,7 @@ export function SystemErrorsFilters({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row sm:flex-wrap sm:items-center 2xl:col-span-1 2xl:justify-end">
+      <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row sm:flex-wrap sm:items-center lg:col-span-1 lg:justify-end">
         {activeFiltersCount > 0 && (
           <Button
             variant="outline"

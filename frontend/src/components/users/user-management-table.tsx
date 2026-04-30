@@ -13,7 +13,7 @@ interface UserManagementTableProps {
   users: User[];
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
-  onCreate: () => void;
+  onCreate?: () => void;
   isLoading?: boolean;
   hideTenantColumn?: boolean; // Hide tenant column for tenant users
 }
@@ -83,12 +83,14 @@ export function UserManagementTable({
         isMobile ? 'flex flex-col gap-4' : 'flex h-full min-h-0 flex-col gap-4'
       }
     >
-      <div className="flex justify-end">
-        <Button onClick={onCreate} disabled={isLoading}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t.pages.admin.users.createUser}
-        </Button>
-      </div>
+      {onCreate ? (
+        <div className="flex justify-end">
+          <Button onClick={onCreate} disabled={isLoading}>
+            <Plus className="h-4 w-4" />
+            {t.pages.admin.users.createUser}
+          </Button>
+        </div>
+      ) : null}
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <DataTable
           data={users}
