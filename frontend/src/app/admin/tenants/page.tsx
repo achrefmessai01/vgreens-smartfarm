@@ -7,6 +7,7 @@ import {
   type TenantFormRef,
 } from '@/components/tenants';
 import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import {
   Sheet,
@@ -52,6 +53,16 @@ export default function TenantsPage() {
       <PageHeader
         title={t.pages.admin.tenants.title}
         subtitle={t.pages.admin.tenants.subtitle}
+        actions={
+          <Button
+            onClick={page.handleCreate}
+            disabled={page.isLoading}
+            className="w-full sm:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            {t.pages.admin.tenants.createTenant}
+          </Button>
+        }
       />
 
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
@@ -59,7 +70,6 @@ export default function TenantsPage() {
           tenants={page.tenants}
           onEdit={page.handleEdit}
           onDelete={page.handleDelete}
-          onCreate={page.handleCreate}
           onManageFeatures={page.handleManageFeatures}
           onRowClick={page.handleRowClick}
         />
