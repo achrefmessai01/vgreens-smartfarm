@@ -13,7 +13,7 @@ interface TenantTableProps {
   tenants: Tenant[];
   onEdit: (tenant: Tenant) => void;
   onDelete: (tenant: Tenant) => void;
-  onCreate: () => void;
+  onCreate?: () => void;
   onViewUsers?: (tenant: Tenant) => void;
   onManageFeatures?: (tenant: Tenant) => void;
   onRowClick?: (tenant: Tenant) => void;
@@ -87,12 +87,14 @@ export function TenantTable({
         isMobile ? 'flex flex-col gap-4' : 'flex h-full min-h-0 flex-col gap-4'
       }
     >
-      <div className="flex justify-end">
-        <Button onClick={onCreate}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t.pages.admin.tenants.createTenant}
-        </Button>
-      </div>
+      {onCreate ? (
+        <div className="flex justify-end">
+          <Button onClick={onCreate}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t.pages.admin.tenants.createTenant}
+          </Button>
+        </div>
+      ) : null}
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <DataTable
           data={tenants}
