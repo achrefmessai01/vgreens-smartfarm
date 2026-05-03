@@ -42,3 +42,12 @@ export const DELETE_USER_MUTATION = gql`
     deleteUser(id: $id)
   }
 `;
+
+export const SET_MY_LANGUAGE_MUTATION = gql`
+  mutation SetMyLanguage($language: String!) {
+    setMyLanguage(language: $language) {
+      id
+      preferredLanguage
+    }
+  }
+`;

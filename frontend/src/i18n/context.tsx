@@ -1,51 +1,69 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Locale } from './config';
+import { defaultLocale, isRtlLocale, locales, type Locale } from './config';
 import { getTranslations, type Translations } from './translations';
 
 interface I18nContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: Translations;
+  /** True when the active locale renders right-to-left (Arabic, etc.). */
+  isRtl: boolean;
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
+const LOCALE_STORAGE_KEY = 'locale';
+
+function isValidLocale(value: unknown): value is Locale {
+  return (
+    typeof value === 'string' && (locales as readonly string[]).includes(value)
+  );
+}
+
+function syncDocumentDirection(locale: Locale) {
+  if (typeof document === 'undefined') return;
+  const dir = isRtlLocale(locale) ? 'rtl' : 'ltr';
+  document.documentElement.lang = locale;
+  document.documentElement.dir = dir;
+}
+
 export function I18nProvider({
   children,
-  defaultLocale = 'en',
+  defaultLocale: providerDefault = defaultLocale,
 }: {
   children: React.ReactNode;
   defaultLocale?: Locale;
 }) {
   const [locale, setLocaleState] = useState<Locale>(() => {
-    // Lazy initializer: read from localStorage only once during initial render
+    // Lazy initializer: read from localStorage only once on first render.
     if (typeof window !== 'undefined') {
-      const savedLocale = localStorage.getItem('locale') as Locale | null;
-      if (savedLocale && (savedLocale === 'en' || savedLocale === 'de')) {
-        return savedLocale;
-      }
+      const saved = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+      if (isValidLocale(saved)) return saved;
     }
-    return defaultLocale;
+    return providerDefault;
   });
 
+  // Keep <html lang> and <html dir> in sync with the active locale so
+  // browser features (spellcheck, RTL layout, copy/paste hints) follow it.
   useEffect(() => {
-    // Update HTML lang attribute when locale changes
-    document.documentElement.lang = locale;
+    syncDocumentDirection(locale);
   }, [locale]);
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
-    localStorage.setItem('locale', newLocale);
-    // Update HTML lang attribute
-    document.documentElement.lang = newLocale;
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, newLocale);
+    }
+    syncDocumentDirection(newLocale);
   };
 
   const t = getTranslations(locale);
+  const isRtl = isRtlLocale(locale);
 
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t }}>
+    <I18nContext.Provider value={{ locale, setLocale, t, isRtl }}>
       {children}
     </I18nContext.Provider>
   );

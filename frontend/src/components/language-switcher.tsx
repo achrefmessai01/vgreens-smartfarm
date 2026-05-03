@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useI18n } from '@/i18n';
-import { locales, localeNames } from '@/i18n/config';
+import { locales, localeNativeNames } from '@/i18n/config';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,12 +19,16 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="p-2" size="sm">
+        <Button
+          variant="outline"
+          className="p-2"
+          size="sm"
+          aria-label="Change language"
+        >
           <FlagIcon locale={locale} className="h-4 w-4" />
-          <span className="sr-only">Change language</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto">
         {locales.map((loc) => (
           <DropdownMenuItem
             key={loc}
@@ -33,9 +37,12 @@ export function LanguageSwitcher() {
               'flex items-center gap-2',
               locale === loc && 'bg-accent font-medium',
             )}
+            // Render each label in its own natural direction so the Arabic
+            // entry mirrors even while the menu itself stays LTR.
+            dir={loc === 'ar' ? 'rtl' : 'ltr'}
           >
             <FlagIcon locale={loc} className="h-4 w-4" />
-            <span>{localeNames[loc]}</span>
+            <span>{localeNativeNames[loc]}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
