@@ -103,8 +103,7 @@ function buildSlotsFromRows(
     // Treat (0, 0) as a legacy/seed value rather than a deliberate placement
     // at the greenhouse origin — fall back to the computed default so those
     // sensors don't pile up in one corner of the map.
-    const isLegacyZero =
-      config?.xPosition === 0 && config?.yPosition === 0;
+    const isLegacyZero = config?.xPosition === 0 && config?.yPosition === 0;
     const xPos =
       typeof config?.xPosition === 'number' && !isLegacyZero
         ? config.xPosition
