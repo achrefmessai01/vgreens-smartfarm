@@ -550,6 +550,7 @@ export type Mutation = {
   resolveErrorReport: ErrorReport;
   resolveSystemError: SystemError;
   runThresholdCheck: Scalars['Boolean']['output'];
+  setMyLanguage: User;
   toggleTenantFeature: TenantFeature;
   updateAlert: Alert;
   updateErrorReport: ErrorReport;
@@ -671,6 +672,11 @@ export type MutationResolveSystemErrorArgs = {
 export type MutationRunThresholdCheckArgs = {
   bucketName: Scalars['String']['input'];
   tenantId: Scalars['ID']['input'];
+};
+
+
+export type MutationSetMyLanguageArgs = {
+  language: Scalars['String']['input'];
 };
 
 
@@ -1171,6 +1177,7 @@ export type User = {
   imageUrl?: Maybe<Scalars['String']['output']>;
   isActive: Scalars['Boolean']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
+  preferredLanguage?: Maybe<Scalars['String']['output']>;
   role: UserRole;
   status?: Maybe<UserStatus>;
   tenant?: Maybe<Tenant>;
@@ -1389,6 +1396,13 @@ export type DeleteUserMutationVariables = Exact<{
 
 
 export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean };
+
+export type SetMyLanguageMutationVariables = Exact<{
+  language: Scalars['String']['input'];
+}>;
+
+
+export type SetMyLanguageMutation = { __typename?: 'Mutation', setMyLanguage: { __typename?: 'User', id: string, preferredLanguage?: string | null } };
 
 export type GetRecentSystemErrorsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Float']['input']>;
@@ -1662,7 +1676,7 @@ export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null }> | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null }> | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2751,6 +2765,40 @@ export function useDeleteUserMutation(baseOptions?: Apollo.MutationHookOptions<D
 export type DeleteUserMutationHookResult = ReturnType<typeof useDeleteUserMutation>;
 export type DeleteUserMutationResult = Apollo.MutationResult<DeleteUserMutation>;
 export type DeleteUserMutationOptions = Apollo.BaseMutationOptions<DeleteUserMutation, DeleteUserMutationVariables>;
+export const SetMyLanguageDocument = gql`
+    mutation SetMyLanguage($language: String!) {
+  setMyLanguage(language: $language) {
+    id
+    preferredLanguage
+  }
+}
+    `;
+export type SetMyLanguageMutationFn = Apollo.MutationFunction<SetMyLanguageMutation, SetMyLanguageMutationVariables>;
+
+/**
+ * __useSetMyLanguageMutation__
+ *
+ * To run a mutation, you first call `useSetMyLanguageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetMyLanguageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setMyLanguageMutation, { data, loading, error }] = useSetMyLanguageMutation({
+ *   variables: {
+ *      language: // value for 'language'
+ *   },
+ * });
+ */
+export function useSetMyLanguageMutation(baseOptions?: Apollo.MutationHookOptions<SetMyLanguageMutation, SetMyLanguageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetMyLanguageMutation, SetMyLanguageMutationVariables>(SetMyLanguageDocument, options);
+      }
+export type SetMyLanguageMutationHookResult = ReturnType<typeof useSetMyLanguageMutation>;
+export type SetMyLanguageMutationResult = Apollo.MutationResult<SetMyLanguageMutation>;
+export type SetMyLanguageMutationOptions = Apollo.BaseMutationOptions<SetMyLanguageMutation, SetMyLanguageMutationVariables>;
 export const GetRecentSystemErrorsDocument = gql`
     query GetRecentSystemErrors($limit: Float, $severity: ReportSeverity, $source: ErrorSource, $isResolved: Boolean) {
   getRecentSystemErrors(
@@ -4722,6 +4770,7 @@ export const MeDocument = gql`
     }
     isActive
     status
+    preferredLanguage
     createdAt
     updatedAt
   }

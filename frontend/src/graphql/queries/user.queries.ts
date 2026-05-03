@@ -28,6 +28,7 @@ export const ME_QUERY = gql`
       }
       isActive
       status
+      preferredLanguage
       createdAt
       updatedAt
     }
