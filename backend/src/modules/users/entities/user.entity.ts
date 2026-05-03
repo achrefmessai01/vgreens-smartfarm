@@ -76,6 +76,16 @@ export class User extends BaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   metadata?: Record<string, any>;
 
+  /**
+   * BCP 47-style locale code the user picked in the language switcher
+   * (e.g. "en", "de", "ar"). Persisted so the preference follows the user
+   * across browsers / devices. Validated by the GraphQL `setMyLanguage`
+   * mutation against the supported locale list.
+   */
+  @Field({ nullable: true })
+  @Column({ type: 'varchar', length: 8, nullable: true })
+  preferredLanguage?: string;
+
   @Field(() => Date)
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

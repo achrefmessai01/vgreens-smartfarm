@@ -86,14 +86,49 @@ export function useParGraphData(
     return last;
   }, [apiPoints, currentHour]);
 
+  /**
+   * Live PPFD (µmol m⁻² s⁻¹) recovered from the cumulative DLI curve.
+   *
+   * Two refinements over the naive "delta between the last two points"
+   * approach:
+   *
+   *   1. **Trailing window of ~5 minutes** instead of the last 60-second
+   *      sample. With minute-level granularity a single sample can be
+   *      noisy (a passing cloud, a sensor glitch, a missed window after
+   *      `aggregateWindow(createEmpty: false)`). Averaging across the last
+   *      five points is what most agronomic dashboards do for the "current"
+   *      indicator.
+   *
+   *   2. **Biological sanity cap at 2 500 µmol m⁻² s⁻¹**. Direct sun at sea
+   *      level peaks around 2 000; anything north of that means a sensor
+   *      anomaly (mis-calibrated lux sensor, multi-source double-counting,
+   *      etc.). Showing "—" is more informative than printing an obviously
+   *      wrong four-digit number.
+   */
   const currentPpfd = React.useMemo(() => {
     if (apiPoints.length < 2) return null;
+
+    const PPFD_TRAILING_MINUTES = 5;
+    const PPFD_MAX_REALISTIC = 2500; // µmol m⁻² s⁻¹
+
     const last = apiPoints[apiPoints.length - 1];
-    const prev = apiPoints[apiPoints.length - 2];
+    const targetHour = last.hour - PPFD_TRAILING_MINUTES / 60;
+
+    // Walk backwards until the candidate is at least PPFD_TRAILING_MINUTES
+    // earlier, or we hit the start of the series.
+    let prevIndex = apiPoints.length - 2;
+    while (prevIndex > 0 && apiPoints[prevIndex].hour > targetHour) {
+      prevIndex -= 1;
+    }
+    const prev = apiPoints[prevIndex];
+
     const deltaDli = last.dli - prev.dli;
     const deltaSeconds = (last.hour - prev.hour) * 3600;
     if (deltaDli <= 0 || deltaSeconds <= 0) return null;
+
     const ppfd = (deltaDli * 1_000_000) / deltaSeconds;
+    if (!Number.isFinite(ppfd) || ppfd > PPFD_MAX_REALISTIC) return null;
+
     return Math.round(ppfd);
   }, [apiPoints]);
 

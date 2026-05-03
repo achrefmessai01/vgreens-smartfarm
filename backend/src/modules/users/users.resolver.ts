@@ -21,6 +21,38 @@ export class UsersResolver {
     return this.usersService.findByClerkUserId(user.clerkUserId);
   }
 
+  /**
+   * Persist the signed-in user's preferred locale so the language choice
+   * follows them across browsers / devices. The list of accepted values
+   * mirrors `frontend/src/i18n/config.ts > locales`.
+   */
+  @Mutation(() => User)
+  async setMyLanguage(
+    @Args('language') language: string,
+    @CurrentUser() user: User,
+  ): Promise<User> {
+    if (!user) {
+      throw new BadRequestException('Not authenticated');
+    }
+    const allowed = new Set([
+      'en',
+      'de',
+      'fr',
+      'es',
+      'it',
+      'pt',
+      'pl',
+      'ro',
+      'tr',
+      'el',
+      'ar',
+    ]);
+    if (!allowed.has(language)) {
+      throw new BadRequestException(`Unsupported language code: ${language}`);
+    }
+    return this.usersService.setPreferredLanguage(user.id, language);
+  }
+
   @Query(() => [User])
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
   async users(@CurrentUser() currentUser: User): Promise<User[]> {

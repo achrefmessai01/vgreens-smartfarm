@@ -10,13 +10,31 @@ interface FlagIconProps {
 }
 
 const flagMap: Record<Locale, string> = {
-  en: '🇺🇸',
+  en: '🇬🇧',
   de: '🇩🇪',
+  fr: '🇫🇷',
+  es: '🇪🇸',
+  it: '🇮🇹',
+  pt: '🇵🇹',
+  pl: '🇵🇱',
+  ro: '🇷🇴',
+  tr: '🇹🇷',
+  el: '🇬🇷',
+  ar: '🇸🇦',
 };
 
 const ariaLabelMap: Record<Locale, string> = {
-  en: 'United States flag',
+  en: 'United Kingdom flag',
   de: 'Germany flag',
+  fr: 'France flag',
+  es: 'Spain flag',
+  it: 'Italy flag',
+  pt: 'Portugal flag',
+  pl: 'Poland flag',
+  ro: 'Romania flag',
+  tr: 'Türkiye flag',
+  el: 'Greece flag',
+  ar: 'Saudi Arabia flag',
 };
 
 export function FlagIcon({ locale, className }: FlagIconProps) {

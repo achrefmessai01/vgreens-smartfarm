@@ -4,6 +4,7 @@ import { NetworkStatusMonitor } from '@/components/network-status-monitor';
 import { RegisterSW } from '@/components/register-sw';
 import { ToastProvider } from '@/components/ui/toast-provider';
 import { I18nProvider } from '@/i18n';
+import { I18nUserSync } from '@/i18n/i18n-user-sync';
 import { ApolloProvider } from '@/lib/apollo-provider';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata, Viewport } from 'next';
@@ -75,6 +76,7 @@ export default function RootLayout({
             <PostHogProvider>
               <ApolloProvider>
                 <I18nProvider defaultLocale="en">
+                  <I18nUserSync />
                   <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
