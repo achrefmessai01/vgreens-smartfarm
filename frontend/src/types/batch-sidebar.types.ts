@@ -57,7 +57,10 @@ export interface YieldDataFieldProps {
   waste: number;
   rowX: number;
   rowY: number;
-  onYieldChange?: (field: 'marketable' | 'waste' | 'rowX' | 'rowY', value: number) => void;
+  onYieldChange?: (
+    field: 'marketable' | 'waste' | 'rowX' | 'rowY',
+    value: number,
+  ) => void;
   isLoading?: boolean;
 }
 

@@ -27,6 +27,9 @@ export interface FarmOverviewCardProps {
   bays: Bay[];
   greenhouseId: string;
   greenhouseLabel: string;
+  /** Optional bucket override forwarded to the embedded PAR graph. Required
+   *  for vGreens admins viewing another tenant. */
+  parGraphBucketName?: string | null;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
   parameterLabel: string;
@@ -58,6 +61,7 @@ export function FarmOverviewCard({
   bays,
   greenhouseId,
   greenhouseLabel,
+  parGraphBucketName,
   selectedSlotId,
   onSelectSlot,
   parameterLabel,
@@ -131,6 +135,7 @@ export function FarmOverviewCard({
                 parameter={effectiveParameter}
                 greenhouseId={greenhouseId}
                 greenhouseLabel={greenhouseLabel}
+                parGraphBucketName={parGraphBucketName}
                 selectedSlotId={selectedSlotId}
                 onSelectSlot={onSelectSlot}
                 parameterLabel={parameterLabel}

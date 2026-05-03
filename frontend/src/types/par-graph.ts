@@ -4,6 +4,13 @@ export interface ParGraphSectionProps {
   bay: Bay | null;
   greenhouseId: string;
   greenhouseLabel: string;
+  /**
+   * Optional InfluxDB bucket override. Required when the viewer is a vGreens
+   * admin viewing another tenant — `me.tenant.influxBucketName` is only set
+   * for tenant users, so without this override the PAR query is silently
+   * skipped on the admin side.
+   */
+  bucketName?: string | null;
   embedded?: boolean;
   className?: string;
 }

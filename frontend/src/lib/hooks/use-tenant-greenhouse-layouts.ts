@@ -1,11 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {
-  useMeQuery,
-  useTenantsQuery,
-  UserRole,
-} from '@/generated/graphql';
+import { useMeQuery, useTenantsQuery, UserRole } from '@/generated/graphql';
 import type { GreenhouseLayout } from '@/lib/sensor-default-positions';
 
 /**
