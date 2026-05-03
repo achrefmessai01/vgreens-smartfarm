@@ -58,7 +58,7 @@ export function DeleteHarvestDialog({
           <Button variant="destructive" onClick={onConfirm} disabled={loading}>
             {loading
               ? (h?.deleting ?? 'Deleting...')
-                : (confirmLabel ?? h?.confirmDelete ?? 'Delete')}
+              : (confirmLabel ?? h?.confirmDelete ?? 'Delete')}
           </Button>
         </DialogFooter>
       </DialogContent>
