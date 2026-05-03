@@ -81,10 +81,8 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
                 // dynamic default so the table never shows zero/zero placeholders.
                 const isLegacyZero =
                   config?.xPosition === 0 && config?.yPosition === 0;
-                const hasXOverride =
-                  config?.xPosition != null && !isLegacyZero;
-                const hasYOverride =
-                  config?.yPosition != null && !isLegacyZero;
+                const hasXOverride = config?.xPosition != null && !isLegacyZero;
+                const hasYOverride = config?.yPosition != null && !isLegacyZero;
                 return (
                   <TableRow
                     key={device}

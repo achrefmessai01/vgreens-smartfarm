@@ -3,11 +3,18 @@ import { useGetParDliTodayQuery, useMeQuery } from '@/generated/graphql';
 import type { ParGraphData, ParCurvePoint } from '@/types/par-graph';
 import { getHourOfDay } from '@/lib/utils/par-graph';
 
-export function useParGraphData(greenhouseId: string): ParGraphData {
+export function useParGraphData(
+  greenhouseId: string,
+  bucketNameOverride?: string | null,
+): ParGraphData {
   const { data: meData } = useMeQuery({
     fetchPolicy: 'cache-first',
   });
-  const bucketName = meData?.me?.tenant?.influxBucketName ?? null;
+  // Prefer the explicit override (set by vGreens admins viewing another
+  // tenant). Fall back to the signed-in user's own tenant bucket so the
+  // tenant-side flow keeps working unchanged.
+  const bucketName =
+    bucketNameOverride ?? meData?.me?.tenant?.influxBucketName ?? null;
 
   const { data: parDliData } = useGetParDliTodayQuery({
     variables: {

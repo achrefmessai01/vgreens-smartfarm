@@ -152,7 +152,13 @@ export function useHarvestPage() {
       return;
     }
     if (deleteTarget) handleDelete(deleteTarget.id);
-  }, [isBatchDelete, deleteBatchTargetIds, deleteTarget, handleDelete, refetch]);
+  }, [
+    isBatchDelete,
+    deleteBatchTargetIds,
+    deleteTarget,
+    handleDelete,
+    refetch,
+  ]);
 
   return {
     harvests,

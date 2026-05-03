@@ -464,9 +464,25 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Returns a time series for today's cumulative DLI curve for PAR/PPFD.
-   * Uses _field "par" or "par_estimated" (µmol m-2 s-1), any measurement.
-   * Aggregates to 1-minute means, converts to mol m-2, then cumulative sum for the day.
+   * Returns today's cumulative DLI (Daily Light Integral) curve in mol m⁻²,
+   * derived from the raw `lux` sensor field.
+   *
+   * Pipeline:
+   *   1. Pull the `lux` field for the given greenhouse, from the start of
+   *      today (UTC).
+   *   2. Collapse all device series with `group()` so we get a single mean
+   *      per minute (rather than N parallel curves when multiple sensors
+   *      report for the same greenhouse).
+   *   3. Aggregate to 1-minute means.
+   *   4. Convert lux → PAR µmol m⁻² s⁻¹  (PAR = lux / 55).
+   *   5. Convert PAR µmol m⁻² s⁻¹ → mol m⁻² per minute  (× 60 s / 1e6).
+   *   6. `cumulativeSum` from midnight gives DLI in mol m⁻², which resets
+   *      each day naturally because the `range` only spans today.
+   *
+   * The `/55` factor is the project-wide convention for converting natural-
+   * daylight lux to PPFD; it intentionally bypasses any pre-computed `par`
+   * or `par_estimated` fields the sensors might write so the dashboard
+   * always uses one consistent calibration.
    */
   async getTodayParCumulativeDli(
     bucketName: string,
@@ -477,64 +493,59 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
       throw new Error('InfluxDB client is not initialized');
     }
 
-    const escapedBucket = bucketName
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g, '\\"');
-    const escapeFluxString = (v: string) =>
-      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
     const flux = `
 import "date"
 
-from(bucket: "${escapedBucket}")
+from(bucket: "${escape(bucketName)}")
   |> range(start: date.truncate(t: now(), unit: 1d))
   |> filter(fn: (r) =>
-    (r["_field"] == "par" or r["_field"] == "par_estimated") and
-    r["greenhouse"] == "${escapeFluxString(options.greenhouse)}"
+    r["_field"] == "lux" and
+    r["greenhouse"] == "${escape(options.greenhouse)}"
   )
+  |> group()
   |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
   |> map(fn: (r) => ({
-      r with
-      _value: float(v: r._value) * 60.0 / 1000000.0
-    })
-  )
+      _time: r._time,
+      _value: float(v: r._value) / 55.0 * 60.0 / 1000000.0
+    }))
   |> cumulativeSum(columns: ["_value"])
-  |> keep(columns: ["_time", "_value"])
 `;
 
     const rows: ParDliPoint[] = [];
     const queryApi = this.queryApi;
 
-    await new Promise<void>((resolve, reject) => {
-      queryApi.queryRows(flux, {
-        next: (row, tableMeta) => {
-          const o = tableMeta.toObject(row) as Record<string, unknown>;
-          const value = Number(o._value);
-          if (Number.isNaN(value)) {
-            return;
-          }
+    try {
+      await new Promise<void>((resolve, reject) => {
+        queryApi.queryRows(flux, {
+          next: (row, tableMeta) => {
+            const o = tableMeta.toObject(row) as Record<string, unknown>;
+            const value = Number(o._value);
+            if (Number.isNaN(value)) return;
 
-          const time =
-            o._time instanceof Date
-              ? o._time
-              : new Date(String((o as { _time?: string })._time ?? ''));
+            const time =
+              o._time instanceof Date
+                ? o._time
+                : new Date(String((o as { _time?: string })._time ?? ''));
 
-          rows.push({
-            time,
-            dli: value,
-          });
-        },
-        error: (error) => {
-          reject(error);
-        },
-        complete: () => {
-          resolve();
-        },
+            rows.push({ time, dli: value });
+          },
+          error: reject,
+          complete: resolve,
+        });
       });
-    });
+    } catch (error) {
+      this.logger.warn(
+        `getTodayParCumulativeDli failed for bucket "${bucketName}" greenhouse "${options.greenhouse}": ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return [];
+    }
 
     this.logger.debug(
-      `getTodayParCumulativeDli("${bucketName}", greenhouse="${options.greenhouse}"): returned ${rows.length} points`,
+      `getTodayParCumulativeDli("${bucketName}", greenhouse="${options.greenhouse}") → ${rows.length} points (lux/55)`,
     );
     return rows;
   }

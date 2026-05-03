@@ -12,6 +12,7 @@ export function ParGraphSection({
   bay,
   greenhouseId,
   greenhouseLabel,
+  bucketName,
   embedded = false,
   className,
 }: ParGraphSectionProps) {
@@ -19,7 +20,7 @@ export function ParGraphSection({
 
   const { t } = useI18n();
   const { curveData, currentHour, currentDli, currentPpfd, timeLabel, yMax } =
-    useParGraphData(greenhouseId);
+    useParGraphData(greenhouseId, bucketName);
 
   const hasData = curveData.length > 0;
   const content = (
