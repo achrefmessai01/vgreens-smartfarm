@@ -238,4 +238,13 @@ export class UsersService extends BaseService<User> {
       relations: ['tenant'],
     });
   }
+
+  async setPreferredLanguage(userId: string, language: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    user.preferredLanguage = language;
+    return this.userRepository.save(user);
+  }
 }
