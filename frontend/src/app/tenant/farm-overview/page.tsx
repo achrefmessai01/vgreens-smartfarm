@@ -69,8 +69,9 @@ export default function FarmOverviewPage() {
               greenhouses={state.combinedGreenhouses}
               parameters={state.parameterOptions}
               noDataMessage={state.labels.noData}
-              parGraphGreenhouseId="greenhouse_01"
+              parGraphGreenhouseId={state.combinedParGraphGreenhouseId}
               parGraphLabel={state.labels.combined}
+              parGraphBucketName={state.tenantBucketNameOverride}
               onParameterClick={(greenhouseIndex, parameterKey) => {
                 state.setActiveGreenhouseTab(greenhouseIndex + 1);
                 state.setSelectedParameter(parameterKey as ParameterType);
@@ -89,6 +90,7 @@ export default function FarmOverviewPage() {
               bays={state.bays}
               greenhouseId={state.greenhouseId}
               greenhouseLabel={state.greenhouseLabel}
+              parGraphBucketName={state.tenantBucketNameOverride}
               selectedSlotId={state.selectedSlotId}
               onSelectSlot={state.setSelectedSlotId}
               parameterLabel={state.getParameterLabel(state.effectiveParameter)}

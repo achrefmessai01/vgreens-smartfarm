@@ -15,6 +15,9 @@ interface FarmDataDisplayProps {
   parameter: ParameterType;
   greenhouseId: string;
   greenhouseLabel: string;
+  /** Optional bucket override forwarded to the embedded PAR graph in `graph`
+   *  view. Required for vGreens admins viewing another tenant. */
+  parGraphBucketName?: string | null;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
   parameterLabel: string;
@@ -38,6 +41,7 @@ export function FarmDataDisplay({
   parameter,
   greenhouseId,
   greenhouseLabel,
+  parGraphBucketName,
   selectedSlotId,
   onSelectSlot,
   parameterLabel,
@@ -72,6 +76,7 @@ export function FarmDataDisplay({
           bay={bays[0] ?? null}
           greenhouseId={greenhouseId}
           greenhouseLabel={greenhouseLabel}
+          bucketName={parGraphBucketName}
           embedded
           className="h-full w-full"
         />
