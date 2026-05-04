@@ -2,6 +2,7 @@
 
 import { useI18n } from '@/i18n';
 import { UserMenu } from './user-menu';
+import { LanguageSwitcher } from '../language-switcher';
 
 interface NavbarProps {
   user?: {
@@ -43,8 +44,9 @@ export function Navbar({ user, welcomeMessage, dateInfo }: NavbarProps) {
         </div>
       </div>
 
+      <LanguageSwitcher />
       {/* Right Section */}
-      <div className="flex items-center gap-2">
+      <div className="ml-2 flex items-center gap-2">
         <UserMenu />
       </div>
     </nav>
