@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { useGreenhouseOptionsQuery } from '@/generated/graphql';
+import { useTenantGreenhousesQuery } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import {
   SENSOR_CONFIG_FIELD_KEYS,
@@ -54,23 +54,28 @@ export function SensorConfigForm({
   const { t } = useI18n();
   const sc = t.pages.admin.tenants.sensorConfig;
 
-  // Greenhouse identifiers come from InfluxDB tag values via the
-  // `greenhouseOptions` query — that's what sensor data is actually tagged
-  // with (e.g. "greenhouse_01"). Also include the current override value so
-  // legacy entries always have a matching option.
+  // Greenhouse identifiers from the tenant's configured greenhouses (not
+  // InfluxDB tags). This ensures the dropdown only shows greenhouses that
+  // have proper layout configuration (xDimension, yDimension, bayCount).
+  // Also include the current override value so legacy entries always have
+  // a matching option.
   const { data: greenhouseData, loading: greenhouseLoading } =
-    useGreenhouseOptionsQuery({
+    useTenantGreenhousesQuery({
       variables: { tenantId },
       skip: !tenantId,
+      fetchPolicy: 'network-only',
+      nextFetchPolicy: 'network-only',
     });
-  const influxGreenhouses = greenhouseData?.greenhouseOptions ?? [];
-  const currentValue = row.config?.greenhouse ?? '';
+  const configuredGreenhouses = React.useMemo(
+    () => greenhouseData?.tenantGreenhouses ?? [],
+    [greenhouseData?.tenantGreenhouses],
+  );
   const greenhouseOptions = React.useMemo(() => {
-    const set = new Set<string>(influxGreenhouses);
-    if (currentValue) set.add(currentValue);
-    return [...set].sort();
-  }, [influxGreenhouses, currentValue]);
-  const hasNoInfluxGreenhouses = influxGreenhouses.length === 0;
+    // Only use the configured greenhouses from the database
+    // Don't include legacy InfluxDB values from old overrides
+    return [...configuredGreenhouses].sort();
+  }, [configuredGreenhouses]);
+  const hasNoConfiguredGreenhouses = configuredGreenhouses.length === 0;
 
   const hintKey: Record<SensorConfigFieldKey, string> = {
     xPosition: sc.xPositionHint,
@@ -83,13 +88,10 @@ export function SensorConfigForm({
   // blank to keep tracking the dynamic default, or type a value to lock in
   // a specific position.
   const def: DefaultPosition | null = row.defaultPosition;
-  const defaultGreenhouse = row.defaultGreenhouse ?? '';
   const placeholderKey: Record<SensorConfigFieldKey, string> = {
     xPosition: def ? `Default: ${def.xPosition}` : sc.xPositionPlaceholder,
     yPosition: def ? `Default: ${def.yPosition}` : sc.yPositionPlaceholder,
-    greenhouse: defaultGreenhouse
-      ? `Default: ${defaultGreenhouse}`
-      : sc.greenhousePlaceholder,
+    greenhouse: sc.greenhousePlaceholder,
   };
 
   const labelKey: Record<SensorConfigFieldKey, string> = {
@@ -98,9 +100,7 @@ export function SensorConfigForm({
     greenhouse: sc.greenhouse,
   };
 
-  // Pre-select the InfluxDB-tagged greenhouse when there is no override so the
-  // user sees the effective value already chosen. They can still pick a
-  // different greenhouse, or "Reset to defaults" wipes the override entirely.
+  // Pre-select the configured greenhouse override if it exists.
   //
   // Treat (0, 0) overrides as "no real position set" — those are typically
   // legacy seed values, not deliberate placements at the origin. Leaving the
@@ -117,7 +117,7 @@ export function SensorConfigForm({
       isLegacyZero || row.config?.yPosition == null
         ? ''
         : row.config.yPosition.toString(),
-    greenhouse: row.config?.greenhouse ?? defaultGreenhouse,
+    greenhouse: row.config?.greenhouse ?? '',
   });
 
   const set =
@@ -178,13 +178,13 @@ export function SensorConfigForm({
                   disabled={greenhouseLoading}
                 >
                   <SelectTrigger id="field-greenhouse" className="h-9 w-full">
-                    <SelectValue placeholder={placeholderKey.greenhouse} />
+                    <SelectValue placeholder="Select a greenhouse" />
                   </SelectTrigger>
                   <SelectContent>
                     {greenhouseOptions.length === 0 ? (
                       <div className="text-muted-foreground px-2 py-1.5 text-xs">
-                        {hasNoInfluxGreenhouses
-                          ? 'No greenhouse tags found in InfluxDB for this tenant.'
+                        {hasNoConfiguredGreenhouses
+                          ? 'No greenhouses configured for this tenant.'
                           : '—'}
                       </div>
                     ) : (
