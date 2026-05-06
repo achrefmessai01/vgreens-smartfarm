@@ -38,15 +38,6 @@ export interface HarvestLike {
   rowX: number;
   rowY: number;
   avgBrix: number;
-  brix1: number;
-  brix2: number;
-  brix3: number;
-  brix4: number;
-  brix5: number;
-  brix6: number;
-  brix7: number;
-  brix8: number;
-  brix9: number;
-  brix10: number;
+  brixReadings: number[];
   photoUrls?: string[] | null;
 }

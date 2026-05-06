@@ -23,18 +23,7 @@ export interface BatchDetailsData {
     rowX: number;
     rowY: number;
   };
-  brixMeasurements: {
-    brix1: number;
-    brix2: number;
-    brix3: number;
-    brix4: number;
-    brix5: number;
-    brix6: number;
-    brix7: number;
-    brix8: number;
-    brix9: number;
-    brix10: number;
-  };
+  brixReadings: number[];
   photos: string[];
 }
 
@@ -65,22 +54,10 @@ export interface YieldDataFieldProps {
 }
 
 export interface BrixMeasurementsFieldProps {
-  measurements: {
-    brix1: number;
-    brix2: number;
-    brix3: number;
-    brix4: number;
-    brix5: number;
-    brix6: number;
-    brix7: number;
-    brix8: number;
-    brix9: number;
-    brix10: number;
-  };
-  onMeasurementChange?: (
-    field: keyof BrixMeasurementsFieldProps['measurements'],
-    value: number,
-  ) => void;
+  readings: number[];
+  onReadingChange?: (index: number, value: number) => void;
+  onAddReading?: () => void;
+  onRemoveReading?: (index: number) => void;
   isLoading?: boolean;
 }
 

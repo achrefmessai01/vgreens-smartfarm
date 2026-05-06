@@ -18,21 +18,6 @@ interface HarvestDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function getBrixValues(h: HarvestItem): number[] {
-  return [
-    h.brix1,
-    h.brix2,
-    h.brix3,
-    h.brix4,
-    h.brix5,
-    h.brix6,
-    h.brix7,
-    h.brix8,
-    h.brix9,
-    h.brix10,
-  ];
-}
-
 export function HarvestDetails({
   harvest,
   open,
@@ -45,7 +30,7 @@ export function HarvestDetails({
 
   const totalYield = harvest.classA + harvest.waste;
   const wasteRatio = totalYield > 0 ? (harvest.waste / totalYield) * 100 : 0;
-  const brixValues = getBrixValues(harvest);
+  const brixValues = harvest.brixReadings;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -129,20 +114,26 @@ export function HarvestDetails({
                   </span>
                 </span>
               </div>
-              <div className="grid grid-cols-5 gap-4">
-                {brixValues.map((value, index) => (
-                  <div key={index} className="text-center">
-                    <div className="text-muted-foreground mb-2 text-xs font-medium">
-                      #{index + 1}
+              {brixValues.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  No Brix readings recorded.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+                  {brixValues.map((value, index) => (
+                    <div key={index} className="text-center">
+                      <div className="text-muted-foreground mb-2 text-xs font-medium">
+                        #{index + 1}
+                      </div>
+                      <div className="bg-muted rounded-lg border p-4">
+                        <span className="text-foreground text-lg font-bold">
+                          {value.toFixed(1)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="bg-muted rounded-lg border p-4">
-                      <span className="text-foreground text-lg font-bold">
-                        {value.toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

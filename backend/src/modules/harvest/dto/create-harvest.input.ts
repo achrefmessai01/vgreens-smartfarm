@@ -132,65 +132,12 @@ export class CreateHarvestInput {
 
   // --- Brix measurements ---
 
-  @Field(() => Float, { defaultValue: 0 })
+  @Field(() => [Float], { nullable: true })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix1?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix2?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix3?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix4?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix5?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix6?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix7?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix8?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix9?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix10?: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Min(0, { each: true })
+  brixReadings?: number[];
 
   // --- Photos ---
 

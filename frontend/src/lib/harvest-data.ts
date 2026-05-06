@@ -114,19 +114,7 @@ export function addCompletedBatchToHistory(
   const newId = (allHarvestData.length + 1).toString();
   const batchName = `${batchData.species} - ${batchData.variety}`;
 
-  // Calculate average Brix from all measurements
-  const brixValues = [
-    batchData.brixMeasurements.brix1,
-    batchData.brixMeasurements.brix2,
-    batchData.brixMeasurements.brix3,
-    batchData.brixMeasurements.brix4,
-    batchData.brixMeasurements.brix5,
-    batchData.brixMeasurements.brix6,
-    batchData.brixMeasurements.brix7,
-    batchData.brixMeasurements.brix8,
-    batchData.brixMeasurements.brix9,
-    batchData.brixMeasurements.brix10,
-  ].filter((value) => value > 0); // Only include non-zero measurements
+  const brixValues = batchData.brixReadings.filter((value) => value > 0);
 
   const avgBrix =
     brixValues.length > 0

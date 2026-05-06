@@ -2,21 +2,8 @@ import { HarvestStatus } from '@/generated/graphql';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import type { HarvestLike, HarvestSummary } from '@/types/harvest.types';
 
-export function computeAvgBrix(
-  brix: BatchDetailsData['brixMeasurements'],
-): number {
-  const values = [
-    brix.brix1,
-    brix.brix2,
-    brix.brix3,
-    brix.brix4,
-    brix.brix5,
-    brix.brix6,
-    brix.brix7,
-    brix.brix8,
-    brix.brix9,
-    brix.brix10,
-  ].filter((v) => v > 0);
+export function computeAvgBrix(readings: number[]): number {
+  const values = readings.filter((v) => v > 0);
 
   if (values.length === 0) return 0;
 
@@ -121,18 +108,7 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
       rowX: h.rowX,
       rowY: h.rowY,
     },
-    brixMeasurements: {
-      brix1: h.brix1,
-      brix2: h.brix2,
-      brix3: h.brix3,
-      brix4: h.brix4,
-      brix5: h.brix5,
-      brix6: h.brix6,
-      brix7: h.brix7,
-      brix8: h.brix8,
-      brix9: h.brix9,
-      brix10: h.brix10,
-    },
+    brixReadings: h.brixReadings.length > 0 ? [...h.brixReadings] : [0],
     photos: h.photoUrls ?? [],
   };
 }
