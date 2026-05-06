@@ -797,6 +797,12 @@ export const de = {
       editAlert: 'Alarm bearbeiten',
       updateAlert: 'Alarm aktualisieren',
       deleteAlert: 'Alarm löschen',
+      archiveFailed: 'Alarm konnte nicht archiviert werden',
+      archiveFailedBody:
+        'Wir haben versucht, diesen Alarm ins Archiv zu verschieben (wo ein Administrator ihn später noch wiederherstellen könnte), aber etwas ist schiefgelaufen. Sie können ihn dauerhaft aus dem System entfernen — dies umgeht jedoch den Prüfpfad und kann auch vom Support nicht rückgängig gemacht werden. Möchten Sie ihn dauerhaft entfernen?',
+      archiveFailedReason: 'Grund',
+      removePermanently: 'Dauerhaft entfernen',
+      keepAlert: 'Alarm behalten',
       toastTitle: 'Kritischer Alarm',
       toastViewAction: 'Alarme ansehen',
       toastFallbackDescription:

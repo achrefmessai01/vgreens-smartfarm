@@ -809,6 +809,12 @@ export const ro = {
       editAlert: 'Editează alerta',
       updateAlert: 'Actualizează alerta',
       deleteAlert: 'Șterge alerta',
+      archiveFailed: 'Această alertă nu a putut fi arhivată',
+      archiveFailedBody:
+        'Am încercat să mutăm această alertă în arhivă (unde un administrator ar mai putea-o recupera ulterior), dar ceva nu a funcționat. O poți totuși șterge definitiv din sistem — dar acest lucru ocolește pista de audit și nu poate fi anulat, nici măcar de către suport. Vrei să o ștergi definitiv?',
+      archiveFailedReason: 'Motiv',
+      removePermanently: 'Șterge definitiv',
+      keepAlert: 'Păstrează alerta',
       toastTitle: 'Alertă critică',
       toastViewAction: 'Vezi alertele',
       toastFallbackDescription:

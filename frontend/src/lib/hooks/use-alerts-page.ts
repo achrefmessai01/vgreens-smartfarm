@@ -16,6 +16,11 @@ export function useAlertsPage() {
     alert: Alert | null;
     isOpen: boolean;
   }>({ alert: null, isOpen: false });
+  const [hardDeleteEscalation, setHardDeleteEscalation] = React.useState<{
+    alert: Alert | null;
+    isOpen: boolean;
+    reason: string;
+  }>({ alert: null, isOpen: false, reason: '' });
   const [actionDialog, setActionDialog] = React.useState<{
     isOpen: boolean;
     alert: Alert | null;
@@ -72,13 +77,35 @@ export function useAlertsPage() {
   }, []);
 
   const confirmDelete = React.useCallback(async () => {
-    if (deleteConfirmation.alert) {
-      const success = await management.handleDelete(
-        deleteConfirmation.alert.id,
-      );
-      if (success) setDeleteConfirmation({ alert: null, isOpen: false });
+    if (!deleteConfirmation.alert) return;
+    const target = deleteConfirmation.alert;
+    const result = await management.handleSoftDelete(target.id);
+    if (result.ok) {
+      setDeleteConfirmation({ alert: null, isOpen: false });
+    } else {
+      // Soft-delete failed — escalate to a customer-friendly hard-delete
+      // dialog that explains what just happened and the trade-off.
+      setDeleteConfirmation({ alert: null, isOpen: false });
+      setHardDeleteEscalation({
+        alert: target,
+        isOpen: true,
+        reason: result.reason,
+      });
     }
   }, [deleteConfirmation.alert, management]);
+
+  const confirmHardDelete = React.useCallback(async () => {
+    if (!hardDeleteEscalation.alert) return;
+    const success = await management.handleHardDelete(
+      hardDeleteEscalation.alert.id,
+    );
+    if (success)
+      setHardDeleteEscalation({ alert: null, isOpen: false, reason: '' });
+  }, [hardDeleteEscalation.alert, management]);
+
+  const cancelHardDelete = React.useCallback(() => {
+    setHardDeleteEscalation({ alert: null, isOpen: false, reason: '' });
+  }, []);
 
   const confirmAction = React.useCallback(async () => {
     if (actionDialog.alert && actionDialog.action) {
@@ -123,6 +150,8 @@ export function useAlertsPage() {
     selectedAlert,
     deleteConfirmation,
     setDeleteConfirmation,
+    hardDeleteEscalation,
+    setHardDeleteEscalation,
     actionDialog,
     setActionDialog,
     onCreate,
@@ -135,6 +164,8 @@ export function useAlertsPage() {
     handleSidebarAcknowledge,
     handleSidebarResolve,
     confirmDelete,
+    confirmHardDelete,
+    cancelHardDelete,
     confirmAction,
     handleSubmit,
     handleCancel,

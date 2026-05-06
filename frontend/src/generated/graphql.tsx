@@ -519,6 +519,7 @@ export type Mutation = {
   createTenant: Tenant;
   createUser: User;
   deleteAlert: Scalars['Boolean']['output'];
+  softDeleteAlert: Scalars['Boolean']['output'];
   deleteErrorReport: Scalars['Boolean']['output'];
   deleteFeature: Scalars['Boolean']['output'];
   deleteHarvest: Scalars['Boolean']['output'];
@@ -589,6 +590,11 @@ export type MutationCreateUserArgs = {
 
 
 export type MutationDeleteAlertArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationSoftDeleteAlertArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1451,6 +1457,13 @@ export type DeleteAlertMutationVariables = Exact<{
 
 
 export type DeleteAlertMutation = { __typename?: 'Mutation', deleteAlert: boolean };
+
+export type SoftDeleteAlertMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SoftDeleteAlertMutation = { __typename?: 'Mutation', softDeleteAlert: boolean };
 
 export type FarmConfigQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -3277,6 +3290,37 @@ export function useDeleteAlertMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteAlertMutationHookResult = ReturnType<typeof useDeleteAlertMutation>;
 export type DeleteAlertMutationResult = Apollo.MutationResult<DeleteAlertMutation>;
 export type DeleteAlertMutationOptions = Apollo.BaseMutationOptions<DeleteAlertMutation, DeleteAlertMutationVariables>;
+export const SoftDeleteAlertDocument = gql`
+    mutation SoftDeleteAlert($id: ID!) {
+  softDeleteAlert(id: $id)
+}
+    `;
+export type SoftDeleteAlertMutationFn = Apollo.MutationFunction<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>;
+
+/**
+ * __useSoftDeleteAlertMutation__
+ *
+ * To run a mutation, you first call `useSoftDeleteAlertMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSoftDeleteAlertMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [softDeleteAlertMutation, { data, loading, error }] = useSoftDeleteAlertMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSoftDeleteAlertMutation(baseOptions?: Apollo.MutationHookOptions<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>(SoftDeleteAlertDocument, options);
+      }
+export type SoftDeleteAlertMutationHookResult = ReturnType<typeof useSoftDeleteAlertMutation>;
+export type SoftDeleteAlertMutationResult = Apollo.MutationResult<SoftDeleteAlertMutation>;
+export type SoftDeleteAlertMutationOptions = Apollo.BaseMutationOptions<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>;
 export const FarmConfigDocument = gql`
     query FarmConfig($tenantId: ID) {
   farmConfig(tenantId: $tenantId) {
