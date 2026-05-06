@@ -804,6 +804,12 @@ export const pl = {
       editAlert: 'Edytuj alarm',
       updateAlert: 'Zaktualizuj alarm',
       deleteAlert: 'Usuń alarm',
+      archiveFailed: 'Nie udało się zarchiwizować tego alarmu',
+      archiveFailedBody:
+        'Próbowaliśmy przenieść ten alarm do archiwum (gdzie administrator nadal mógłby go później odzyskać), ale coś poszło nie tak. Możesz jednak trwale usunąć go z systemu — pomija to jednak ścieżkę audytu i nie można tego cofnąć, nawet przez wsparcie. Czy chcesz go trwale usunąć?',
+      archiveFailedReason: 'Powód',
+      removePermanently: 'Usuń trwale',
+      keepAlert: 'Zachowaj alarm',
       toastTitle: 'Alarm krytyczny',
       toastViewAction: 'Zobacz alarmy',
       toastFallbackDescription:

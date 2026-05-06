@@ -805,6 +805,12 @@ export const tr = {
       editAlert: 'Alarmı düzenle',
       updateAlert: 'Alarmı güncelle',
       deleteAlert: 'Alarmı sil',
+      archiveFailed: 'Bu alarm arşivlenemedi',
+      archiveFailedBody:
+        'Bu alarmı arşive taşımayı denedik (orada bir yönetici daha sonra kurtarabilirdi), ancak bir sorun oluştu. Yine de sistemden kalıcı olarak kaldırabilirsiniz — ancak bu, denetim izini atlar ve destek tarafından bile geri alınamaz. Kalıcı olarak kaldırmak istiyor musunuz?',
+      archiveFailedReason: 'Neden',
+      removePermanently: 'Kalıcı olarak kaldır',
+      keepAlert: 'Alarmı koru',
       toastTitle: 'Kritik alarm',
       toastViewAction: 'Alarmları görüntüle',
       toastFallbackDescription: 'Yeni bir kritik alarm dikkat gerektiriyor.',

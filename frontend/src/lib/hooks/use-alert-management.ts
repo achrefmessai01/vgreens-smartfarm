@@ -7,6 +7,7 @@ import {
   useCreateAlertMutation,
   useUpdateAlertMutation,
   useDeleteAlertMutation,
+  useSoftDeleteAlertMutation,
   useResolveAlertMutation,
   useAcknowledgeAlertMutation,
 } from '@/generated/graphql';
@@ -40,6 +41,7 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
   const [createAlert] = useCreateAlertMutation();
   const [updateAlert] = useUpdateAlertMutation();
   const [deleteAlert] = useDeleteAlertMutation();
+  const [softDeleteAlert] = useSoftDeleteAlertMutation();
   const [acknowledgeAlert] = useAcknowledgeAlertMutation();
   const [resolveAlert] = useResolveAlertMutation();
 
@@ -95,14 +97,33 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleSoftDelete = async (
+    id: string,
+  ): Promise<{ ok: true } | { ok: false; reason: string }> => {
+    setIsLoading(true);
+    try {
+      await softDeleteAlert({ variables: { id } });
+      refetch();
+      return { ok: true };
+    } catch (error) {
+      console.error('Error soft-deleting alert:', error);
+      return {
+        ok: false,
+        reason: error instanceof Error ? error.message : String(error),
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleHardDelete = async (id: string) => {
     setIsLoading(true);
     try {
       await deleteAlert({ variables: { id } });
       refetch();
       return true;
     } catch (error) {
-      console.error('Error deleting alert:', error);
+      console.error('Error hard-deleting alert:', error);
       return false;
     } finally {
       setIsLoading(false);
@@ -145,7 +166,8 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
     openAlertsCount,
     handleCreate,
     handleUpdate,
-    handleDelete,
+    handleSoftDelete,
+    handleHardDelete,
     handleAcknowledge,
     handleResolve,
     refetch,

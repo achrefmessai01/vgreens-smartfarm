@@ -799,6 +799,12 @@ export const it = {
       editAlert: 'Modifica allarme',
       updateAlert: 'Aggiorna allarme',
       deleteAlert: 'Elimina allarme',
+      archiveFailed: 'Impossibile archiviare questo allarme',
+      archiveFailedBody:
+        "Abbiamo provato a spostare questo allarme nell'archivio (dove un amministratore potrebbe ancora recuperarlo in seguito), ma qualcosa è andato storto. Puoi comunque rimuoverlo definitivamente dal sistema, ma questo salta la traccia di audit e non può essere annullato, nemmeno dal supporto. Vuoi rimuoverlo definitivamente?",
+      archiveFailedReason: 'Motivo',
+      removePermanently: 'Rimuovi definitivamente',
+      keepAlert: 'Mantieni allarme',
       toastTitle: 'Allarme critico',
       toastViewAction: 'Visualizza allarmi',
       toastFallbackDescription: 'Un nuovo allarme critico richiede attenzione.',

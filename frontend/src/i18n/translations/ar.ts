@@ -808,6 +808,12 @@ export const ar = {
       editAlert: 'تعديل التنبيه',
       updateAlert: 'تحديث التنبيه',
       deleteAlert: 'حذف التنبيه',
+      archiveFailed: 'تعذر أرشفة هذا التنبيه',
+      archiveFailedBody:
+        'حاولنا نقل هذا التنبيه إلى الأرشيف (حيث يمكن للمسؤول استعادته لاحقًا)، لكن حدث خطأ ما. لا يزال بإمكانك إزالته نهائيًا من النظام — لكن ذلك يتجاوز سجل التدقيق ولا يمكن التراجع عنه، حتى من قبل الدعم. هل تريد إزالته نهائيًا؟',
+      archiveFailedReason: 'السبب',
+      removePermanently: 'إزالة نهائيًا',
+      keepAlert: 'الاحتفاظ بالتنبيه',
       toastTitle: 'تنبيه حرج',
       toastViewAction: 'عرض التنبيهات',
       toastFallbackDescription: 'يتطلب تنبيه حرج جديد الانتباه.',

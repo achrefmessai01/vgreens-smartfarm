@@ -803,6 +803,12 @@ export const es = {
       editAlert: 'Editar alerta',
       updateAlert: 'Actualizar alerta',
       deleteAlert: 'Eliminar alerta',
+      archiveFailed: 'No se pudo archivar esta alerta',
+      archiveFailedBody:
+        'Intentamos mover esta alerta al archivo (donde un administrador aún podría recuperarla más tarde), pero algo salió mal. Aún puedes eliminarla permanentemente del sistema, pero esto omite el registro de auditoría y no se puede deshacer, ni siquiera por el soporte. ¿Quieres eliminarla permanentemente?',
+      archiveFailedReason: 'Motivo',
+      removePermanently: 'Eliminar permanentemente',
+      keepAlert: 'Mantener alerta',
       toastTitle: 'Alerta crítica',
       toastViewAction: 'Ver alertas',
       toastFallbackDescription: 'Una nueva alerta crítica requiere atención.',

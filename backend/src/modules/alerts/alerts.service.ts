@@ -73,6 +73,8 @@ export class AlertsService extends BaseService<Alert> {
         qb.andWhere('alert.tenantId = :tenantId', { tenantId });
       }
 
+      qb.andWhere('alert.deletedAt IS NULL');
+
       if (!filter) {
         return qb.getMany();
       }
@@ -148,7 +150,12 @@ export class AlertsService extends BaseService<Alert> {
 
   async findOneById(id: string, tenantId?: string): Promise<Alert> {
     try {
-      const alert = await this.findOne(id, tenantId);
+      // Use repository.findOne (not BaseService.findOne) so the soft-delete
+      // filter is applied automatically via @DeleteDateColumn — soft-deleted
+      // rows behave as if they don't exist for normal lookups.
+      const alert = await this.alertRepository.findOne({
+        where: tenantId !== undefined ? { id, tenantId } : { id },
+      });
       if (!alert) {
         throw new NotFoundException(`Alert with ID ${id} not found`);
       }
@@ -390,9 +397,39 @@ export class AlertsService extends BaseService<Alert> {
     }
   }
 
-  async deleteAlert(id: string, tenantId?: string): Promise<void> {
+  async softDeleteAlert(
+    id: string,
+    userId: string,
+    tenantId?: string,
+  ): Promise<void> {
     try {
       await this.findOneById(id, tenantId);
+      await this.alertRepository.update(
+        tenantId !== undefined ? { id, tenantId } : { id },
+        { deletedById: userId, deletedAt: new Date() },
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      this.logger.error(
+        `softDeleteAlert failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw new InternalServerErrorException('Failed to soft-delete alert');
+    }
+  }
+
+  async deleteAlert(id: string, tenantId?: string): Promise<void> {
+    try {
+      // Hard-delete fallback. Look up by primary key directly (bypassing the
+      // soft-delete filter) so this can clean up rows that were already
+      // soft-deleted but need to be purged.
+      const existing = await this.alertRepository.findOne({
+        where: tenantId !== undefined ? { id, tenantId } : { id },
+        withDeleted: true,
+      });
+      if (!existing) {
+        throw new NotFoundException(`Alert with ID ${id} not found`);
+      }
       await this.delete(id, tenantId);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;

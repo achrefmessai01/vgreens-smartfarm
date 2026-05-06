@@ -5,6 +5,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   Index,
 } from 'typeorm';
 import { BaseEntity } from '@common/entities';
@@ -144,4 +145,17 @@ export class Alert extends BaseEntity {
   @Field()
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @Field({ nullable: true })
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt?: Date | null;
+
+  @Field(() => ID, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  deletedById?: string;
+
+  @Field(() => User, { nullable: true })
+  @ManyToOne(() => User, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'deletedById' })
+  deletedBy?: User;
 }

@@ -785,6 +785,12 @@ export const en = {
       editAlert: 'Edit Alert',
       updateAlert: 'Update Alert',
       deleteAlert: 'Delete Alert',
+      archiveFailed: "Couldn't archive this alert",
+      archiveFailedBody:
+        "We tried to move this alert to the archive (where an admin could still recover it later), but something went wrong. You can still remove it permanently from the system — but this skips the audit trail and cannot be undone, even by support. Do you want to permanently remove it?",
+      archiveFailedReason: 'Reason',
+      removePermanently: 'Remove permanently',
+      keepAlert: 'Keep alert',
       toastTitle: 'Critical alert',
       toastViewAction: 'View alerts',
       toastFallbackDescription: 'A new critical alert requires attention.',
