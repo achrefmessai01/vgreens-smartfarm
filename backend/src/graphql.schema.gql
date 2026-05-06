@@ -115,16 +115,7 @@ input CreateHarvestInput {
 
   """Defaults to "species - variety" if omitted"""
   batch: String
-  brix1: Float! = 0
-  brix2: Float! = 0
-  brix3: Float! = 0
-  brix4: Float! = 0
-  brix5: Float! = 0
-  brix6: Float! = 0
-  brix7: Float! = 0
-  brix8: Float! = 0
-  brix9: Float! = 0
-  brix10: Float! = 0
+  brixReadings: [Float!]
   classA: Float! = 0
 
   """Cultivation area in m²"""
@@ -285,16 +276,7 @@ input GetSignedImageUrlInput {
 type Harvest {
   avgBrix: Float!
   batch: String!
-  brix1: Float!
-  brix2: Float!
-  brix3: Float!
-  brix4: Float!
-  brix5: Float!
-  brix6: Float!
-  brix7: Float!
-  brix8: Float!
-  brix9: Float!
-  brix10: Float!
+  brixReadings: [Float!]!
   classA: Float!
   createdAt: DateTime!
   createdBy: User
@@ -558,16 +540,7 @@ input UpdateFeatureInput {
 input UpdateHarvestInput {
   avgBrix: Float
   batch: String
-  brix1: Float
-  brix2: Float
-  brix3: Float
-  brix4: Float
-  brix5: Float
-  brix6: Float
-  brix7: Float
-  brix8: Float
-  brix9: Float
-  brix10: Float
+  brixReadings: [Float!]
   classA: Float
   cultivationArea: Float
   date: String

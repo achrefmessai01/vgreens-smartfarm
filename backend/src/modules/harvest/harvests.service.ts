@@ -205,16 +205,7 @@ export class HarvestsService extends BaseService<Harvest> {
           (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
             ? input.numberOfRowsHarvested
             : 0),
-        brix1: input.brix1 ?? 0,
-        brix2: input.brix2 ?? 0,
-        brix3: input.brix3 ?? 0,
-        brix4: input.brix4 ?? 0,
-        brix5: input.brix5 ?? 0,
-        brix6: input.brix6 ?? 0,
-        brix7: input.brix7 ?? 0,
-        brix8: input.brix8 ?? 0,
-        brix9: input.brix9 ?? 0,
-        brix10: input.brix10 ?? 0,
+        brixReadings: input.brixReadings ?? [],
         photos: input.photos ?? 0,
         photoUrls: input.photoUrls ?? [],
       });
@@ -297,16 +288,9 @@ export class HarvestsService extends BaseService<Harvest> {
         harvest.rowY =
           input.numberOfRowsHarvested > 0 ? input.numberOfRowsHarvested : 0;
       }
-      if (input.brix1 !== undefined) harvest.brix1 = input.brix1;
-      if (input.brix2 !== undefined) harvest.brix2 = input.brix2;
-      if (input.brix3 !== undefined) harvest.brix3 = input.brix3;
-      if (input.brix4 !== undefined) harvest.brix4 = input.brix4;
-      if (input.brix5 !== undefined) harvest.brix5 = input.brix5;
-      if (input.brix6 !== undefined) harvest.brix6 = input.brix6;
-      if (input.brix7 !== undefined) harvest.brix7 = input.brix7;
-      if (input.brix8 !== undefined) harvest.brix8 = input.brix8;
-      if (input.brix9 !== undefined) harvest.brix9 = input.brix9;
-      if (input.brix10 !== undefined) harvest.brix10 = input.brix10;
+      if (input.brixReadings !== undefined) {
+        harvest.brixReadings = input.brixReadings;
+      }
       if (input.photos !== undefined) harvest.photos = input.photos;
       if (input.photoUrls !== undefined) harvest.photoUrls = input.photoUrls;
 

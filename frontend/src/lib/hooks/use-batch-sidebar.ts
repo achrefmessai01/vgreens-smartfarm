@@ -51,19 +51,31 @@ export function useBatchSidebar({
 
   const currentData = localData ?? batchData;
 
-  const handleBrixChange = React.useCallback(
-    (field: keyof BatchDetailsData['brixMeasurements'], value: number) => {
-      setLocalData((prev) =>
-        prev
-          ? {
-              ...prev,
-              brixMeasurements: { ...prev.brixMeasurements, [field]: value },
-            }
-          : prev,
-      );
-    },
-    [],
-  );
+  const handleBrixChange = React.useCallback((index: number, value: number) => {
+    setLocalData((prev) => {
+      if (!prev) return prev;
+      const next = [...prev.brixReadings];
+      next[index] = value;
+      return { ...prev, brixReadings: next };
+    });
+  }, []);
+
+  const handleAddBrixReading = React.useCallback(() => {
+    setLocalData((prev) =>
+      prev ? { ...prev, brixReadings: [...prev.brixReadings, 0] } : prev,
+    );
+  }, []);
+
+  const handleRemoveBrixReading = React.useCallback((index: number) => {
+    setLocalData((prev) => {
+      if (!prev) return prev;
+      if (prev.brixReadings.length <= 1) return prev;
+      return {
+        ...prev,
+        brixReadings: prev.brixReadings.filter((_, i) => i !== index),
+      };
+    });
+  }, []);
 
   const handleYieldChange = React.useCallback(
     (field: 'marketable' | 'waste' | 'rowX' | 'rowY', value: number) => {
@@ -115,7 +127,7 @@ export function useBatchSidebar({
 
   const handleSave = React.useCallback(async () => {
     if (!harvestId || !currentData) return;
-    const brix = currentData.brixMeasurements;
+    const brixReadings = currentData.brixReadings;
     // Re-fetch the harvest list after every save so the entry tab updates
     // immediately. awaitRefetchQueries makes the mutation promise resolve only
     // after the refetch lands, so onCompleted fires against fresh data.
@@ -142,10 +154,10 @@ export function useBatchSidebar({
               rowSpacing: currentData.rowSpacing,
               classA: currentData.todaysHarvest.marketable,
               waste: currentData.todaysHarvest.waste,
-              avgBrix: computeAvgBrix(brix),
+              avgBrix: computeAvgBrix(brixReadings),
               rowX: currentData.todaysHarvest.rowX,
               rowY: currentData.todaysHarvest.rowY,
-              ...brix,
+              brixReadings,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,
               date: new Date().toISOString(),
@@ -161,10 +173,10 @@ export function useBatchSidebar({
             input: {
               classA: currentData.todaysHarvest.marketable,
               waste: currentData.todaysHarvest.waste,
-              avgBrix: computeAvgBrix(brix),
+              avgBrix: computeAvgBrix(brixReadings),
               rowX: currentData.todaysHarvest.rowX,
               rowY: currentData.todaysHarvest.rowY,
-              ...brix,
+              brixReadings,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,
               status: currentData.status,
@@ -184,6 +196,8 @@ export function useBatchSidebar({
     loading: loading || createLoading || uploading,
     mode,
     handleBrixChange,
+    handleAddBrixReading,
+    handleRemoveBrixReading,
     handleYieldChange,
     handlePhotoUpload,
     handleRemovePhoto,

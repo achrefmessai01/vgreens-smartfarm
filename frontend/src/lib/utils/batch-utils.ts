@@ -38,18 +38,7 @@ export function createBatchDetailsFromForm(
       rowX: 0,
       rowY: 0,
     },
-    brixMeasurements: {
-      brix1: 0,
-      brix2: 0,
-      brix3: 0,
-      brix4: 0,
-      brix5: 0,
-      brix6: 0,
-      brix7: 0,
-      brix8: 0,
-      brix9: 0,
-      brix10: 0,
-    },
+    brixReadings: [0],
     photos: [],
   };
 }

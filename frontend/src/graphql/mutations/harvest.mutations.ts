@@ -24,16 +24,7 @@ export const CREATE_HARVEST_MUTATION = gql`
       avgBrix
       rowX
       rowY
-      brix1
-      brix2
-      brix3
-      brix4
-      brix5
-      brix6
-      brix7
-      brix8
-      brix9
-      brix10
+      brixReadings
       photos
       photoUrls
       createdAt
@@ -66,16 +57,7 @@ export const UPDATE_HARVEST_MUTATION = gql`
       avgBrix
       rowX
       rowY
-      brix1
-      brix2
-      brix3
-      brix4
-      brix5
-      brix6
-      brix7
-      brix8
-      brix9
-      brix10
+      brixReadings
       photos
       photoUrls
       createdAt
