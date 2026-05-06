@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
 
 export function YieldDataField({
@@ -15,6 +16,7 @@ export function YieldDataField({
 }: YieldDataFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  const [showRowCoordinates, setShowRowCoordinates] = React.useState(false);
   const marketableRef = React.useRef<HTMLInputElement>(null);
   const wasteRef = React.useRef<HTMLInputElement>(null);
 
@@ -39,8 +41,12 @@ export function YieldDataField({
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-muted h-10 animate-pulse rounded" />
           <div className="bg-muted h-10 animate-pulse rounded" />
-          <div className="bg-muted h-10 animate-pulse rounded" />
-          <div className="bg-muted h-10 animate-pulse rounded" />
+          {showRowCoordinates && (
+            <>
+              <div className="bg-muted h-10 animate-pulse rounded" />
+              <div className="bg-muted h-10 animate-pulse rounded" />
+            </>
+          )}
         </div>
       </div>
     );
@@ -55,9 +61,20 @@ export function YieldDataField({
         </span>
       </div>
       <div className="space-y-3">
-        <p className="text-muted-foreground text-sm font-medium">
-          {h?.yieldData ?? 'Yield Data'}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-muted-foreground text-sm font-medium">
+            {h?.yieldData ?? 'Yield Data'}
+          </p>
+          <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm select-none">
+            <Checkbox
+              checked={showRowCoordinates}
+              onCheckedChange={(checked) =>
+                setShowRowCoordinates(checked === true)
+              }
+            />
+            <span>Show row coordinates</span>
+          </label>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2 text-left">
             <p className="text-muted-foreground text-sm">
@@ -107,54 +124,58 @@ export function YieldDataField({
               </span>
             </div>
           </div>
-          <div className="space-y-2 text-left">
-            <p className="text-muted-foreground text-sm">
-              {h?.rowX ?? 'Row X'}
-            </p>
-            <div className="relative">
-              <Input
-                type="number"
-                min="0"
-                step="1"
-                value={rowX === 0 ? '' : rowX.toString()}
-                onChange={(e) =>
-                  onYieldChange?.(
-                    'rowX',
-                    Math.max(0, Number.parseInt(e.target.value, 10) || 0),
-                  )
-                }
-                className="h-10 pr-12 text-left text-base"
-                placeholder={h?.enterRowX ?? 'Start row'}
-              />
-              <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
-                rows
-              </span>
-            </div>
-          </div>
-          <div className="space-y-2 text-left">
-            <p className="text-muted-foreground text-sm">
-              {h?.rowY ?? 'Row Y'}
-            </p>
-            <div className="relative">
-              <Input
-                type="number"
-                min="0"
-                step="1"
-                value={rowY === 0 ? '' : rowY.toString()}
-                onChange={(e) =>
-                  onYieldChange?.(
-                    'rowY',
-                    Math.max(0, Number.parseInt(e.target.value, 10) || 0),
-                  )
-                }
-                className="h-10 pr-12 text-left text-base"
-                placeholder={h?.enterRowY ?? 'End row'}
-              />
-              <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
-                rows
-              </span>
-            </div>
-          </div>
+          {showRowCoordinates && (
+            <>
+              <div className="space-y-2 text-left">
+                <p className="text-muted-foreground text-sm">
+                  {h?.rowX ?? 'Row X'}
+                </p>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={rowX === 0 ? '' : rowX.toString()}
+                    onChange={(e) =>
+                      onYieldChange?.(
+                        'rowX',
+                        Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+                      )
+                    }
+                    className="h-10 pr-12 text-left text-base"
+                    placeholder={h?.enterRowX ?? 'Start row'}
+                  />
+                  <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
+                    rows
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-2 text-left">
+                <p className="text-muted-foreground text-sm">
+                  {h?.rowY ?? 'Row Y'}
+                </p>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={rowY === 0 ? '' : rowY.toString()}
+                    onChange={(e) =>
+                      onYieldChange?.(
+                        'rowY',
+                        Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+                      )
+                    }
+                    className="h-10 pr-12 text-left text-base"
+                    placeholder={h?.enterRowY ?? 'End row'}
+                  />
+                  <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
+                    rows
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
