@@ -3,7 +3,6 @@ import type { Translations } from '@/i18n/translations';
 import {
   AlertTriangle,
   Apple,
-  Bell,
   Building2,
   Clock,
   ClipboardList,
@@ -76,12 +75,6 @@ export const getTenantNavItems = (t: Translations): NavItem[] => [
     href: '/tenant/users',
     icon: Users,
     featureKey: 'user_management', // Always show user management
-  },
-  {
-    label: t.navigation.warnings,
-    href: '/tenant/warnings',
-    icon: Bell,
-    featureKey: 'sensor_alerts',
   },
   {
     label: t.navigation.alerts,
