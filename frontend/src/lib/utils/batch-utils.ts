@@ -35,6 +35,7 @@ export function createBatchDetailsFromForm(
     todaysHarvest: {
       marketable: 0,
       waste: 0,
+      classB: 0,
       rowX: 0,
       rowY: 0,
     },

@@ -23,6 +23,7 @@ export function isAutoDraftPlaceholder(entry: HarvestItem): boolean {
     !entry.parentBatchId &&
     entry.status === HarvestStatus.Draft &&
     entry.classA === 0 &&
+    entry.classB === 0 &&
     entry.waste === 0 &&
     entry.avgBrix === 0 &&
     entry.rowX === 0 &&

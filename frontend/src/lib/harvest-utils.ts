@@ -53,12 +53,14 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
       totalHarvests: 0,
       variety: '-',
       totalClassA: 0,
+      totalClassB: 0,
       totalWaste: 0,
       avgBrix: 0,
     };
   }
 
   const totalClassA = harvests.reduce((s, h) => s + h.classA, 0);
+  const totalClassB = harvests.reduce((s, h) => s + h.classB, 0);
   const totalWaste = harvests.reduce((s, h) => s + h.waste, 0);
   const avgBrix = harvests.reduce((s, h) => s + h.avgBrix, 0) / harvests.length;
 
@@ -73,6 +75,7 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
     totalHarvests: harvests.length,
     variety,
     totalClassA: Math.round(totalClassA * 10) / 10,
+    totalClassB: Math.round(totalClassB * 10) / 10,
     totalWaste: Math.round(totalWaste * 10) / 10,
     avgBrix: Math.round(avgBrix * 10) / 10,
   };
@@ -105,6 +108,7 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
     todaysHarvest: {
       marketable: h.classA,
       waste: h.waste,
+      classB: h.classB,
       rowX: h.rowX,
       rowY: h.rowY,
     },

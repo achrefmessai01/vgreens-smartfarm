@@ -50,6 +50,7 @@ export class HarvestsService extends BaseService<Harvest> {
       harvest.status === HarvestStatus.DRAFT &&
       harvest.parentBatchId == null &&
       harvest.classA === 0 &&
+      harvest.classB === 0 &&
       harvest.waste === 0 &&
       harvest.avgBrix === 0 &&
       harvest.rowX === 0 &&
@@ -193,6 +194,7 @@ export class HarvestsService extends BaseService<Harvest> {
         status: input.status ?? HarvestStatus.ACTIVE,
         date: new Date(input.date),
         classA: input.classA ?? 0,
+        classB: input.classB ?? 0,
         waste: input.waste ?? 0,
         avgBrix: input.avgBrix ?? 0,
         rowX:
@@ -275,6 +277,7 @@ export class HarvestsService extends BaseService<Harvest> {
       if (input.status !== undefined) harvest.status = input.status;
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.classA !== undefined) harvest.classA = input.classA;
+      if (input.classB !== undefined) harvest.classB = input.classB;
       if (input.waste !== undefined) harvest.waste = input.waste;
       if (input.avgBrix !== undefined) harvest.avgBrix = input.avgBrix;
       if (input.rowX !== undefined) harvest.rowX = input.rowX;

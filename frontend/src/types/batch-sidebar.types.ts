@@ -20,6 +20,7 @@ export interface BatchDetailsData {
   todaysHarvest: {
     marketable: number;
     waste: number;
+    classB: number;
     rowX: number;
     rowY: number;
   };
@@ -44,10 +45,11 @@ export interface BatchStatsFieldProps {
 export interface YieldDataFieldProps {
   marketable: number;
   waste: number;
+  classB: number;
   rowX: number;
   rowY: number;
   onYieldChange?: (
-    field: 'marketable' | 'waste' | 'rowX' | 'rowY',
+    field: 'marketable' | 'waste' | 'classB' | 'rowX' | 'rowY',
     value: number,
   ) => void;
   isLoading?: boolean;
