@@ -55,6 +55,8 @@ export interface YieldDataFieldProps {
 
 export interface BrixMeasurementsFieldProps {
   readings: number[];
+  showBrix: boolean;
+  onShowBrixChange: (show: boolean) => void;
   onReadingChange?: (index: number, value: number) => void;
   onAddReading?: () => void;
   onRemoveReading?: (index: number) => void;
