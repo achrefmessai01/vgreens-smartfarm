@@ -358,6 +358,8 @@ export const pl = {
       quality1: 'Jakość 1',
       quality2: 'Jakość 2',
       quality2Ratio: 'Wskaźnik Jakości 2',
+      quality1Percent: 'Jakość 1 %',
+      quality2Percent: 'Jakość 2 %',
       enterQuality1Yield: 'Wprowadź plon Jakości 1',
       enterQuality2Yield: 'Wprowadź plon Jakości 2',
       uploadPhotos: 'Kliknij, aby wgrać, lub przeciągnij i upuść',

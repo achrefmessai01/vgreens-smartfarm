@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
+import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import {
   ChartDot,
   ChartTooltipContainer,
@@ -18,6 +19,7 @@ import {
 interface CumulativeYieldData {
   date: string;
   cumulative: number;
+  cumulativeClassB: number;
   cumulativeWaste: number;
 }
 
@@ -26,20 +28,6 @@ interface CumulativeYieldChartProps {
   className?: string;
 }
 
-const CumulativeTooltip = ({ active, payload, label }: ChartTooltipProps) => {
-  if (!active || !payload?.length) return null;
-  const yieldVal = payload.find((p) => p.dataKey === 'cumulative')?.value ?? 0;
-  const wasteVal =
-    payload.find((p) => p.dataKey === 'cumulativeWaste')?.value ?? 0;
-  return (
-    <ChartTooltipContainer>
-      <p className="font-medium">{`Date: ${label}`}</p>
-      <p className="text-sm text-emerald-500">{`Yield: ${yieldVal} kg`}</p>
-      <p className="text-sm text-red-500">{`Waste: ${wasteVal} kg`}</p>
-    </ChartTooltipContainer>
-  );
-};
-
 const cumulativeDot = <ChartDot fill="#10b981" stroke="#059669" />;
 
 export function CumulativeYieldChart({
@@ -47,13 +35,54 @@ export function CumulativeYieldChart({
   className,
 }: CumulativeYieldChartProps) {
   const { t } = useI18n();
+  const classBMode = useHarvestClassBMode();
+  const h = t.pages.harvest;
+
+  const primaryLabel = classBMode
+    ? (h?.quality1 ?? 'Quality 1')
+    : (h?.yieldKg ?? 'Yield (kg)');
+  const secondaryLabel = classBMode
+    ? (h?.quality2 ?? 'Quality 2')
+    : (h?.waste ?? 'Waste');
+  const secondaryDataKey: 'cumulativeClassB' | 'cumulativeWaste' = classBMode
+    ? 'cumulativeClassB'
+    : 'cumulativeWaste';
+  const secondaryStroke = classBMode ? '#14b8a6' : '#ef4444';
+  const secondaryGradientId = classBMode
+    ? 'cumulativeClassBGradient'
+    : 'cumulativeWasteGradient';
+  const secondaryDotFill = classBMode ? '#14b8a6' : '#ef4444';
+  const secondaryShadow = classBMode
+    ? 'drop-shadow(0 2px 4px rgba(20, 184, 166, 0.3))'
+    : 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))';
+  const secondaryLegendColor = classBMode ? 'bg-teal-500' : 'bg-red-500';
+
+  const CumulativeTooltip = ({
+    active,
+    payload,
+    label,
+  }: ChartTooltipProps) => {
+    if (!active || !payload?.length) return null;
+    const yieldVal =
+      payload.find((p) => p.dataKey === 'cumulative')?.value ?? 0;
+    const secondaryVal =
+      payload.find((p) => p.dataKey === secondaryDataKey)?.value ?? 0;
+    return (
+      <ChartTooltipContainer>
+        <p className="font-medium">{`Date: ${label}`}</p>
+        <p className="text-sm text-emerald-500">{`${primaryLabel}: ${yieldVal} kg`}</p>
+        <p
+          className={`text-sm ${classBMode ? 'text-teal-500' : 'text-red-500'}`}
+        >{`${secondaryLabel}: ${secondaryVal} kg`}</p>
+      </ChartTooltipContainer>
+    );
+  };
 
   return (
     <Card className={className}>
       <div className="p-6">
         <h3 className="mb-4 text-lg font-semibold">
-          {t.pages.harvest?.cumulativeYieldProgress ??
-            'Cumulative Yield Progress'}
+          {h?.cumulativeYieldProgress ?? 'Cumulative Yield Progress'}
         </h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -82,6 +111,16 @@ export function CumulativeYieldChart({
                   <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
                 </linearGradient>
+                <linearGradient
+                  id="cumulativeClassBGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#14b8a6" stopOpacity={0.1} />
+                </linearGradient>
                 <filter id="glow">
                   <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                   <feMerge>
@@ -105,7 +144,7 @@ export function CumulativeYieldChart({
               <YAxis
                 fontSize={12}
                 label={{
-                  value: t.pages.harvest?.totalYieldKg ?? 'Total Yield (kg)',
+                  value: h?.totalYieldKg ?? 'Total Yield (kg)',
                   angle: -90,
                   position: 'insideLeft',
                 }}
@@ -125,15 +164,15 @@ export function CumulativeYieldChart({
               />
               <Area
                 type="monotone"
-                dataKey="cumulativeWaste"
-                stroke="#ef4444"
+                dataKey={secondaryDataKey}
+                stroke={secondaryStroke}
                 strokeWidth={2}
                 strokeDasharray="5 5"
-                fill="url(#cumulativeWasteGradient)"
-                dot={{ r: 3, fill: '#ef4444' }}
-                activeDot={{ r: 5, fill: '#ef4444' }}
+                fill={`url(#${secondaryGradientId})`}
+                dot={{ r: 3, fill: secondaryDotFill }}
+                activeDot={{ r: 5, fill: secondaryDotFill }}
                 style={{
-                  filter: 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))',
+                  filter: secondaryShadow,
                 }}
               />
             </AreaChart>
@@ -142,15 +181,11 @@ export function CumulativeYieldChart({
         <div className="mt-4 flex items-center justify-center gap-6">
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-emerald-500" />
-            <span className="text-sm font-medium">
-              {t.pages.harvest?.yieldKg ?? 'Yield (kg)'}
-            </span>
+            <span className="text-sm font-medium">{primaryLabel}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-red-500" />
-            <span className="text-sm font-medium">
-              {t.pages.harvest?.waste ?? 'Waste'}
-            </span>
+            <div className={`h-3 w-3 rounded-full ${secondaryLegendColor}`} />
+            <span className="text-sm font-medium">{secondaryLabel}</span>
           </div>
         </div>
       </div>

@@ -358,6 +358,8 @@ export const it = {
       quality1: 'Qualità 1',
       quality2: 'Qualità 2',
       quality2Ratio: 'Rapporto Qualità 2',
+      quality1Percent: 'Qualità 1 %',
+      quality2Percent: 'Qualità 2 %',
       enterQuality1Yield: 'Inserisci la resa Qualità 1',
       enterQuality2Yield: 'Inserisci la resa Qualità 2',
       uploadPhotos: 'Clicca per caricare o trascina e rilascia',

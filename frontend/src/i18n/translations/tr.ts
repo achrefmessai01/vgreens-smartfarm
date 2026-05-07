@@ -357,6 +357,8 @@ export const tr = {
       quality1: 'Kalite 1',
       quality2: 'Kalite 2',
       quality2Ratio: 'Kalite 2 Oranı',
+      quality1Percent: 'Kalite 1 %',
+      quality2Percent: 'Kalite 2 %',
       enterQuality1Yield: 'Kalite 1 verimi girin',
       enterQuality2Yield: 'Kalite 2 verimi girin',
       uploadPhotos: 'Yüklemek için tıklayın veya sürükleyip bırakın',

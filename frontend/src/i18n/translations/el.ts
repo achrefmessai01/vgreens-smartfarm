@@ -362,6 +362,8 @@ export const el = {
       quality1: 'Ποιότητα 1',
       quality2: 'Ποιότητα 2',
       quality2Ratio: 'Λόγος Ποιότητας 2',
+      quality1Percent: 'Ποιότητα 1 %',
+      quality2Percent: 'Ποιότητα 2 %',
       enterQuality1Yield: 'Εισαγάγετε την απόδοση Ποιότητας 1',
       enterQuality2Yield: 'Εισαγάγετε την απόδοση Ποιότητας 2',
       uploadPhotos: 'Κάντε κλικ για μεταφόρτωση ή σύρετε & αποθέστε',

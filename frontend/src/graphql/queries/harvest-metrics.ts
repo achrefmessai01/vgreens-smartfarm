@@ -12,6 +12,7 @@ export const GET_HARVEST_METRICS = gql`
       marketablePercent
       wastePercent
       wasteTotal
+      classBTotal
       criticalAlerts
       daysActive
     }
@@ -37,6 +38,7 @@ export const GET_CLASS_DISTRIBUTION = gql`
       classDistribution {
         date
         marketable
+        classB
         waste
       }
     }
@@ -62,6 +64,7 @@ export const GET_CUMULATIVE_YIELD = gql`
       cumulativeYield {
         date
         cumulative
+        cumulativeClassB
         cumulativeWaste
       }
     }

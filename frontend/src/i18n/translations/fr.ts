@@ -251,6 +251,8 @@ export const fr = {
       quality1: 'Qualité 1',
       quality2: 'Qualité 2',
       quality2Ratio: 'Ratio Qualité 2',
+      quality1Percent: 'Qualité 1 %',
+      quality2Percent: 'Qualité 2 %',
       enterQuality1Yield: 'Saisir le rendement Qualité 1',
       enterQuality2Yield: 'Saisir le rendement Qualité 2',
       uploadPhotos: 'Cliquez pour téléverser ou glissez-déposez',

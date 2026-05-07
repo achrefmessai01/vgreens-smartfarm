@@ -358,6 +358,8 @@ export const ro = {
       quality1: 'Calitate 1',
       quality2: 'Calitate 2',
       quality2Ratio: 'Raport Calitate 2',
+      quality1Percent: 'Calitate 1 %',
+      quality2Percent: 'Calitate 2 %',
       enterQuality1Yield: 'Introdu producția de Calitate 1',
       enterQuality2Yield: 'Introdu producția de Calitate 2',
       uploadPhotos: 'Apasă pentru a încărca sau trage și plasează',

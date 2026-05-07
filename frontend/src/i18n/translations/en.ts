@@ -348,6 +348,8 @@ export const en = {
       quality1: 'Quality 1',
       quality2: 'Quality 2',
       quality2Ratio: 'Quality 2 Ratio',
+      quality1Percent: 'Quality 1 %',
+      quality2Percent: 'Quality 2 %',
       enterQuality1Yield: 'Enter Quality 1 yield',
       enterQuality2Yield: 'Enter Quality 2 yield',
       uploadPhotos: 'Click to upload or drag and drop',

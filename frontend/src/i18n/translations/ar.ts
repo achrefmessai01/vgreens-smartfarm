@@ -359,6 +359,8 @@ export const ar = {
       quality1: 'الجودة 1',
       quality2: 'الجودة 2',
       quality2Ratio: 'نسبة الجودة 2',
+      quality1Percent: 'الجودة 1 %',
+      quality2Percent: 'الجودة 2 %',
       enterQuality1Yield: 'أدخل إنتاج الجودة 1',
       enterQuality2Yield: 'أدخل إنتاج الجودة 2',
       uploadPhotos: 'انقر للتحميل أو اسحب وأفلت',
