@@ -48,6 +48,8 @@ export function BatchSidebar({
   const {
     currentData,
     loading: isSaving,
+    showBrix,
+    setShowBrix,
     handleBrixChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
@@ -121,6 +123,8 @@ export function BatchSidebar({
                 <div className="bg-card rounded-xl border p-3 shadow-sm">
                   <BrixMeasurementsField
                     readings={currentData.brixReadings}
+                    showBrix={showBrix}
+                    onShowBrixChange={setShowBrix}
                     onReadingChange={handleBrixChange}
                     onAddReading={handleAddBrixReading}
                     onRemoveReading={handleRemoveBrixReading}

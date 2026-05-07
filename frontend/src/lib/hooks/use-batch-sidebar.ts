@@ -30,6 +30,7 @@ export function useBatchSidebar({
   const [localData, setLocalData] = React.useState<BatchDetailsData | null>(
     null,
   );
+  const [showBrix, setShowBrix] = React.useState(false);
   const [createHarvest, { loading: createLoading }] =
     useCreateHarvestMutation();
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
@@ -38,7 +39,12 @@ export function useBatchSidebar({
 
   React.useEffect(() => {
     setLocalData(batchData);
-  }, [batchData]);
+    // In edit mode, expand the brix section automatically when the batch
+    // already has readings — otherwise existing values would appear lost.
+    setShowBrix(
+      mode === 'edit' && (batchData?.brixReadings?.some((v) => v > 0) ?? false),
+    );
+  }, [batchData, mode]);
 
   React.useEffect(() => {
     const photos = localData?.photos ?? [];
@@ -127,7 +133,8 @@ export function useBatchSidebar({
 
   const handleSave = React.useCallback(async () => {
     if (!harvestId || !currentData) return;
-    const brixReadings = currentData.brixReadings;
+    const brixReadings = showBrix ? currentData.brixReadings : [];
+    const avgBrix = computeAvgBrix(brixReadings);
     // Re-fetch the harvest list after every save so the entry tab updates
     // immediately. awaitRefetchQueries makes the mutation promise resolve only
     // after the refetch lands, so onCompleted fires against fresh data.
@@ -154,7 +161,7 @@ export function useBatchSidebar({
               rowSpacing: currentData.rowSpacing,
               classA: currentData.todaysHarvest.marketable,
               waste: currentData.todaysHarvest.waste,
-              avgBrix: computeAvgBrix(brixReadings),
+              avgBrix,
               rowX: currentData.todaysHarvest.rowX,
               rowY: currentData.todaysHarvest.rowY,
               brixReadings,
@@ -173,7 +180,7 @@ export function useBatchSidebar({
             input: {
               classA: currentData.todaysHarvest.marketable,
               waste: currentData.todaysHarvest.waste,
-              avgBrix: computeAvgBrix(brixReadings),
+              avgBrix,
               rowX: currentData.todaysHarvest.rowX,
               rowY: currentData.todaysHarvest.rowY,
               brixReadings,
@@ -189,12 +196,22 @@ export function useBatchSidebar({
     } catch (err) {
       console.error('Failed to save harvest:', err);
     }
-  }, [harvestId, currentData, mode, updateHarvest, createHarvest, onCompleted]);
+  }, [
+    harvestId,
+    currentData,
+    mode,
+    showBrix,
+    updateHarvest,
+    createHarvest,
+    onCompleted,
+  ]);
 
   return {
     currentData,
     loading: loading || createLoading || uploading,
     mode,
+    showBrix,
+    setShowBrix,
     handleBrixChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
