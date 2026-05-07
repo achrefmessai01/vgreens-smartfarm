@@ -116,6 +116,10 @@ export class Harvest {
 
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
+  classB: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   waste: number;
 
   @Field(() => Float)

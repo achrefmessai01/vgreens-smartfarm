@@ -5,6 +5,7 @@ export interface HarvestRecord {
   date: string;
   batch: string;
   classA: number;
+  classB: number;
   waste: number;
   avgBrix: number;
   photos: number;
@@ -16,6 +17,7 @@ export interface HarvestSummary {
   totalHarvests: number;
   variety: string;
   totalClassA: number;
+  totalClassB: number;
   totalWaste: number;
   avgBrix: number;
 }
@@ -34,6 +36,7 @@ export interface HarvestLike {
   plantsPerMeter: number;
   rowSpacing: number;
   classA: number;
+  classB: number;
   waste: number;
   rowX: number;
   rowY: number;

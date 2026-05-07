@@ -84,7 +84,10 @@ export function useBatchSidebar({
   }, []);
 
   const handleYieldChange = React.useCallback(
-    (field: 'marketable' | 'waste' | 'rowX' | 'rowY', value: number) => {
+    (
+      field: 'marketable' | 'waste' | 'classB' | 'rowX' | 'rowY',
+      value: number,
+    ) => {
       setLocalData((prev) =>
         prev
           ? {
@@ -160,6 +163,7 @@ export function useBatchSidebar({
               plantsPerMeter: currentData.plantsPerMeter,
               rowSpacing: currentData.rowSpacing,
               classA: currentData.todaysHarvest.marketable,
+              classB: currentData.todaysHarvest.classB,
               waste: currentData.todaysHarvest.waste,
               avgBrix,
               rowX: currentData.todaysHarvest.rowX,
@@ -179,6 +183,7 @@ export function useBatchSidebar({
             id: harvestId,
             input: {
               classA: currentData.todaysHarvest.marketable,
+              classB: currentData.todaysHarvest.classB,
               waste: currentData.todaysHarvest.waste,
               avgBrix,
               rowX: currentData.todaysHarvest.rowX,

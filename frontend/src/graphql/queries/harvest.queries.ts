@@ -20,6 +20,7 @@ export const HARVESTS_QUERY = gql`
       status
       date
       classA
+      classB
       waste
       avgBrix
       rowX
@@ -59,6 +60,7 @@ export const HARVEST_QUERY = gql`
       status
       date
       classA
+      classB
       waste
       avgBrix
       rowX
