@@ -8,6 +8,7 @@ import {
   SheetContent,
 } from '@/components/ui/sheet';
 import { formatHarvestDate, getGreenhouseLabel } from '@/lib/harvest-utils';
+import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import type { HarvestsQuery } from '@/generated/graphql';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
@@ -18,21 +19,6 @@ interface HarvestDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function getBrixValues(h: HarvestItem): number[] {
-  return [
-    h.brix1,
-    h.brix2,
-    h.brix3,
-    h.brix4,
-    h.brix5,
-    h.brix6,
-    h.brix7,
-    h.brix8,
-    h.brix9,
-    h.brix10,
-  ];
-}
-
 export function HarvestDetails({
   harvest,
   open,
@@ -40,12 +26,24 @@ export function HarvestDetails({
 }: HarvestDetailsProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  const classBMode = useHarvestClassBMode();
 
   if (!harvest) return null;
 
-  const totalYield = harvest.classA + harvest.waste;
-  const wasteRatio = totalYield > 0 ? (harvest.waste / totalYield) * 100 : 0;
-  const brixValues = getBrixValues(harvest);
+  const secondaryValue = classBMode ? harvest.classB : harvest.waste;
+  const totalYield = harvest.classA + secondaryValue;
+  const secondaryRatio =
+    totalYield > 0 ? (secondaryValue / totalYield) * 100 : 0;
+  const primaryLabel = classBMode
+    ? (h?.quality1 ?? 'Quality 1')
+    : (h?.marketable ?? 'Marketable');
+  const secondaryLabel = classBMode
+    ? (h?.quality2 ?? 'Quality 2')
+    : (h?.waste ?? 'Waste');
+  const ratioLabel = classBMode
+    ? (h?.quality2Ratio ?? 'Quality 2 Ratio')
+    : (h?.wasteRatio ?? 'Waste Ratio');
+  const brixValues = harvest.brixReadings;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -92,7 +90,7 @@ export function HarvestDetails({
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-3">
                   <span className="text-muted-foreground font-medium">
-                    {h?.marketable ?? 'Marketable'}:
+                    {primaryLabel}:
                   </span>
                   <span className="text-xl font-bold text-teal-600">
                     {harvest.classA} kg
@@ -100,18 +98,20 @@ export function HarvestDetails({
                 </div>
                 <div className="flex items-center justify-between py-3">
                   <span className="text-muted-foreground font-medium">
-                    {h?.waste ?? 'Waste'}:
+                    {secondaryLabel}:
                   </span>
-                  <span className="text-xl font-bold text-red-500">
-                    {harvest.waste} kg
+                  <span
+                    className={`text-xl font-bold ${classBMode ? 'text-teal-600' : 'text-red-500'}`}
+                  >
+                    {secondaryValue} kg
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-3">
                   <span className="text-muted-foreground font-medium">
-                    {h?.wasteRatio ?? 'Waste Ratio'}:
+                    {ratioLabel}:
                   </span>
                   <span className="bg-muted rounded px-3 py-1 text-sm font-medium">
-                    {wasteRatio.toFixed(1)}%
+                    {secondaryRatio.toFixed(1)}%
                   </span>
                 </div>
               </div>
@@ -129,20 +129,26 @@ export function HarvestDetails({
                   </span>
                 </span>
               </div>
-              <div className="grid grid-cols-5 gap-4">
-                {brixValues.map((value, index) => (
-                  <div key={index} className="text-center">
-                    <div className="text-muted-foreground mb-2 text-xs font-medium">
-                      #{index + 1}
+              {brixValues.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  No Brix readings recorded.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+                  {brixValues.map((value, index) => (
+                    <div key={index} className="text-center">
+                      <div className="text-muted-foreground mb-2 text-xs font-medium">
+                        #{index + 1}
+                      </div>
+                      <div className="bg-muted rounded-lg border p-4">
+                        <span className="text-foreground text-lg font-bold">
+                          {value.toFixed(1)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="bg-muted rounded-lg border p-4">
-                      <span className="text-foreground text-lg font-bold">
-                        {value.toFixed(1)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

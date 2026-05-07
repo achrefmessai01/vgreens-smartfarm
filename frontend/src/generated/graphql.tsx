@@ -92,6 +92,7 @@ export type BrixTrendData = {
 
 export type ClassDistributionData = {
   __typename?: 'ClassDistributionData';
+  classB: Scalars['Float']['output'];
   date: Scalars['String']['output'];
   marketable: Scalars['Float']['output'];
   waste: Scalars['Float']['output'];
@@ -139,17 +140,9 @@ export type CreateHarvestInput = {
   avgBrix?: Scalars['Float']['input'];
   /** Defaults to "species - variety" if omitted */
   batch?: InputMaybe<Scalars['String']['input']>;
-  brix1?: Scalars['Float']['input'];
-  brix2?: Scalars['Float']['input'];
-  brix3?: Scalars['Float']['input'];
-  brix4?: Scalars['Float']['input'];
-  brix5?: Scalars['Float']['input'];
-  brix6?: Scalars['Float']['input'];
-  brix7?: Scalars['Float']['input'];
-  brix8?: Scalars['Float']['input'];
-  brix9?: Scalars['Float']['input'];
-  brix10?: Scalars['Float']['input'];
+  brixReadings?: InputMaybe<Array<Scalars['Float']['input']>>;
   classA?: Scalars['Float']['input'];
+  classB?: Scalars['Float']['input'];
   /** Cultivation area in m² */
   cultivationArea: Scalars['Float']['input'];
   /** Harvest date (ISO date string) */
@@ -226,6 +219,7 @@ export type CreateUserInput = {
 export type CumulativeYieldData = {
   __typename?: 'CumulativeYieldData';
   cumulative: Scalars['Float']['output'];
+  cumulativeClassB: Scalars['Float']['output'];
   cumulativeWaste: Scalars['Float']['output'];
   date: Scalars['String']['output'];
 };
@@ -406,17 +400,9 @@ export type Harvest = {
   __typename?: 'Harvest';
   avgBrix: Scalars['Float']['output'];
   batch: Scalars['String']['output'];
-  brix1: Scalars['Float']['output'];
-  brix2: Scalars['Float']['output'];
-  brix3: Scalars['Float']['output'];
-  brix4: Scalars['Float']['output'];
-  brix5: Scalars['Float']['output'];
-  brix6: Scalars['Float']['output'];
-  brix7: Scalars['Float']['output'];
-  brix8: Scalars['Float']['output'];
-  brix9: Scalars['Float']['output'];
-  brix10: Scalars['Float']['output'];
+  brixReadings: Array<Scalars['Float']['output']>;
   classA: Scalars['Float']['output'];
+  classB: Scalars['Float']['output'];
   createdAt: Scalars['DateTime']['output'];
   createdBy?: Maybe<User>;
   createdById?: Maybe<Scalars['ID']['output']>;
@@ -450,6 +436,7 @@ export type HarvestDashboardMetrics = {
   __typename?: 'HarvestDashboardMetrics';
   averageBrix: Scalars['Float']['output'];
   brixTrend: Array<BrixTrendData>;
+  classBTotal: Scalars['Float']['output'];
   classDistribution: Array<ClassDistributionData>;
   criticalAlerts: Scalars['Int']['output'];
   cumulativeYield: Array<CumulativeYieldData>;
@@ -537,6 +524,7 @@ export type Mutation = {
   createTenant: Tenant;
   createUser: User;
   deleteAlert: Scalars['Boolean']['output'];
+  softDeleteAlert: Scalars['Boolean']['output'];
   deleteErrorReport: Scalars['Boolean']['output'];
   deleteFeature: Scalars['Boolean']['output'];
   deleteHarvest: Scalars['Boolean']['output'];
@@ -607,6 +595,11 @@ export type MutationCreateUserArgs = {
 
 
 export type MutationDeleteAlertArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationSoftDeleteAlertArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1094,17 +1087,9 @@ export type UpdateFeatureInput = {
 export type UpdateHarvestInput = {
   avgBrix?: InputMaybe<Scalars['Float']['input']>;
   batch?: InputMaybe<Scalars['String']['input']>;
-  brix1?: InputMaybe<Scalars['Float']['input']>;
-  brix2?: InputMaybe<Scalars['Float']['input']>;
-  brix3?: InputMaybe<Scalars['Float']['input']>;
-  brix4?: InputMaybe<Scalars['Float']['input']>;
-  brix5?: InputMaybe<Scalars['Float']['input']>;
-  brix6?: InputMaybe<Scalars['Float']['input']>;
-  brix7?: InputMaybe<Scalars['Float']['input']>;
-  brix8?: InputMaybe<Scalars['Float']['input']>;
-  brix9?: InputMaybe<Scalars['Float']['input']>;
-  brix10?: InputMaybe<Scalars['Float']['input']>;
+  brixReadings?: InputMaybe<Array<Scalars['Float']['input']>>;
   classA?: InputMaybe<Scalars['Float']['input']>;
+  classB?: InputMaybe<Scalars['Float']['input']>;
   cultivationArea?: InputMaybe<Scalars['Float']['input']>;
   date?: InputMaybe<Scalars['String']['input']>;
   greenhouse?: InputMaybe<Scalars['String']['input']>;
@@ -1306,7 +1291,7 @@ export type CreateHarvestMutationVariables = Exact<{
 }>;
 
 
-export type CreateHarvestMutation = { __typename?: 'Mutation', createHarvest: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, parentBatchId?: string | null, greenhouse?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, status: HarvestStatus, date: any, classA: number, waste: number, avgBrix: number, rowX: number, rowY: number, brix1: number, brix2: number, brix3: number, brix4: number, brix5: number, brix6: number, brix7: number, brix8: number, brix9: number, brix10: number, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any } };
+export type CreateHarvestMutation = { __typename?: 'Mutation', createHarvest: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, parentBatchId?: string | null, greenhouse?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, status: HarvestStatus, date: any, classA: number, classB: number, waste: number, avgBrix: number, rowX: number, rowY: number, brixReadings: Array<number>, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any } };
 
 export type UpdateHarvestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1314,7 +1299,7 @@ export type UpdateHarvestMutationVariables = Exact<{
 }>;
 
 
-export type UpdateHarvestMutation = { __typename?: 'Mutation', updateHarvest: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, parentBatchId?: string | null, greenhouse?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, status: HarvestStatus, date: any, classA: number, waste: number, avgBrix: number, rowX: number, rowY: number, brix1: number, brix2: number, brix3: number, brix4: number, brix5: number, brix6: number, brix7: number, brix8: number, brix9: number, brix10: number, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any } };
+export type UpdateHarvestMutation = { __typename?: 'Mutation', updateHarvest: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, parentBatchId?: string | null, greenhouse?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, status: HarvestStatus, date: any, classA: number, classB: number, waste: number, avgBrix: number, rowX: number, rowY: number, brixReadings: Array<number>, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any } };
 
 export type DeleteHarvestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1479,6 +1464,13 @@ export type DeleteAlertMutationVariables = Exact<{
 
 export type DeleteAlertMutation = { __typename?: 'Mutation', deleteAlert: boolean };
 
+export type SoftDeleteAlertMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SoftDeleteAlertMutation = { __typename?: 'Mutation', softDeleteAlert: boolean };
+
 export type FarmConfigQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
@@ -1517,7 +1509,7 @@ export type GetHarvestDashboardQueryVariables = Exact<{
 }>;
 
 
-export type GetHarvestDashboardQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, marketablePercent: number, wastePercent: number, wasteTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeWaste: number }> } };
+export type GetHarvestDashboardQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, marketablePercent: number, wastePercent: number, wasteTotal: number, classBTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, classB: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeClassB: number, cumulativeWaste: number }> } };
 
 export type GetHarvestDashboardWithVariablesQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
@@ -1531,14 +1523,14 @@ export type GetHarvestDashboardWithVariablesQueryVariables = Exact<{
 }>;
 
 
-export type GetHarvestDashboardWithVariablesQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, marketablePercent: number, wastePercent: number, wasteTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeWaste: number }> } };
+export type GetHarvestDashboardWithVariablesQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, marketablePercent: number, wastePercent: number, wasteTotal: number, classBTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, classB: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeClassB: number, cumulativeWaste: number }> } };
 
 export type GetHarvestMetricsQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
 }>;
 
 
-export type GetHarvestMetricsQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, marketablePercent: number, wastePercent: number, wasteTotal: number, criticalAlerts: number, daysActive: number } };
+export type GetHarvestMetricsQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, marketablePercent: number, wastePercent: number, wasteTotal: number, classBTotal: number, criticalAlerts: number, daysActive: number } };
 
 export type GetYieldOverTimeQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
@@ -1552,7 +1544,7 @@ export type GetClassDistributionQueryVariables = Exact<{
 }>;
 
 
-export type GetClassDistributionQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, waste: number }> } };
+export type GetClassDistributionQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, classB: number, waste: number }> } };
 
 export type GetBrixTrendQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
@@ -1566,7 +1558,7 @@ export type GetCumulativeYieldQueryVariables = Exact<{
 }>;
 
 
-export type GetCumulativeYieldQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeWaste: number }> } };
+export type GetCumulativeYieldQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeClassB: number, cumulativeWaste: number }> } };
 
 export type GetHarvestSummaryQueryVariables = Exact<{
   filter?: InputMaybe<HarvestFilterInput>;
@@ -1580,14 +1572,14 @@ export type HarvestsQueryVariables = Exact<{
 }>;
 
 
-export type HarvestsQuery = { __typename?: 'Query', harvests: Array<{ __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, parentBatchId?: string | null, greenhouse?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, status: HarvestStatus, date: any, classA: number, waste: number, avgBrix: number, rowX: number, rowY: number, brix1: number, brix2: number, brix3: number, brix4: number, brix5: number, brix6: number, brix7: number, brix8: number, brix9: number, brix10: number, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
+export type HarvestsQuery = { __typename?: 'Query', harvests: Array<{ __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, parentBatchId?: string | null, greenhouse?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, status: HarvestStatus, date: any, classA: number, classB: number, waste: number, avgBrix: number, rowX: number, rowY: number, brixReadings: Array<number>, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
 
 export type HarvestQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type HarvestQuery = { __typename?: 'Query', harvest?: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, parentBatchId?: string | null, greenhouse?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, status: HarvestStatus, date: any, classA: number, waste: number, avgBrix: number, rowX: number, rowY: number, brix1: number, brix2: number, brix3: number, brix4: number, brix5: number, brix6: number, brix7: number, brix8: number, brix9: number, brix10: number, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
+export type HarvestQuery = { __typename?: 'Query', harvest?: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, parentBatchId?: string | null, greenhouse?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, status: HarvestStatus, date: any, classA: number, classB: number, waste: number, avgBrix: number, rowX: number, rowY: number, brixReadings: Array<number>, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
 
 export type HarvestImagesQueryVariables = Exact<{
   folder?: InputMaybe<Scalars['String']['input']>;
@@ -2234,20 +2226,12 @@ export const CreateHarvestDocument = gql`
     status
     date
     classA
+    classB
     waste
     avgBrix
     rowX
     rowY
-    brix1
-    brix2
-    brix3
-    brix4
-    brix5
-    brix6
-    brix7
-    brix8
-    brix9
-    brix10
+    brixReadings
     photos
     photoUrls
     createdAt
@@ -2301,20 +2285,12 @@ export const UpdateHarvestDocument = gql`
     status
     date
     classA
+    classB
     waste
     avgBrix
     rowX
     rowY
-    brix1
-    brix2
-    brix3
-    brix4
-    brix5
-    brix6
-    brix7
-    brix8
-    brix9
-    brix10
+    brixReadings
     photos
     photoUrls
     createdAt
@@ -3322,6 +3298,37 @@ export function useDeleteAlertMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteAlertMutationHookResult = ReturnType<typeof useDeleteAlertMutation>;
 export type DeleteAlertMutationResult = Apollo.MutationResult<DeleteAlertMutation>;
 export type DeleteAlertMutationOptions = Apollo.BaseMutationOptions<DeleteAlertMutation, DeleteAlertMutationVariables>;
+export const SoftDeleteAlertDocument = gql`
+    mutation SoftDeleteAlert($id: ID!) {
+  softDeleteAlert(id: $id)
+}
+    `;
+export type SoftDeleteAlertMutationFn = Apollo.MutationFunction<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>;
+
+/**
+ * __useSoftDeleteAlertMutation__
+ *
+ * To run a mutation, you first call `useSoftDeleteAlertMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSoftDeleteAlertMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [softDeleteAlertMutation, { data, loading, error }] = useSoftDeleteAlertMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSoftDeleteAlertMutation(baseOptions?: Apollo.MutationHookOptions<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>(SoftDeleteAlertDocument, options);
+      }
+export type SoftDeleteAlertMutationHookResult = ReturnType<typeof useSoftDeleteAlertMutation>;
+export type SoftDeleteAlertMutationResult = Apollo.MutationResult<SoftDeleteAlertMutation>;
+export type SoftDeleteAlertMutationOptions = Apollo.BaseMutationOptions<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>;
 export const FarmConfigDocument = gql`
     query FarmConfig($tenantId: ID) {
   farmConfig(tenantId: $tenantId) {
@@ -3587,6 +3594,7 @@ export const GetHarvestDashboardDocument = gql`
     marketablePercent
     wastePercent
     wasteTotal
+    classBTotal
     criticalAlerts
     daysActive
     yieldOverTime {
@@ -3596,6 +3604,7 @@ export const GetHarvestDashboardDocument = gql`
     classDistribution {
       date
       marketable
+      classB
       waste
     }
     brixTrend {
@@ -3605,6 +3614,7 @@ export const GetHarvestDashboardDocument = gql`
     cumulativeYield {
       date
       cumulative
+      cumulativeClassB
       cumulativeWaste
     }
   }
@@ -3659,6 +3669,7 @@ export const GetHarvestDashboardWithVariablesDocument = gql`
     marketablePercent
     wastePercent
     wasteTotal
+    classBTotal
     criticalAlerts
     daysActive
     yieldOverTime {
@@ -3668,6 +3679,7 @@ export const GetHarvestDashboardWithVariablesDocument = gql`
     classDistribution {
       date
       marketable
+      classB
       waste
     }
     brixTrend {
@@ -3677,6 +3689,7 @@ export const GetHarvestDashboardWithVariablesDocument = gql`
     cumulativeYield {
       date
       cumulative
+      cumulativeClassB
       cumulativeWaste
     }
   }
@@ -3736,6 +3749,7 @@ export const GetHarvestMetricsDocument = gql`
     marketablePercent
     wastePercent
     wasteTotal
+    classBTotal
     criticalAlerts
     daysActive
   }
@@ -3829,6 +3843,7 @@ export const GetClassDistributionDocument = gql`
     classDistribution {
       date
       marketable
+      classB
       waste
     }
   }
@@ -3922,6 +3937,7 @@ export const GetCumulativeYieldDocument = gql`
     cumulativeYield {
       date
       cumulative
+      cumulativeClassB
       cumulativeWaste
     }
   }
@@ -4036,20 +4052,12 @@ export const HarvestsDocument = gql`
     status
     date
     classA
+    classB
     waste
     avgBrix
     rowX
     rowY
-    brix1
-    brix2
-    brix3
-    brix4
-    brix5
-    brix6
-    brix7
-    brix8
-    brix9
-    brix10
+    brixReadings
     photos
     photoUrls
     createdAt
@@ -4119,20 +4127,12 @@ export const HarvestDocument = gql`
     status
     date
     classA
+    classB
     waste
     avgBrix
     rowX
     rowY
-    brix1
-    brix2
-    brix3
-    brix4
-    brix5
-    brix6
-    brix7
-    brix8
-    brix9
-    brix10
+    brixReadings
     photos
     photoUrls
     createdAt

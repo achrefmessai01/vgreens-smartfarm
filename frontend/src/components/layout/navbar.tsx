@@ -44,7 +44,7 @@ export function Navbar({ user, welcomeMessage, dateInfo }: NavbarProps) {
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-2">
+      <div className="ml-2 flex items-center gap-2">
         <UserMenu />
       </div>
     </nav>

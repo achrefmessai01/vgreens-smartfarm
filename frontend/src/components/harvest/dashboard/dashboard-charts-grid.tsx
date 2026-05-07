@@ -21,6 +21,7 @@ export function DashboardChartsGrid({ data }: DashboardChartsGridProps) {
           (data.cumulativeYield as Array<{
             date: string;
             cumulative: number;
+            cumulativeClassB: number;
             cumulativeWaste: number;
           }>) ?? []
         }

@@ -18,6 +18,9 @@ export class ClassDistributionData {
   marketable: number;
 
   @Field(() => Float)
+  classB: number;
+
+  @Field(() => Float)
   waste: number;
 }
 
@@ -37,6 +40,9 @@ export class CumulativeYieldData {
 
   @Field(() => Float)
   cumulative: number;
+
+  @Field(() => Float)
+  cumulativeClassB: number;
 
   @Field(() => Float)
   cumulativeWaste: number;
@@ -67,6 +73,9 @@ export class HarvestDashboardMetrics {
 
   @Field(() => Float)
   wasteTotal: number;
+
+  @Field(() => Float)
+  classBTotal: number;
 
   @Field(() => Int)
   criticalAlerts: number;

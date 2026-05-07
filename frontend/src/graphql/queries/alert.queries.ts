@@ -164,6 +164,12 @@ export const RESOLVE_ALERT_MUTATION = gql`
   }
 `;
 
+export const SOFT_DELETE_ALERT_MUTATION = gql`
+  mutation SoftDeleteAlert($id: ID!) {
+    softDeleteAlert(id: $id)
+  }
+`;
+
 export const DELETE_ALERT_MUTATION = gql`
   mutation DeleteAlert($id: ID!) {
     deleteAlert(id: $id)

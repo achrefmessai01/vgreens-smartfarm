@@ -98,6 +98,12 @@ export class UpdateHarvestInput {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  classB?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   waste?: number;
 
   @Field(() => Float, { nullable: true })
@@ -129,65 +135,12 @@ export class UpdateHarvestInput {
 
   // --- Brix measurements ---
 
-  @Field(() => Float, { nullable: true })
+  @Field(() => [Float], { nullable: true })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix1?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix2?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix3?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix4?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix5?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix6?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix7?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix8?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix9?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  brix10?: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Min(0, { each: true })
+  brixReadings?: number[];
 
   // --- Photos ---
 

@@ -45,11 +45,6 @@ const baseFeatureRouteConfigs: FeatureRouteConfig[] = [
   },
   {
     featureKey: 'sensor_alerts',
-    path: '/tenant/warnings',
-    name: 'Warnings',
-  },
-  {
-    featureKey: 'sensor_alerts',
     path: '/tenant/alerts',
     name: 'Alerts',
   },
