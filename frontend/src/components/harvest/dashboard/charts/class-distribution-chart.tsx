@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
+import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import {
   ChartTooltipContainer,
   type ChartTooltipProps,
@@ -17,6 +18,7 @@ import {
 interface ClassDistributionData {
   date: string;
   marketable: number;
+  classB: number;
   waste: number;
 }
 
@@ -32,7 +34,7 @@ const ClassTooltip = ({ active, payload, label }: ChartTooltipProps) => {
       <p className="font-medium">{`Date: ${label}`}</p>
       {payload.map((entry, index) => (
         <p key={index} className="text-sm" style={{ color: entry.color }}>
-          {`${entry.dataKey}: ${entry.value} kg`}
+          {`${entry.name ?? entry.dataKey}: ${entry.value} kg`}
         </p>
       ))}
     </ChartTooltipContainer>
@@ -44,12 +46,28 @@ export function ClassDistributionChart({
   className,
 }: ClassDistributionChartProps) {
   const { t } = useI18n();
+  const classBMode = useHarvestClassBMode();
+  const h = t.pages.harvest;
+
+  const primaryName = classBMode
+    ? (h?.quality1 ?? 'Quality 1')
+    : (h?.marketable ?? 'Marketable');
+  const secondaryName = classBMode
+    ? (h?.quality2 ?? 'Quality 2')
+    : (h?.waste ?? 'Waste');
+  const secondaryDataKey: 'classB' | 'waste' = classBMode ? 'classB' : 'waste';
+  const secondaryGradientId = classBMode
+    ? 'classBGradient'
+    : 'wasteGradient';
+  const secondaryShadow = classBMode
+    ? 'drop-shadow(0 4px 6px rgba(20, 184, 166, 0.3))'
+    : 'drop-shadow(0 4px 6px rgba(239, 68, 68, 0.3))';
 
   return (
     <Card className={className}>
       <div className="p-6">
         <h3 className="mb-4 text-lg font-semibold">
-          {t.pages.harvest?.classDistribution ?? 'Class Distribution'}
+          {h?.classDistribution ?? 'Class Distribution'}
         </h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -72,6 +90,10 @@ export function ClassDistributionChart({
                   <stop offset="5%" stopColor="#ef4444" stopOpacity={1} />
                   <stop offset="95%" stopColor="#dc2626" stopOpacity={1} />
                 </linearGradient>
+                <linearGradient id="classBGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#14b8a6" stopOpacity={1} />
+                  <stop offset="95%" stopColor="#0d9488" stopOpacity={1} />
+                </linearGradient>
               </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -88,7 +110,7 @@ export function ClassDistributionChart({
               <YAxis
                 fontSize={12}
                 label={{
-                  value: t.pages.harvest?.weightKg ?? 'Weight (kg)',
+                  value: h?.weightKg ?? 'Weight (kg)',
                   angle: -90,
                   position: 'insideLeft',
                 }}
@@ -98,20 +120,20 @@ export function ClassDistributionChart({
                 dataKey="marketable"
                 stackId="a"
                 fill="url(#marketableGradient)"
-                name={t.pages.harvest?.marketable ?? 'Marketable'}
+                name={primaryName}
                 radius={[0, 0, 4, 4]}
                 style={{
                   filter: 'drop-shadow(0 4px 6px rgba(16, 185, 129, 0.3))',
                 }}
               />
               <Bar
-                dataKey="waste"
+                dataKey={secondaryDataKey}
                 stackId="a"
-                fill="url(#wasteGradient)"
-                name={t.pages.harvest?.waste ?? 'Waste'}
+                fill={`url(#${secondaryGradientId})`}
+                name={secondaryName}
                 radius={[4, 4, 0, 0]}
                 style={{
-                  filter: 'drop-shadow(0 4px 6px rgba(239, 68, 68, 0.3))',
+                  filter: secondaryShadow,
                 }}
               />
             </BarChart>

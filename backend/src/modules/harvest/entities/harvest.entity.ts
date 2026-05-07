@@ -116,6 +116,10 @@ export class Harvest {
 
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
+  classB: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   waste: number;
 
   @Field(() => Float)
@@ -140,47 +144,11 @@ export class Harvest {
     return 0;
   }
 
-  // --- Brix measurements (10 individual readings) ---
+  // --- Brix measurements (dynamic list of readings) ---
 
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix1: number;
-
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix2: number;
-
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix3: number;
-
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix4: number;
-
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix5: number;
-
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix6: number;
-
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix7: number;
-
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix8: number;
-
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix9: number;
-
-  @Field(() => Float)
-  @Column({ type: 'float', default: 0 })
-  brix10: number;
+  @Field(() => [Float])
+  @Column({ type: 'jsonb', default: [] })
+  brixReadings: number[];
 
   // --- Photos ---
 

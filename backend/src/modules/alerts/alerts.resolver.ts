@@ -125,6 +125,21 @@ export class AlertsResolver {
 
   @Mutation(() => Boolean)
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  async softDeleteAlert(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() currentUser: User,
+  ): Promise<boolean> {
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? undefined
+        : currentUser.tenantId;
+
+    await this.alertsService.softDeleteAlert(id, currentUser.id, tenantId);
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
   async deleteAlert(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,

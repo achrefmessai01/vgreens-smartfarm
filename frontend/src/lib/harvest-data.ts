@@ -8,6 +8,7 @@ const mockHarvestData: HarvestRecord[] = [
     date: '3/05/2026',
     batch: 'Strawberry - Elsanta',
     classA: 11.8,
+    classB: 0,
     waste: 0.6,
     avgBrix: 7.1,
     photos: 0,
@@ -19,6 +20,7 @@ const mockHarvestData: HarvestRecord[] = [
     date: '3/04/2026',
     batch: 'Tomato - Roma',
     classA: 12.9,
+    classB: 0,
     waste: 0.7,
     avgBrix: 4.8,
     photos: 0,
@@ -30,6 +32,7 @@ const mockHarvestData: HarvestRecord[] = [
     date: '3/03/2026',
     batch: 'Strawberry - Elsanta',
     classA: 14.3,
+    classB: 0,
     waste: 0.9,
     avgBrix: 7.9,
     photos: 0,
@@ -41,6 +44,7 @@ const mockHarvestData: HarvestRecord[] = [
     date: '3/02/2026',
     batch: 'Lettuce - Butterhead',
     classA: 14.1,
+    classB: 0,
     waste: 0.5,
     avgBrix: 1.2,
     photos: 0,
@@ -52,6 +56,7 @@ const mockHarvestData: HarvestRecord[] = [
     date: '3/01/2026',
     batch: 'Basil - Genovese',
     classA: 13.2,
+    classB: 0,
     waste: 0.8,
     avgBrix: 2.1,
     photos: 0,
@@ -63,6 +68,7 @@ const mockHarvestData: HarvestRecord[] = [
     date: '2/29/2026',
     batch: 'Strawberry - Sonata',
     classA: 15.6,
+    classB: 0,
     waste: 1.1,
     avgBrix: 8.3,
     photos: 0,
@@ -97,6 +103,7 @@ export function addNewHarvest(batchData: BatchFormData): HarvestRecord {
     }),
     batch: batchName,
     classA,
+    classB: 0,
     waste,
     avgBrix,
     photos: 0,
@@ -114,19 +121,7 @@ export function addCompletedBatchToHistory(
   const newId = (allHarvestData.length + 1).toString();
   const batchName = `${batchData.species} - ${batchData.variety}`;
 
-  // Calculate average Brix from all measurements
-  const brixValues = [
-    batchData.brixMeasurements.brix1,
-    batchData.brixMeasurements.brix2,
-    batchData.brixMeasurements.brix3,
-    batchData.brixMeasurements.brix4,
-    batchData.brixMeasurements.brix5,
-    batchData.brixMeasurements.brix6,
-    batchData.brixMeasurements.brix7,
-    batchData.brixMeasurements.brix8,
-    batchData.brixMeasurements.brix9,
-    batchData.brixMeasurements.brix10,
-  ].filter((value) => value > 0); // Only include non-zero measurements
+  const brixValues = batchData.brixReadings.filter((value) => value > 0);
 
   const avgBrix =
     brixValues.length > 0
@@ -145,6 +140,7 @@ export function addCompletedBatchToHistory(
     }),
     batch: batchName,
     classA: batchData.todaysHarvest.marketable,
+    classB: batchData.todaysHarvest.classB,
     waste: batchData.todaysHarvest.waste,
     avgBrix,
     photos: batchData.photos.length,
@@ -160,6 +156,10 @@ export function getHarvestSummary(): HarvestSummary {
   const harvests = getAllHarvests();
   const totalClassA = harvests.reduce(
     (sum, harvest) => sum + harvest.classA,
+    0,
+  );
+  const totalClassB = harvests.reduce(
+    (sum, harvest) => sum + harvest.classB,
     0,
   );
   const totalWaste = harvests.reduce((sum, harvest) => sum + harvest.waste, 0);
@@ -185,6 +185,7 @@ export function getHarvestSummary(): HarvestSummary {
     totalHarvests: harvests.length,
     variety: mostCommonVariety,
     totalClassA: Math.round(totalClassA * 10) / 10,
+    totalClassB: Math.round(totalClassB * 10) / 10,
     totalWaste: Math.round(totalWaste * 10) / 10,
     avgBrix: Math.round(avgBrix * 10) / 10,
   };

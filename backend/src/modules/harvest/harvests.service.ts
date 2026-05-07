@@ -50,6 +50,7 @@ export class HarvestsService extends BaseService<Harvest> {
       harvest.status === HarvestStatus.DRAFT &&
       harvest.parentBatchId == null &&
       harvest.classA === 0 &&
+      harvest.classB === 0 &&
       harvest.waste === 0 &&
       harvest.avgBrix === 0 &&
       harvest.rowX === 0 &&
@@ -193,6 +194,7 @@ export class HarvestsService extends BaseService<Harvest> {
         status: input.status ?? HarvestStatus.ACTIVE,
         date: new Date(input.date),
         classA: input.classA ?? 0,
+        classB: input.classB ?? 0,
         waste: input.waste ?? 0,
         avgBrix: input.avgBrix ?? 0,
         rowX:
@@ -205,16 +207,7 @@ export class HarvestsService extends BaseService<Harvest> {
           (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
             ? input.numberOfRowsHarvested
             : 0),
-        brix1: input.brix1 ?? 0,
-        brix2: input.brix2 ?? 0,
-        brix3: input.brix3 ?? 0,
-        brix4: input.brix4 ?? 0,
-        brix5: input.brix5 ?? 0,
-        brix6: input.brix6 ?? 0,
-        brix7: input.brix7 ?? 0,
-        brix8: input.brix8 ?? 0,
-        brix9: input.brix9 ?? 0,
-        brix10: input.brix10 ?? 0,
+        brixReadings: input.brixReadings ?? [],
         photos: input.photos ?? 0,
         photoUrls: input.photoUrls ?? [],
       });
@@ -284,6 +277,7 @@ export class HarvestsService extends BaseService<Harvest> {
       if (input.status !== undefined) harvest.status = input.status;
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.classA !== undefined) harvest.classA = input.classA;
+      if (input.classB !== undefined) harvest.classB = input.classB;
       if (input.waste !== undefined) harvest.waste = input.waste;
       if (input.avgBrix !== undefined) harvest.avgBrix = input.avgBrix;
       if (input.rowX !== undefined) harvest.rowX = input.rowX;
@@ -297,16 +291,9 @@ export class HarvestsService extends BaseService<Harvest> {
         harvest.rowY =
           input.numberOfRowsHarvested > 0 ? input.numberOfRowsHarvested : 0;
       }
-      if (input.brix1 !== undefined) harvest.brix1 = input.brix1;
-      if (input.brix2 !== undefined) harvest.brix2 = input.brix2;
-      if (input.brix3 !== undefined) harvest.brix3 = input.brix3;
-      if (input.brix4 !== undefined) harvest.brix4 = input.brix4;
-      if (input.brix5 !== undefined) harvest.brix5 = input.brix5;
-      if (input.brix6 !== undefined) harvest.brix6 = input.brix6;
-      if (input.brix7 !== undefined) harvest.brix7 = input.brix7;
-      if (input.brix8 !== undefined) harvest.brix8 = input.brix8;
-      if (input.brix9 !== undefined) harvest.brix9 = input.brix9;
-      if (input.brix10 !== undefined) harvest.brix10 = input.brix10;
+      if (input.brixReadings !== undefined) {
+        harvest.brixReadings = input.brixReadings;
+      }
       if (input.photos !== undefined) harvest.photos = input.photos;
       if (input.photoUrls !== undefined) harvest.photoUrls = input.photoUrls;
 
@@ -428,6 +415,10 @@ export class HarvestsService extends BaseService<Harvest> {
         0,
       );
       const totalWaste = metricsHarvests.reduce((sum, h) => sum + h.waste, 0);
+      const totalClassB = metricsHarvests.reduce(
+        (sum, h) => sum + h.classB,
+        0,
+      );
       const totalYield = totalMarketable + totalWaste;
 
       const marketablePercent =
@@ -479,6 +470,7 @@ export class HarvestsService extends BaseService<Harvest> {
         marketablePercent: Math.round(marketablePercent * 10) / 10,
         wastePercent: Math.round(wastePercent * 10) / 10,
         wasteTotal: Math.round(totalWaste * 10) / 10,
+        classBTotal: Math.round(totalClassB * 10) / 10,
         criticalAlerts,
         daysActive,
         yieldOverTime,
@@ -507,6 +499,7 @@ export class HarvestsService extends BaseService<Harvest> {
       marketablePercent: 0,
       wastePercent: 0,
       wasteTotal: 0,
+      classBTotal: 0,
       criticalAlerts: 0,
       daysActive: 0,
       yieldOverTime: [],
@@ -536,13 +529,21 @@ export class HarvestsService extends BaseService<Harvest> {
   private generateClassDistributionData(
     harvests: Harvest[],
   ): ClassDistributionData[] {
-    const dailyData = new Map<string, { marketable: number; waste: number }>();
+    const dailyData = new Map<
+      string,
+      { marketable: number; classB: number; waste: number }
+    >();
 
     harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
-      const current = dailyData.get(dateStr) || { marketable: 0, waste: 0 };
+      const current = dailyData.get(dateStr) || {
+        marketable: 0,
+        classB: 0,
+        waste: 0,
+      };
       dailyData.set(dateStr, {
         marketable: current.marketable + harvest.classA,
+        classB: current.classB + harvest.classB,
         waste: current.waste + harvest.waste,
       });
     });
@@ -552,6 +553,7 @@ export class HarvestsService extends BaseService<Harvest> {
       .map(([date, data]) => ({
         date,
         marketable: Math.round(data.marketable * 10) / 10,
+        classB: Math.round(data.classB * 10) / 10,
         waste: Math.round(data.waste * 10) / 10,
       }));
   }
@@ -581,13 +583,21 @@ export class HarvestsService extends BaseService<Harvest> {
   private generateCumulativeYieldData(
     harvests: Harvest[],
   ): CumulativeYieldData[] {
-    const dailyData = new Map<string, { marketable: number; waste: number }>();
+    const dailyData = new Map<
+      string,
+      { marketable: number; classB: number; waste: number }
+    >();
 
     harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
-      const current = dailyData.get(dateStr) || { marketable: 0, waste: 0 };
+      const current = dailyData.get(dateStr) || {
+        marketable: 0,
+        classB: 0,
+        waste: 0,
+      };
       dailyData.set(dateStr, {
         marketable: current.marketable + harvest.classA,
+        classB: current.classB + harvest.classB,
         waste: current.waste + harvest.waste,
       });
     });
@@ -597,14 +607,17 @@ export class HarvestsService extends BaseService<Harvest> {
     );
 
     let cumulative = 0;
+    let cumulativeClassB = 0;
     let cumulativeWaste = 0;
 
     return sortedEntries.map(([date, data]) => {
       cumulative += data.marketable;
+      cumulativeClassB += data.classB;
       cumulativeWaste += data.waste;
       return {
         date,
         cumulative: Math.round(cumulative * 10) / 10,
+        cumulativeClassB: Math.round(cumulativeClassB * 10) / 10,
         cumulativeWaste: Math.round(cumulativeWaste * 10) / 10,
       };
     });

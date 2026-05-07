@@ -13,7 +13,6 @@ import { useApolloClient } from '@apollo/client/react';
 import {
   AlertTriangle,
   Apple,
-  Bell,
   Building2,
   ClipboardList,
   Clock,
@@ -171,12 +170,6 @@ export function Sidebar({
       featureKey: 'user_management',
       // Regular tenant users shouldn't be able to manage other users.
       allowedRoles: [UserRole.VgreensAdmin, UserRole.TenantAdmin],
-    },
-    {
-      label: t.navigation.warnings,
-      href: '/tenant/warnings',
-      icon: Bell,
-      featureKey: 'sensor_alerts',
     },
     {
       label: t.navigation.alerts,

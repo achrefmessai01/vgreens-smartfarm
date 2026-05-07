@@ -42,6 +42,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/tenant/warnings',
+        destination: '/tenant/alerts',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -20,20 +20,12 @@ export const HARVESTS_QUERY = gql`
       status
       date
       classA
+      classB
       waste
       avgBrix
       rowX
       rowY
-      brix1
-      brix2
-      brix3
-      brix4
-      brix5
-      brix6
-      brix7
-      brix8
-      brix9
-      brix10
+      brixReadings
       photos
       photoUrls
       createdAt
@@ -68,20 +60,12 @@ export const HARVEST_QUERY = gql`
       status
       date
       classA
+      classB
       waste
       avgBrix
       rowX
       rowY
-      brix1
-      brix2
-      brix3
-      brix4
-      brix5
-      brix6
-      brix7
-      brix8
-      brix9
-      brix10
+      brixReadings
       photos
       photoUrls
       createdAt

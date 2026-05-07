@@ -48,7 +48,11 @@ export function BatchSidebar({
   const {
     currentData,
     loading: isSaving,
+    showBrix,
+    setShowBrix,
     handleBrixChange,
+    handleAddBrixReading,
+    handleRemoveBrixReading,
     handleYieldChange,
     handlePhotoUpload,
     handleRemovePhoto,
@@ -110,6 +114,7 @@ export function BatchSidebar({
                   <YieldDataField
                     marketable={currentData.todaysHarvest.marketable}
                     waste={currentData.todaysHarvest.waste}
+                    classB={currentData.todaysHarvest.classB}
                     rowX={currentData.todaysHarvest.rowX}
                     rowY={currentData.todaysHarvest.rowY}
                     onYieldChange={handleYieldChange}
@@ -118,8 +123,12 @@ export function BatchSidebar({
                 </div>
                 <div className="bg-card rounded-xl border p-3 shadow-sm">
                   <BrixMeasurementsField
-                    measurements={currentData.brixMeasurements}
-                    onMeasurementChange={handleBrixChange}
+                    readings={currentData.brixReadings}
+                    showBrix={showBrix}
+                    onShowBrixChange={setShowBrix}
+                    onReadingChange={handleBrixChange}
+                    onAddReading={handleAddBrixReading}
+                    onRemoveReading={handleRemoveBrixReading}
                     isLoading={busy}
                   />
                 </div>

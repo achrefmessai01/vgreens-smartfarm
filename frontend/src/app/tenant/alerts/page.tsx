@@ -4,6 +4,7 @@ import {
   AlertActionDialog,
   AlertDeleteDialog,
   AlertFormSheet,
+  AlertHardDeleteDialog,
   AlertPageHeader,
   AlertSidebar,
   AlertTable,
@@ -108,6 +109,23 @@ export default function AlertsPage() {
           onCancel={() =>
             page.setDeleteConfirmation({ alert: null, isOpen: false })
           }
+          isLoading={page.isLoading}
+        />
+
+        <AlertHardDeleteDialog
+          open={page.hardDeleteEscalation.isOpen}
+          onOpenChange={(open) => {
+            if (!open)
+              page.setHardDeleteEscalation({
+                alert: null,
+                isOpen: false,
+                reason: '',
+              });
+          }}
+          alert={page.hardDeleteEscalation.alert}
+          reason={page.hardDeleteEscalation.reason}
+          onConfirm={page.confirmHardDelete}
+          onCancel={page.cancelHardDelete}
           isLoading={page.isLoading}
         />
       </div>

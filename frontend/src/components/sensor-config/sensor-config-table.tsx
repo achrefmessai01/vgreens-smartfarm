@@ -122,16 +122,11 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
                     </TableCell>
                     <TableCell>
                       {config?.greenhouse ? (
-                        <span>{config.greenhouse}</span>
-                      ) : row.defaultGreenhouse ? (
-                        <span
-                          className="text-muted-foreground text-sm italic"
-                          title="Default from InfluxDB tag"
-                        >
-                          {row.defaultGreenhouse}
-                        </span>
+                        <Badge variant="secondary">{config.greenhouse}</Badge>
                       ) : (
-                        <span className="text-muted-foreground text-sm">-</span>
+                        <span className="text-muted-foreground text-sm">
+                          Not configured
+                        </span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
