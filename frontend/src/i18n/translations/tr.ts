@@ -150,6 +150,10 @@ export const tr = {
     },
     farmOverview: {
       title: 'Çiftlik genel bakış',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'Çiftlik operasyonlarınız hakkında gerçek zamanlı bilgiler',
       batches: 'Partiler',
       onTime: 'Zamanında',
@@ -552,6 +556,8 @@ export const tr = {
             'Bu kiracının InfluxDB bucket’ında sensör bulunamadı.',
           sheetDescription:
             'Bu sensör için konum etiketlerini geçersiz kılın. InfluxDB değerlerini kullanmak için boş bırakın.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Çiftlik düzeni',

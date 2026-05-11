@@ -150,6 +150,10 @@ export const es = {
     },
     farmOverview: {
       title: 'Visión de la granja',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'Información en tiempo real sobre el funcionamiento de tu granja',
       batches: 'Lotes',
       onTime: 'A tiempo',
@@ -554,6 +558,8 @@ export const es = {
             'No se encontraron sensores en el bucket de InfluxDB de este inquilino.',
           sheetDescription:
             'Anula las etiquetas de ubicación de este sensor. Deja en blanco para usar los valores de InfluxDB.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Diseño de la granja',

@@ -150,6 +150,10 @@ export const pt = {
     },
     farmOverview: {
       title: 'Visão geral da quinta',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'Informação em tempo real sobre as operações da sua quinta',
       batches: 'Lotes',
       onTime: 'A tempo',
@@ -553,6 +557,8 @@ export const pt = {
             'Nenhum sensor encontrado no bucket InfluxDB deste inquilino.',
           sheetDescription:
             'Substitua as etiquetas de localização deste sensor. Deixe em branco para usar os valores do InfluxDB.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Esquema da quinta',

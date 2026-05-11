@@ -151,6 +151,10 @@ export const ar = {
     },
     farmOverview: {
       title: 'نظرة عامة على المزرعة',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'رؤى لحظية لعمليات مزرعتك',
       batches: 'الدفعات',
       onTime: 'في الوقت',
@@ -555,6 +559,8 @@ export const ar = {
             'لم يتم العثور على أجهزة استشعار في bucket InfluxDB لهذا المستأجر.',
           sheetDescription:
             'تجاوز علامات الموقع لهذا المستشعر. اتركه فارغًا لاستخدام القيم من InfluxDB.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'تخطيط المزرعة',
