@@ -174,6 +174,26 @@ export const ro = {
       oneDay: '1 zi',
       oneWeek: '1 săptămână',
       oneMonth: '1 lună',
+      timeRangePresets: {
+        ariaLabel: 'Average over',
+        last5min: 'Last 5 min',
+        last1h: 'Last 1 h',
+        last24h: 'Last 24 h',
+        last7d: 'Last 7 d',
+        last30d: 'Last 30 d',
+        last90d: 'Last 90 d',
+        ytd: 'Year to date',
+        custom: 'Custom…',
+        customRangeTitle: 'Custom range',
+        from: 'From',
+        until: 'Until',
+        apply: 'Apply',
+        clear: 'Clear',
+        invalidRange:
+          'From must be before Until, and Until cannot be in the future.',
+        recalculating: 'Recalculating averages…',
+        currentRange: 'Showing averages for',
+      },
       farmOverview: 'Privire de ansamblu fermă',
       tunnelView: 'Vedere tunel',
       systemOverview: 'Privire de ansamblu sistem',
@@ -205,7 +225,8 @@ export const ro = {
       viewHeatmap: 'Hartă termică',
       viewGraph: 'Grafic',
       invalidDropTitle: 'Plasare în afara hărții',
-      invalidDropDescription: 'Plasează senzorul în interiorul layoutului serei.',
+      invalidDropDescription:
+        'Plasează senzorul în interiorul layoutului serei.',
       positionSaveFailedTitle: 'Poziția nu a putut fi salvată',
       positionSaveFailedDescription:
         'Senzorul a revenit la ultima poziție salvată.',
@@ -387,7 +408,8 @@ export const ro = {
       enterRowX: 'Rând de început',
       enterRowY: 'Rând de sfârșit',
       editHarvest: 'Editează recolta',
-      editHarvestDescription: 'Actualizează detaliile înregistrării de recoltă.',
+      editHarvestDescription:
+        'Actualizează detaliile înregistrării de recoltă.',
       deleteHarvest: 'Șterge recolta',
       deleteHarvestTitle: 'Șterge înregistrarea recoltei',
       deleteHarvestDescription:
@@ -445,16 +467,14 @@ export const ro = {
         activeFeatures: 'Funcționalități active',
         systemStatus: 'Stare sistem',
         viewingDataFor: 'Se afișează date pentru',
-        topPerformingZonesComponentTitle:
-          'Zone cu cele mai bune performanțe',
+        topPerformingZonesComponentTitle: 'Zone cu cele mai bune performanțe',
         maintenanceComponentTitle: 'Mentenanță viitoare',
         liveMapComponentTitle: 'Hartă live',
         liveMapComponentPlaceholder:
           'Marcator hartă live — integrează Leaflet/Mapbox pentru a afișa zone și senzori',
         liveMapComponentHint:
           'Apasă pe zone pentru a vedea liste de senzori și grafice istorice.',
-        deviceHealthAndWeatherComponentTitle:
-          'Starea dispozitivelor și meteo',
+        deviceHealthAndWeatherComponentTitle: 'Starea dispozitivelor și meteo',
         lastUpdated: 'Ultima actualizare: acum 2 minute',
         refresh: 'Actualizează',
       },
@@ -483,8 +503,7 @@ export const ro = {
         clerkUserId: 'ID utilizator Clerk',
         clerkUserIdDescription: 'ID-ul Clerk este generat automat',
         emailPlaceholder: 'utilizator@exemplu.com',
-        invitationEmailDescription:
-          'Va fi trimisă o invitație la acest e-mail',
+        invitationEmailDescription: 'Va fi trimisă o invitație la acest e-mail',
         firstName: 'Prenume',
         firstNamePlaceholder: 'Ion',
         lastName: 'Nume',
@@ -523,8 +542,7 @@ export const ro = {
         tabs: {
           features: 'Funcționalități',
           alertConfiguration: 'Configurare alerte',
-          farmOverviewConfiguration:
-            'Configurare privire de ansamblu fermă',
+          farmOverviewConfiguration: 'Configurare privire de ansamblu fermă',
         },
         sensorConfig: {
           device: 'Dispozitiv',
@@ -535,8 +553,7 @@ export const ro = {
           actions: 'Acțiuni',
           xPositionHint:
             'Poziție orizontală în metri față de partea cu intrarea',
-          yPositionHint:
-            'Poziție verticală în metri față de originea serei',
+          yPositionHint: 'Poziție verticală în metri față de originea serei',
           greenhouseHint: 'Identificator seră',
           cityHint: 'Orașul locației',
           xPositionPlaceholder: 'ex. 5,25',
@@ -633,8 +650,7 @@ export const ro = {
         created: 'Creat',
         lastUpdated: 'Ultima actualizare',
         actions: 'Acțiuni',
-        searchPlaceholder:
-          'Caută rapoarte după titlu, e-mail utilizator...',
+        searchPlaceholder: 'Caută rapoarte după titlu, e-mail utilizator...',
         noReports: 'Niciun raport de eroare găsit',
         loading: 'Se încarcă rapoartele...',
         description: 'Descriere',
@@ -723,8 +739,7 @@ export const ro = {
         recording: 'Înregistrare și redare',
         recordingDesc: 'Înregistrează și revezi materialele anterioare',
         aiAnalysis: 'Analiză cu AI',
-        aiAnalysisDesc:
-          'Obține informații din analiza AI a culturilor tale',
+        aiAnalysisDesc: 'Obține informații din analiza AI a culturilor tale',
       },
       notifyMe: 'Anunță-mă',
       notifyMeDescription:
@@ -823,8 +838,7 @@ export const ro = {
       keepAlert: 'Păstrează alerta',
       toastTitle: 'Alertă critică',
       toastViewAction: 'Vezi alertele',
-      toastFallbackDescription:
-        'O nouă alertă critică necesită atenție.',
+      toastFallbackDescription: 'O nouă alertă critică necesită atenție.',
       cancel: 'Anulează',
       save: 'Salvează',
       delete: 'Șterge',

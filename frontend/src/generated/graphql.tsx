@@ -352,6 +352,7 @@ export type FeatureWithTenantStatus = {
 
 export type FieldMeanMetric = {
   __typename?: 'FieldMeanMetric';
+  chamber?: Maybe<Scalars['String']['output']>;
   field: Scalars['String']['output'];
   greenhouse?: Maybe<Scalars['String']['output']>;
   time: Scalars['DateTime']['output'];
@@ -373,6 +374,8 @@ export type GetBucketDataInput = {
 export type GetFieldMeansInput = {
   bucketName: Scalars['String']['input'];
   greenhouse?: InputMaybe<Scalars['String']['input']>;
+  start?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['String']['input']>;
   windowMinutes?: Scalars['Int']['input'];
 };
 
@@ -535,6 +538,7 @@ export type Mutation = {
   resolveErrorReport: ErrorReport;
   resolveSystemError: SystemError;
   runThresholdCheck: Scalars['Boolean']['output'];
+  setMyFarmOverviewTimeRange: User;
   setMyLanguage: User;
   setTenantDisabledSensorFields: Tenant;
   softDeleteAlert: Scalars['Boolean']['output'];
@@ -659,6 +663,11 @@ export type MutationResolveSystemErrorArgs = {
 export type MutationRunThresholdCheckArgs = {
   bucketName: Scalars['String']['input'];
   tenantId: Scalars['ID']['input'];
+};
+
+
+export type MutationSetMyFarmOverviewTimeRangeArgs = {
+  value: Scalars['String']['input'];
 };
 
 
@@ -1162,6 +1171,7 @@ export type User = {
   clerkUserId: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
   email?: Maybe<Scalars['String']['output']>;
+  farmOverviewTimeRange?: Maybe<Scalars['String']['output']>;
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   imageUrl?: Maybe<Scalars['String']['output']>;
@@ -1395,6 +1405,13 @@ export type DeleteUserMutationVariables = Exact<{
 
 export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean };
 
+export type SetMyFarmOverviewTimeRangeMutationVariables = Exact<{
+  value: Scalars['String']['input'];
+}>;
+
+
+export type SetMyFarmOverviewTimeRangeMutation = { __typename?: 'Mutation', setMyFarmOverviewTimeRange: { __typename?: 'User', id: string, farmOverviewTimeRange?: string | null } };
+
 export type SetMyLanguageMutationVariables = Exact<{
   language: Scalars['String']['input'];
 }>;
@@ -1622,7 +1639,7 @@ export type GetBucketFieldMeansLastMinutesQueryVariables = Exact<{
 }>;
 
 
-export type GetBucketFieldMeansLastMinutesQuery = { __typename?: 'Query', getBucketFieldMeansLastMinutes: Array<{ __typename?: 'FieldMeanMetric', field: string, greenhouse?: string | null, value: number }> };
+export type GetBucketFieldMeansLastMinutesQuery = { __typename?: 'Query', getBucketFieldMeansLastMinutes: Array<{ __typename?: 'FieldMeanMetric', field: string, greenhouse?: string | null, chamber?: string | null, value: number }> };
 
 export type GetParDliTodayQueryVariables = Exact<{
   input: GetParDliTodayInput;
@@ -1681,7 +1698,7 @@ export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null }> | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null }> | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2821,6 +2838,40 @@ export function useSetMyLanguageMutation(baseOptions?: Apollo.MutationHookOption
 export type SetMyLanguageMutationHookResult = ReturnType<typeof useSetMyLanguageMutation>;
 export type SetMyLanguageMutationResult = Apollo.MutationResult<SetMyLanguageMutation>;
 export type SetMyLanguageMutationOptions = Apollo.BaseMutationOptions<SetMyLanguageMutation, SetMyLanguageMutationVariables>;
+export const SetMyFarmOverviewTimeRangeDocument = gql`
+    mutation SetMyFarmOverviewTimeRange($value: String!) {
+  setMyFarmOverviewTimeRange(value: $value) {
+    id
+    farmOverviewTimeRange
+  }
+}
+    `;
+export type SetMyFarmOverviewTimeRangeMutationFn = Apollo.MutationFunction<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>;
+
+/**
+ * __useSetMyFarmOverviewTimeRangeMutation__
+ *
+ * To run a mutation, you first call `useSetMyFarmOverviewTimeRangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetMyFarmOverviewTimeRangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setMyFarmOverviewTimeRangeMutation, { data, loading, error }] = useSetMyFarmOverviewTimeRangeMutation({
+ *   variables: {
+ *      value: // value for 'value'
+ *   },
+ * });
+ */
+export function useSetMyFarmOverviewTimeRangeMutation(baseOptions?: Apollo.MutationHookOptions<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>(SetMyFarmOverviewTimeRangeDocument, options);
+      }
+export type SetMyFarmOverviewTimeRangeMutationHookResult = ReturnType<typeof useSetMyFarmOverviewTimeRangeMutation>;
+export type SetMyFarmOverviewTimeRangeMutationResult = Apollo.MutationResult<SetMyFarmOverviewTimeRangeMutation>;
+export type SetMyFarmOverviewTimeRangeMutationOptions = Apollo.BaseMutationOptions<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>;
 export const GetRecentSystemErrorsDocument = gql`
     query GetRecentSystemErrors($limit: Float, $severity: ReportSeverity, $source: ErrorSource, $isResolved: Boolean) {
   getRecentSystemErrors(
@@ -4355,6 +4406,7 @@ export const GetBucketFieldMeansLastMinutesDocument = gql`
   getBucketFieldMeansLastMinutes(input: $input) {
     field
     greenhouse
+    chamber
     value
   }
 }
@@ -4810,6 +4862,7 @@ export const MeDocument = gql`
     isActive
     status
     preferredLanguage
+    farmOverviewTimeRange
     createdAt
     updatedAt
   }

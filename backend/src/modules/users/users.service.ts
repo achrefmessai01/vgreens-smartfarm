@@ -247,4 +247,13 @@ export class UsersService extends BaseService<User> {
     user.preferredLanguage = language;
     return this.userRepository.save(user);
   }
+
+  async setFarmOverviewTimeRange(userId: string, value: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    user.farmOverviewTimeRange = value;
+    return this.userRepository.save(user);
+  }
 }

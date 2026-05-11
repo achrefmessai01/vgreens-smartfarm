@@ -175,6 +175,26 @@ export const it = {
       oneDay: '1 giorno',
       oneWeek: '1 settimana',
       oneMonth: '1 mese',
+      timeRangePresets: {
+        ariaLabel: 'Average over',
+        last5min: 'Last 5 min',
+        last1h: 'Last 1 h',
+        last24h: 'Last 24 h',
+        last7d: 'Last 7 d',
+        last30d: 'Last 30 d',
+        last90d: 'Last 90 d',
+        ytd: 'Year to date',
+        custom: 'Custom…',
+        customRangeTitle: 'Custom range',
+        from: 'From',
+        until: 'Until',
+        apply: 'Apply',
+        clear: 'Clear',
+        invalidRange:
+          'From must be before Until, and Until cannot be in the future.',
+        recalculating: 'Recalculating averages…',
+        currentRange: 'Showing averages for',
+      },
       farmOverview: 'Panoramica fattoria',
       tunnelView: 'Vista tunnel',
       systemOverview: 'Panoramica del sistema',
@@ -277,12 +297,14 @@ export const it = {
       historyTitle: 'Cronologia dei raccolti',
       harvestEntryTab: 'Inserimento raccolto',
       harvestEntryTitle: 'Inserimento raccolto',
-      dashboardPlaceholder: 'Il contenuto della dashboard sarà visualizzato qui',
+      dashboardPlaceholder:
+        'Il contenuto della dashboard sarà visualizzato qui',
       subtitle: 'Tieni traccia e gestisci i tuoi record di raccolta',
       performanceDashboard: 'Dashboard delle performance',
       harvestsLogged: 'raccolti registrati',
       yieldPredictionTitle: 'Previsione di resa',
-      yieldPredictionSubtitle: 'Anteprima delle performance del prossimo raccolto.',
+      yieldPredictionSubtitle:
+        'Anteprima delle performance del prossimo raccolto.',
       predictedYieldLabel: 'Resa prevista',
       predictedYieldValue: '1.280 kg',
       yieldPredictionTrend: '+8,4 % rispetto al mese scorso',
@@ -452,8 +474,7 @@ export const it = {
           'Segnaposto mappa live: integra Leaflet/Mapbox per mostrare zone e sensori',
         liveMapComponentHint:
           'Clicca sulle zone per vedere elenchi di sensori e grafici storici.',
-        deviceHealthAndWeatherComponentTitle:
-          'Stato dispositivi e meteo',
+        deviceHealthAndWeatherComponentTitle: 'Stato dispositivi e meteo',
         lastUpdated: 'Ultimo aggiornamento: 2 minuti fa',
         refresh: 'Aggiorna',
       },
@@ -482,7 +503,8 @@ export const it = {
         clerkUserId: 'ID utente Clerk',
         clerkUserIdDescription: 'L’ID Clerk viene generato automaticamente',
         emailPlaceholder: 'utente@esempio.com',
-        invitationEmailDescription: 'Verrà inviato un invito a questo indirizzo',
+        invitationEmailDescription:
+          'Verrà inviato un invito a questo indirizzo',
         firstName: 'Nome',
         firstNamePlaceholder: 'Mario',
         lastName: 'Cognome',
@@ -530,8 +552,10 @@ export const it = {
           greenhouse: 'Serra',
           city: 'Città',
           actions: 'Azioni',
-          xPositionHint: 'Posizione orizzontale in metri dal lato dell’ingresso',
-          yPositionHint: 'Posizione verticale in metri dall’origine della serra',
+          xPositionHint:
+            'Posizione orizzontale in metri dal lato dell’ingresso',
+          yPositionHint:
+            'Posizione verticale in metri dall’origine della serra',
           greenhouseHint: 'Identificatore della serra',
           cityHint: 'Città di posizione',
           xPositionPlaceholder: 'es. 5,25',
@@ -645,8 +669,7 @@ export const it = {
           expectedVsActual: 'Atteso vs effettivo',
           adminControls: 'Controlli amministratore',
           adminNotes: 'Note amministratore',
-          adminNotesPlaceholder:
-            'Aggiungi note su indagine, risoluzione, ecc.',
+          adminNotesPlaceholder: 'Aggiungi note su indagine, risoluzione, ecc.',
           severityLevel: 'Livello di gravità',
           update: 'Aggiorna segnalazione',
           cancel: 'Annulla',
@@ -708,7 +731,8 @@ export const it = {
       },
       features: {
         realTimeMonitoring: 'Monitoraggio in tempo reale',
-        realTimeMonitoringDesc: 'Osserva le tue colture crescere in tempo reale',
+        realTimeMonitoringDesc:
+          'Osserva le tue colture crescere in tempo reale',
         multipleCameras: 'Supporto a più videocamere',
         multipleCamerasDesc: 'Collega e monitora più flussi video',
         recording: 'Registrazione e riproduzione',
@@ -832,7 +856,8 @@ export const it = {
         resolved: 'Risolta',
         openDescription:
           'La tua segnalazione è stata ricevuta e attende la revisione.',
-        inProgressDescription: 'Il nostro team sta indagando sulla segnalazione.',
+        inProgressDescription:
+          'Il nostro team sta indagando sulla segnalazione.',
         resolvedDescription:
           'La tua segnalazione è stata risolta. Grazie per averci aiutato a migliorare.',
       },

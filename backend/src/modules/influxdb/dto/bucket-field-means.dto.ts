@@ -18,6 +18,21 @@ export class GetFieldMeansInput {
   @IsOptional()
   @IsString()
   greenhouse?: string;
+
+  /**
+   * Absolute range start (ISO 8601). When both `start` and `stop` are
+   * provided, they take precedence over `windowMinutes`.
+   */
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  start?: string;
+
+  /** Absolute range stop (ISO 8601). Paired with `start`. */
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  stop?: string;
 }
 
 @ObjectType()
@@ -27,6 +42,14 @@ export class FieldMeanMetric {
 
   @Field({ nullable: true })
   greenhouse?: string;
+
+  /**
+   * Some tenants tag their location with `chamber` instead of `greenhouse`
+   * (see `farm-data-live.ts`). The Flux query groups by both, so exactly
+   * one of `greenhouse` / `chamber` is set on each row.
+   */
+  @Field({ nullable: true })
+  chamber?: string;
 
   @Field(() => Date)
   time: Date;

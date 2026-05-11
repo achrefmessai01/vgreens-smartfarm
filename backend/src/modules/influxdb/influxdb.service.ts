@@ -384,7 +384,12 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
 
   async getBucketFieldMeansLastMinutes(
     bucketName: string,
-    options: { greenhouse?: string; windowMinutes?: number },
+    options: {
+      greenhouse?: string;
+      windowMinutes?: number;
+      start?: string;
+      stop?: string;
+    },
   ): Promise<FieldMeanMetric[]> {
     if (!this.client || !this.queryApi) {
       this.logger.error('InfluxDB client is not initialized');
@@ -411,11 +416,26 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
         : '';
 
     const windowMinutes = options.windowMinutes ?? 5;
+    const useAbsolute =
+      typeof options.start === 'string' &&
+      typeof options.stop === 'string' &&
+      !Number.isNaN(new Date(options.start).getTime()) &&
+      !Number.isNaN(new Date(options.stop).getTime());
+    const rangeClause = useAbsolute
+      ? `|> range(start: time(v: "${escapeFluxString(options.start)}"), stop: time(v: "${escapeFluxString(options.stop)}"))`
+      : `|> range(start: -${windowMinutes}m)`;
+
+    // Group by `_field` plus BOTH `greenhouse` and `chamber`. Different
+    // tenants tag their location with one or the other (see
+    // `farm-data-live.ts` which falls back from `greenhouse` to `chamber`),
+    // and keying only on `greenhouse` would lose every row for the
+    // `chamber`-tagged tenants. With this grouping each row carries
+    // exactly one non-empty location tag.
     const flux = `from(bucket: "${escapedBucket}")
-  |> range(start: -${windowMinutes}m)
-  ${filterClause}|> group(columns: ["_field", "greenhouse"])
+  ${rangeClause}
+  ${filterClause}|> group(columns: ["_field", "greenhouse", "chamber"])
   |> mean()
-  |> keep(columns: ["_time", "_value", "_field", "greenhouse"])`;
+  |> keep(columns: ["_time", "_value", "_field", "greenhouse", "chamber"])`;
 
     const rows: FieldMeanMetric[] = [];
     const queryApi = this.queryApi;
@@ -439,11 +459,18 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
           }
 
           const greenhouse =
-            typeof o.greenhouse === 'string' ? o.greenhouse : undefined;
+            typeof o.greenhouse === 'string' && o.greenhouse !== ''
+              ? o.greenhouse
+              : undefined;
+          const chamber =
+            typeof o.chamber === 'string' && o.chamber !== ''
+              ? o.chamber
+              : undefined;
 
           rows.push({
             field,
             greenhouse,
+            chamber,
             time,
             value,
           });
@@ -458,7 +485,7 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.logger.debug(
-      `getBucketFieldMeansLastMinutes("${bucketName}", greenhouse="${options.greenhouse ?? ''}", windowMinutes=${windowMinutes}): returned ${rows.length} rows`,
+      `getBucketFieldMeansLastMinutes("${bucketName}", greenhouse="${options.greenhouse ?? ''}", ${useAbsolute ? `start=${options.start}, stop=${options.stop}` : `windowMinutes=${windowMinutes}`}): returned ${rows.length} rows`,
     );
     return rows;
   }

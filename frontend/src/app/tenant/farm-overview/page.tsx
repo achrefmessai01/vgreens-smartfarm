@@ -8,6 +8,7 @@ import {
   HistoryDrawer,
   SensorVisibilityDropdown,
 } from '@/components/farm-overview';
+import { TimeRangeSelector } from '@/components/farm-overview/time-range-selector';
 import { FeatureGuard } from '@/components/features/feature-guard';
 import { PageHeader } from '@/components/layout/page-header';
 import { TenantSelector } from '@/components/tenants';
@@ -48,6 +49,7 @@ export default function FarmOverviewPage() {
             className="mb-0"
           />
           <div className="flex shrink-0 items-end gap-2">
+            {state.isCombinedView && <TimeRangeSelector />}
             {state.canEditSensorPositions && (
               <SensorVisibilityDropdown
                 disabledFields={state.disabledSensorFields}

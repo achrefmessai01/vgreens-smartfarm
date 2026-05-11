@@ -93,8 +93,7 @@ export const el = {
       currentYield: 'Τρέχουσα απόδοση',
       currentYieldSubtitle: 'Με βάση την πρόβλεψη των τελευταίων 90 ημερών',
       totalYield: 'Συνολική απόδοση',
-      totalYieldSubtitle:
-        'Ολοκλήρωμα 90 ημερών παραγωγής σε όλη τη φάρμα',
+      totalYieldSubtitle: 'Ολοκλήρωμα 90 ημερών παραγωγής σε όλη τη φάρμα',
       comingSoon: 'Σύντομα',
       marketAlignmentHub: 'Κέντρο ευθυγράμμισης με την αγορά',
       marketAlignmentHubSubtitle: 'Σύντομα',
@@ -156,7 +155,8 @@ export const el = {
       showAllSensors: 'Show all',
       hideAllSensors: 'Hide all',
       sensorsVisible: 'visible',
-      subtitle: 'Πληροφορίες σε πραγματικό χρόνο για τις δραστηριότητες της φάρμας σας',
+      subtitle:
+        'Πληροφορίες σε πραγματικό χρόνο για τις δραστηριότητες της φάρμας σας',
       batches: 'Παρτίδες',
       onTime: 'Στην ώρα',
       delayed: 'Καθυστερημένο',
@@ -176,6 +176,26 @@ export const el = {
       oneDay: '1 ημέρα',
       oneWeek: '1 εβδομάδα',
       oneMonth: '1 μήνας',
+      timeRangePresets: {
+        ariaLabel: 'Average over',
+        last5min: 'Last 5 min',
+        last1h: 'Last 1 h',
+        last24h: 'Last 24 h',
+        last7d: 'Last 7 d',
+        last30d: 'Last 30 d',
+        last90d: 'Last 90 d',
+        ytd: 'Year to date',
+        custom: 'Custom…',
+        customRangeTitle: 'Custom range',
+        from: 'From',
+        until: 'Until',
+        apply: 'Apply',
+        clear: 'Clear',
+        invalidRange:
+          'From must be before Until, and Until cannot be in the future.',
+        recalculating: 'Recalculating averages…',
+        currentRange: 'Showing averages for',
+      },
       farmOverview: 'Επισκόπηση φάρμας',
       tunnelView: 'Προβολή σήραγγας',
       systemOverview: 'Επισκόπηση συστήματος',
@@ -279,8 +299,7 @@ export const el = {
       historyTitle: 'Ιστορικό συγκομιδής',
       harvestEntryTab: 'Καταχώριση συγκομιδής',
       harvestEntryTitle: 'Καταχώριση συγκομιδής',
-      dashboardPlaceholder:
-        'Το περιεχόμενο του πίνακα θα εμφανιστεί εδώ',
+      dashboardPlaceholder: 'Το περιεχόμενο του πίνακα θα εμφανιστεί εδώ',
       subtitle: 'Παρακολουθήστε και διαχειριστείτε τα αρχεία συγκομιδής σας',
       performanceDashboard: 'Πίνακας απόδοσης',
       harvestsLogged: 'συγκομιδές καταχωρήθηκαν',
@@ -457,8 +476,7 @@ export const el = {
           'Σύμβολο ζωντανού χάρτη — ενσωματώστε Leaflet/Mapbox για εμφάνιση ζωνών και αισθητήρων',
         liveMapComponentHint:
           'Κάντε κλικ στις ζώνες για εξερεύνηση λιστών αισθητήρων και ιστορικών γραφημάτων.',
-        deviceHealthAndWeatherComponentTitle:
-          'Υγεία συσκευών και καιρός',
+        deviceHealthAndWeatherComponentTitle: 'Υγεία συσκευών και καιρός',
         lastUpdated: 'Τελευταία ενημέρωση: 2 λεπτά πριν',
         refresh: 'Ανανέωση',
       },
@@ -485,11 +503,9 @@ export const el = {
         tenantRequired:
           'Ο μισθωτής είναι υποχρεωτικός για ρόλους εκτός διαχειριστή',
         clerkUserId: 'Αναγνωριστικό χρήστη Clerk',
-        clerkUserIdDescription:
-          'Το αναγνωριστικό Clerk δημιουργείται αυτόματα',
+        clerkUserIdDescription: 'Το αναγνωριστικό Clerk δημιουργείται αυτόματα',
         emailPlaceholder: 'χρηστης@παραδειγμα.com',
-        invitationEmailDescription:
-          'Θα σταλεί πρόσκληση σε αυτό το e-mail',
+        invitationEmailDescription: 'Θα σταλεί πρόσκληση σε αυτό το e-mail',
         firstName: 'Όνομα',
         firstNamePlaceholder: 'Γιάννης',
         lastName: 'Επώνυμο',
@@ -614,8 +630,7 @@ export const el = {
         descriptionPlaceholder: 'Περιγράψτε τι κάνει αυτή η λειτουργία...',
         categoryLabel: 'Κατηγορία',
         categoryPlaceholder: 'π.χ. παρακολούθηση, αυτοματισμός, ανάλυση',
-        isActiveLabel:
-          'Η λειτουργία είναι ενεργή (διαθέσιμη στο σύστημα)',
+        isActiveLabel: 'Η λειτουργία είναι ενεργή (διαθέσιμη στο σύστημα)',
         loading: 'Φόρτωση λειτουργιών...',
         featureAccess: 'Πρόσβαση σε λειτουργίες',
         manageFeaturesSubtitle:
@@ -637,8 +652,7 @@ export const el = {
         created: 'Δημιουργήθηκε',
         lastUpdated: 'Τελευταία ενημέρωση',
         actions: 'Ενέργειες',
-        searchPlaceholder:
-          'Αναζήτηση αναφορών ανά τίτλο, e-mail χρήστη...',
+        searchPlaceholder: 'Αναζήτηση αναφορών ανά τίτλο, e-mail χρήστη...',
         noReports: 'Δεν βρέθηκαν αναφορές σφαλμάτων',
         loading: 'Φόρτωση αναφορών...',
         description: 'Περιγραφή',
@@ -846,10 +860,8 @@ export const el = {
         open: 'Ανοικτή',
         inProgress: 'Σε εξέλιξη',
         resolved: 'Επιλυμένη',
-        openDescription:
-          'Η αναφορά σας έχει ληφθεί και αναμένει έλεγχο.',
-        inProgressDescription:
-          'Η ομάδα μας ερευνά ενεργά την αναφορά σας.',
+        openDescription: 'Η αναφορά σας έχει ληφθεί και αναμένει έλεγχο.',
+        inProgressDescription: 'Η ομάδα μας ερευνά ενεργά την αναφορά σας.',
         resolvedDescription:
           'Η αναφορά σας έχει επιλυθεί. Σας ευχαριστούμε που μας βοηθάτε να βελτιωθούμε.',
       },
