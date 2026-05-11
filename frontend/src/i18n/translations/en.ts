@@ -876,4 +876,12 @@ export const en = {
       },
     },
   },
+  errors: {
+    sessionLoad: {
+      title: "We couldn't load your account",
+      description:
+        'Something went wrong while preparing your session. Please try again — if the problem persists, sign out and back in.',
+      retry: 'Try again',
+    },
+  },
 } as const;

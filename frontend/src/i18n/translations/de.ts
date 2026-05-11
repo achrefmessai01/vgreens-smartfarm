@@ -144,10 +144,10 @@ export const de = {
     },
     farmOverview: {
       title: 'Farm-Übersicht',
-      enableSensors: 'Enable Sensors',
-      showAllSensors: 'Show all',
-      hideAllSensors: 'Hide all',
-      sensorsVisible: 'visible',
+      enableSensors: 'Sensoren aktivieren',
+      showAllSensors: 'Alle anzeigen',
+      hideAllSensors: 'Alle ausblenden',
+      sensorsVisible: 'sichtbar',
       subtitle: 'Echtzeit-Einblicke in Ihre Betriebsabläufe',
       batches: 'Chargen',
       onTime: 'Pünktlich',
@@ -638,7 +638,7 @@ export const de = {
           sheetDescription:
             'Überschreiben Sie die Standort-Tags für diesen Sensor. Lassen Sie das Feld leer, um die InfluxDB-Werte zu verwenden.',
           enableSensorsHint:
-            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
+            'Deaktivierte Sensortypen werden in der Farm-Übersicht ausgeblendet und erzeugen keine Warnungen.',
         },
         farmLayout: {
           title: 'Farm-Layout',
@@ -887,6 +887,14 @@ export const de = {
           'Wenn Sie Fragen zu diesem Bericht haben, kontaktieren Sie bitte unser Support-Team.',
         submitAnother: 'Weiteren Bericht einreichen',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: 'Ihr Konto konnte nicht geladen werden',
+      description:
+        'Beim Vorbereiten Ihrer Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut – falls das Problem weiterhin besteht, melden Sie sich ab und wieder an.',
+      retry: 'Erneut versuchen',
     },
   },
 } as const;
