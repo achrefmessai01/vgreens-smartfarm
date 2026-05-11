@@ -150,6 +150,10 @@ export const ro = {
     },
     farmOverview: {
       title: 'Privire de ansamblu fermă',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'Informații în timp real despre operațiunile fermei tale',
       batches: 'Loturi',
       onTime: 'La timp',
@@ -549,6 +553,8 @@ export const ro = {
             'Nu s-au găsit senzori în bucket-ul InfluxDB al acestui chiriaș.',
           sheetDescription:
             'Suprascrie etichetele de locație pentru acest senzor. Lasă necompletat pentru a folosi valorile din InfluxDB.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Plan fermă',

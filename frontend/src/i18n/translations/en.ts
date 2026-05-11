@@ -146,6 +146,10 @@ export const en = {
     farmOverview: {
       title: 'Farm Overview',
       subtitle: 'Real-time insights into your farm operations',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       batches: 'Batches',
       onTime: 'On time',
       delayed: 'Delayed',
@@ -532,6 +536,8 @@ export const en = {
           noSensorsFound: "No sensors found in this tenant's InfluxDB bucket.",
           sheetDescription:
             'Override the location tags for this sensor. Leave blank to use the values from InfluxDB.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Farm Layout',

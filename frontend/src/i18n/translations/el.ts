@@ -152,6 +152,10 @@ export const el = {
     },
     farmOverview: {
       title: 'Επισκόπηση φάρμας',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'Πληροφορίες σε πραγματικό χρόνο για τις δραστηριότητες της φάρμας σας',
       batches: 'Παρτίδες',
       onTime: 'Στην ώρα',
@@ -552,6 +556,8 @@ export const el = {
             'Δεν βρέθηκαν αισθητήρες στο bucket InfluxDB αυτού του μισθωτή.',
           sheetDescription:
             'Παρακάμψτε τις ετικέτες τοποθεσίας για αυτόν τον αισθητήρα. Αφήστε κενό για χρήση των τιμών από το InfluxDB.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Διάταξη φάρμας',

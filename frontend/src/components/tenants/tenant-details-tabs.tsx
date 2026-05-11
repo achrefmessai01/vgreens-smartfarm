@@ -5,7 +5,10 @@ import { useParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n';
 import { TenantFeaturesTab } from './tenant-features-tab';
-import { SensorConfigTable } from '@/components/sensor-config';
+import {
+  SensorConfigTable,
+  SensorVisibilityConfig,
+} from '@/components/sensor-config';
 import { FarmLayoutConfig } from '@/components/farm-config';
 
 export function TenantDetailsTabs() {
@@ -59,6 +62,7 @@ export function TenantDetailsTabs() {
         {activeTab === 'farm-overview' && (
           <div className="flex min-w-0 flex-col gap-6">
             <FarmLayoutConfig tenantId={tenantId} />
+            <SensorVisibilityConfig tenantId={tenantId} />
             <SensorConfigTable tenantId={tenantId} />
           </div>
         )}

@@ -151,6 +151,10 @@ export const pl = {
     },
     farmOverview: {
       title: 'Przegląd farmy',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'Aktualne informacje o działaniu Twojej farmy',
       batches: 'Partie',
       onTime: 'Na czas',
@@ -546,6 +550,8 @@ export const pl = {
             'Nie znaleziono czujników w buckecie InfluxDB tego najemcy.',
           sheetDescription:
             'Zastąp etykiety lokalizacji dla tego czujnika. Pozostaw puste, aby użyć wartości z InfluxDB.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Układ farmy',

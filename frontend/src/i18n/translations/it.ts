@@ -151,6 +151,10 @@ export const it = {
     },
     farmOverview: {
       title: 'Panoramica fattoria',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'Informazioni in tempo reale sulle operazioni della fattoria',
       batches: 'Lotti',
       onTime: 'In orario',
@@ -544,6 +548,8 @@ export const it = {
             'Nessun sensore trovato nel bucket InfluxDB di questo tenant.',
           sheetDescription:
             'Sovrascrivi i tag di posizione per questo sensore. Lascia vuoto per usare i valori di InfluxDB.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Planimetria della fattoria',

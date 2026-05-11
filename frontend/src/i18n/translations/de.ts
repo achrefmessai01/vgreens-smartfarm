@@ -144,6 +144,10 @@ export const de = {
     },
     farmOverview: {
       title: 'Farm-Übersicht',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'Echtzeit-Einblicke in Ihre Betriebsabläufe',
       batches: 'Chargen',
       onTime: 'Pünktlich',
@@ -613,6 +617,8 @@ export const de = {
             'Keine Sensoren im InfluxDB-Eimer dieses Mandanten gefunden.',
           sheetDescription:
             'Überschreiben Sie die Standort-Tags für diesen Sensor. Lassen Sie das Feld leer, um die InfluxDB-Werte zu verwenden.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Farm-Layout',

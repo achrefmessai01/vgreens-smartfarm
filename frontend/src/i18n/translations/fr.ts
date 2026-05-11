@@ -132,6 +132,10 @@ export const fr = {
     },
     farmOverview: {
       title: 'Vue de la ferme',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       subtitle: 'Aperçu en temps réel de vos opérations',
       batches: 'Lots', onTime: 'À temps', delayed: 'En retard',
       early: 'En avance', complete: 'Terminé',
@@ -371,6 +375,8 @@ export const fr = {
           saving: 'Enregistrement…', cancel: 'Annuler',
           noSensorsFound: 'Aucun capteur dans le bucket InfluxDB.',
           sheetDescription: 'Remplacez les balises pour ce capteur.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
         },
         farmLayout: {
           title: 'Plan de la ferme',
