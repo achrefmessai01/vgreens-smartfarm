@@ -30,6 +30,7 @@ export const ME_QUERY = gql`
       isActive
       status
       preferredLanguage
+      farmOverviewTimeRange
       createdAt
       updatedAt
     }

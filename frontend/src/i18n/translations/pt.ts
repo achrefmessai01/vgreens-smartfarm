@@ -174,6 +174,26 @@ export const pt = {
       oneDay: '1 dia',
       oneWeek: '1 semana',
       oneMonth: '1 mês',
+      timeRangePresets: {
+        ariaLabel: 'Average over',
+        last5min: 'Last 5 min',
+        last1h: 'Last 1 h',
+        last24h: 'Last 24 h',
+        last7d: 'Last 7 d',
+        last30d: 'Last 30 d',
+        last90d: 'Last 90 d',
+        ytd: 'Year to date',
+        custom: 'Custom…',
+        customRangeTitle: 'Custom range',
+        from: 'From',
+        until: 'Until',
+        apply: 'Apply',
+        clear: 'Clear',
+        invalidRange:
+          'From must be before Until, and Until cannot be in the future.',
+        recalculating: 'Recalculating averages…',
+        currentRange: 'Showing averages for',
+      },
       farmOverview: 'Visão geral da quinta',
       tunnelView: 'Vista do túnel',
       systemOverview: 'Visão geral do sistema',
@@ -489,8 +509,7 @@ export const pt = {
         clerkUserId: 'ID de utilizador do Clerk',
         clerkUserIdDescription: 'O ID do Clerk é gerado automaticamente',
         emailPlaceholder: 'utilizador@exemplo.com',
-        invitationEmailDescription:
-          'Será enviado um convite para este e-mail',
+        invitationEmailDescription: 'Será enviado um convite para este e-mail',
         firstName: 'Nome próprio',
         firstNamePlaceholder: 'João',
         lastName: 'Apelido',
@@ -540,7 +559,8 @@ export const pt = {
           actions: 'Ações',
           xPositionHint:
             'Posição horizontal em metros a partir do lado da entrada',
-          yPositionHint: 'Posição vertical em metros a partir da origem da estufa',
+          yPositionHint:
+            'Posição vertical em metros a partir da origem da estufa',
           greenhouseHint: 'Identificador da estufa',
           cityHint: 'Cidade da localização',
           xPositionPlaceholder: 'p. ex., 5,25',
@@ -842,9 +862,9 @@ export const pt = {
         open: 'Aberto',
         inProgress: 'Em curso',
         resolved: 'Resolvido',
-        openDescription:
-          'O seu relatório foi recebido e aguarda revisão.',
-        inProgressDescription: 'A nossa equipa está a investigar o seu relatório.',
+        openDescription: 'O seu relatório foi recebido e aguarda revisão.',
+        inProgressDescription:
+          'A nossa equipa está a investigar o seu relatório.',
         resolvedDescription:
           'O seu relatório foi resolvido. Obrigado por nos ajudar a melhorar.',
       },

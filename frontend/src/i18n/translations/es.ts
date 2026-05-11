@@ -108,7 +108,8 @@ export const es = {
     },
     nextCyclePlanner: {
       title: 'Planificador de Ciclo Futuro',
-      subtitle: 'Planifica y simula el próximo ciclo de cultivo según la variedad.',
+      subtitle:
+        'Planifica y simula el próximo ciclo de cultivo según la variedad.',
       openVarietyCatalogue: 'Abrir catálogo de variedades',
       varietyCatalogueTitle: 'Catálogo de variedades',
       varietyCatalogueSubtitle:
@@ -154,7 +155,8 @@ export const es = {
       showAllSensors: 'Show all',
       hideAllSensors: 'Hide all',
       sensorsVisible: 'visible',
-      subtitle: 'Información en tiempo real sobre el funcionamiento de tu granja',
+      subtitle:
+        'Información en tiempo real sobre el funcionamiento de tu granja',
       batches: 'Lotes',
       onTime: 'A tiempo',
       delayed: 'Retrasado',
@@ -174,6 +176,26 @@ export const es = {
       oneDay: '1 día',
       oneWeek: '1 semana',
       oneMonth: '1 mes',
+      timeRangePresets: {
+        ariaLabel: 'Promedio de',
+        last5min: 'Últimos 5 min',
+        last1h: 'Última 1 h',
+        last24h: 'Últimas 24 h',
+        last7d: 'Últimos 7 d',
+        last30d: 'Últimos 30 d',
+        last90d: 'Últimos 90 d',
+        ytd: 'Desde inicio de año',
+        custom: 'Personalizado…',
+        customRangeTitle: 'Rango personalizado',
+        from: 'Desde',
+        until: 'Hasta',
+        apply: 'Aplicar',
+        clear: 'Limpiar',
+        invalidRange:
+          'Desde debe ser anterior a Hasta, y Hasta no puede estar en el futuro.',
+        recalculating: 'Recalculando promedios…',
+        currentRange: 'Promedios de',
+      },
       farmOverview: 'Visión de la granja',
       tunnelView: 'Vista del túnel',
       systemOverview: 'Visión del sistema',
@@ -205,7 +227,8 @@ export const es = {
       viewHeatmap: 'Mapa de calor',
       viewGraph: 'Gráfico',
       invalidDropTitle: 'Soltar fuera del mapa',
-      invalidDropDescription: 'Coloca el sensor dentro del diseño del invernadero.',
+      invalidDropDescription:
+        'Coloca el sensor dentro del diseño del invernadero.',
       positionSaveFailedTitle: 'No se pudo guardar la posición',
       positionSaveFailedDescription:
         'El sensor volvió a su última posición guardada.',
@@ -627,7 +650,8 @@ export const es = {
       },
       reports: {
         title: 'Gestión de informes de errores',
-        subtitle: 'Supervisa y gestiona los informes de errores de los usuarios',
+        subtitle:
+          'Supervisa y gestiona los informes de errores de los usuarios',
         errorTitle: 'Título del error',
         userEmail: 'Correo del usuario',
         severity: 'Gravedad',

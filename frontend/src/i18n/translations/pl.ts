@@ -93,8 +93,7 @@ export const pl = {
       currentYield: 'Bieżący plon',
       currentYieldSubtitle: 'Na podstawie prognozy z ostatnich 90 dni',
       totalYield: 'Plon całkowity',
-      totalYieldSubtitle:
-        '90-dniowa całka produkcji w skali całej farmy',
+      totalYieldSubtitle: '90-dniowa całka produkcji w skali całej farmy',
       comingSoon: 'Wkrótce',
       marketAlignmentHub: 'Centrum dopasowania do rynku',
       marketAlignmentHubSubtitle: 'Wkrótce',
@@ -112,8 +111,7 @@ export const pl = {
       subtitle: 'Planuj i symuluj kolejny cykl uprawy w oparciu o odmianę.',
       openVarietyCatalogue: 'Otwórz katalog odmian',
       varietyCatalogueTitle: 'Katalog odmian',
-      varietyCatalogueSubtitle:
-        'Poznaj różne odmiany truskawek i ich cechy.',
+      varietyCatalogueSubtitle: 'Poznaj różne odmiany truskawek i ich cechy.',
       predictedBrix: 'Prognozowany Brix',
       adjustPredictedBrix:
         'Dostosuj prognozowaną krzywą Brix dla wybranej odmiany.',
@@ -175,6 +173,26 @@ export const pl = {
       oneDay: '1 dzień',
       oneWeek: '1 tydzień',
       oneMonth: '1 miesiąc',
+      timeRangePresets: {
+        ariaLabel: 'Average over',
+        last5min: 'Last 5 min',
+        last1h: 'Last 1 h',
+        last24h: 'Last 24 h',
+        last7d: 'Last 7 d',
+        last30d: 'Last 30 d',
+        last90d: 'Last 90 d',
+        ytd: 'Year to date',
+        custom: 'Custom…',
+        customRangeTitle: 'Custom range',
+        from: 'From',
+        until: 'Until',
+        apply: 'Apply',
+        clear: 'Clear',
+        invalidRange:
+          'From must be before Until, and Until cannot be in the future.',
+        recalculating: 'Recalculating averages…',
+        currentRange: 'Showing averages for',
+      },
       farmOverview: 'Przegląd farmy',
       tunnelView: 'Widok tunelu',
       systemOverview: 'Przegląd systemu',
@@ -265,8 +283,7 @@ export const pl = {
       insight1Description:
         'Przychody wzrosły o 12,5 % w porównaniu z poprzednim okresem',
       insight2Title: 'Efektywność kosztowa',
-      insight2Description:
-        'Koszty produkcji spadły o 3,2 % w tym kwartale',
+      insight2Description: 'Koszty produkcji spadły o 3,2 % w tym kwartale',
       insight3Title: 'Optymalizacja plonu',
       insight3Description:
         'Średni plon poprawił się o 8,7 % tydzień do tygodnia',
@@ -537,10 +554,8 @@ export const pl = {
           greenhouse: 'Szklarnia',
           city: 'Miasto',
           actions: 'Akcje',
-          xPositionHint:
-            'Pozycja pozioma w metrach od strony wejścia',
-          yPositionHint:
-            'Pozycja pionowa w metrach od początku szklarni',
+          xPositionHint: 'Pozycja pozioma w metrach od strony wejścia',
+          yPositionHint: 'Pozycja pionowa w metrach od początku szklarni',
           greenhouseHint: 'Identyfikator szklarni',
           cityHint: 'Miasto lokalizacji',
           xPositionPlaceholder: 'np. 5,25',
@@ -626,8 +641,7 @@ export const pl = {
       },
       reports: {
         title: 'Zarządzanie zgłoszeniami błędów',
-        subtitle:
-          'Monitoruj i zarządzaj zgłoszeniami błędów od użytkowników',
+        subtitle: 'Monitoruj i zarządzaj zgłoszeniami błędów od użytkowników',
         errorTitle: 'Tytuł błędu',
         userEmail: 'E-mail użytkownika',
         severity: 'Waga',
@@ -637,8 +651,7 @@ export const pl = {
         created: 'Utworzone',
         lastUpdated: 'Ostatnia aktualizacja',
         actions: 'Akcje',
-        searchPlaceholder:
-          'Szukaj zgłoszeń po tytule, e-mailu użytkownika...',
+        searchPlaceholder: 'Szukaj zgłoszeń po tytule, e-mailu użytkownika...',
         noReports: 'Nie znaleziono zgłoszeń błędów',
         loading: 'Ładowanie zgłoszeń...',
         description: 'Opis',
@@ -719,8 +732,7 @@ export const pl = {
       },
       features: {
         realTimeMonitoring: 'Monitorowanie w czasie rzeczywistym',
-        realTimeMonitoringDesc:
-          'Obserwuj wzrost upraw w czasie rzeczywistym',
+        realTimeMonitoringDesc: 'Obserwuj wzrost upraw w czasie rzeczywistym',
         multipleCameras: 'Obsługa wielu kamer',
         multipleCamerasDesc: 'Podłączaj i monitoruj wiele kamer',
         recording: 'Nagrywanie i odtwarzanie',
@@ -825,8 +837,7 @@ export const pl = {
       keepAlert: 'Zachowaj alarm',
       toastTitle: 'Alarm krytyczny',
       toastViewAction: 'Zobacz alarmy',
-      toastFallbackDescription:
-        'Nowy krytyczny alarm wymaga uwagi.',
+      toastFallbackDescription: 'Nowy krytyczny alarm wymaga uwagi.',
       cancel: 'Anuluj',
       save: 'Zapisz',
       delete: 'Usuń',
