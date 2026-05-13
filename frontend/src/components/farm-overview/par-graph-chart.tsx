@@ -135,51 +135,6 @@ export function ParGraphChart({
               strokeDasharray="4 4"
               ifOverflow="extendDomain"
             />
-
-            <Area
-              type="monotone"
-              dataKey="lowerBand"
-              stackId="parBand"
-              stroke="none"
-              fill="transparent"
-              isAnimationActive={false}
-            />
-            <Area
-              type="monotone"
-              dataKey="band"
-              stackId="parBand"
-              stroke="none"
-              fill="#34D399"
-              fillOpacity={0.65}
-              isAnimationActive={false}
-            />
-
-            <Line
-              type="monotone"
-              dataKey="avg"
-              stroke="#94A3B8"
-              strokeDasharray="4 4"
-              strokeWidth={1.4}
-              dot={false}
-              isAnimationActive={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="yesterday"
-              stroke="#64748B"
-              strokeWidth={1.3}
-              dot={false}
-              isAnimationActive={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="today"
-              stroke="#059669"
-              strokeWidth={2.2}
-              dot={false}
-              connectNulls={false}
-              isAnimationActive={false}
-            />
           </AreaChart>
         </ResponsiveContainer>
       </div>
