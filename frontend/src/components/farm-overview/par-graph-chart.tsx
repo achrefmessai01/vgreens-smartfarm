@@ -1,14 +1,14 @@
 'use client';
 
+import * as React from 'react';
 import { useI18n } from '@/i18n';
 import {
-  Area,
   Line,
   Label,
   XAxis,
   YAxis,
   Tooltip,
-  AreaChart,
+  LineChart,
   CartesianGrid,
   ReferenceLine,
   ResponsiveContainer,
@@ -21,11 +21,19 @@ import {
   formatTooltipValue,
 } from '@/lib/utils/par-graph';
 
+export interface ParGraphLinePoint {
+  hour: number;
+  value: number;
+}
+
 export interface ParGraphChartProps {
   curveData: ParCurvePoint[];
   currentHour: number;
   currentDli: number;
   yMax: number;
+  dli: ParGraphLinePoint[];
+  lowerEdge: ParGraphLinePoint[];
+  upperEdge: ParGraphLinePoint[];
 }
 
 export function ParGraphChart({
@@ -33,31 +41,52 @@ export function ParGraphChart({
   currentHour,
   currentDli,
   yMax,
+  dli,
+  lowerEdge,
+  upperEdge,
 }: ParGraphChartProps) {
   const { t } = useI18n();
   const labels = t.pages.farmOverview.parGraph;
 
+  const mergedMock = React.useMemo(() => {
+    const byHour = new Map<
+      number,
+      { hour: number; dli?: number; lowerEdge?: number; upperEdge?: number }
+    >();
+    const ensure = (hour: number) => {
+      let entry = byHour.get(hour);
+      if (!entry) {
+        entry = { hour };
+        byHour.set(hour, entry);
+      }
+      return entry;
+    };
+    for (const p of dli) ensure(p.hour).dli = p.value;
+    for (const p of lowerEdge) ensure(p.hour).lowerEdge = p.value;
+    for (const p of upperEdge) ensure(p.hour).upperEdge = p.value;
+    return Array.from(byHour.values()).sort((a, b) => a.hour - b.hour);
+  }, [dli, lowerEdge, upperEdge]);
+
+  const effectiveYMax = React.useMemo(() => {
+    const mockMax = mergedMock.reduce(
+      (acc, p) =>
+        Math.max(acc, p.dli ?? 0, p.lowerEdge ?? 0, p.upperEdge ?? 0),
+      0,
+    );
+    const combined = Math.max(yMax, mockMax);
+    return Math.ceil((combined + 1) / 5) * 5;
+  }, [mergedMock, yMax]);
+
+  void curveData;
+
   return (
     <div className="flex min-h-0 flex-1 flex-col p-1.5 sm:p-3">
-      <div className="text-muted-foreground mb-2 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block w-4 border-t border-dashed border-slate-400" />
-          {labels.legendAverage}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block w-4 border-t border-slate-500" />
-          {labels.legendYesterday}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block w-4 border-t-2 border-emerald-600" />
-          {labels.legendToday}
-        </span>
-      </div>
+      <div className="text-muted-foreground mb-2 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 text-[10px]"></div>
 
       <div className="min-h-[10rem] flex-1 sm:min-h-[14rem]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={curveData}
+          <LineChart
+            data={mergedMock}
             margin={{ top: 6, right: 6, left: 2, bottom: 14 }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -80,7 +109,7 @@ export function ParGraphChart({
               />
             </XAxis>
             <YAxis
-              domain={[0, yMax]}
+              domain={[0, effectiveYMax]}
               tickLine={false}
               axisLine={false}
               width={40}
@@ -135,7 +164,37 @@ export function ParGraphChart({
               strokeDasharray="4 4"
               ifOverflow="extendDomain"
             />
-          </AreaChart>
+
+            <Line
+              dataKey="dli"
+              type="monotone"
+              name="dli"
+              stroke="hsl(142 71% 35%)"
+              strokeWidth={2}
+              dot={false}
+              isAnimationActive={false}
+            />
+            <Line
+              dataKey="lowerEdge"
+              type="monotone"
+              name="lowerEdge"
+              stroke="hsl(217 91% 55%)"
+              strokeWidth={1.5}
+              strokeDasharray="4 4"
+              dot={false}
+              isAnimationActive={false}
+            />
+            <Line
+              dataKey="upperEdge"
+              type="monotone"
+              name="upperEdge"
+              stroke="hsl(0 84% 55%)"
+              strokeWidth={1.5}
+              strokeDasharray="4 4"
+              dot={false}
+              isAnimationActive={false}
+            />
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </div>
