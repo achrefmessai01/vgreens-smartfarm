@@ -151,10 +151,10 @@ export const es = {
     },
     farmOverview: {
       title: 'Visión de la granja',
-      enableSensors: 'Enable Sensors',
-      showAllSensors: 'Show all',
-      hideAllSensors: 'Hide all',
-      sensorsVisible: 'visible',
+      enableSensors: 'Activar sensores',
+      showAllSensors: 'Mostrar todos',
+      hideAllSensors: 'Ocultar todos',
+      sensorsVisible: 'visibles',
       subtitle:
         'Información en tiempo real sobre el funcionamiento de tu granja',
       batches: 'Lotes',
@@ -582,7 +582,7 @@ export const es = {
           sheetDescription:
             'Anula las etiquetas de ubicación de este sensor. Deja en blanco para usar los valores de InfluxDB.',
           enableSensorsHint:
-            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
+            'Los tipos de sensor desactivados se ocultan del mapa Vista de la granja y no generan alertas.',
         },
         farmLayout: {
           title: 'Diseño de la granja',
@@ -902,6 +902,14 @@ export const es = {
           'Si tienes preguntas sobre este informe, contacta con nuestro equipo de soporte.',
         submitAnother: 'Enviar otro informe',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: 'No pudimos cargar tu cuenta',
+      description:
+        'Algo salió mal al preparar tu sesión. Inténtalo de nuevo — si el problema persiste, cierra sesión y vuelve a iniciarla.',
+      retry: 'Reintentar',
     },
   },
 } as const;

@@ -12,10 +12,9 @@ import {
 import { UserRole } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
-import { useClerk } from '@clerk/nextjs';
+import { useLogout } from '@/lib/hooks/use-logout';
 import { Building2, LogOut, Moon, Shield, Sun, User } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useRouter } from 'next/navigation';
 
 interface UserMenuProps {
   className?: string;
@@ -23,19 +22,9 @@ interface UserMenuProps {
 
 export function UserMenu({ className }: UserMenuProps) {
   const { t } = useI18n();
-  const router = useRouter();
-  const { signOut } = useClerk();
+  const handleLogout = useLogout();
   const { theme, setTheme } = useTheme();
   const { user, role, isVGreensAdmin } = useCurrentUser();
-
-  const handleLogout = async () => {
-    try {
-      await signOut({ redirectUrl: '/login' });
-      router.push('/login');
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
-  };
 
   const getUserDisplayName = () => {
     if (user?.firstName && user?.lastName) {
