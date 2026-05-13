@@ -400,6 +400,7 @@ export type GetFieldMeansInput = {
 
 export type GetParDliTodayInput = {
   bucketName: Scalars['String']['input'];
+  timezone?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GetSignedImageUrlInput = {
@@ -777,6 +778,12 @@ export enum OrderDirection {
   Desc = 'DESC'
 }
 
+export type ParDliBandPoint = {
+  __typename?: 'ParDliBandPoint';
+  dli?: Maybe<Scalars['Float']['output']>;
+  hour: Scalars['Int']['output'];
+};
+
 export type ParDliPoint = {
   __typename?: 'ParDliPoint';
   dli: Scalars['Float']['output'];
@@ -787,7 +794,9 @@ export type ParDliResult = {
   __typename?: 'ParDliResult';
   currentDLI?: Maybe<Scalars['Float']['output']>;
   currentPPFD?: Maybe<Scalars['Float']['output']>;
+  lowerEdge: Array<ParDliBandPoint>;
   todaysGraphData: Array<ParDliPoint>;
+  upperEdge: Array<ParDliBandPoint>;
 };
 
 export type Query = {
@@ -1678,10 +1687,11 @@ export type GetBucketFieldMeansLastMinutesQuery = { __typename?: 'Query', getBuc
 
 export type GetParDliTodayQueryVariables = Exact<{
   bucketName: Scalars['String']['input'];
+  timezone?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetParDliTodayQuery = { __typename?: 'Query', getParDliToday: { __typename?: 'ParDliResult', currentPPFD?: number | null, currentDLI?: number | null, todaysGraphData: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }> } };
+export type GetParDliTodayQuery = { __typename?: 'Query', getParDliToday: { __typename?: 'ParDliResult', currentPPFD?: number | null, currentDLI?: number | null, todaysGraphData: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }>, lowerEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }>, upperEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }> } };
 
 export type SensorConfigsQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -4505,12 +4515,20 @@ export type GetBucketFieldMeansLastMinutesLazyQueryHookResult = ReturnType<typeo
 export type GetBucketFieldMeansLastMinutesSuspenseQueryHookResult = ReturnType<typeof useGetBucketFieldMeansLastMinutesSuspenseQuery>;
 export type GetBucketFieldMeansLastMinutesQueryResult = Apollo.QueryResult<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>;
 export const GetParDliTodayDocument = gql`
-    query GetParDliToday($bucketName: String!) {
-  getParDliToday(input: {bucketName: $bucketName}) {
+    query GetParDliToday($bucketName: String!, $timezone: String) {
+  getParDliToday(input: {bucketName: $bucketName, timezone: $timezone}) {
     currentPPFD
     currentDLI
     todaysGraphData {
       time
+      dli
+    }
+    lowerEdge {
+      hour
+      dli
+    }
+    upperEdge {
+      hour
       dli
     }
   }
@@ -4530,6 +4548,7 @@ export const GetParDliTodayDocument = gql`
  * const { data, loading, error } = useGetParDliTodayQuery({
  *   variables: {
  *      bucketName: // value for 'bucketName'
+ *      timezone: // value for 'timezone'
  *   },
  * });
  */

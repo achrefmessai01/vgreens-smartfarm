@@ -71,6 +71,16 @@ export class GetParDliTodayInput {
   @IsString()
   @IsNotEmpty()
   bucketName: string;
+
+  /**
+   * IANA timezone name (e.g. "Europe/Berlin"). Used to align today's
+   * window and the historical band's hour buckets to the viewer's local
+   * time. Falls back to UTC when omitted.
+   */
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  timezone?: string;
 }
 
 @ObjectType()
@@ -80,6 +90,21 @@ export class ParDliPoint {
 
   @Field()
   dli: number;
+}
+
+/**
+ * One hourly point on the historical DLI band. `hour` is the local hour
+ * (0–23) in the requesting client's timezone. `dli` is null when the
+ * hour has no samples on any of the lookback days, signalling the chart
+ * to render a gap rather than zero.
+ */
+@ObjectType()
+export class ParDliBandPoint {
+  @Field(() => Int)
+  hour: number;
+
+  @Field({ nullable: true })
+  dli?: number;
 }
 
 @ObjectType()
@@ -95,4 +120,19 @@ export class ParDliResult {
   /** Cumulative DLI curve for today, one point per 5-minute window. */
   @Field(() => [ParDliPoint])
   todaysGraphData: ParDliPoint[];
+
+  /**
+   * Historical band lower edge: cumulative DLI built from the per-hour
+   * mean (across the last 14 days) of each day's hourly **minimum** lux.
+   * 24 points, one per hour starting at today's UTC midnight.
+   */
+  @Field(() => [ParDliBandPoint])
+  lowerEdge: ParDliBandPoint[];
+
+  /**
+   * Historical band upper edge: cumulative DLI built from the per-hour
+   * mean of each day's hourly **maximum** lux. Same shape as `lowerEdge`.
+   */
+  @Field(() => [ParDliBandPoint])
+  upperEdge: ParDliBandPoint[];
 }

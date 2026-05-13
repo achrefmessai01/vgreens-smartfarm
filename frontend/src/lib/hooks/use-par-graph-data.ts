@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { useGetParDliTodayQuery, useMeQuery } from '@/generated/graphql';
-import type { ParGraphData, ParCurvePoint } from '@/types/par-graph';
+import type {
+  ParGraphData,
+  ParCurvePoint,
+  ParBandPoint,
+} from '@/types/par-graph';
 import { getHourOfDay } from '@/lib/utils/par-graph';
 
 export function useParGraphData(
@@ -15,8 +19,20 @@ export function useParGraphData(
   const bucketName =
     bucketNameOverride ?? meData?.me?.tenant?.influxBucketName ?? null;
 
+  // Send the viewer's IANA timezone so Flux can align today's window and the
+  // historical band's hour buckets to local time. Without this the band wraps
+  // by the UTC offset (e.g. Germany's +2h DST puts the night-time high
+  // cumulative value at the start of the chart).
+  const timezone = React.useMemo(() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const { data: parDliData } = useGetParDliTodayQuery({
-    variables: { bucketName: bucketName ?? '' },
+    variables: { bucketName: bucketName ?? '', timezone },
     skip: !bucketName,
     fetchPolicy: 'cache-and-network',
   });
@@ -51,6 +67,29 @@ export function useParGraphData(
     [apiPoints],
   );
 
+  const toBandPoints = React.useCallback(
+    (raw: readonly { hour: number; dli?: number | null }[] | undefined) => {
+      if (!raw?.length) return [];
+      return raw
+        .map<ParBandPoint>((p) => ({
+          hour: p.hour,
+          dli: typeof p.dli === 'number' ? p.dli : null,
+        }))
+        .filter((p) => Number.isFinite(p.hour))
+        .sort((a, b) => a.hour - b.hour);
+    },
+    [],
+  );
+
+  const lowerEdge = React.useMemo(
+    () => toBandPoints(result?.lowerEdge),
+    [result, toBandPoints],
+  );
+  const upperEdge = React.useMemo(
+    () => toBandPoints(result?.upperEdge),
+    [result, toBandPoints],
+  );
+
   const currentHour = React.useMemo(() => getHourOfDay(new Date()), []);
 
   const currentDli = result?.currentDLI ?? 0;
@@ -60,10 +99,15 @@ export function useParGraphData(
       : null;
 
   const yMax = React.useMemo(() => {
-    if (!curveData.length) return 5;
-    const maxSeries = curveData.reduce((acc, d) => Math.max(acc, d.today), 0);
+    const maxToday = curveData.reduce((acc, d) => Math.max(acc, d.today), 0);
+    const maxUpper = upperEdge.reduce(
+      (acc, d) => Math.max(acc, d.dli ?? 0),
+      0,
+    );
+    const maxSeries = Math.max(maxToday, maxUpper);
+    if (maxSeries === 0) return 5;
     return Math.ceil((maxSeries + 1) / 5) * 5;
-  }, [curveData]);
+  }, [curveData, upperEdge]);
 
   const timeLabel = React.useMemo(
     () =>
@@ -76,6 +120,8 @@ export function useParGraphData(
 
   return {
     curveData,
+    lowerEdge,
+    upperEdge,
     currentHour,
     currentDli,
     currentPpfd,

@@ -26,12 +26,20 @@ export const GET_BUCKET_FIELD_MEANS_LAST_MINUTES_QUERY = gql`
 `;
 
 export const GET_PAR_DLI_TODAY_QUERY = gql`
-  query GetParDliToday($bucketName: String!) {
-    getParDliToday(input: { bucketName: $bucketName }) {
+  query GetParDliToday($bucketName: String!, $timezone: String) {
+    getParDliToday(input: { bucketName: $bucketName, timezone: $timezone }) {
       currentPPFD
       currentDLI
       todaysGraphData {
         time
+        dli
+      }
+      lowerEdge {
+        hour
+        dli
+      }
+      upperEdge {
+        hour
         dli
       }
     }
