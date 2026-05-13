@@ -121,6 +121,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
             yPosition: c.yPosition ?? undefined,
             greenhouse: c.greenhouse ?? undefined,
             city: c.city ?? undefined,
+            hiddenInFarmOverview: c.hiddenInFarmOverview ?? undefined,
           },
         ]),
       ),

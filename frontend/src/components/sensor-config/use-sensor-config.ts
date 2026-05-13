@@ -126,6 +126,7 @@ export function useSensorConfig(tenantId: string) {
       xPosition?: number;
       yPosition?: number;
       greenhouse?: string;
+      hiddenInFarmOverview?: boolean;
     }) => {
       setSaving(true);
       try {

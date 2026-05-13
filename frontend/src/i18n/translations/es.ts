@@ -576,6 +576,11 @@ export const es = {
             'Anula las etiquetas de ubicación de este sensor. Deja en blanco para usar los valores de InfluxDB.',
           enableSensorsHint:
             'Los tipos de sensor desactivados se ocultan del mapa Vista de la granja y no generan alertas.',
+          showInFarmOverview: 'Mostrar en Vista de la granja',
+          showInFarmOverviewHint:
+            'Cuando está desactivado, este sensor se oculta de los mapas de calor y discreto de la Vista de la granja. Está activado por defecto.',
+          hiddenBadge: 'Oculto',
+          visibleColumn: 'Visible',
         },
         farmLayout: {
           title: 'Diseño de la granja',

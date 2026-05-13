@@ -10,6 +10,7 @@ export const UPSERT_SENSOR_CONFIG_MUTATION = gql`
       yPosition
       greenhouse
       city
+      hiddenInFarmOverview
       createdAt
       updatedAt
     }

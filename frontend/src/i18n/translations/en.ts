@@ -558,6 +558,11 @@ export const en = {
             'Override the location tags for this sensor. Leave blank to use the values from InfluxDB.',
           enableSensorsHint:
             'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
+          showInFarmOverview: 'Show in Farm Overview',
+          showInFarmOverviewHint:
+            'When off, this sensor is hidden from the Farm Overview heat and discrete maps. It is enabled by default.',
+          hiddenBadge: 'Hidden',
+          visibleColumn: 'Visible',
         },
         farmLayout: {
           title: 'Farm Layout',

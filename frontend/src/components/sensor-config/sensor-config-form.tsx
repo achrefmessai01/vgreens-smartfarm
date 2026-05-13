@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { useTenantGreenhousesQuery } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import {
@@ -18,7 +19,7 @@ import {
   type SensorConfigFieldKey,
 } from '@/lib/sensor-config-constants';
 import { cn } from '@/lib/utils';
-import { Building2, Layers, Navigation, Trash2 } from 'lucide-react';
+import { Building2, Eye, Layers, Navigation, Trash2 } from 'lucide-react';
 import * as React from 'react';
 import type { SensorRow } from './use-sensor-config';
 import type { DefaultPosition } from '@/lib/sensor-default-positions';
@@ -31,6 +32,7 @@ interface SensorConfigFormProps {
     xPosition?: number;
     yPosition?: number;
     greenhouse?: string;
+    hiddenInFarmOverview?: boolean;
   }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   saving: boolean;
@@ -118,6 +120,7 @@ export function SensorConfigForm({
         ? ''
         : row.config.yPosition.toString(),
     greenhouse: row.config?.greenhouse ?? '',
+    visible: !(row.config?.hiddenInFarmOverview ?? false),
   });
 
   const set =
@@ -133,6 +136,7 @@ export function SensorConfigForm({
       yPosition:
         values.yPosition.trim() === '' ? undefined : Number(values.yPosition),
       greenhouse: (values.greenhouse as string) || undefined,
+      hiddenInFarmOverview: !values.visible,
     });
     onClose();
   };
@@ -152,6 +156,30 @@ export function SensorConfigForm({
         >
           {hasConfig ? sc.customConfig : sc.influxDefaults}
         </span>
+      </div>
+
+      <Separator />
+
+      <div className="flex items-start justify-between gap-4 rounded-lg border p-3">
+        <div className="flex flex-col gap-0.5">
+          <Label
+            htmlFor="field-visible"
+            className="flex items-center gap-1.5 text-sm font-medium"
+          >
+            <Eye className="text-muted-foreground h-3.5 w-3.5" />
+            {sc.showInFarmOverview}
+          </Label>
+          <p className="text-muted-foreground text-xs">
+            {sc.showInFarmOverviewHint}
+          </p>
+        </div>
+        <Switch
+          id="field-visible"
+          checked={values.visible}
+          onCheckedChange={(checked) =>
+            setValues((prev) => ({ ...prev, visible: checked }))
+          }
+        />
       </div>
 
       <Separator />

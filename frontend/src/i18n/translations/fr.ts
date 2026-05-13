@@ -549,6 +549,11 @@ export const fr = {
           sheetDescription: 'Remplacez les balises pour ce capteur.',
           enableSensorsHint:
             'Les types de capteurs désactivés sont masqués de la vue de la ferme et ne génèrent pas d’alertes.',
+          showInFarmOverview: 'Afficher dans la vue de la ferme',
+          showInFarmOverviewHint:
+            'Lorsqu’il est désactivé, ce capteur est masqué des cartes thermique et discrète de la vue de la ferme. Activé par défaut.',
+          hiddenBadge: 'Masqué',
+          visibleColumn: 'Visible',
         },
         farmLayout: {
           title: 'Plan de la ferme',

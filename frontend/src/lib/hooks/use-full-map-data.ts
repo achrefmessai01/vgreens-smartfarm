@@ -36,6 +36,7 @@ export function useFullMapData(
         );
         for (const p of positions) {
           if (!isParameterSupportedByType(parameter, p.type)) continue;
+          if (p.slot.meta?.hiddenInFarmOverview === true) continue;
           const value =
             typeof p.slot.values?.[parameter] === 'number'
               ? (p.slot.values[parameter] as number)

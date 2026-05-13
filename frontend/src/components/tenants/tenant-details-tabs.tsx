@@ -61,8 +61,8 @@ export function TenantDetailsTabs() {
       <TabsContent value="farm-overview" className="mt-4 w-full min-w-0">
         {activeTab === 'farm-overview' && (
           <div className="flex min-w-0 flex-col gap-6">
-            <FarmLayoutConfig tenantId={tenantId} />
             <SensorVisibilityConfig tenantId={tenantId} />
+            <FarmLayoutConfig tenantId={tenantId} />
             <SensorConfigTable tenantId={tenantId} />
           </div>
         )}

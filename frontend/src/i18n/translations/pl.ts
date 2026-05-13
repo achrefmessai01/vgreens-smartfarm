@@ -567,6 +567,11 @@ export const pl = {
             'Zastąp etykiety lokalizacji dla tego czujnika. Pozostaw puste, aby użyć wartości z InfluxDB.',
           enableSensorsHint:
             'Wyłączone typy czujników są ukryte na mapie Przeglądu farmy i nie generują alarmów.',
+          showInFarmOverview: 'Pokaż w Przeglądzie farmy',
+          showInFarmOverviewHint:
+            'Po wyłączeniu ten czujnik jest ukryty na mapach cieplnej i dyskretnej Przeglądu farmy. Domyślnie włączony.',
+          hiddenBadge: 'Ukryty',
+          visibleColumn: 'Widoczny',
         },
         farmLayout: {
           title: 'Układ farmy',

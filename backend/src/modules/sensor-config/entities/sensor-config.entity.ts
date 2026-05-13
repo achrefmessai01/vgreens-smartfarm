@@ -47,6 +47,10 @@ export class SensorConfig extends BaseEntity {
   @Column({ type: 'varchar', length: 128, nullable: true })
   city?: string;
 
+  @Field({ nullable: true })
+  @Column({ type: 'boolean', default: false, nullable: true })
+  hiddenInFarmOverview?: boolean;
+
   @Field()
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

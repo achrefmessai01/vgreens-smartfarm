@@ -572,6 +572,11 @@ export const pt = {
             'Substitua as etiquetas de localização deste sensor. Deixe em branco para usar os valores do InfluxDB.',
           enableSensorsHint:
             'Os tipos de sensor desativados ficam ocultos no mapa de Visão Geral da Quinta e não geram alertas.',
+          showInFarmOverview: 'Mostrar em Visão Geral da Quinta',
+          showInFarmOverviewHint:
+            'Quando desativado, este sensor fica oculto nos mapas de calor e discreto da Visão Geral da Quinta. Está ativado por padrão.',
+          hiddenBadge: 'Oculto',
+          visibleColumn: 'Visível',
         },
         farmLayout: {
           title: 'Esquema da quinta',

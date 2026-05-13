@@ -953,6 +953,7 @@ export type SensorConfig = {
   createdAt: Scalars['DateTime']['output'];
   device: Scalars['String']['output'];
   greenhouse?: Maybe<Scalars['String']['output']>;
+  hiddenInFarmOverview?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
@@ -1162,6 +1163,7 @@ export type UpsertSensorConfigInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   device: Scalars['String']['input'];
   greenhouse?: InputMaybe<Scalars['String']['input']>;
+  hiddenInFarmOverview?: InputMaybe<Scalars['Boolean']['input']>;
   xPosition?: InputMaybe<Scalars['Float']['input']>;
   yPosition?: InputMaybe<Scalars['Float']['input']>;
 };
@@ -1343,7 +1345,7 @@ export type UpsertSensorConfigMutationVariables = Exact<{
 }>;
 
 
-export type UpsertSensorConfigMutation = { __typename?: 'Mutation', upsertSensorConfig: { __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any } };
+export type UpsertSensorConfigMutation = { __typename?: 'Mutation', upsertSensorConfig: { __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any } };
 
 export type DeleteSensorConfigMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1653,7 +1655,7 @@ export type SensorConfigsQueryVariables = Exact<{
 }>;
 
 
-export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any }> };
+export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any }> };
 
 export type SensorDevicesQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -2462,6 +2464,7 @@ export const UpsertSensorConfigDocument = gql`
     yPosition
     greenhouse
     city
+    hiddenInFarmOverview
     createdAt
     updatedAt
   }
@@ -4501,6 +4504,7 @@ export const SensorConfigsDocument = gql`
     yPosition
     greenhouse
     city
+    hiddenInFarmOverview
     createdAt
     updatedAt
   }

@@ -574,6 +574,11 @@ export const it = {
             'Sovrascrivi i tag di posizione per questo sensore. Lascia vuoto per usare i valori di InfluxDB.',
           enableSensorsHint:
             'I tipi di sensore disattivati sono nascosti dalla mappa Panoramica fattoria e non generano avvisi.',
+          showInFarmOverview: 'Mostra in Panoramica fattoria',
+          showInFarmOverviewHint:
+            'Quando disattivato, questo sensore è nascosto dalle mappe termiche e discrete della Panoramica fattoria. È attivato per impostazione predefinita.',
+          hiddenBadge: 'Nascosto',
+          visibleColumn: 'Visibile',
         },
         farmLayout: {
           title: 'Planimetria della fattoria',
