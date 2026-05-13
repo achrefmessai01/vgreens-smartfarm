@@ -2,9 +2,14 @@ import { Repository } from 'typeorm';
 import { Tenant } from './entities/tenant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTenantInput, UpdateTenantInput } from './dto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InfluxDBService } from '@modules/influxdb/influxdb.service';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
+import { isAllowedSensorField } from './sensor-fields.constants';
 
 const DEFAULT_BUCKET_RETENTION_SECONDS = 60 * 60 * 24 * 30;
 
@@ -70,6 +75,21 @@ export class TenantsService {
 
     await this.tenantRepository.remove(tenant);
     return true;
+  }
+
+  async setDisabledSensorFields(id: string, fields: string[]): Promise<Tenant> {
+    const unknown = fields.filter((f) => !isAllowedSensorField(f));
+    if (unknown.length > 0) {
+      throw new BadRequestException(
+        `Unknown sensor field(s): ${unknown.join(', ')}`,
+      );
+    }
+    const tenant = await this.findOne(id);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with id ${id} not found`);
+    }
+    tenant.disabledSensorFields = Array.from(new Set(fields));
+    return this.tenantRepository.save(tenant);
   }
 
   private buildBucketName(

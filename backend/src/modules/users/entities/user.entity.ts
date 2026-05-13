@@ -86,6 +86,16 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 8, nullable: true })
   preferredLanguage?: string;
 
+  /**
+   * User's saved time-range for the farm overview combined view. Either a
+   * preset key (`5m`, `1h`, `24h`, `7d`, `30d`, `90d`, `ytd`) or a custom
+   * range encoded as `custom:<fromISO>:<toISO>`. Validated server-side by
+   * the `setMyFarmOverviewTimeRange` mutation.
+   */
+  @Field({ nullable: true })
+  @Column({ type: 'varchar', length: 96, nullable: true })
+  farmOverviewTimeRange?: string;
+
   @Field(() => Date)
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

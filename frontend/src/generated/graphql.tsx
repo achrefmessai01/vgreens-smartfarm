@@ -28,6 +28,9 @@ export type Alert = {
   city?: Maybe<Scalars['String']['output']>;
   column?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  deletedBy?: Maybe<User>;
+  deletedById?: Maybe<Scalars['ID']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   device?: Maybe<Scalars['String']['output']>;
   field?: Maybe<Scalars['String']['output']>;
@@ -352,6 +355,7 @@ export type FeatureWithTenantStatus = {
 
 export type FieldMeanMetric = {
   __typename?: 'FieldMeanMetric';
+  chamber?: Maybe<Scalars['String']['output']>;
   field: Scalars['String']['output'];
   greenhouse?: Maybe<Scalars['String']['output']>;
   time: Scalars['DateTime']['output'];
@@ -373,6 +377,8 @@ export type GetBucketDataInput = {
 export type GetFieldMeansInput = {
   bucketName: Scalars['String']['input'];
   greenhouse?: InputMaybe<Scalars['String']['input']>;
+  start?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['String']['input']>;
   windowMinutes?: Scalars['Int']['input'];
 };
 
@@ -524,7 +530,6 @@ export type Mutation = {
   createTenant: Tenant;
   createUser: User;
   deleteAlert: Scalars['Boolean']['output'];
-  softDeleteAlert: Scalars['Boolean']['output'];
   deleteErrorReport: Scalars['Boolean']['output'];
   deleteFeature: Scalars['Boolean']['output'];
   deleteHarvest: Scalars['Boolean']['output'];
@@ -538,7 +543,10 @@ export type Mutation = {
   resolveErrorReport: ErrorReport;
   resolveSystemError: SystemError;
   runThresholdCheck: Scalars['Boolean']['output'];
+  setMyFarmOverviewTimeRange: User;
   setMyLanguage: User;
+  setTenantDisabledSensorFields: Tenant;
+  softDeleteAlert: Scalars['Boolean']['output'];
   toggleTenantFeature: TenantFeature;
   updateAlert: Alert;
   updateErrorReport: ErrorReport;
@@ -595,11 +603,6 @@ export type MutationCreateUserArgs = {
 
 
 export type MutationDeleteAlertArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
-export type MutationSoftDeleteAlertArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -668,8 +671,24 @@ export type MutationRunThresholdCheckArgs = {
 };
 
 
+export type MutationSetMyFarmOverviewTimeRangeArgs = {
+  value: Scalars['String']['input'];
+};
+
+
 export type MutationSetMyLanguageArgs = {
   language: Scalars['String']['input'];
+};
+
+
+export type MutationSetTenantDisabledSensorFieldsArgs = {
+  fields: Array<Scalars['String']['input']>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationSoftDeleteAlertArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -939,6 +958,7 @@ export type SensorConfig = {
   createdAt: Scalars['DateTime']['output'];
   device: Scalars['String']['output'];
   greenhouse?: Maybe<Scalars['String']['output']>;
+  hiddenInFarmOverview?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
@@ -996,6 +1016,7 @@ export type Tenant = {
   __typename?: 'Tenant';
   companyName?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
+  disabledSensorFields: Array<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   greenhouses?: Maybe<Array<TenantGreenhouse>>;
   id: Scalars['ID']['output'];
@@ -1148,6 +1169,7 @@ export type UpsertSensorConfigInput = {
   city?: InputMaybe<Scalars['String']['input']>;
   device: Scalars['String']['input'];
   greenhouse?: InputMaybe<Scalars['String']['input']>;
+  hiddenInFarmOverview?: InputMaybe<Scalars['Boolean']['input']>;
   xPosition?: InputMaybe<Scalars['Float']['input']>;
   yPosition?: InputMaybe<Scalars['Float']['input']>;
 };
@@ -1157,6 +1179,7 @@ export type User = {
   clerkUserId: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
   email?: Maybe<Scalars['String']['output']>;
+  farmOverviewTimeRange?: Maybe<Scalars['String']['output']>;
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   imageUrl?: Maybe<Scalars['String']['output']>;
@@ -1328,7 +1351,7 @@ export type UpsertSensorConfigMutationVariables = Exact<{
 }>;
 
 
-export type UpsertSensorConfigMutation = { __typename?: 'Mutation', upsertSensorConfig: { __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any } };
+export type UpsertSensorConfigMutation = { __typename?: 'Mutation', upsertSensorConfig: { __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any } };
 
 export type DeleteSensorConfigMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1360,6 +1383,14 @@ export type DeleteTenantMutationVariables = Exact<{
 
 export type DeleteTenantMutation = { __typename?: 'Mutation', deleteTenant: boolean };
 
+export type SetTenantDisabledSensorFieldsMutationVariables = Exact<{
+  fields: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type SetTenantDisabledSensorFieldsMutation = { __typename?: 'Mutation', setTenantDisabledSensorFields: { __typename?: 'Tenant', id: string, disabledSensorFields: Array<string> } };
+
 export type CreateUserMutationVariables = Exact<{
   input: CreateUserInput;
 }>;
@@ -1382,6 +1413,13 @@ export type DeleteUserMutationVariables = Exact<{
 
 export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean };
 
+export type SetMyFarmOverviewTimeRangeMutationVariables = Exact<{
+  value: Scalars['String']['input'];
+}>;
+
+
+export type SetMyFarmOverviewTimeRangeMutation = { __typename?: 'Mutation', setMyFarmOverviewTimeRange: { __typename?: 'User', id: string, farmOverviewTimeRange?: string | null } };
+
 export type SetMyLanguageMutationVariables = Exact<{
   language: Scalars['String']['input'];
 }>;
@@ -1397,7 +1435,7 @@ export type GetRecentSystemErrorsQueryVariables = Exact<{
 }>;
 
 
-export type GetRecentSystemErrorsQuery = { __typename?: 'Query', getRecentSystemErrors: Array<{ __typename?: 'SystemError', id: string, source: ErrorSource, errorType: ErrorType, severity: ReportSeverity, errorMessage: string, component?: string | null, action?: string | null, occurrenceCount?: number | null, isResolved: boolean, createdAt: any, updatedAt: any, lastOccurredAt?: any | null, user?: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email?: string | null, id: string, isActive: boolean, createdAt: any, updatedAt: any, clerkUserId: string, role: UserRole } | null, tenant?: { __typename?: 'Tenant', id: string, isActive: boolean, createdAt: any, updatedAt: any, name: string } | null }> };
+export type GetRecentSystemErrorsQuery = { __typename?: 'Query', getRecentSystemErrors: Array<{ __typename?: 'SystemError', id: string, source: ErrorSource, errorType: ErrorType, severity: ReportSeverity, errorMessage: string, component?: string | null, action?: string | null, occurrenceCount?: number | null, isResolved: boolean, createdAt: any, updatedAt: any, lastOccurredAt?: any | null, user?: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email?: string | null, id: string, isActive: boolean, createdAt: any, updatedAt: any, clerkUserId: string, role: UserRole } | null, tenant?: { __typename?: 'Tenant', id: string, isActive: boolean, createdAt: any, updatedAt: any, name: string, disabledSensorFields: Array<string> } | null }> };
 
 export type GetSystemErrorStatsQueryVariables = Exact<{
   hours?: InputMaybe<Scalars['Float']['input']>;
@@ -1457,19 +1495,19 @@ export type ResolveAlertMutationVariables = Exact<{
 
 export type ResolveAlertMutation = { __typename?: 'Mutation', resolveAlert: { __typename?: 'Alert', id: string, status: AlertStatus, updatedAt: any } };
 
-export type DeleteAlertMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type DeleteAlertMutation = { __typename?: 'Mutation', deleteAlert: boolean };
-
 export type SoftDeleteAlertMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
 export type SoftDeleteAlertMutation = { __typename?: 'Mutation', softDeleteAlert: boolean };
+
+export type DeleteAlertMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteAlertMutation = { __typename?: 'Mutation', deleteAlert: boolean };
 
 export type FarmConfigQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -1609,7 +1647,7 @@ export type GetBucketFieldMeansLastMinutesQueryVariables = Exact<{
 }>;
 
 
-export type GetBucketFieldMeansLastMinutesQuery = { __typename?: 'Query', getBucketFieldMeansLastMinutes: Array<{ __typename?: 'FieldMeanMetric', field: string, greenhouse?: string | null, value: number }> };
+export type GetBucketFieldMeansLastMinutesQuery = { __typename?: 'Query', getBucketFieldMeansLastMinutes: Array<{ __typename?: 'FieldMeanMetric', field: string, greenhouse?: string | null, chamber?: string | null, value: number }> };
 
 export type GetParDliTodayQueryVariables = Exact<{
   input: GetParDliTodayInput;
@@ -1623,7 +1661,7 @@ export type SensorConfigsQueryVariables = Exact<{
 }>;
 
 
-export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, createdAt: any, updatedAt: any }> };
+export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouse?: string | null, city?: string | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any }> };
 
 export type SensorDevicesQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -1642,14 +1680,14 @@ export type GreenhouseOptionsQuery = { __typename?: 'Query', greenhouseOptions: 
 export type TenantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null }> | null }> };
+export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null }> | null }> };
 
 export type TenantQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
+export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
 
 export type GetTenantBucketQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1668,7 +1706,7 @@ export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null }> | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null }> | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2434,6 +2472,7 @@ export const UpsertSensorConfigDocument = gql`
     yPosition
     greenhouse
     city
+    hiddenInFarmOverview
     createdAt
     updatedAt
   }
@@ -2622,6 +2661,41 @@ export function useDeleteTenantMutation(baseOptions?: Apollo.MutationHookOptions
 export type DeleteTenantMutationHookResult = ReturnType<typeof useDeleteTenantMutation>;
 export type DeleteTenantMutationResult = Apollo.MutationResult<DeleteTenantMutation>;
 export type DeleteTenantMutationOptions = Apollo.BaseMutationOptions<DeleteTenantMutation, DeleteTenantMutationVariables>;
+export const SetTenantDisabledSensorFieldsDocument = gql`
+    mutation SetTenantDisabledSensorFields($fields: [String!]!, $tenantId: ID) {
+  setTenantDisabledSensorFields(fields: $fields, tenantId: $tenantId) {
+    id
+    disabledSensorFields
+  }
+}
+    `;
+export type SetTenantDisabledSensorFieldsMutationFn = Apollo.MutationFunction<SetTenantDisabledSensorFieldsMutation, SetTenantDisabledSensorFieldsMutationVariables>;
+
+/**
+ * __useSetTenantDisabledSensorFieldsMutation__
+ *
+ * To run a mutation, you first call `useSetTenantDisabledSensorFieldsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetTenantDisabledSensorFieldsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setTenantDisabledSensorFieldsMutation, { data, loading, error }] = useSetTenantDisabledSensorFieldsMutation({
+ *   variables: {
+ *      fields: // value for 'fields'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useSetTenantDisabledSensorFieldsMutation(baseOptions?: Apollo.MutationHookOptions<SetTenantDisabledSensorFieldsMutation, SetTenantDisabledSensorFieldsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetTenantDisabledSensorFieldsMutation, SetTenantDisabledSensorFieldsMutationVariables>(SetTenantDisabledSensorFieldsDocument, options);
+      }
+export type SetTenantDisabledSensorFieldsMutationHookResult = ReturnType<typeof useSetTenantDisabledSensorFieldsMutation>;
+export type SetTenantDisabledSensorFieldsMutationResult = Apollo.MutationResult<SetTenantDisabledSensorFieldsMutation>;
+export type SetTenantDisabledSensorFieldsMutationOptions = Apollo.BaseMutationOptions<SetTenantDisabledSensorFieldsMutation, SetTenantDisabledSensorFieldsMutationVariables>;
 export const CreateUserDocument = gql`
     mutation CreateUser($input: CreateUserInput!) {
   createUser(input: $input) {
@@ -2775,6 +2849,40 @@ export function useSetMyLanguageMutation(baseOptions?: Apollo.MutationHookOption
 export type SetMyLanguageMutationHookResult = ReturnType<typeof useSetMyLanguageMutation>;
 export type SetMyLanguageMutationResult = Apollo.MutationResult<SetMyLanguageMutation>;
 export type SetMyLanguageMutationOptions = Apollo.BaseMutationOptions<SetMyLanguageMutation, SetMyLanguageMutationVariables>;
+export const SetMyFarmOverviewTimeRangeDocument = gql`
+    mutation SetMyFarmOverviewTimeRange($value: String!) {
+  setMyFarmOverviewTimeRange(value: $value) {
+    id
+    farmOverviewTimeRange
+  }
+}
+    `;
+export type SetMyFarmOverviewTimeRangeMutationFn = Apollo.MutationFunction<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>;
+
+/**
+ * __useSetMyFarmOverviewTimeRangeMutation__
+ *
+ * To run a mutation, you first call `useSetMyFarmOverviewTimeRangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetMyFarmOverviewTimeRangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setMyFarmOverviewTimeRangeMutation, { data, loading, error }] = useSetMyFarmOverviewTimeRangeMutation({
+ *   variables: {
+ *      value: // value for 'value'
+ *   },
+ * });
+ */
+export function useSetMyFarmOverviewTimeRangeMutation(baseOptions?: Apollo.MutationHookOptions<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>(SetMyFarmOverviewTimeRangeDocument, options);
+      }
+export type SetMyFarmOverviewTimeRangeMutationHookResult = ReturnType<typeof useSetMyFarmOverviewTimeRangeMutation>;
+export type SetMyFarmOverviewTimeRangeMutationResult = Apollo.MutationResult<SetMyFarmOverviewTimeRangeMutation>;
+export type SetMyFarmOverviewTimeRangeMutationOptions = Apollo.BaseMutationOptions<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>;
 export const GetRecentSystemErrorsDocument = gql`
     query GetRecentSystemErrors($limit: Float, $severity: ReportSeverity, $source: ErrorSource, $isResolved: Boolean) {
   getRecentSystemErrors(
@@ -2812,6 +2920,7 @@ export const GetRecentSystemErrorsDocument = gql`
       createdAt
       updatedAt
       name
+      disabledSensorFields
     }
   }
 }
@@ -3267,37 +3376,6 @@ export function useResolveAlertMutation(baseOptions?: Apollo.MutationHookOptions
 export type ResolveAlertMutationHookResult = ReturnType<typeof useResolveAlertMutation>;
 export type ResolveAlertMutationResult = Apollo.MutationResult<ResolveAlertMutation>;
 export type ResolveAlertMutationOptions = Apollo.BaseMutationOptions<ResolveAlertMutation, ResolveAlertMutationVariables>;
-export const DeleteAlertDocument = gql`
-    mutation DeleteAlert($id: ID!) {
-  deleteAlert(id: $id)
-}
-    `;
-export type DeleteAlertMutationFn = Apollo.MutationFunction<DeleteAlertMutation, DeleteAlertMutationVariables>;
-
-/**
- * __useDeleteAlertMutation__
- *
- * To run a mutation, you first call `useDeleteAlertMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeleteAlertMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deleteAlertMutation, { data, loading, error }] = useDeleteAlertMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useDeleteAlertMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAlertMutation, DeleteAlertMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteAlertMutation, DeleteAlertMutationVariables>(DeleteAlertDocument, options);
-      }
-export type DeleteAlertMutationHookResult = ReturnType<typeof useDeleteAlertMutation>;
-export type DeleteAlertMutationResult = Apollo.MutationResult<DeleteAlertMutation>;
-export type DeleteAlertMutationOptions = Apollo.BaseMutationOptions<DeleteAlertMutation, DeleteAlertMutationVariables>;
 export const SoftDeleteAlertDocument = gql`
     mutation SoftDeleteAlert($id: ID!) {
   softDeleteAlert(id: $id)
@@ -3329,6 +3407,37 @@ export function useSoftDeleteAlertMutation(baseOptions?: Apollo.MutationHookOpti
 export type SoftDeleteAlertMutationHookResult = ReturnType<typeof useSoftDeleteAlertMutation>;
 export type SoftDeleteAlertMutationResult = Apollo.MutationResult<SoftDeleteAlertMutation>;
 export type SoftDeleteAlertMutationOptions = Apollo.BaseMutationOptions<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>;
+export const DeleteAlertDocument = gql`
+    mutation DeleteAlert($id: ID!) {
+  deleteAlert(id: $id)
+}
+    `;
+export type DeleteAlertMutationFn = Apollo.MutationFunction<DeleteAlertMutation, DeleteAlertMutationVariables>;
+
+/**
+ * __useDeleteAlertMutation__
+ *
+ * To run a mutation, you first call `useDeleteAlertMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAlertMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAlertMutation, { data, loading, error }] = useDeleteAlertMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteAlertMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAlertMutation, DeleteAlertMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteAlertMutation, DeleteAlertMutationVariables>(DeleteAlertDocument, options);
+      }
+export type DeleteAlertMutationHookResult = ReturnType<typeof useDeleteAlertMutation>;
+export type DeleteAlertMutationResult = Apollo.MutationResult<DeleteAlertMutation>;
+export type DeleteAlertMutationOptions = Apollo.BaseMutationOptions<DeleteAlertMutation, DeleteAlertMutationVariables>;
 export const FarmConfigDocument = gql`
     query FarmConfig($tenantId: ID) {
   farmConfig(tenantId: $tenantId) {
@@ -4319,6 +4428,7 @@ export const GetBucketFieldMeansLastMinutesDocument = gql`
   getBucketFieldMeansLastMinutes(input: $input) {
     field
     greenhouse
+    chamber
     value
   }
 }
@@ -4413,6 +4523,7 @@ export const SensorConfigsDocument = gql`
     yPosition
     greenhouse
     city
+    hiddenInFarmOverview
     createdAt
     updatedAt
   }
@@ -4545,6 +4656,7 @@ export const TenantsDocument = gql`
     email
     phone
     isActive
+    disabledSensorFields
     greenhouses {
       name
       doorPosition
@@ -4601,6 +4713,7 @@ export const TenantDocument = gql`
     email
     phone
     isActive
+    disabledSensorFields
     greenhouses {
       name
       doorPosition
@@ -4760,6 +4873,7 @@ export const MeDocument = gql`
       createdAt
       isActive
       updatedAt
+      disabledSensorFields
       greenhouses {
         name
         xDimension
@@ -4771,6 +4885,7 @@ export const MeDocument = gql`
     isActive
     status
     preferredLanguage
+    farmOverviewTimeRange
     createdAt
     updatedAt
   }

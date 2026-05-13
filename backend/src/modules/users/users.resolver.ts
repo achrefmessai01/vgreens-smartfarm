@@ -53,6 +53,48 @@ export class UsersResolver {
     return this.usersService.setPreferredLanguage(user.id, language);
   }
 
+  /**
+   * Persist the signed-in user's farm-overview time-range selection. Accepts
+   * either a preset key (5m, 1h, 24h, 7d, 30d, 90d, ytd) or a custom range
+   * encoded as `custom:<fromISO>|<toISO>` — the pipe separator avoids the
+   * `:` collisions inside ISO 8601 timestamps. Both timestamps must parse,
+   * `from` must be strictly before `to`, and `to` cannot be more than 60 s
+   * in the future (small clock-skew tolerance).
+   */
+  @Mutation(() => User)
+  async setMyFarmOverviewTimeRange(
+    @Args('value') value: string,
+    @CurrentUser() user: User,
+  ): Promise<User> {
+    if (!user) {
+      throw new BadRequestException('Not authenticated');
+    }
+    const presets = new Set(['5m', '1h', '24h', '7d', '30d', '90d', 'ytd']);
+    if (presets.has(value)) {
+      return this.usersService.setFarmOverviewTimeRange(user.id, value);
+    }
+    if (value.startsWith('custom:')) {
+      const body = value.slice('custom:'.length);
+      const pipeIdx = body.indexOf('|');
+      if (pipeIdx > 0) {
+        const fromIso = body.slice(0, pipeIdx);
+        const toIso = body.slice(pipeIdx + 1);
+        const from = new Date(fromIso);
+        const to = new Date(toIso);
+        if (
+          !Number.isNaN(from.getTime()) &&
+          !Number.isNaN(to.getTime()) &&
+          from < to &&
+          to.getTime() <= Date.now() + 60_000
+        ) {
+          return this.usersService.setFarmOverviewTimeRange(user.id, value);
+        }
+      }
+      throw new BadRequestException(`Invalid custom range: ${value}`);
+    }
+    throw new BadRequestException(`Unsupported time-range value: ${value}`);
+  }
+
   @Query(() => [User])
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
   async users(@CurrentUser() currentUser: User): Promise<User[]> {

@@ -6,10 +6,9 @@ import { SidebarSkeleton } from '@/components/ui/sidebar-skeleton';
 import { User, UserRole } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { useLogout } from '@/lib/hooks/use-logout';
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features';
 import { cn } from '@/lib/utils';
-import { useClerk } from '@clerk/nextjs';
-import { useApolloClient } from '@apollo/client/react';
 import {
   AlertTriangle,
   Apple,
@@ -25,7 +24,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import * as React from 'react';
 import { SidebarContent } from './sidebar-content';
 
@@ -57,9 +56,7 @@ export function Sidebar({
 }: SidebarProps) {
   const { t } = useI18n();
   const pathname = usePathname();
-  const router = useRouter();
-  const { signOut } = useClerk();
-  const apolloClient = useApolloClient();
+  const logout = useLogout();
   const [internalIsCollapsed, setInternalIsCollapsed] = React.useState(false);
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const { theme, setTheme } = useTheme();
@@ -68,21 +65,12 @@ export function Sidebar({
   const { user: currentUser, role, loading: userLoading } = useCurrentUser();
   const { hasFeature, loading: featuresLoading } = useTenantFeatures();
 
-  // Handle logout — clear the Apollo cache before sign-out so the next user
-  // who logs in on the same browser doesn't briefly see the previous user's
-  // data while their own queries are in flight.
   const handleLogout = React.useCallback(async () => {
-    try {
-      await apolloClient.clearStore();
-      await signOut();
-      router.push('/login');
-      if (onLogout) {
-        onLogout();
-      }
-    } catch (error) {
-      console.error('Error signing out:', error);
+    await logout();
+    if (onLogout) {
+      onLogout();
     }
-  }, [apolloClient, signOut, router, onLogout]);
+  }, [logout, onLogout]);
 
   // Use current user if available, otherwise fall back to prop
   const user = currentUser || propUser;

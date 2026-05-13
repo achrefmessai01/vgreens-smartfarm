@@ -19,6 +19,7 @@ export const GET_BUCKET_FIELD_MEANS_LAST_MINUTES_QUERY = gql`
     getBucketFieldMeansLastMinutes(input: $input) {
       field
       greenhouse
+      chamber
       value
     }
   }

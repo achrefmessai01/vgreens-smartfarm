@@ -74,8 +74,7 @@ export const ar = {
   pages: {
     yieldSettings: {
       title: 'مركز إعداد الأداء',
-      subtitle:
-        'اضبط أهداف الإنتاج وتركيز Brix لإدارة محصول مثالية',
+      subtitle: 'اضبط أهداف الإنتاج وتركيز Brix لإدارة محصول مثالية',
       quantitativeYieldScheduler: 'مخطط الإنتاج',
       next90Days: 'الـ 90 يومًا القادمة',
       plus5Percent: '+5%',
@@ -93,8 +92,7 @@ export const ar = {
       currentYield: 'الإنتاج الحالي',
       currentYieldSubtitle: 'استنادًا إلى توقعات آخر 90 يومًا',
       totalYield: 'إجمالي الإنتاج',
-      totalYieldSubtitle:
-        'تكامل لمدة 90 يومًا من إنتاج المزرعة بأكملها',
+      totalYieldSubtitle: 'تكامل لمدة 90 يومًا من إنتاج المزرعة بأكملها',
       comingSoon: 'قريبًا',
       marketAlignmentHub: 'مركز التوافق مع السوق',
       marketAlignmentHubSubtitle: 'قريبًا',
@@ -112,11 +110,9 @@ export const ar = {
       subtitle: 'خطط ومحاكي دورة المحصول التالية بناءً على الصنف.',
       openVarietyCatalogue: 'فتح كتالوج الأصناف',
       varietyCatalogueTitle: 'كتالوج الأصناف',
-      varietyCatalogueSubtitle:
-        'استكشف أصناف الفراولة المختلفة وخصائصها.',
+      varietyCatalogueSubtitle: 'استكشف أصناف الفراولة المختلفة وخصائصها.',
       predictedBrix: 'Brix المتوقع',
-      adjustPredictedBrix:
-        'اضبط منحنى Brix المتوقع للصنف المحدد.',
+      adjustPredictedBrix: 'اضبط منحنى Brix المتوقع للصنف المحدد.',
       yield: 'الإنتاج',
       shelfLife: 'مدة الصلاحية',
       taste: 'المذاق',
@@ -141,8 +137,7 @@ export const ar = {
         december: 'ديسمبر',
       },
       aiCropConsultant: 'مستشار المحاصيل بالذكاء الاصطناعي',
-      aiCropConsultantSubtitle:
-        'اسأل عن المهام في المزرعة وتحدث مع مزرعتك',
+      aiCropConsultantSubtitle: 'اسأل عن المهام في المزرعة وتحدث مع مزرعتك',
       chatPlaceholder: 'اسأل عن المهام...',
       sampleQuestion1: 'ما المهام الحالية؟',
       sampleQuestion2: 'كيف صحة المحصول اليوم؟',
@@ -151,6 +146,10 @@ export const ar = {
     },
     farmOverview: {
       title: 'نظرة عامة على المزرعة',
+      enableSensors: 'تفعيل المستشعرات',
+      showAllSensors: 'عرض الكل',
+      hideAllSensors: 'إخفاء الكل',
+      sensorsVisible: 'ظاهر',
       subtitle: 'رؤى لحظية لعمليات مزرعتك',
       batches: 'الدفعات',
       onTime: 'في الوقت',
@@ -171,6 +170,26 @@ export const ar = {
       oneDay: 'يوم واحد',
       oneWeek: 'أسبوع واحد',
       oneMonth: 'شهر واحد',
+      timeRangePresets: {
+        ariaLabel: 'متوسط خلال',
+        last5min: 'آخر 5 دقائق',
+        last1h: 'آخر ساعة',
+        last24h: 'آخر 24 ساعة',
+        last7d: 'آخر 7 أيام',
+        last30d: 'آخر 30 يومًا',
+        last90d: 'آخر 90 يومًا',
+        ytd: 'منذ بداية السنة',
+        custom: 'مخصص…',
+        customRangeTitle: 'نطاق مخصص',
+        from: 'من',
+        until: 'إلى',
+        apply: 'تطبيق',
+        clear: 'مسح',
+        invalidRange:
+          '«من» يجب أن يكون قبل «إلى»، ولا يمكن أن يكون «إلى» في المستقبل.',
+        recalculating: 'إعادة حساب المتوسطات…',
+        currentRange: 'المتوسطات لـ',
+      },
       farmOverview: 'نظرة عامة على المزرعة',
       tunnelView: 'عرض النفق',
       systemOverview: 'نظرة عامة على النظام',
@@ -204,8 +223,7 @@ export const ar = {
       invalidDropTitle: 'تم الإفلات خارج الخريطة',
       invalidDropDescription: 'ضع المستشعر داخل تخطيط البيت المحمي.',
       positionSaveFailedTitle: 'تعذّر حفظ الموقع',
-      positionSaveFailedDescription:
-        'عاد المستشعر إلى آخر موقع محفوظ.',
+      positionSaveFailedDescription: 'عاد المستشعر إلى آخر موقع محفوظ.',
       dateRange: 'نطاق التواريخ',
       fromDate: 'من',
       toDate: 'إلى',
@@ -238,8 +256,7 @@ export const ar = {
     },
     history: {
       title: 'السجل',
-      subtitle:
-        'اضبط سجل الإنتاج وBrix لإدارة محصول مثالية.',
+      subtitle: 'اضبط سجل الإنتاج وBrix لإدارة محصول مثالية.',
       yieldHistory: 'سجل الإنتاج',
       brixHistory: 'سجل Brix',
       bothHistory: 'كلا السجلين',
@@ -261,11 +278,9 @@ export const ar = {
       insight1Description:
         'ارتفعت الإيرادات بنسبة 12.5 % مقارنةً بالفترة السابقة',
       insight2Title: 'كفاءة التكلفة',
-      insight2Description:
-        'انخفضت تكاليف الإنتاج بنسبة 3.2 % هذا الربع',
+      insight2Description: 'انخفضت تكاليف الإنتاج بنسبة 3.2 % هذا الربع',
       insight3Title: 'تحسين الإنتاج',
-      insight3Description:
-        'تحسن متوسط الإنتاج بنسبة 8.7 % من أسبوع لآخر',
+      insight3Description: 'تحسن متوسط الإنتاج بنسبة 8.7 % من أسبوع لآخر',
     },
     harvest: {
       title: 'سجل الحصاد',
@@ -278,8 +293,7 @@ export const ar = {
       performanceDashboard: 'لوحة الأداء',
       harvestsLogged: 'حصاد مسجل',
       yieldPredictionTitle: 'توقعات الإنتاج',
-      yieldPredictionSubtitle:
-        'معاينة لأداء الحصاد القادم.',
+      yieldPredictionSubtitle: 'معاينة لأداء الحصاد القادم.',
       predictedYieldLabel: 'الإنتاج المتوقع',
       predictedYieldValue: '1,280 kg',
       yieldPredictionTrend: '+8.4 % مقارنةً بالشهر الماضي',
@@ -456,8 +470,7 @@ export const ar = {
           'عنصر نائب لخريطة حية — قم بدمج Leaflet/Mapbox لعرض المناطق وأجهزة الاستشعار',
         liveMapComponentHint:
           'انقر على المناطق للتعمق في قوائم أجهزة الاستشعار والرسوم التاريخية.',
-        deviceHealthAndWeatherComponentTitle:
-          'صحة الأجهزة والطقس',
+        deviceHealthAndWeatherComponentTitle: 'صحة الأجهزة والطقس',
         lastUpdated: 'آخر تحديث: قبل دقيقتين',
         refresh: 'تحديث',
       },
@@ -481,13 +494,11 @@ export const ar = {
         roleTenantAdmin: 'مسؤول المستأجر',
         roleTenantUser: 'مستخدم المستأجر',
         roleRequired: 'الدور مطلوب',
-        tenantRequired:
-          'المستأجر مطلوب للأدوار التي ليست مسؤولة',
+        tenantRequired: 'المستأجر مطلوب للأدوار التي ليست مسؤولة',
         clerkUserId: 'معرّف مستخدم Clerk',
         clerkUserIdDescription: 'يتم إنشاء معرّف Clerk تلقائيًا',
         emailPlaceholder: 'user@example.com',
-        invitationEmailDescription:
-          'سيتم إرسال دعوة إلى هذا البريد الإلكتروني',
+        invitationEmailDescription: 'سيتم إرسال دعوة إلى هذا البريد الإلكتروني',
         firstName: 'الاسم الأول',
         firstNamePlaceholder: 'أحمد',
         lastName: 'اسم العائلة',
@@ -535,10 +546,8 @@ export const ar = {
           greenhouse: 'البيت المحمي',
           city: 'المدينة',
           actions: 'الإجراءات',
-          xPositionHint:
-            'الموقع الأفقي بالأمتار من جانب المدخل',
-          yPositionHint:
-            'الموقع الرأسي بالأمتار من نقطة بداية البيت المحمي',
+          xPositionHint: 'الموقع الأفقي بالأمتار من جانب المدخل',
+          yPositionHint: 'الموقع الرأسي بالأمتار من نقطة بداية البيت المحمي',
           greenhouseHint: 'معرّف البيت المحمي',
           cityHint: 'مدينة الموقع',
           xPositionPlaceholder: 'مثال: 5.25',
@@ -555,6 +564,13 @@ export const ar = {
             'لم يتم العثور على أجهزة استشعار في bucket InfluxDB لهذا المستأجر.',
           sheetDescription:
             'تجاوز علامات الموقع لهذا المستشعر. اتركه فارغًا لاستخدام القيم من InfluxDB.',
+          enableSensorsHint:
+            'تكون أنواع المستشعرات المعطلة مخفية من خريطة نظرة عامة على المزرعة ولا تنشئ تنبيهات.',
+          showInFarmOverview: 'إظهار في نظرة عامة على المزرعة',
+          showInFarmOverviewHint:
+            'عند الإيقاف، يتم إخفاء هذا المستشعر من خرائط الحرارة والخرائط المنفصلة في نظرة عامة على المزرعة. يكون مفعّلاً افتراضيًا.',
+          hiddenBadge: 'مخفي',
+          visibleColumn: 'مرئي',
         },
         farmLayout: {
           title: 'تخطيط المزرعة',
@@ -579,8 +595,7 @@ export const ar = {
       },
       features: {
         title: 'إدارة feature flag',
-        subtitle:
-          'إنشاء وإدارة feature flag للتحكم في وصول المستأجرين',
+        subtitle: 'إنشاء وإدارة feature flag للتحكم في وصول المستأجرين',
         key: 'المفتاح',
         name: 'الاسم',
         category: 'الفئة',
@@ -614,16 +629,14 @@ export const ar = {
         isActiveLabel: 'الميزة نشطة (متاحة في النظام)',
         loading: 'جارٍ تحميل الميزات...',
         featureAccess: 'الوصول إلى الميزات',
-        manageFeaturesSubtitle:
-          'إدارة الميزات المفعّلة لهذا المستأجر',
+        manageFeaturesSubtitle: 'إدارة الميزات المفعّلة لهذا المستأجر',
         noFeaturesAvailable: 'لا توجد ميزات متاحة',
         enabled: 'مفعّلة',
         of: 'من',
       },
       reports: {
         title: 'إدارة تقارير الأخطاء',
-        subtitle:
-          'مراقبة وإدارة تقارير الأخطاء من المستخدمين',
+        subtitle: 'مراقبة وإدارة تقارير الأخطاء من المستخدمين',
         errorTitle: 'عنوان الخطأ',
         userEmail: 'بريد المستخدم',
         severity: 'الخطورة',
@@ -633,8 +646,7 @@ export const ar = {
         created: 'تاريخ الإنشاء',
         lastUpdated: 'آخر تحديث',
         actions: 'الإجراءات',
-        searchPlaceholder:
-          'ابحث في التقارير حسب العنوان، بريد المستخدم...',
+        searchPlaceholder: 'ابحث في التقارير حسب العنوان، بريد المستخدم...',
         noReports: 'لم يتم العثور على تقارير أخطاء',
         loading: 'جارٍ تحميل التقارير...',
         description: 'الوصف',
@@ -652,8 +664,7 @@ export const ar = {
           expectedVsActual: 'المتوقع مقابل الفعلي',
           adminControls: 'عناصر تحكم المسؤول',
           adminNotes: 'ملاحظات المسؤول',
-          adminNotesPlaceholder:
-            'أضف ملاحظات حول التحقيق، الحل، إلخ.',
+          adminNotesPlaceholder: 'أضف ملاحظات حول التحقيق، الحل، إلخ.',
           severityLevel: 'مستوى الخطورة',
           update: 'تحديث التقرير',
           cancel: 'إلغاء',
@@ -715,20 +726,16 @@ export const ar = {
       },
       features: {
         realTimeMonitoring: 'مراقبة في الوقت الفعلي',
-        realTimeMonitoringDesc:
-          'شاهد محاصيلك تنمو في الوقت الفعلي',
+        realTimeMonitoringDesc: 'شاهد محاصيلك تنمو في الوقت الفعلي',
         multipleCameras: 'دعم لكاميرات متعددة',
-        multipleCamerasDesc:
-          'اربط وراقب موجزات كاميرات متعددة',
+        multipleCamerasDesc: 'اربط وراقب موجزات كاميرات متعددة',
         recording: 'التسجيل والتشغيل',
         recordingDesc: 'سجّل وراجع اللقطات السابقة',
         aiAnalysis: 'تحليل بالذكاء الاصطناعي',
-        aiAnalysisDesc:
-          'احصل على رؤى من تحليل الذكاء الاصطناعي لمحاصيلك',
+        aiAnalysisDesc: 'احصل على رؤى من تحليل الذكاء الاصطناعي لمحاصيلك',
       },
       notifyMe: 'أعلمني',
-      notifyMeDescription:
-        'احصل على إشعار عندما تصبح هذه الميزة متاحة',
+      notifyMeDescription: 'احصل على إشعار عندما تصبح هذه الميزة متاحة',
       subscribed: 'تم الاشتراك',
       upcomingFeatures: 'الميزات القادمة',
     },
@@ -779,8 +786,7 @@ export const ar = {
       resolvedBy: 'حلّه',
       noAlerts: 'لا توجد تنبيهات',
       noAlertsDescription: 'لم يتم اكتشاف أي مشكلات حرجة',
-      searchPlaceholder:
-        'ابحث باسم المستشعر، أقرّه، حلّه...',
+      searchPlaceholder: 'ابحث باسم المستشعر، أقرّه، حلّه...',
       filterByStatus: 'الحالة',
       filterBySeverity: 'الخطورة',
       filterByAcknowledgedBy: 'أقرّه',
@@ -840,12 +846,9 @@ export const ar = {
         open: 'مفتوح',
         inProgress: 'قيد المعالجة',
         resolved: 'تم الحل',
-        openDescription:
-          'تم استلام تقريرك وهو في انتظار المراجعة.',
-        inProgressDescription:
-          'يقوم فريقنا بالتحقيق في تقريرك بنشاط.',
-        resolvedDescription:
-          'تم حل تقريرك. شكرًا لمساعدتنا على التحسين.',
+        openDescription: 'تم استلام تقريرك وهو في انتظار المراجعة.',
+        inProgressDescription: 'يقوم فريقنا بالتحقيق في تقريرك بنشاط.',
+        resolvedDescription: 'تم حل تقريرك. شكرًا لمساعدتنا على التحسين.',
       },
 
       details: {
@@ -878,6 +881,14 @@ export const ar = {
           'إذا كانت لديك أسئلة حول هذا التقرير، يرجى التواصل مع فريق الدعم.',
         submitAnother: 'إرسال تقرير آخر',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: 'تعذر تحميل حسابك',
+      description:
+        'حدث خطأ ما أثناء تجهيز جلستك. يُرجى المحاولة مرة أخرى — إذا استمرت المشكلة، فقم بتسجيل الخروج ثم تسجيل الدخول من جديد.',
+      retry: 'إعادة المحاولة',
     },
   },
 } as const;

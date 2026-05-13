@@ -9,6 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -60,6 +61,9 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
               {SENSOR_CONFIG_FIELD_KEYS.map((key) => (
                 <TableHead key={key}>{columnLabels[key]}</TableHead>
               ))}
+              <TableHead className="w-24 text-center">
+                {sc.visibleColumn}
+              </TableHead>
               <TableHead className="text-right">{sc.actions}</TableHead>
             </TableRow>
           </TableHeader>
@@ -67,7 +71,7 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
             {rows.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={6}
                   className="text-muted-foreground py-10 text-center text-sm"
                 >
                   {sc.noSensorsFound}
@@ -128,6 +132,22 @@ export function SensorConfigTable({ tenantId }: SensorConfigTableProps) {
                           Not configured
                         </span>
                       )}
+                    </TableCell>
+                    <TableCell
+                      className="text-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Switch
+                        checked={config?.hiddenInFarmOverview !== true}
+                        disabled={saving}
+                        aria-label={sc.showInFarmOverview}
+                        onCheckedChange={(checked) => {
+                          void handleSave({
+                            device: row.device,
+                            hiddenInFarmOverview: !checked,
+                          });
+                        }}
+                      />
                     </TableCell>
                     <TableCell className="text-right">
                       <Button

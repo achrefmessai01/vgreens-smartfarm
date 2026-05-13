@@ -116,7 +116,12 @@ export class AlertThresholdService {
       for (const tenant of withBucket) {
         const bucket = tenant.influxBucketName;
         if (!bucket) continue;
-        await this.checkTenant(tenant.id, bucket, tenant.timezone);
+        await this.checkTenant(
+          tenant.id,
+          bucket,
+          tenant.timezone,
+          tenant.disabledSensorFields ?? [],
+        );
       }
     } catch (error) {
       this.logger.error(
@@ -131,16 +136,35 @@ export class AlertThresholdService {
     bucketName: string,
   ): Promise<void> {
     const tenant = await this.tenantsService.findOne(tenantId);
-    await this.checkTenant(tenantId, bucketName, tenant?.timezone);
+    await this.checkTenant(
+      tenantId,
+      bucketName,
+      tenant?.timezone,
+      tenant?.disabledSensorFields ?? [],
+    );
+  }
+
+  private isRuleDisabled(
+    rule: SingleThresholdRule | CompositeThresholdRule | DeltaThresholdRule,
+    disabled: Set<string>,
+  ): boolean {
+    if (rule.type === 'composite') {
+      // Composite rules need both fields; disabling either one disables the rule.
+      return disabled.has(rule.fieldA) || disabled.has(rule.fieldB);
+    }
+    return disabled.has(rule.field);
   }
 
   private async checkTenant(
     tenantId: string,
     bucketName: string,
     tenantTimezone?: string | null,
+    disabledSensorFields: string[] = [],
   ): Promise<void> {
+    const disabled = new Set(disabledSensorFields);
     for (const rule of THRESHOLD_RULES) {
       try {
+        if (this.isRuleDisabled(rule, disabled)) continue;
         if (!isInTimeGate(rule.timeGate, tenantTimezone)) continue;
         if (rule.type === 'single') {
           await this.evaluateSingle(tenantId, bucketName, rule);

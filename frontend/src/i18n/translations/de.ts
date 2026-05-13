@@ -144,6 +144,10 @@ export const de = {
     },
     farmOverview: {
       title: 'Farm-Übersicht',
+      enableSensors: 'Sensoren aktivieren',
+      showAllSensors: 'Alle anzeigen',
+      hideAllSensors: 'Alle ausblenden',
+      sensorsVisible: 'sichtbar',
       subtitle: 'Echtzeit-Einblicke in Ihre Betriebsabläufe',
       batches: 'Chargen',
       onTime: 'Pünktlich',
@@ -164,6 +168,26 @@ export const de = {
       oneDay: '1 Tag',
       oneWeek: '1 Woche',
       oneMonth: '1 Monat',
+      timeRangePresets: {
+        ariaLabel: 'Durchschnitt über',
+        last5min: 'Letzte 5 Min.',
+        last1h: 'Letzte 1 Std.',
+        last24h: 'Letzte 24 Std.',
+        last7d: 'Letzte 7 T.',
+        last30d: 'Letzte 30 T.',
+        last90d: 'Letzte 90 T.',
+        ytd: 'Seit Jahresbeginn',
+        custom: 'Benutzerdefiniert…',
+        customRangeTitle: 'Benutzerdefinierter Zeitraum',
+        from: 'Von',
+        until: 'Bis',
+        apply: 'Anwenden',
+        clear: 'Zurücksetzen',
+        invalidRange:
+          'Von muss vor Bis liegen, und Bis darf nicht in der Zukunft liegen.',
+        recalculating: 'Durchschnitte werden neu berechnet…',
+        currentRange: 'Durchschnitte für',
+      },
       farmOverview: 'Betriebsübersicht',
       tunnelView: 'Tunnel-Ansicht',
       systemOverview: 'Systemübersicht',
@@ -620,6 +644,13 @@ export const de = {
             'Keine Sensoren im InfluxDB-Eimer dieses Mandanten gefunden.',
           sheetDescription:
             'Überschreiben Sie die Standort-Tags für diesen Sensor. Lassen Sie das Feld leer, um die InfluxDB-Werte zu verwenden.',
+          enableSensorsHint:
+            'Deaktivierte Sensortypen werden in der Farm-Übersicht ausgeblendet und erzeugen keine Warnungen.',
+          showInFarmOverview: 'In Farm-Übersicht anzeigen',
+          showInFarmOverviewHint:
+            'Wenn deaktiviert, wird dieser Sensor in der Wärme- und Diskretkarte der Farm-Übersicht ausgeblendet. Standardmäßig aktiviert.',
+          hiddenBadge: 'Ausgeblendet',
+          visibleColumn: 'Sichtbar',
         },
         farmLayout: {
           title: 'Farm-Layout',
@@ -868,6 +899,14 @@ export const de = {
           'Wenn Sie Fragen zu diesem Bericht haben, kontaktieren Sie bitte unser Support-Team.',
         submitAnother: 'Weiteren Bericht einreichen',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: 'Ihr Konto konnte nicht geladen werden',
+      description:
+        'Beim Vorbereiten Ihrer Sitzung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut – falls das Problem weiterhin besteht, melden Sie sich ab und wieder an.',
+      retry: 'Erneut versuchen',
     },
   },
 } as const;

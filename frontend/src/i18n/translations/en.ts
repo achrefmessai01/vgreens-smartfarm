@@ -146,6 +146,10 @@ export const en = {
     farmOverview: {
       title: 'Farm Overview',
       subtitle: 'Real-time insights into your farm operations',
+      enableSensors: 'Enable Sensors',
+      showAllSensors: 'Show all',
+      hideAllSensors: 'Hide all',
+      sensorsVisible: 'visible',
       batches: 'Batches',
       onTime: 'On time',
       delayed: 'Delayed',
@@ -165,6 +169,26 @@ export const en = {
       oneDay: '1 Day',
       oneWeek: '1 Week',
       oneMonth: '1 Month',
+      timeRangePresets: {
+        ariaLabel: 'Average over',
+        last5min: 'Last 5 min',
+        last1h: 'Last 1 h',
+        last24h: 'Last 24 h',
+        last7d: 'Last 7 d',
+        last30d: 'Last 30 d',
+        last90d: 'Last 90 d',
+        ytd: 'Year to date',
+        custom: 'Custom…',
+        customRangeTitle: 'Custom range',
+        from: 'From',
+        until: 'Until',
+        apply: 'Apply',
+        clear: 'Clear',
+        invalidRange:
+          'From must be before Until, and Until cannot be in the future.',
+        recalculating: 'Recalculating averages…',
+        currentRange: 'Showing averages for',
+      },
       farmOverview: 'Farm Overview',
       tunnelView: 'Tunnel View',
       systemOverview: 'System Overview',
@@ -539,6 +563,13 @@ export const en = {
           noSensorsFound: "No sensors found in this tenant's InfluxDB bucket.",
           sheetDescription:
             'Override the location tags for this sensor. Leave blank to use the values from InfluxDB.',
+          enableSensorsHint:
+            'Disabled sensor types are hidden from the Farm Overview map and do not generate alerts.',
+          showInFarmOverview: 'Show in Farm Overview',
+          showInFarmOverviewHint:
+            'When off, this sensor is hidden from the Farm Overview heat and discrete maps. It is enabled by default.',
+          hiddenBadge: 'Hidden',
+          visibleColumn: 'Visible',
         },
         farmLayout: {
           title: 'Farm Layout',
@@ -794,7 +825,7 @@ export const en = {
       deleteAlert: 'Delete Alert',
       archiveFailed: "Couldn't archive this alert",
       archiveFailedBody:
-        "We tried to move this alert to the archive (where an admin could still recover it later), but something went wrong. You can still remove it permanently from the system — but this skips the audit trail and cannot be undone, even by support. Do you want to permanently remove it?",
+        'We tried to move this alert to the archive (where an admin could still recover it later), but something went wrong. You can still remove it permanently from the system — but this skips the audit trail and cannot be undone, even by support. Do you want to permanently remove it?',
       archiveFailedReason: 'Reason',
       removePermanently: 'Remove permanently',
       keepAlert: 'Keep alert',
@@ -855,6 +886,14 @@ export const en = {
           'If you have questions about this report, please contact our support team.',
         submitAnother: 'Submit Another Report',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: "We couldn't load your account",
+      description:
+        'Something went wrong while preparing your session. Please try again — if the problem persists, sign out and back in.',
+      retry: 'Try again',
     },
   },
 } as const;

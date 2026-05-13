@@ -10,6 +10,7 @@ export const SENSOR_CONFIGS_QUERY = gql`
       yPosition
       greenhouse
       city
+      hiddenInFarmOverview
       createdAt
       updatedAt
     }

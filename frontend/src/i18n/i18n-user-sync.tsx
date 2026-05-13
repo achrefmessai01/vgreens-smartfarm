@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { gql } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
+import { useAuth } from '@clerk/nextjs';
 import { locales, type Locale } from './config';
 import { useI18n } from './context';
 
@@ -59,8 +60,10 @@ function isSupportedLocale(value: unknown): value is Locale {
  */
 export function I18nUserSync() {
   const { locale, setLocale } = useI18n();
+  const { isSignedIn } = useAuth();
   const { data } = useQuery<MeLanguageResult>(ME_LANGUAGE_QUERY, {
-    fetchPolicy: 'cache-first',
+    fetchPolicy: 'cache-and-network',
+    skip: !isSignedIn,
   });
   const [setMyLanguage] = useMutation<unknown, SetMyLanguageVars>(
     SET_MY_LANGUAGE,

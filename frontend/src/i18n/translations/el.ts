@@ -93,8 +93,7 @@ export const el = {
       currentYield: 'Τρέχουσα απόδοση',
       currentYieldSubtitle: 'Με βάση την πρόβλεψη των τελευταίων 90 ημερών',
       totalYield: 'Συνολική απόδοση',
-      totalYieldSubtitle:
-        'Ολοκλήρωμα 90 ημερών παραγωγής σε όλη τη φάρμα',
+      totalYieldSubtitle: 'Ολοκλήρωμα 90 ημερών παραγωγής σε όλη τη φάρμα',
       comingSoon: 'Σύντομα',
       marketAlignmentHub: 'Κέντρο ευθυγράμμισης με την αγορά',
       marketAlignmentHubSubtitle: 'Σύντομα',
@@ -152,7 +151,12 @@ export const el = {
     },
     farmOverview: {
       title: 'Επισκόπηση φάρμας',
-      subtitle: 'Πληροφορίες σε πραγματικό χρόνο για τις δραστηριότητες της φάρμας σας',
+      enableSensors: 'Ενεργοποίηση αισθητήρων',
+      showAllSensors: 'Εμφάνιση όλων',
+      hideAllSensors: 'Απόκρυψη όλων',
+      sensorsVisible: 'ορατά',
+      subtitle:
+        'Πληροφορίες σε πραγματικό χρόνο για τις δραστηριότητες της φάρμας σας',
       batches: 'Παρτίδες',
       onTime: 'Στην ώρα',
       delayed: 'Καθυστερημένο',
@@ -172,6 +176,26 @@ export const el = {
       oneDay: '1 ημέρα',
       oneWeek: '1 εβδομάδα',
       oneMonth: '1 μήνας',
+      timeRangePresets: {
+        ariaLabel: 'Μέσος όρος για',
+        last5min: 'Τελευταία 5 λεπτά',
+        last1h: 'Τελευταία 1 ώρα',
+        last24h: 'Τελευταίες 24 ώρες',
+        last7d: 'Τελευταίες 7 ημ.',
+        last30d: 'Τελευταίες 30 ημ.',
+        last90d: 'Τελευταίες 90 ημ.',
+        ytd: 'Από αρχή έτους',
+        custom: 'Προσαρμοσμένο…',
+        customRangeTitle: 'Προσαρμοσμένο εύρος',
+        from: 'Από',
+        until: 'Έως',
+        apply: 'Εφαρμογή',
+        clear: 'Καθαρισμός',
+        invalidRange:
+          'Το Από πρέπει να είναι πριν από το Έως, και το Έως δεν μπορεί να είναι στο μέλλον.',
+        recalculating: 'Επανυπολογισμός μέσων όρων…',
+        currentRange: 'Μέσοι όροι για',
+      },
       farmOverview: 'Επισκόπηση φάρμας',
       tunnelView: 'Προβολή σήραγγας',
       systemOverview: 'Επισκόπηση συστήματος',
@@ -275,8 +299,7 @@ export const el = {
       historyTitle: 'Ιστορικό συγκομιδής',
       harvestEntryTab: 'Καταχώριση συγκομιδής',
       harvestEntryTitle: 'Καταχώριση συγκομιδής',
-      dashboardPlaceholder:
-        'Το περιεχόμενο του πίνακα θα εμφανιστεί εδώ',
+      dashboardPlaceholder: 'Το περιεχόμενο του πίνακα θα εμφανιστεί εδώ',
       subtitle: 'Παρακολουθήστε και διαχειριστείτε τα αρχεία συγκομιδής σας',
       performanceDashboard: 'Πίνακας απόδοσης',
       harvestsLogged: 'συγκομιδές καταχωρήθηκαν',
@@ -460,8 +483,7 @@ export const el = {
           'Σύμβολο ζωντανού χάρτη — ενσωματώστε Leaflet/Mapbox για εμφάνιση ζωνών και αισθητήρων',
         liveMapComponentHint:
           'Κάντε κλικ στις ζώνες για εξερεύνηση λιστών αισθητήρων και ιστορικών γραφημάτων.',
-        deviceHealthAndWeatherComponentTitle:
-          'Υγεία συσκευών και καιρός',
+        deviceHealthAndWeatherComponentTitle: 'Υγεία συσκευών και καιρός',
         lastUpdated: 'Τελευταία ενημέρωση: 2 λεπτά πριν',
         refresh: 'Ανανέωση',
       },
@@ -488,11 +510,9 @@ export const el = {
         tenantRequired:
           'Ο μισθωτής είναι υποχρεωτικός για ρόλους εκτός διαχειριστή',
         clerkUserId: 'Αναγνωριστικό χρήστη Clerk',
-        clerkUserIdDescription:
-          'Το αναγνωριστικό Clerk δημιουργείται αυτόματα',
+        clerkUserIdDescription: 'Το αναγνωριστικό Clerk δημιουργείται αυτόματα',
         emailPlaceholder: 'χρηστης@παραδειγμα.com',
-        invitationEmailDescription:
-          'Θα σταλεί πρόσκληση σε αυτό το e-mail',
+        invitationEmailDescription: 'Θα σταλεί πρόσκληση σε αυτό το e-mail',
         firstName: 'Όνομα',
         firstNamePlaceholder: 'Γιάννης',
         lastName: 'Επώνυμο',
@@ -559,6 +579,13 @@ export const el = {
             'Δεν βρέθηκαν αισθητήρες στο bucket InfluxDB αυτού του μισθωτή.',
           sheetDescription:
             'Παρακάμψτε τις ετικέτες τοποθεσίας για αυτόν τον αισθητήρα. Αφήστε κενό για χρήση των τιμών από το InfluxDB.',
+          enableSensorsHint:
+            'Οι απενεργοποιημένοι τύποι αισθητήρων δεν εμφανίζονται στον χάρτη Επισκόπησης φάρμας και δεν δημιουργούν ειδοποιήσεις.',
+          showInFarmOverview: 'Εμφάνιση στην Επισκόπηση φάρμας',
+          showInFarmOverviewHint:
+            'Όταν είναι απενεργοποιημένο, ο αισθητήρας αποκρύπτεται από τον θερμικό χάρτη και τον διακριτό χάρτη της Επισκόπησης φάρμας. Είναι ενεργοποιημένος από προεπιλογή.',
+          hiddenBadge: 'Κρυφό',
+          visibleColumn: 'Ορατό',
         },
         farmLayout: {
           title: 'Διάταξη φάρμας',
@@ -615,8 +642,7 @@ export const el = {
         descriptionPlaceholder: 'Περιγράψτε τι κάνει αυτή η λειτουργία...',
         categoryLabel: 'Κατηγορία',
         categoryPlaceholder: 'π.χ. παρακολούθηση, αυτοματισμός, ανάλυση',
-        isActiveLabel:
-          'Η λειτουργία είναι ενεργή (διαθέσιμη στο σύστημα)',
+        isActiveLabel: 'Η λειτουργία είναι ενεργή (διαθέσιμη στο σύστημα)',
         loading: 'Φόρτωση λειτουργιών...',
         featureAccess: 'Πρόσβαση σε λειτουργίες',
         manageFeaturesSubtitle:
@@ -638,8 +664,7 @@ export const el = {
         created: 'Δημιουργήθηκε',
         lastUpdated: 'Τελευταία ενημέρωση',
         actions: 'Ενέργειες',
-        searchPlaceholder:
-          'Αναζήτηση αναφορών ανά τίτλο, e-mail χρήστη...',
+        searchPlaceholder: 'Αναζήτηση αναφορών ανά τίτλο, e-mail χρήστη...',
         noReports: 'Δεν βρέθηκαν αναφορές σφαλμάτων',
         loading: 'Φόρτωση αναφορών...',
         description: 'Περιγραφή',
@@ -847,10 +872,8 @@ export const el = {
         open: 'Ανοικτή',
         inProgress: 'Σε εξέλιξη',
         resolved: 'Επιλυμένη',
-        openDescription:
-          'Η αναφορά σας έχει ληφθεί και αναμένει έλεγχο.',
-        inProgressDescription:
-          'Η ομάδα μας ερευνά ενεργά την αναφορά σας.',
+        openDescription: 'Η αναφορά σας έχει ληφθεί και αναμένει έλεγχο.',
+        inProgressDescription: 'Η ομάδα μας ερευνά ενεργά την αναφορά σας.',
         resolvedDescription:
           'Η αναφορά σας έχει επιλυθεί. Σας ευχαριστούμε που μας βοηθάτε να βελτιωθούμε.',
       },
@@ -885,6 +908,14 @@ export const el = {
           'Αν έχετε απορίες για αυτή την αναφορά, επικοινωνήστε με την ομάδα υποστήριξης.',
         submitAnother: 'Υποβολή άλλης αναφοράς',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: 'Δεν ήταν δυνατή η φόρτωση του λογαριασμού σας',
+      description:
+        'Κάτι πήγε στραβά κατά την προετοιμασία της συνεδρίας σας. Δοκιμάστε ξανά — αν το πρόβλημα παραμένει, αποσυνδεθείτε και συνδεθείτε ξανά.',
+      retry: 'Δοκιμή ξανά',
     },
   },
 } as const;

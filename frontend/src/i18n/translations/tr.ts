@@ -108,14 +108,14 @@ export const tr = {
     },
     nextCyclePlanner: {
       title: 'Sonraki Döngü Planlayıcı',
-      subtitle: 'Çeşide göre bir sonraki ürün döngüsünü planlayın ve simüle edin.',
+      subtitle:
+        'Çeşide göre bir sonraki ürün döngüsünü planlayın ve simüle edin.',
       openVarietyCatalogue: 'Çeşit kataloğunu aç',
       varietyCatalogueTitle: 'Çeşit kataloğu',
       varietyCatalogueSubtitle:
         'Farklı çilek çeşitlerini ve özelliklerini keşfedin.',
       predictedBrix: 'Tahmini Brix',
-      adjustPredictedBrix:
-        'Seçili çeşit için tahmini Brix eğrisini ayarlayın.',
+      adjustPredictedBrix: 'Seçili çeşit için tahmini Brix eğrisini ayarlayın.',
       yield: 'Verim',
       shelfLife: 'Raf ömrü',
       taste: 'Tat',
@@ -150,6 +150,10 @@ export const tr = {
     },
     farmOverview: {
       title: 'Çiftlik genel bakış',
+      enableSensors: 'Sensörleri etkinleştir',
+      showAllSensors: 'Tümünü göster',
+      hideAllSensors: 'Tümünü gizle',
+      sensorsVisible: 'görünür',
       subtitle: 'Çiftlik operasyonlarınız hakkında gerçek zamanlı bilgiler',
       batches: 'Partiler',
       onTime: 'Zamanında',
@@ -170,6 +174,26 @@ export const tr = {
       oneDay: '1 gün',
       oneWeek: '1 hafta',
       oneMonth: '1 ay',
+      timeRangePresets: {
+        ariaLabel: 'Ortalama süresi',
+        last5min: 'Son 5 dk',
+        last1h: 'Son 1 sa',
+        last24h: 'Son 24 sa',
+        last7d: 'Son 7 g',
+        last30d: 'Son 30 g',
+        last90d: 'Son 90 g',
+        ytd: 'Yıl başından bugüne',
+        custom: 'Özel…',
+        customRangeTitle: 'Özel aralık',
+        from: 'Başlangıç',
+        until: 'Bitiş',
+        apply: 'Uygula',
+        clear: 'Temizle',
+        invalidRange:
+          'Başlangıç, Bitiş tarihinden önce olmalı ve Bitiş gelecekte olamaz.',
+        recalculating: 'Ortalamalar yeniden hesaplanıyor…',
+        currentRange: 'Şu döneme ait ortalamalar',
+      },
       farmOverview: 'Çiftlik genel bakış',
       tunnelView: 'Tünel görünümü',
       systemOverview: 'Sistem genel bakış',
@@ -203,8 +227,7 @@ export const tr = {
       invalidDropTitle: 'Harita dışına bırakıldı',
       invalidDropDescription: 'Sensörü sera düzeninin içine yerleştirin.',
       positionSaveFailedTitle: 'Konum kaydedilemedi',
-      positionSaveFailedDescription:
-        'Sensör son kayıtlı konumuna döndü.',
+      positionSaveFailedDescription: 'Sensör son kayıtlı konumuna döndü.',
       dateRange: 'Tarih aralığı',
       fromDate: 'Başlangıç',
       toDate: 'Bitiş',
@@ -237,8 +260,7 @@ export const tr = {
     },
     history: {
       title: 'Geçmiş',
-      subtitle:
-        'Optimum ürün yönetimi için verim ve Brix geçmişini ayarlayın.',
+      subtitle: 'Optimum ürün yönetimi için verim ve Brix geçmişini ayarlayın.',
       yieldHistory: 'Verim geçmişi',
       brixHistory: 'Brix geçmişi',
       bothHistory: 'Her iki geçmiş',
@@ -257,14 +279,11 @@ export const tr = {
       performanceInsights: 'Performans içgörüleri',
       weeklyPerformanceData: 'Haftalık performans verileri',
       insight1Title: 'Gelir artışı',
-      insight1Description:
-        'Gelir, önceki döneme göre %12,5 arttı',
+      insight1Description: 'Gelir, önceki döneme göre %12,5 arttı',
       insight2Title: 'Maliyet verimliliği',
-      insight2Description:
-        'Üretim maliyetleri bu çeyrekte %3,2 azaldı',
+      insight2Description: 'Üretim maliyetleri bu çeyrekte %3,2 azaldı',
       insight3Title: 'Verim optimizasyonu',
-      insight3Description:
-        'Ortalama verim haftadan haftaya %8,7 iyileşti',
+      insight3Description: 'Ortalama verim haftadan haftaya %8,7 iyileşti',
     },
     harvest: {
       title: 'Hasat geçmişi',
@@ -454,8 +473,7 @@ export const tr = {
           'Canlı harita yer tutucusu — bölgeleri ve sensörleri göstermek için Leaflet/Mapbox entegre edin',
         liveMapComponentHint:
           'Bölgelere tıklayarak sensör listelerini ve geçmiş grafikleri inceleyin.',
-        deviceHealthAndWeatherComponentTitle:
-          'Cihaz sağlığı ve hava durumu',
+        deviceHealthAndWeatherComponentTitle: 'Cihaz sağlığı ve hava durumu',
         lastUpdated: 'Son güncelleme: 2 dakika önce',
         refresh: 'Yenile',
       },
@@ -479,8 +497,7 @@ export const tr = {
         roleTenantAdmin: 'Kiracı yöneticisi',
         roleTenantUser: 'Kiracı kullanıcısı',
         roleRequired: 'Rol zorunludur',
-        tenantRequired:
-          'Yönetici dışındaki roller için kiracı zorunludur',
+        tenantRequired: 'Yönetici dışındaki roller için kiracı zorunludur',
         clerkUserId: 'Clerk kullanıcı kimliği',
         clerkUserIdDescription: 'Clerk kimliği otomatik oluşturulur',
         emailPlaceholder: 'kullanici@ornek.com',
@@ -532,8 +549,7 @@ export const tr = {
           greenhouse: 'Sera',
           city: 'Şehir',
           actions: 'Eylemler',
-          xPositionHint:
-            'Giriş tarafından metre cinsinden yatay konum',
+          xPositionHint: 'Giriş tarafından metre cinsinden yatay konum',
           yPositionHint:
             'Sera başlangıç noktasından metre cinsinden dikey konum',
           greenhouseHint: 'Sera tanımlayıcısı',
@@ -552,6 +568,13 @@ export const tr = {
             'Bu kiracının InfluxDB bucket’ında sensör bulunamadı.',
           sheetDescription:
             'Bu sensör için konum etiketlerini geçersiz kılın. InfluxDB değerlerini kullanmak için boş bırakın.',
+          enableSensorsHint:
+            'Devre dışı bırakılan sensör türleri Çiftlik Genel Bakış haritasında gizlenir ve uyarı oluşturmaz.',
+          showInFarmOverview: 'Çiftlik Genel Bakış’ta göster',
+          showInFarmOverviewHint:
+            'Kapatıldığında bu sensör, Çiftlik Genel Bakış’ın ısı ve ayrık haritalarında gizlenir. Varsayılan olarak etkindir.',
+          hiddenBadge: 'Gizli',
+          visibleColumn: 'Görünür',
         },
         farmLayout: {
           title: 'Çiftlik düzeni',
@@ -619,8 +642,7 @@ export const tr = {
       },
       reports: {
         title: 'Hata raporu yönetimi',
-        subtitle:
-          'Kullanıcılardan gelen hata raporlarını izleyin ve yönetin',
+        subtitle: 'Kullanıcılardan gelen hata raporlarını izleyin ve yönetin',
         errorTitle: 'Hata başlığı',
         userEmail: 'Kullanıcı e-postası',
         severity: 'Önem',
@@ -630,8 +652,7 @@ export const tr = {
         created: 'Oluşturuldu',
         lastUpdated: 'Son güncelleme',
         actions: 'Eylemler',
-        searchPlaceholder:
-          'Raporları başlık, kullanıcı e-postası ile ara...',
+        searchPlaceholder: 'Raporları başlık, kullanıcı e-postası ile ara...',
         noReports: 'Hata raporu bulunamadı',
         loading: 'Raporlar yükleniyor...',
         description: 'Açıklama',
@@ -715,17 +736,14 @@ export const tr = {
         realTimeMonitoringDesc:
           'Ürünlerinizin büyümesini gerçek zamanlı izleyin',
         multipleCameras: 'Birden çok kamera desteği',
-        multipleCamerasDesc:
-          'Birden fazla kamera akışını bağlayın ve izleyin',
+        multipleCamerasDesc: 'Birden fazla kamera akışını bağlayın ve izleyin',
         recording: 'Kayıt ve oynatma',
         recordingDesc: 'Geçmiş görüntüleri kaydedin ve inceleyin',
         aiAnalysis: 'Yapay zeka destekli analiz',
-        aiAnalysisDesc:
-          'Ürünlerinizin yapay zeka analizinden içgörüler edinin',
+        aiAnalysisDesc: 'Ürünlerinizin yapay zeka analizinden içgörüler edinin',
       },
       notifyMe: 'Beni bilgilendir',
-      notifyMeDescription:
-        'Bu özellik kullanılabilir olduğunda bildirim alın',
+      notifyMeDescription: 'Bu özellik kullanılabilir olduğunda bildirim alın',
       subscribed: 'Abone olundu',
       upcomingFeatures: 'Yaklaşan özellikler',
     },
@@ -776,8 +794,7 @@ export const tr = {
       resolvedBy: 'Çözen',
       noAlerts: 'Alarm bulunamadı',
       noAlertsDescription: 'Kritik sorun tespit edilmedi',
-      searchPlaceholder:
-        'Sensör adı, onaylayan, çözen ile ara...',
+      searchPlaceholder: 'Sensör adı, onaylayan, çözen ile ara...',
       filterByStatus: 'Durum',
       filterBySeverity: 'Önem',
       filterByAcknowledgedBy: 'Onaylayan',
@@ -837,10 +854,8 @@ export const tr = {
         open: 'Açık',
         inProgress: 'Devam ediyor',
         resolved: 'Çözüldü',
-        openDescription:
-          'Raporunuz alındı ve incelenmek üzere bekliyor.',
-        inProgressDescription:
-          'Ekibimiz raporunuzu aktif olarak inceliyor.',
+        openDescription: 'Raporunuz alındı ve incelenmek üzere bekliyor.',
+        inProgressDescription: 'Ekibimiz raporunuzu aktif olarak inceliyor.',
         resolvedDescription:
           'Raporunuz çözüldü. Geliştirmemize yardımcı olduğunuz için teşekkür ederiz.',
       },
@@ -875,6 +890,14 @@ export const tr = {
           'Bu rapor hakkında sorularınız varsa lütfen destek ekibimizle iletişime geçin.',
         submitAnother: 'Başka bir rapor gönder',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: 'Hesabınız yüklenemedi',
+      description:
+        'Oturumunuz hazırlanırken bir hata oluştu. Lütfen tekrar deneyin — sorun devam ederse oturumu kapatıp tekrar açın.',
+      retry: 'Tekrar dene',
     },
   },
 } as const;

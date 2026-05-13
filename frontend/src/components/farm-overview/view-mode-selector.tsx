@@ -22,9 +22,14 @@ export function ViewModeSelector({
   graphLabel = 'Graph',
   showGraphOption = false,
 }: ViewModeSelectorProps) {
+  // VSL-169: When PAR/PAR-estimated is the active parameter the PAR graph is
+  // the only meaningful visualization, so heatmap/discrete are hidden and only
+  // the "Graph" button is shown. For every other parameter we keep the prior
+  // behavior (heatmap + discrete, no graph). Restore the old `visible: true`
+  // values on the first two entries to re-enable mode switching on PAR.
   const modes: { key: ViewMode; label: string; visible: boolean }[] = [
-    { key: 'heatmap', label: heatmapLabel, visible: true },
-    { key: 'discrete', label: discreteLabel, visible: true },
+    { key: 'heatmap', label: heatmapLabel, visible: !showGraphOption },
+    { key: 'discrete', label: discreteLabel, visible: !showGraphOption },
     { key: 'graph', label: graphLabel, visible: showGraphOption },
   ];
 
