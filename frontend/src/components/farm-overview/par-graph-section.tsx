@@ -16,8 +16,16 @@ export function ParGraphSection({
 }: ParGraphSectionProps) {
   void bay;
 
-  const { curveData, currentHour, currentDli, currentPpfd, timeLabel, yMax } =
-    useParGraphData(bucketName);
+  const {
+    curveData,
+    lowerEdge,
+    upperEdge,
+    currentHour,
+    currentDli,
+    currentPpfd,
+    timeLabel,
+    yMax,
+  } = useParGraphData(bucketName);
 
   const content = (
     <>
@@ -29,6 +37,8 @@ export function ParGraphSection({
       />
       <ParGraphChart
         curveData={curveData}
+        lowerEdge={lowerEdge}
+        upperEdge={upperEdge}
         currentHour={currentHour}
         currentDli={currentDli}
         yMax={yMax}

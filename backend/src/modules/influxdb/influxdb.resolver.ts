@@ -86,7 +86,9 @@ export class InfluxDBResolver {
   async getParDliToday(
     @Args('input') input: GetParDliTodayInput,
   ): Promise<ParDliResult> {
-    return this.influxDBService.getTodayParDli(input.bucketName);
+    return this.influxDBService.getTodayParDli(input.bucketName, {
+      timezone: input.timezone,
+    });
   }
 
   @Query(() => [String], { name: 'getBucketFields' })

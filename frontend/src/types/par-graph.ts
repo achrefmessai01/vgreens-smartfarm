@@ -19,8 +19,20 @@ export interface ParCurvePoint {
   today: number;
 }
 
+/**
+ * One point on the historical DLI envelope. `dli` is `null` for hours
+ * that have no samples on any of the lookback days — Recharts renders
+ * those as gaps rather than dropping to zero.
+ */
+export interface ParBandPoint {
+  hour: number;
+  dli: number | null;
+}
+
 export interface ParGraphData {
   curveData: ParCurvePoint[];
+  lowerEdge: ParBandPoint[];
+  upperEdge: ParBandPoint[];
   currentHour: number;
   currentDli: number;
   currentPpfd: number | null;

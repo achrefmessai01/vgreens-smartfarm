@@ -4,7 +4,12 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { FieldMeanMetric, ParDliPoint, ParDliResult } from './dto';
+import {
+  FieldMeanMetric,
+  ParDliBandPoint,
+  ParDliPoint,
+  ParDliResult,
+} from './dto';
 import { ConfigService } from '@nestjs/config';
 import { BucketsAPI, OrgsAPI } from '@influxdata/influxdb-client-apis';
 import { InfluxDB, QueryApi, WriteApi } from '@influxdata/influxdb-client';
@@ -17,6 +22,21 @@ import {
 
 const DLI_INTERVAL_SECONDS = 300;
 const LUX_TO_PAR = 55;
+const DLI_BAND_LOOKBACK_DAYS = 14;
+const SECONDS_PER_HOUR = 3600;
+
+/**
+ * IANA timezone names only contain `[A-Za-z0-9/_+-]`. Anything else
+ * means the client sent something unexpected (or potentially a Flux
+ * injection attempt) and we fall back to UTC. Validating with
+ * `Intl.DateTimeFormat` would also work, but the regex is cheap and
+ * doesn't depend on the Node ICU build.
+ */
+function sanitizeTimezone(tz?: string): string {
+  if (!tz) return 'UTC';
+  if (!/^[A-Za-z0-9_+/\-]+$/.test(tz)) return 'UTC';
+  return tz;
+}
 
 @Injectable()
 export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
@@ -546,16 +566,23 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
    * filter would silently match zero rows for some tenants. Scoping by
    * bucket is sufficient because each tenant has their own bucket.
    */
-  async getTodayParDli(bucketName: string): Promise<ParDliResult> {
+  async getTodayParDli(
+    bucketName: string,
+    options: { timezone?: string } = {},
+  ): Promise<ParDliResult> {
     if (!this.client || !this.queryApi) {
       this.logger.error('InfluxDB client is not initialized');
       throw new Error('InfluxDB client is not initialized');
     }
 
     const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const tz = sanitizeTimezone(options.timezone);
 
     const flux = `
 import "date"
+import "timezone"
+
+option location = timezone.location(name: "${escape(tz)}")
 
 from(bucket: "${escape(bucketName)}")
   |> range(start: date.truncate(t: now(), unit: 1d))
@@ -604,8 +631,10 @@ from(bucket: "${escape(bucketName)}")
           error instanceof Error ? error.message : String(error)
         }`,
       );
-      return { todaysGraphData: [] };
+      return { todaysGraphData: [], lowerEdge: [], upperEdge: [] };
     }
+
+    const { lowerEdge, upperEdge } = await this.fetchDliBand(bucketName, tz);
 
     this.logger.debug(
       `getTodayParDli("${bucketName}") → ${points.length} points`,
@@ -614,7 +643,146 @@ from(bucket: "${escape(bucketName)}")
       currentPPFD,
       currentDLI,
       todaysGraphData: points,
+      lowerEdge,
+      upperEdge,
     };
+  }
+
+  /**
+   * Builds the historical PAR/DLI envelope for the in-app chart. For each of
+   * the last `DLI_BAND_LOOKBACK_DAYS` whole days (ending at today's *local*
+   * midnight in `tz`) Flux gives us the hourly minimum and maximum lux. We
+   * then:
+   *
+   *   - Group those per-hour mins/maxes across days.
+   *   - Take the mean per `hourOfDay` to smooth out a single freak day.
+   *   - Divide by 55 to convert lux → PPFD (µmol m⁻² s⁻¹).
+   *   - Integrate the per-hour PPFD into a cumulative mol m⁻² curve so the
+   *     edges live in the same units as `todaysGraphData` and can be plotted
+   *     on the same y-axis.
+   *
+   * Flux's `option location` aligns `aggregateWindow` to local hour
+   * boundaries and lets `date.hour` return the local hour 0–23. This is
+   * critical for tenants outside UTC: bucketing in UTC would shift the
+   * band by the offset and wrap high cumulative values to the start of
+   * the chart (e.g. Germany's UTC+2 manifested as a "wall" at hour 0).
+   *
+   * Hours with no samples on any of the lookback days emit a point with a
+   * null `dli`, which the chart renders as a gap (the user explicitly
+   * asked for a gap rather than zero so it's visually obvious that the
+   * envelope is missing rather than implying "no light expected").
+   *
+   * Returns empty arrays on Flux error so the caller can still serve
+   * today's curve.
+   */
+  private async fetchDliBand(
+    bucketName: string,
+    tz: string,
+  ): Promise<{
+    lowerEdge: ParDliBandPoint[];
+    upperEdge: ParDliBandPoint[];
+  }> {
+    if (!this.client || !this.queryApi) {
+      return { lowerEdge: [], upperEdge: [] };
+    }
+
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+    // Two `aggregateWindow` pipelines (min and max) over the same source,
+    // tagged with a `kind` column, then unioned. `option location` makes
+    // window boundaries and `date.hour` honour the viewer's timezone, so
+    // the emitted `hour` column is already 0–23 in local time.
+    const flux = `
+import "date"
+import "timezone"
+
+option location = timezone.location(name: "${escape(tz)}")
+
+todayStart = date.truncate(t: now(), unit: 1d)
+
+base = from(bucket: "${escape(bucketName)}")
+  |> range(start: date.sub(d: ${DLI_BAND_LOOKBACK_DAYS}d, from: todayStart), stop: todayStart)
+  |> filter(fn: (r) => r["_field"] == "lux")
+  |> group()
+
+mins = base
+  |> aggregateWindow(every: 1h, fn: min, createEmpty: false, timeSrc: "_start")
+  |> map(fn: (r) => ({ _time: r._time, _value: r._value, hour: date.hour(t: r._time) }))
+  |> set(key: "kind", value: "min")
+
+maxs = base
+  |> aggregateWindow(every: 1h, fn: max, createEmpty: false, timeSrc: "_start")
+  |> map(fn: (r) => ({ _time: r._time, _value: r._value, hour: date.hour(t: r._time) }))
+  |> set(key: "kind", value: "max")
+
+union(tables: [mins, maxs])
+`;
+
+    const minByHour = new Map<number, number[]>();
+    const maxByHour = new Map<number, number[]>();
+    const queryApi = this.queryApi;
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        queryApi.queryRows(flux, {
+          next: (row, tableMeta) => {
+            const o = tableMeta.toObject(row) as Record<string, unknown>;
+            const value = Number(o._value);
+            const hour = Number(o.hour);
+            if (!Number.isFinite(value) || !Number.isFinite(hour)) return;
+            if (hour < 0 || hour > 23) return;
+
+            const target = o.kind === 'min' ? minByHour : maxByHour;
+            const list = target.get(hour);
+            if (list) list.push(value);
+            else target.set(hour, [value]);
+          },
+          error: reject,
+          complete: resolve,
+        });
+      });
+    } catch (error) {
+      this.logger.warn(
+        `fetchDliBand failed for bucket "${bucketName}" tz "${tz}": ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return { lowerEdge: [], upperEdge: [] };
+    }
+
+    const mean = (xs: number[]): number =>
+      xs.reduce((a, b) => a + b, 0) / xs.length;
+
+    const hourToDli = SECONDS_PER_HOUR / 1_000_000;
+
+    const lowerEdge: ParDliBandPoint[] = [];
+    const upperEdge: ParDliBandPoint[] = [];
+    let cumulLower = 0;
+    let cumulUpper = 0;
+
+    for (let h = 0; h < 24; h++) {
+      const minSamples = minByHour.get(h);
+      if (minSamples && minSamples.length > 0) {
+        cumulLower += (mean(minSamples) / LUX_TO_PAR) * hourToDli;
+        lowerEdge.push({ hour: h, dli: cumulLower });
+      } else {
+        lowerEdge.push({ hour: h });
+      }
+
+      const maxSamples = maxByHour.get(h);
+      if (maxSamples && maxSamples.length > 0) {
+        cumulUpper += (mean(maxSamples) / LUX_TO_PAR) * hourToDli;
+        upperEdge.push({ hour: h, dli: cumulUpper });
+      } else {
+        upperEdge.push({ hour: h });
+      }
+    }
+
+    this.logger.debug(
+      `fetchDliBand("${bucketName}", tz="${tz}") → ${minByHour.size} hourly mins, ${maxByHour.size} hourly maxes`,
+    );
+
+    return { lowerEdge, upperEdge };
   }
 
   /**
