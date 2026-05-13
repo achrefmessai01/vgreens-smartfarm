@@ -3,12 +3,13 @@
 import * as React from 'react';
 import { useI18n } from '@/i18n';
 import {
+  Area,
   Line,
   Label,
   XAxis,
   YAxis,
   Tooltip,
-  LineChart,
+  ComposedChart,
   CartesianGrid,
   ReferenceLine,
   ResponsiveContainer,
@@ -51,7 +52,13 @@ export function ParGraphChart({
   const mergedMock = React.useMemo(() => {
     const byHour = new Map<
       number,
-      { hour: number; dli?: number; lowerEdge?: number; upperEdge?: number }
+      {
+        hour: number;
+        dli?: number;
+        lowerEdge?: number;
+        upperEdge?: number;
+        band?: [number, number];
+      }
     >();
     const ensure = (hour: number) => {
       let entry = byHour.get(hour);
@@ -64,13 +71,17 @@ export function ParGraphChart({
     for (const p of dli) ensure(p.hour).dli = p.value;
     for (const p of lowerEdge) ensure(p.hour).lowerEdge = p.value;
     for (const p of upperEdge) ensure(p.hour).upperEdge = p.value;
+    for (const entry of byHour.values()) {
+      if (entry.lowerEdge !== undefined && entry.upperEdge !== undefined) {
+        entry.band = [entry.lowerEdge, entry.upperEdge];
+      }
+    }
     return Array.from(byHour.values()).sort((a, b) => a.hour - b.hour);
   }, [dli, lowerEdge, upperEdge]);
 
   const effectiveYMax = React.useMemo(() => {
     const mockMax = mergedMock.reduce(
-      (acc, p) =>
-        Math.max(acc, p.dli ?? 0, p.lowerEdge ?? 0, p.upperEdge ?? 0),
+      (acc, p) => Math.max(acc, p.dli ?? 0, p.lowerEdge ?? 0, p.upperEdge ?? 0),
       0,
     );
     const combined = Math.max(yMax, mockMax);
@@ -85,7 +96,7 @@ export function ParGraphChart({
 
       <div className="min-h-[10rem] flex-1 sm:min-h-[14rem]">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
+          <ComposedChart
             data={mergedMock}
             margin={{ top: 6, right: 6, left: 2, bottom: 14 }}
           >
@@ -165,11 +176,22 @@ export function ParGraphChart({
               ifOverflow="extendDomain"
             />
 
+            <Area
+              dataKey="band"
+              type="monotone"
+              name="band"
+              stroke="none"
+              fill="hsl(142 91% 50%)"
+              fillOpacity={0.15}
+              activeDot={false}
+              isAnimationActive={false}
+            />
+
             <Line
               dataKey="dli"
               type="monotone"
               name="dli"
-              stroke="hsl(142 71% 35%)"
+              stroke="hsl(142 100% 50%)"
               strokeWidth={2}
               dot={false}
               isAnimationActive={false}
@@ -178,7 +200,7 @@ export function ParGraphChart({
               dataKey="lowerEdge"
               type="monotone"
               name="lowerEdge"
-              stroke="hsl(217 91% 55%)"
+              stroke="hsl(142 91% 55%)"
               strokeWidth={1.5}
               strokeDasharray="4 4"
               dot={false}
@@ -188,13 +210,13 @@ export function ParGraphChart({
               dataKey="upperEdge"
               type="monotone"
               name="upperEdge"
-              stroke="hsl(0 84% 55%)"
+              stroke="hsl(142 91% 55%)"
               strokeWidth={1.5}
               strokeDasharray="4 4"
               dot={false}
               isAnimationActive={false}
             />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>
