@@ -41,6 +41,8 @@ export class SensorConfigService {
         yPosition: input.yPosition ?? existing.yPosition,
         greenhouse: input.greenhouse ?? existing.greenhouse,
         city: input.city ?? existing.city,
+        hiddenInFarmOverview:
+          input.hiddenInFarmOverview ?? existing.hiddenInFarmOverview ?? false,
       });
       return this.repo.save(existing);
     }
@@ -50,6 +52,7 @@ export class SensorConfigService {
       tenantId,
       xPosition: input.xPosition ?? null,
       yPosition: input.yPosition ?? null,
+      hiddenInFarmOverview: input.hiddenInFarmOverview ?? false,
     });
     return this.repo.save(config);
   }

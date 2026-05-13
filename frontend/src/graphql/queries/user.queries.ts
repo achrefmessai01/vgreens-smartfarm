@@ -18,6 +18,7 @@ export const ME_QUERY = gql`
         createdAt
         isActive
         updatedAt
+        disabledSensorFields
         greenhouses {
           name
           xDimension
@@ -29,6 +30,7 @@ export const ME_QUERY = gql`
       isActive
       status
       preferredLanguage
+      farmOverviewTimeRange
       createdAt
       updatedAt
     }

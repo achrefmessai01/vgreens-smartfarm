@@ -9,6 +9,7 @@ export const TENANTS_QUERY = gql`
       email
       phone
       isActive
+      disabledSensorFields
       greenhouses {
         name
         doorPosition
@@ -31,6 +32,7 @@ export const TENANT_QUERY = gql`
       email
       phone
       isActive
+      disabledSensorFields
       greenhouses {
         name
         doorPosition

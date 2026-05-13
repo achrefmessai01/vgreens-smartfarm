@@ -151,6 +151,10 @@ export const it = {
     },
     farmOverview: {
       title: 'Panoramica fattoria',
+      enableSensors: 'Attiva sensori',
+      showAllSensors: 'Mostra tutto',
+      hideAllSensors: 'Nascondi tutto',
+      sensorsVisible: 'visibili',
       subtitle: 'Informazioni in tempo reale sulle operazioni della fattoria',
       batches: 'Lotti',
       onTime: 'In orario',
@@ -171,6 +175,26 @@ export const it = {
       oneDay: '1 giorno',
       oneWeek: '1 settimana',
       oneMonth: '1 mese',
+      timeRangePresets: {
+        ariaLabel: 'Media su',
+        last5min: 'Ultimi 5 min',
+        last1h: 'Ultima 1 h',
+        last24h: 'Ultime 24 h',
+        last7d: 'Ultimi 7 g',
+        last30d: 'Ultimi 30 g',
+        last90d: 'Ultimi 90 g',
+        ytd: 'Da inizio anno',
+        custom: 'Personalizzato…',
+        customRangeTitle: 'Intervallo personalizzato',
+        from: 'Da',
+        until: 'A',
+        apply: 'Applica',
+        clear: 'Cancella',
+        invalidRange:
+          'Da deve essere precedente ad A, e A non può essere nel futuro.',
+        recalculating: 'Ricalcolo medie…',
+        currentRange: 'Medie per',
+      },
       farmOverview: 'Panoramica fattoria',
       tunnelView: 'Vista tunnel',
       systemOverview: 'Panoramica del sistema',
@@ -273,12 +297,14 @@ export const it = {
       historyTitle: 'Cronologia dei raccolti',
       harvestEntryTab: 'Inserimento raccolto',
       harvestEntryTitle: 'Inserimento raccolto',
-      dashboardPlaceholder: 'Il contenuto della dashboard sarà visualizzato qui',
+      dashboardPlaceholder:
+        'Il contenuto della dashboard sarà visualizzato qui',
       subtitle: 'Tieni traccia e gestisci i tuoi record di raccolta',
       performanceDashboard: 'Dashboard delle performance',
       harvestsLogged: 'raccolti registrati',
       yieldPredictionTitle: 'Previsione di resa',
-      yieldPredictionSubtitle: 'Anteprima delle performance del prossimo raccolto.',
+      yieldPredictionSubtitle:
+        'Anteprima delle performance del prossimo raccolto.',
       predictedYieldLabel: 'Resa prevista',
       predictedYieldValue: '1.280 kg',
       yieldPredictionTrend: '+8,4 % rispetto al mese scorso',
@@ -455,8 +481,7 @@ export const it = {
           'Segnaposto mappa live: integra Leaflet/Mapbox per mostrare zone e sensori',
         liveMapComponentHint:
           'Clicca sulle zone per vedere elenchi di sensori e grafici storici.',
-        deviceHealthAndWeatherComponentTitle:
-          'Stato dispositivi e meteo',
+        deviceHealthAndWeatherComponentTitle: 'Stato dispositivi e meteo',
         lastUpdated: 'Ultimo aggiornamento: 2 minuti fa',
         refresh: 'Aggiorna',
       },
@@ -485,7 +510,8 @@ export const it = {
         clerkUserId: 'ID utente Clerk',
         clerkUserIdDescription: 'L’ID Clerk viene generato automaticamente',
         emailPlaceholder: 'utente@esempio.com',
-        invitationEmailDescription: 'Verrà inviato un invito a questo indirizzo',
+        invitationEmailDescription:
+          'Verrà inviato un invito a questo indirizzo',
         firstName: 'Nome',
         firstNamePlaceholder: 'Mario',
         lastName: 'Cognome',
@@ -533,8 +559,10 @@ export const it = {
           greenhouse: 'Serra',
           city: 'Città',
           actions: 'Azioni',
-          xPositionHint: 'Posizione orizzontale in metri dal lato dell’ingresso',
-          yPositionHint: 'Posizione verticale in metri dall’origine della serra',
+          xPositionHint:
+            'Posizione orizzontale in metri dal lato dell’ingresso',
+          yPositionHint:
+            'Posizione verticale in metri dall’origine della serra',
           greenhouseHint: 'Identificatore della serra',
           cityHint: 'Città di posizione',
           xPositionPlaceholder: 'es. 5,25',
@@ -551,6 +579,13 @@ export const it = {
             'Nessun sensore trovato nel bucket InfluxDB di questo tenant.',
           sheetDescription:
             'Sovrascrivi i tag di posizione per questo sensore. Lascia vuoto per usare i valori di InfluxDB.',
+          enableSensorsHint:
+            'I tipi di sensore disattivati sono nascosti dalla mappa Panoramica fattoria e non generano avvisi.',
+          showInFarmOverview: 'Mostra in Panoramica fattoria',
+          showInFarmOverviewHint:
+            'Quando disattivato, questo sensore è nascosto dalle mappe termiche e discrete della Panoramica fattoria. È attivato per impostazione predefinita.',
+          hiddenBadge: 'Nascosto',
+          visibleColumn: 'Visibile',
         },
         farmLayout: {
           title: 'Planimetria della fattoria',
@@ -646,8 +681,7 @@ export const it = {
           expectedVsActual: 'Atteso vs effettivo',
           adminControls: 'Controlli amministratore',
           adminNotes: 'Note amministratore',
-          adminNotesPlaceholder:
-            'Aggiungi note su indagine, risoluzione, ecc.',
+          adminNotesPlaceholder: 'Aggiungi note su indagine, risoluzione, ecc.',
           severityLevel: 'Livello di gravità',
           update: 'Aggiorna segnalazione',
           cancel: 'Annulla',
@@ -709,7 +743,8 @@ export const it = {
       },
       features: {
         realTimeMonitoring: 'Monitoraggio in tempo reale',
-        realTimeMonitoringDesc: 'Osserva le tue colture crescere in tempo reale',
+        realTimeMonitoringDesc:
+          'Osserva le tue colture crescere in tempo reale',
         multipleCameras: 'Supporto a più videocamere',
         multipleCamerasDesc: 'Collega e monitora più flussi video',
         recording: 'Registrazione e riproduzione',
@@ -833,7 +868,8 @@ export const it = {
         resolved: 'Risolta',
         openDescription:
           'La tua segnalazione è stata ricevuta e attende la revisione.',
-        inProgressDescription: 'Il nostro team sta indagando sulla segnalazione.',
+        inProgressDescription:
+          'Il nostro team sta indagando sulla segnalazione.',
         resolvedDescription:
           'La tua segnalazione è stata risolta. Grazie per averci aiutato a migliorare.',
       },
@@ -868,6 +904,14 @@ export const it = {
           'Per domande su questa segnalazione, contatta il nostro team di supporto.',
         submitAnother: 'Invia un’altra segnalazione',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: 'Impossibile caricare il tuo account',
+      description:
+        'Si è verificato un errore durante la preparazione della sessione. Riprova — se il problema persiste, esci e accedi di nuovo.',
+      retry: 'Riprova',
     },
   },
 } as const;

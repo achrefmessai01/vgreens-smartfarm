@@ -47,3 +47,15 @@ export const DELETE_TENANT_MUTATION = gql`
     deleteTenant(id: $id)
   }
 `;
+
+export const SET_TENANT_DISABLED_SENSOR_FIELDS_MUTATION = gql`
+  mutation SetTenantDisabledSensorFields(
+    $fields: [String!]!
+    $tenantId: ID
+  ) {
+    setTenantDisabledSensorFields(fields: $fields, tenantId: $tenantId) {
+      id
+      disabledSensorFields
+    }
+  }
+`;

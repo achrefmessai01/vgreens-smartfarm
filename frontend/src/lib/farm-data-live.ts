@@ -19,6 +19,7 @@ export interface SensorConfigOverride {
   city?: string | null;
   xPosition?: number | null;
   yPosition?: number | null;
+  hiddenInFarmOverview?: boolean | null;
 }
 
 /** One row from getBucketData (each item has a "data" object). */
@@ -72,6 +73,7 @@ function buildSlotsFromRows(
     side?: string;
     xPosition?: number;
     yPosition?: number;
+    hiddenInFarmOverview?: boolean;
   };
 
   const bySlot = new Map<SlotKey, FieldValues>();
@@ -123,6 +125,9 @@ function buildSlotsFromRows(
       side: (row.side as string) ?? undefined,
       ...(Number.isFinite(xPos) && xPos != null && { xPosition: xPos }),
       ...(Number.isFinite(yPos) && yPos != null && { yPosition: yPos }),
+      ...(config?.hiddenInFarmOverview === true && {
+        hiddenInFarmOverview: true,
+      }),
     });
   }
 

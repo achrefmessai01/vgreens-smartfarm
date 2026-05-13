@@ -65,4 +65,18 @@ export class TenantsResolver {
   ): Promise<boolean> {
     return this.tenantsService.delete(id);
   }
+
+  @Mutation(() => Tenant)
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  async setTenantDisabledSensorFields(
+    @CurrentUser() currentUser: User,
+    @Args('fields', { type: () => [String] }) fields: string[],
+    @Args('tenantId', { type: () => ID, nullable: true }) tenantId?: string,
+  ): Promise<Tenant> {
+    const targetTenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? (tenantId ?? currentUser.tenantId)
+        : currentUser.tenantId;
+    return this.tenantsService.setDisabledSensorFields(targetTenantId, fields);
+  }
 }

@@ -11,6 +11,7 @@ import {
   useFarmConfigQuery,
   UserRole,
   useSensorConfigsQuery,
+  useSetTenantDisabledSensorFieldsMutation,
   useTenantsQuery,
   useUpsertSensorConfigMutation,
   type Tenant,
@@ -120,6 +121,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
             yPosition: c.yPosition ?? undefined,
             greenhouse: c.greenhouse ?? undefined,
             city: c.city ?? undefined,
+            hiddenInFarmOverview: c.hiddenInFarmOverview ?? undefined,
           },
         ]),
       ),
@@ -200,6 +202,80 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     // The `tenant(id)` resolver is admin-only, so we use the already-loaded user.tenant.
     return user?.tenant?.greenhouses ?? [];
   }, [isVGreensAdmin, tenants, selectedTenantId, user?.tenant?.greenhouses]);
+
+  const tenantDisabledSensorFields = React.useMemo<string[]>(() => {
+    if (isVGreensAdmin) {
+      const tenant = tenants.find((tn) => tn.id === selectedTenantId);
+      return tenant?.disabledSensorFields ?? [];
+    }
+    return user?.tenant?.disabledSensorFields ?? [];
+  }, [
+    isVGreensAdmin,
+    tenants,
+    selectedTenantId,
+    user?.tenant?.disabledSensorFields,
+  ]);
+
+  const disabledSensorFieldsSet = React.useMemo(
+    () => new Set(tenantDisabledSensorFields),
+    [tenantDisabledSensorFields],
+  );
+
+  const [setDisabledSensorFieldsMutation] =
+    useSetTenantDisabledSensorFieldsMutation();
+  const [savingSensorFields, setSavingSensorFields] = React.useState(false);
+
+  const handleToggleSensorField = React.useCallback(
+    async (fields: string[], enabled: boolean) => {
+      if (!canEditSensorPositions) return;
+      const next = new Set(tenantDisabledSensorFields);
+      for (const field of fields) {
+        if (enabled) {
+          next.delete(field);
+        } else {
+          next.add(field);
+        }
+      }
+      setSavingSensorFields(true);
+      try {
+        await setDisabledSensorFieldsMutation({
+          variables: {
+            fields: Array.from(next),
+            tenantId: configQueryTenantId ?? undefined,
+          },
+          // Update the cached tenant so the UI reflects the change without a
+          // full refetch of `me` / `tenants`.
+          update: (cache, result) => {
+            const updated = result.data?.setTenantDisabledSensorFields;
+            if (!updated) return;
+            cache.modify({
+              id: cache.identify({ __typename: 'Tenant', id: updated.id }),
+              fields: {
+                disabledSensorFields: () => updated.disabledSensorFields,
+              },
+            });
+          },
+        });
+      } catch (err) {
+        toast({
+          title: t.positionSaveFailedTitle,
+          description:
+            err instanceof Error ? err.message : String(err),
+          variant: 'destructive',
+        });
+      } finally {
+        setSavingSensorFields(false);
+      }
+    },
+    [
+      canEditSensorPositions,
+      configQueryTenantId,
+      setDisabledSensorFieldsMutation,
+      t.positionSaveFailedTitle,
+      tenantDisabledSensorFields,
+      toast,
+    ],
+  );
 
   const farmLayout = React.useMemo<FarmLayoutConfig>(
     () => ({
@@ -346,8 +422,10 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         { label: t.temperature, value: 'temperature' },
         { label: t.humidity, value: 'humidity' },
         { label: t.co2, value: 'co2' },
-        { label: t.soilEC, value: 'soil_ec' },
-        { label: t.soilMoisture, value: 'soil_moisture' },
+        // VSL-169: Soil EC / Soil moisture hidden from the fallback option
+        // list (used when the bucket has no fields yet).
+        // { label: t.soilEC, value: 'soil_ec' },
+        // { label: t.soilMoisture, value: 'soil_moisture' },
         { label: t.vpd, value: 'vpd' },
         { label: t.par, value: 'par' },
       ];
@@ -375,10 +453,27 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     // PAR) in every view. The Combined view previously surfaced every bucket
     // field — including diagnostic ones like Battery, RSSI, Missing — which
     // cluttered the per-greenhouse summary cards.
-    return allOptions.filter((opt) =>
+    const allowed = allOptions.filter((opt) =>
       ALLOWED_SINGLE_GREENHOUSE_PARAMETERS.includes(opt.value as ParameterType),
     );
-  }, [bucketFields, t]);
+    // Hide types the tenant has explicitly disabled. Some logical types map
+    // to multiple Influx field names (PAR/PAR estimated, Soil EC/conductivity)
+    // — disabling any alias hides the option regardless of which name a
+    // tenant's bucket emits.
+    const aliasGroups: string[][] = [
+      ['par', 'par_estimated'],
+      // VSL-169: Soil EC aliases kept commented for re-enablement alongside
+      // the constants in farm-overview-constants.ts.
+      // ['soil_ec', 'soil_conductivity'],
+    ];
+    return allowed.filter((opt) => {
+      const group = aliasGroups.find((g) => g.includes(opt.value));
+      if (group) {
+        return !group.some((alias) => disabledSensorFieldsSet.has(alias));
+      }
+      return !disabledSensorFieldsSet.has(opt.value);
+    });
+  }, [bucketFields, t, disabledSensorFieldsSet]);
 
   const effectiveParameter =
     selectedParameter && bucketFields.includes(selectedParameter)
@@ -538,6 +633,9 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     tenantBucketNameOverride,
     farmLayout,
     greenhouseDimensions: selectedGreenhouseDimensions,
+    disabledSensorFields: disabledSensorFieldsSet,
+    handleToggleSensorField,
+    savingSensorFields,
     labels: {
       viewHeatmap: t.viewHeatmap,
       viewDiscrete: t.viewDiscrete,

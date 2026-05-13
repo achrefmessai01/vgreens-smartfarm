@@ -150,6 +150,10 @@ export const pt = {
     },
     farmOverview: {
       title: 'Visão geral da quinta',
+      enableSensors: 'Ativar sensores',
+      showAllSensors: 'Mostrar todos',
+      hideAllSensors: 'Ocultar todos',
+      sensorsVisible: 'visíveis',
       subtitle: 'Informação em tempo real sobre as operações da sua quinta',
       batches: 'Lotes',
       onTime: 'A tempo',
@@ -170,6 +174,26 @@ export const pt = {
       oneDay: '1 dia',
       oneWeek: '1 semana',
       oneMonth: '1 mês',
+      timeRangePresets: {
+        ariaLabel: 'Média de',
+        last5min: 'Últimos 5 min',
+        last1h: 'Última 1 h',
+        last24h: 'Últimas 24 h',
+        last7d: 'Últimos 7 d',
+        last30d: 'Últimos 30 d',
+        last90d: 'Últimos 90 d',
+        ytd: 'Desde o início do ano',
+        custom: 'Personalizado…',
+        customRangeTitle: 'Intervalo personalizado',
+        from: 'De',
+        until: 'Até',
+        apply: 'Aplicar',
+        clear: 'Limpar',
+        invalidRange:
+          'De deve ser anterior a Até, e Até não pode estar no futuro.',
+        recalculating: 'A recalcular médias…',
+        currentRange: 'Médias para',
+      },
       farmOverview: 'Visão geral da quinta',
       tunnelView: 'Vista do túnel',
       systemOverview: 'Visão geral do sistema',
@@ -485,8 +509,7 @@ export const pt = {
         clerkUserId: 'ID de utilizador do Clerk',
         clerkUserIdDescription: 'O ID do Clerk é gerado automaticamente',
         emailPlaceholder: 'utilizador@exemplo.com',
-        invitationEmailDescription:
-          'Será enviado um convite para este e-mail',
+        invitationEmailDescription: 'Será enviado um convite para este e-mail',
         firstName: 'Nome próprio',
         firstNamePlaceholder: 'João',
         lastName: 'Apelido',
@@ -536,7 +559,8 @@ export const pt = {
           actions: 'Ações',
           xPositionHint:
             'Posição horizontal em metros a partir do lado da entrada',
-          yPositionHint: 'Posição vertical em metros a partir da origem da estufa',
+          yPositionHint:
+            'Posição vertical em metros a partir da origem da estufa',
           greenhouseHint: 'Identificador da estufa',
           cityHint: 'Cidade da localização',
           xPositionPlaceholder: 'p. ex., 5,25',
@@ -553,6 +577,13 @@ export const pt = {
             'Nenhum sensor encontrado no bucket InfluxDB deste inquilino.',
           sheetDescription:
             'Substitua as etiquetas de localização deste sensor. Deixe em branco para usar os valores do InfluxDB.',
+          enableSensorsHint:
+            'Os tipos de sensor desativados ficam ocultos no mapa de Visão Geral da Quinta e não geram alertas.',
+          showInFarmOverview: 'Mostrar em Visão Geral da Quinta',
+          showInFarmOverviewHint:
+            'Quando desativado, este sensor fica oculto nos mapas de calor e discreto da Visão Geral da Quinta. Está ativado por padrão.',
+          hiddenBadge: 'Oculto',
+          visibleColumn: 'Visível',
         },
         farmLayout: {
           title: 'Esquema da quinta',
@@ -836,9 +867,9 @@ export const pt = {
         open: 'Aberto',
         inProgress: 'Em curso',
         resolved: 'Resolvido',
-        openDescription:
-          'O seu relatório foi recebido e aguarda revisão.',
-        inProgressDescription: 'A nossa equipa está a investigar o seu relatório.',
+        openDescription: 'O seu relatório foi recebido e aguarda revisão.',
+        inProgressDescription:
+          'A nossa equipa está a investigar o seu relatório.',
         resolvedDescription:
           'O seu relatório foi resolvido. Obrigado por nos ajudar a melhorar.',
       },
@@ -873,6 +904,14 @@ export const pt = {
           'Se tiver dúvidas sobre este relatório, contacte a nossa equipa de suporte.',
         submitAnother: 'Submeter outro relatório',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: 'Não conseguimos carregar a sua conta',
+      description:
+        'Algo correu mal ao preparar a sua sessão. Tente novamente — se o problema persistir, termine sessão e inicie sessão de novo.',
+      retry: 'Tentar novamente',
     },
   },
 } as const;

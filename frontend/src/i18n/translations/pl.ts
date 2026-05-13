@@ -93,8 +93,7 @@ export const pl = {
       currentYield: 'Bieżący plon',
       currentYieldSubtitle: 'Na podstawie prognozy z ostatnich 90 dni',
       totalYield: 'Plon całkowity',
-      totalYieldSubtitle:
-        '90-dniowa całka produkcji w skali całej farmy',
+      totalYieldSubtitle: '90-dniowa całka produkcji w skali całej farmy',
       comingSoon: 'Wkrótce',
       marketAlignmentHub: 'Centrum dopasowania do rynku',
       marketAlignmentHubSubtitle: 'Wkrótce',
@@ -112,8 +111,7 @@ export const pl = {
       subtitle: 'Planuj i symuluj kolejny cykl uprawy w oparciu o odmianę.',
       openVarietyCatalogue: 'Otwórz katalog odmian',
       varietyCatalogueTitle: 'Katalog odmian',
-      varietyCatalogueSubtitle:
-        'Poznaj różne odmiany truskawek i ich cechy.',
+      varietyCatalogueSubtitle: 'Poznaj różne odmiany truskawek i ich cechy.',
       predictedBrix: 'Prognozowany Brix',
       adjustPredictedBrix:
         'Dostosuj prognozowaną krzywą Brix dla wybranej odmiany.',
@@ -151,6 +149,10 @@ export const pl = {
     },
     farmOverview: {
       title: 'Przegląd farmy',
+      enableSensors: 'Włącz czujniki',
+      showAllSensors: 'Pokaż wszystko',
+      hideAllSensors: 'Ukryj wszystko',
+      sensorsVisible: 'widocznych',
       subtitle: 'Aktualne informacje o działaniu Twojej farmy',
       batches: 'Partie',
       onTime: 'Na czas',
@@ -171,6 +173,26 @@ export const pl = {
       oneDay: '1 dzień',
       oneWeek: '1 tydzień',
       oneMonth: '1 miesiąc',
+      timeRangePresets: {
+        ariaLabel: 'Średnia z',
+        last5min: 'Ostatnie 5 min',
+        last1h: 'Ostatnia 1 godz.',
+        last24h: 'Ostatnie 24 godz.',
+        last7d: 'Ostatnie 7 dni',
+        last30d: 'Ostatnie 30 dni',
+        last90d: 'Ostatnie 90 dni',
+        ytd: 'Od początku roku',
+        custom: 'Niestandardowy…',
+        customRangeTitle: 'Zakres niestandardowy',
+        from: 'Od',
+        until: 'Do',
+        apply: 'Zastosuj',
+        clear: 'Wyczyść',
+        invalidRange:
+          'Od musi być wcześniej niż Do, a Do nie może być w przyszłości.',
+        recalculating: 'Przeliczanie średnich…',
+        currentRange: 'Średnie dla',
+      },
       farmOverview: 'Przegląd farmy',
       tunnelView: 'Widok tunelu',
       systemOverview: 'Przegląd systemu',
@@ -261,8 +283,7 @@ export const pl = {
       insight1Description:
         'Przychody wzrosły o 12,5 % w porównaniu z poprzednim okresem',
       insight2Title: 'Efektywność kosztowa',
-      insight2Description:
-        'Koszty produkcji spadły o 3,2 % w tym kwartale',
+      insight2Description: 'Koszty produkcji spadły o 3,2 % w tym kwartale',
       insight3Title: 'Optymalizacja plonu',
       insight3Description:
         'Średni plon poprawił się o 8,7 % tydzień do tygodnia',
@@ -533,10 +554,8 @@ export const pl = {
           greenhouse: 'Szklarnia',
           city: 'Miasto',
           actions: 'Akcje',
-          xPositionHint:
-            'Pozycja pozioma w metrach od strony wejścia',
-          yPositionHint:
-            'Pozycja pionowa w metrach od początku szklarni',
+          xPositionHint: 'Pozycja pozioma w metrach od strony wejścia',
+          yPositionHint: 'Pozycja pionowa w metrach od początku szklarni',
           greenhouseHint: 'Identyfikator szklarni',
           cityHint: 'Miasto lokalizacji',
           xPositionPlaceholder: 'np. 5,25',
@@ -553,6 +572,13 @@ export const pl = {
             'Nie znaleziono czujników w buckecie InfluxDB tego najemcy.',
           sheetDescription:
             'Zastąp etykiety lokalizacji dla tego czujnika. Pozostaw puste, aby użyć wartości z InfluxDB.',
+          enableSensorsHint:
+            'Wyłączone typy czujników są ukryte na mapie Przeglądu farmy i nie generują alarmów.',
+          showInFarmOverview: 'Pokaż w Przeglądzie farmy',
+          showInFarmOverviewHint:
+            'Po wyłączeniu ten czujnik jest ukryty na mapach cieplnej i dyskretnej Przeglądu farmy. Domyślnie włączony.',
+          hiddenBadge: 'Ukryty',
+          visibleColumn: 'Widoczny',
         },
         farmLayout: {
           title: 'Układ farmy',
@@ -620,8 +646,7 @@ export const pl = {
       },
       reports: {
         title: 'Zarządzanie zgłoszeniami błędów',
-        subtitle:
-          'Monitoruj i zarządzaj zgłoszeniami błędów od użytkowników',
+        subtitle: 'Monitoruj i zarządzaj zgłoszeniami błędów od użytkowników',
         errorTitle: 'Tytuł błędu',
         userEmail: 'E-mail użytkownika',
         severity: 'Waga',
@@ -631,8 +656,7 @@ export const pl = {
         created: 'Utworzone',
         lastUpdated: 'Ostatnia aktualizacja',
         actions: 'Akcje',
-        searchPlaceholder:
-          'Szukaj zgłoszeń po tytule, e-mailu użytkownika...',
+        searchPlaceholder: 'Szukaj zgłoszeń po tytule, e-mailu użytkownika...',
         noReports: 'Nie znaleziono zgłoszeń błędów',
         loading: 'Ładowanie zgłoszeń...',
         description: 'Opis',
@@ -713,8 +737,7 @@ export const pl = {
       },
       features: {
         realTimeMonitoring: 'Monitorowanie w czasie rzeczywistym',
-        realTimeMonitoringDesc:
-          'Obserwuj wzrost upraw w czasie rzeczywistym',
+        realTimeMonitoringDesc: 'Obserwuj wzrost upraw w czasie rzeczywistym',
         multipleCameras: 'Obsługa wielu kamer',
         multipleCamerasDesc: 'Podłączaj i monitoruj wiele kamer',
         recording: 'Nagrywanie i odtwarzanie',
@@ -819,8 +842,7 @@ export const pl = {
       keepAlert: 'Zachowaj alarm',
       toastTitle: 'Alarm krytyczny',
       toastViewAction: 'Zobacz alarmy',
-      toastFallbackDescription:
-        'Nowy krytyczny alarm wymaga uwagi.',
+      toastFallbackDescription: 'Nowy krytyczny alarm wymaga uwagi.',
       cancel: 'Anuluj',
       save: 'Zapisz',
       delete: 'Usuń',
@@ -875,6 +897,14 @@ export const pl = {
           'Jeśli masz pytania dotyczące tego zgłoszenia, skontaktuj się z naszym zespołem wsparcia.',
         submitAnother: 'Wyślij kolejne zgłoszenie',
       },
+    },
+  },
+  errors: {
+    sessionLoad: {
+      title: 'Nie udało się załadować Twojego konta',
+      description:
+        'Coś poszło nie tak podczas przygotowywania sesji. Spróbuj ponownie — jeśli problem nie ustąpi, wyloguj się i zaloguj ponownie.',
+      retry: 'Spróbuj ponownie',
     },
   },
 } as const;

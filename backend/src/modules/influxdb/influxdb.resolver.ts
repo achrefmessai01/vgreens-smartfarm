@@ -72,10 +72,12 @@ export class InfluxDBResolver {
   async getBucketFieldMeansLastMinutes(
     @Args('input') input: GetFieldMeansInput,
   ): Promise<FieldMeanMetric[]> {
-    const { bucketName, windowMinutes, greenhouse } = input;
+    const { bucketName, windowMinutes, greenhouse, start, stop } = input;
     return this.influxDBService.getBucketFieldMeansLastMinutes(bucketName, {
       greenhouse,
       windowMinutes,
+      start,
+      stop,
     });
   }
 

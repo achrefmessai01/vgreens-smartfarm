@@ -51,3 +51,12 @@ export const SET_MY_LANGUAGE_MUTATION = gql`
     }
   }
 `;
+
+export const SET_MY_FARM_OVERVIEW_TIME_RANGE_MUTATION = gql`
+  mutation SetMyFarmOverviewTimeRange($value: String!) {
+    setMyFarmOverviewTimeRange(value: $value) {
+      id
+      farmOverviewTimeRange
+    }
+  }
+`;

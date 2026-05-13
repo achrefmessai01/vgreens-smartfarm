@@ -6,7 +6,9 @@ import {
   FarmOverviewPageSkeleton,
   GreenhouseSelector,
   HistoryDrawer,
+  SensorVisibilityDropdown,
 } from '@/components/farm-overview';
+import { TimeRangeSelector } from '@/components/farm-overview/time-range-selector';
 import { FeatureGuard } from '@/components/features/feature-guard';
 import { PageHeader } from '@/components/layout/page-header';
 import { TenantSelector } from '@/components/tenants';
@@ -46,15 +48,29 @@ export default function FarmOverviewPage() {
             subtitle={t.pages.farmOverview.subtitle}
             className="mb-0"
           />
-          {state.isVGreensAdmin && (
-            <TenantSelector
-              tenants={state.tenants}
-              selectedTenantId={state.tenantSelectorValue}
-              onTenantChange={state.handleTenantChange}
-              label={t.pages.admin.users.selectTenant || 'Select tenant'}
-              placeholder={t.pages.admin.users.selectTenant}
-            />
-          )}
+          <div className="flex shrink-0 items-end gap-2">
+            {state.isCombinedView && <TimeRangeSelector />}
+            {state.canEditSensorPositions && (
+              <SensorVisibilityDropdown
+                disabledFields={state.disabledSensorFields}
+                onToggle={state.handleToggleSensorField}
+                saving={state.savingSensorFields}
+                triggerLabel={t.pages.farmOverview.enableSensors}
+                showAllLabel={t.pages.farmOverview.showAllSensors}
+                hideAllLabel={t.pages.farmOverview.hideAllSensors}
+                visibleSuffixLabel={t.pages.farmOverview.sensorsVisible}
+              />
+            )}
+            {state.isVGreensAdmin && (
+              <TenantSelector
+                tenants={state.tenants}
+                selectedTenantId={state.tenantSelectorValue}
+                onTenantChange={state.handleTenantChange}
+                label={t.pages.admin.users.selectTenant || 'Select tenant'}
+                placeholder={t.pages.admin.users.selectTenant}
+              />
+            )}
+          </div>
         </div>
 
         <GreenhouseSelector
