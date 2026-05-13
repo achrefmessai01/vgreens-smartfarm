@@ -579,6 +579,11 @@ export const ro = {
             'Suprascrie etichetele de locație pentru acest senzor. Lasă necompletat pentru a folosi valorile din InfluxDB.',
           enableSensorsHint:
             'Tipurile de senzori dezactivate sunt ascunse din harta Prezentare fermă și nu generează alerte.',
+          showInFarmOverview: 'Afișează în Prezentare fermă',
+          showInFarmOverviewHint:
+            'Când este dezactivat, acest senzor este ascuns din hărțile termice și discrete ale Prezentării fermei. Este activat implicit.',
+          hiddenBadge: 'Ascuns',
+          visibleColumn: 'Vizibil',
         },
         farmLayout: {
           title: 'Plan fermă',

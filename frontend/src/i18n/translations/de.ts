@@ -646,6 +646,11 @@ export const de = {
             'Überschreiben Sie die Standort-Tags für diesen Sensor. Lassen Sie das Feld leer, um die InfluxDB-Werte zu verwenden.',
           enableSensorsHint:
             'Deaktivierte Sensortypen werden in der Farm-Übersicht ausgeblendet und erzeugen keine Warnungen.',
+          showInFarmOverview: 'In Farm-Übersicht anzeigen',
+          showInFarmOverviewHint:
+            'Wenn deaktiviert, wird dieser Sensor in der Wärme- und Diskretkarte der Farm-Übersicht ausgeblendet. Standardmäßig aktiviert.',
+          hiddenBadge: 'Ausgeblendet',
+          visibleColumn: 'Sichtbar',
         },
         farmLayout: {
           title: 'Farm-Layout',

@@ -1,5 +1,6 @@
 import { Field, Float, InputType } from '@nestjs/graphql';
 import {
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -35,4 +36,9 @@ export class UpsertSensorConfigInput {
   @IsString()
   @IsOptional()
   city?: string;
+
+  @Field({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  hiddenInFarmOverview?: boolean;
 }

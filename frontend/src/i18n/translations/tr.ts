@@ -570,6 +570,11 @@ export const tr = {
             'Bu sensör için konum etiketlerini geçersiz kılın. InfluxDB değerlerini kullanmak için boş bırakın.',
           enableSensorsHint:
             'Devre dışı bırakılan sensör türleri Çiftlik Genel Bakış haritasında gizlenir ve uyarı oluşturmaz.',
+          showInFarmOverview: 'Çiftlik Genel Bakış’ta göster',
+          showInFarmOverviewHint:
+            'Kapatıldığında bu sensör, Çiftlik Genel Bakış’ın ısı ve ayrık haritalarında gizlenir. Varsayılan olarak etkindir.',
+          hiddenBadge: 'Gizli',
+          visibleColumn: 'Görünür',
         },
         farmLayout: {
           title: 'Çiftlik düzeni',
