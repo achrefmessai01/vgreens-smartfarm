@@ -71,11 +71,6 @@ export class GetParDliTodayInput {
   @IsString()
   @IsNotEmpty()
   bucketName: string;
-
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  greenhouse: string;
 }
 
 @ObjectType()
@@ -85,4 +80,19 @@ export class ParDliPoint {
 
   @Field()
   dli: number;
+}
+
+@ObjectType()
+export class ParDliResult {
+  /** Latest PPFD reading in µmol m⁻² s⁻¹ (mean lux of the last 5-minute window / 55). */
+  @Field({ nullable: true })
+  currentPPFD?: number;
+
+  /** Latest cumulative DLI value for today in mol m⁻². */
+  @Field({ nullable: true })
+  currentDLI?: number;
+
+  /** Cumulative DLI curve for today, one point per 5-minute window. */
+  @Field(() => [ParDliPoint])
+  todaysGraphData: ParDliPoint[];
 }

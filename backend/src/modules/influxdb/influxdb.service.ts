@@ -4,7 +4,7 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { FieldMeanMetric, ParDliPoint } from './dto';
+import { FieldMeanMetric, ParDliPoint, ParDliResult } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { BucketsAPI, OrgsAPI } from '@influxdata/influxdb-client-apis';
 import { InfluxDB, QueryApi, WriteApi } from '@influxdata/influxdb-client';
@@ -14,7 +14,9 @@ import {
   correctRawRows,
   isTargetBucket,
 } from './air-temperature-correction';
-import { KNAUP_DLI, getKnaupLuxDevices } from './knaup-dli';
+
+const DLI_INTERVAL_SECONDS = 300;
+const LUX_TO_PAR = 55;
 
 @Injectable()
 export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
@@ -518,142 +520,60 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Returns today's cumulative DLI (Daily Light Integral) curve in mol m⁻²,
-   * derived from the raw `lux` sensor field.
+   * Returns today's PAR/DLI summary for a tenant bucket:
+   *   - `todaysGraphData`: cumulative DLI curve in mol m⁻², one point per
+   *     5-minute window starting at midnight (UTC).
+   *   - `currentPPFD`: latest PPFD reading in µmol m⁻² s⁻¹ (mean lux of the
+   *     last 5-minute window / 55).
+   *   - `currentDLI`: latest cumulative DLI value in mol m⁻².
    *
    * Pipeline:
-   *   1. Pull the `lux` field for the given greenhouse, from the start of
-   *      today (UTC).
-   *   2. Collapse all device series with `group()` so we get a single mean
-   *      per minute (rather than N parallel curves when multiple sensors
-   *      report for the same greenhouse).
-   *   3. Aggregate to 1-minute means.
-   *   4. Convert lux → PAR µmol m⁻² s⁻¹  (PAR = lux / 55).
-   *   5. Convert PAR µmol m⁻² s⁻¹ → mol m⁻² per minute  (× 60 s / 1e6).
-   *   6. `cumulativeSum` from midnight gives DLI in mol m⁻², which resets
-   *      each day naturally because the `range` only spans today.
+   *   1. Pull every `lux` reading in the bucket since the start of today.
+   *   2. Collapse all device series with `group()` so each 5-minute window
+   *      mean is across every lux sensor in the tenant bucket.
+   *   3. Aggregate to 5-minute (`DLI_INTERVAL_SECONDS`) means.
+   *   4. Per window: PPFD = lux / 55 (µmol m⁻² s⁻¹) and DLI contribution =
+   *      PPFD × 300 s / 1e6 (mol m⁻²).
+   *   5. `cumulativeSum` over the DLI column gives the running curve.
    *
    * The `/55` factor is the project-wide convention for converting natural-
-   * daylight lux to PPFD; it intentionally bypasses any pre-computed `par`
-   * or `par_estimated` fields the sensors might write so the dashboard
-   * always uses one consistent calibration.
-   */
-  async getTodayParCumulativeDli(
-    bucketName: string,
-    options: { greenhouse: string },
-  ): Promise<ParDliPoint[]> {
-    if (!this.client || !this.queryApi) {
-      this.logger.error('InfluxDB client is not initialized');
-      throw new Error('InfluxDB client is not initialized');
-    }
-
-    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-
-    const flux = `
-import "date"
-
-from(bucket: "${escape(bucketName)}")
-  |> range(start: date.truncate(t: now(), unit: 1d))
-  |> filter(fn: (r) =>
-    r["_field"] == "lux" and
-    r["greenhouse"] == "${escape(options.greenhouse)}"
-  )
-  |> group()
-  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
-  |> map(fn: (r) => ({
-      _time: r._time,
-      _value: float(v: r._value) / 55.0 * 60.0 / 1000000.0
-    }))
-  |> cumulativeSum(columns: ["_value"])
-`;
-
-    const rows: ParDliPoint[] = [];
-    const queryApi = this.queryApi;
-
-    try {
-      await new Promise<void>((resolve, reject) => {
-        queryApi.queryRows(flux, {
-          next: (row, tableMeta) => {
-            const o = tableMeta.toObject(row) as Record<string, unknown>;
-            const value = Number(o._value);
-            if (Number.isNaN(value)) return;
-
-            const time =
-              o._time instanceof Date
-                ? o._time
-                : new Date(String((o as { _time?: string })._time ?? ''));
-
-            rows.push({ time, dli: value });
-          },
-          error: reject,
-          complete: resolve,
-        });
-      });
-    } catch (error) {
-      this.logger.warn(
-        `getTodayParCumulativeDli failed for bucket "${bucketName}" greenhouse "${options.greenhouse}": ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-      return [];
-    }
-
-    this.logger.debug(
-      `getTodayParCumulativeDli("${bucketName}", greenhouse="${options.greenhouse}") → ${rows.length} points (lux/55)`,
-    );
-    return rows;
-  }
-
-  /**
-   * Knaup-specific DLI. Averages a fixed group of lux sensors per greenhouse
-   * (see `knaup-dli.ts`) at 5-minute resolution, converts to PAR, integrates
-   * via Riemann sum (Σ PAR × 300 s) and converts µmol → mol.
+   * daylight lux to PPFD; we intentionally bypass any pre-computed `par`
+   * fields so the dashboard uses one consistent calibration.
    *
-   * Returns the same `ParDliPoint[]` shape as `getTodayParCumulativeDli` so
-   * callers and the frontend hook are interchangeable.
+   * We deliberately do not filter by the `greenhouse` tag: per-tenant tag
+   * values are inconsistent (some tenants tag with `chamber`, some apply
+   * SensorConfig overrides that diverge from the raw Influx tag), so the
+   * filter would silently match zero rows for some tenants. Scoping by
+   * bucket is sufficient because each tenant has their own bucket.
    */
-  async getTodayParCumulativeDliKnaup(
-    bucketName: string,
-    options: { greenhouse: string },
-  ): Promise<ParDliPoint[]> {
+  async getTodayParDli(bucketName: string): Promise<ParDliResult> {
     if (!this.client || !this.queryApi) {
       this.logger.error('InfluxDB client is not initialized');
       throw new Error('InfluxDB client is not initialized');
     }
 
-    const devices = getKnaupLuxDevices(options.greenhouse);
-    if (!devices || devices.length === 0) {
-      this.logger.warn(
-        `getTodayParCumulativeDliKnaup: no lux-device mapping for greenhouse "${options.greenhouse}"`,
-      );
-      return [];
-    }
-
     const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    const deviceList = devices.map((d) => `"${escape(d)}"`).join(', ');
 
     const flux = `
 import "date"
 
 from(bucket: "${escape(bucketName)}")
   |> range(start: date.truncate(t: now(), unit: 1d))
-  |> filter(fn: (r) =>
-    r["_field"] == "${escape(KNAUP_DLI.luxFieldName)}" and
-    contains(value: r["device"], set: [${deviceList}])
-  )
-  |> aggregateWindow(every: ${KNAUP_DLI.intervalSeconds}s, fn: mean, createEmpty: false)
-  |> group(columns: ["_time"])
-  |> mean(column: "_value")
+  |> filter(fn: (r) => r["_field"] == "lux")
   |> group()
+  |> aggregateWindow(every: ${DLI_INTERVAL_SECONDS}s, fn: mean, createEmpty: false)
   |> sort(columns: ["_time"])
   |> map(fn: (r) => ({
       _time: r._time,
-      _value: float(v: r._value) / ${KNAUP_DLI.luxToPar}.0 * ${KNAUP_DLI.intervalSeconds}.0 / 1000000.0
+      ppfd: float(v: r._value) / ${LUX_TO_PAR}.0,
+      _value: float(v: r._value) / ${LUX_TO_PAR}.0 * ${DLI_INTERVAL_SECONDS}.0 / 1000000.0
     }))
   |> cumulativeSum(columns: ["_value"])
 `;
 
-    const rows: ParDliPoint[] = [];
+    const points: ParDliPoint[] = [];
+    let currentPPFD: number | undefined;
+    let currentDLI: number | undefined;
     const queryApi = this.queryApi;
 
     try {
@@ -661,15 +581,18 @@ from(bucket: "${escape(bucketName)}")
         queryApi.queryRows(flux, {
           next: (row, tableMeta) => {
             const o = tableMeta.toObject(row) as Record<string, unknown>;
-            const value = Number(o._value);
-            if (Number.isNaN(value)) return;
+            const dli = Number(o._value);
+            const ppfd = Number(o.ppfd);
+            if (Number.isNaN(dli) || Number.isNaN(ppfd)) return;
 
             const time =
               o._time instanceof Date
                 ? o._time
                 : new Date(String((o as { _time?: string })._time ?? ''));
 
-            rows.push({ time, dli: value });
+            points.push({ time, dli });
+            currentPPFD = ppfd;
+            currentDLI = dli;
           },
           error: reject,
           complete: resolve,
@@ -677,17 +600,21 @@ from(bucket: "${escape(bucketName)}")
       });
     } catch (error) {
       this.logger.warn(
-        `getTodayParCumulativeDliKnaup failed for bucket "${bucketName}" greenhouse "${options.greenhouse}": ${
+        `getTodayParDli failed for bucket "${bucketName}": ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
-      return [];
+      return { todaysGraphData: [] };
     }
 
     this.logger.debug(
-      `getTodayParCumulativeDliKnaup("${bucketName}", greenhouse="${options.greenhouse}") → ${rows.length} points (devices=${devices.join(',')})`,
+      `getTodayParDli("${bucketName}") → ${points.length} points`,
     );
-    return rows;
+    return {
+      currentPPFD,
+      currentDLI,
+      todaysGraphData: points,
+    };
   }
 
   /**

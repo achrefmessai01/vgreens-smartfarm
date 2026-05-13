@@ -33,7 +33,6 @@ export interface CombinedGreenhouseViewProps {
   greenhouses: CombinedGreenhouse[];
   parameters: ParameterOption[];
   noDataMessage: string;
-  parGraphGreenhouseId: string;
   parGraphLabel: string;
   /** Optional bucket override forwarded to the embedded PAR graph. Required
    *  when a vGreens admin views another tenant. */
@@ -100,7 +99,6 @@ export function CombinedGreenhouseView({
   greenhouses,
   parameters,
   noDataMessage,
-  parGraphGreenhouseId,
   parGraphLabel,
   parGraphBucketName,
   onParameterClick,
@@ -270,7 +268,6 @@ export function CombinedGreenhouseView({
 
       <ParGraphSection
         bay={null}
-        greenhouseId={parGraphGreenhouseId}
         greenhouseLabel={parGraphLabel}
         bucketName={parGraphBucketName}
         embedded

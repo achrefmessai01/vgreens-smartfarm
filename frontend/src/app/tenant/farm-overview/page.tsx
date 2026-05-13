@@ -85,7 +85,6 @@ export default function FarmOverviewPage() {
               greenhouses={state.combinedGreenhouses}
               parameters={state.parameterOptions}
               noDataMessage={state.labels.noData}
-              parGraphGreenhouseId={state.combinedParGraphGreenhouseId}
               parGraphLabel={state.labels.combined}
               parGraphBucketName={state.tenantBucketNameOverride}
               onParameterClick={(greenhouseIndex, parameterKey) => {
@@ -104,7 +103,6 @@ export default function FarmOverviewPage() {
               viewDiscreteLabel={state.labels.viewDiscrete}
               viewGraphLabel={state.labels.viewGraph}
               bays={state.bays}
-              greenhouseId={state.greenhouseId}
               greenhouseLabel={state.greenhouseLabel}
               parGraphBucketName={state.tenantBucketNameOverride}
               selectedSlotId={state.selectedSlotId}

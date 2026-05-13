@@ -8,10 +8,9 @@ import {
   FieldMeanMetric,
   GetFieldMeansInput,
   GetParDliTodayInput,
-  ParDliPoint,
+  ParDliResult,
 } from './dto';
 import { Resolver, Query, Args } from '@nestjs/graphql';
-import { isKnaupBucket } from './knaup-dli';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @Resolver()
@@ -83,19 +82,11 @@ export class InfluxDBResolver {
   }
 
   @Public()
-  @Query(() => [ParDliPoint], { name: 'getParDliToday' })
+  @Query(() => ParDliResult, { name: 'getParDliToday' })
   async getParDliToday(
     @Args('input') input: GetParDliTodayInput,
-  ): Promise<ParDliPoint[]> {
-    const { bucketName, greenhouse } = input;
-    if (isKnaupBucket(bucketName)) {
-      return this.influxDBService.getTodayParCumulativeDliKnaup(bucketName, {
-        greenhouse,
-      });
-    }
-    return this.influxDBService.getTodayParCumulativeDli(bucketName, {
-      greenhouse,
-    });
+  ): Promise<ParDliResult> {
+    return this.influxDBService.getTodayParDli(input.bucketName);
   }
 
   @Query(() => [String], { name: 'getBucketFields' })
