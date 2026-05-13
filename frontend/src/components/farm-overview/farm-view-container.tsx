@@ -13,7 +13,6 @@ interface FarmDataDisplayProps {
   bays: Bay[];
   viewMode: 'heatmap' | 'discrete' | 'graph';
   parameter: ParameterType;
-  greenhouseId: string;
   greenhouseLabel: string;
   /** Optional bucket override forwarded to the embedded PAR graph in `graph`
    *  view. Required for vGreens admins viewing another tenant. */
@@ -39,7 +38,6 @@ export function FarmDataDisplay({
   bays,
   viewMode,
   parameter,
-  greenhouseId,
   greenhouseLabel,
   parGraphBucketName,
   selectedSlotId,
@@ -74,7 +72,6 @@ export function FarmDataDisplay({
       {viewMode === 'graph' ? (
         <ParGraphSection
           bay={bays[0] ?? null}
-          greenhouseId={greenhouseId}
           greenhouseLabel={greenhouseLabel}
           bucketName={parGraphBucketName}
           embedded

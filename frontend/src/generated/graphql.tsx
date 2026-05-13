@@ -358,6 +358,7 @@ export type FieldMeanMetric = {
   chamber?: Maybe<Scalars['String']['output']>;
   field: Scalars['String']['output'];
   greenhouse?: Maybe<Scalars['String']['output']>;
+  rawValue?: Maybe<Scalars['Float']['output']>;
   time: Scalars['DateTime']['output'];
   value: Scalars['Float']['output'];
 };
@@ -384,7 +385,6 @@ export type GetFieldMeansInput = {
 
 export type GetParDliTodayInput = {
   bucketName: Scalars['String']['input'];
-  greenhouse: Scalars['String']['input'];
 };
 
 export type GetSignedImageUrlInput = {
@@ -766,6 +766,13 @@ export type ParDliPoint = {
   time: Scalars['DateTime']['output'];
 };
 
+export type ParDliResult = {
+  __typename?: 'ParDliResult';
+  currentDLI?: Maybe<Scalars['Float']['output']>;
+  currentPPFD?: Maybe<Scalars['Float']['output']>;
+  todaysGraphData: Array<ParDliPoint>;
+};
+
 export type Query = {
   __typename?: 'Query';
   alert?: Maybe<Alert>;
@@ -780,7 +787,7 @@ export type Query = {
   getBucketFieldMeansLastMinutes: Array<FieldMeanMetric>;
   getBucketFields: Array<Scalars['String']['output']>;
   getBuckets: Array<Scalars['String']['output']>;
-  getParDliToday: Array<ParDliPoint>;
+  getParDliToday: ParDliResult;
   getRecentSystemErrors: Array<SystemError>;
   getSystemErrorStats: Scalars['String']['output'];
   greenhouseOptions: Array<Scalars['String']['output']>;
@@ -1413,19 +1420,19 @@ export type DeleteUserMutationVariables = Exact<{
 
 export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean };
 
-export type SetMyFarmOverviewTimeRangeMutationVariables = Exact<{
-  value: Scalars['String']['input'];
-}>;
-
-
-export type SetMyFarmOverviewTimeRangeMutation = { __typename?: 'Mutation', setMyFarmOverviewTimeRange: { __typename?: 'User', id: string, farmOverviewTimeRange?: string | null } };
-
 export type SetMyLanguageMutationVariables = Exact<{
   language: Scalars['String']['input'];
 }>;
 
 
 export type SetMyLanguageMutation = { __typename?: 'Mutation', setMyLanguage: { __typename?: 'User', id: string, preferredLanguage?: string | null } };
+
+export type SetMyFarmOverviewTimeRangeMutationVariables = Exact<{
+  value: Scalars['String']['input'];
+}>;
+
+
+export type SetMyFarmOverviewTimeRangeMutation = { __typename?: 'Mutation', setMyFarmOverviewTimeRange: { __typename?: 'User', id: string, farmOverviewTimeRange?: string | null } };
 
 export type GetRecentSystemErrorsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Float']['input']>;
@@ -1650,11 +1657,11 @@ export type GetBucketFieldMeansLastMinutesQueryVariables = Exact<{
 export type GetBucketFieldMeansLastMinutesQuery = { __typename?: 'Query', getBucketFieldMeansLastMinutes: Array<{ __typename?: 'FieldMeanMetric', field: string, greenhouse?: string | null, chamber?: string | null, value: number }> };
 
 export type GetParDliTodayQueryVariables = Exact<{
-  input: GetParDliTodayInput;
+  bucketName: Scalars['String']['input'];
 }>;
 
 
-export type GetParDliTodayQuery = { __typename?: 'Query', getParDliToday: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }> };
+export type GetParDliTodayQuery = { __typename?: 'Query', getParDliToday: { __typename?: 'ParDliResult', currentPPFD?: number | null, currentDLI?: number | null, todaysGraphData: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }> } };
 
 export type SensorConfigsQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -4470,10 +4477,14 @@ export type GetBucketFieldMeansLastMinutesLazyQueryHookResult = ReturnType<typeo
 export type GetBucketFieldMeansLastMinutesSuspenseQueryHookResult = ReturnType<typeof useGetBucketFieldMeansLastMinutesSuspenseQuery>;
 export type GetBucketFieldMeansLastMinutesQueryResult = Apollo.QueryResult<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>;
 export const GetParDliTodayDocument = gql`
-    query GetParDliToday($input: GetParDliTodayInput!) {
-  getParDliToday(input: $input) {
-    time
-    dli
+    query GetParDliToday($bucketName: String!) {
+  getParDliToday(input: {bucketName: $bucketName}) {
+    currentPPFD
+    currentDLI
+    todaysGraphData {
+      time
+      dli
+    }
   }
 }
     `;
@@ -4490,7 +4501,7 @@ export const GetParDliTodayDocument = gql`
  * @example
  * const { data, loading, error } = useGetParDliTodayQuery({
  *   variables: {
- *      input: // value for 'input'
+ *      bucketName: // value for 'bucketName'
  *   },
  * });
  */

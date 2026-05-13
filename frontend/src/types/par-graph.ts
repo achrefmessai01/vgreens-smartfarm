@@ -2,7 +2,6 @@ import type { Bay } from '@/types/farm.types';
 
 export interface ParGraphSectionProps {
   bay: Bay | null;
-  greenhouseId: string;
   greenhouseLabel: string;
   /**
    * Optional InfluxDB bucket override. Required when the viewer is a vGreens
@@ -17,11 +16,7 @@ export interface ParGraphSectionProps {
 
 export interface ParCurvePoint {
   hour: number;
-  avg: number;
-  yesterday: number;
-  today: number | null;
-  lowerBand: number;
-  band: number;
+  today: number;
 }
 
 export interface ParGraphData {

@@ -26,10 +26,14 @@ export const GET_BUCKET_FIELD_MEANS_LAST_MINUTES_QUERY = gql`
 `;
 
 export const GET_PAR_DLI_TODAY_QUERY = gql`
-  query GetParDliToday($input: GetParDliTodayInput!) {
-    getParDliToday(input: $input) {
-      time
-      dli
+  query GetParDliToday($bucketName: String!) {
+    getParDliToday(input: { bucketName: $bucketName }) {
+      currentPPFD
+      currentDLI
+      todaysGraphData {
+        time
+        dli
+      }
     }
   }
 `;
