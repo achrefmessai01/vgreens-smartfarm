@@ -26,13 +26,15 @@ export function getDefaultDashboardContentProps(): Omit<
       },
     ],
     metricCards: [
-      {
-        icon: '💧',
-        title: 'Average Soil Moisture',
-        value: '42%',
-        subtitle: 'Last 24h average from sensors',
-        sparklineData: [35, 40, 45, 42, 38, 42],
-      },
+      // VSL-169: Soil moisture KPI card hidden from the default dashboard.
+      // Re-enable by uncommenting this block.
+      // {
+      //   icon: '💧',
+      //   title: 'Average Soil Moisture',
+      //   value: '42%',
+      //   subtitle: 'Last 24h average from sensors',
+      //   sparklineData: [35, 40, 45, 42, 38, 42],
+      // },
       {
         icon: '🌡️',
         title: 'Average Air Temperature',
@@ -91,7 +93,8 @@ export function getDefaultDashboardContentProps(): Omit<
       detail: '25°C · Winds 8 km/h',
     },
     trends: [
-      { label: 'Soil Moisture', data: [38, 40, 42, 41, 39, 42, 43] },
+      // VSL-169: Soil moisture trend hidden from the default dashboard.
+      // { label: 'Soil Moisture', data: [38, 40, 42, 41, 39, 42, 43] },
       { label: 'Air Temperature', data: [22, 21, 23, 24, 23, 22, 23] },
       {
         label: 'Water Usage',
