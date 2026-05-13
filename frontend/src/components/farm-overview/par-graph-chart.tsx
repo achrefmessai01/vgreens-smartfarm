@@ -49,44 +49,64 @@ export function ParGraphChart({
 
   /**
    * Merge today's 5-min cumulative DLI samples and the 24 hourly band
-   * points into one dataset, keyed by `hour`. Each Line/Area component
-   * draws only the rows where its `dataKey` is defined, so the today
-   * curve (fine-grained) and the band edges (24 sparse points) coexist
-   * on the same x-axis without forcing one to interpolate through the
-   * other's null cells.
+   * points into one dataset, keyed by `hour`.
    *
-   * `band` is a 2-tuple `[lower, upper]` for the recharts Area component
-   * — emitted only when both edges have a non-null DLI so gaps stay gaps.
+   * The band edges are only known at integer hours, but we **interpolate**
+   * them linearly at every today-curve hour too. Without this, recharts
+   * sees `band === undefined` at every 5-min row in between band hours
+   * (since today rows don't carry band values) and treats those as gaps
+   * — visually the Area only renders past the current hour where there
+   * are no today rows interrupting it. Cumulative DLI is roughly linear
+   * within an hour (constant PPFD assumption) so the interpolation is
+   * faithful.
+   *
+   * Legitimate gaps still surface as `undefined`: when an hour has no
+   * historical samples on any of the lookback days, both surrounding
+   * band points have null DLI and the interpolation propagates that.
    */
   const mergedData = React.useMemo(() => {
-    type Row = {
-      hour: number;
-      today?: number;
-      lowerEdge?: number | null;
-      upperEdge?: number | null;
-      band?: [number, number];
-    };
-    const byHour = new Map<number, Row>();
-    const ensure = (hour: number): Row => {
-      let row = byHour.get(hour);
-      if (!row) {
-        row = { hour };
-        byHour.set(hour, row);
-      }
-      return row;
-    };
-    for (const p of curveData) ensure(p.hour).today = p.today;
-    for (const p of lowerEdge) ensure(p.hour).lowerEdge = p.dli ?? null;
-    for (const p of upperEdge) ensure(p.hour).upperEdge = p.dli ?? null;
-    for (const row of byHour.values()) {
-      if (
-        typeof row.lowerEdge === 'number' &&
-        typeof row.upperEdge === 'number'
-      ) {
-        row.band = [row.lowerEdge, row.upperEdge];
-      }
+    const lowerByHour = new Map<number, number>();
+    const upperByHour = new Map<number, number>();
+    for (const p of lowerEdge) {
+      if (typeof p.dli === 'number') lowerByHour.set(p.hour, p.dli);
     }
-    return Array.from(byHour.values()).sort((a, b) => a.hour - b.hour);
+    for (const p of upperEdge) {
+      if (typeof p.dli === 'number') upperByHour.set(p.hour, p.dli);
+    }
+    const interp = (
+      hour: number,
+      byHour: Map<number, number>,
+    ): number | undefined => {
+      const lh = Math.floor(hour);
+      const uh = Math.ceil(hour);
+      const lv = byHour.get(lh);
+      const uv = byHour.get(uh);
+      if (lv == null || uv == null) return undefined;
+      if (lh === uh) return lv;
+      return lv + (uv - lv) * (hour - lh);
+    };
+
+    const todayByHour = new Map<number, number>();
+    for (const p of curveData) todayByHour.set(p.hour, p.today);
+
+    const allHours = new Set<number>(todayByHour.keys());
+    for (let h = 0; h < 24; h++) allHours.add(h);
+
+    return Array.from(allHours)
+      .sort((a, b) => a - b)
+      .map((hour) => {
+        const lower = interp(hour, lowerByHour);
+        const upper = interp(hour, upperByHour);
+        const band: [number, number] | undefined =
+          lower != null && upper != null ? [lower, upper] : undefined;
+        return {
+          hour,
+          today: todayByHour.get(hour),
+          lowerEdge: lower,
+          upperEdge: upper,
+          band,
+        };
+      });
   }, [curveData, lowerEdge, upperEdge]);
 
   return (
@@ -184,6 +204,7 @@ export function ParGraphChart({
               fillOpacity={0.15}
               activeDot={false}
               isAnimationActive={false}
+              tooltipType="none"
             />
             <Line
               dataKey="lowerEdge"
