@@ -422,8 +422,10 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         { label: t.temperature, value: 'temperature' },
         { label: t.humidity, value: 'humidity' },
         { label: t.co2, value: 'co2' },
-        { label: t.soilEC, value: 'soil_ec' },
-        { label: t.soilMoisture, value: 'soil_moisture' },
+        // VSL-169: Soil EC / Soil moisture hidden from the fallback option
+        // list (used when the bucket has no fields yet).
+        // { label: t.soilEC, value: 'soil_ec' },
+        // { label: t.soilMoisture, value: 'soil_moisture' },
         { label: t.vpd, value: 'vpd' },
         { label: t.par, value: 'par' },
       ];
@@ -460,7 +462,9 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     // tenant's bucket emits.
     const aliasGroups: string[][] = [
       ['par', 'par_estimated'],
-      ['soil_ec', 'soil_conductivity'],
+      // VSL-169: Soil EC aliases kept commented for re-enablement alongside
+      // the constants in farm-overview-constants.ts.
+      // ['soil_ec', 'soil_conductivity'],
     ];
     return allowed.filter((opt) => {
       const group = aliasGroups.find((g) => g.includes(opt.value));

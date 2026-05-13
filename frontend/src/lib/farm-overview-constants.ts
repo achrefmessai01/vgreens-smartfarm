@@ -17,8 +17,10 @@ export const VALID_PARAMETERS: ParameterType[] = [
   'temperature',
   'humidity',
   'co2',
-  'soil_ec',
-  'soil_moisture',
+  // VSL-169: Soil EC / Soil moisture hidden from UI for now. Stale URLs like
+  // ?parameter=soil_ec will fall back to temperature until re-enabled.
+  // 'soil_ec',
+  // 'soil_moisture',
   'vpd',
   'par',
   'par_estimated',
@@ -38,9 +40,12 @@ export const ALLOWED_SINGLE_GREENHOUSE_PARAMETERS: ParameterType[] = [
   'temperature',
   'humidity',
   'co2',
-  'soil_ec',
-  'soil_conductivity',
-  'soil_moisture',
+  // VSL-169: Soil EC / Soil moisture hidden from the parameter tabs. Keep
+  // these commented (rather than deleted) so we can re-enable without
+  // re-deriving the alias mapping.
+  // 'soil_ec',
+  // 'soil_conductivity',
+  // 'soil_moisture',
   'vpd',
   'par',
   'par_estimated',
@@ -59,8 +64,11 @@ export const SENSOR_TYPE_TOGGLES: ReadonlyArray<{
   { key: 'temperature', fields: ['temperature'] },
   { key: 'humidity', fields: ['humidity'] },
   { key: 'co2', fields: ['co2'] },
-  { key: 'soil_ec', fields: ['soil_ec', 'soil_conductivity'] },
-  { key: 'soil_moisture', fields: ['soil_moisture'] },
+  // VSL-169: Soil EC / Soil moisture toggles hidden so users can't enable
+  // them from the "Enable Sensors" dropdown. Field-name groupings preserved
+  // here for easy re-enablement.
+  // { key: 'soil_ec', fields: ['soil_ec', 'soil_conductivity'] },
+  // { key: 'soil_moisture', fields: ['soil_moisture'] },
   { key: 'vpd', fields: ['vpd'] },
   { key: 'par', fields: ['par', 'par_estimated'] },
 ];
