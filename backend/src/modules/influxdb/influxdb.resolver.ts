@@ -11,6 +11,7 @@ import {
   ParDliPoint,
 } from './dto';
 import { Resolver, Query, Args } from '@nestjs/graphql';
+import { isKnaupBucket } from './knaup-dli';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @Resolver()
@@ -87,6 +88,11 @@ export class InfluxDBResolver {
     @Args('input') input: GetParDliTodayInput,
   ): Promise<ParDliPoint[]> {
     const { bucketName, greenhouse } = input;
+    if (isKnaupBucket(bucketName)) {
+      return this.influxDBService.getTodayParCumulativeDliKnaup(bucketName, {
+        greenhouse,
+      });
+    }
     return this.influxDBService.getTodayParCumulativeDli(bucketName, {
       greenhouse,
     });
