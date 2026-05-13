@@ -65,11 +65,9 @@ export function AlertTable({
     [alerts],
   );
 
-  // Local search state buffers keystrokes. The parent filter (which triggers
-  // a network refetch) only updates after a short debounce of inactivity OR
-  // when the user explicitly commits via Enter / blur. This gives the
-  // "search-as-you-type" feel without firing one query per keystroke.
-  const SEARCH_DEBOUNCE_MS = 350;
+  // Local search state buffers keystrokes for instant input feedback. The
+  // parent filter (which triggers a network refetch) only updates when the
+  // user explicitly commits via Enter or blur.
   const [searchDraft, setSearchDraft] = React.useState(filter.search ?? '');
 
   // Re-sync the input when the parent filter changes from elsewhere (e.g.
@@ -92,14 +90,6 @@ export function AlertTable({
     },
     [filter.search, onFilterChange],
   );
-
-  // Debounced commit: schedule a commit after the user stops typing.
-  React.useEffect(() => {
-    const handle = window.setTimeout(() => {
-      commitSearch(searchDraft);
-    }, SEARCH_DEBOUNCE_MS);
-    return () => window.clearTimeout(handle);
-  }, [searchDraft, commitSearch]);
 
   const alertsT = t.pages.alerts as typeof t.pages.alerts & {
     searchPlaceholder?: string;
