@@ -56,6 +56,13 @@ export class FieldMeanMetric {
 
   @Field()
   value: number;
+
+  /**
+   * Pre-correction reading. Set only when a tenant-specific correction was
+   * applied to `value` (see `air-temperature-correction.ts`).
+   */
+  @Field({ nullable: true })
+  rawValue?: number;
 }
 
 @InputType()

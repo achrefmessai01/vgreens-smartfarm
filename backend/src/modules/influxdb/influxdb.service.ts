@@ -8,6 +8,12 @@ import { FieldMeanMetric, ParDliPoint } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { BucketsAPI, OrgsAPI } from '@influxdata/influxdb-client-apis';
 import { InfluxDB, QueryApi, WriteApi } from '@influxdata/influxdb-client';
+import {
+  AIR_TEMP_CORRECTION,
+  correctFieldMeans,
+  correctRawRows,
+  isTargetBucket,
+} from './air-temperature-correction';
 
 @Injectable()
 export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
@@ -289,6 +295,11 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
       });
     });
 
+    await this.applyAirTemperatureCorrection(bucketName, rows, {
+      start,
+      stop,
+    });
+
     this.logger.debug(
       `getBucketData("${bucketName}"): returned ${rows.length} rows`,
     );
@@ -374,6 +385,11 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
           resolve();
         },
       });
+    });
+
+    await this.applyAirTemperatureCorrection(bucketName, rows, {
+      start,
+      stop,
     });
 
     this.logger.debug(
@@ -484,6 +500,16 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
       });
     });
 
+    if (isTargetBucket(bucketName)) {
+      const luxMeans = await this.fetchLuxMeansForCorrection(bucketName, {
+        greenhouse: options.greenhouse,
+        windowMinutes,
+        start: useAbsolute ? options.start : undefined,
+        stop: useAbsolute ? options.stop : undefined,
+      });
+      correctFieldMeans(rows, luxMeans);
+    }
+
     this.logger.debug(
       `getBucketFieldMeansLastMinutes("${bucketName}", greenhouse="${options.greenhouse ?? ''}", ${useAbsolute ? `start=${options.start}, stop=${options.stop}` : `windowMinutes=${windowMinutes}`}): returned ${rows.length} rows`,
     );
@@ -575,6 +601,172 @@ from(bucket: "${escape(bucketName)}")
       `getTodayParCumulativeDli("${bucketName}", greenhouse="${options.greenhouse}") → ${rows.length} points (lux/55)`,
     );
     return rows;
+  }
+
+  /**
+   * Applies the per-tenant air-temperature correction to raw row results.
+   * No-op for non-target buckets and for result sets without any air_*
+   * temperature rows. Fetches lux_03 / lux_08 over the same time range only
+   * when the existing result set doesn't already contain them (e.g. the
+   * caller filtered to a single air device).
+   */
+  private async applyAirTemperatureCorrection(
+    bucketName: string,
+    rows: Record<string, unknown>[],
+    range: { start: string; stop?: string },
+  ): Promise<void> {
+    if (!isTargetBucket(bucketName)) return;
+
+    const hasAirRow = rows.some((r) => {
+      const device = typeof r.device === 'string' ? r.device.toLowerCase() : '';
+      const field = typeof r._field === 'string' ? r._field.toLowerCase() : '';
+      return (
+        device.startsWith(AIR_TEMP_CORRECTION.airDevicePrefix) &&
+        field === AIR_TEMP_CORRECTION.airFieldName
+      );
+    });
+    if (!hasAirRow) return;
+
+    const hasAllLuxRows = AIR_TEMP_CORRECTION.luxDevices.every((id) =>
+      rows.some((r) => {
+        const device =
+          typeof r.device === 'string' ? r.device.toLowerCase() : '';
+        const field =
+          typeof r._field === 'string' ? r._field.toLowerCase() : '';
+        return field === AIR_TEMP_CORRECTION.luxFieldName && device === id;
+      }),
+    );
+
+    const extraLuxRows = hasAllLuxRows
+      ? undefined
+      : await this.fetchLuxRowsForCorrection(bucketName, range);
+    correctRawRows(rows, { extraLuxRows });
+  }
+
+  /**
+   * Fetches lux_03 and lux_08 rows over the given time range. Used only by
+   * `applyAirTemperatureCorrection` when the main query's filters excluded
+   * lux from the result. Returns [] on error (correction degrades gracefully).
+   */
+  private async fetchLuxRowsForCorrection(
+    bucketName: string,
+    range: { start: string; stop?: string },
+  ): Promise<Record<string, unknown>[]> {
+    if (!this.client || !this.queryApi) return [];
+
+    const escape = (v: string) =>
+      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const isIso = (s: string) =>
+      s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s);
+    const rangeStart = isIso(range.start)
+      ? `time(v: "${escape(range.start)}")`
+      : range.start;
+    const rangeStop =
+      range.stop && isIso(range.stop)
+        ? `, stop: time(v: "${escape(range.stop)}")`
+        : '';
+    const luxDeviceFilter = AIR_TEMP_CORRECTION.luxDevices
+      .map((d) => `r["device"] == "${escape(d)}"`)
+      .join(' or ');
+
+    const flux = `from(bucket: "${escape(bucketName)}")
+  |> range(start: ${rangeStart}${rangeStop})
+  |> filter(fn: (r) => r["_field"] == "${escape(AIR_TEMP_CORRECTION.luxFieldName)}" and (${luxDeviceFilter}))`;
+
+    const rows: Record<string, unknown>[] = [];
+    const queryApi = this.queryApi;
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        queryApi.queryRows(flux, {
+          next: (row, tableMeta) => {
+            rows.push(tableMeta.toObject(row) as Record<string, unknown>);
+          },
+          error: reject,
+          complete: resolve,
+        });
+      });
+    } catch (error) {
+      this.logger.warn(
+        `fetchLuxRowsForCorrection failed for bucket "${bucketName}": ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return [];
+    }
+    return rows;
+  }
+
+  /**
+   * Fetches the mean lux_03 / lux_08 over the same window/scope as the main
+   * means query. Returns nullable per-device means (undefined when a device
+   * has no rows in the window). On error returns {}.
+   */
+  private async fetchLuxMeansForCorrection(
+    bucketName: string,
+    options: {
+      greenhouse?: string;
+      windowMinutes: number;
+      start?: string;
+      stop?: string;
+    },
+  ): Promise<{ lux03?: number; lux08?: number }> {
+    if (!this.client || !this.queryApi) return {};
+
+    const escape = (v: string) =>
+      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const useAbsolute =
+      typeof options.start === 'string' &&
+      typeof options.stop === 'string' &&
+      !Number.isNaN(new Date(options.start).getTime()) &&
+      !Number.isNaN(new Date(options.stop).getTime());
+    const rangeClause = useAbsolute
+      ? `|> range(start: time(v: "${escape(options.start!)}"), stop: time(v: "${escape(options.stop!)}"))`
+      : `|> range(start: -${options.windowMinutes}m)`;
+
+    const greenhouseClause =
+      options.greenhouse && options.greenhouse !== ''
+        ? `and r["greenhouse"] == "${escape(options.greenhouse)}"`
+        : '';
+    const luxDeviceFilter = AIR_TEMP_CORRECTION.luxDevices
+      .map((d) => `r["device"] == "${escape(d)}"`)
+      .join(' or ');
+
+    const flux = `from(bucket: "${escape(bucketName)}")
+  ${rangeClause}
+  |> filter(fn: (r) => r["_field"] == "${escape(AIR_TEMP_CORRECTION.luxFieldName)}" and (${luxDeviceFilter}) ${greenhouseClause})
+  |> group(columns: ["device"])
+  |> mean()
+  |> keep(columns: ["device", "_value"])`;
+
+    const result: { lux03?: number; lux08?: number } = {};
+    const queryApi = this.queryApi;
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        queryApi.queryRows(flux, {
+          next: (row, tableMeta) => {
+            const o = tableMeta.toObject(row) as Record<string, unknown>;
+            const device =
+              typeof o.device === 'string' ? o.device.toLowerCase() : '';
+            const value = Number(o._value);
+            if (!Number.isFinite(value)) return;
+            if (device === 'lux_03') result.lux03 = value;
+            else if (device === 'lux_08') result.lux08 = value;
+          },
+          error: reject,
+          complete: resolve,
+        });
+      });
+    } catch (error) {
+      this.logger.warn(
+        `fetchLuxMeansForCorrection failed for bucket "${bucketName}": ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return {};
+    }
+    return result;
   }
 
   /**
