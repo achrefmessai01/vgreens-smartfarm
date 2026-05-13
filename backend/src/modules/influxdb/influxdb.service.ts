@@ -14,6 +14,7 @@ import {
   correctRawRows,
   isTargetBucket,
 } from './air-temperature-correction';
+import { KNAUP_DLI, getKnaupLuxDevices } from './knaup-dli';
 
 @Injectable()
 export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
@@ -599,6 +600,92 @@ from(bucket: "${escape(bucketName)}")
 
     this.logger.debug(
       `getTodayParCumulativeDli("${bucketName}", greenhouse="${options.greenhouse}") → ${rows.length} points (lux/55)`,
+    );
+    return rows;
+  }
+
+  /**
+   * Knaup-specific DLI. Averages a fixed group of lux sensors per greenhouse
+   * (see `knaup-dli.ts`) at 5-minute resolution, converts to PAR, integrates
+   * via Riemann sum (Σ PAR × 300 s) and converts µmol → mol.
+   *
+   * Returns the same `ParDliPoint[]` shape as `getTodayParCumulativeDli` so
+   * callers and the frontend hook are interchangeable.
+   */
+  async getTodayParCumulativeDliKnaup(
+    bucketName: string,
+    options: { greenhouse: string },
+  ): Promise<ParDliPoint[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.error('InfluxDB client is not initialized');
+      throw new Error('InfluxDB client is not initialized');
+    }
+
+    const devices = getKnaupLuxDevices(options.greenhouse);
+    if (!devices || devices.length === 0) {
+      this.logger.warn(
+        `getTodayParCumulativeDliKnaup: no lux-device mapping for greenhouse "${options.greenhouse}"`,
+      );
+      return [];
+    }
+
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const deviceList = devices.map((d) => `"${escape(d)}"`).join(', ');
+
+    const flux = `
+import "date"
+
+from(bucket: "${escape(bucketName)}")
+  |> range(start: date.truncate(t: now(), unit: 1d))
+  |> filter(fn: (r) =>
+    r["_field"] == "${escape(KNAUP_DLI.luxFieldName)}" and
+    contains(value: r["device"], set: [${deviceList}])
+  )
+  |> aggregateWindow(every: ${KNAUP_DLI.intervalSeconds}s, fn: mean, createEmpty: false)
+  |> group(columns: ["_time"])
+  |> mean(column: "_value")
+  |> group()
+  |> sort(columns: ["_time"])
+  |> map(fn: (r) => ({
+      _time: r._time,
+      _value: float(v: r._value) / ${KNAUP_DLI.luxToPar}.0 * ${KNAUP_DLI.intervalSeconds}.0 / 1000000.0
+    }))
+  |> cumulativeSum(columns: ["_value"])
+`;
+
+    const rows: ParDliPoint[] = [];
+    const queryApi = this.queryApi;
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        queryApi.queryRows(flux, {
+          next: (row, tableMeta) => {
+            const o = tableMeta.toObject(row) as Record<string, unknown>;
+            const value = Number(o._value);
+            if (Number.isNaN(value)) return;
+
+            const time =
+              o._time instanceof Date
+                ? o._time
+                : new Date(String((o as { _time?: string })._time ?? ''));
+
+            rows.push({ time, dli: value });
+          },
+          error: reject,
+          complete: resolve,
+        });
+      });
+    } catch (error) {
+      this.logger.warn(
+        `getTodayParCumulativeDliKnaup failed for bucket "${bucketName}" greenhouse "${options.greenhouse}": ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return [];
+    }
+
+    this.logger.debug(
+      `getTodayParCumulativeDliKnaup("${bucketName}", greenhouse="${options.greenhouse}") → ${rows.length} points (devices=${devices.join(',')})`,
     );
     return rows;
   }
