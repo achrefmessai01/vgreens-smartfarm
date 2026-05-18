@@ -23,6 +23,8 @@ export function buildCreateEntryInput(
     rowLength: d.rowLength,
     plantsPerMeter: d.plantsPerMeter,
     rowSpacing: d.rowSpacing,
+    totalPlants: d.totalPlants,
+    lostPlants: d.lostPlants,
     classA: d.todaysHarvest.marketable,
     waste: d.todaysHarvest.waste,
     avgBrix: computeAvgBrix(brix),

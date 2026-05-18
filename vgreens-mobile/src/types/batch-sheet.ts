@@ -29,6 +29,8 @@ export interface BatchDetailsData {
   rowLength: number;
   plantsPerMeter: number;
   rowSpacing: number;
+  totalPlants: number;
+  lostPlants: number;
   plantingDate: string;
   todaysHarvest: {
     marketable: number;
