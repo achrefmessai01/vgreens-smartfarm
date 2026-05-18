@@ -17,10 +17,6 @@ const parseF = (s: string) => {
   const v = parseFloat(s.replace(',', '.'));
   return Number.isFinite(v) && v > 0 ? v : 0;
 };
-const parseI = (s: string) => {
-  const v = parseInt(s, 10);
-  return Number.isFinite(v) && v > 0 ? v : 0;
-};
 
 export function HarvestBatchForm({
   formData,
@@ -40,7 +36,7 @@ export function HarvestBatchForm({
       variety: text('variety'),
       plantingDate: text('plantingDate'),
       cultivationArea: numSet('cultivationArea', parseF),
-      numberOfRows: numSet('numberOfRows', parseI),
+      numberOfRows: numSet('numberOfRows', parseF),
       rowLength: numSet('rowLength', parseF),
       plantsPerMeter: numSet('plantsPerMeter', parseF),
     };
@@ -89,7 +85,7 @@ export function HarvestBatchForm({
         />
         <HarvestBatchField
           label="Number of rows" required readOnly={readOnly}
-          autoCapitalize="none" keyboardType="number-pad" suffix="rows"
+          autoCapitalize="none" keyboardType="decimal-pad" suffix="rows"
           value={num(formData.numberOfRows)} onChangeText={s.numberOfRows}
           placeholder="0" error={errors.numberOfRows}
         />

@@ -56,9 +56,9 @@ export class CreateHarvestInput {
   @Min(0)
   cultivationArea: number;
 
-  @Field(() => Int)
-  @IsInt()
-  @Min(1)
+  @Field(() => Float)
+  @IsNumber()
+  @Min(0.01)
   numberOfRows: number;
 
   @Field(() => Float)

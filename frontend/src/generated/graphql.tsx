@@ -151,7 +151,7 @@ export type CreateHarvestInput = {
   /** Harvest date (ISO date string) */
   date: Scalars['String']['input'];
   greenhouse?: InputMaybe<Scalars['String']['input']>;
-  numberOfRows: Scalars['Int']['input'];
+  numberOfRows: Scalars['Float']['input'];
   parentBatchId?: InputMaybe<Scalars['ID']['input']>;
   photoUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   photos?: Scalars['Int']['input'];
@@ -416,7 +416,7 @@ export type Harvest = {
   date: Scalars['DateTime']['output'];
   greenhouse?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  numberOfRows: Scalars['Int']['output'];
+  numberOfRows: Scalars['Float']['output'];
   /** @deprecated Use rowX and rowY instead. */
   numberOfRowsHarvested: Scalars['Int']['output'];
   parentBatch?: Maybe<Harvest>;
@@ -1114,7 +1114,7 @@ export type UpdateHarvestInput = {
   cultivationArea?: InputMaybe<Scalars['Float']['input']>;
   date?: InputMaybe<Scalars['String']['input']>;
   greenhouse?: InputMaybe<Scalars['String']['input']>;
-  numberOfRows?: InputMaybe<Scalars['Int']['input']>;
+  numberOfRows?: InputMaybe<Scalars['Float']['input']>;
   parentBatchId?: InputMaybe<Scalars['String']['input']>;
   photoUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   photos?: InputMaybe<Scalars['Int']['input']>;

@@ -80,8 +80,8 @@ export class Harvest {
   @Column({ type: 'float', default: 0 })
   cultivationArea: number;
 
-  @Field(() => Int)
-  @Column({ type: 'int', default: 0 })
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   numberOfRows: number;
 
   @Field(() => Float)

@@ -52,10 +52,10 @@ export class UpdateHarvestInput {
   @Min(0)
   cultivationArea?: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Float, { nullable: true })
   @IsOptional()
-  @IsInt()
-  @Min(1)
+  @IsNumber()
+  @Min(0.01)
   numberOfRows?: number;
 
   @Field(() => Float, { nullable: true })
