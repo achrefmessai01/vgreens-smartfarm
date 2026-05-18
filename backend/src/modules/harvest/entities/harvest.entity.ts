@@ -126,15 +126,15 @@ export class Harvest {
   @Column({ type: 'float', default: 0 })
   avgBrix: number;
 
-  @Field(() => Int)
-  @Column({ type: 'int', default: 0 })
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   rowX: number;
 
-  @Field(() => Int)
-  @Column({ type: 'int', default: 0 })
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   rowY: number;
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     deprecationReason: 'Use rowX and rowY instead.',
   })
   get numberOfRowsHarvested(): number {

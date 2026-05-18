@@ -160,8 +160,8 @@ export type CreateHarvestInput = {
   plantsPerMeter: Scalars['Float']['input'];
   rowLength: Scalars['Float']['input'];
   rowSpacing?: InputMaybe<Scalars['Float']['input']>;
-  rowX?: Scalars['Int']['input'];
-  rowY?: Scalars['Int']['input'];
+  rowX?: Scalars['Float']['input'];
+  rowY?: Scalars['Float']['input'];
   species: Scalars['String']['input'];
   status?: InputMaybe<HarvestStatus>;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -418,7 +418,7 @@ export type Harvest = {
   id: Scalars['ID']['output'];
   numberOfRows: Scalars['Float']['output'];
   /** @deprecated Use rowX and rowY instead. */
-  numberOfRowsHarvested: Scalars['Int']['output'];
+  numberOfRowsHarvested: Scalars['Float']['output'];
   parentBatch?: Maybe<Harvest>;
   parentBatchId?: Maybe<Scalars['ID']['output']>;
   photoUrls?: Maybe<Array<Scalars['String']['output']>>;
@@ -427,8 +427,8 @@ export type Harvest = {
   plantsPerMeter: Scalars['Float']['output'];
   rowLength: Scalars['Float']['output'];
   rowSpacing: Scalars['Float']['output'];
-  rowX: Scalars['Int']['output'];
-  rowY: Scalars['Int']['output'];
+  rowX: Scalars['Float']['output'];
+  rowY: Scalars['Float']['output'];
   species: Scalars['String']['output'];
   status: HarvestStatus;
   tenant?: Maybe<Tenant>;
@@ -1122,8 +1122,8 @@ export type UpdateHarvestInput = {
   plantsPerMeter?: InputMaybe<Scalars['Float']['input']>;
   rowLength?: InputMaybe<Scalars['Float']['input']>;
   rowSpacing?: InputMaybe<Scalars['Float']['input']>;
-  rowX?: InputMaybe<Scalars['Int']['input']>;
-  rowY?: InputMaybe<Scalars['Int']['input']>;
+  rowX?: InputMaybe<Scalars['Float']['input']>;
+  rowY?: InputMaybe<Scalars['Float']['input']>;
   species?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<HarvestStatus>;
   variety?: InputMaybe<Scalars['String']['input']>;

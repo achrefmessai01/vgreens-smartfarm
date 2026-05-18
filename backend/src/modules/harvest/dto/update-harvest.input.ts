@@ -112,24 +112,24 @@ export class UpdateHarvestInput {
   @Min(0)
   avgBrix?: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Float, { nullable: true })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   rowX?: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Float, { nullable: true })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   rowY?: number;
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     nullable: true,
     deprecationReason: 'Use rowX and rowY instead.',
   })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   numberOfRowsHarvested?: number;
 

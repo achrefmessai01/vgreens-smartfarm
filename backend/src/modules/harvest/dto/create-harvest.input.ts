@@ -115,24 +115,24 @@ export class CreateHarvestInput {
   @Min(0)
   avgBrix?: number;
 
-  @Field(() => Int, { defaultValue: 0 })
+  @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   rowX?: number;
 
-  @Field(() => Int, { defaultValue: 0 })
+  @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   rowY?: number;
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     defaultValue: 0,
     deprecationReason: 'Use rowX and rowY instead.',
   })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   numberOfRowsHarvested?: number;
 
