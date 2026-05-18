@@ -138,13 +138,13 @@ export function NumberOfRowsField({
       <Input
         id="numberOfRows"
         type="number"
-        min="1"
-        step="1"
+        min="0"
+        step="0.1"
         value={formData.numberOfRows || ''}
         onChange={(e) =>
           setFormData((prev) => ({
             ...prev,
-            numberOfRows: Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+            numberOfRows: parsePositiveNumber(e.target.value),
           }))
         }
         disabled={disabled}

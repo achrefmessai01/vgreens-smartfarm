@@ -151,12 +151,12 @@ export function YieldDataField({
                   <Input
                     type="number"
                     min="0"
-                    step="1"
+                    step="0.1"
                     value={rowX === 0 ? '' : rowX.toString()}
                     onChange={(e) =>
                       onYieldChange?.(
                         'rowX',
-                        Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+                        Math.max(0, Number.parseFloat(e.target.value) || 0),
                       )
                     }
                     className="h-10 pr-12 text-left text-base"
@@ -175,12 +175,12 @@ export function YieldDataField({
                   <Input
                     type="number"
                     min="0"
-                    step="1"
+                    step="0.1"
                     value={rowY === 0 ? '' : rowY.toString()}
                     onChange={(e) =>
                       onYieldChange?.(
                         'rowY',
-                        Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+                        Math.max(0, Number.parseFloat(e.target.value) || 0),
                       )
                     }
                     className="h-10 pr-12 text-left text-base"

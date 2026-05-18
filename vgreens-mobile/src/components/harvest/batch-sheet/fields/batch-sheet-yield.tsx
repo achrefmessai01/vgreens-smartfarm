@@ -119,7 +119,7 @@ export function BatchSheetYield({
             style={styles.inputSmall}
             value={rowX === 0 ? '' : String(rowX)}
             onChangeText={(t) => onYieldChange('rowX', parseValue(t))}
-            keyboardType="number-pad"
+            keyboardType="decimal-pad"
             placeholder="0"
             placeholderTextColor={colors.mutedForeground}
             editable={!disabled}
@@ -131,7 +131,7 @@ export function BatchSheetYield({
             style={styles.inputSmall}
             value={rowY === 0 ? '' : String(rowY)}
             onChangeText={(t) => onYieldChange('rowY', parseValue(t))}
-            keyboardType="number-pad"
+            keyboardType="decimal-pad"
             placeholder="0"
             placeholderTextColor={colors.mutedForeground}
             editable={!disabled}
