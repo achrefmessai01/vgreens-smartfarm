@@ -649,17 +649,20 @@ from(bucket: "${escape(bucketName)}")
   }
 
   /**
-   * Builds the historical PAR/DLI envelope for the in-app chart. For each of
-   * the last `DLI_BAND_LOOKBACK_DAYS` whole days (ending at today's *local*
-   * midnight in `tz`) Flux gives us the hourly minimum and maximum lux. We
-   * then:
+   * Builds the historical PAR/DLI envelope for the in-app chart.
    *
-   *   - Group those per-hour mins/maxes across days.
-   *   - Take the mean per `hourOfDay` to smooth out a single freak day.
-   *   - Divide by 55 to convert lux → PPFD (µmol m⁻² s⁻¹).
-   *   - Integrate the per-hour PPFD into a cumulative mol m⁻² curve so the
-   *     edges live in the same units as `todaysGraphData` and can be plotted
-   *     on the same y-axis.
+   * Statistic used: **per-day, per-hour mean lux**, then per hour-of-day
+   * the min and max across the last `DLI_BAND_LOOKBACK_DAYS` whole days.
+   * The lower/upper edges therefore represent "cumulative DLI on the
+   * dimmest day in the last 14 days" and "…on the brightest day".
+   *
+   * Why mean (not min/max of raw samples)? Today's curve aggregates lux
+   * across all sensors with `mean`. If the band used min/max of any raw
+   * reading, it would track the dimmest and brightest *sensors* in the
+   * greenhouse — a much wider, fundamentally different statistic from
+   * the curve plotted on top, making the band useless for "is today
+   * inside the typical range?" comparisons. Matching aggregations lets
+   * the chart answer that question directly.
    *
    * Flux's `option location` aligns `aggregateWindow` to local hour
    * boundaries and lets `date.hour` return the local hour 0–23. This is
@@ -668,9 +671,9 @@ from(bucket: "${escape(bucketName)}")
    * the chart (e.g. Germany's UTC+2 manifested as a "wall" at hour 0).
    *
    * Hours with no samples on any of the lookback days emit a point with a
-   * null `dli`, which the chart renders as a gap (the user explicitly
-   * asked for a gap rather than zero so it's visually obvious that the
-   * envelope is missing rather than implying "no light expected").
+   * null `dli`, which the chart renders as a gap rather than zero so it's
+   * visually obvious that the envelope is missing rather than implying
+   * "no light expected".
    *
    * Returns empty arrays on Flux error so the caller can still serve
    * today's curve.
@@ -688,10 +691,9 @@ from(bucket: "${escape(bucketName)}")
 
     const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
-    // Two `aggregateWindow` pipelines (min and max) over the same source,
-    // tagged with a `kind` column, then unioned. `option location` makes
-    // window boundaries and `date.hour` honour the viewer's timezone, so
-    // the emitted `hour` column is already 0–23 in local time.
+    // One hourly mean per (day, hour) — the cross-sensor average lux for
+    // that hour. The JS side then takes min/max across days per hour to
+    // produce the envelope edges.
     const flux = `
 import "date"
 import "timezone"
@@ -700,26 +702,15 @@ option location = timezone.location(name: "${escape(tz)}")
 
 todayStart = date.truncate(t: now(), unit: 1d)
 
-base = from(bucket: "${escape(bucketName)}")
+from(bucket: "${escape(bucketName)}")
   |> range(start: date.sub(d: ${DLI_BAND_LOOKBACK_DAYS}d, from: todayStart), stop: todayStart)
   |> filter(fn: (r) => r["_field"] == "lux")
   |> group()
-
-mins = base
-  |> aggregateWindow(every: 1h, fn: min, createEmpty: false, timeSrc: "_start")
+  |> aggregateWindow(every: 1h, fn: mean, createEmpty: false, timeSrc: "_start")
   |> map(fn: (r) => ({ _time: r._time, _value: r._value, hour: date.hour(t: r._time) }))
-  |> set(key: "kind", value: "min")
-
-maxs = base
-  |> aggregateWindow(every: 1h, fn: max, createEmpty: false, timeSrc: "_start")
-  |> map(fn: (r) => ({ _time: r._time, _value: r._value, hour: date.hour(t: r._time) }))
-  |> set(key: "kind", value: "max")
-
-union(tables: [mins, maxs])
 `;
 
-    const minByHour = new Map<number, number[]>();
-    const maxByHour = new Map<number, number[]>();
+    const hourlyMeansByHour = new Map<number, number[]>();
     const queryApi = this.queryApi;
 
     try {
@@ -732,10 +723,9 @@ union(tables: [mins, maxs])
             if (!Number.isFinite(value) || !Number.isFinite(hour)) return;
             if (hour < 0 || hour > 23) return;
 
-            const target = o.kind === 'min' ? minByHour : maxByHour;
-            const list = target.get(hour);
+            const list = hourlyMeansByHour.get(hour);
             if (list) list.push(value);
-            else target.set(hour, [value]);
+            else hourlyMeansByHour.set(hour, [value]);
           },
           error: reject,
           complete: resolve,
@@ -750,9 +740,6 @@ union(tables: [mins, maxs])
       return { lowerEdge: [], upperEdge: [] };
     }
 
-    const mean = (xs: number[]): number =>
-      xs.reduce((a, b) => a + b, 0) / xs.length;
-
     const hourToDli = SECONDS_PER_HOUR / 1_000_000;
 
     const lowerEdge: ParDliBandPoint[] = [];
@@ -761,25 +748,22 @@ union(tables: [mins, maxs])
     let cumulUpper = 0;
 
     for (let h = 0; h < 24; h++) {
-      const minSamples = minByHour.get(h);
-      if (minSamples && minSamples.length > 0) {
-        cumulLower += (mean(minSamples) / LUX_TO_PAR) * hourToDli;
+      const dailyMeans = hourlyMeansByHour.get(h);
+      if (dailyMeans && dailyMeans.length > 0) {
+        const minLux = Math.min(...dailyMeans);
+        const maxLux = Math.max(...dailyMeans);
+        cumulLower += (minLux / LUX_TO_PAR) * hourToDli;
+        cumulUpper += (maxLux / LUX_TO_PAR) * hourToDli;
         lowerEdge.push({ hour: h, dli: cumulLower });
-      } else {
-        lowerEdge.push({ hour: h });
-      }
-
-      const maxSamples = maxByHour.get(h);
-      if (maxSamples && maxSamples.length > 0) {
-        cumulUpper += (mean(maxSamples) / LUX_TO_PAR) * hourToDli;
         upperEdge.push({ hour: h, dli: cumulUpper });
       } else {
+        lowerEdge.push({ hour: h });
         upperEdge.push({ hour: h });
       }
     }
 
     this.logger.debug(
-      `fetchDliBand("${bucketName}", tz="${tz}") → ${minByHour.size} hourly mins, ${maxByHour.size} hourly maxes`,
+      `fetchDliBand("${bucketName}", tz="${tz}") → ${hourlyMeansByHour.size} hours populated`,
     );
 
     return { lowerEdge, upperEdge };
