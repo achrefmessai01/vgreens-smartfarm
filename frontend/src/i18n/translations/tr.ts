@@ -403,6 +403,8 @@ export const tr = {
       rowLength: 'Sıra uzunluğu (m)',
       plantsPerMeter: 'Metre başına bitki',
       rowSpacing: 'Sıra aralığı (otomatik hesaplanır)',
+      totalPlants: 'Toplam Bitki',
+      lostPlants: 'Kaybedilen Bitki',
       rowX: 'X sırası',
       rowY: 'Y sırası',
       enterRowX: 'Başlangıç sırası',

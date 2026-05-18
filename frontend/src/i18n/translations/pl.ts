@@ -406,6 +406,8 @@ export const pl = {
       rowLength: 'Długość rzędu (m)',
       plantsPerMeter: 'Roślin na metr',
       rowSpacing: 'Odstęp między rzędami (obliczane automatycznie)',
+      totalPlants: 'Całkowita liczba roślin',
+      lostPlants: 'Utracone rośliny',
       rowX: 'Rząd X',
       rowY: 'Rząd Y',
       enterRowX: 'Rząd początkowy',

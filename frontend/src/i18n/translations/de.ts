@@ -404,6 +404,8 @@ export const de = {
       rowLength: 'Reihenlänge (m)',
       plantsPerMeter: 'Pflanzen pro Meter',
       rowSpacing: 'Reihenabstand (automatisch berechnet)',
+      totalPlants: 'Gesamtpflanzen',
+      lostPlants: 'Verlorene Pflanzen',
       rowX: 'Reihe X',
       rowY: 'Reihe Y',
       enterRowX: 'Startreihe',

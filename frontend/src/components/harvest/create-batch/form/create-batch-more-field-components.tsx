@@ -231,6 +231,92 @@ export function PlantsPerMeterField({
   );
 }
 
+export function TotalPlantsField({
+  formData,
+  setFormData,
+  errors,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+  const touchedRef = React.useRef(formData.totalPlants > 0);
+
+  const computed = React.useMemo(() => {
+    const v =
+      formData.rowLength * formData.plantsPerMeter * formData.numberOfRows;
+    return Number.isFinite(v) && v > 0 ? Math.round(v) : 0;
+  }, [formData.rowLength, formData.plantsPerMeter, formData.numberOfRows]);
+
+  React.useEffect(() => {
+    if (!touchedRef.current && computed !== formData.totalPlants) {
+      setFormData((prev) => ({ ...prev, totalPlants: computed }));
+    }
+  }, [computed, formData.totalPlants, setFormData]);
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="totalPlants" className="text-sm font-medium">
+        {h?.totalPlants ?? 'Total Plants'}
+      </Label>
+      <Input
+        id="totalPlants"
+        type="number"
+        min="0"
+        step="1"
+        value={formData.totalPlants || ''}
+        onChange={(e) => {
+          touchedRef.current = true;
+          setFormData((prev) => ({
+            ...prev,
+            totalPlants: Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+          }));
+        }}
+        disabled={disabled}
+        className={`h-10 ${errors.totalPlants ? 'border-destructive' : ''}`}
+      />
+      {errors.totalPlants && (
+        <p className="text-destructive text-sm">{errors.totalPlants}</p>
+      )}
+    </div>
+  );
+}
+
+export function LostPlantsField({
+  formData,
+  setFormData,
+  errors,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="lostPlants" className="text-sm font-medium">
+        {h?.lostPlants ?? 'Lost Plants'}
+      </Label>
+      <Input
+        id="lostPlants"
+        type="number"
+        min="0"
+        step="1"
+        value={formData.lostPlants || ''}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            lostPlants: Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+          }))
+        }
+        disabled={disabled}
+        className={`h-10 ${errors.lostPlants ? 'border-destructive' : ''}`}
+      />
+      {errors.lostPlants && (
+        <p className="text-destructive text-sm">{errors.lostPlants}</p>
+      )}
+    </div>
+  );
+}
+
 export function RowSpacingField({
   formData,
   setFormData,

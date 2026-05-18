@@ -395,6 +395,8 @@ export const fr = {
       rowLength: 'Longueur du rang (m)',
       plantsPerMeter: 'Plantes par mètre',
       rowSpacing: 'Espacement (calc. auto)',
+      totalPlants: 'Total des plantes',
+      lostPlants: 'Plantes perdues',
       rowX: 'Rang X',
       rowY: 'Rang Y',
       enterRowX: 'Rang de début',

@@ -411,6 +411,8 @@ export const it = {
       rowLength: 'Lunghezza fila (m)',
       plantsPerMeter: 'Piante per metro',
       rowSpacing: 'Distanza tra le file (calcolata automaticamente)',
+      totalPlants: 'Totale piante',
+      lostPlants: 'Piante perse',
       rowX: 'Fila X',
       rowY: 'Fila Y',
       enterRowX: 'Fila iniziale',

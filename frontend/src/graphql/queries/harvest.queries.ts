@@ -17,6 +17,8 @@ export const HARVESTS_QUERY = gql`
       rowLength
       plantsPerMeter
       rowSpacing
+      totalPlants
+      lostPlants
       status
       date
       classA
@@ -57,6 +59,8 @@ export const HARVEST_QUERY = gql`
       rowLength
       plantsPerMeter
       rowSpacing
+      totalPlants
+      lostPlants
       status
       date
       classA

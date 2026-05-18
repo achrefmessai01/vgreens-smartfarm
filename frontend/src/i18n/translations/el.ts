@@ -412,6 +412,8 @@ export const el = {
       rowLength: 'Μήκος σειράς (m)',
       plantsPerMeter: 'Φυτά ανά μέτρο',
       rowSpacing: 'Απόσταση σειρών (υπολογίζεται αυτόματα)',
+      totalPlants: 'Σύνολο φυτών',
+      lostPlants: 'Χαμένα φυτά',
       rowX: 'Σειρά X',
       rowY: 'Σειρά Y',
       enterRowX: 'Σειρά αρχής',

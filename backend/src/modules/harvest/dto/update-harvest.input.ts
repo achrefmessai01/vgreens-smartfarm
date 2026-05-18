@@ -76,6 +76,18 @@ export class UpdateHarvestInput {
   @Min(0)
   rowSpacing?: number;
 
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  totalPlants?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  lostPlants?: number;
+
   @Field(() => HarvestStatus, { nullable: true })
   @IsOptional()
   @IsEnum(HarvestStatus)

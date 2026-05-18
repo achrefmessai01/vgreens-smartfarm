@@ -410,6 +410,8 @@ export const ro = {
       rowLength: 'Lungimea rândului (m)',
       plantsPerMeter: 'Plante pe metru',
       rowSpacing: 'Distanța între rânduri (calculată automat)',
+      totalPlants: 'Total plante',
+      lostPlants: 'Plante pierdute',
       rowX: 'Rândul X',
       rowY: 'Rândul Y',
       enterRowX: 'Rând de început',
