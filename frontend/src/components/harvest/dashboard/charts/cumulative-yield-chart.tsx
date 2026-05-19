@@ -6,6 +6,7 @@ import {
   ResponsiveContainer,
   Area,
   AreaChart,
+  Legend,
 } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
@@ -23,20 +24,45 @@ interface CumulativeYieldData {
   cumulativeWaste: number;
 }
 
-interface CumulativeYieldChartProps {
+interface CumulativeYieldSeries {
+  batchId: string;
+  batchName: string;
+  color: string;
   data: CumulativeYieldData[];
-  className?: string;
 }
+
+type CumulativeYieldChartProps = {
+  className?: string;
+  title?: string;
+} & (
+  | { data: CumulativeYieldData[]; series?: never }
+  | { series: CumulativeYieldSeries[]; data?: never }
+);
 
 const cumulativeDot = <ChartDot fill="#10b981" stroke="#059669" />;
 
-export function CumulativeYieldChart({
-  data,
-  className,
-}: CumulativeYieldChartProps) {
+function mergeSeries(
+  series: CumulativeYieldSeries[],
+): Array<Record<string, unknown>> {
+  const byDate = new Map<string, Record<string, unknown>>();
+  for (const s of series) {
+    for (const point of s.data) {
+      const existing = byDate.get(point.date) ?? { date: point.date };
+      existing[s.batchId] = point.cumulative;
+      byDate.set(point.date, existing);
+    }
+  }
+  return Array.from(byDate.values()).sort((a, b) =>
+    String(a.date).localeCompare(String(b.date)),
+  );
+}
+
+export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
   const { t } = useI18n();
   const classBMode = useHarvestClassBMode();
   const h = t.pages.harvest;
+  const { className, title } = props;
+  const isMulti = 'series' in props && props.series !== undefined;
 
   const primaryLabel = classBMode
     ? (h?.quality1 ?? 'Quality 1')
@@ -63,6 +89,22 @@ export function CumulativeYieldChart({
     label,
   }: ChartTooltipProps) => {
     if (!active || !payload?.length) return null;
+    if (isMulti) {
+      return (
+        <ChartTooltipContainer>
+          <p className="font-medium">{`Date: ${label}`}</p>
+          {payload.map((entry, idx) => (
+            <p
+              key={`${entry.dataKey ?? idx}`}
+              className="text-sm"
+              style={{ color: entry.color }}
+            >
+              {`${entry.name ?? 'Yield'}: ${entry.value} kg`}
+            </p>
+          ))}
+        </ChartTooltipContainer>
+      );
+    }
     const yieldVal =
       payload.find((p) => p.dataKey === 'cumulative')?.value ?? 0;
     const secondaryVal =
@@ -78,16 +120,18 @@ export function CumulativeYieldChart({
     );
   };
 
+  const chartData = isMulti ? mergeSeries(props.series) : props.data;
+
   return (
     <Card className={className}>
       <div className="p-6">
         <h3 className="mb-4 text-lg font-semibold">
-          {h?.cumulativeYieldProgress ?? 'Cumulative Yield Progress'}
+          {title ?? h?.cumulativeYieldProgress ?? 'Cumulative Yield Progress'}
         </h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-              data={data}
+              data={chartData}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
               <defs>
@@ -150,44 +194,67 @@ export function CumulativeYieldChart({
                 }}
               />
               <Tooltip content={<CumulativeTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="cumulative"
-                stroke="#10b981"
-                strokeWidth={3}
-                fill="url(#cumulativeGradient)"
-                dot={cumulativeDot}
-                activeDot={{ r: 6 }}
-                style={{
-                  filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))',
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey={secondaryDataKey}
-                stroke={secondaryStroke}
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                fill={`url(#${secondaryGradientId})`}
-                dot={{ r: 3, fill: secondaryDotFill }}
-                activeDot={{ r: 5, fill: secondaryDotFill }}
-                style={{
-                  filter: secondaryShadow,
-                }}
-              />
+              {isMulti && <Legend />}
+              {isMulti
+                ? props.series.map((s) => (
+                    <Area
+                      key={s.batchId}
+                      type="monotone"
+                      dataKey={s.batchId}
+                      name={s.batchName}
+                      stroke={s.color}
+                      strokeWidth={2}
+                      fill={s.color}
+                      fillOpacity={0.15}
+                      dot={{ r: 3, fill: s.color, stroke: s.color }}
+                      activeDot={{ r: 5 }}
+                      connectNulls
+                    />
+                  ))
+                : (
+                    <>
+                      <Area
+                        type="monotone"
+                        dataKey="cumulative"
+                        stroke="#10b981"
+                        strokeWidth={3}
+                        fill="url(#cumulativeGradient)"
+                        dot={cumulativeDot}
+                        activeDot={{ r: 6 }}
+                        style={{
+                          filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))',
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey={secondaryDataKey}
+                        stroke={secondaryStroke}
+                        strokeWidth={2}
+                        strokeDasharray="5 5"
+                        fill={`url(#${secondaryGradientId})`}
+                        dot={{ r: 3, fill: secondaryDotFill }}
+                        activeDot={{ r: 5, fill: secondaryDotFill }}
+                        style={{
+                          filter: secondaryShadow,
+                        }}
+                      />
+                    </>
+                  )}
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="mt-4 flex items-center justify-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-emerald-500" />
-            <span className="text-sm font-medium">{primaryLabel}</span>
+        {!isMulti && (
+          <div className="mt-4 flex items-center justify-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="h-3 w-3 rounded-full bg-emerald-500" />
+              <span className="text-sm font-medium">{primaryLabel}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={`h-3 w-3 rounded-full ${secondaryLegendColor}`} />
+              <span className="text-sm font-medium">{secondaryLabel}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`h-3 w-3 rounded-full ${secondaryLegendColor}`} />
-            <span className="text-sm font-medium">{secondaryLabel}</span>
-          </div>
-        </div>
+        )}
       </div>
     </Card>
   );
