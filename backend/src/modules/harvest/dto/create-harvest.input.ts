@@ -56,19 +56,19 @@ export class CreateHarvestInput {
   @Min(0)
   cultivationArea: number;
 
-  @Field(() => Int)
-  @IsInt()
-  @Min(1)
+  @Field(() => Float)
+  @IsNumber()
+  @Min(0)
   numberOfRows: number;
 
   @Field(() => Float)
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   rowLength: number;
 
   @Field(() => Float)
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   plantsPerMeter: number;
 
   @Field(() => Float, { nullable: true })
@@ -76,6 +76,18 @@ export class CreateHarvestInput {
   @IsNumber()
   @Min(0)
   rowSpacing?: number;
+
+  @Field(() => Int, { defaultValue: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  totalPlants?: number;
+
+  @Field(() => Int, { defaultValue: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  lostPlants?: number;
 
   @Field(() => HarvestStatus, {
     nullable: true,
@@ -115,24 +127,24 @@ export class CreateHarvestInput {
   @Min(0)
   avgBrix?: number;
 
-  @Field(() => Int, { defaultValue: 0 })
+  @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   rowX?: number;
 
-  @Field(() => Int, { defaultValue: 0 })
+  @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   rowY?: number;
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     defaultValue: 0,
     deprecationReason: 'Use rowX and rowY instead.',
   })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   numberOfRowsHarvested?: number;
 

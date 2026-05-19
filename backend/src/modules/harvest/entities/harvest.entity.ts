@@ -80,8 +80,8 @@ export class Harvest {
   @Column({ type: 'float', default: 0 })
   cultivationArea: number;
 
-  @Field(() => Int)
-  @Column({ type: 'int', default: 0 })
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   numberOfRows: number;
 
   @Field(() => Float)
@@ -95,6 +95,14 @@ export class Harvest {
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
   rowSpacing: number;
+
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  totalPlants: number;
+
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  lostPlants: number;
 
   @Field(() => HarvestStatus)
   @Column({
@@ -126,15 +134,15 @@ export class Harvest {
   @Column({ type: 'float', default: 0 })
   avgBrix: number;
 
-  @Field(() => Int)
-  @Column({ type: 'int', default: 0 })
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   rowX: number;
 
-  @Field(() => Int)
-  @Column({ type: 'int', default: 0 })
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   rowY: number;
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     deprecationReason: 'Use rowX and rowY instead.',
   })
   get numberOfRowsHarvested(): number {

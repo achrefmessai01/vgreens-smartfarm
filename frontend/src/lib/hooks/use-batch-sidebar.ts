@@ -18,19 +18,33 @@ interface UseBatchSidebarOptions {
   harvestId: string | null;
   batchData: BatchDetailsData | null;
   mode?: SidebarMode;
+  initialDate?: string | null;
   onCompleted?: () => void;
+}
+
+function todayIsoDate(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function toIsoDateInput(value: string | null | undefined): string {
+  if (!value) return todayIsoDate();
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return todayIsoDate();
+  return parsed.toISOString().split('T')[0];
 }
 
 export function useBatchSidebar({
   harvestId,
   batchData,
   mode = 'create',
+  initialDate,
   onCompleted,
 }: UseBatchSidebarOptions) {
   const [localData, setLocalData] = React.useState<BatchDetailsData | null>(
     null,
   );
   const [showBrix, setShowBrix] = React.useState(false);
+  const [harvestDate, setHarvestDate] = React.useState<string>(todayIsoDate);
   const [createHarvest, { loading: createLoading }] =
     useCreateHarvestMutation();
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
@@ -44,7 +58,10 @@ export function useBatchSidebar({
     setShowBrix(
       mode === 'edit' && (batchData?.brixReadings?.some((v) => v > 0) ?? false),
     );
-  }, [batchData, mode]);
+    setHarvestDate(
+      mode === 'edit' ? toIsoDateInput(initialDate) : todayIsoDate(),
+    );
+  }, [batchData, mode, initialDate]);
 
   React.useEffect(() => {
     const photos = localData?.photos ?? [];
@@ -145,6 +162,7 @@ export function useBatchSidebar({
       refetchQueries: [{ query: HarvestsDocument }],
       awaitRefetchQueries: true,
     };
+    const isoDate = new Date(harvestDate).toISOString();
     try {
       if (mode === 'create') {
         await createHarvest({
@@ -162,6 +180,8 @@ export function useBatchSidebar({
               rowLength: currentData.rowLength,
               plantsPerMeter: currentData.plantsPerMeter,
               rowSpacing: currentData.rowSpacing,
+              totalPlants: currentData.totalPlants,
+              lostPlants: currentData.lostPlants,
               classA: currentData.todaysHarvest.marketable,
               classB: currentData.todaysHarvest.classB,
               waste: currentData.todaysHarvest.waste,
@@ -171,7 +191,7 @@ export function useBatchSidebar({
               brixReadings,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,
-              date: new Date().toISOString(),
+              date: isoDate,
               status: HarvestStatus.Completed,
             },
           },
@@ -191,6 +211,7 @@ export function useBatchSidebar({
               brixReadings,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,
+              date: isoDate,
               status: currentData.status,
             },
           },
@@ -206,6 +227,7 @@ export function useBatchSidebar({
     currentData,
     mode,
     showBrix,
+    harvestDate,
     updateHarvest,
     createHarvest,
     onCompleted,
@@ -217,6 +239,8 @@ export function useBatchSidebar({
     mode,
     showBrix,
     setShowBrix,
+    harvestDate,
+    setHarvestDate,
     handleBrixChange,
     handleAddBrixReading,
     handleRemoveBrixReading,

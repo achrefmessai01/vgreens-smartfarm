@@ -95,6 +95,8 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
     rowLength: h.rowLength,
     plantsPerMeter: h.plantsPerMeter,
     rowSpacing: h.rowSpacing,
+    totalPlants: h.totalPlants,
+    lostPlants: h.lostPlants,
     plantingDate: h.plantingDate,
     todaysHarvest: {
       marketable: h.classA,

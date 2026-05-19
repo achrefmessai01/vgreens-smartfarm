@@ -8,10 +8,12 @@ import {
 } from './create-batch-form-field-components';
 import {
   CultivationAreaField,
+  LostPlantsField,
   NumberOfRowsField,
   PlantsPerMeterField,
   PlantingDateField,
   RowLengthField,
+  TotalPlantsField,
   VarietyField,
 } from './create-batch-more-field-components';
 
@@ -73,6 +75,18 @@ export function CreateBatchFormFields({
         disabled={disabled}
       />
       <PlantsPerMeterField
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+        disabled={disabled}
+      />
+      <TotalPlantsField
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+        disabled={disabled}
+      />
+      <LostPlantsField
         formData={formData}
         setFormData={setFormData}
         errors={errors}

@@ -4,6 +4,7 @@ export {
 } from './metric-card/metric-card-skeleton';
 export { MetricCard } from './metric-card/metric-card';
 export { HarvestDashboard } from './harvest-dashboard';
+export { HarvestDashboardCompare } from './harvest-dashboard-compare';
 export { BrixTrendChart } from './charts/brix-trend-chart';
 export { DashboardChartsGrid } from './dashboard-charts-grid';
 export { DashboardMetricsGrid } from './dashboard-metrics-grid';

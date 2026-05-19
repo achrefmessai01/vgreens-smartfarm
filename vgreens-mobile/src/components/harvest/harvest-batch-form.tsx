@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import type { BatchFormData, BatchFormErrors } from '@/types/harvest';
 import { HarvestBatchField } from './harvest-batch-field';
@@ -29,6 +29,7 @@ export function HarvestBatchForm({
   readOnly,
 }: HarvestBatchFormProps) {
   const styles = useMemo(() => StyleSheet.create({ wrap: { gap: 14 } }), []);
+  const totalPlantsTouched = useRef(formData.totalPlants > 0);
   const s = useMemo(() => {
     const text = (k: keyof BatchFormData) => (t: string) =>
       setFormData((p) => ({ ...p, [k]: t }));
@@ -40,11 +41,30 @@ export function HarvestBatchForm({
       variety: text('variety'),
       plantingDate: text('plantingDate'),
       cultivationArea: numSet('cultivationArea', parseF),
-      numberOfRows: numSet('numberOfRows', parseI),
+      numberOfRows: numSet('numberOfRows', parseF),
       rowLength: numSet('rowLength', parseF),
       plantsPerMeter: numSet('plantsPerMeter', parseF),
+      totalPlants: (t: string) => {
+        totalPlantsTouched.current = true;
+        setFormData((prev) => ({ ...prev, totalPlants: parseI(t) }));
+      },
+      lostPlants: numSet('lostPlants', parseI),
     };
   }, [setFormData]);
+
+  useEffect(() => {
+    if (totalPlantsTouched.current) return;
+    setFormData((prev) => {
+      const v = prev.rowLength * prev.plantsPerMeter * prev.numberOfRows;
+      const next = Number.isFinite(v) && v > 0 ? Math.round(v) : 0;
+      return next === prev.totalPlants ? prev : { ...prev, totalPlants: next };
+    });
+  }, [
+    formData.rowLength,
+    formData.plantsPerMeter,
+    formData.numberOfRows,
+    setFormData,
+  ]);
 
   return (
     <View style={styles.wrap}>
@@ -89,7 +109,7 @@ export function HarvestBatchForm({
         />
         <HarvestBatchField
           label="Number of rows" required readOnly={readOnly}
-          autoCapitalize="none" keyboardType="number-pad" suffix="rows"
+          autoCapitalize="none" keyboardType="decimal-pad" suffix="rows"
           value={num(formData.numberOfRows)} onChangeText={s.numberOfRows}
           placeholder="0" error={errors.numberOfRows}
         />
@@ -102,9 +122,21 @@ export function HarvestBatchForm({
         <HarvestBatchField
           label="Plants per meter" required readOnly={readOnly}
           autoCapitalize="none" keyboardType="decimal-pad" suffix="/ m"
-          returnKeyType="done"
           value={num(formData.plantsPerMeter)} onChangeText={s.plantsPerMeter}
           placeholder="0" error={errors.plantsPerMeter}
+        />
+        <HarvestBatchField
+          label="Total plants" readOnly={readOnly}
+          autoCapitalize="none" keyboardType="number-pad" suffix="plants"
+          value={num(formData.totalPlants)} onChangeText={s.totalPlants}
+          placeholder="0" error={errors.totalPlants}
+        />
+        <HarvestBatchField
+          label="Lost plants" readOnly={readOnly}
+          autoCapitalize="none" keyboardType="number-pad" suffix="plants"
+          returnKeyType="done"
+          value={num(formData.lostPlants)} onChangeText={s.lostPlants}
+          placeholder="0" error={errors.lostPlants}
         />
       </HarvestFormSection>
     </View>

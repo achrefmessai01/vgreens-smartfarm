@@ -52,22 +52,22 @@ export class UpdateHarvestInput {
   @Min(0)
   cultivationArea?: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Float, { nullable: true })
   @IsOptional()
-  @IsInt()
-  @Min(1)
+  @IsNumber()
+  @Min(0)
   numberOfRows?: number;
 
   @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   rowLength?: number;
 
   @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   plantsPerMeter?: number;
 
   @Field(() => Float, { nullable: true })
@@ -75,6 +75,18 @@ export class UpdateHarvestInput {
   @IsNumber()
   @Min(0)
   rowSpacing?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  totalPlants?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  lostPlants?: number;
 
   @Field(() => HarvestStatus, { nullable: true })
   @IsOptional()
@@ -112,24 +124,24 @@ export class UpdateHarvestInput {
   @Min(0)
   avgBrix?: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Float, { nullable: true })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   rowX?: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Float, { nullable: true })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   rowY?: number;
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     nullable: true,
     deprecationReason: 'Use rowX and rowY instead.',
   })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   numberOfRowsHarvested?: number;
 
