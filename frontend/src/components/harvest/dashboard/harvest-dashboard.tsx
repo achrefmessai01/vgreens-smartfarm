@@ -1,13 +1,17 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
+import { useHarvestBatches } from '@/lib/hooks/use-harvest-batches';
 import {
   useHarvestDashboard,
   type DateFilter,
 } from '@/lib/hooks/use-harvest-dashboard';
+import { useHarvestDashboardUrlState } from '@/lib/hooks/use-harvest-dashboard-url-state';
 import { AlertTriangle, Package } from 'lucide-react';
-import { useState } from 'react';
 import { DashboardChartsGrid } from './dashboard-charts-grid';
 import { DashboardMetricsGrid } from './dashboard-metrics-grid';
+import { HarvestDashboardCompare } from './harvest-dashboard-compare';
 import { DashboardFilters } from './harvest-dashboard-filters';
 import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
 import { YieldPredictionCard } from './yield-prediction-card';
@@ -34,84 +38,152 @@ export function HarvestDashboard({
 }: HarvestDashboardProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const [currentFilter, setCurrentFilter] = useState<DateFilter>('thisMonth');
+
+  const {
+    period,
+    batchId,
+    compareBatchIds,
+    compareMode,
+    setPeriod,
+    setBatchId,
+    setCompareBatchIds,
+    enterCompareMode,
+    exitCompareMode,
+  } = useHarvestDashboardUrlState();
+
+  const { batches, loading: batchesLoading } = useHarvestBatches();
+
+  const selectedBatch = batchId
+    ? batches.find((b) => b.id === batchId)
+    : undefined;
+  const isStaleBatchId = Boolean(
+    batchId && !batchesLoading && !selectedBatch && batches.length > 0,
+  );
 
   const { data, loading, error, refetch } = useHarvestDashboard({
-    dateFilter: currentFilter,
+    dateFilter: period,
     species,
     variety,
+    batchId: isStaleBatchId ? undefined : batchId,
   });
 
   const filterLabel =
-    t.common?.[FILTER_LABEL_KEYS[currentFilter] as keyof typeof t.common] ??
-    currentFilter;
+    t.common?.[FILTER_LABEL_KEYS[period] as keyof typeof t.common] ?? period;
 
-  if (loading) return <HarvestDashboardSkeleton className={className} />;
+  const filterBar = (
+    <DashboardFilters
+      period={period}
+      onPeriodChange={setPeriod}
+      batches={batches}
+      batchesLoading={batchesLoading}
+      batchId={batchId}
+      onBatchChange={setBatchId}
+      compareMode={compareMode}
+      compareBatchIds={compareBatchIds}
+      onCompareToggle={() => (compareMode ? exitCompareMode() : enterCompareMode())}
+      onCompareBatchesChange={setCompareBatchIds}
+    />
+  );
+
+  if (compareMode) {
+    return (
+      <div className={className}>
+        <div className="bg-card mb-5 rounded-xl border p-3 sm:mb-6 sm:p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
+                {h?.performanceDashboard ?? 'Performance Dashboard'}
+              </h1>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Comparing {compareBatchIds.length} batch
+                {compareBatchIds.length === 1 ? '' : 'es'} for {filterLabel}
+              </p>
+            </div>
+            {filterBar}
+          </div>
+        </div>
+        <HarvestDashboardCompare
+          batches={batches}
+          compareBatchIds={compareBatchIds}
+          period={period}
+        />
+      </div>
+    );
+  }
+
+  if (loading && !data) return <HarvestDashboardSkeleton className={className} />;
 
   if (error) {
     return (
-      <div
-        className={`flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px] ${className}`}
-      >
-        <div className="max-w-md text-center">
-          <AlertTriangle className="text-destructive mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
-          <p className="text-destructive mb-3 text-sm sm:mb-4 sm:text-base">
-            {error.message}
-          </p>
-          <Button
-            onClick={() => refetch()}
-            variant="outline"
-            size="sm"
-            className="sm:size-default"
-          >
-            {t.common.retry ?? 'Try Again'}
-          </Button>
+      <div className={className}>
+        <div className="bg-card mb-5 rounded-xl border p-3 sm:mb-6 sm:p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
+                {h?.performanceDashboard ?? 'Performance Dashboard'}
+              </h1>
+            </div>
+            {filterBar}
+          </div>
+        </div>
+        <div className="flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px]">
+          <div className="max-w-md text-center">
+            <AlertTriangle className="text-destructive mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
+            <p className="text-destructive mb-3 text-sm sm:mb-4 sm:text-base">
+              {error.message}
+            </p>
+            <Button onClick={() => refetch()} variant="outline" size="sm">
+              {t.common.retry ?? 'Try Again'}
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!data || data.harvestCount === 0) {
-    return (
-      <div
-        className={`flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px] ${className}`}
-      >
-        <div className="max-w-md text-center">
-          <Package className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
-          <p className="text-muted-foreground text-sm sm:text-base">
-            {h?.noHarvestsYet ?? 'No harvest data available'}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const noData = !data || data.harvestCount === 0;
 
   return (
     <div className={className}>
       <div className="bg-card mb-5 rounded-xl border p-3 sm:mb-6 sm:p-4">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
               {h?.performanceDashboard ?? 'Performance Dashboard'}
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              {data.harvestCount} {h?.harvestsLogged ?? 'harvests logged'} for{' '}
-              {filterLabel}
+              {selectedBatch
+                ? `${selectedBatch.name} · ${data?.harvestCount ?? 0} ${h?.harvestsLogged ?? 'harvests logged'} for ${filterLabel}`
+                : `${data?.harvestCount ?? 0} ${h?.harvestsLogged ?? 'harvests logged'} for ${filterLabel}`}
             </p>
+            {isStaleBatchId && (
+              <p className="text-amber-600 mt-1 text-xs">
+                Selected batch not found — showing all batches.
+              </p>
+            )}
           </div>
-          <DashboardFilters
-            onFilterChange={(f) =>
-              f.dateFilter && setCurrentFilter(f.dateFilter)
-            }
-            className="ml-auto w-40 shrink-0"
-            defaultValue={currentFilter}
-          />
+          {filterBar}
         </div>
       </div>
 
-      <DashboardMetricsGrid data={data} />
-      <YieldPredictionCard />
-      <DashboardChartsGrid data={data} />
+      {noData ? (
+        <div className="flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px]">
+          <div className="max-w-md text-center">
+            <Package className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
+            <p className="text-muted-foreground text-sm sm:text-base">
+              {selectedBatch
+                ? `No harvests for ${selectedBatch.name} in ${filterLabel}`
+                : (h?.noHarvestsYet ?? 'No harvest data available')}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <DashboardMetricsGrid data={data} />
+          <YieldPredictionCard />
+          <DashboardChartsGrid data={data} />
+        </>
+      )}
     </div>
   );
 }
