@@ -84,6 +84,20 @@ export const HARVEST_QUERY = gql`
   }
 `;
 
+export const HARVESTS_CSV_EXPORT_QUERY = gql`
+  query HarvestsCsvExport($filter: HarvestFilterInput) {
+    harvestsCsvExport(filter: $filter)
+  }
+`;
+
+export const HARVESTS_COUNT_QUERY = gql`
+  query HarvestsCount($filter: HarvestFilterInput) {
+    harvests(filter: $filter) {
+      id
+    }
+  }
+`;
+
 export const HARVEST_IMAGES_QUERY = gql`
   query HarvestImages($folder: String) {
     images(input: { folder: $folder }) {
