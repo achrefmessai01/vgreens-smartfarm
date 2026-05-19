@@ -77,6 +77,18 @@ export class CreateHarvestInput {
   @Min(0)
   rowSpacing?: number;
 
+  @Field(() => Int, { defaultValue: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  totalPlants?: number;
+
+  @Field(() => Int, { defaultValue: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  lostPlants?: number;
+
   @Field(() => HarvestStatus, {
     nullable: true,
     defaultValue: HarvestStatus.ACTIVE,

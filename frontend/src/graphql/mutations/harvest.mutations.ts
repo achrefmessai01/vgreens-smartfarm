@@ -17,6 +17,8 @@ export const CREATE_HARVEST_MUTATION = gql`
       rowLength
       plantsPerMeter
       rowSpacing
+      totalPlants
+      lostPlants
       status
       date
       classA
@@ -51,6 +53,8 @@ export const UPDATE_HARVEST_MUTATION = gql`
       rowLength
       plantsPerMeter
       rowSpacing
+      totalPlants
+      lostPlants
       status
       date
       classA

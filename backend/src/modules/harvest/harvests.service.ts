@@ -191,6 +191,8 @@ export class HarvestsService extends BaseService<Harvest> {
             input.numberOfRows,
             input.rowLength,
           ),
+        totalPlants: input.totalPlants ?? 0,
+        lostPlants: input.lostPlants ?? 0,
         status: input.status ?? HarvestStatus.ACTIVE,
         date: new Date(input.date),
         classA: input.classA ?? 0,
@@ -274,6 +276,10 @@ export class HarvestsService extends BaseService<Harvest> {
           harvest.rowLength,
         );
       }
+      if (input.totalPlants !== undefined)
+        harvest.totalPlants = input.totalPlants;
+      if (input.lostPlants !== undefined)
+        harvest.lostPlants = input.lostPlants;
       if (input.status !== undefined) harvest.status = input.status;
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.classA !== undefined) harvest.classA = input.classA;

@@ -17,6 +17,8 @@ const emptyForm = (): BatchFormData => ({
   rowLength: 0,
   plantsPerMeter: 0,
   rowSpacing: 0,
+  totalPlants: 0,
+  lostPlants: 0,
 });
 
 function toForm(h: HarvestItem): BatchFormData {
@@ -32,6 +34,8 @@ function toForm(h: HarvestItem): BatchFormData {
     rowLength: h.rowLength,
     plantsPerMeter: h.plantsPerMeter,
     rowSpacing: h.rowSpacing,
+    totalPlants: h.totalPlants,
+    lostPlants: h.lostPlants,
   };
 }
 
@@ -100,6 +104,8 @@ export function useEditHarvest(onSuccess?: () => void) {
           rowLength: formData.rowLength,
           plantsPerMeter: formData.plantsPerMeter,
           rowSpacing: formData.rowSpacing,
+          totalPlants: formData.totalPlants,
+          lostPlants: formData.lostPlants,
           batch: `${formData.species} - ${formData.variety}`,
         },
       },

@@ -35,6 +35,8 @@ export interface HarvestLike {
   rowLength: number;
   plantsPerMeter: number;
   rowSpacing: number;
+  totalPlants: number;
+  lostPlants: number;
   classA: number;
   classB: number;
   waste: number;

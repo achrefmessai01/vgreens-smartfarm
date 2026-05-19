@@ -162,6 +162,8 @@ export function useBatchSidebar({
               rowLength: currentData.rowLength,
               plantsPerMeter: currentData.plantsPerMeter,
               rowSpacing: currentData.rowSpacing,
+              totalPlants: currentData.totalPlants,
+              lostPlants: currentData.lostPlants,
               classA: currentData.todaysHarvest.marketable,
               classB: currentData.todaysHarvest.classB,
               waste: currentData.todaysHarvest.waste,

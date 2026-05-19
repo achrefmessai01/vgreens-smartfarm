@@ -400,6 +400,8 @@ export const ar = {
       rowLength: 'طول الصف (m)',
       plantsPerMeter: 'النباتات لكل متر',
       rowSpacing: 'المسافة بين الصفوف (يُحسب تلقائيًا)',
+      totalPlants: 'إجمالي النباتات',
+      lostPlants: 'النباتات المفقودة',
       rowX: 'الصف X',
       rowY: 'الصف Y',
       enterRowX: 'صف البداية',

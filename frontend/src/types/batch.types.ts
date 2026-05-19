@@ -8,6 +8,8 @@ export interface BatchFormData {
   rowLength: number;
   plantsPerMeter: number;
   rowSpacing: number;
+  totalPlants: number;
+  lostPlants: number;
 }
 
 export interface BatchFormErrors {
@@ -19,4 +21,6 @@ export interface BatchFormErrors {
   numberOfRows?: string;
   rowLength?: string;
   plantsPerMeter?: string;
+  totalPlants?: string;
+  lostPlants?: string;
 }

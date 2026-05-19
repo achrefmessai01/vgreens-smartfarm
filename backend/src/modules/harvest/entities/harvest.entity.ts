@@ -96,6 +96,14 @@ export class Harvest {
   @Column({ type: 'float', default: 0 })
   rowSpacing: number;
 
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  totalPlants: number;
+
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  lostPlants: number;
+
   @Field(() => HarvestStatus)
   @Column({
     type: 'enum',

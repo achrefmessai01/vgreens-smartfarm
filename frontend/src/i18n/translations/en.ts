@@ -399,6 +399,8 @@ export const en = {
       rowLength: 'Row Length (m)',
       plantsPerMeter: 'Plants per Meter',
       rowSpacing: 'Row Spacing (Auto-calculated)',
+      totalPlants: 'Total Plants',
+      lostPlants: 'Lost Plants',
       rowX: 'Row X',
       rowY: 'Row Y',
       enterRowX: 'Start row',
