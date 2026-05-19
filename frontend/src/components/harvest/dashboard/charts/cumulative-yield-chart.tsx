@@ -83,11 +83,7 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
     : 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))';
   const secondaryLegendColor = classBMode ? 'bg-teal-500' : 'bg-red-500';
 
-  const CumulativeTooltip = ({
-    active,
-    payload,
-    label,
-  }: ChartTooltipProps) => {
+  const CumulativeTooltip = ({ active, payload, label }: ChartTooltipProps) => {
     if (!active || !payload?.length) return null;
     if (isMulti) {
       return (
@@ -124,7 +120,7 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
 
   return (
     <Card className={className}>
-      <div className="p-6">
+      <div className="p-8">
         <h3 className="mb-4 text-lg font-semibold">
           {title ?? h?.cumulativeYieldProgress ?? 'Cumulative Yield Progress'}
         </h3>
@@ -132,7 +128,7 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={chartData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 1, right: 30, left: 20, bottom: 1 }}
             >
               <defs>
                 <linearGradient
@@ -181,9 +177,10 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
               <XAxis
                 dataKey="date"
                 fontSize={12}
-                angle={-45}
-                textAnchor="end"
-                interval={0}
+                angle={0}
+                textAnchor="middle"
+                interval={isMulti ? 'preserveStartEnd' : 0}
+                minTickGap={isMulti ? 20 : undefined}
               />
               <YAxis
                 fontSize={12}
@@ -195,51 +192,51 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
               />
               <Tooltip content={<CumulativeTooltip />} />
               {isMulti && <Legend />}
-              {isMulti
-                ? props.series.map((s) => (
-                    <Area
-                      key={s.batchId}
-                      type="monotone"
-                      dataKey={s.batchId}
-                      name={s.batchName}
-                      stroke={s.color}
-                      strokeWidth={2}
-                      fill={s.color}
-                      fillOpacity={0.15}
-                      dot={{ r: 3, fill: s.color, stroke: s.color }}
-                      activeDot={{ r: 5 }}
-                      connectNulls
-                    />
-                  ))
-                : (
-                    <>
-                      <Area
-                        type="monotone"
-                        dataKey="cumulative"
-                        stroke="#10b981"
-                        strokeWidth={3}
-                        fill="url(#cumulativeGradient)"
-                        dot={cumulativeDot}
-                        activeDot={{ r: 6 }}
-                        style={{
-                          filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))',
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey={secondaryDataKey}
-                        stroke={secondaryStroke}
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        fill={`url(#${secondaryGradientId})`}
-                        dot={{ r: 3, fill: secondaryDotFill }}
-                        activeDot={{ r: 5, fill: secondaryDotFill }}
-                        style={{
-                          filter: secondaryShadow,
-                        }}
-                      />
-                    </>
-                  )}
+              {isMulti ? (
+                props.series.map((s) => (
+                  <Area
+                    key={s.batchId}
+                    type="monotone"
+                    dataKey={s.batchId}
+                    name={s.batchName}
+                    stroke={s.color}
+                    strokeWidth={2}
+                    fill={s.color}
+                    fillOpacity={0.15}
+                    dot={{ r: 3, fill: s.color, stroke: s.color }}
+                    activeDot={{ r: 5 }}
+                    connectNulls
+                  />
+                ))
+              ) : (
+                <>
+                  <Area
+                    type="monotone"
+                    dataKey="cumulative"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    fill="url(#cumulativeGradient)"
+                    dot={cumulativeDot}
+                    activeDot={{ r: 6 }}
+                    style={{
+                      filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3))',
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey={secondaryDataKey}
+                    stroke={secondaryStroke}
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    fill={`url(#${secondaryGradientId})`}
+                    dot={{ r: 3, fill: secondaryDotFill }}
+                    activeDot={{ r: 5, fill: secondaryDotFill }}
+                    style={{
+                      filter: secondaryShadow,
+                    }}
+                  />
+                </>
+              )}
             </AreaChart>
           </ResponsiveContainer>
         </div>

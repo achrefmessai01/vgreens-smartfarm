@@ -79,7 +79,7 @@ export function YieldOverTimeChart(props: YieldOverTimeChartProps) {
 
   return (
     <Card className={className}>
-      <div className="p-6">
+      <div className="p-8">
         <h3 className="mb-4 text-lg font-semibold">
           {title ?? t.pages.harvest?.yieldOverTime ?? 'Yield Over Time'}
         </h3>
@@ -87,7 +87,7 @@ export function YieldOverTimeChart(props: YieldOverTimeChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 1, right: 30, left: 20, bottom: 1 }}
             >
               <defs>
                 <linearGradient id="yieldGradient" x1="0" y1="0" x2="0" y2="1">
@@ -103,9 +103,10 @@ export function YieldOverTimeChart(props: YieldOverTimeChartProps) {
               <XAxis
                 dataKey="date"
                 fontSize={12}
-                angle={-45}
-                textAnchor="end"
-                interval={0}
+                angle={0}
+                textAnchor="middle"
+                interval={isMulti ? 'preserveStartEnd' : 0}
+                minTickGap={isMulti ? 20 : undefined}
               />
               <YAxis
                 fontSize={12}
@@ -117,34 +118,33 @@ export function YieldOverTimeChart(props: YieldOverTimeChartProps) {
               />
               <Tooltip content={<YieldTooltip />} />
               {isMulti && <Legend />}
-              {isMulti
-                ? props.series.map((s) => (
-                    <Line
-                      key={s.batchId}
-                      type="monotone"
-                      dataKey={s.batchId}
-                      name={s.batchName}
-                      stroke={s.color}
-                      strokeWidth={2}
-                      dot={{ r: 3, fill: s.color, stroke: s.color }}
-                      activeDot={{ r: 5 }}
-                      connectNulls
-                    />
-                  ))
-                : (
-                    <Line
-                      type="monotone"
-                      dataKey="yield"
-                      stroke="#3b82f6"
-                      strokeWidth={3}
-                      dot={yieldDot}
-                      activeDot={{ r: 6 }}
-                      style={{
-                        filter:
-                          'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))',
-                      }}
-                    />
-                  )}
+              {isMulti ? (
+                props.series.map((s) => (
+                  <Line
+                    key={s.batchId}
+                    type="monotone"
+                    dataKey={s.batchId}
+                    name={s.batchName}
+                    stroke={s.color}
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: s.color, stroke: s.color }}
+                    activeDot={{ r: 5 }}
+                    connectNulls
+                  />
+                ))
+              ) : (
+                <Line
+                  type="monotone"
+                  dataKey="yield"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                  dot={yieldDot}
+                  activeDot={{ r: 6 }}
+                  style={{
+                    filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))',
+                  }}
+                />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>
