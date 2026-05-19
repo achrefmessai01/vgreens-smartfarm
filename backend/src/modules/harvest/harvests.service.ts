@@ -19,6 +19,7 @@ import {
   BrixTrendData,
   CumulativeYieldData,
 } from './dto/dashboard-metrics.dto';
+import { HarvestBatchListItem } from './dto/harvest-batch-list-item.dto';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
 
@@ -126,6 +127,59 @@ export class HarvestsService extends BaseService<Harvest> {
         error instanceof Error ? error.stack : undefined,
       );
       throw new InternalServerErrorException('Failed to fetch harvests');
+    }
+  }
+
+  private getLegacyGroupKey(harvest: Harvest): string {
+    const batch = harvest.batch.trim().toLowerCase();
+    const greenhouse = (harvest.greenhouse ?? '').trim().toLowerCase();
+    return `${batch}::${greenhouse}`;
+  }
+
+  async findBatchesForSelector(
+    tenantId: string | undefined,
+  ): Promise<HarvestBatchListItem[]> {
+    try {
+      const qb = this.harvestRepository
+        .createQueryBuilder('harvest')
+        .where('harvest.parentBatchId IS NULL')
+        .orderBy('harvest.createdAt', OrderDirection.ASC);
+
+      if (tenantId !== undefined) {
+        qb.andWhere('harvest.tenantId = :tenantId', { tenantId });
+      }
+
+      const rows = await qb.getMany();
+
+      const representatives = new Map<string, Harvest>();
+      for (const row of rows) {
+        const key = this.getLegacyGroupKey(row);
+        if (!representatives.has(key)) representatives.set(key, row);
+      }
+
+      return Array.from(representatives.values())
+        .sort(
+          (a, b) =>
+            new Date(b.plantingDate).getTime() -
+            new Date(a.plantingDate).getTime(),
+        )
+        .map((h) => ({
+          id: h.id,
+          name: h.batch,
+          species: h.species,
+          variety: h.variety,
+          greenhouse: h.greenhouse,
+          plantingDate: h.plantingDate,
+          status: h.status,
+        }));
+    } catch (error) {
+      this.logger.error(
+        `findBatchesForSelector failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw new InternalServerErrorException(
+        'Failed to fetch batches for selector',
+      );
     }
   }
 
@@ -371,6 +425,33 @@ export class HarvestsService extends BaseService<Harvest> {
           qb.andWhere('harvest.batch ILIKE :batch', {
             batch: `%${filter.batch}%`,
           });
+        }
+        if (filter.batchId) {
+          const representative = await this.harvestRepository.findOne({
+            where: { id: filter.batchId },
+          });
+          if (representative) {
+            qb.andWhere(
+              `(
+                harvest.id = :batchId
+                OR harvest.parentBatchId = :batchId
+                OR (
+                  harvest.parentBatchId IS NULL
+                  AND LOWER(TRIM(harvest.batch)) = :legacyBatchName
+                  AND LOWER(TRIM(COALESCE(harvest.greenhouse, ''))) = :legacyGreenhouse
+                )
+              )`,
+              {
+                batchId: filter.batchId,
+                legacyBatchName: representative.batch.trim().toLowerCase(),
+                legacyGreenhouse: (representative.greenhouse ?? '')
+                  .trim()
+                  .toLowerCase(),
+              },
+            );
+          } else {
+            qb.andWhere('1 = 0');
+          }
         }
         if (filter.dateFrom) {
           qb.andWhere('harvest.date >= :dateFrom', {
