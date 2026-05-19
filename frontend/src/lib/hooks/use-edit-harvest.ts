@@ -91,6 +91,8 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
       rowLength: 0,
       plantsPerMeter: 0,
       rowSpacing: 0,
+      totalPlants: 0,
+      lostPlants: 0,
     });
     setErrors({});
   }, []);
