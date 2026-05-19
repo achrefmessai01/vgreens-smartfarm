@@ -22,7 +22,7 @@ import {
   MAX_COMPARE_BATCHES,
 } from '@/lib/hooks/use-harvest-dashboard-url-state';
 import { cn } from '@/lib/utils';
-import { GitCompareArrows, X } from 'lucide-react';
+import { Leaf, Clock, GitCompareArrows, X } from 'lucide-react';
 
 export interface DashboardFiltersProps {
   period: DateFilter;
@@ -53,6 +53,15 @@ export function DashboardFilters({
 }: DashboardFiltersProps) {
   const { t } = useI18n();
 
+  const PERIOD_ICON: Record<DateFilter, typeof Clock> = {
+    today: Clock,
+    thisWeek: Clock,
+    lastWeek: Clock,
+    thisMonth: Clock,
+    lastMonth: Clock,
+    total: Clock,
+  };
+
   const periodOptions: { value: DateFilter; label: string }[] = [
     { value: 'today', label: t.common?.today || 'Today' },
     { value: 'thisWeek', label: t.common?.thisWeek || 'This Week' },
@@ -78,28 +87,34 @@ export function DashboardFilters({
 
   return (
     <div
-      className={cn(
-        'flex flex-wrap items-center justify-end gap-2',
-        className,
-      )}
+      className={cn('flex flex-wrap items-center justify-end gap-2', className)}
     >
       <Select
         value={period}
         onValueChange={(v) => onPeriodChange(v as DateFilter)}
       >
         <SelectTrigger className="h-9 w-40">
-          <SelectValue placeholder={t.common?.selectPeriod || 'Select period'} />
+          <SelectValue
+            placeholder={t.common?.selectPeriod || 'Select period'}
+          />
         </SelectTrigger>
         <SelectContent>
-          {periodOptions.map((option) => (
-            <SelectItem
-              key={option.value}
-              value={option.value}
-              className="text-sm"
-            >
-              {option.label}
-            </SelectItem>
-          ))}
+          {periodOptions.map((option) => {
+            const ItemIcon = PERIOD_ICON[option.value] ?? Clock;
+            return (
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                className="text-sm"
+              >
+                <ItemIcon
+                  className="text-muted-foreground h-3.5 w-3.5"
+                  aria-hidden
+                />
+                <span>{option.label}</span>
+              </SelectItem>
+            );
+          })}
         </SelectContent>
       </Select>
 
@@ -119,12 +134,8 @@ export function DashboardFilters({
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            sideOffset={6}
-            className="w-72 p-0"
-          >
-            <div className="px-3 pt-3 pb-2 text-xs font-medium text-muted-foreground">
+          <DropdownMenuContent align="end" sideOffset={6} className="w-72 p-0">
+            <div className="text-muted-foreground px-3 pt-3 pb-2 text-xs font-medium">
               Pick up to {MAX_COMPARE_BATCHES} batches to compare
             </div>
             <div className="max-h-72 overflow-y-auto px-2 pb-2">
@@ -179,11 +190,11 @@ export function DashboardFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_BATCHES} className="text-sm">
-              All batches
+              <Leaf></Leaf> All batches
             </SelectItem>
             {batches.map((b) => (
               <SelectItem key={b.id} value={b.id} className="text-sm">
-                {b.name}{' '}
+                <Leaf></Leaf> {b.name}
                 <span className="text-muted-foreground">({b.species})</span>
               </SelectItem>
             ))}
