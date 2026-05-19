@@ -8,6 +8,7 @@ import {
   HarvestFilterInput,
   DashboardFilterInput,
   HarvestDashboardMetrics,
+  HarvestBatchListItem,
 } from './dto';
 import { User } from '@modules/users/entities/user.entity';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
@@ -76,6 +77,23 @@ export class HarvestsResolver {
       filter ?? undefined,
     );
     return serializeHarvestsToCsv(harvests);
+  }
+
+  @Query(() => [HarvestBatchListItem], { name: 'harvestBatches' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  async findBatches(
+    @CurrentUser() currentUser: User,
+  ): Promise<HarvestBatchListItem[]> {
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? undefined
+        : currentUser.tenantId;
+
+    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
+    return this.harvestsService.findBatchesForSelector(tenantId);
   }
 
   @Query(() => HarvestDashboardMetrics, { name: 'harvestDashboard' })

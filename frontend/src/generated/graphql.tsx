@@ -232,6 +232,8 @@ export type CumulativeYieldData = {
 export type DashboardFilterInput = {
   /** Filter by batch name */
   batch?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by batch root id; matches the batch row itself and all its harvest log entries (via parentBatchId) */
+  batchId?: InputMaybe<Scalars['ID']['input']>;
   /** Start date for dashboard data (ISO date string) */
   dateFrom?: InputMaybe<Scalars['String']['input']>;
   /** End date for dashboard data (ISO date string) */
@@ -243,6 +245,17 @@ export type DashboardFilterInput = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
   /** Filter by variety */
   variety?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type HarvestBatchListItem = {
+  __typename?: 'HarvestBatchListItem';
+  greenhouse?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  plantingDate: Scalars['DateTime']['output'];
+  species: Scalars['String']['output'];
+  status: HarvestStatus;
+  variety: Scalars['String']['output'];
 };
 
 export type DeleteImageInput = {
@@ -789,6 +802,7 @@ export type Query = {
   getSystemErrorStats: Scalars['String']['output'];
   greenhouseOptions: Array<Scalars['String']['output']>;
   harvest?: Maybe<Harvest>;
+  harvestBatches: Array<HarvestBatchListItem>;
   harvestDashboard: HarvestDashboardMetrics;
   harvests: Array<Harvest>;
   health: Scalars['String']['output'];
@@ -5053,3 +5067,53 @@ export type UserQueryHookResult = ReturnType<typeof useUserQuery>;
 export type UserLazyQueryHookResult = ReturnType<typeof useUserLazyQuery>;
 export type UserSuspenseQueryHookResult = ReturnType<typeof useUserSuspenseQuery>;
 export type UserQueryResult = Apollo.QueryResult<UserQuery, UserQueryVariables>;
+export type GetHarvestBatchesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetHarvestBatchesQuery = { __typename?: 'Query', harvestBatches: Array<{ __typename?: 'HarvestBatchListItem', id: string, name: string, species: string, variety: string, greenhouse?: string | null, plantingDate: any, status: HarvestStatus }> };
+
+export const GetHarvestBatchesDocument = gql`
+    query GetHarvestBatches {
+  harvestBatches {
+    id
+    name
+    species
+    variety
+    greenhouse
+    plantingDate
+    status
+  }
+}
+    `;
+
+/**
+ * __useGetHarvestBatchesQuery__
+ *
+ * To run a query within a React component, call `useGetHarvestBatchesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetHarvestBatchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetHarvestBatchesQuery();
+ */
+export function useGetHarvestBatchesQuery(baseOptions?: Apollo.QueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>(GetHarvestBatchesDocument, options);
+      }
+export function useGetHarvestBatchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>(GetHarvestBatchesDocument, options);
+        }
+// @ts-ignore
+export function useGetHarvestBatchesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>;
+export function useGetHarvestBatchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestBatchesQuery | undefined, GetHarvestBatchesQueryVariables>;
+export function useGetHarvestBatchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>(GetHarvestBatchesDocument, options);
+        }
+export type GetHarvestBatchesQueryHookResult = ReturnType<typeof useGetHarvestBatchesQuery>;
+export type GetHarvestBatchesLazyQueryHookResult = ReturnType<typeof useGetHarvestBatchesLazyQuery>;
+export type GetHarvestBatchesSuspenseQueryHookResult = ReturnType<typeof useGetHarvestBatchesSuspenseQuery>;
+export type GetHarvestBatchesQueryResult = Apollo.QueryResult<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>;

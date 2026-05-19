@@ -22,32 +22,43 @@ interface ClassDistributionData {
   waste: number;
 }
 
-interface ClassDistributionChartProps {
-  data: ClassDistributionData[];
-  className?: string;
+interface ClassDistributionSeries {
+  batchId: string;
+  batchName: string;
+  color: string;
+  marketable: number;
+  classB: number;
+  waste: number;
 }
+
+type ClassDistributionChartProps = {
+  className?: string;
+  title?: string;
+} & (
+  | { data: ClassDistributionData[]; series?: never }
+  | { series: ClassDistributionSeries[]; data?: never }
+);
 
 const ClassTooltip = ({ active, payload, label }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
     <ChartTooltipContainer>
-      <p className="font-medium">{`Date: ${label}`}</p>
+      <p className="font-medium">{label}</p>
       {payload.map((entry, index) => (
         <p key={index} className="text-sm" style={{ color: entry.color }}>
-          {`${entry.name ?? entry.dataKey}: ${entry.value} kg`}
+          {`${entry.name ?? entry.dataKey}: ${Math.round((entry.value ?? 0) * 10) / 10} kg`}
         </p>
       ))}
     </ChartTooltipContainer>
   );
 };
 
-export function ClassDistributionChart({
-  data,
-  className,
-}: ClassDistributionChartProps) {
+export function ClassDistributionChart(props: ClassDistributionChartProps) {
   const { t } = useI18n();
   const classBMode = useHarvestClassBMode();
   const h = t.pages.harvest;
+  const { className, title } = props;
+  const isMulti = 'series' in props && props.series !== undefined;
 
   const primaryName = classBMode
     ? (h?.quality1 ?? 'Quality 1')
@@ -63,16 +74,27 @@ export function ClassDistributionChart({
     ? 'drop-shadow(0 4px 6px rgba(20, 184, 166, 0.3))'
     : 'drop-shadow(0 4px 6px rgba(239, 68, 68, 0.3))';
 
+  const chartData = isMulti
+    ? props.series.map((s) => ({
+        name: s.batchName,
+        marketable: s.marketable,
+        classB: s.classB,
+        waste: s.waste,
+        color: s.color,
+      }))
+    : props.data;
+  const xKey = isMulti ? 'name' : 'date';
+
   return (
     <Card className={className}>
       <div className="p-6">
         <h3 className="mb-4 text-lg font-semibold">
-          {h?.classDistribution ?? 'Class Distribution'}
+          {title ?? h?.classDistribution ?? 'Class Distribution'}
         </h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={data}
+              data={chartData}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
               <defs>
@@ -101,10 +123,10 @@ export function ClassDistributionChart({
                 stroke="#94a3b8"
               />
               <XAxis
-                dataKey="date"
+                dataKey={xKey}
                 fontSize={12}
-                angle={-45}
-                textAnchor="end"
+                angle={isMulti ? 0 : -45}
+                textAnchor={isMulti ? 'middle' : 'end'}
                 interval={0}
               />
               <YAxis

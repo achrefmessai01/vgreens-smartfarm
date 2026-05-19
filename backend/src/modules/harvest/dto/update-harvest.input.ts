@@ -55,19 +55,19 @@ export class UpdateHarvestInput {
   @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   numberOfRows?: number;
 
   @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   rowLength?: number;
 
   @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
-  @Min(0.01)
+  @Min(0)
   plantsPerMeter?: number;
 
   @Field(() => Float, { nullable: true })

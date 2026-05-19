@@ -23,6 +23,15 @@ export class DashboardFilterInput {
   @IsString()
   batch?: string;
 
+  @Field(() => ID, {
+    nullable: true,
+    description:
+      'Filter by batch root id; matches the batch row itself and all its harvest log entries (via parentBatchId)',
+  })
+  @IsOptional()
+  @IsUUID()
+  batchId?: string;
+
   @Field({
     nullable: true,
     description: 'Start date for dashboard data (ISO date string)',
