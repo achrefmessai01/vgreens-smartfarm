@@ -11,6 +11,8 @@ import {
 import { GitCompareArrows } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { BrixTrendChart } from './charts/brix-trend-chart';
+import { ClassDistributionChart } from './charts/class-distribution-chart';
+import { CumulativeYieldChart } from './charts/cumulative-yield-chart';
 import { YieldOverTimeChart } from './charts/yield-over-time-chart';
 
 const COMPARE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
@@ -87,15 +89,45 @@ export function HarvestDashboardCompare({
     );
   }
 
-  const series = selected.map(({ batch, color }) => ({
+  const yieldSeries = selected.map(({ batch, color }) => ({
     batchId: batch.id,
     batchName: batch.name,
     color,
     data: loaded[batch.id]?.data?.yieldOverTime ?? [],
   }));
 
+  const brixSeries = selected.map(({ batch, color }) => ({
+    batchId: batch.id,
+    batchName: batch.name,
+    color,
+    data: loaded[batch.id]?.data?.brixTrend ?? [],
+  }));
+
+  const cumulativeSeries = selected.map(({ batch, color }) => ({
+    batchId: batch.id,
+    batchName: batch.name,
+    color,
+    data: loaded[batch.id]?.data?.cumulativeYield ?? [],
+  }));
+
+  const classSeries = selected.map(({ batch, color }) => {
+    const data = loaded[batch.id]?.data;
+    const totalYield = data?.totalYield ?? 0;
+    const wasteTotal = data?.wasteTotal ?? 0;
+    const classBTotal = data?.classBTotal ?? 0;
+    const marketable = Math.max(totalYield - wasteTotal, 0);
+    return {
+      batchId: batch.id,
+      batchName: batch.name,
+      color,
+      marketable,
+      classB: classBTotal,
+      waste: wasteTotal,
+    };
+  });
+
   return (
-    <div className="flex flex-col gap-6">
+    <div>
       {selected.map(({ batch, color }) => (
         <BatchDataLoader
           key={batch.id}
@@ -115,12 +147,12 @@ export function HarvestDashboardCompare({
       ))}
 
       <div
-        className={`grid grid-cols-1 gap-3 sm:gap-4 ${
+        className={`mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:gap-6 ${
           selected.length === 2
-            ? 'sm:grid-cols-2'
+            ? 'md:grid-cols-2'
             : selected.length === 3
-              ? 'sm:grid-cols-3'
-              : 'sm:grid-cols-2 lg:grid-cols-4'
+              ? 'md:grid-cols-3'
+              : 'md:grid-cols-2 lg:grid-cols-4'
         }`}
       >
         {selected.map(({ batch, color }) => {
@@ -129,7 +161,10 @@ export function HarvestDashboardCompare({
           const isLoading = state?.loading ?? true;
           const totalYield = data?.totalYield ?? 0;
           const marketablePercent = data?.marketablePercent ?? 0;
+          const wastePercent = data?.wastePercent ?? 0;
           const averageBrix = data?.averageBrix ?? 0;
+          const criticalAlerts = data?.criticalAlerts ?? 0;
+          const daysActive = data?.daysActive ?? 0;
           const harvestCount = data?.harvestCount ?? 0;
           return (
             <Card
@@ -149,7 +184,7 @@ export function HarvestDashboardCompare({
                   style={{ backgroundColor: color }}
                 />
               </div>
-              <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+              <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
                 <div>
                   <p className="text-muted-foreground">
                     {h?.totalYield ?? 'Total Yield'}
@@ -160,18 +195,42 @@ export function HarvestDashboardCompare({
                 </div>
                 <div>
                   <p className="text-muted-foreground">
-                    {h?.marketablePercent ?? 'Marketable'}
+                    {h?.averageBrix ?? 'Avg Brix'}
                   </p>
                   <p className="text-sm font-semibold">
+                    {isLoading ? '–' : `${averageBrix.toFixed(1)}°Bx`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">
+                    {h?.marketablePercent ?? 'Marketable %'}
+                  </p>
+                  <p className="text-sm font-semibold text-emerald-600">
                     {isLoading ? '–' : `${marketablePercent.toFixed(1)}%`}
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">
-                    {h?.averageBrix ?? 'Avg Brix'}
+                    {h?.wastePercent ?? 'Waste %'}
+                  </p>
+                  <p className="text-sm font-semibold text-red-600">
+                    {isLoading ? '–' : `${wastePercent.toFixed(1)}%`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">
+                    {h?.criticalAlerts ?? 'Critical Alerts'}
+                  </p>
+                  <p className="text-sm font-semibold text-amber-600">
+                    {isLoading ? '–' : criticalAlerts}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">
+                    {h?.daysActive ?? 'Days Active'}
                   </p>
                   <p className="text-sm font-semibold">
-                    {isLoading ? '–' : `${averageBrix.toFixed(1)}°Bx`}
+                    {isLoading ? '–' : daysActive}
                   </p>
                 </div>
               </div>
@@ -185,34 +244,11 @@ export function HarvestDashboardCompare({
         })}
       </div>
 
-      <YieldOverTimeChart
-        title={`${h?.yieldOverTime ?? 'Yield Over Time'} — comparison`}
-        series={series}
-      />
-
-      <div
-        className={`grid grid-cols-1 gap-4 ${
-          selected.length === 2
-            ? 'md:grid-cols-2'
-            : 'md:grid-cols-2 xl:grid-cols-3'
-        }`}
-      >
-        {selected.map(({ batch, color }) => {
-          const state = loaded[batch.id];
-          const data = state?.data;
-          return (
-            <div key={batch.id} className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 px-1">
-                <span
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: color }}
-                />
-                <span className="text-sm font-medium">{batch.name}</span>
-              </div>
-              <BrixTrendChart data={data?.brixTrend ?? []} />
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+        <YieldOverTimeChart series={yieldSeries} />
+        <ClassDistributionChart series={classSeries} />
+        <BrixTrendChart series={brixSeries} />
+        <CumulativeYieldChart series={cumulativeSeries} />
       </div>
     </div>
   );
