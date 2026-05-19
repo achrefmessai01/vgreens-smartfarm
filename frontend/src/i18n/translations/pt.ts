@@ -362,6 +362,7 @@ export const pt = {
       editBatchDescription: 'Atualize os detalhes do lote.',
       deleteBatch: 'Eliminar lote',
       completeBatch: 'Concluir lote',
+      harvestDate: 'Data da colheita',
       logHarvest: 'Registar colheita',
       logEntry: 'Registar entrada',
       logFirstEntryHint: 'Crie um lote e registe a sua primeira entrada.',

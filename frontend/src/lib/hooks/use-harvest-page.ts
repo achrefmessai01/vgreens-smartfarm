@@ -45,6 +45,7 @@ export function useHarvestPage() {
   const [pendingBatch, setPendingBatch] = React.useState<{
     id: string;
     details: BatchDetailsData;
+    initialDate?: string | null;
   } | null>(null);
 
   const editHarvest = useEditHarvest({
@@ -69,7 +70,7 @@ export function useHarvestPage() {
   const handleBatchCreated = React.useCallback(
     (harvest: Parameters<typeof harvestToBatchDetails>[0]) => {
       const details = harvestToBatchDetails(harvest);
-      setPendingBatch({ id: harvest.id, details });
+      setPendingBatch({ id: harvest.id, details, initialDate: null });
       setSidebarMode('create');
       setBatchSidebarOpen(true);
     },
@@ -111,14 +112,14 @@ export function useHarvestPage() {
 
   const handleSidebarEdit = React.useCallback((harvest: HarvestItem) => {
     const details = harvestToBatchDetails(harvest);
-    setPendingBatch({ id: harvest.id, details });
+    setPendingBatch({ id: harvest.id, details, initialDate: harvest.date });
     setSidebarMode('edit');
     setBatchSidebarOpen(true);
   }, []);
 
   const handleLogEntry = React.useCallback((harvest: HarvestItem) => {
     const details = harvestToBatchDetails(harvest);
-    setPendingBatch({ id: harvest.id, details });
+    setPendingBatch({ id: harvest.id, details, initialDate: null });
     setSidebarMode('create');
     setBatchSidebarOpen(true);
   }, []);

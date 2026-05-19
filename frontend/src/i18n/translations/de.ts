@@ -356,6 +356,7 @@ export const de = {
       editBatchDescription: 'Batch-Details aktualisieren.',
       deleteBatch: 'Batch löschen',
       completeBatch: 'Batch abschließen',
+      harvestDate: 'Erntedatum',
       logHarvest: 'Ernte protokollieren',
       logEntry: 'Eintrag protokollieren',
       logFirstEntryHint:

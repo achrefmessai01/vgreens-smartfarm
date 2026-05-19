@@ -359,6 +359,7 @@ export const pl = {
       editBatchDescription: 'Zaktualizuj szczegóły partii.',
       deleteBatch: 'Usuń partię',
       completeBatch: 'Zakończ partię',
+      harvestDate: 'Data zbioru',
       logHarvest: 'Zarejestruj zbiór',
       logEntry: 'Zarejestruj wpis',
       logFirstEntryHint: 'Utwórz partię i zarejestruj swój pierwszy wpis.',

@@ -348,6 +348,7 @@ export const fr = {
       editBatchDescription: 'Mettre à jour les détails du lot.',
       deleteBatch: 'Supprimer le lot',
       completeBatch: 'Terminer le lot',
+      harvestDate: 'Date de récolte',
       logHarvest: 'Enregistrer la récolte',
       logEntry: 'Saisie',
       logFirstEntryHint: 'Créez un lot et enregistrez votre première saisie.',

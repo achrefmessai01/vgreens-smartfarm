@@ -356,6 +356,7 @@ export const tr = {
       editBatchDescription: 'Parti detaylarını güncelle.',
       deleteBatch: 'Partiyi sil',
       completeBatch: 'Partiyi tamamla',
+      harvestDate: 'Hasat tarihi',
       logHarvest: 'Hasat kaydet',
       logEntry: 'Giriş kaydet',
       logFirstEntryHint: 'Bir parti oluşturun ve ilk kaydı yapın.',
