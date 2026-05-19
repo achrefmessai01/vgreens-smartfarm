@@ -20,6 +20,8 @@ const INITIAL_FORM_DATA: BatchFormData = {
   rowLength: 0,
   plantsPerMeter: 0,
   rowSpacing: 0,
+  totalPlants: 0,
+  lostPlants: 0,
 };
 
 function validateBatchForm(data: BatchFormData): BatchFormErrors {
