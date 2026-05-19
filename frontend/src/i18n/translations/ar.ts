@@ -353,6 +353,7 @@ export const ar = {
       editBatchDescription: 'تحديث تفاصيل الدفعة.',
       deleteBatch: 'حذف الدفعة',
       completeBatch: 'إنهاء الدفعة',
+      harvestDate: 'تاريخ الحصاد',
       logHarvest: 'تسجيل حصاد',
       logEntry: 'تسجيل إدخال',
       logFirstEntryHint: 'أنشئ دفعة وسجّل أول إدخال لك.',

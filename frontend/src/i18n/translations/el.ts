@@ -364,6 +364,7 @@ export const el = {
       editBatchDescription: 'Ενημερώστε τις λεπτομέρειες της παρτίδας.',
       deleteBatch: 'Διαγραφή παρτίδας',
       completeBatch: 'Ολοκλήρωση παρτίδας',
+      harvestDate: 'Ημερομηνία συγκομιδής',
       logHarvest: 'Καταχώριση συγκομιδής',
       logEntry: 'Καταχώριση εγγραφής',
       logFirstEntryHint:

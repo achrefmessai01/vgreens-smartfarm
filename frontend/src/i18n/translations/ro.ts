@@ -363,6 +363,7 @@ export const ro = {
       editBatchDescription: 'Actualizează detaliile lotului.',
       deleteBatch: 'Șterge lot',
       completeBatch: 'Finalizează lot',
+      harvestDate: 'Data recoltei',
       logHarvest: 'Înregistrează recoltă',
       logEntry: 'Înregistrează intrare',
       logFirstEntryHint: 'Creează un lot și înregistrează prima intrare.',

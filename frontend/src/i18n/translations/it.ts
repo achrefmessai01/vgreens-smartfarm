@@ -364,6 +364,7 @@ export const it = {
       editBatchDescription: 'Aggiorna i dettagli del lotto.',
       deleteBatch: 'Elimina lotto',
       completeBatch: 'Completa lotto',
+      harvestDate: 'Data del raccolto',
       logHarvest: 'Registra raccolto',
       logEntry: 'Registra voce',
       logFirstEntryHint: 'Crea un lotto e registra la tua prima voce.',

@@ -50,6 +50,9 @@ export interface YieldDataFieldProps {
   classB: number;
   rowX: number;
   rowY: number;
+  harvestDate: string;
+  maxDate: string;
+  onHarvestDateChange: (value: string) => void;
   onYieldChange?: (
     field: 'marketable' | 'waste' | 'classB' | 'rowX' | 'rowY',
     value: number,

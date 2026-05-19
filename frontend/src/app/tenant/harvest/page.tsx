@@ -180,6 +180,7 @@ export default function HarvestPage() {
           harvestId={pendingBatch?.id ?? null}
           batchData={pendingBatch?.details ?? null}
           mode={sidebarMode}
+          initialDate={pendingBatch?.initialDate ?? null}
           onCompleted={handleSidebarCompleted}
         />
       </div>
