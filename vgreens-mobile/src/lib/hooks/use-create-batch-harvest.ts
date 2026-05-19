@@ -18,6 +18,8 @@ const initialForm = (): BatchFormData => ({
   rowLength: 0,
   plantsPerMeter: 0,
   rowSpacing: 0,
+  totalPlants: 0,
+  lostPlants: 0,
 });
 
 function validate(data: BatchFormData): BatchFormErrors {
@@ -77,6 +79,8 @@ export function useCreateBatchHarvest(onSuccess?: (h: CreatedHarvest) => void) {
           rowLength: formData.rowLength,
           plantsPerMeter: formData.plantsPerMeter,
           rowSpacing: formData.rowSpacing,
+          totalPlants: formData.totalPlants,
+          lostPlants: formData.lostPlants,
           date: new Date().toISOString(),
           status: HarvestStatus.Draft,
         },

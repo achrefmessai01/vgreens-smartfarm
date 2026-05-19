@@ -10,10 +10,10 @@ import type { ServerError } from '@apollo/client/link/utils';
 export const apolloErrorLink = onError(
   ({ graphQLErrors, networkError, operation }) => {
     if (graphQLErrors) {
-      graphQLErrors.forEach(({ message, locations, path }) => {
+      graphQLErrors.forEach(({ message, locations, path, extensions }) => {
         console.error(
           `[GraphQL error] op=${operation.operationName} message=${message}`,
-          { locations, path },
+          { locations, path, extensions },
         );
       });
     }

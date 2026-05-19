@@ -16,6 +16,8 @@ export interface BatchDetailsData {
   rowLength: number;
   plantsPerMeter: number;
   rowSpacing: number;
+  totalPlants: number;
+  lostPlants: number;
   plantingDate: string;
   todaysHarvest: {
     marketable: number;
@@ -48,6 +50,9 @@ export interface YieldDataFieldProps {
   classB: number;
   rowX: number;
   rowY: number;
+  harvestDate: string;
+  maxDate: string;
+  onHarvestDateChange: (value: string) => void;
   onYieldChange?: (
     field: 'marketable' | 'waste' | 'classB' | 'rowX' | 'rowY',
     value: number,

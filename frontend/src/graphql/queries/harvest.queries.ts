@@ -17,6 +17,8 @@ export const HARVESTS_QUERY = gql`
       rowLength
       plantsPerMeter
       rowSpacing
+      totalPlants
+      lostPlants
       status
       date
       classA
@@ -57,6 +59,8 @@ export const HARVEST_QUERY = gql`
       rowLength
       plantsPerMeter
       rowSpacing
+      totalPlants
+      lostPlants
       status
       date
       classA
@@ -76,6 +80,20 @@ export const HARVEST_QUERY = gql`
         lastName
         email
       }
+    }
+  }
+`;
+
+export const HARVESTS_CSV_EXPORT_QUERY = gql`
+  query HarvestsCsvExport($filter: HarvestFilterInput) {
+    harvestsCsvExport(filter: $filter)
+  }
+`;
+
+export const HARVESTS_COUNT_QUERY = gql`
+  query HarvestsCount($filter: HarvestFilterInput) {
+    harvests(filter: $filter) {
+      id
     }
   }
 `;

@@ -7,6 +7,7 @@ import {
   DeleteHarvestDialog,
   EditHarvestDialog,
   HarvestDashboard,
+  HarvestExportDialog,
   HarvestPageHeader,
   HarvestTable,
 } from '@/components/harvest';
@@ -16,6 +17,7 @@ import { useHarvestPage } from '@/lib/hooks/use-harvest-page';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { BarChart3, History } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 export default function HarvestPage() {
   const { t } = useI18n();
@@ -62,6 +64,8 @@ export default function HarvestPage() {
     handleBatchDeleteRequest,
     isBatchDelete,
   } = useHarvestPage();
+
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   return (
     <FeatureGuard featureKey="harvest_management">
@@ -128,6 +132,7 @@ export default function HarvestPage() {
                 summary={summary}
                 title={t.pages.harvest?.harvestEntryTitle || 'Harvest Entry'}
                 onCreateBatch={handleCreateBatch}
+                onExportClick={() => setExportDialogOpen(true)}
               />
               <HarvestTable
                 harvests={harvests ?? []}
@@ -180,7 +185,13 @@ export default function HarvestPage() {
           harvestId={pendingBatch?.id ?? null}
           batchData={pendingBatch?.details ?? null}
           mode={sidebarMode}
+          initialDate={pendingBatch?.initialDate ?? null}
           onCompleted={handleSidebarCompleted}
+        />
+
+        <HarvestExportDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
         />
       </div>
     </FeatureGuard>

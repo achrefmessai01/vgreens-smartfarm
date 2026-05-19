@@ -21,6 +21,8 @@ const INITIAL_FORM_DATA: BatchFormData = {
   rowLength: 0,
   plantsPerMeter: 0,
   rowSpacing: 0,
+  totalPlants: 0,
+  lostPlants: 0,
 };
 
 function computeRowSpacing(data: BatchFormData): number {
@@ -88,6 +90,8 @@ export function useCreateBatchForm({
               rowLength: formData.rowLength,
               plantsPerMeter: formData.plantsPerMeter,
               rowSpacing,
+              totalPlants: formData.totalPlants,
+              lostPlants: formData.lostPlants,
               date: new Date().toISOString(),
               status: HarvestStatus.Draft,
             },

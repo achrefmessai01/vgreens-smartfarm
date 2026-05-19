@@ -8,12 +8,14 @@ import {
   HarvestFilterInput,
   DashboardFilterInput,
   HarvestDashboardMetrics,
+  HarvestBatchListItem,
 } from './dto';
 import { User } from '@modules/users/entities/user.entity';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
+import { serializeHarvestsToCsv } from './utils/csv.util';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @UseInterceptors(UserInterceptor, TenantInterceptor)
@@ -52,6 +54,46 @@ export class HarvestsResolver {
         : currentUser.tenantId;
 
     return this.harvestsService.findOneWithRelations(id, tenantId);
+  }
+
+  @Query(() => String, { name: 'harvestsCsvExport' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  async harvestsCsvExport(
+    @CurrentUser() currentUser: User,
+    @Args('filter', { type: () => HarvestFilterInput, nullable: true })
+    filter?: HarvestFilterInput | null,
+  ): Promise<string> {
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? undefined
+        : currentUser.tenantId;
+
+    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
+    const harvests = await this.harvestsService.findAllFiltered(
+      tenantId,
+      filter ?? undefined,
+    );
+    return serializeHarvestsToCsv(harvests);
+  }
+
+  @Query(() => [HarvestBatchListItem], { name: 'harvestBatches' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  async findBatches(
+    @CurrentUser() currentUser: User,
+  ): Promise<HarvestBatchListItem[]> {
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? undefined
+        : currentUser.tenantId;
+
+    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+
+    return this.harvestsService.findBatchesForSelector(tenantId);
   }
 
   @Query(() => HarvestDashboardMetrics, { name: 'harvestDashboard' })

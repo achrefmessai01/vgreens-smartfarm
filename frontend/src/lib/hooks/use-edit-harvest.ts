@@ -28,6 +28,8 @@ function harvestToFormData(harvest: HarvestItem): BatchFormData {
     rowLength: harvest.rowLength,
     plantsPerMeter: harvest.plantsPerMeter,
     rowSpacing: harvest.rowSpacing,
+    totalPlants: harvest.totalPlants,
+    lostPlants: harvest.lostPlants,
   };
 }
 
@@ -64,6 +66,8 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
     rowLength: 0,
     plantsPerMeter: 0,
     rowSpacing: 0,
+    totalPlants: 0,
+    lostPlants: 0,
   });
   const [errors, setErrors] = React.useState<BatchFormErrors>({});
   const [harvestId, setHarvestId] = React.useState<string | null>(null);
@@ -113,6 +117,8 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               rowLength: formData.rowLength,
               plantsPerMeter: formData.plantsPerMeter,
               rowSpacing,
+              totalPlants: formData.totalPlants,
+              lostPlants: formData.lostPlants,
               batch: `${formData.species} - ${formData.variety}`,
             },
           },

@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { useI18n } from '@/i18n';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -30,6 +31,7 @@ export interface BatchSidebarProps {
   harvestId: string | null;
   batchData: BatchDetailsData | null;
   mode?: SidebarMode;
+  initialDate?: string | null;
   onCompleted?: () => void;
   isLoading?: boolean;
 }
@@ -40,6 +42,7 @@ export function BatchSidebar({
   harvestId,
   batchData,
   mode = 'create',
+  initialDate,
   onCompleted,
   isLoading = false,
 }: BatchSidebarProps) {
@@ -50,6 +53,8 @@ export function BatchSidebar({
     loading: isSaving,
     showBrix,
     setShowBrix,
+    harvestDate,
+    setHarvestDate,
     handleBrixChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
@@ -57,7 +62,11 @@ export function BatchSidebar({
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
-  } = useBatchSidebar({ harvestId, batchData, mode, onCompleted });
+  } = useBatchSidebar({ harvestId, batchData, mode, initialDate, onCompleted });
+  const todayIso = React.useMemo(
+    () => new Date().toISOString().split('T')[0],
+    [],
+  );
 
   const busy = isLoading || isSaving;
 
@@ -117,6 +126,9 @@ export function BatchSidebar({
                     classB={currentData.todaysHarvest.classB}
                     rowX={currentData.todaysHarvest.rowX}
                     rowY={currentData.todaysHarvest.rowY}
+                    harvestDate={harvestDate}
+                    maxDate={todayIso}
+                    onHarvestDateChange={setHarvestDate}
                     onYieldChange={handleYieldChange}
                     isLoading={busy}
                   />

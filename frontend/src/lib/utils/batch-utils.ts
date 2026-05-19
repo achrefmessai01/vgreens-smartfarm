@@ -31,6 +31,8 @@ export function createBatchDetailsFromForm(
     rowLength: formData.rowLength,
     plantsPerMeter: formData.plantsPerMeter,
     rowSpacing: formData.rowSpacing,
+    totalPlants: formData.totalPlants,
+    lostPlants: formData.lostPlants,
     plantingDate: formData.plantingDate,
     todaysHarvest: {
       marketable: 0,
