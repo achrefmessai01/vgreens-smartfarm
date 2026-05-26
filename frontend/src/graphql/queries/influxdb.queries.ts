@@ -25,11 +25,44 @@ export const GET_BUCKET_FIELD_MEANS_LAST_MINUTES_QUERY = gql`
   }
 `;
 
-export const GET_PAR_DLI_TODAY_QUERY = gql`
-  query GetParDliToday($input: GetParDliTodayInput!) {
-    getParDliToday(input: $input) {
-      time
-      dli
+export const GET_PAR_DLI_FOR_TENANT_QUERY = gql`
+  query GetParDliForTenant($tenantId: ID, $timezone: String) {
+    getParDliForTenant(input: { tenantId: $tenantId, timezone: $timezone }) {
+      combined {
+        currentPPFD
+        currentDLI
+        todaysGraphData {
+          time
+          dli
+        }
+        lowerEdge {
+          hour
+          dli
+        }
+        upperEdge {
+          hour
+          dli
+        }
+      }
+      greenhouses {
+        name
+        data {
+          currentPPFD
+          currentDLI
+          todaysGraphData {
+            time
+            dli
+          }
+          lowerEdge {
+            hour
+            dli
+          }
+          upperEdge {
+            hour
+            dli
+          }
+        }
+      }
     }
   }
 `;

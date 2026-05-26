@@ -95,6 +95,12 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const tenantBucketNameOverride = isVGreensAdmin
     ? (selectedTenantBucketName ?? null)
     : undefined;
+  // Mirror the bucket override but for tenantId — forwarded to the PAR
+  // graph so admins viewing another tenant fetch its mapping. `undefined`
+  // for tenant users lets the backend resolve from their auth context.
+  const tenantIdOverride = isVGreensAdmin
+    ? (selectedTenantId || null)
+    : undefined;
 
   // Explicit tenantId for all config queries.
   // Admin → selected tenant; tenant user → from me.tenant.id (always a valid UUID).
@@ -521,27 +527,6 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     return bay ? [bay] : [];
   }, [activeGreenhouseTab, bays]);
 
-  // Derive the InfluxDB greenhouse tag from the live bay data instead of
-  // hard-coding "greenhouse_01". `bay.name` is set from the row's
-  // `greenhouse` tag in farm-data-live.ts, so it tracks whatever identifier
-  // the tenant's bucket actually uses (some tenants tag with chamber names,
-  // not the canonical greenhouse_NN).
-  const greenhouseId = React.useMemo(() => {
-    const idx = activeGreenhouseTab === 0 ? 0 : activeGreenhouseTab - 1;
-    const bay = bays[idx];
-    if (bay?.name) return bay.name;
-    return `greenhouse_${String(Math.max(idx + 1, 1)).padStart(2, '0')}`;
-  }, [activeGreenhouseTab, bays]);
-
-  /**
-   * Greenhouse identifier for the embedded PAR graph in the **Combined**
-   * view (which doesn't have an "active" greenhouse). Defaults to the first
-   * bay's name and falls back to `greenhouse_01`.
-   */
-  const combinedParGraphGreenhouseId = React.useMemo(() => {
-    return bays[0]?.name ?? 'greenhouse_01';
-  }, [bays]);
-
   const ghLabels = [t.greenHouse1, t.greenHouse2];
 
   const greenhouseLabel = React.useMemo(() => {
@@ -622,15 +607,14 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     historyDrawerOpen,
     setHistoryDrawerOpen,
     bays: selectedBays,
-    greenhouseId,
     greenhouseLabel,
-    combinedParGraphGreenhouseId,
     combinedGreenhouses,
     getParameterLabel,
     handleSensorPositionCommit,
     savingDeviceId,
     positionErrorDeviceId,
     tenantBucketNameOverride,
+    tenantIdOverride,
     farmLayout,
     greenhouseDimensions: selectedGreenhouseDimensions,
     disabledSensorFields: disabledSensorFieldsSet,
