@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { useI18n } from '@/i18n';
 
 export interface ConfirmationDialogProps {
   open: boolean;
@@ -31,14 +32,17 @@ export function ConfirmationDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   variant = 'default',
   onConfirm,
   onCancel,
   isLoading = false,
   children,
 }: ConfirmationDialogProps) {
+  const { t } = useI18n();
+  const resolvedConfirmLabel = confirmLabel ?? t.common.confirm;
+  const resolvedCancelLabel = cancelLabel ?? t.common.cancel;
   const handleCancel = () => {
     onCancel?.();
     onOpenChange(false);
@@ -71,7 +75,7 @@ export function ConfirmationDialog({
             disabled={isLoading}
             className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 sm:flex-1"
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </Button>
           <Button
             variant={variant === 'destructive' ? 'destructive' : 'default'}
@@ -82,10 +86,10 @@ export function ConfirmationDialog({
             {isLoading ? (
               <span className="inline-flex items-center gap-2">
                 <Spinner />
-                {confirmLabel}
+                {resolvedConfirmLabel}
               </span>
             ) : (
-              confirmLabel
+              resolvedConfirmLabel
             )}
           </Button>
         </DialogFooter>

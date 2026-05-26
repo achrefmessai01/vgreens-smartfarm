@@ -1,11 +1,17 @@
+'use client';
+
 import Link from 'next/link';
 import { CheckCircle, FileText, Sparkles } from 'lucide-react';
+import { useI18n } from '@/i18n';
 
 interface ReportSuccessScreenProps {
   reportId: string | null;
 }
 
 export function ReportSuccessScreen({ reportId }: ReportSuccessScreenProps) {
+  const { t } = useI18n();
+  const reportT = t.pages.report;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 sm:p-8 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="relative w-full max-w-md rounded-2xl border border-green-200/50 bg-white/90 p-6 shadow-2xl shadow-green-200/40 backdrop-blur-xl sm:p-8 dark:border-green-500/20 dark:bg-gray-900/60 dark:shadow-green-500/25">
@@ -23,11 +29,10 @@ export function ReportSuccessScreen({ reportId }: ReportSuccessScreenProps) {
 
           <div className="space-y-4">
             <h2 className="text-2xl leading-tight font-bold text-gray-900 sm:text-3xl dark:text-white">
-              Report Submitted!
+              {reportT.successTitle}
             </h2>
             <p className="mx-auto max-w-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              Thank you for your report. Our team will review it and get back to
-              you soon.
+              {reportT.successDescription}
             </p>
 
             {reportId && (
@@ -35,7 +40,7 @@ export function ReportSuccessScreen({ reportId }: ReportSuccessScreenProps) {
                 <Link href={`/report-status?id=${reportId}`}>
                   <button className="inline-flex transform items-center gap-2 rounded-xl bg-green-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600">
                     <FileText className="h-4 w-4" />
-                    View Report Status
+                    {reportT.viewReportStatus}
                   </button>
                 </Link>
               </div>
@@ -43,7 +48,7 @@ export function ReportSuccessScreen({ reportId }: ReportSuccessScreenProps) {
           </div>
 
           <div className="text-sm text-gray-500 dark:text-gray-500">
-            Redirecting to report status in 3 seconds...
+            {reportT.redirectingHint}
           </div>
         </div>
       </div>

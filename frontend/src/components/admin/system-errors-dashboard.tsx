@@ -14,8 +14,10 @@ import { SystemErrorStatsCards } from './system-error-stats-cards';
 import { SystemErrorFilters } from './system-error-filters';
 import { SystemErrorsList } from './system-errors-list';
 import { SystemErrorData } from './system-error-card';
+import { useI18n } from '@/i18n';
 
 export function SystemErrorsDashboard() {
+  const { t } = useI18n();
   const [filters, setFilters] = React.useState({
     severity: '',
     source: '',
@@ -116,7 +118,12 @@ export function SystemErrorsDashboard() {
     return (
       <div className="p-8 text-center text-red-500">
         <AlertTriangle className="mx-auto mb-4 h-12 w-12" />
-        <p>Failed to load system errors: {error.message}</p>
+        <p>
+          {t.pages.admin.systemErrors.loadFailed.replace(
+            '{message}',
+            error.message,
+          )}
+        </p>
       </div>
     );
   }
@@ -125,14 +132,16 @@ export function SystemErrorsDashboard() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">System Error Dashboard</h1>
+          <h1 className="text-3xl font-bold">
+            {t.pages.admin.systemErrors.dashboardTitle}
+          </h1>
           <p className="text-muted-foreground">
-            Monitor and resolve application errors in real-time
+            {t.pages.admin.systemErrors.dashboardSubtitle}
           </p>
         </div>
         <Button onClick={() => refetch()} variant="outline">
           <RefreshCw className="mr-2 h-4 w-4" />
-          Refresh
+          {t.common.refresh}
         </Button>
       </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { User } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import * as React from 'react';
 import { AppMobileLayout } from './app-mobile-layout';
@@ -14,6 +15,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children, user, onLogout }: AppLayoutProps) {
+  const { t } = useI18n();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
   const { isMobile, isInitialized } = useResponsiveBreakpoint('lg');
 
@@ -40,7 +42,7 @@ export function AppLayout({ children, user, onLogout }: AppLayoutProps) {
         name:
           user.firstName && user.lastName
             ? `${user.firstName} ${user.lastName}`
-            : user.email || 'Unknown User',
+            : user.email || t.common.unknownUser,
         avatar: user.imageUrl || undefined,
       }
     : undefined;

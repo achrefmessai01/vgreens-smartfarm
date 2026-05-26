@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useI18n } from '@/i18n';
 
 interface ErrorReportDeleteDialogProps {
   isOpen: boolean;
@@ -24,6 +25,8 @@ export function ErrorReportDeleteDialog({
   onConfirm,
   reportTitle,
 }: ErrorReportDeleteDialogProps) {
+  const { t } = useI18n();
+  const deleteT = t.pages.admin.reports.deleteDialog;
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
@@ -42,22 +45,21 @@ export function ErrorReportDeleteDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Error Report</DialogTitle>
+          <DialogTitle>{deleteT.title}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete the report "{reportTitle}"? This
-            action cannot be undone.
+            {deleteT.description} {reportTitle ? `"${reportTitle}"` : ''}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isDeleting}>
-            Cancel
+            {deleteT.cancel}
           </Button>
           <Button
             variant="destructive"
             onClick={handleConfirm}
             disabled={isDeleting}
           >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? t.common.loading : deleteT.confirm}
           </Button>
         </DialogFooter>
       </DialogContent>

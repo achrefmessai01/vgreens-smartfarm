@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { StyledSelect } from '@/components/ui/styled-select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { CirclePlus, ChevronRight, RotateCcw } from 'lucide-react';
 
@@ -83,6 +84,7 @@ export function TableFiltersPopover({
   onClearAll,
   className,
 }: TableFiltersPopoverProps) {
+  const { t } = useI18n();
   const [open, setOpen] = React.useState(false);
   const [expandedLabel, setExpandedLabel] = React.useState<string | null>(null);
 
@@ -104,7 +106,7 @@ export function TableFiltersPopover({
           )}
         >
           <CirclePlus className="h-4 w-4" aria-hidden />
-          <span>Filter</span>
+          <span>{t.common.filter}</span>
           {activeCount > 0 && (
             <span
               className="bg-primary text-primary-foreground flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium"
@@ -178,7 +180,7 @@ export function TableFiltersPopover({
               className="text-muted-foreground hover:bg-muted/50 hover:text-foreground flex w-full items-center justify-center gap-1.5 rounded-md py-2 text-sm"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              Clear all filters
+              {t.common.clearAllFilters}
             </button>
           </div>
         )}

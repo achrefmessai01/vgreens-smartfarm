@@ -58,11 +58,26 @@ export const useSystemErrorTableFilters = (
         label: t.pages.admin.reports.source ?? 'Source',
         value: filter.sourceIn?.length ? filter.sourceIn.join(',') : '',
         options: [
-          { label: 'Frontend', value: ErrorSource.Frontend },
-          { label: 'Backend', value: ErrorSource.Backend },
-          { label: 'Database', value: ErrorSource.Database },
-          { label: 'External API', value: ErrorSource.ExternalApi },
-          { label: 'Infrastructure', value: ErrorSource.Infrastructure },
+          {
+            label: t.pages.admin.systemErrors.sourceLabels.frontend,
+            value: ErrorSource.Frontend,
+          },
+          {
+            label: t.pages.admin.systemErrors.sourceLabels.backend,
+            value: ErrorSource.Backend,
+          },
+          {
+            label: t.pages.admin.systemErrors.sourceLabels.database,
+            value: ErrorSource.Database,
+          },
+          {
+            label: t.pages.admin.systemErrors.sourceLabels.externalApi,
+            value: ErrorSource.ExternalApi,
+          },
+          {
+            label: t.pages.admin.systemErrors.sourceLabels.infrastructure,
+            value: ErrorSource.Infrastructure,
+          },
         ],
         multiSelect: true,
         onFilterChange: (value) =>

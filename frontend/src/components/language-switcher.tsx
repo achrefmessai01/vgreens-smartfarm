@@ -14,7 +14,7 @@ import { FlagIcon } from '@/components/ui/flag-icon';
 import { cn } from '@/lib/utils';
 
 export function LanguageSwitcher() {
-  const { locale, setLocale } = useI18n();
+  const { locale, setLocale, t } = useI18n();
 
   return (
     <DropdownMenu>
@@ -23,7 +23,7 @@ export function LanguageSwitcher() {
           variant="outline"
           className="p-2"
           size="sm"
-          aria-label="Change language"
+          aria-label={t.common.changeLanguage}
         >
           <FlagIcon locale={locale} className="h-4 w-4" />
         </Button>

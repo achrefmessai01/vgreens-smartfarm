@@ -9,7 +9,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useI18nOptional } from '@/i18n';
+import { getTranslations } from '@/i18n/translations';
 import { cn } from '@/lib/utils';
+
+const fallbackT = getTranslations('en');
 
 interface TableSkeletonProps {
   /** Number of columns (default 5) */
@@ -28,6 +32,7 @@ export function TableSkeleton({
   className,
   showHeader = true,
 }: TableSkeletonProps) {
+  const t = useI18nOptional()?.t ?? fallbackT;
   const headerWidths = ['w-24', 'w-32', 'w-28', 'w-36', 'w-20', 'w-24', 'w-28'];
   const cellWidths = ['w-32', 'w-40', 'w-24', 'w-48', 'w-20', 'w-24', 'w-28'];
 
@@ -37,7 +42,7 @@ export function TableSkeleton({
         'border-border overflow-hidden rounded-md border',
         className,
       )}
-      aria-label="Loading table"
+      aria-label={t.common.loadingTable}
     >
       <Table>
         {showHeader && (

@@ -1,5 +1,6 @@
 'use client';
 
+import { useI18n } from '@/i18n';
 import { CameraCard } from './camera-card';
 import type { Camera } from '@/types/camera.types';
 
@@ -9,15 +10,16 @@ interface CameraGridProps {
 }
 
 export function CameraGrid({ cameras, onCameraClick }: CameraGridProps) {
+  const { t } = useI18n();
   if (cameras.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center px-4 py-16">
         <div className="space-y-3 text-center">
           <p className="text-muted-foreground text-lg font-semibold dark:text-white/70">
-            No cameras found
+            {t.pages.cameraLivestream.noCamerasFound}
           </p>
           <p className="text-muted-foreground text-sm dark:text-white/50">
-            Try adjusting your filters
+            {t.pages.cameraLivestream.tryAdjustingFilters}
           </p>
         </div>
       </div>

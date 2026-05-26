@@ -7,13 +7,28 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { FlagIcon } from '@/components/ui/flag-icon';
 import { UserRole } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
+import { locales, localeNativeNames } from '@/i18n/config';
+import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLogout } from '@/lib/hooks/use-logout';
-import { Building2, LogOut, Moon, Shield, Sun, User } from 'lucide-react';
+import {
+  Building2,
+  Check,
+  Globe,
+  LogOut,
+  Moon,
+  Shield,
+  Sun,
+  User,
+} from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 interface UserMenuProps {
@@ -21,7 +36,7 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ className }: UserMenuProps) {
-  const { t } = useI18n();
+  const { t, locale, setLocale } = useI18n();
   const handleLogout = useLogout();
   const { theme, setTheme } = useTheme();
   const { user, role, isVGreensAdmin } = useCurrentUser();
@@ -103,37 +118,31 @@ export function UserMenu({ className }: UserMenuProps) {
               {user.email}
             </span>
           )}
+          <div className="text-muted-foreground mt-1 ml-6 flex items-center gap-1.5 text-xs font-normal">
+            <Shield className="h-3 w-3" />
+            <span>{getRoleLabel()}</span>
+          </div>
+          {!isVGreensAdmin && user?.tenantId && (
+            <div className="text-muted-foreground ml-6 flex items-center gap-1.5 text-xs font-normal">
+              <Building2 className="h-3 w-3" />
+              <span>{getTenantName()}</span>
+            </div>
+          )}
         </DropdownMenuLabel>
 
         <DropdownMenuSeparator />
 
-        {/* Role Section */}
-        <div className="px-2 py-1.5">
-          <div className="text-muted-foreground flex items-center gap-2 text-xs">
-            <Shield className="h-3.5 w-3.5" />
-            <span>{getRoleLabel()}</span>
-          </div>
-        </div>
-
-        {/* Organization/Tenant Section */}
-        {!isVGreensAdmin && user?.tenantId && (
-          <>
-            <div className="px-2 py-1.5">
-              <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                <Building2 className="h-3.5 w-3.5" />
-                <span>{getTenantName()}</span>
-              </div>
-            </div>
-            <DropdownMenuSeparator />
-          </>
-        )}
+        {/* Preferences */}
+        <DropdownMenuLabel className="text-muted-foreground px-2 py-1 text-xs font-normal">
+          {t.common.preferences}
+        </DropdownMenuLabel>
 
         {/* Theme Toggle */}
         <DropdownMenuItem
           onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
           className="cursor-pointer"
         >
-          <div className="relative mr-2 h-4 w-4">
+          <div className="relative h-4 w-4 shrink-0">
             <Moon className="absolute inset-0 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
             <Sun className="absolute inset-0 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
           </div>
@@ -141,6 +150,50 @@ export function UserMenu({ className }: UserMenuProps) {
             {theme === 'dark' ? t.common.darkMode : t.common.lightMode}
           </span>
         </DropdownMenuItem>
+
+        {/* Language Switcher */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="cursor-pointer" chevron={false}>
+            <Globe className="h-4 w-4 shrink-0" />
+            <span className="flex-1">{t.common.language}</span>
+            <span className="text-muted-foreground ml-auto inline-flex items-center gap-1.5 text-xs">
+              <FlagIcon locale={locale} className="h-3.5 w-3.5" />
+              {localeNativeNames[locale]}
+            </span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent
+            sideOffset={8}
+            className="max-h-[60vh] min-w-48 overflow-y-auto p-1"
+          >
+            {locales.map((loc) => {
+              const isActive = locale === loc;
+              return (
+                <DropdownMenuItem
+                  key={loc}
+                  onClick={() => setLocale(loc)}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-2.5 py-2 pl-2 pr-2',
+                    isActive && 'bg-accent/60',
+                  )}
+                  dir={loc === 'ar' ? 'rtl' : 'ltr'}
+                >
+                  <FlagIcon locale={loc} className="h-4 w-4 shrink-0" />
+                  <span
+                    className={cn(
+                      'flex-1 text-sm',
+                      isActive && 'font-medium',
+                    )}
+                  >
+                    {localeNativeNames[loc]}
+                  </span>
+                  {isActive && (
+                    <Check className="text-primary h-4 w-4 shrink-0" />
+                  )}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
 
         <DropdownMenuSeparator />
 

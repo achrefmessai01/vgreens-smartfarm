@@ -2,8 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorReport } from '@/generated/graphql';
-import { formatDateTime } from '@/lib/utils/error-report-utils';
-import { useI18n } from '@/i18n';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { User } from 'lucide-react';
 
 interface ReportStatusInfoProps {
@@ -12,6 +11,7 @@ interface ReportStatusInfoProps {
 
 export function ReportStatusInfo({ report }: ReportStatusInfoProps) {
   const { t } = useI18n();
+  const { formatDateTime } = useLocaleFormatters();
 
   const infoData = [
     {

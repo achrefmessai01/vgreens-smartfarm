@@ -3,6 +3,7 @@
 import type { Bay } from '@/types/farm.types';
 import { ParameterRow } from './parameter-row';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { useI18n } from '@/i18n';
 import { getAverageParameterValue } from '@/lib/bay-parameter-utils';
 import { getParameterStatus } from '@/lib/parameter-status';
 
@@ -28,6 +29,7 @@ export function GreenhouseSummaryCard({
   valueOverride,
   onParameterClick,
 }: GreenhouseSummaryCardProps) {
+  const { t } = useI18n();
   const criticalCount = parameters.reduce((acc, p) => {
     const val =
       valueOverride?.(p.value) ?? getAverageParameterValue(bay, p.value);
@@ -43,7 +45,7 @@ export function GreenhouseSummaryCard({
         {criticalCount > 0 && (
           <div className="mr-1 ml-auto flex items-center">
             <span className="bg-destructive/90 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium text-white">
-              {criticalCount} critical
+              {criticalCount} {t.pages.farmOverview.criticalSuffix}
             </span>
           </div>
         )}

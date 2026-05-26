@@ -4,7 +4,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { formatFieldToLabel } from '@/lib/farm-data';
 import type { ParameterType } from '@/types/farm.types';
-import { useI18n } from '@/i18n';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 
 interface SensorHoverCardProps {
   parameter: ParameterType;
@@ -34,6 +34,7 @@ export function SensorHoverCard({
   children,
 }: SensorHoverCardProps) {
   const { t } = useI18n();
+  const { formatDateTime } = useLocaleFormatters();
   const { chamber, device, level } = parseSlotId(slotId);
 
   const metaInfo = meta ?? {};
@@ -108,20 +109,17 @@ export function SensorHoverCard({
               )}
               {time && (
                 <div>
-                  {t.pages.farmOverview.timeLabel}:{' '}
-                  {new Date(time).toLocaleString()}
+                  {t.pages.farmOverview.timeLabel}: {formatDateTime(time)}
                 </div>
               )}
               {start && (
                 <div>
-                  {t.pages.farmOverview.startLabel}:{' '}
-                  {new Date(start).toLocaleString()}
+                  {t.pages.farmOverview.startLabel}: {formatDateTime(start)}
                 </div>
               )}
               {stop && (
                 <div>
-                  {t.pages.farmOverview.stopLabel}:{' '}
-                  {new Date(stop).toLocaleString()}
+                  {t.pages.farmOverview.stopLabel}: {formatDateTime(stop)}
                 </div>
               )}
             </div>

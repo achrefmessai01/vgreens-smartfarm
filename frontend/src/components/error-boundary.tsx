@@ -12,6 +12,13 @@ import {
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { ReportSeverity } from '@/types/error-types';
 import { errorLogger } from '@/lib/error-logging';
+import { useI18nOptional } from '@/i18n';
+import { getTranslations } from '@/i18n/translations';
+
+// English-only fallback strings used when this boundary renders above the
+// I18nProvider in the tree (e.g. the root-level <ErrorBoundary level="global">
+// in app/layout.tsx). Mirrors the keys read below from `t.*`.
+const fallbackT = getTranslations('en');
 
 interface Props {
   children: React.ReactNode;
@@ -90,6 +97,7 @@ function DefaultErrorFallback({
   error: Error;
   retry: () => void;
 }) {
+  const t = useI18nOptional()?.t ?? fallbackT;
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-900">
       <Card className="w-full max-w-md">
@@ -98,18 +106,15 @@ function DefaultErrorFallback({
             <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
           </div>
           <CardTitle className="text-gray-900 dark:text-white">
-            Something went wrong
+            {t.errors.boundary.title}
           </CardTitle>
-          <CardDescription>
-            We&apos;ve encountered an unexpected error. Our team has been
-            notified and is working on a fix.
-          </CardDescription>
+          <CardDescription>{t.errors.boundary.description}</CardDescription>
         </CardHeader>
         <CardContent>
           {process.env.NODE_ENV === 'development' && (
             <details className="mt-4 text-left">
               <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                Error details (dev only)
+                {t.errors.boundary.devDetails}
               </summary>
               <pre className="mt-2 max-h-32 overflow-auto rounded bg-gray-100 p-2 text-xs text-red-600 dark:bg-gray-700 dark:text-red-400">
                 {error.message}
@@ -121,14 +126,14 @@ function DefaultErrorFallback({
           <div className="mt-6 flex space-x-3">
             <Button onClick={retry} className="flex-1" variant="default">
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try again
+              {t.common.tryAgain}
             </Button>
             <Button
               onClick={() => window.location.reload()}
               className="flex-1"
               variant="secondary"
             >
-              Reload page
+              {t.common.reloadPage}
             </Button>
           </div>
 
@@ -144,7 +149,7 @@ function DefaultErrorFallback({
                 window.location.href = `mailto:support@vgreens.com?subject=${subject}&body=${body}`;
               }}
             >
-              Contact support
+              {t.common.contactSupport}
             </Button>
           </div>
         </CardContent>

@@ -1,6 +1,7 @@
 'use client';
 
 import ErrorPage from '@/components/ui/error-page';
+import { useI18n } from '@/i18n';
 import { Camera } from 'lucide-react';
 
 export default function CameraErrorPage({
@@ -10,18 +11,19 @@ export default function CameraErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <ErrorPage
       error={error}
       reset={reset}
-      title="Camera Stream Error"
-      description="Something went wrong with the camera livestream. Your other farm sections are still working."
-      sectionName="Camera"
+      title={t.errors.camera.title}
+      description={t.errors.camera.description}
+      sectionName={t.errors.camera.section}
       theme="purple"
-      resetLabel="Reconnect Camera"
+      resetLabel={t.errors.camera.resetLabel}
       backLink={{
         href: '/tenant/dashboard',
-        label: 'Back to Dashboard',
+        label: t.common.backToDashboard,
         icon: Camera,
       }}
     />

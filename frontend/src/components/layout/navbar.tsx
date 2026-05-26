@@ -1,6 +1,6 @@
 'use client';
 
-import { useI18n } from '@/i18n';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { UserMenu } from './user-menu';
 
 interface NavbarProps {
@@ -15,14 +15,15 @@ interface NavbarProps {
 
 export function Navbar({ user, welcomeMessage, dateInfo }: NavbarProps) {
   const { t } = useI18n();
+  const { formatDate } = useLocaleFormatters();
 
   const defaultUser = {
-    name: user?.name || 'User',
+    name: user?.name || t.common.user,
     avatar: user?.avatar,
   };
 
   const defaultWelcomeMessage = `${t.common.welcomeBack}, ${defaultUser.name} 👋`;
-  const defaultDateInfo = new Date().toLocaleDateString('en-US', {
+  const defaultDateInfo = formatDate(new Date(), {
     weekday: 'long',
     month: '2-digit',
     day: '2-digit',

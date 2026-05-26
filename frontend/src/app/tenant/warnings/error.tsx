@@ -1,6 +1,7 @@
 'use client';
 
 import ErrorPage from '@/components/ui/error-page';
+import { useI18n } from '@/i18n';
 import { AlertCircle } from 'lucide-react';
 
 export default function WarningsErrorPage({
@@ -10,18 +11,19 @@ export default function WarningsErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <ErrorPage
       error={error}
       reset={reset}
-      title="Warnings Section Error"
-      description="Something went wrong with the warnings section. Your other farm sections are still working."
-      sectionName="Warnings"
+      title={t.errors.warnings.title}
+      description={t.errors.warnings.description}
+      sectionName={t.errors.warnings.section}
       theme="orange"
-      resetLabel="Reload Warnings"
+      resetLabel={t.errors.warnings.resetLabel}
       backLink={{
         href: '/tenant/dashboard',
-        label: 'Back to Dashboard',
+        label: t.common.backToDashboard,
         icon: AlertCircle,
       }}
     />

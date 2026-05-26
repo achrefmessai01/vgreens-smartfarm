@@ -1,6 +1,7 @@
 'use client';
 
 import ErrorPage from '@/components/ui/error-page';
+import { useI18n } from '@/i18n';
 import { Building2 } from 'lucide-react';
 
 export default function TenantErrorPage({
@@ -10,17 +11,18 @@ export default function TenantErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <ErrorPage
       error={error}
       reset={reset}
-      title="Dashboard Error"
-      description="An error occurred in your farm dashboard. Other sections should still be working."
-      sectionName="Tenant"
+      title={t.errors.tenant.title}
+      description={t.errors.tenant.description}
+      sectionName={t.errors.tenant.section}
       theme="orange"
       backLink={{
         href: '/tenant/dashboard',
-        label: 'Back to Dashboard',
+        label: t.common.backToDashboard,
         icon: Building2,
       }}
     />

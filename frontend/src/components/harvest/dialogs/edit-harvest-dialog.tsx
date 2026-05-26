@@ -58,7 +58,7 @@ export function EditHarvestDialog({
           </DialogTitle>
           <DialogDescription>
             {readOnly
-              ? 'View batch form details.'
+              ? (h?.viewBatchFormDetails ?? 'View batch form details.')
               : (h?.editBatchDescription ?? 'Update batch details.')}
           </DialogDescription>
         </DialogHeader>

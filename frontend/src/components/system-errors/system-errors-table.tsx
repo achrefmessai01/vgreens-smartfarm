@@ -6,6 +6,7 @@ import {
   type FilterConfigOption,
 } from '@/components/ui/data-table';
 import { SystemError } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
 import { useSystemErrorsRow } from './system-errors-table-rows';
 
@@ -26,6 +27,7 @@ export function SystemErrorsTable({
   isResolving = false,
   filterConfigs,
 }: SystemErrorsTableProps) {
+  const { t } = useI18n();
   const paginationConfig = usePaginationConfig();
 
   // Get row and card renderers from dedicated modules
@@ -37,16 +39,20 @@ export function SystemErrorsTable({
   });
 
   const columns: Column<SystemError>[] = [
-    { key: 'errorMessage', header: 'Message' },
-    { key: 'component', header: 'Component' },
-    { key: 'errorType', header: 'Type' },
-    { key: 'source', header: 'Source' },
-    { key: 'severity', header: 'Severity' },
-    { key: 'occurrenceCount', header: 'Count' },
-    { key: 'isResolved', header: 'Status' },
-    { key: 'createdAt', header: 'Created' },
-    { key: 'user', header: 'User' },
-    { key: 'actions', header: 'Actions', headerClassName: 'text-right' },
+    { key: 'errorMessage', header: t.pages.admin.systemErrors.columnMessage },
+    { key: 'component', header: t.pages.admin.systemErrors.columnComponent },
+    { key: 'errorType', header: t.pages.admin.systemErrors.columnType },
+    { key: 'source', header: t.pages.admin.systemErrors.columnSource },
+    { key: 'severity', header: t.pages.admin.systemErrors.columnSeverity },
+    { key: 'occurrenceCount', header: t.pages.admin.systemErrors.columnCount },
+    { key: 'isResolved', header: t.pages.admin.systemErrors.columnStatus },
+    { key: 'createdAt', header: t.pages.admin.systemErrors.columnCreated },
+    { key: 'user', header: t.pages.admin.systemErrors.columnUser },
+    {
+      key: 'actions',
+      header: t.pages.admin.systemErrors.columnActions,
+      headerClassName: 'text-right',
+    },
   ];
 
   return (
@@ -62,7 +68,7 @@ export function SystemErrorsTable({
       pageSizeOptions={paginationConfig.pageSizeOptions}
       paginationLabels={paginationConfig.paginationLabels}
       paginationVariant="compact"
-      emptyState={{ title: 'No system errors found' }}
+      emptyState={{ title: t.pages.admin.systemErrors.emptyTitle }}
       filterConfigs={filterConfigs}
     />
   );

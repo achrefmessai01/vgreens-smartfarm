@@ -1,6 +1,9 @@
+'use client';
+
 import { ArrowLeft, FileText, Image, Send, Upload, X } from 'lucide-react';
 import Link from 'next/link';
 import { ReportSeverity } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 
 interface ReportFormData {
   title: string;
@@ -39,6 +42,9 @@ export function ReportForm({
   onRemoveImage,
   onSubmit,
 }: ReportFormProps) {
+  const { t } = useI18n();
+  const reportT = t.pages.report;
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="mx-auto max-w-2xl">
@@ -48,7 +54,7 @@ export function ReportForm({
             className="group mb-6 inline-flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
           >
             <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-            Back to Dashboard
+            {t.common.backToDashboard}
           </Link>
 
           <div className="space-y-4 text-center">
@@ -56,10 +62,10 @@ export function ReportForm({
               <FileText className="h-8 w-8 text-orange-600 dark:text-orange-400" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 sm:text-4xl dark:text-white">
-              Report an Error
+              {reportT.title}
             </h1>
             <p className="mx-auto max-w-md text-gray-600 dark:text-gray-400">
-              Help us improve by reporting any issues you've encountered.
+              {reportT.subtitle}
             </p>
           </div>
         </div>
@@ -68,7 +74,7 @@ export function ReportForm({
           <form onSubmit={onSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className={labelClass}>
-                Your Email (Optional)
+                {reportT.emailLabel}
               </label>
               <input
                 type="email"
@@ -76,17 +82,15 @@ export function ReportForm({
                 name="email"
                 value={formData.email}
                 onChange={onInputChange}
-                placeholder="your.email@example.com"
+                placeholder={reportT.emailPlaceholder}
                 className={inputClass}
               />
-              <p className="mt-1 text-xs text-gray-500">
-                We'll only use this to follow up if needed.
-              </p>
+              <p className="mt-1 text-xs text-gray-500">{reportT.emailHint}</p>
             </div>
 
             <div>
               <label htmlFor="title" className={labelClass}>
-                Error Title
+                {reportT.errorTitleLabel}
               </label>
               <input
                 type="text"
@@ -95,14 +99,14 @@ export function ReportForm({
                 value={formData.title}
                 onChange={onInputChange}
                 required
-                placeholder="Brief description of the issue"
+                placeholder={reportT.errorTitlePlaceholder}
                 className={inputClass}
               />
             </div>
 
             <div>
               <label htmlFor="severity" className={labelClass}>
-                Severity Level
+                {reportT.severityLabel}
               </label>
               <select
                 id="severity"
@@ -112,26 +116,26 @@ export function ReportForm({
                 className={inputClass}
               >
                 <option value={ReportSeverity.Low}>
-                  Low - Minor inconvenience
+                  {reportT.severityLowOption}
                 </option>
                 <option value={ReportSeverity.Medium}>
-                  Medium - Affects functionality
+                  {reportT.severityMediumOption}
                 </option>
                 <option value={ReportSeverity.High}>
-                  High - Blocks important tasks
+                  {reportT.severityHighOption}
                 </option>
                 <option value={ReportSeverity.Critical}>
-                  Critical - System unusable
+                  {reportT.severityCriticalOption}
                 </option>
                 <option value={ReportSeverity.Urgent}>
-                  Urgent - Immediate attention required
+                  {reportT.severityUrgentOption}
                 </option>
               </select>
             </div>
 
             <div>
               <label htmlFor="section" className={labelClass}>
-                Affected Section
+                {reportT.sectionLabel}
               </label>
               <input
                 type="text"
@@ -139,14 +143,14 @@ export function ReportForm({
                 name="section"
                 value={formData.section}
                 onChange={onInputChange}
-                placeholder="e.g., Dashboard, Harvest, Farm Overview"
+                placeholder={reportT.sectionPlaceholder}
                 className={inputClass}
               />
             </div>
 
             <div>
               <label htmlFor="description" className={labelClass}>
-                Detailed Description
+                {reportT.descriptionLabel}
               </label>
               <textarea
                 id="description"
@@ -155,14 +159,14 @@ export function ReportForm({
                 onChange={onInputChange}
                 required
                 rows={4}
-                placeholder="Describe what happened, what you expected, and what went wrong..."
+                placeholder={reportT.descriptionPlaceholder}
                 className={`${inputClass} resize-none`}
               />
             </div>
 
             <div>
               <label htmlFor="steps" className={labelClass}>
-                Steps to Reproduce (Optional)
+                {reportT.stepsLabel}
               </label>
               <textarea
                 id="steps"
@@ -170,17 +174,13 @@ export function ReportForm({
                 value={formData.steps}
                 onChange={onInputChange}
                 rows={3}
-                placeholder={
-                  '1. First I did...\n2. Then I clicked...\n3. The error occurred when...'
-                }
+                placeholder={reportT.stepsPlaceholder}
                 className={`${inputClass} resize-none`}
               />
             </div>
 
             <div>
-              <label className={labelClass}>
-                Screenshots or Images (Optional)
-              </label>
+              <label className={labelClass}>{reportT.screenshotsLabel}</label>
               <div className="space-y-3">
                 <label className="group flex w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300/50 bg-gray-50/30 px-6 py-8 transition-all duration-300 hover:border-orange-400/50 hover:bg-orange-50/30 dark:border-gray-600/30 dark:bg-gray-800/30 dark:hover:border-orange-500/50 dark:hover:bg-orange-900/20">
                   <div className="flex flex-col items-center space-y-3">
@@ -189,10 +189,10 @@ export function ReportForm({
                     </div>
                     <div className="text-center">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Click to upload images
+                        {reportT.clickToUpload}
                       </p>
                       <p className="mt-1 text-xs text-gray-500">
-                        Image up to 10MB (Max 3 files)
+                        {reportT.uploadHint}
                       </p>
                     </div>
                   </div>
@@ -241,12 +241,12 @@ export function ReportForm({
               {isSubmitting ? (
                 <>
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Submitting...
+                  {reportT.submitting}
                 </>
               ) : (
                 <>
                   <Send className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-                  Submit Report
+                  {reportT.submit}
                 </>
               )}
             </button>
@@ -255,8 +255,7 @@ export function ReportForm({
 
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-500">
-            Your report helps us improve the platform for everyone. Thank you
-            for your feedback!
+            {reportT.footerNote}
           </p>
         </div>
       </div>

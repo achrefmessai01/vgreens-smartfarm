@@ -18,11 +18,13 @@ import {
   type UserManagementFormRef,
 } from '@/components/users';
 import { FeatureGuard } from '@/components/features/feature-guard';
+import { useI18n } from '@/i18n';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { useTenantUsersPage } from '@/lib/hooks/use-tenant-users-page';
 import * as React from 'react';
 
 export default function TenantUsersPage() {
+  const { t } = useI18n();
   const { isMobile } = useResponsiveBreakpoint('lg');
   const formRef = React.useRef<UserManagementFormRef>(null);
   const page = useTenantUsersPage();
@@ -46,8 +48,8 @@ export default function TenantUsersPage() {
         }
       >
         <PageHeader
-          title="User Management"
-          subtitle="Manage users for your tenant"
+          title={t.pages.users.title}
+          subtitle={t.pages.users.subtitleTenant}
         />
 
         <div className={isMobile ? '' : 'min-h-0 flex-1'}>
@@ -68,7 +70,9 @@ export default function TenantUsersPage() {
           >
             <SheetHeader className="dark:border-primary-foreground/30 border-b px-6 pt-6 pb-4">
               <SheetTitle className="dark:text-card-foreground">
-                {page.editingUser ? 'Edit User' : 'Create User'}
+                {page.editingUser
+                  ? t.pages.admin.users.editUser
+                  : t.pages.admin.users.createUser}
               </SheetTitle>
             </SheetHeader>
             <div className="flex-1 overflow-y-auto px-6 py-4">
@@ -89,7 +93,7 @@ export default function TenantUsersPage() {
                 disabled={page.isLoading}
                 className="dark:border-primary-foreground/30 dark:hover:bg-primary-foreground/10 flex-1"
               >
-                Cancel
+                {t.pages.users.cancel}
               </Button>
               <Button
                 onClick={() => formRef.current?.submit()}
@@ -99,8 +103,8 @@ export default function TenantUsersPage() {
                 {page.isLoading
                   ? '...'
                   : page.editingUser
-                    ? 'Update User'
-                    : 'Create User'}
+                    ? t.pages.admin.users.updateUser
+                    : t.pages.admin.users.createUser}
               </Button>
             </SheetFooter>
           </SheetContent>
@@ -111,10 +115,10 @@ export default function TenantUsersPage() {
           onOpenChange={(open) =>
             page.setDeleteConfirmation({ user: null, isOpen: open })
           }
-          title="Delete User"
-          description="Are you sure you want to delete this user? This action cannot be undone."
-          confirmLabel="Delete"
-          cancelLabel="Cancel"
+          title={t.pages.admin.users.deleteUser}
+          description={t.pages.users.confirmDeleteTenantDescription}
+          confirmLabel={t.pages.users.delete}
+          cancelLabel={t.pages.users.cancel}
           variant="destructive"
           onConfirm={page.confirmDelete}
           onCancel={() =>
@@ -127,7 +131,8 @@ export default function TenantUsersPage() {
                 {page.deleteConfirmation.user.firstName &&
                 page.deleteConfirmation.user.lastName
                   ? `${page.deleteConfirmation.user.firstName} ${page.deleteConfirmation.user.lastName}`
-                  : page.deleteConfirmation.user.email || 'Unknown User'}
+                  : page.deleteConfirmation.user.email ||
+                    t.pages.users.unknownUser}
               </p>
               {page.deleteConfirmation.user.email && (
                 <p className="text-muted-foreground mt-1 text-sm">

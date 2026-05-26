@@ -1,3 +1,5 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -7,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useI18n } from '@/i18n';
 import { Search } from 'lucide-react';
 
 interface SystemErrorFiltersProps {
@@ -30,17 +33,19 @@ export function SystemErrorFilters({
   showResolved,
   onShowResolvedChange,
 }: SystemErrorFiltersProps) {
+  const { t } = useI18n();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Filters</CardTitle>
+        <CardTitle>{t.common.filters}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div className="relative">
             <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
             <Input
-              placeholder="Search errors..."
+              placeholder={t.pages.admin.systemErrors.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-8"
@@ -49,28 +54,54 @@ export function SystemErrorFilters({
 
           <Select value={selectedSeverity} onValueChange={onSeverityChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Severities" />
+              <SelectValue
+                placeholder={t.pages.admin.systemErrors.allSeverities}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Severities</SelectItem>
-              <SelectItem value="CRITICAL">Critical</SelectItem>
-              <SelectItem value="URGENT">Urgent</SelectItem>
-              <SelectItem value="HIGH">High</SelectItem>
-              <SelectItem value="MEDIUM">Medium</SelectItem>
-              <SelectItem value="LOW">Low</SelectItem>
+              <SelectItem value="">
+                {t.pages.admin.systemErrors.allSeverities}
+              </SelectItem>
+              <SelectItem value="CRITICAL">
+                {t.pages.admin.reports.severities.critical}
+              </SelectItem>
+              <SelectItem value="URGENT">
+                {t.pages.admin.reports.severities.urgent}
+              </SelectItem>
+              <SelectItem value="HIGH">
+                {t.pages.admin.reports.severities.high}
+              </SelectItem>
+              <SelectItem value="MEDIUM">
+                {t.pages.admin.reports.severities.medium}
+              </SelectItem>
+              <SelectItem value="LOW">
+                {t.pages.admin.reports.severities.low}
+              </SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={selectedSource} onValueChange={onSourceChange}>
             <SelectTrigger>
-              <SelectValue placeholder="All Sources" />
+              <SelectValue
+                placeholder={t.pages.admin.systemErrors.allSources}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Sources</SelectItem>
-              <SelectItem value="FRONTEND">Frontend</SelectItem>
-              <SelectItem value="BACKEND">Backend</SelectItem>
-              <SelectItem value="DATABASE">Database</SelectItem>
-              <SelectItem value="EXTERNAL_API">External API</SelectItem>
+              <SelectItem value="">
+                {t.pages.admin.systemErrors.allSources}
+              </SelectItem>
+              <SelectItem value="FRONTEND">
+                {t.pages.admin.systemErrors.sourceLabels.frontend}
+              </SelectItem>
+              <SelectItem value="BACKEND">
+                {t.pages.admin.systemErrors.sourceLabels.backend}
+              </SelectItem>
+              <SelectItem value="DATABASE">
+                {t.pages.admin.systemErrors.sourceLabels.database}
+              </SelectItem>
+              <SelectItem value="EXTERNAL_API">
+                {t.pages.admin.systemErrors.sourceLabels.externalApi}
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -83,7 +114,7 @@ export function SystemErrorFilters({
               className="rounded"
             />
             <label htmlFor="showResolved" className="text-sm">
-              Show Resolved
+              {t.pages.admin.systemErrors.showResolved}
             </label>
           </div>
         </div>
