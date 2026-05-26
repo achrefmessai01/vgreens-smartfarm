@@ -95,8 +95,12 @@ export function HarvestDashboard({
                 {h?.performanceDashboard ?? 'Performance Dashboard'}
               </h1>
               <p className="text-muted-foreground mt-1 text-sm">
-                Comparing {compareBatchIds.length} batch
-                {compareBatchIds.length === 1 ? '' : 'es'} for {filterLabel}
+                {(compareBatchIds.length === 1
+                  ? (h?.comparing ?? 'Comparing {count} batch for {filter}')
+                  : (h?.comparingPlural ??
+                    'Comparing {count} batches for {filter}'))
+                  .replace('{count}', String(compareBatchIds.length))
+                  .replace('{filter}', filterLabel)}
               </p>
             </div>
             {filterBar}
@@ -133,7 +137,7 @@ export function HarvestDashboard({
               {error.message}
             </p>
             <Button onClick={() => refetch()} variant="outline" size="sm">
-              {t.common.retry ?? 'Try Again'}
+              {t.common.retry}
             </Button>
           </div>
         </div>
@@ -158,7 +162,8 @@ export function HarvestDashboard({
             </p>
             {isStaleBatchId && (
               <p className="text-amber-600 mt-1 text-xs">
-                Selected batch not found — showing all batches.
+                {h?.selectedBatchNotFound ??
+                  'Selected batch not found — showing all batches.'}
               </p>
             )}
           </div>
@@ -172,7 +177,9 @@ export function HarvestDashboard({
             <Package className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
             <p className="text-muted-foreground text-sm sm:text-base">
               {selectedBatch
-                ? `No harvests for ${selectedBatch.name} in ${filterLabel}`
+                ? (h?.noHarvestsForBatch ?? 'No harvests for {name} in {filter}')
+                    .replace('{name}', selectedBatch.name)
+                    .replace('{filter}', filterLabel)
                 : (h?.noHarvestsYet ?? 'No harvest data available')}
             </p>
           </div>

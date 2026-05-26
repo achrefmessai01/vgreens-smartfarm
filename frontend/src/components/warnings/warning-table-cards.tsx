@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import type { Warning } from '@/types/warning.types';
 import { formatTimestamp, getStatusBadge } from './warning-table-utils';
 
@@ -27,6 +28,8 @@ export const useWarningCard = ({
   onResolve,
   translations,
 }: WarningCardProps) => {
+  const formatters = useLocaleFormatters();
+  const { t } = useI18n();
   const renderCard = (warning: Warning) => (
     <Card className="gap-2 overflow-hidden border py-2 shadow-none">
       {/* Custom-Header implementation - using card-header breaks ux */}
@@ -52,7 +55,7 @@ export const useWarningCard = ({
             {translations.timestamp}:
           </span>
           <span className="font-medium dark:text-gray-300">
-            {formatTimestamp(warning.timestamp)}
+            {formatTimestamp(warning.timestamp, formatters, t)}
           </span>
         </div>
 

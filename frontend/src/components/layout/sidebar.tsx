@@ -106,32 +106,32 @@ export function Sidebar({
   // Admin navigation items
   const adminNavItems: NavItem[] = [
     {
-      label: 'Tenants',
+      label: t.navigation.tenants,
       href: '/admin/tenants',
       icon: Building2,
     },
     {
-      label: 'Users',
+      label: t.navigation.adminUsers,
       href: '/admin/users',
       icon: Users,
     },
     {
-      label: 'Feature Flags',
+      label: t.navigation.featureFlags,
       href: '/admin/feature-flags',
       icon: Flag,
     },
     {
-      label: 'Reports',
+      label: t.navigation.reports,
       href: '/admin/reports',
       icon: ClipboardList,
     },
     {
-      label: 'System Errors',
+      label: t.navigation.systemErrors,
       href: '/admin/system-errors',
       icon: Zap,
     },
     {
-      label: 'Settings',
+      label: t.navigation.settings,
       href: '/admin/settings',
       icon: Settings,
     },

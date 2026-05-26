@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -8,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ErrorSource, ReportSeverity } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 import { AlertCircle, CheckCircle2, RefreshCw, TrendingUp } from 'lucide-react';
 
 interface StatsProps {
@@ -15,54 +18,68 @@ interface StatsProps {
 }
 
 export function SystemErrorsStatsCards({ stats }: StatsProps) {
+  const { t } = useI18n();
+
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
           <CardTitle className="min-w-0 text-sm font-medium break-words">
-            Last 24 Hours
+            {t.pages.admin.systemErrors.last24Hours}
           </CardTitle>
           <TrendingUp className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.total}</div>
-          <p className="text-muted-foreground text-xs">Total errors</p>
+          <p className="text-muted-foreground text-xs">
+            {t.pages.admin.systemErrors.totalErrors}
+          </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
           <CardTitle className="min-w-0 text-sm font-medium break-words">
-            Active Errors
+            {t.pages.admin.systemErrors.activeErrors}
           </CardTitle>
           <AlertCircle className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-600">{stats.active}</div>
-          <p className="text-muted-foreground text-xs">Unresolved issues</p>
+          <p className="text-muted-foreground text-xs">
+            {t.pages.admin.systemErrors.unresolvedIssues}
+          </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Resolved</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            {t.pages.admin.systemErrors.resolved}
+          </CardTitle>
           <CheckCircle2 className="h-4 w-4 text-green-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600">
             {stats.resolved}
           </div>
-          <p className="text-muted-foreground text-xs">Fixed this period</p>
+          <p className="text-muted-foreground text-xs">
+            {t.pages.admin.systemErrors.fixedThisPeriod}
+          </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Critical</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            {t.pages.admin.systemErrors.critical}
+          </CardTitle>
           <AlertCircle className="h-4 w-4 text-orange-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-orange-600">
             {stats.critical}
           </div>
-          <p className="text-muted-foreground text-xs">High priority issues</p>
+          <p className="text-muted-foreground text-xs">
+            {t.pages.admin.systemErrors.highPriorityIssues}
+          </p>
         </CardContent>
       </Card>
     </div>
@@ -94,11 +111,13 @@ export function SystemErrorsFilters({
   loading,
   activeFiltersCount,
 }: FiltersProps) {
+  const { t } = useI18n();
+
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div className="min-w-0">
         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-          Severity
+          {t.pages.admin.reports.severity}
         </label>
         <Select
           value={severityFilter ?? 'all'}
@@ -109,21 +128,35 @@ export function SystemErrorsFilters({
           }
         >
           <SelectTrigger className="h-9 w-full">
-            <SelectValue placeholder="All severities" />
+            <SelectValue
+              placeholder={t.pages.admin.systemErrors.allSeverities}
+            />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All severities</SelectItem>
-            <SelectItem value={ReportSeverity.Low}>Low</SelectItem>
-            <SelectItem value={ReportSeverity.Medium}>Medium</SelectItem>
-            <SelectItem value={ReportSeverity.High}>High</SelectItem>
-            <SelectItem value={ReportSeverity.Critical}>Critical</SelectItem>
-            <SelectItem value={ReportSeverity.Urgent}>Urgent</SelectItem>
+            <SelectItem value="all">
+              {t.pages.admin.systemErrors.allSeverities}
+            </SelectItem>
+            <SelectItem value={ReportSeverity.Low}>
+              {t.pages.admin.reports.severities.low}
+            </SelectItem>
+            <SelectItem value={ReportSeverity.Medium}>
+              {t.pages.admin.reports.severities.medium}
+            </SelectItem>
+            <SelectItem value={ReportSeverity.High}>
+              {t.pages.admin.reports.severities.high}
+            </SelectItem>
+            <SelectItem value={ReportSeverity.Critical}>
+              {t.pages.admin.reports.severities.critical}
+            </SelectItem>
+            <SelectItem value={ReportSeverity.Urgent}>
+              {t.pages.admin.reports.severities.urgent}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="min-w-0">
         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-          Source
+          {t.pages.admin.reports.source}
         </label>
         <Select
           value={sourceFilter ?? 'all'}
@@ -134,25 +167,33 @@ export function SystemErrorsFilters({
           }
         >
           <SelectTrigger className="h-9 w-full">
-            <SelectValue placeholder="All sources" />
+            <SelectValue placeholder={t.pages.admin.systemErrors.allSources} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All sources</SelectItem>
-            <SelectItem value={ErrorSource.Frontend}>Frontend</SelectItem>
-            <SelectItem value={ErrorSource.Backend}>Backend</SelectItem>
-            <SelectItem value={ErrorSource.Database}>Database</SelectItem>
+            <SelectItem value="all">
+              {t.pages.admin.systemErrors.allSources}
+            </SelectItem>
+            <SelectItem value={ErrorSource.Frontend}>
+              {t.pages.admin.systemErrors.sourceLabels.frontend}
+            </SelectItem>
+            <SelectItem value={ErrorSource.Backend}>
+              {t.pages.admin.systemErrors.sourceLabels.backend}
+            </SelectItem>
+            <SelectItem value={ErrorSource.Database}>
+              {t.pages.admin.systemErrors.sourceLabels.database}
+            </SelectItem>
             <SelectItem value={ErrorSource.ExternalApi}>
-              External API
+              {t.pages.admin.systemErrors.sourceLabels.externalApi}
             </SelectItem>
             <SelectItem value={ErrorSource.Infrastructure}>
-              Infrastructure
+              {t.pages.admin.systemErrors.sourceLabels.infrastructure}
             </SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="min-w-0">
         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-          Status
+          {t.pages.admin.reports.status}
         </label>
         <Select
           value={
@@ -165,12 +206,20 @@ export function SystemErrorsFilters({
           }
         >
           <SelectTrigger className="h-9 w-full">
-            <SelectValue placeholder="All statuses" />
+            <SelectValue
+              placeholder={t.pages.admin.systemErrors.allStatuses}
+            />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="false">Active</SelectItem>
-            <SelectItem value="true">Resolved</SelectItem>
+            <SelectItem value="all">
+              {t.pages.admin.systemErrors.allStatuses}
+            </SelectItem>
+            <SelectItem value="false">
+              {t.pages.admin.systemErrors.active}
+            </SelectItem>
+            <SelectItem value="true">
+              {t.pages.admin.reports.statuses.resolved}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -182,7 +231,10 @@ export function SystemErrorsFilters({
             onClick={clearFilters}
             className="h-9 w-full sm:w-auto"
           >
-            Clear All ({activeFiltersCount})
+            {t.pages.admin.systemErrors.clearAll.replace(
+              '{count}',
+              String(activeFiltersCount),
+            )}
           </Button>
         )}
         <Button

@@ -1,11 +1,13 @@
 'use client';
 
 import { useToast } from '@/components/ui/toast-provider';
+import { useI18n } from '@/i18n';
 import { Wifi, WifiOff } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 export function NetworkStatusMonitor() {
   const { toast } = useToast();
+  const { t } = useI18n();
   const [isOnline, setIsOnline] = useState(true);
   const hasMountedRef = useRef(false);
   const lastKnownStatusRef = useRef<boolean | null>(null);
@@ -29,17 +31,15 @@ export function NetworkStatusMonitor() {
 
       if (online) {
         toast({
-          title: 'Connection restored',
-          description:
-            'You are back online. You can continue using the application.',
+          title: t.common.connectionRestored,
+          description: t.common.connectionRestoredDescription,
           duration: 3000,
           variant: 'default',
         });
       } else {
         toast({
-          title: 'No internet connection',
-          description:
-            'Please turn on Wi-Fi or mobile data to use this application.',
+          title: t.common.noInternet,
+          description: t.common.noInternetDescription,
           duration: 5000,
           variant: 'destructive',
         });
@@ -58,7 +58,7 @@ export function NetworkStatusMonitor() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [toast]);
+  }, [toast, t]);
 
   if (isOnline) return null;
 
@@ -72,17 +72,16 @@ export function NetworkStatusMonitor() {
 
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
-              No internet connection
+              {t.common.noInternet}
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-              This application requires an active internet connection. Please
-              turn on Wi-Fi or mobile data to continue.
+              {t.common.noInternetBlocker}
             </p>
 
             <div className="mt-4 flex items-center gap-2 rounded-xl bg-zinc-100 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
               <Wifi className="h-4 w-4" />
-              Waiting for connection…
+              {t.common.waitingForConnection}
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
+import { useLocaleFormatters } from '@/i18n';
 
 export interface ExpenseData {
   name: string;
@@ -20,6 +21,7 @@ interface ExpenseDonutChartProps {
 const COLORS = ['#016F7C', '#0EA97C', '#0DBA97', '#0ECA97', '#0EDA97'];
 
 export function ExpenseDonutChart({ data, title }: ExpenseDonutChartProps) {
+  const { formatCurrency } = useLocaleFormatters();
   return (
     <Card>
       <CardHeader>
@@ -66,7 +68,7 @@ export function ExpenseDonutChart({ data, title }: ExpenseDonutChartProps) {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-medium">
-                    €{item.value.toLocaleString()}
+                    {formatCurrency(item.value, 'EUR')}
                   </span>
                   <span className="text-muted-foreground">
                     {item.percentage}%

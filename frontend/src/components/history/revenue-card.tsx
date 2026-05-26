@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLocaleFormatters } from '@/i18n';
 import { Droplet, Zap, Leaf, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +32,7 @@ export function RevenueCard({
   laborLabel,
   totalLabel,
 }: RevenueCardProps) {
+  const { formatCurrency } = useLocaleFormatters();
   const total = data.water + data.energy + data.consumables + data.labor;
 
   return (
@@ -44,14 +46,18 @@ export function RevenueCard({
             <Droplet className="h-4 w-4 text-blue-500" />
             <span className="text-muted-foreground">{waterLabel}</span>
           </div>
-          <span className="font-medium">€{data.water.toLocaleString()}</span>
+          <span className="font-medium">
+            {formatCurrency(data.water, 'EUR')}
+          </span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
             <Zap className="h-4 w-4 text-yellow-500" />
             <span className="text-muted-foreground">{energyLabel}</span>
           </div>
-          <span className="font-medium">€{data.energy.toLocaleString()}</span>
+          <span className="font-medium">
+            {formatCurrency(data.energy, 'EUR')}
+          </span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
@@ -59,7 +65,7 @@ export function RevenueCard({
             <span className="text-muted-foreground">{consumablesLabel}</span>
           </div>
           <span className="font-medium">
-            €{data.consumables.toLocaleString()}
+            {formatCurrency(data.consumables, 'EUR')}
           </span>
         </div>
         <div className="flex items-center justify-between text-sm">
@@ -67,13 +73,15 @@ export function RevenueCard({
             <Users className="h-4 w-4 text-purple-500" />
             <span className="text-muted-foreground">{laborLabel}</span>
           </div>
-          <span className="font-medium">€{data.labor.toLocaleString()}</span>
+          <span className="font-medium">
+            {formatCurrency(data.labor, 'EUR')}
+          </span>
         </div>
         <div className="mt-3 border-t pt-3">
           <div className="flex items-center justify-between">
             <span className="font-semibold">{totalLabel}</span>
             <span className="text-primary text-lg font-bold">
-              €{total.toLocaleString()}
+              {formatCurrency(total, 'EUR')}
             </span>
           </div>
         </div>

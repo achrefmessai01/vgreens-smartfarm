@@ -52,6 +52,7 @@ export function DashboardFilters({
   className,
 }: DashboardFiltersProps) {
   const { t } = useI18n();
+  const h = t.pages.harvest;
 
   const PERIOD_ICON: Record<DateFilter, typeof Clock> = {
     today: Clock,
@@ -129,14 +130,21 @@ export function DashboardFilters({
               <GitCompareArrows className="h-4 w-4" aria-hidden />
               <span className="truncate">
                 {compareBatchIds.length === 0
-                  ? 'Select batches'
-                  : `${compareBatchIds.length} batch${compareBatchIds.length === 1 ? '' : 'es'} selected`}
+                  ? (h?.selectBatches ?? 'Select batches')
+                  : (compareBatchIds.length === 1
+                      ? (h?.batchesSelectedSingular ?? '{count} batch selected')
+                      : (h?.batchesSelectedPlural ??
+                        '{count} batches selected')
+                    ).replace('{count}', String(compareBatchIds.length))}
               </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={6} className="w-72 p-0">
             <div className="text-muted-foreground px-3 pt-3 pb-2 text-xs font-medium">
-              Pick up to {MAX_COMPARE_BATCHES} batches to compare
+              {(h?.pickBatches ?? 'Pick up to {max} batches to compare').replace(
+                '{max}',
+                String(MAX_COMPARE_BATCHES),
+              )}
             </div>
             <div className="max-h-72 overflow-y-auto px-2 pb-2">
               {batches.map((b) => {
@@ -181,16 +189,16 @@ export function DashboardFilters({
             <SelectValue
               placeholder={
                 batchesLoading
-                  ? 'Loading batches...'
+                  ? (h?.loadingBatches ?? 'Loading batches...')
                   : hasBatches
-                    ? 'All batches'
-                    : 'No batches yet'
+                    ? (h?.allBatches ?? 'All batches')
+                    : (h?.noBatchesYet ?? 'No batches yet')
               }
             />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_BATCHES} className="text-sm">
-              <Leaf></Leaf> All batches
+              <Leaf></Leaf> {h?.allBatches ?? 'All batches'}
             </SelectItem>
             {batches.map((b) => (
               <SelectItem key={b.id} value={b.id} className="text-sm">
@@ -214,7 +222,9 @@ export function DashboardFilters({
           ) : (
             <GitCompareArrows className="h-4 w-4" aria-hidden />
           )}
-          {compareMode ? 'Exit compare' : 'Compare'}
+          {compareMode
+            ? (h?.exitCompare ?? 'Exit compare')
+            : (h?.compare ?? 'Compare')}
         </Button>
       )}
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import ErrorPage from '@/components/ui/error-page';
+import { useI18n } from '@/i18n';
 import { Bell } from 'lucide-react';
 
 export default function AlertsErrorPage({
@@ -10,18 +11,19 @@ export default function AlertsErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <ErrorPage
       error={error}
       reset={reset}
-      title="Alerts Section Error"
-      description="Something went wrong with the alerts section. Your other farm sections are still working."
-      sectionName="Alerts"
+      title={t.errors.alerts.title}
+      description={t.errors.alerts.description}
+      sectionName={t.errors.alerts.section}
       theme="red"
-      resetLabel="Reload Alerts"
+      resetLabel={t.errors.alerts.resetLabel}
       backLink={{
         href: '/tenant/dashboard',
-        label: 'Back to Dashboard',
+        label: t.common.backToDashboard,
         icon: Bell,
       }}
     />

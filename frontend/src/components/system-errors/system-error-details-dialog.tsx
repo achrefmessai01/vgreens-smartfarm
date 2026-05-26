@@ -12,6 +12,7 @@ import { ErrorSourceBadge } from '@/components/ui/error-source-badge';
 import { ErrorTypeBadge } from '@/components/ui/error-type-badge';
 import { ErrorReportSeverityBadge } from '@/components/error-reports/error-report-severity-badge';
 import { SystemError } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 import { formatDistanceToNow } from 'date-fns';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -30,7 +31,21 @@ export function SystemErrorDetailsDialog({
   onResolve,
   isResolving = false,
 }: SystemErrorDetailsDialogProps) {
+  const { t } = useI18n();
+
   if (!error) return null;
+
+  const occurrenceCount = error.occurrenceCount || 1;
+  const occurrenceLabel =
+    occurrenceCount > 1
+      ? t.pages.admin.systemErrors.details.occurrencePlural.replace(
+          '{count}',
+          String(occurrenceCount),
+        )
+      : t.pages.admin.systemErrors.details.occurrenceSingular.replace(
+          '{count}',
+          String(occurrenceCount),
+        );
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
@@ -38,7 +53,9 @@ export function SystemErrorDetailsDialog({
         <DialogHeader className="border-b px-4 py-3 text-left sm:px-5 sm:py-3 2xl:px-6 2xl:py-4">
           <DialogTitle className="flex items-start gap-2 pr-8 leading-tight">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-            <span className="break-words">Error Details</span>
+            <span className="break-words">
+              {t.pages.admin.systemErrors.details.title}
+            </span>
           </DialogTitle>
         </DialogHeader>
 
@@ -48,12 +65,12 @@ export function SystemErrorDetailsDialog({
               {error.isResolved ? (
                 <Badge variant="secondary" className="text-green-600">
                   <CheckCircle2 className="mr-1 h-3 w-3" />
-                  Resolved
+                  {t.pages.admin.reports.statuses.resolved}
                 </Badge>
               ) : (
                 <Badge variant="destructive">
                   <AlertCircle className="mr-1 h-3 w-3" />
-                  Open
+                  {t.pages.admin.reports.statuses.open}
                 </Badge>
               )}
             </div>
@@ -65,13 +82,17 @@ export function SystemErrorDetailsDialog({
                 className="w-full sm:w-auto"
               >
                 <CheckCircle2 className="mr-2 h-4 w-4" />
-                {isResolving ? 'Resolving...' : 'Resolve'}
+                {isResolving
+                  ? t.pages.admin.systemErrors.resolving
+                  : t.pages.admin.systemErrors.resolve}
               </Button>
             )}
           </div>
 
           <div className="rounded border border-red-200 bg-red-50 p-4">
-            <h3 className="mb-2 font-medium text-red-800">Error Message</h3>
+            <h3 className="mb-2 font-medium text-red-800">
+              {t.pages.admin.systemErrors.details.errorMessage}
+            </h3>
             <p className="font-mono text-xs break-all text-red-700 sm:text-sm">
               {error.errorMessage}
             </p>
@@ -79,15 +100,21 @@ export function SystemErrorDetailsDialog({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="min-w-0">
-              <div className="mb-1 text-sm font-medium">Type</div>
+              <div className="mb-1 text-sm font-medium">
+                {t.pages.admin.reports.type}
+              </div>
               <ErrorTypeBadge errorType={error.errorType} />
             </div>
             <div className="min-w-0">
-              <div className="mb-1 text-sm font-medium">Source</div>
+              <div className="mb-1 text-sm font-medium">
+                {t.pages.admin.reports.source}
+              </div>
               <ErrorSourceBadge source={error.source} />
             </div>
             <div className="min-w-0">
-              <div className="mb-1 text-sm font-medium">Severity</div>
+              <div className="mb-1 text-sm font-medium">
+                {t.pages.admin.reports.severity}
+              </div>
               <ErrorReportSeverityBadge severity={error.severity} />
             </div>
           </div>
@@ -96,13 +123,18 @@ export function SystemErrorDetailsDialog({
             <div className="space-y-2">
               {error.component && (
                 <div className="text-sm break-words">
-                  <span className="font-medium">Component:</span>{' '}
+                  <span className="font-medium">
+                    {t.pages.admin.systemErrors.fieldComponent}
+                  </span>{' '}
                   {error.component}
                 </div>
               )}
               {error.action && (
                 <div className="text-sm break-words">
-                  <span className="font-medium">Action:</span> {error.action}
+                  <span className="font-medium">
+                    {t.pages.admin.systemErrors.fieldAction}
+                  </span>{' '}
+                  {error.action}
                 </div>
               )}
             </div>
@@ -110,7 +142,9 @@ export function SystemErrorDetailsDialog({
 
           <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
             <div className="min-w-0">
-              <div className="mb-1 font-medium">User/Tenant</div>
+              <div className="mb-1 font-medium">
+                {t.pages.admin.systemErrors.details.userTenant}
+              </div>
               <div className="break-words text-gray-600">
                 {error.user ? (
                   <span>
@@ -119,33 +153,45 @@ export function SystemErrorDetailsDialog({
                 ) : error.tenant ? (
                   <span>{error.tenant.name}</span>
                 ) : (
-                  <span>Unknown</span>
+                  <span>{t.common.unknown}</span>
                 )}
               </div>
             </div>
             <div className="min-w-0">
-              <div className="mb-1 font-medium">Frequency</div>
-              <div className="text-gray-600">
-                {error.occurrenceCount || 1} occurrence
-                {(error.occurrenceCount || 1) > 1 ? 's' : ''}
+              <div className="mb-1 font-medium">
+                {t.pages.admin.systemErrors.details.frequency}
               </div>
+              <div className="text-gray-600">{occurrenceLabel}</div>
             </div>
           </div>
 
           <div className="space-y-2 text-xs text-gray-500">
-            <div className="break-all">ID: {error.id}</div>
+            <div className="break-all">
+              {t.pages.admin.systemErrors.details.id.replace(
+                '{value}',
+                error.id,
+              )}
+            </div>
             <div>
-              Created: {formatDistanceToNow(new Date(error.createdAt))} ago
+              {t.pages.admin.systemErrors.details.created.replace(
+                '{time}',
+                formatDistanceToNow(new Date(error.createdAt)),
+              )}
             </div>
             {error.lastOccurredAt && (
               <div>
-                Last occurred:{' '}
-                {formatDistanceToNow(new Date(error.lastOccurredAt))} ago
+                {t.pages.admin.systemErrors.details.lastOccurred.replace(
+                  '{time}',
+                  formatDistanceToNow(new Date(error.lastOccurredAt)),
+                )}
               </div>
             )}
             {error.updatedAt && (
               <div>
-                Updated: {formatDistanceToNow(new Date(error.updatedAt))} ago
+                {t.pages.admin.systemErrors.details.updated.replace(
+                  '{time}',
+                  formatDistanceToNow(new Date(error.updatedAt)),
+                )}
               </div>
             )}
           </div>

@@ -1,7 +1,10 @@
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertSeverity, AlertStatus, User } from '@/generated/graphql';
-import { useI18n } from '@/i18n';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { AlertTriangle, CheckCircle, CheckCircle2 } from 'lucide-react';
+
+export type LocaleFormatters = ReturnType<typeof useLocaleFormatters>;
+export type Translations = ReturnType<typeof useI18n>['t'];
 
 export type AlertTableUser = Pick<
   User,
@@ -93,12 +96,13 @@ export const getRowClassName = (alert: Alert): string => {
 };
 
 export const formatTimestamp = (
-  timestamp?: Alert['timestamp'] | null,
+  timestamp: Alert['timestamp'] | null | undefined,
+  formatters: LocaleFormatters,
 ): string => {
   if (!timestamp) return '-';
   const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleString();
+  return formatters.formatDateTime(date);
 };
 
 export const getTimestampMs = (
@@ -109,18 +113,22 @@ export const getTimestampMs = (
   return Number.isNaN(time) ? 0 : time;
 };
 
-export const formatFieldLabel = (field?: string | null): string => {
+export const formatFieldLabel = (
+  field: string | null | undefined,
+  t: Translations,
+): string => {
   if (!field) return '-';
 
+  const sensorLabels = t.pages.farmOverview.sensorFieldLabels;
   const labels: Record<string, string> = {
-    temperature: 'Temperature',
-    humidity: 'Humidity',
-    vpd: 'VPD',
-    soil_moisture: 'Soil moisture',
-    soil_ec: 'Soil EC',
-    soil_temp: 'Soil temp',
-    par: 'PAR',
-    co2: 'CO2',
+    temperature: sensorLabels.temperature,
+    humidity: sensorLabels.humidity,
+    vpd: sensorLabels.vpd,
+    soil_moisture: sensorLabels.soilMoisture,
+    soil_ec: sensorLabels.soilEC,
+    soil_temp: sensorLabels.soilTemp,
+    par: sensorLabels.par,
+    co2: sensorLabels.co2,
   };
 
   return (

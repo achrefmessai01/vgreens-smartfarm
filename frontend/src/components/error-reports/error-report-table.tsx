@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { TableCell } from '@/components/ui/table';
 import { ErrorReport, ReportStatus } from '@/generated/graphql';
-import { formatDate } from '@/lib/utils/error-report-utils';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { Edit2, Trash2 } from 'lucide-react';
 import { ErrorReportQuickActions } from './error-report-quick-actions';
 import { ErrorReportSeverityBadge } from './error-report-severity-badge';
@@ -26,11 +26,15 @@ export function ErrorReportTable({
   onStatusUpdate,
   isUpdating = false,
 }: ErrorReportTableProps) {
+  const { t } = useI18n();
+  const { formatDate, formatTime } = useLocaleFormatters();
+  const reportsT = t.pages.admin.reports;
+
   // Table column configuration
   const columns: Column<ErrorReport>[] = [
     {
       key: 'errorTitle',
-      header: 'Error Title',
+      header: reportsT.errorTitle,
       accessor: (report) => (
         <div className="max-w-xs">
           <div className="truncate font-medium">{report.errorTitle}</div>
@@ -42,7 +46,7 @@ export function ErrorReportTable({
     },
     {
       key: 'userEmail',
-      header: 'Submitted By',
+      header: reportsT.submittedBy,
       accessor: (report) => (
         <div className="text-sm">
           <div className="font-medium">
@@ -54,14 +58,14 @@ export function ErrorReportTable({
     },
     {
       key: 'severity',
-      header: 'Severity',
+      header: reportsT.severity,
       accessor: (report) => (
         <ErrorReportSeverityBadge severity={report.severity} />
       ),
     },
     {
       key: 'status',
-      header: 'Status',
+      header: reportsT.status,
       accessor: (report) => (
         <ErrorReportQuickActions
           report={report}
@@ -72,23 +76,23 @@ export function ErrorReportTable({
     },
     {
       key: 'createdAt',
-      header: 'Created',
+      header: reportsT.created,
       accessor: (report) => (
         <div className="text-sm">
-          <div>{formatDate(report.createdAt)}</div>
+          <div>{formatDate(report.createdAt, { dateStyle: 'medium' })}</div>
           <div className="text-xs text-gray-500">
-            {new Intl.DateTimeFormat('en-US', {
+            {formatTime(report.createdAt, {
               hour: '2-digit',
               minute: '2-digit',
               hour12: false,
-            }).format(new Date(report.createdAt))}
+            })}
           </div>
         </div>
       ),
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: reportsT.actions,
       accessor: (report) => (
         <div className="flex items-center gap-1">
           <Button
@@ -143,13 +147,13 @@ export function ErrorReportTable({
       </TableCell>
       <TableCell>
         <div className="text-sm">
-          <div>{formatDate(report.createdAt)}</div>
+          <div>{formatDate(report.createdAt, { dateStyle: 'medium' })}</div>
           <div className="text-xs text-gray-500">
-            {new Intl.DateTimeFormat('en-US', {
+            {formatTime(report.createdAt, {
               hour: '2-digit',
               minute: '2-digit',
               hour12: false,
-            }).format(new Date(report.createdAt))}
+            })}
           </div>
         </div>
       </TableCell>
@@ -224,13 +228,13 @@ export function ErrorReportTable({
           </p>
         </div>
         <div className="text-muted-foreground shrink-0 text-right text-xs">
-          <p>{formatDate(report.createdAt)}</p>
+          <p>{formatDate(report.createdAt, { dateStyle: 'medium' })}</p>
           <p>
-            {new Intl.DateTimeFormat('en-US', {
+            {formatTime(report.createdAt, {
               hour: '2-digit',
               minute: '2-digit',
               hour12: false,
-            }).format(new Date(report.createdAt))}
+            })}
           </p>
         </div>
       </div>
@@ -246,7 +250,7 @@ export function ErrorReportTable({
       responsiveBreakpoint="xl"
       isLoading={isLoading}
       searchConfig={{
-        placeholder: 'Search reports by title, user email...',
+        placeholder: reportsT.searchPlaceholder,
         onSearch: (query, report) =>
           report.errorTitle.toLowerCase().includes(query.toLowerCase()) ||
           report.userEmail.toLowerCase().includes(query.toLowerCase()) ||
@@ -255,8 +259,8 @@ export function ErrorReportTable({
             .includes(query.toLowerCase()),
       }}
       emptyState={{
-        title: 'No error reports found',
-        description: 'No error reports found',
+        title: reportsT.noReports,
+        description: reportsT.noReports,
       }}
     />
   );

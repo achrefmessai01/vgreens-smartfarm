@@ -5,6 +5,7 @@ import { ErrorSourceBadge } from '@/components/ui/error-source-badge';
 import { ErrorTypeBadge } from '@/components/ui/error-type-badge';
 import { TableCell } from '@/components/ui/table';
 import { SystemError } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 import { formatDistanceToNow } from 'date-fns';
 import { CheckCircle2, Eye } from 'lucide-react';
 import { useSystemErrorsCard } from './system-errors-table-cards';
@@ -26,6 +27,8 @@ export const useSystemErrorsRow = ({
   isLoading = false,
   isResolving = false,
 }: SystemErrorsRowProps) => {
+  const { t } = useI18n();
+
   // Get card renderer from dedicated card module
   const { renderCard } = useSystemErrorsCard({
     onResolve,
@@ -58,13 +61,20 @@ export const useSystemErrorsRow = ({
         <TableCell>{error.occurrenceCount ?? 1}</TableCell>
         <TableCell>
           {error.isResolved ? (
-            <Badge variant="secondary">Resolved</Badge>
+            <Badge variant="secondary">
+              {t.pages.admin.reports.statuses.resolved}
+            </Badge>
           ) : (
-            <Badge variant="destructive">Active</Badge>
+            <Badge variant="destructive">
+              {t.pages.admin.systemErrors.active}
+            </Badge>
           )}
         </TableCell>
         <TableCell>
-          {formatDistanceToNow(new Date(error.createdAt))} ago
+          {t.pages.admin.systemErrors.timeAgo.replace(
+            '{time}',
+            formatDistanceToNow(new Date(error.createdAt)),
+          )}
         </TableCell>
         <TableCell>{userName}</TableCell>
         <TableCell className="text-right">
