@@ -95,6 +95,12 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const tenantBucketNameOverride = isVGreensAdmin
     ? (selectedTenantBucketName ?? null)
     : undefined;
+  // Mirror the bucket override but for tenantId — forwarded to the PAR
+  // graph so admins viewing another tenant fetch its mapping. `undefined`
+  // for tenant users lets the backend resolve from their auth context.
+  const tenantIdOverride = isVGreensAdmin
+    ? (selectedTenantId || null)
+    : undefined;
 
   // Explicit tenantId for all config queries.
   // Admin → selected tenant; tenant user → from me.tenant.id (always a valid UUID).
@@ -608,6 +614,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     savingDeviceId,
     positionErrorDeviceId,
     tenantBucketNameOverride,
+    tenantIdOverride,
     farmLayout,
     greenhouseDimensions: selectedGreenhouseDimensions,
     disabledSensorFields: disabledSensorFieldsSet,

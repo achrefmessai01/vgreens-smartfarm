@@ -4,12 +4,19 @@ export interface ParGraphSectionProps {
   bay: Bay | null;
   greenhouseLabel: string;
   /**
-   * Optional InfluxDB bucket override. Required when the viewer is a vGreens
-   * admin viewing another tenant — `me.tenant.influxBucketName` is only set
-   * for tenant users, so without this override the PAR query is silently
-   * skipped on the admin side.
+   * Optional tenant override. Required when the viewer is a vGreens admin
+   * targeting another tenant; tenant users can leave this undefined and
+   * the backend resolves the tenant from their auth context.
    */
-  bucketName?: string | null;
+  tenantId?: string | null;
+  /**
+   * Greenhouse name to slice the tenant PAR/DLI response by. Must match
+   * one of the names returned in `TenantParDli.greenhouses[].name` (which
+   * mirror `tenants.greenhouses[].name`). Leave undefined/null to render
+   * the combined view. For tenants without a sensor→greenhouse mapping
+   * the hook falls back to combined regardless.
+   */
+  greenhouseName?: string | null;
   embedded?: boolean;
   className?: string;
 }

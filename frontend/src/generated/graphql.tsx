@@ -247,17 +247,6 @@ export type DashboardFilterInput = {
   variety?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type HarvestBatchListItem = {
-  __typename?: 'HarvestBatchListItem';
-  greenhouse?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  name: Scalars['String']['output'];
-  plantingDate: Scalars['DateTime']['output'];
-  species: Scalars['String']['output'];
-  status: HarvestStatus;
-  variety: Scalars['String']['output'];
-};
-
 export type DeleteImageInput = {
   /** Full storage path of the image relative to the bucket (including tenant prefix). */
   path: Scalars['String']['input'];
@@ -398,16 +387,16 @@ export type GetFieldMeansInput = {
   windowMinutes?: Scalars['Int']['input'];
 };
 
-export type GetParDliTodayInput = {
-  bucketName: Scalars['String']['input'];
-  timezone?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type GetSignedImageUrlInput = {
   /** Signed URL validity in seconds (default: 600, max: 3600). */
   expiresIn?: InputMaybe<Scalars['Int']['input']>;
   /** Full storage path of the image relative to the bucket (including tenant prefix). */
   path: Scalars['String']['input'];
+};
+
+export type GetTenantParDliInput = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GreenhouseInput = {
@@ -416,6 +405,12 @@ export type GreenhouseInput = {
   name: Scalars['String']['input'];
   xDimension: Scalars['Float']['input'];
   yDimension: Scalars['Float']['input'];
+};
+
+export type GreenhouseParDli = {
+  __typename?: 'GreenhouseParDli';
+  data: ParDliResult;
+  name: Scalars['String']['output'];
 };
 
 export type Harvest = {
@@ -454,6 +449,17 @@ export type Harvest = {
   updatedAt: Scalars['DateTime']['output'];
   variety: Scalars['String']['output'];
   waste: Scalars['Float']['output'];
+};
+
+export type HarvestBatchListItem = {
+  __typename?: 'HarvestBatchListItem';
+  greenhouse?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  plantingDate: Scalars['DateTime']['output'];
+  species: Scalars['String']['output'];
+  status: HarvestStatus;
+  variety: Scalars['String']['output'];
 };
 
 export type HarvestDashboardMetrics = {
@@ -813,7 +819,7 @@ export type Query = {
   getBucketFieldMeansLastMinutes: Array<FieldMeanMetric>;
   getBucketFields: Array<Scalars['String']['output']>;
   getBuckets: Array<Scalars['String']['output']>;
-  getParDliToday: ParDliResult;
+  getParDliForTenant: TenantParDli;
   getRecentSystemErrors: Array<SystemError>;
   getSystemErrorStats: Scalars['String']['output'];
   greenhouseOptions: Array<Scalars['String']['output']>;
@@ -821,6 +827,7 @@ export type Query = {
   harvestBatches: Array<HarvestBatchListItem>;
   harvestDashboard: HarvestDashboardMetrics;
   harvests: Array<Harvest>;
+  harvestsCsvExport: Scalars['String']['output'];
   health: Scalars['String']['output'];
   /** List images stored for the current tenant (or a specific tenant for admins). */
   images: Array<ImageFile>;
@@ -892,8 +899,8 @@ export type QueryGetBucketFieldsArgs = {
 };
 
 
-export type QueryGetParDliTodayArgs = {
-  input: GetParDliTodayInput;
+export type QueryGetParDliForTenantArgs = {
+  input: GetTenantParDliInput;
 };
 
 
@@ -927,6 +934,11 @@ export type QueryHarvestDashboardArgs = {
 
 
 export type QueryHarvestsArgs = {
+  filter?: InputMaybe<HarvestFilterInput>;
+};
+
+
+export type QueryHarvestsCsvExportArgs = {
   filter?: InputMaybe<HarvestFilterInput>;
 };
 
@@ -1095,6 +1107,12 @@ export type TenantGreenhouse = {
   name: Scalars['String']['output'];
   xDimension: Scalars['Float']['output'];
   yDimension: Scalars['Float']['output'];
+};
+
+export type TenantParDli = {
+  __typename?: 'TenantParDli';
+  combined: ParDliResult;
+  greenhouses: Array<GreenhouseParDli>;
 };
 
 export type ToggleTenantFeatureInput = {
@@ -1578,6 +1596,11 @@ export type TenantFeaturesQueryVariables = Exact<{
 
 export type TenantFeaturesQuery = { __typename?: 'Query', tenantFeatures: Array<{ __typename?: 'TenantFeature', id: string, tenantId: string, featureId: string, enabled: boolean, createdAt: any, updatedAt: any, feature?: { __typename?: 'Feature', id: string, key: string, name: string, description?: string | null, category?: string | null, isActive: boolean } | null }> };
 
+export type GetHarvestBatchesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetHarvestBatchesQuery = { __typename?: 'Query', harvestBatches: Array<{ __typename?: 'HarvestBatchListItem', id: string, name: string, species: string, variety: string, greenhouse?: string | null, plantingDate: any, status: HarvestStatus }> };
+
 export type GetHarvestDashboardQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
 }>;
@@ -1655,6 +1678,20 @@ export type HarvestQueryVariables = Exact<{
 
 export type HarvestQuery = { __typename?: 'Query', harvest?: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, species: string, variety: string, batch: string, parentBatchId?: string | null, greenhouse?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, totalPlants: number, lostPlants: number, status: HarvestStatus, date: any, classA: number, classB: number, waste: number, avgBrix: number, rowX: number, rowY: number, brixReadings: Array<number>, photos: number, photoUrls?: Array<string> | null, createdAt: any, updatedAt: any, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
 
+export type HarvestsCsvExportQueryVariables = Exact<{
+  filter?: InputMaybe<HarvestFilterInput>;
+}>;
+
+
+export type HarvestsCsvExportQuery = { __typename?: 'Query', harvestsCsvExport: string };
+
+export type HarvestsCountQueryVariables = Exact<{
+  filter?: InputMaybe<HarvestFilterInput>;
+}>;
+
+
+export type HarvestsCountQuery = { __typename?: 'Query', harvests: Array<{ __typename?: 'Harvest', id: string }> };
+
 export type HarvestImagesQueryVariables = Exact<{
   folder?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -1685,13 +1722,13 @@ export type GetBucketFieldMeansLastMinutesQueryVariables = Exact<{
 
 export type GetBucketFieldMeansLastMinutesQuery = { __typename?: 'Query', getBucketFieldMeansLastMinutes: Array<{ __typename?: 'FieldMeanMetric', field: string, greenhouse?: string | null, chamber?: string | null, value: number }> };
 
-export type GetParDliTodayQueryVariables = Exact<{
-  bucketName: Scalars['String']['input'];
+export type GetParDliForTenantQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
   timezone?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetParDliTodayQuery = { __typename?: 'Query', getParDliToday: { __typename?: 'ParDliResult', currentPPFD?: number | null, currentDLI?: number | null, todaysGraphData: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }>, lowerEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }>, upperEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }> } };
+export type GetParDliForTenantQuery = { __typename?: 'Query', getParDliForTenant: { __typename?: 'TenantParDli', combined: { __typename?: 'ParDliResult', currentPPFD?: number | null, currentDLI?: number | null, todaysGraphData: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }>, lowerEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }>, upperEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }> }, greenhouses: Array<{ __typename?: 'GreenhouseParDli', name: string, data: { __typename?: 'ParDliResult', currentPPFD?: number | null, currentDLI?: number | null, todaysGraphData: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }>, lowerEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }>, upperEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }> } }> } };
 
 export type SensorConfigsQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -3733,6 +3770,54 @@ export type TenantFeaturesQueryHookResult = ReturnType<typeof useTenantFeaturesQ
 export type TenantFeaturesLazyQueryHookResult = ReturnType<typeof useTenantFeaturesLazyQuery>;
 export type TenantFeaturesSuspenseQueryHookResult = ReturnType<typeof useTenantFeaturesSuspenseQuery>;
 export type TenantFeaturesQueryResult = Apollo.QueryResult<TenantFeaturesQuery, TenantFeaturesQueryVariables>;
+export const GetHarvestBatchesDocument = gql`
+    query GetHarvestBatches {
+  harvestBatches {
+    id
+    name
+    species
+    variety
+    greenhouse
+    plantingDate
+    status
+  }
+}
+    `;
+
+/**
+ * __useGetHarvestBatchesQuery__
+ *
+ * To run a query within a React component, call `useGetHarvestBatchesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetHarvestBatchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetHarvestBatchesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetHarvestBatchesQuery(baseOptions?: Apollo.QueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>(GetHarvestBatchesDocument, options);
+      }
+export function useGetHarvestBatchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>(GetHarvestBatchesDocument, options);
+        }
+// @ts-ignore
+export function useGetHarvestBatchesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>;
+export function useGetHarvestBatchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestBatchesQuery | undefined, GetHarvestBatchesQueryVariables>;
+export function useGetHarvestBatchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>(GetHarvestBatchesDocument, options);
+        }
+export type GetHarvestBatchesQueryHookResult = ReturnType<typeof useGetHarvestBatchesQuery>;
+export type GetHarvestBatchesLazyQueryHookResult = ReturnType<typeof useGetHarvestBatchesLazyQuery>;
+export type GetHarvestBatchesSuspenseQueryHookResult = ReturnType<typeof useGetHarvestBatchesSuspenseQuery>;
+export type GetHarvestBatchesQueryResult = Apollo.QueryResult<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>;
 export const GetHarvestDashboardDocument = gql`
     query GetHarvestDashboard($filter: DashboardFilterInput) {
   harvestDashboard(filter: $filter) {
@@ -4336,6 +4421,90 @@ export type HarvestQueryHookResult = ReturnType<typeof useHarvestQuery>;
 export type HarvestLazyQueryHookResult = ReturnType<typeof useHarvestLazyQuery>;
 export type HarvestSuspenseQueryHookResult = ReturnType<typeof useHarvestSuspenseQuery>;
 export type HarvestQueryResult = Apollo.QueryResult<HarvestQuery, HarvestQueryVariables>;
+export const HarvestsCsvExportDocument = gql`
+    query HarvestsCsvExport($filter: HarvestFilterInput) {
+  harvestsCsvExport(filter: $filter)
+}
+    `;
+
+/**
+ * __useHarvestsCsvExportQuery__
+ *
+ * To run a query within a React component, call `useHarvestsCsvExportQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHarvestsCsvExportQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHarvestsCsvExportQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useHarvestsCsvExportQuery(baseOptions?: Apollo.QueryHookOptions<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>(HarvestsCsvExportDocument, options);
+      }
+export function useHarvestsCsvExportLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>(HarvestsCsvExportDocument, options);
+        }
+// @ts-ignore
+export function useHarvestsCsvExportSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>;
+export function useHarvestsCsvExportSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestsCsvExportQuery | undefined, HarvestsCsvExportQueryVariables>;
+export function useHarvestsCsvExportSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>(HarvestsCsvExportDocument, options);
+        }
+export type HarvestsCsvExportQueryHookResult = ReturnType<typeof useHarvestsCsvExportQuery>;
+export type HarvestsCsvExportLazyQueryHookResult = ReturnType<typeof useHarvestsCsvExportLazyQuery>;
+export type HarvestsCsvExportSuspenseQueryHookResult = ReturnType<typeof useHarvestsCsvExportSuspenseQuery>;
+export type HarvestsCsvExportQueryResult = Apollo.QueryResult<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>;
+export const HarvestsCountDocument = gql`
+    query HarvestsCount($filter: HarvestFilterInput) {
+  harvests(filter: $filter) {
+    id
+  }
+}
+    `;
+
+/**
+ * __useHarvestsCountQuery__
+ *
+ * To run a query within a React component, call `useHarvestsCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHarvestsCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHarvestsCountQuery({
+ *   variables: {
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useHarvestsCountQuery(baseOptions?: Apollo.QueryHookOptions<HarvestsCountQuery, HarvestsCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HarvestsCountQuery, HarvestsCountQueryVariables>(HarvestsCountDocument, options);
+      }
+export function useHarvestsCountLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HarvestsCountQuery, HarvestsCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HarvestsCountQuery, HarvestsCountQueryVariables>(HarvestsCountDocument, options);
+        }
+// @ts-ignore
+export function useHarvestsCountSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HarvestsCountQuery, HarvestsCountQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestsCountQuery, HarvestsCountQueryVariables>;
+export function useHarvestsCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestsCountQuery, HarvestsCountQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestsCountQuery | undefined, HarvestsCountQueryVariables>;
+export function useHarvestsCountSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestsCountQuery, HarvestsCountQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HarvestsCountQuery, HarvestsCountQueryVariables>(HarvestsCountDocument, options);
+        }
+export type HarvestsCountQueryHookResult = ReturnType<typeof useHarvestsCountQuery>;
+export type HarvestsCountLazyQueryHookResult = ReturnType<typeof useHarvestsCountLazyQuery>;
+export type HarvestsCountSuspenseQueryHookResult = ReturnType<typeof useHarvestsCountSuspenseQuery>;
+export type HarvestsCountQueryResult = Apollo.QueryResult<HarvestsCountQuery, HarvestsCountQueryVariables>;
 export const HarvestImagesDocument = gql`
     query HarvestImages($folder: String) {
   images(input: {folder: $folder}) {
@@ -4514,63 +4683,84 @@ export type GetBucketFieldMeansLastMinutesQueryHookResult = ReturnType<typeof us
 export type GetBucketFieldMeansLastMinutesLazyQueryHookResult = ReturnType<typeof useGetBucketFieldMeansLastMinutesLazyQuery>;
 export type GetBucketFieldMeansLastMinutesSuspenseQueryHookResult = ReturnType<typeof useGetBucketFieldMeansLastMinutesSuspenseQuery>;
 export type GetBucketFieldMeansLastMinutesQueryResult = Apollo.QueryResult<GetBucketFieldMeansLastMinutesQuery, GetBucketFieldMeansLastMinutesQueryVariables>;
-export const GetParDliTodayDocument = gql`
-    query GetParDliToday($bucketName: String!, $timezone: String) {
-  getParDliToday(input: {bucketName: $bucketName, timezone: $timezone}) {
-    currentPPFD
-    currentDLI
-    todaysGraphData {
-      time
-      dli
+export const GetParDliForTenantDocument = gql`
+    query GetParDliForTenant($tenantId: ID, $timezone: String) {
+  getParDliForTenant(input: {tenantId: $tenantId, timezone: $timezone}) {
+    combined {
+      currentPPFD
+      currentDLI
+      todaysGraphData {
+        time
+        dli
+      }
+      lowerEdge {
+        hour
+        dli
+      }
+      upperEdge {
+        hour
+        dli
+      }
     }
-    lowerEdge {
-      hour
-      dli
-    }
-    upperEdge {
-      hour
-      dli
+    greenhouses {
+      name
+      data {
+        currentPPFD
+        currentDLI
+        todaysGraphData {
+          time
+          dli
+        }
+        lowerEdge {
+          hour
+          dli
+        }
+        upperEdge {
+          hour
+          dli
+        }
+      }
     }
   }
 }
     `;
 
 /**
- * __useGetParDliTodayQuery__
+ * __useGetParDliForTenantQuery__
  *
- * To run a query within a React component, call `useGetParDliTodayQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetParDliTodayQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetParDliForTenantQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetParDliForTenantQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetParDliTodayQuery({
+ * const { data, loading, error } = useGetParDliForTenantQuery({
  *   variables: {
- *      bucketName: // value for 'bucketName'
+ *      tenantId: // value for 'tenantId'
  *      timezone: // value for 'timezone'
  *   },
  * });
  */
-export function useGetParDliTodayQuery(baseOptions: Apollo.QueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables> & ({ variables: GetParDliTodayQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetParDliForTenantQuery(baseOptions?: Apollo.QueryHookOptions<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetParDliTodayQuery, GetParDliTodayQueryVariables>(GetParDliTodayDocument, options);
+        return Apollo.useQuery<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>(GetParDliForTenantDocument, options);
       }
-export function useGetParDliTodayLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables>) {
+export function useGetParDliForTenantLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetParDliTodayQuery, GetParDliTodayQueryVariables>(GetParDliTodayDocument, options);
+          return Apollo.useLazyQuery<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>(GetParDliForTenantDocument, options);
         }
 // @ts-ignore
-export function useGetParDliTodaySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables>): Apollo.UseSuspenseQueryResult<GetParDliTodayQuery, GetParDliTodayQueryVariables>;
-export function useGetParDliTodaySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables>): Apollo.UseSuspenseQueryResult<GetParDliTodayQuery | undefined, GetParDliTodayQueryVariables>;
-export function useGetParDliTodaySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetParDliTodayQuery, GetParDliTodayQueryVariables>) {
+export function useGetParDliForTenantSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>): Apollo.UseSuspenseQueryResult<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>;
+export function useGetParDliForTenantSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>): Apollo.UseSuspenseQueryResult<GetParDliForTenantQuery | undefined, GetParDliForTenantQueryVariables>;
+export function useGetParDliForTenantSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetParDliTodayQuery, GetParDliTodayQueryVariables>(GetParDliTodayDocument, options);
+          return Apollo.useSuspenseQuery<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>(GetParDliForTenantDocument, options);
         }
-export type GetParDliTodayQueryHookResult = ReturnType<typeof useGetParDliTodayQuery>;
-export type GetParDliTodayLazyQueryHookResult = ReturnType<typeof useGetParDliTodayLazyQuery>;
-export type GetParDliTodaySuspenseQueryHookResult = ReturnType<typeof useGetParDliTodaySuspenseQuery>;
-export type GetParDliTodayQueryResult = Apollo.QueryResult<GetParDliTodayQuery, GetParDliTodayQueryVariables>;
+export type GetParDliForTenantQueryHookResult = ReturnType<typeof useGetParDliForTenantQuery>;
+export type GetParDliForTenantLazyQueryHookResult = ReturnType<typeof useGetParDliForTenantLazyQuery>;
+export type GetParDliForTenantSuspenseQueryHookResult = ReturnType<typeof useGetParDliForTenantSuspenseQuery>;
+export type GetParDliForTenantQueryResult = Apollo.QueryResult<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>;
 export const SensorConfigsDocument = gql`
     query SensorConfigs($tenantId: ID) {
   sensorConfigs(tenantId: $tenantId) {
@@ -5097,53 +5287,3 @@ export type UserQueryHookResult = ReturnType<typeof useUserQuery>;
 export type UserLazyQueryHookResult = ReturnType<typeof useUserLazyQuery>;
 export type UserSuspenseQueryHookResult = ReturnType<typeof useUserSuspenseQuery>;
 export type UserQueryResult = Apollo.QueryResult<UserQuery, UserQueryVariables>;
-export type GetHarvestBatchesQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetHarvestBatchesQuery = { __typename?: 'Query', harvestBatches: Array<{ __typename?: 'HarvestBatchListItem', id: string, name: string, species: string, variety: string, greenhouse?: string | null, plantingDate: any, status: HarvestStatus }> };
-
-export const GetHarvestBatchesDocument = gql`
-    query GetHarvestBatches {
-  harvestBatches {
-    id
-    name
-    species
-    variety
-    greenhouse
-    plantingDate
-    status
-  }
-}
-    `;
-
-/**
- * __useGetHarvestBatchesQuery__
- *
- * To run a query within a React component, call `useGetHarvestBatchesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetHarvestBatchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetHarvestBatchesQuery();
- */
-export function useGetHarvestBatchesQuery(baseOptions?: Apollo.QueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>(GetHarvestBatchesDocument, options);
-      }
-export function useGetHarvestBatchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>(GetHarvestBatchesDocument, options);
-        }
-// @ts-ignore
-export function useGetHarvestBatchesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>;
-export function useGetHarvestBatchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>): Apollo.UseSuspenseQueryResult<GetHarvestBatchesQuery | undefined, GetHarvestBatchesQueryVariables>;
-export function useGetHarvestBatchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>(GetHarvestBatchesDocument, options);
-        }
-export type GetHarvestBatchesQueryHookResult = ReturnType<typeof useGetHarvestBatchesQuery>;
-export type GetHarvestBatchesLazyQueryHookResult = ReturnType<typeof useGetHarvestBatchesLazyQuery>;
-export type GetHarvestBatchesSuspenseQueryHookResult = ReturnType<typeof useGetHarvestBatchesSuspenseQuery>;
-export type GetHarvestBatchesQueryResult = Apollo.QueryResult<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>;

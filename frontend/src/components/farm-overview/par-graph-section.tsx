@@ -10,7 +10,8 @@ import { ParGraphChart } from './par-graph-chart';
 export function ParGraphSection({
   bay,
   greenhouseLabel,
-  bucketName,
+  tenantId,
+  greenhouseName,
   embedded = false,
   className,
 }: ParGraphSectionProps) {
@@ -25,7 +26,7 @@ export function ParGraphSection({
     currentPpfd,
     timeLabel,
     yMax,
-  } = useParGraphData(bucketName);
+  } = useParGraphData(tenantId, greenhouseName);
 
   const content = (
     <>

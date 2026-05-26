@@ -34,9 +34,13 @@ export interface CombinedGreenhouseViewProps {
   parameters: ParameterOption[];
   noDataMessage: string;
   parGraphLabel: string;
-  /** Optional bucket override forwarded to the embedded PAR graph. Required
-   *  when a vGreens admin views another tenant. */
+  /** Optional bucket override forwarded to the embedded field-means query
+   *  (used to populate per-greenhouse parameter cards). Required when a
+   *  vGreens admin views another tenant. */
   parGraphBucketName?: string | null;
+  /** Optional tenant override forwarded to the PAR graph. Required when a
+   *  vGreens admin views another tenant; tenant users can omit it. */
+  parGraphTenantId?: string | null;
   onParameterClick?: (greenhouseIndex: number, parameterKey: string) => void;
 }
 
@@ -101,6 +105,7 @@ export function CombinedGreenhouseView({
   noDataMessage,
   parGraphLabel,
   parGraphBucketName,
+  parGraphTenantId,
   onParameterClick,
 }: CombinedGreenhouseViewProps) {
   const orderedParameters = React.useMemo(
@@ -269,7 +274,7 @@ export function CombinedGreenhouseView({
       <ParGraphSection
         bay={null}
         greenhouseLabel={parGraphLabel}
-        bucketName={parGraphBucketName}
+        tenantId={parGraphTenantId}
         embedded
         className="min-h-[15rem] w-full shrink-0 sm:min-h-[17rem] md:min-h-[20rem] lg:min-h-[24rem]"
       />

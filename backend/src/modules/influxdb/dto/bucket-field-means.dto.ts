@@ -65,24 +65,6 @@ export class FieldMeanMetric {
   rawValue?: number;
 }
 
-@InputType()
-export class GetParDliTodayInput {
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  bucketName: string;
-
-  /**
-   * IANA timezone name (e.g. "Europe/Berlin"). Used to align today's
-   * window and the historical band's hour buckets to the viewer's local
-   * time. Falls back to UTC when omitted.
-   */
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  timezone?: string;
-}
-
 @ObjectType()
 export class ParDliPoint {
   @Field(() => Date)

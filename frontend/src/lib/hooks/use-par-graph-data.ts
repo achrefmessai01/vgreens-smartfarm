@@ -1,5 +1,9 @@
 import * as React from 'react';
-import { useGetParDliTodayQuery, useMeQuery } from '@/generated/graphql';
+import {
+  useGetParDliForTenantQuery,
+  useMeQuery,
+  type GetParDliForTenantQuery,
+} from '@/generated/graphql';
 import type {
   ParGraphData,
   ParCurvePoint,
@@ -7,17 +11,30 @@ import type {
 } from '@/types/par-graph';
 import { getHourOfDay } from '@/lib/utils/par-graph';
 
+type TenantParDli = GetParDliForTenantQuery['getParDliForTenant'];
+type ParDliResult = TenantParDli['combined'];
+
+/**
+ * Fetches today's PAR/DLI for the active tenant and selects the slice the
+ * caller wants to render (`greenhouseName` for a specific greenhouse, or
+ * `null/undefined` for the combined view).
+ *
+ * The same `getParDliForTenant` query runs for every `<ParGraphSection>`
+ * on the page; Apollo deduplicates them because the variables match.
+ * That means each component just picks its own slice from the cached
+ * `TenantParDli` payload — no extra round trips when switching tabs.
+ *
+ * Fallback behaviour: when a tenant has no sensor→greenhouse mapping,
+ * the backend returns `greenhouses: []` and the per-greenhouse path is
+ * meaningless. In that case we always render `combined` — so per-tab
+ * navigation degrades gracefully to "one combined PAR graph" for those
+ * tenants, matching the spec.
+ */
 export function useParGraphData(
-  bucketNameOverride?: string | null,
+  tenantIdOverride?: string | null,
+  greenhouseName?: string | null,
 ): ParGraphData {
-  const { data: meData } = useMeQuery({
-    fetchPolicy: 'cache-first',
-  });
-  // Prefer the explicit override (set by vGreens admins viewing another
-  // tenant). Fall back to the signed-in user's own tenant bucket so the
-  // tenant-side flow keeps working unchanged.
-  const bucketName =
-    bucketNameOverride ?? meData?.me?.tenant?.influxBucketName ?? null;
+  const { data: meData } = useMeQuery({ fetchPolicy: 'cache-first' });
 
   // Send the viewer's IANA timezone so Flux can align today's window and the
   // historical band's hour buckets to local time. Without this the band wraps
@@ -31,13 +48,30 @@ export function useParGraphData(
     }
   }, []);
 
-  const { data: parDliData } = useGetParDliTodayQuery({
-    variables: { bucketName: bucketName ?? '', timezone },
-    skip: !bucketName,
+  // Skip until we have *some* tenant context to send. Tenant users have
+  // `me.tenant.id`; vGreens admins viewing another tenant pass an explicit
+  // override. Without either the backend would 400 with "Tenant context
+  // is required" — better to wait for auth to resolve.
+  const hasTenantContext =
+    !!tenantIdOverride || !!meData?.me?.tenant?.id;
+
+  const { data } = useGetParDliForTenantQuery({
+    variables: { tenantId: tenantIdOverride ?? null, timezone },
+    skip: !hasTenantContext,
     fetchPolicy: 'cache-and-network',
   });
 
-  const result = parDliData?.getParDliToday;
+  const result = React.useMemo<ParDliResult | undefined>(() => {
+    const tenantPayload = data?.getParDliForTenant;
+    if (!tenantPayload) return undefined;
+    if (!greenhouseName) return tenantPayload.combined;
+    const match = tenantPayload.greenhouses.find(
+      (g) => g.name === greenhouseName,
+    );
+    // Tenants without a mapping return `greenhouses: []`; fall through to
+    // combined so per-greenhouse tabs still render meaningfully.
+    return match?.data ?? tenantPayload.combined;
+  }, [data, greenhouseName]);
 
   const apiPoints = React.useMemo(() => {
     const raw = result?.todaysGraphData ?? [];

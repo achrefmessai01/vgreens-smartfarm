@@ -540,54 +540,34 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Returns today's PAR/DLI summary for a tenant bucket:
-   *   - `todaysGraphData`: cumulative DLI curve in mol m⁻², one point per
-   *     5-minute window starting at midnight (UTC).
-   *   - `currentPPFD`: latest PPFD reading in µmol m⁻² s⁻¹ (mean lux of the
-   *     last 5-minute window / 55).
-   *   - `currentDLI`: latest cumulative DLI value in mol m⁻².
+   * Returns today's PAR/DLI summary for a tenant bucket, optionally
+   * scoped to a specific list of lux devices.
    *
    * Pipeline:
-   *   1. Pull every `lux` reading in the bucket since the start of today.
-   *   2. Collapse all device series with `group()` so each 5-minute window
-   *      mean is across every lux sensor in the tenant bucket.
+   *   1. Pull every `lux` reading since the start of today, filtered to
+   *      the supplied `devices` when provided.
+   *   2. Collapse all matching device series with `group()` so each
+   *      5-minute window mean is across the selected lux sensors.
    *   3. Aggregate to 5-minute (`DLI_INTERVAL_SECONDS`) means.
    *   4. Per window: PPFD = lux / 55 (µmol m⁻² s⁻¹) and DLI contribution =
    *      PPFD × 300 s / 1e6 (mol m⁻²).
    *   5. `cumulativeSum` over the DLI column gives the running curve.
    *
+   * Pass an empty/undefined `devices` list to fall back to "all lux in the
+   * bucket" — used for tenants with no sensor→greenhouse mapping yet.
+   *
    * The `/55` factor is the project-wide convention for converting natural-
    * daylight lux to PPFD; we intentionally bypass any pre-computed `par`
    * fields so the dashboard uses one consistent calibration.
-   *
-   * Bucket-scoped (no greenhouse tag filter): per-tenant tag values are
-   * inconsistent, so scoping by bucket is sufficient because each tenant
-   * has their own bucket. For per-greenhouse breakdowns, use
-   * `getParDliForDevices` with a device list sourced from the Postgres
-   * `sensor_configs` mapping.
-   */
-  async getTodayParDli(
-    bucketName: string,
-    options: { timezone?: string } = {},
-  ): Promise<ParDliResult> {
-    return this.getParDliForDevices(bucketName, { timezone: options.timezone });
-  }
-
-  /**
-   * PAR/DLI summary scoped to a specific list of lux devices. Same pipeline
-   * as `getTodayParDli` but adds a `device IN (...)` Flux predicate so the
-   * cross-sensor mean is taken only over the supplied devices.
-   *
-   * Pass an empty/undefined `devices` list to fall back to "all lux in the
-   * bucket" — used for tenants with no sensor→greenhouse mapping yet.
    *
    * The historical envelope (`fetchDliBand`) is computed with the same
    * device filter so today's curve and the band stay statistically
    * comparable (see the comment block on `fetchDliBand`).
    *
-   * Devices are escaped before being interpolated into Flux even though
-   * they come from our own Postgres table — defence in depth against any
-   * future path that might let a less trusted source set them.
+   * No greenhouse tag filter is applied — the deprecated InfluxDB
+   * `greenhouse` tag is never used by this path. Devices are escaped
+   * before being interpolated into Flux even though they come from our
+   * own Postgres table — defence in depth.
    */
   async getParDliForDevices(
     bucketName: string,

@@ -4,12 +4,7 @@ import { InfluxDBService } from './influxdb.service';
 import { InfluxDBData } from './dto/influxdb-data.object';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import { GetBucketDataInput } from './dto/get-bucket-data.dto';
-import {
-  FieldMeanMetric,
-  GetFieldMeansInput,
-  GetParDliTodayInput,
-  ParDliResult,
-} from './dto';
+import { FieldMeanMetric, GetFieldMeansInput } from './dto';
 import { Resolver, Query, Args } from '@nestjs/graphql';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
@@ -78,16 +73,6 @@ export class InfluxDBResolver {
       windowMinutes,
       start,
       stop,
-    });
-  }
-
-  @Public()
-  @Query(() => ParDliResult, { name: 'getParDliToday' })
-  async getParDliToday(
-    @Args('input') input: GetParDliTodayInput,
-  ): Promise<ParDliResult> {
-    return this.influxDBService.getTodayParDli(input.bucketName, {
-      timezone: input.timezone,
     });
   }
 
