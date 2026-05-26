@@ -7,8 +7,9 @@ import {
 } from '@/lib/camera-utils';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/i18n';
 import { Badge } from '@/components/ui/badge';
-import type { Camera } from '@/types/camera.types';
+import type { Camera, CameraStatus } from '@/types/camera.types';
 import { Video, Circle, Clock, Monitor } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
@@ -17,7 +18,16 @@ interface CameraCardProps {
   onClick?: () => void;
 }
 
+const STATUS_LABEL_KEY: Record<CameraStatus, string> = {
+  online: 'statusOnline',
+  recording: 'statusRecording',
+  offline: 'statusOffline',
+  error: 'statusError',
+};
+
 export function CameraCard({ camera, onClick }: CameraCardProps) {
+  const { t } = useI18n();
+  const filters = t.pages.cameraLivestream;
   const [currentTime, setCurrentTime] = React.useState(() => Date.now());
 
   React.useEffect(() => {
@@ -65,7 +75,7 @@ export function CameraCard({ camera, onClick }: CameraCardProps) {
               <Circle
                 className={cn('h-2 w-2', getCameraStatusColor(camera.status))}
               />
-              {camera.status.charAt(0).toUpperCase() + camera.status.slice(1)}
+              {filters[STATUS_LABEL_KEY[camera.status] as keyof typeof filters] as string}
             </Badge>
           </div>
 
@@ -76,7 +86,7 @@ export function CameraCard({ camera, onClick }: CameraCardProps) {
                 className="flex animate-pulse items-center gap-1.5 px-2 py-1 text-xs font-semibold"
               >
                 <Video className="h-3 w-3" />
-                Recording
+                {filters.recordingBadge}
               </Badge>
             </div>
           )}

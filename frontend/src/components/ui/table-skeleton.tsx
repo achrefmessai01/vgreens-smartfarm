@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 interface TableSkeletonProps {
@@ -28,6 +29,7 @@ export function TableSkeleton({
   className,
   showHeader = true,
 }: TableSkeletonProps) {
+  const { t } = useI18n();
   const headerWidths = ['w-24', 'w-32', 'w-28', 'w-36', 'w-20', 'w-24', 'w-28'];
   const cellWidths = ['w-32', 'w-40', 'w-24', 'w-48', 'w-20', 'w-24', 'w-28'];
 
@@ -37,7 +39,7 @@ export function TableSkeleton({
         'border-border overflow-hidden rounded-md border',
         className,
       )}
-      aria-label="Loading table"
+      aria-label={t.common.loadingTable}
     >
       <Table>
         {showHeader && (

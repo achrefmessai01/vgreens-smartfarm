@@ -2,20 +2,25 @@
 
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useI18nOptional } from '@/i18n';
+import { getTranslations } from '@/i18n/translations';
 import { cn } from '@/lib/utils';
+
+const fallbackT = getTranslations('en');
 
 interface SidebarSkeletonProps {
   className?: string;
 }
 
 export function SidebarSkeleton({ className }: SidebarSkeletonProps) {
+  const { t } = useI18n();
   return (
     <div
       className={cn(
         'border-border dark:border-sidebar-border/70 bg-muted/30 dark:bg-background fixed top-0 left-0 z-40 hidden h-screen w-64 flex-col border-r lg:flex',
         className,
       )}
-      aria-label="Loading sidebar"
+      aria-label={t.common.loadingSidebar}
     >
       {/* Header */}
       <div className="border-border dark:border-sidebar-border/70 flex h-16 items-center justify-between border-b px-4">

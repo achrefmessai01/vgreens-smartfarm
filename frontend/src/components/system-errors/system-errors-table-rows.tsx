@@ -5,8 +5,7 @@ import { ErrorSourceBadge } from '@/components/ui/error-source-badge';
 import { ErrorTypeBadge } from '@/components/ui/error-type-badge';
 import { TableCell } from '@/components/ui/table';
 import { SystemError } from '@/generated/graphql';
-import { useI18n } from '@/i18n';
-import { formatDistanceToNow } from 'date-fns';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { CheckCircle2, Eye } from 'lucide-react';
 import { useSystemErrorsCard } from './system-errors-table-cards';
 
@@ -28,6 +27,7 @@ export const useSystemErrorsRow = ({
   isResolving = false,
 }: SystemErrorsRowProps) => {
   const { t } = useI18n();
+  const { formatRelativeTime } = useLocaleFormatters();
 
   // Get card renderer from dedicated card module
   const { renderCard } = useSystemErrorsCard({
@@ -73,7 +73,7 @@ export const useSystemErrorsRow = ({
         <TableCell>
           {t.pages.admin.systemErrors.timeAgo.replace(
             '{time}',
-            formatDistanceToNow(new Date(error.createdAt)),
+            formatRelativeTime(error.createdAt),
           )}
         </TableCell>
         <TableCell>{userName}</TableCell>

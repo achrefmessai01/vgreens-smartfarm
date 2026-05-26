@@ -760,7 +760,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
       )}
     >
       {resolvedSensors.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No sensor data</p>
+        <p className="text-muted-foreground text-sm">{farmOverviewT.noData}</p>
       ) : (
         <DndContext
           sensors={sensorsConfig}

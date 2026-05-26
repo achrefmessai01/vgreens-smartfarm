@@ -197,7 +197,7 @@ export function Sidebar({
   const defaultUser = {
     name: user?.firstName
       ? `${user.firstName} ${user.lastName}`
-      : 'Unknown User',
+      : t.common.unknownUser,
     role: user?.role || (isVGreensAdmin ? 'VGREENS_ADMIN' : 'TENANT_USER'),
     avatar: user?.imageUrl || '',
   };
@@ -222,7 +222,7 @@ export function Sidebar({
       {/* Mobile Sidebar */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="w-[280px] p-0">
-          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+          <SheetTitle className="sr-only">{t.common.navigationMenu}</SheetTitle>
           <SidebarContent
             mobile
             isCollapsed={false}

@@ -98,7 +98,7 @@ export function LoginForm({
           <div className="bg-muted relative hidden md:block">
             <Image
               src="/login-placeholder.svg"
-              alt="Smart Farm"
+              alt={t.common.smartFarm}
               fill
               className="object-cover dark:brightness-[0.2] dark:grayscale"
               priority

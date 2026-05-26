@@ -54,17 +54,17 @@ export function DeviceHealthCard({
                 className={cn('text-sm font-semibold', statusClass[d.status])}
               >
                 {d.status === 'online'
-                  ? 'Online'
+                  ? t.common.online
                   : d.status === 'degraded'
-                    ? 'Degraded'
-                    : 'Offline'}
+                    ? t.common.degraded
+                    : t.common.offline}
               </div>
             </div>
           ))}
         </div>
         {weather && (
           <div className="mt-6 border-t pt-4">
-            <h4 className="text-muted-foreground text-sm">Weather</h4>
+            <h4 className="text-muted-foreground text-sm">{t.common.weather}</h4>
             <div className="mt-2 flex items-center gap-3">
               {weather.icon && <div className="text-3xl">{weather.icon}</div>}
               <div>

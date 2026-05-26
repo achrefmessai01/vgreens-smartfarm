@@ -2,11 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ErrorReport, ReportStatus } from '@/generated/graphql';
-import {
-  formatDateTime,
-  getTimelineStatus,
-} from '@/lib/utils/error-report-utils';
-import { useI18n } from '@/i18n';
+import { getTimelineStatus } from '@/lib/utils/error-report-utils';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { Clock } from 'lucide-react';
 
 interface ReportStatusTimelineProps {
@@ -15,6 +12,7 @@ interface ReportStatusTimelineProps {
 
 export function ReportStatusTimeline({ report }: ReportStatusTimelineProps) {
   const { t } = useI18n();
+  const { formatDateTime } = useLocaleFormatters();
 
   const timelineSteps = [
     {

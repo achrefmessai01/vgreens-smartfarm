@@ -96,3 +96,13 @@ export function useI18n() {
   }
   return context;
 }
+
+/**
+ * Like `useI18n` but returns `undefined` when called outside an
+ * `I18nProvider`. Use this in components that mount above the provider tree
+ * (root error boundaries, global error pages) and need to render plain
+ * English when the provider hasn't initialised yet.
+ */
+export function useI18nOptional(): I18nContextType | undefined {
+  return useContext(I18nContext);
+}

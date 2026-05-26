@@ -1,7 +1,13 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { useI18nOptional } from '@/i18n';
+import { getTranslations } from '@/i18n/translations';
 import { cn } from '@/lib/utils';
+
+// Skeletons can render above I18nProvider as Suspense / loading fallbacks.
+// Fall back to English if no provider is in scope yet.
+const fallbackT = getTranslations('en');
 
 interface ContentSkeletonProps {
   className?: string;
@@ -16,13 +22,14 @@ export function ContentSkeleton({
   showHeader = true,
   lines = 3,
 }: ContentSkeletonProps) {
+  const t = useI18nOptional()?.t ?? fallbackT;
   return (
     <div
       className={cn(
         'flex min-h-[400px] flex-col gap-4 rounded-lg p-4',
         className,
       )}
-      aria-label="Loading content"
+      aria-label={t.common.loadingContent}
     >
       {showHeader && (
         <div className="flex items-center gap-3">

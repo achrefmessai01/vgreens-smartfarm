@@ -12,8 +12,7 @@ import { ErrorSourceBadge } from '@/components/ui/error-source-badge';
 import { ErrorTypeBadge } from '@/components/ui/error-type-badge';
 import { ErrorReportSeverityBadge } from '@/components/error-reports/error-report-severity-badge';
 import { SystemError } from '@/generated/graphql';
-import { useI18n } from '@/i18n';
-import { formatDistanceToNow } from 'date-fns';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface SystemErrorDetailsDialogProps {
@@ -32,6 +31,7 @@ export function SystemErrorDetailsDialog({
   isResolving = false,
 }: SystemErrorDetailsDialogProps) {
   const { t } = useI18n();
+  const { formatRelativeTime } = useLocaleFormatters();
 
   if (!error) return null;
 
@@ -175,14 +175,14 @@ export function SystemErrorDetailsDialog({
             <div>
               {t.pages.admin.systemErrors.details.created.replace(
                 '{time}',
-                formatDistanceToNow(new Date(error.createdAt)),
+                formatRelativeTime(error.createdAt),
               )}
             </div>
             {error.lastOccurredAt && (
               <div>
                 {t.pages.admin.systemErrors.details.lastOccurred.replace(
                   '{time}',
-                  formatDistanceToNow(new Date(error.lastOccurredAt)),
+                  formatRelativeTime(error.lastOccurredAt),
                 )}
               </div>
             )}
@@ -190,7 +190,7 @@ export function SystemErrorDetailsDialog({
               <div>
                 {t.pages.admin.systemErrors.details.updated.replace(
                   '{time}',
-                  formatDistanceToNow(new Date(error.updatedAt)),
+                  formatRelativeTime(error.updatedAt),
                 )}
               </div>
             )}
