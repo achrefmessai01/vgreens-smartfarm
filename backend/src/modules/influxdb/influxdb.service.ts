@@ -560,15 +560,38 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
    * daylight lux to PPFD; we intentionally bypass any pre-computed `par`
    * fields so the dashboard uses one consistent calibration.
    *
-   * We deliberately do not filter by the `greenhouse` tag: per-tenant tag
-   * values are inconsistent (some tenants tag with `chamber`, some apply
-   * SensorConfig overrides that diverge from the raw Influx tag), so the
-   * filter would silently match zero rows for some tenants. Scoping by
-   * bucket is sufficient because each tenant has their own bucket.
+   * Bucket-scoped (no greenhouse tag filter): per-tenant tag values are
+   * inconsistent, so scoping by bucket is sufficient because each tenant
+   * has their own bucket. For per-greenhouse breakdowns, use
+   * `getParDliForDevices` with a device list sourced from the Postgres
+   * `sensor_configs` mapping.
    */
   async getTodayParDli(
     bucketName: string,
     options: { timezone?: string } = {},
+  ): Promise<ParDliResult> {
+    return this.getParDliForDevices(bucketName, { timezone: options.timezone });
+  }
+
+  /**
+   * PAR/DLI summary scoped to a specific list of lux devices. Same pipeline
+   * as `getTodayParDli` but adds a `device IN (...)` Flux predicate so the
+   * cross-sensor mean is taken only over the supplied devices.
+   *
+   * Pass an empty/undefined `devices` list to fall back to "all lux in the
+   * bucket" — used for tenants with no sensor→greenhouse mapping yet.
+   *
+   * The historical envelope (`fetchDliBand`) is computed with the same
+   * device filter so today's curve and the band stay statistically
+   * comparable (see the comment block on `fetchDliBand`).
+   *
+   * Devices are escaped before being interpolated into Flux even though
+   * they come from our own Postgres table — defence in depth against any
+   * future path that might let a less trusted source set them.
+   */
+  async getParDliForDevices(
+    bucketName: string,
+    options: { devices?: string[]; timezone?: string } = {},
   ): Promise<ParDliResult> {
     if (!this.client || !this.queryApi) {
       this.logger.error('InfluxDB client is not initialized');
@@ -577,6 +600,7 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
 
     const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     const tz = sanitizeTimezone(options.timezone);
+    const deviceFilter = this.buildDeviceFilterClause(options.devices);
 
     const flux = `
 import "date"
@@ -586,7 +610,7 @@ option location = timezone.location(name: "${escape(tz)}")
 
 from(bucket: "${escape(bucketName)}")
   |> range(start: date.truncate(t: now(), unit: 1d))
-  |> filter(fn: (r) => r["_field"] == "lux")
+  |> filter(fn: (r) => r["_field"] == "lux"${deviceFilter})
   |> group()
   |> aggregateWindow(every: ${DLI_INTERVAL_SECONDS}s, fn: mean, createEmpty: false)
   |> sort(columns: ["_time"])
@@ -627,17 +651,21 @@ from(bucket: "${escape(bucketName)}")
       });
     } catch (error) {
       this.logger.warn(
-        `getTodayParDli failed for bucket "${bucketName}": ${
+        `getParDliForDevices failed for bucket "${bucketName}" (devices=${options.devices?.length ?? 0}): ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
       return { todaysGraphData: [], lowerEdge: [], upperEdge: [] };
     }
 
-    const { lowerEdge, upperEdge } = await this.fetchDliBand(bucketName, tz);
+    const { lowerEdge, upperEdge } = await this.fetchDliBand(
+      bucketName,
+      tz,
+      options.devices,
+    );
 
     this.logger.debug(
-      `getTodayParDli("${bucketName}") → ${points.length} points`,
+      `getParDliForDevices("${bucketName}", devices=${options.devices?.length ?? 0}) → ${points.length} points`,
     );
     return {
       currentPPFD,
@@ -646,6 +674,20 @@ from(bucket: "${escape(bucketName)}")
       lowerEdge,
       upperEdge,
     };
+  }
+
+  /**
+   * Builds the additional Flux predicate (` and (r["device"] == "X" or ...)`)
+   * for filtering lux queries to a specific device list. Returns an empty
+   * string when no devices are supplied, leaving the query unfiltered.
+   */
+  private buildDeviceFilterClause(devices?: string[]): string {
+    if (!devices || devices.length === 0) return '';
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const predicates = devices
+      .map((d) => `r["device"] == "${escape(d)}"`)
+      .join(' or ');
+    return ` and (${predicates})`;
   }
 
   /**
@@ -681,6 +723,7 @@ from(bucket: "${escape(bucketName)}")
   private async fetchDliBand(
     bucketName: string,
     tz: string,
+    devices?: string[],
   ): Promise<{
     lowerEdge: ParDliBandPoint[];
     upperEdge: ParDliBandPoint[];
@@ -690,6 +733,7 @@ from(bucket: "${escape(bucketName)}")
     }
 
     const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const deviceFilter = this.buildDeviceFilterClause(devices);
 
     // One hourly mean per (day, hour) — the cross-sensor average lux for
     // that hour. The JS side then takes min/max across days per hour to
@@ -704,7 +748,7 @@ todayStart = date.truncate(t: now(), unit: 1d)
 
 from(bucket: "${escape(bucketName)}")
   |> range(start: date.sub(d: ${DLI_BAND_LOOKBACK_DAYS}d, from: todayStart), stop: todayStart)
-  |> filter(fn: (r) => r["_field"] == "lux")
+  |> filter(fn: (r) => r["_field"] == "lux"${deviceFilter})
   |> group()
   |> aggregateWindow(every: 1h, fn: mean, createEmpty: false, timeSrc: "_start")
   |> map(fn: (r) => ({ _time: r._time, _value: r._value, hour: date.hour(t: r._time) }))
