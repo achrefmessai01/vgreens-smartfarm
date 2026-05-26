@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertStatus } from '@/generated/graphql';
-import { useI18n } from '@/i18n';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { cn } from '@/lib/utils';
 import {
   getActionState,
@@ -31,6 +31,7 @@ export const useAlertTableCard = (
   hasSecondaryActions: boolean,
 ) => {
   const { t } = useI18n();
+  const formatters = useLocaleFormatters();
 
   const renderCard = (alert: Alert) => {
     const rowClassName = getRowClassName(alert);
@@ -49,7 +50,7 @@ export const useAlertTableCard = (
           <h3
             className={cn('text-sm leading-none font-semibold', textClassName)}
           >
-            {formatFieldLabel(alert.field)}
+            {formatFieldLabel(alert.field, t)}
           </h3>
           <div className="flex shrink-0 flex-wrap gap-2">
             {getStatusBadge(alert.status, t)}
@@ -74,7 +75,7 @@ export const useAlertTableCard = (
               {t.pages.alerts.timestamp}:
             </span>
             <span className={cn('font-medium', textClassName)}>
-              {formatTimestamp(alert.timestamp)}
+              {formatTimestamp(alert.timestamp, formatters)}
             </span>
           </div>
 

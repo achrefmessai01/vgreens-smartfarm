@@ -1,6 +1,6 @@
 import { TableCell } from '@/components/ui/table';
 import { Alert, AlertStatus } from '@/generated/graphql';
-import { useI18n } from '@/i18n';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import {
   renderPrimaryActions,
   renderSecondaryActions,
@@ -22,6 +22,7 @@ import {
 
 export const useAlertTableRow = (actionHandlers: ActionHandlers) => {
   const { t } = useI18n();
+  const formatters = useLocaleFormatters();
   const hideEditButton = true;
   const hasSecondaryActions = Boolean(
     (actionHandlers.onEdit && !hideEditButton) || actionHandlers.onDelete,
@@ -39,7 +40,7 @@ export const useAlertTableRow = (actionHandlers: ActionHandlers) => {
     return (
       <>
         <TableCell className={`font-medium ${cellClassName}`.trim()}>
-          {formatFieldLabel(alert.field)}
+          {formatFieldLabel(alert.field, t)}
         </TableCell>
         <TableCell className={cellClassName}>{alert.value}</TableCell>
         <TableCell className={cellClassName}>
@@ -49,7 +50,7 @@ export const useAlertTableRow = (actionHandlers: ActionHandlers) => {
           {getSeverityBadge(alert.severity, t)}
         </TableCell>
         <TableCell className={cellClassName}>
-          {formatTimestamp(alert.timestamp)}
+          {formatTimestamp(alert.timestamp, formatters)}
         </TableCell>
         <TableCell className={cellClassName}>
           {formatUser(alert.acknowledgedBy)}

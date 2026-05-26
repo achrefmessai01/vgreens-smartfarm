@@ -1,6 +1,7 @@
 'use client';
 
 import ErrorPage from '@/components/ui/error-page';
+import { useI18n } from '@/i18n';
 
 export default function AdminReportsError({
   error,
@@ -9,12 +10,13 @@ export default function AdminReportsError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <ErrorPage
       error={error}
       reset={reset}
-      title="Something went wrong!"
-      description="We encountered an error while loading the reports management page."
+      title={t.errors.adminReports.title}
+      description={t.errors.adminReports.description}
       theme="blue"
     />
   );

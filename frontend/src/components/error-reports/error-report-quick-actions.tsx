@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/select';
 import { ErrorReport, ReportStatus } from '@/generated/graphql';
 import { ErrorReportStatusBadge } from './error-report-status-badge';
+import { useI18n } from '@/i18n';
 
 import { useState } from 'react';
 import { Check, X } from 'lucide-react';
@@ -25,6 +26,8 @@ export function ErrorReportQuickActions({
   onStatusUpdate,
   isUpdating = false,
 }: ErrorReportQuickActionsProps) {
+  const { t } = useI18n();
+  const statusesT = t.pages.admin.reports.statuses;
   const [isEditing, setIsEditing] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(report.status);
 
@@ -51,9 +54,13 @@ export function ErrorReportQuickActions({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ReportStatus.Open}>Open</SelectItem>
-            <SelectItem value={ReportStatus.InProgress}>In Progress</SelectItem>
-            <SelectItem value={ReportStatus.Resolved}>Resolved</SelectItem>
+            <SelectItem value={ReportStatus.Open}>{statusesT.open}</SelectItem>
+            <SelectItem value={ReportStatus.InProgress}>
+              {statusesT.inProgress}
+            </SelectItem>
+            <SelectItem value={ReportStatus.Resolved}>
+              {statusesT.resolved}
+            </SelectItem>
           </SelectContent>
         </Select>
         <Button

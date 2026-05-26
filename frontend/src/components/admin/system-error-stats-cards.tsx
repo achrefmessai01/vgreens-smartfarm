@@ -1,4 +1,7 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useI18n } from '@/i18n';
 import { AlertTriangle, XCircle } from 'lucide-react';
 
 interface SystemErrorStatsData {
@@ -16,6 +19,8 @@ export function SystemErrorStatsCards({
   stats,
   loading,
 }: SystemErrorStatsCardsProps) {
+  const { t } = useI18n();
+
   if (loading || !stats) return null;
 
   return (
@@ -23,7 +28,7 @@ export function SystemErrorStatsCards({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Total Errors (24h)
+            {t.pages.admin.systemErrors.totalErrors24h}
           </CardTitle>
           <AlertTriangle className="text-muted-foreground h-4 w-4" />
         </CardHeader>
@@ -34,7 +39,9 @@ export function SystemErrorStatsCards({
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Unresolved</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            {t.pages.admin.systemErrors.unresolved}
+          </CardTitle>
           <XCircle className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>
@@ -46,7 +53,9 @@ export function SystemErrorStatsCards({
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Critical Errors</CardTitle>
+          <CardTitle className="text-sm font-medium">
+            {t.pages.admin.systemErrors.criticalErrors}
+          </CardTitle>
           <AlertTriangle className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>

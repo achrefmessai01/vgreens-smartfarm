@@ -95,7 +95,12 @@ export function BatchSidebar({
           </div>
           <SheetTitle className="dark:text-card-foreground pr-8 text-left leading-tight break-words">
             {currentData?.greenhouse?.name
-              ? `${h?.batchDetails ?? 'Batch Details'} for ${currentData.greenhouse.name}`
+              ? (h?.batchDetailsFor ?? '{label} for {greenhouse}')
+                  .replace(
+                    '{label}',
+                    h?.batchDetails ?? 'Batch Details',
+                  )
+                  .replace('{greenhouse}', currentData.greenhouse.name)
               : (h?.batchDetails ?? 'Batch Details')}
           </SheetTitle>
         </SheetHeader>

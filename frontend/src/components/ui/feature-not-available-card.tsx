@@ -10,6 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Lock, ArrowRight } from 'lucide-react';
+import { useI18n } from '@/i18n';
 
 interface FeatureNotAvailableCardProps {
   title?: string;
@@ -20,12 +21,19 @@ interface FeatureNotAvailableCardProps {
 }
 
 export function FeatureNotAvailableCard({
-  title = 'Feature Not Available',
-  description = 'This feature is not enabled for your tenant. Please contact your administrator to enable this feature.',
-  badgeText = 'Not Available',
+  title,
+  description,
+  badgeText,
   onRedirect,
-  redirectLabel = 'Go to Dashboard',
+  redirectLabel,
 }: FeatureNotAvailableCardProps) {
+  const { t } = useI18n();
+  const featuresT = t.pages.admin.features;
+  const resolvedTitle = title ?? featuresT.featureNotAvailableTitle;
+  const resolvedDescription =
+    description ?? featuresT.featureNotAvailableDefaultDescription;
+  const resolvedBadgeText = badgeText ?? featuresT.notAvailableBadge;
+  const resolvedRedirectLabel = redirectLabel ?? featuresT.goToDashboard;
   return (
     <div className="flex min-h-[60vh] items-center justify-center py-12">
       {/* Main Feature Not Available Card */}
@@ -104,20 +112,20 @@ export function FeatureNotAvailableCard({
               variant="secondary"
               className="dark:bg-secondary/80 dark:border-primary-foreground/20 dark:text-secondary-foreground border-2 px-5 py-2 text-sm font-semibold shadow-md transition-transform duration-200 hover:scale-105"
             >
-              {badgeText}
+              {resolvedBadgeText}
             </Badge>
           </div>
 
           {/* Title with Gradient Text */}
           <CardTitle className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
             <span className="from-foreground via-foreground/90 to-foreground/80 dark:from-card-foreground dark:via-card-foreground/95 dark:to-card-foreground/90 bg-gradient-to-r bg-clip-text text-transparent">
-              {title}
+              {resolvedTitle}
             </span>
           </CardTitle>
 
           {/* Description with Better Typography */}
           <CardDescription className="text-muted-foreground/90 dark:text-muted-foreground/80 mx-auto max-w-2xl text-base leading-relaxed font-normal sm:text-lg md:text-xl">
-            {description}
+            {resolvedDescription}
           </CardDescription>
 
           {/* Decorative Gradient Line */}
@@ -132,7 +140,7 @@ export function FeatureNotAvailableCard({
                 className="group relative overflow-hidden px-8 py-6 text-base font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  {redirectLabel}
+                  {resolvedRedirectLabel}
                   <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
               </Button>

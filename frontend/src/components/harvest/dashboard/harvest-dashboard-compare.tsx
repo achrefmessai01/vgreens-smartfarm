@@ -79,11 +79,11 @@ export function HarvestDashboardCompare({
       <Card className="flex flex-col items-center justify-center px-6 py-20 text-center">
         <GitCompareArrows className="text-muted-foreground mb-3 h-8 w-8" />
         <p className="text-foreground text-sm font-medium">
-          Select at least 2 batches to compare
+          {h?.selectAtLeast2 ?? 'Select at least 2 batches to compare'}
         </p>
         <p className="text-muted-foreground mt-1 max-w-sm text-xs">
-          Use the dropdown above to pick up to 4 batches and compare their yield
-          and quality side by side.
+          {h?.useDropdownHint ??
+            'Use the dropdown above to pick up to 4 batches and compare their yield and quality side by side.'}
         </p>
       </Card>
     );
@@ -236,7 +236,7 @@ export function HarvestDashboardCompare({
               </div>
               {!isLoading && harvestCount === 0 && (
                 <p className="text-muted-foreground mt-3 text-xs italic">
-                  No harvests in this period
+                  {h?.noHarvestsInPeriod ?? 'No harvests in this period'}
                 </p>
               )}
             </Card>

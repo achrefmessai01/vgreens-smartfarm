@@ -13,11 +13,13 @@ interface FarmDataDisplayProps {
   bays: Bay[];
   viewMode: 'heatmap' | 'discrete' | 'graph';
   parameter: ParameterType;
-  greenhouseId: string;
   greenhouseLabel: string;
-  /** Optional bucket override forwarded to the embedded PAR graph in `graph`
-   *  view. Required for vGreens admins viewing another tenant. */
-  parGraphBucketName?: string | null;
+  /** Optional tenant override forwarded to the embedded PAR graph in
+   *  `graph` view. Required for vGreens admins viewing another tenant. */
+  parGraphTenantId?: string | null;
+  /** Greenhouse name passed through to the PAR graph for tenant-aware
+   *  slicing. Falls back to the combined view when undefined. */
+  parGraphGreenhouseName?: string | null;
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
   parameterLabel: string;
@@ -39,9 +41,9 @@ export function FarmDataDisplay({
   bays,
   viewMode,
   parameter,
-  greenhouseId,
   greenhouseLabel,
-  parGraphBucketName,
+  parGraphTenantId,
+  parGraphGreenhouseName,
   selectedSlotId,
   onSelectSlot,
   parameterLabel,
@@ -74,9 +76,9 @@ export function FarmDataDisplay({
       {viewMode === 'graph' ? (
         <ParGraphSection
           bay={bays[0] ?? null}
-          greenhouseId={greenhouseId}
           greenhouseLabel={greenhouseLabel}
-          bucketName={parGraphBucketName}
+          tenantId={parGraphTenantId}
+          greenhouseName={parGraphGreenhouseName}
           embedded
           className="h-full w-full"
         />

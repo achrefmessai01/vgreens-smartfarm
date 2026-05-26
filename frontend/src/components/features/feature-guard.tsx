@@ -11,6 +11,7 @@ import {
 } from '@/lib/utils/feature-routes';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { FeatureNotAvailableCard } from '@/components/ui/feature-not-available-card';
+import { useI18n } from '@/i18n';
 
 interface FeatureGuardProps {
   featureKey: string;
@@ -27,6 +28,7 @@ export function FeatureGuard({
   redirectTo,
   skeleton,
 }: FeatureGuardProps) {
+  const { t } = useI18n();
   const { role } = useCurrentUser();
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
   const { hasFeature, enabledFeatures, dataLoaded } = useTenantFeatures();
@@ -59,11 +61,11 @@ export function FeatureGuard({
 
     return (
       <FeatureNotAvailableCard
-        title="Feature Not Available"
-        description="This feature is not enabled for your tenant. Please contact your administrator to request access to this feature."
-        badgeText="Not Available"
+        title={t.pages.admin.features.featureNotAvailableTitle}
+        description={t.pages.admin.features.featureNotAvailableDescription}
+        badgeText={t.pages.admin.features.notAvailableBadge}
         onRedirect={handleRedirect}
-        redirectLabel={`Go to ${targetRouteName}`}
+        redirectLabel={t.common.goTo.replace('{target}', targetRouteName)}
       />
     );
   }

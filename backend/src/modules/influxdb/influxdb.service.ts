@@ -4,7 +4,12 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { FieldMeanMetric, ParDliPoint } from './dto';
+import {
+  FieldMeanMetric,
+  ParDliBandPoint,
+  ParDliPoint,
+  ParDliResult,
+} from './dto';
 import { ConfigService } from '@nestjs/config';
 import { BucketsAPI, OrgsAPI } from '@influxdata/influxdb-client-apis';
 import { InfluxDB, QueryApi, WriteApi } from '@influxdata/influxdb-client';
@@ -14,6 +19,24 @@ import {
   correctRawRows,
   isTargetBucket,
 } from './air-temperature-correction';
+
+const DLI_INTERVAL_SECONDS = 300;
+const LUX_TO_PAR = 55;
+const DLI_BAND_LOOKBACK_DAYS = 14;
+const SECONDS_PER_HOUR = 3600;
+
+/**
+ * IANA timezone names only contain `[A-Za-z0-9/_+-]`. Anything else
+ * means the client sent something unexpected (or potentially a Flux
+ * injection attempt) and we fall back to UTC. Validating with
+ * `Intl.DateTimeFormat` would also work, but the regex is cheap and
+ * doesn't depend on the Node ICU build.
+ */
+function sanitizeTimezone(tz?: string): string {
+  if (!tz) return 'UTC';
+  if (!/^[A-Za-z0-9_+/\-]+$/.test(tz)) return 'UTC';
+  return tz;
+}
 
 @Injectable()
 export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
@@ -517,56 +540,201 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Returns today's cumulative DLI (Daily Light Integral) curve in mol m⁻²,
-   * derived from the raw `lux` sensor field.
+   * Returns today's PAR/DLI summary for a tenant bucket, optionally
+   * scoped to a specific list of lux devices.
    *
    * Pipeline:
-   *   1. Pull the `lux` field for the given greenhouse, from the start of
-   *      today (UTC).
-   *   2. Collapse all device series with `group()` so we get a single mean
-   *      per minute (rather than N parallel curves when multiple sensors
-   *      report for the same greenhouse).
-   *   3. Aggregate to 1-minute means.
-   *   4. Convert lux → PAR µmol m⁻² s⁻¹  (PAR = lux / 55).
-   *   5. Convert PAR µmol m⁻² s⁻¹ → mol m⁻² per minute  (× 60 s / 1e6).
-   *   6. `cumulativeSum` from midnight gives DLI in mol m⁻², which resets
-   *      each day naturally because the `range` only spans today.
+   *   1. Pull every `lux` reading since the start of today, filtered to
+   *      the supplied `devices` when provided.
+   *   2. Collapse all matching device series with `group()` so each
+   *      5-minute window mean is across the selected lux sensors.
+   *   3. Aggregate to 5-minute (`DLI_INTERVAL_SECONDS`) means.
+   *   4. Per window: PPFD = lux / 55 (µmol m⁻² s⁻¹) and DLI contribution =
+   *      PPFD × 300 s / 1e6 (mol m⁻²).
+   *   5. `cumulativeSum` over the DLI column gives the running curve.
+   *
+   * Pass an empty/undefined `devices` list to fall back to "all lux in the
+   * bucket" — used for tenants with no sensor→greenhouse mapping yet.
    *
    * The `/55` factor is the project-wide convention for converting natural-
-   * daylight lux to PPFD; it intentionally bypasses any pre-computed `par`
-   * or `par_estimated` fields the sensors might write so the dashboard
-   * always uses one consistent calibration.
+   * daylight lux to PPFD; we intentionally bypass any pre-computed `par`
+   * fields so the dashboard uses one consistent calibration.
+   *
+   * The historical envelope (`fetchDliBand`) is computed with the same
+   * device filter so today's curve and the band stay statistically
+   * comparable (see the comment block on `fetchDliBand`).
+   *
+   * No greenhouse tag filter is applied — the deprecated InfluxDB
+   * `greenhouse` tag is never used by this path. Devices are escaped
+   * before being interpolated into Flux even though they come from our
+   * own Postgres table — defence in depth.
    */
-  async getTodayParCumulativeDli(
+  async getParDliForDevices(
     bucketName: string,
-    options: { greenhouse: string },
-  ): Promise<ParDliPoint[]> {
+    options: { devices?: string[]; timezone?: string } = {},
+  ): Promise<ParDliResult> {
     if (!this.client || !this.queryApi) {
       this.logger.error('InfluxDB client is not initialized');
       throw new Error('InfluxDB client is not initialized');
     }
 
     const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const tz = sanitizeTimezone(options.timezone);
+    const deviceFilter = this.buildDeviceFilterClause(options.devices);
 
     const flux = `
 import "date"
+import "timezone"
+
+option location = timezone.location(name: "${escape(tz)}")
 
 from(bucket: "${escape(bucketName)}")
   |> range(start: date.truncate(t: now(), unit: 1d))
-  |> filter(fn: (r) =>
-    r["_field"] == "lux" and
-    r["greenhouse"] == "${escape(options.greenhouse)}"
-  )
+  |> filter(fn: (r) => r["_field"] == "lux"${deviceFilter})
   |> group()
-  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+  |> aggregateWindow(every: ${DLI_INTERVAL_SECONDS}s, fn: mean, createEmpty: false)
+  |> sort(columns: ["_time"])
   |> map(fn: (r) => ({
       _time: r._time,
-      _value: float(v: r._value) / 55.0 * 60.0 / 1000000.0
+      ppfd: float(v: r._value) / ${LUX_TO_PAR}.0,
+      _value: float(v: r._value) / ${LUX_TO_PAR}.0 * ${DLI_INTERVAL_SECONDS}.0 / 1000000.0
     }))
   |> cumulativeSum(columns: ["_value"])
 `;
 
-    const rows: ParDliPoint[] = [];
+    const points: ParDliPoint[] = [];
+    let currentPPFD: number | undefined;
+    let currentDLI: number | undefined;
+    const queryApi = this.queryApi;
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        queryApi.queryRows(flux, {
+          next: (row, tableMeta) => {
+            const o = tableMeta.toObject(row) as Record<string, unknown>;
+            const dli = Number(o._value);
+            const ppfd = Number(o.ppfd);
+            if (Number.isNaN(dli) || Number.isNaN(ppfd)) return;
+
+            const time =
+              o._time instanceof Date
+                ? o._time
+                : new Date(String((o as { _time?: string })._time ?? ''));
+
+            points.push({ time, dli });
+            currentPPFD = ppfd;
+            currentDLI = dli;
+          },
+          error: reject,
+          complete: resolve,
+        });
+      });
+    } catch (error) {
+      this.logger.warn(
+        `getParDliForDevices failed for bucket "${bucketName}" (devices=${options.devices?.length ?? 0}): ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return { todaysGraphData: [], lowerEdge: [], upperEdge: [] };
+    }
+
+    const { lowerEdge, upperEdge } = await this.fetchDliBand(
+      bucketName,
+      tz,
+      options.devices,
+    );
+
+    this.logger.debug(
+      `getParDliForDevices("${bucketName}", devices=${options.devices?.length ?? 0}) → ${points.length} points`,
+    );
+    return {
+      currentPPFD,
+      currentDLI,
+      todaysGraphData: points,
+      lowerEdge,
+      upperEdge,
+    };
+  }
+
+  /**
+   * Builds the additional Flux predicate (` and (r["device"] == "X" or ...)`)
+   * for filtering lux queries to a specific device list. Returns an empty
+   * string when no devices are supplied, leaving the query unfiltered.
+   */
+  private buildDeviceFilterClause(devices?: string[]): string {
+    if (!devices || devices.length === 0) return '';
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const predicates = devices
+      .map((d) => `r["device"] == "${escape(d)}"`)
+      .join(' or ');
+    return ` and (${predicates})`;
+  }
+
+  /**
+   * Builds the historical PAR/DLI envelope for the in-app chart.
+   *
+   * Statistic used: **per-day, per-hour mean lux**, then per hour-of-day
+   * the min and max across the last `DLI_BAND_LOOKBACK_DAYS` whole days.
+   * The lower/upper edges therefore represent "cumulative DLI on the
+   * dimmest day in the last 14 days" and "…on the brightest day".
+   *
+   * Why mean (not min/max of raw samples)? Today's curve aggregates lux
+   * across all sensors with `mean`. If the band used min/max of any raw
+   * reading, it would track the dimmest and brightest *sensors* in the
+   * greenhouse — a much wider, fundamentally different statistic from
+   * the curve plotted on top, making the band useless for "is today
+   * inside the typical range?" comparisons. Matching aggregations lets
+   * the chart answer that question directly.
+   *
+   * Flux's `option location` aligns `aggregateWindow` to local hour
+   * boundaries and lets `date.hour` return the local hour 0–23. This is
+   * critical for tenants outside UTC: bucketing in UTC would shift the
+   * band by the offset and wrap high cumulative values to the start of
+   * the chart (e.g. Germany's UTC+2 manifested as a "wall" at hour 0).
+   *
+   * Hours with no samples on any of the lookback days emit a point with a
+   * null `dli`, which the chart renders as a gap rather than zero so it's
+   * visually obvious that the envelope is missing rather than implying
+   * "no light expected".
+   *
+   * Returns empty arrays on Flux error so the caller can still serve
+   * today's curve.
+   */
+  private async fetchDliBand(
+    bucketName: string,
+    tz: string,
+    devices?: string[],
+  ): Promise<{
+    lowerEdge: ParDliBandPoint[];
+    upperEdge: ParDliBandPoint[];
+  }> {
+    if (!this.client || !this.queryApi) {
+      return { lowerEdge: [], upperEdge: [] };
+    }
+
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const deviceFilter = this.buildDeviceFilterClause(devices);
+
+    // One hourly mean per (day, hour) — the cross-sensor average lux for
+    // that hour. The JS side then takes min/max across days per hour to
+    // produce the envelope edges.
+    const flux = `
+import "date"
+import "timezone"
+
+option location = timezone.location(name: "${escape(tz)}")
+
+todayStart = date.truncate(t: now(), unit: 1d)
+
+from(bucket: "${escape(bucketName)}")
+  |> range(start: date.sub(d: ${DLI_BAND_LOOKBACK_DAYS}d, from: todayStart), stop: todayStart)
+  |> filter(fn: (r) => r["_field"] == "lux"${deviceFilter})
+  |> group()
+  |> aggregateWindow(every: 1h, fn: mean, createEmpty: false, timeSrc: "_start")
+  |> map(fn: (r) => ({ _time: r._time, _value: r._value, hour: date.hour(t: r._time) }))
+`;
+
+    const hourlyMeansByHour = new Map<number, number[]>();
     const queryApi = this.queryApi;
 
     try {
@@ -575,14 +743,13 @@ from(bucket: "${escape(bucketName)}")
           next: (row, tableMeta) => {
             const o = tableMeta.toObject(row) as Record<string, unknown>;
             const value = Number(o._value);
-            if (Number.isNaN(value)) return;
+            const hour = Number(o.hour);
+            if (!Number.isFinite(value) || !Number.isFinite(hour)) return;
+            if (hour < 0 || hour > 23) return;
 
-            const time =
-              o._time instanceof Date
-                ? o._time
-                : new Date(String((o as { _time?: string })._time ?? ''));
-
-            rows.push({ time, dli: value });
+            const list = hourlyMeansByHour.get(hour);
+            if (list) list.push(value);
+            else hourlyMeansByHour.set(hour, [value]);
           },
           error: reject,
           complete: resolve,
@@ -590,17 +757,40 @@ from(bucket: "${escape(bucketName)}")
       });
     } catch (error) {
       this.logger.warn(
-        `getTodayParCumulativeDli failed for bucket "${bucketName}" greenhouse "${options.greenhouse}": ${
+        `fetchDliBand failed for bucket "${bucketName}" tz "${tz}": ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
-      return [];
+      return { lowerEdge: [], upperEdge: [] };
+    }
+
+    const hourToDli = SECONDS_PER_HOUR / 1_000_000;
+
+    const lowerEdge: ParDliBandPoint[] = [];
+    const upperEdge: ParDliBandPoint[] = [];
+    let cumulLower = 0;
+    let cumulUpper = 0;
+
+    for (let h = 0; h < 24; h++) {
+      const dailyMeans = hourlyMeansByHour.get(h);
+      if (dailyMeans && dailyMeans.length > 0) {
+        const minLux = Math.min(...dailyMeans);
+        const maxLux = Math.max(...dailyMeans);
+        cumulLower += (minLux / LUX_TO_PAR) * hourToDli;
+        cumulUpper += (maxLux / LUX_TO_PAR) * hourToDli;
+        lowerEdge.push({ hour: h, dli: cumulLower });
+        upperEdge.push({ hour: h, dli: cumulUpper });
+      } else {
+        lowerEdge.push({ hour: h });
+        upperEdge.push({ hour: h });
+      }
     }
 
     this.logger.debug(
-      `getTodayParCumulativeDli("${bucketName}", greenhouse="${options.greenhouse}") → ${rows.length} points (lux/55)`,
+      `fetchDliBand("${bucketName}", tz="${tz}") → ${hourlyMeansByHour.size} hours populated`,
     );
-    return rows;
+
+    return { lowerEdge, upperEdge };
   }
 
   /**

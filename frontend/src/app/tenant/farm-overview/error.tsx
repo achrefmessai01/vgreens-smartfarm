@@ -1,6 +1,7 @@
 'use client';
 
 import ErrorPage from '@/components/ui/error-page';
+import { useI18n } from '@/i18n';
 import { BarChart3 } from 'lucide-react';
 
 export default function FarmOverviewErrorPage({
@@ -10,18 +11,19 @@ export default function FarmOverviewErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <ErrorPage
       error={error}
       reset={reset}
-      title="Farm Overview Error"
-      description="Something went wrong with the farm overview. Your other farm sections are still working."
-      sectionName="Farm Overview"
+      title={t.errors.farmOverview.title}
+      description={t.errors.farmOverview.description}
+      sectionName={t.errors.farmOverview.section}
       theme="green"
-      resetLabel="Reload Overview"
+      resetLabel={t.errors.farmOverview.resetLabel}
       backLink={{
         href: '/tenant/dashboard',
-        label: 'Back to Dashboard',
+        label: t.common.backToDashboard,
         icon: BarChart3,
       }}
     />

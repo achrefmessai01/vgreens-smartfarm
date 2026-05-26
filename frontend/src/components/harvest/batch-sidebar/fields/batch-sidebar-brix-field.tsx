@@ -58,7 +58,7 @@ export function BrixMeasurementsField({
             checked={showBrix}
             onCheckedChange={(checked) => onShowBrixChange(checked === true)}
           />
-          <span>Add Brix measurements</span>
+          <span>{h?.addBrixMeasurements ?? 'Add Brix measurements'}</span>
         </label>
       </div>
       {showBrix && (
@@ -115,7 +115,7 @@ export function BrixMeasurementsField({
                       className="h-9 w-9 shrink-0"
                       onClick={() => onRemoveReading?.(index)}
                       disabled={isLoading || !canRemove}
-                      aria-label="Remove reading"
+                      aria-label={h?.removeReading ?? 'Remove reading'}
                     >
                       <Trash2 className="text-destructive h-4 w-4" />
                     </Button>
@@ -132,7 +132,7 @@ export function BrixMeasurementsField({
               className="w-full"
             >
               <Plus className="mr-1 h-4 w-4" />
-              Add Brix reading
+              {h?.addBrixReading ?? 'Add Brix reading'}
             </Button>
           </div>
         </div>

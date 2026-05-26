@@ -4,6 +4,7 @@ import * as React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StyledSelect } from '@/components/ui/styled-select';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 export interface TablePaginationProps {
@@ -42,12 +43,13 @@ export function TablePagination({
   variant = 'default',
   className,
 }: TablePaginationProps) {
-  const showing = labels.showing ?? 'Showing';
-  const ofLabel = labels.of ?? 'of';
-  const results = labels.results ?? 'results';
+  const { t } = useI18n();
+  const showing = labels.showing ?? t.common.showing;
+  const ofLabel = labels.of ?? t.common.of;
+  const results = labels.results ?? t.common.results;
   const perPage = labels.perPage ?? 'per page';
-  const previous = labels.previous ?? 'Previous';
-  const next = labels.next ?? 'Next';
+  const previous = labels.previous ?? t.common.previous;
+  const next = labels.next ?? t.common.next;
   const isCompact = variant === 'compact';
   const safeTotalPages = Math.max(totalPages, 1);
 
@@ -104,7 +106,7 @@ export function TablePagination({
             {isCompact ? (
               <nav
                 className="flex w-full items-center justify-between gap-3 sm:hidden"
-                aria-label="Pagination"
+                aria-label={t.common.pagination}
               >
                 <Button
                   variant="outline"
@@ -142,7 +144,7 @@ export function TablePagination({
                 'items-center gap-0.5',
                 isCompact ? 'hidden sm:flex' : 'flex',
               )}
-              aria-label="Pagination"
+              aria-label={t.common.pagination}
             >
               <Button
                 variant="outline"

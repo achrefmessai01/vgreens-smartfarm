@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { useI18n } from '@/i18n';
 import {
   Area,
@@ -8,12 +9,12 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  AreaChart,
+  ComposedChart,
   CartesianGrid,
   ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
-import type { ParCurvePoint } from '@/types/par-graph';
+import type { ParBandPoint, ParCurvePoint } from '@/types/par-graph';
 import {
   HOUR_TICKS,
   formatHourTick,
@@ -23,6 +24,8 @@ import {
 
 export interface ParGraphChartProps {
   curveData: ParCurvePoint[];
+  lowerEdge: ParBandPoint[];
+  upperEdge: ParBandPoint[];
   currentHour: number;
   currentDli: number;
   yMax: number;
@@ -30,6 +33,8 @@ export interface ParGraphChartProps {
 
 export function ParGraphChart({
   curveData,
+  lowerEdge,
+  upperEdge,
   currentHour,
   currentDli,
   yMax,
@@ -37,27 +42,81 @@ export function ParGraphChart({
   const { t } = useI18n();
   const labels = t.pages.farmOverview.parGraph;
 
+  const effectiveYMax = React.useMemo(
+    () => Math.ceil((yMax + 1) / 5) * 5,
+    [yMax],
+  );
+
+  /**
+   * Merge today's 5-min cumulative DLI samples and the 24 hourly band
+   * points into one dataset, keyed by `hour`.
+   *
+   * The band edges are only known at integer hours, but we **interpolate**
+   * them linearly at every today-curve hour too. Without this, recharts
+   * sees `band === undefined` at every 5-min row in between band hours
+   * (since today rows don't carry band values) and treats those as gaps
+   * — visually the Area only renders past the current hour where there
+   * are no today rows interrupting it. Cumulative DLI is roughly linear
+   * within an hour (constant PPFD assumption) so the interpolation is
+   * faithful.
+   *
+   * Legitimate gaps still surface as `undefined`: when an hour has no
+   * historical samples on any of the lookback days, both surrounding
+   * band points have null DLI and the interpolation propagates that.
+   */
+  const mergedData = React.useMemo(() => {
+    const lowerByHour = new Map<number, number>();
+    const upperByHour = new Map<number, number>();
+    for (const p of lowerEdge) {
+      if (typeof p.dli === 'number') lowerByHour.set(p.hour, p.dli);
+    }
+    for (const p of upperEdge) {
+      if (typeof p.dli === 'number') upperByHour.set(p.hour, p.dli);
+    }
+    const interp = (
+      hour: number,
+      byHour: Map<number, number>,
+    ): number | undefined => {
+      const lh = Math.floor(hour);
+      const uh = Math.ceil(hour);
+      const lv = byHour.get(lh);
+      const uv = byHour.get(uh);
+      if (lv == null || uv == null) return undefined;
+      if (lh === uh) return lv;
+      return lv + (uv - lv) * (hour - lh);
+    };
+
+    const todayByHour = new Map<number, number>();
+    for (const p of curveData) todayByHour.set(p.hour, p.today);
+
+    const allHours = new Set<number>(todayByHour.keys());
+    for (let h = 0; h < 24; h++) allHours.add(h);
+
+    return Array.from(allHours)
+      .sort((a, b) => a - b)
+      .map((hour) => {
+        const lower = interp(hour, lowerByHour);
+        const upper = interp(hour, upperByHour);
+        const band: [number, number] | undefined =
+          lower != null && upper != null ? [lower, upper] : undefined;
+        return {
+          hour,
+          today: todayByHour.get(hour),
+          lowerEdge: lower,
+          upperEdge: upper,
+          band,
+        };
+      });
+  }, [curveData, lowerEdge, upperEdge]);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col p-1.5 sm:p-3">
-      <div className="text-muted-foreground mb-2 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block w-4 border-t border-dashed border-slate-400" />
-          {labels.legendAverage}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block w-4 border-t border-slate-500" />
-          {labels.legendYesterday}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block w-4 border-t-2 border-emerald-600" />
-          {labels.legendToday}
-        </span>
-      </div>
+      <div className="text-muted-foreground mb-2 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 text-[10px]"></div>
 
       <div className="min-h-[10rem] flex-1 sm:min-h-[14rem]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={curveData}
+          <ComposedChart
+            data={mergedData}
             margin={{ top: 6, right: 6, left: 2, bottom: 14 }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -80,7 +139,7 @@ export function ParGraphChart({
               />
             </XAxis>
             <YAxis
-              domain={[0, yMax]}
+              domain={[0, effectiveYMax]}
               tickLine={false}
               axisLine={false}
               width={40}
@@ -137,50 +196,46 @@ export function ParGraphChart({
             />
 
             <Area
-              type="monotone"
-              dataKey="lowerBand"
-              stackId="parBand"
-              stroke="none"
-              fill="transparent"
-              isAnimationActive={false}
-            />
-            <Area
-              type="monotone"
               dataKey="band"
-              stackId="parBand"
+              type="monotone"
+              name="band"
               stroke="none"
-              fill="#34D399"
-              fillOpacity={0.65}
+              fill="hsl(142 91% 50%)"
+              fillOpacity={0.15}
+              activeDot={false}
               isAnimationActive={false}
+              tooltipType="none"
             />
-
             <Line
+              dataKey="lowerEdge"
               type="monotone"
-              dataKey="avg"
-              stroke="#94A3B8"
+              name="lowerEdge"
+              stroke="hsl(142 91% 55%)"
+              strokeWidth={1.5}
               strokeDasharray="4 4"
-              strokeWidth={1.4}
               dot={false}
               isAnimationActive={false}
             />
             <Line
+              dataKey="upperEdge"
               type="monotone"
-              dataKey="yesterday"
-              stroke="#64748B"
-              strokeWidth={1.3}
+              name="upperEdge"
+              stroke="hsl(142 91% 55%)"
+              strokeWidth={1.5}
+              strokeDasharray="4 4"
               dot={false}
               isAnimationActive={false}
             />
             <Line
-              type="monotone"
               dataKey="today"
-              stroke="#059669"
-              strokeWidth={2.2}
+              type="monotone"
+              name="today"
+              stroke="hsl(142 100% 50%)"
+              strokeWidth={2.5}
               dot={false}
-              connectNulls={false}
               isAnimationActive={false}
             />
-          </AreaChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>

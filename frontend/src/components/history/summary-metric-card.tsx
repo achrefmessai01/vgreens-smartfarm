@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useLocaleFormatters } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export function SummaryMetricCard({
   variant = 'default',
   className,
 }: SummaryMetricCardProps) {
+  const { formatNumber } = useLocaleFormatters();
   const variantStyles = {
     default: 'bg-card border',
     primary: 'bg-primary text-primary-foreground border-primary',
@@ -71,7 +73,7 @@ export function SummaryMetricCard({
               </p>
             </div>
             <p className={cn('text-3xl font-bold', valueStyles[variant])}>
-              {typeof value === 'number' ? value.toLocaleString() : value}
+              {typeof value === 'number' ? formatNumber(value) : value}
             </p>
             {subtitle && (
               <p

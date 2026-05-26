@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { AlertTriangle, Bell, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 type ToastVariant = 'default' | 'destructive';
@@ -59,6 +60,7 @@ function ToastViewport({
   toasts: ToastRecord[];
   onDismiss: (id: string) => void;
 }) {
+  const { t } = useI18n();
   if (toasts.length === 0) {
     return null;
   }
@@ -130,7 +132,7 @@ function ToastViewport({
                   type="button"
                   onClick={() => onDismiss(toast.id)}
                   className="text-muted-foreground hover:bg-accent hover:text-foreground focus:ring-ring rounded-md p-0.5 transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-none sm:p-1"
-                  aria-label="Dismiss notification"
+                  aria-label={t.common.dismissNotification}
                 >
                   <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </button>

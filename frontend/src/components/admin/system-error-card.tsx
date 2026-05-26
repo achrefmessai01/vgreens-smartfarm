@@ -1,3 +1,5 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -5,6 +7,7 @@ import {
   ErrorReportStatusBadge,
 } from '@/components/error-reports';
 import { ReportSeverity, ReportStatus } from '@/types/error-types';
+import { useI18n } from '@/i18n';
 import { Clock, CheckCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -34,8 +37,14 @@ interface SystemErrorCardProps {
 }
 
 export function SystemErrorCard({ error, onResolve }: SystemErrorCardProps) {
+  const { t } = useI18n();
   const isCritical =
     error.severity === 'CRITICAL' || error.severity === 'URGENT';
+
+  const userDisplay = error.user
+    ? `${error.user.firstName || ''} ${error.user.lastName || ''}`.trim() +
+      (error.user.email ? ` (${error.user.email})` : '')
+    : '';
 
   return (
     <div
@@ -65,30 +74,56 @@ export function SystemErrorCard({ error, onResolve }: SystemErrorCardProps) {
           <h3 className="text-sm font-medium">{error.errorMessage}</h3>
 
           <div className="text-muted-foreground space-y-1 text-xs">
-            {error.component && <p>Component: {error.component}</p>}
-            {error.action && <p>Action: {error.action}</p>}
+            {error.component && (
+              <p>
+                {t.pages.admin.systemErrors.component.replace(
+                  '{value}',
+                  error.component,
+                )}
+              </p>
+            )}
+            {error.action && (
+              <p>
+                {t.pages.admin.systemErrors.action.replace(
+                  '{value}',
+                  error.action,
+                )}
+              </p>
+            )}
             {error.user &&
               (error.user.firstName ||
                 error.user.lastName ||
                 error.user.email) && (
                 <p>
-                  User: {error.user.firstName || ''} {error.user.lastName || ''}
-                  {error.user.email && ` (${error.user.email})`}
+                  {t.pages.admin.systemErrors.user.replace(
+                    '{value}',
+                    userDisplay,
+                  )}
                 </p>
               )}
-            {error.tenant && <p>Tenant: {error.tenant.name}</p>}
+            {error.tenant && (
+              <p>
+                {t.pages.admin.systemErrors.tenant.replace(
+                  '{value}',
+                  error.tenant.name,
+                )}
+              </p>
+            )}
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                First: {formatDistanceToNow(new Date(error.createdAt))} ago
+                {t.pages.admin.systemErrors.firstSeen.replace(
+                  '{time}',
+                  formatDistanceToNow(new Date(error.createdAt)),
+                )}
               </span>
               {error.lastOccurredAt && (
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  Last: {formatDistanceToNow(
-                    new Date(error.lastOccurredAt),
-                  )}{' '}
-                  ago
+                  {t.pages.admin.systemErrors.lastSeen.replace(
+                    '{time}',
+                    formatDistanceToNow(new Date(error.lastOccurredAt)),
+                  )}
                 </span>
               )}
             </div>

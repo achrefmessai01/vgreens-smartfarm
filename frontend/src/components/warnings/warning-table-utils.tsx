@@ -1,6 +1,10 @@
 import { Badge } from '@/components/ui/badge';
+import type { useI18n, useLocaleFormatters } from '@/i18n';
 import type { WarningStatus } from '@/types/warning.types';
 import { AlertCircle, CheckCircle, CheckCircle2 } from 'lucide-react';
+
+export type LocaleFormatters = ReturnType<typeof useLocaleFormatters>;
+export type Translations = ReturnType<typeof useI18n>['t'];
 
 /**
  * Utility functions for warning table
@@ -48,7 +52,11 @@ export const getStatusBadge = ({
   );
 };
 
-export const formatTimestamp = (timestamp: string) => {
+export const formatTimestamp = (
+  timestamp: string,
+  formatters: LocaleFormatters,
+  t: Translations,
+) => {
   const date = new Date(timestamp);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -56,9 +64,12 @@ export const formatTimestamp = (timestamp: string) => {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+  if (diffMins < 1) return t.common.justNow;
+  if (diffMins < 60)
+    return t.common.minutesAgoCompact.replace('{count}', String(diffMins));
+  if (diffHours < 24)
+    return t.common.hoursAgoCompact.replace('{count}', String(diffHours));
+  if (diffDays < 7)
+    return t.common.daysAgoCompact.replace('{count}', String(diffDays));
+  return formatters.formatDate(date);
 };

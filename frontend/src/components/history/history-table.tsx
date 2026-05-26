@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 export type HistoryViewType = 'yield' | 'brix' | 'both';
@@ -55,6 +56,8 @@ export function HistoryTable({
   tonsLabel,
   brixUnit,
 }: HistoryTableProps) {
+  const { t } = useI18n();
+  const { formatCurrency } = useLocaleFormatters();
   const showYield = viewType === 'yield' || viewType === 'both';
   const showBrix = viewType === 'brix' || viewType === 'both';
 
@@ -156,9 +159,11 @@ export function HistoryTable({
                   </>
                 )}
                 <TableCell>
-                  €{row.expectedProductionCost.toFixed(2)}/kg
+                  {formatCurrency(row.expectedProductionCost, 'EUR')}{t.pages.history.perKg}
                 </TableCell>
-                <TableCell>€{row.actualProductionCost.toFixed(2)}/kg</TableCell>
+                <TableCell>
+                  {formatCurrency(row.actualProductionCost, 'EUR')}{t.pages.history.perKg}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

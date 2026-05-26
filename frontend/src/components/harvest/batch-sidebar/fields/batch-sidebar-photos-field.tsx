@@ -97,11 +97,13 @@ export function PhotosField({
           }`}
         >
           {isDragOver
-            ? 'Drop images here'
+            ? (h?.dropImagesHere ?? 'Drop images here')
             : (h?.uploadPhotos ?? 'Click to upload or drag and drop')}
         </p>
         {isDragOver && (
-          <p className="text-primary mt-1 text-xs">Release to upload</p>
+          <p className="text-primary mt-1 text-xs">
+            {h?.releaseToUpload ?? 'Release to upload'}
+          </p>
         )}
       </div>
 

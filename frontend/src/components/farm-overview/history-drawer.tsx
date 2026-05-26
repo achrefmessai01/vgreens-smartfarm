@@ -21,7 +21,7 @@ import {
 import type { ParameterType } from '@/types/farm.types';
 import { useMeQuery, useGetBucketDataQuery } from '@/generated/graphql';
 import { HistoryChartSkeleton } from './history-chart-skeleton';
-import { useI18n } from '@/i18n';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 
 /** Parse slotId (e.g. "live_greenhouse_01|Air_09|unknown") into greenhouse, device, level for InfluxDB filters */
 function parseSlotId(slotId: string): {
@@ -87,6 +87,7 @@ export function HistoryDrawer({
   bucketName: bucketNameOverride,
 }: HistoryDrawerProps) {
   const { t } = useI18n();
+  const { formatDate, formatDateTime } = useLocaleFormatters();
 
   const [timeRange, setTimeRange] = React.useState<'1day' | '1week' | '1month'>(
     '1month',
@@ -199,20 +200,16 @@ export function HistoryDrawer({
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="timestamp"
-                    tickFormatter={(value) => {
-                      const date = new Date(value);
-                      return date.toLocaleDateString('en-US', {
+                    tickFormatter={(value) =>
+                      formatDate(new Date(value), {
                         month: 'short',
                         day: 'numeric',
-                      });
-                    }}
+                      })
+                    }
                   />
                   <YAxis />
                   <Tooltip
-                    labelFormatter={(value) => {
-                      const date = new Date(value);
-                      return date.toLocaleString();
-                    }}
+                    labelFormatter={(value) => formatDateTime(new Date(value))}
                   />
                   <Line
                     type="monotone"

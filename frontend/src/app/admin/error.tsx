@@ -1,6 +1,7 @@
 'use client';
 
 import ErrorPage from '@/components/ui/error-page';
+import { useI18n } from '@/i18n';
 import { Settings } from 'lucide-react';
 
 export default function AdminErrorPage({
@@ -10,17 +11,18 @@ export default function AdminErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <ErrorPage
       error={error}
       reset={reset}
-      title="Admin Section Error"
-      description="Something went wrong in the admin section. Other parts of the app should still work."
-      sectionName="Admin"
+      title={t.errors.admin.title}
+      description={t.errors.admin.description}
+      sectionName={t.errors.admin.section}
       theme="indigo"
       backLink={{
         href: '/admin/dashboard',
-        label: 'Back to Admin Dashboard',
+        label: t.errors.admin.backLabel,
         icon: Settings,
       }}
     />
