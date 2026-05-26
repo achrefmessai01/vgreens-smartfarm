@@ -7,13 +7,27 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { FlagIcon } from '@/components/ui/flag-icon';
 import { UserRole } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
+import { locales, localeNativeNames } from '@/i18n/config';
+import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLogout } from '@/lib/hooks/use-logout';
-import { Building2, LogOut, Moon, Shield, Sun, User } from 'lucide-react';
+import {
+  Building2,
+  Globe,
+  LogOut,
+  Moon,
+  Shield,
+  Sun,
+  User,
+} from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 interface UserMenuProps {
@@ -21,7 +35,7 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ className }: UserMenuProps) {
-  const { t } = useI18n();
+  const { t, locale, setLocale } = useI18n();
   const handleLogout = useLogout();
   const { theme, setTheme } = useTheme();
   const { user, role, isVGreensAdmin } = useCurrentUser();
@@ -141,6 +155,33 @@ export function UserMenu({ className }: UserMenuProps) {
             {theme === 'dark' ? t.common.darkMode : t.common.lightMode}
           </span>
         </DropdownMenuItem>
+
+        {/* Language Switcher */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="cursor-pointer">
+            <Globe className="mr-2 h-4 w-4" />
+            <span className="flex-1">{t.common.language}</span>
+            <span className="text-muted-foreground ml-2 text-xs">
+              {localeNativeNames[locale]}
+            </span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="max-h-80 overflow-y-auto">
+            {locales.map((loc) => (
+              <DropdownMenuItem
+                key={loc}
+                onClick={() => setLocale(loc)}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2',
+                  locale === loc && 'bg-accent font-medium',
+                )}
+                dir={loc === 'ar' ? 'rtl' : 'ltr'}
+              >
+                <FlagIcon locale={loc} className="h-4 w-4" />
+                <span>{localeNativeNames[loc]}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
 
         <DropdownMenuSeparator />
 

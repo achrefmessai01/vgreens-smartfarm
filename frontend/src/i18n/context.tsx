@@ -22,6 +22,23 @@ function isValidLocale(value: unknown): value is Locale {
   );
 }
 
+function getBrowserLocale(): Locale | null {
+  if (typeof navigator === 'undefined') return null;
+  const candidates =
+    navigator.languages && navigator.languages.length > 0
+      ? navigator.languages
+      : navigator.language
+        ? [navigator.language]
+        : [];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    if (isValidLocale(candidate)) return candidate;
+    const primary = candidate.split('-')[0]?.toLowerCase();
+    if (primary && isValidLocale(primary)) return primary;
+  }
+  return null;
+}
+
 function syncDocumentDirection(locale: Locale) {
   if (typeof document === 'undefined') return;
   const dir = isRtlLocale(locale) ? 'rtl' : 'ltr';
@@ -37,10 +54,13 @@ export function I18nProvider({
   defaultLocale?: Locale;
 }) {
   const [locale, setLocaleState] = useState<Locale>(() => {
-    // Lazy initializer: read from localStorage only once on first render.
+    // Resolution order on client: localStorage → navigator.language → default.
+    // The DB-stored user preference layers on top later via I18nUserSync.
     if (typeof window !== 'undefined') {
       const saved = window.localStorage.getItem(LOCALE_STORAGE_KEY);
       if (isValidLocale(saved)) return saved;
+      const browserLocale = getBrowserLocale();
+      if (browserLocale) return browserLocale;
     }
     return providerDefault;
   });

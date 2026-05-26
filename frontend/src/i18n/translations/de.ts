@@ -43,6 +43,7 @@ export const de = {
     yes: 'Ja',
     retry: 'Erneut versuchen',
     selectPeriod: 'Zeitraum auswählen',
+    language: 'Sprache',
   },
   login: {
     title: 'Willkommen zurück',
