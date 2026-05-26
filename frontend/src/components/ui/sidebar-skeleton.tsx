@@ -13,7 +13,7 @@ interface SidebarSkeletonProps {
 }
 
 export function SidebarSkeleton({ className }: SidebarSkeletonProps) {
-  const { t } = useI18n();
+  const t = useI18nOptional()?.t ?? fallbackT;
   return (
     <div
       className={cn(
