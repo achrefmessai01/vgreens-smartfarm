@@ -46,6 +46,7 @@ export const en = {
     retry: 'Retry',
     selectPeriod: 'Select period',
     language: 'Language',
+    preferences: 'Preferences',
   },
   login: {
     title: 'Welcome back',

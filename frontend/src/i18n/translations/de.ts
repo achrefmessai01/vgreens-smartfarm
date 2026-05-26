@@ -44,6 +44,7 @@ export const de = {
     retry: 'Erneut versuchen',
     selectPeriod: 'Zeitraum auswählen',
     language: 'Sprache',
+    preferences: 'Einstellungen',
   },
   login: {
     title: 'Willkommen zurück',
