@@ -1,6 +1,7 @@
 'use client';
 
 import { User } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 import * as React from 'react';
 import { Navbar } from './navbar';
 import { Sidebar } from './sidebar';
@@ -20,6 +21,7 @@ export function AppMobileLayout({
   user,
   onLogout,
 }: AppMobileLayoutProps) {
+  const { t } = useI18n();
   const handleLogout = () => {
     onLogout?.();
   };
@@ -34,7 +36,7 @@ export function AppMobileLayout({
         name:
           user.firstName && user.lastName
             ? `${user.firstName} ${user.lastName}`
-            : user.email || 'Unknown User',
+            : user.email || t.common.unknownUser,
         avatar: user.imageUrl || undefined,
       }
     : undefined;

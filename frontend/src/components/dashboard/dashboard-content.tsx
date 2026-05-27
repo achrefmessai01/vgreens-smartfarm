@@ -1,5 +1,6 @@
 'use client';
 
+import { useI18n } from '@/i18n';
 import { StatCard } from './stat-card';
 import { ZonesCard } from './zones-card';
 import { TrendsCard } from './trends-card';
@@ -75,6 +76,8 @@ export function DashboardContent({
   onExportPdf,
   loading,
 }: DashboardContentProps) {
+  const { t } = useI18n();
+  const d = t.pages.tenant.dashboard;
   if (true) {
     return <DashboardContentSkeleton />;
   }
@@ -108,7 +111,7 @@ export function DashboardContent({
         {alertCount && (
           <StatCard
             icon={<span className="text-2xl">⚠️</span>}
-            title="Active Alerts"
+            title={d.activeAlerts}
             value={alertCount?.value ?? ''}
             subtitle={alertCount?.subtitle}
           />
@@ -116,10 +119,10 @@ export function DashboardContent({
         {recommendation && (
           <RecommendationCard
             icon={recommendation?.icon ?? <span className="text-2xl">🫧</span>}
-            title={recommendation?.title ?? 'Irrigation Recommendation'}
+            title={recommendation?.title ?? d.irrigationRecommendationTitle}
             description={
               recommendation?.description ??
-              'Delay irrigation for 6 hours in Zone A. Increase drip rate in Zone C by 10%.'
+              d.irrigationRecommendationDescription
             }
           />
         )}

@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { ErrorReport, ReportSeverity } from '@/generated/graphql';
 import { ErrorReportStatusBadge } from './error-report-status-badge';
 import { ErrorReportSeverityBadge } from './error-report-severity-badge';
-import { formatDateTime } from '@/lib/utils/error-report-utils';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import {
   Calendar,
   User,
@@ -52,6 +52,10 @@ export function ErrorReportDetails({
   onUpdate,
   isUpdating = false,
 }: ErrorReportDetailsProps) {
+  const { t } = useI18n();
+  const { formatDateTime } = useLocaleFormatters();
+  const detailsT = t.pages.admin.reports.details;
+  const severitiesT = t.pages.admin.reports.severities;
   const [adminNotes, setAdminNotes] = useState('');
   const [severity, setSeverity] = useState<ReportSeverity>(
     ReportSeverity.Medium,
@@ -83,11 +87,9 @@ export function ErrorReportDetails({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-1">
               <SheetTitle className="text-xl break-words">
-                Error Report Details
+                {detailsT.title}
               </SheetTitle>
-              <SheetDescription>
-                Review and update error report information
-              </SheetDescription>
+              <SheetDescription>{detailsT.subtitle}</SheetDescription>
             </div>
             <div className="shrink-0">
               <ErrorReportStatusBadge status={report.status} />
@@ -134,7 +136,7 @@ export function ErrorReportDetails({
           <div className="space-y-4">
             <h4 className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               <AlertTriangle className="h-4 w-4" />
-              Error Description
+              {detailsT.errorDescription}
             </h4>
             <Card>
               <CardContent className="pt-6">
@@ -149,7 +151,7 @@ export function ErrorReportDetails({
           {report.reproductionSteps && (
             <div className="space-y-4">
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Steps to Reproduce
+                {detailsT.reproductionSteps}
               </h4>
               <Card>
                 <CardContent className="pt-6">
@@ -165,7 +167,7 @@ export function ErrorReportDetails({
           {report.expectedVsActual && (
             <div className="space-y-4">
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Expected vs Actual
+                {detailsT.expectedVsActual}
               </h4>
               <Card>
                 <CardContent className="pt-6">
@@ -182,12 +184,14 @@ export function ErrorReportDetails({
           {/* Admin Controls */}
           <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
             <CardHeader>
-              <CardTitle className="text-base">Admin Controls</CardTitle>
+              <CardTitle className="text-base">
+                {detailsT.adminControls}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Severity Level
+                  {detailsT.severityLevel}
                 </label>
                 <Select
                   value={severity}
@@ -197,16 +201,20 @@ export function ErrorReportDetails({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={ReportSeverity.Low}>Low</SelectItem>
-                    <SelectItem value={ReportSeverity.Medium}>
-                      Medium
+                    <SelectItem value={ReportSeverity.Low}>
+                      {severitiesT.low}
                     </SelectItem>
-                    <SelectItem value={ReportSeverity.High}>High</SelectItem>
+                    <SelectItem value={ReportSeverity.Medium}>
+                      {severitiesT.medium}
+                    </SelectItem>
+                    <SelectItem value={ReportSeverity.High}>
+                      {severitiesT.high}
+                    </SelectItem>
                     <SelectItem value={ReportSeverity.Critical}>
-                      Critical
+                      {severitiesT.critical}
                     </SelectItem>
                     <SelectItem value={ReportSeverity.Urgent}>
-                      Urgent
+                      {severitiesT.urgent}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -214,13 +222,13 @@ export function ErrorReportDetails({
 
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Admin Notes
+                  {detailsT.adminNotes}
                 </label>
                 <Textarea
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   rows={4}
-                  placeholder="Add notes about investigation, resolution, etc."
+                  placeholder={detailsT.adminNotesPlaceholder}
                   className="resize-none"
                 />
               </div>
@@ -235,7 +243,7 @@ export function ErrorReportDetails({
               disabled={isUpdating}
             >
               <Save className="h-4 w-4" />
-              {isUpdating ? 'Loading...' : 'Update Report'}
+              {isUpdating ? t.common.loading : detailsT.update}
             </Button>
             <Button
               variant="outline"
@@ -244,7 +252,7 @@ export function ErrorReportDetails({
               className="flex w-full items-center gap-2 sm:w-auto"
             >
               <X className="h-4 w-4" />
-              Cancel
+              {detailsT.cancel}
             </Button>
           </div>
         </div>

@@ -9,6 +9,7 @@ import {
 } from '@/components/system-errors';
 import { Badge } from '@/components/ui/badge';
 import { ErrorSource, ReportSeverity, SystemError } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 import {
   useResolveSystemError,
   useSystemErrors,
@@ -19,6 +20,7 @@ import { useState } from 'react';
 // ...existing code...
 
 export default function AdminSystemErrorsPage() {
+  const { t } = useI18n();
   const [selectedError, setSelectedError] = useState<SystemError | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -100,8 +102,8 @@ export default function AdminSystemErrorsPage() {
   return (
     <div className={containerClassName}>
       <PageHeader
-        title="System Error History"
-        subtitle="Monitor and manage application errors and exceptions"
+        title={t.pages.admin.systemErrors.title}
+        subtitle={t.pages.admin.systemErrors.subtitle}
         className="mb-4 lg:mb-5 xl:mb-6"
       />
 
@@ -111,11 +113,15 @@ export default function AdminSystemErrorsPage() {
       {/* Error List */}
       <div className={listContainerClassName}>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h3 className="text-lg font-semibold break-words">Error History</h3>
+          <h3 className="text-lg font-semibold break-words">
+            {t.pages.admin.systemErrors.listTitle}
+          </h3>
           {activeFiltersCount > 0 && (
             <Badge variant="outline" className="w-fit">
-              {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''}{' '}
-              active
+              {(activeFiltersCount > 1
+                ? t.pages.admin.systemErrors.filtersActivePlural
+                : t.pages.admin.systemErrors.filtersActive
+              ).replace('{count}', String(activeFiltersCount))}
             </Badge>
           )}
         </div>

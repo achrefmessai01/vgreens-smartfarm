@@ -23,6 +23,7 @@ import {
   DoorPosition as DoorPositionEnum,
   useFarmConfigQuery,
 } from '@/generated/graphql';
+import { useI18n } from '@/i18n';
 import { DEFAULT_FARM_CONFIG } from '@/lib/farm-config-constants';
 import { Building, Columns2, Plus, Trash2 } from 'lucide-react';
 import * as React from 'react';
@@ -86,6 +87,8 @@ export interface TenantFormRef {
 
 export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
   ({ initialData, tenantId, onSubmit, isLoading = false }, ref) => {
+    const { t } = useI18n();
+    const tenantsT = t.pages.admin.tenants;
     const formRef = React.useRef<HTMLFormElement>(null);
 
     const { data: farmConfigData } = useFarmConfigQuery({
@@ -147,9 +150,9 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
 
     const validateForm = (): boolean => {
       const newErrors: TenantFormErrors = {};
-      if (!formData.name.trim()) newErrors.name = 'Name is required';
+      if (!formData.name.trim()) newErrors.name = tenantsT.nameRequired;
       if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-        newErrors.email = 'Invalid email format';
+        newErrors.email = tenantsT.emailInvalid;
       if (
         formData.greenhouses.some(
           (greenhouse) =>
@@ -160,8 +163,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
             greenhouse.yDimension <= 0,
         )
       ) {
-        newErrors.greenhouses =
-          'Each greenhouse requires a name and positive X/Y dimensions';
+        newErrors.greenhouses = tenantsT.greenhousesInvalid;
       }
       setErrors(newErrors);
       return Object.keys(newErrors).length === 0;
@@ -252,14 +254,14 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="name">Name *</FieldLabel>
+            <FieldLabel htmlFor="name">{`${tenantsT.name} *`}</FieldLabel>
             <FieldContent>
               <Input
                 id="name"
                 type="text"
                 value={formData.name}
                 onChange={handleChange('name')}
-                placeholder="Tenant name"
+                placeholder={tenantsT.namePlaceholder}
                 aria-invalid={!!errors.name}
                 disabled={isLoading}
               />
@@ -268,28 +270,28 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="companyName">Company Name</FieldLabel>
+            <FieldLabel htmlFor="companyName">{tenantsT.companyName}</FieldLabel>
             <FieldContent>
               <Input
                 id="companyName"
                 type="text"
                 value={formData.companyName}
                 onChange={handleChange('companyName')}
-                placeholder="Company name"
+                placeholder={tenantsT.companyPlaceholder}
                 disabled={isLoading}
               />
             </FieldContent>
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
+            <FieldLabel htmlFor="email">{tenantsT.email}</FieldLabel>
             <FieldContent>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange('email')}
-                placeholder="contact@company.com"
+                placeholder={tenantsT.emailPlaceholder}
                 aria-invalid={!!errors.email}
                 disabled={isLoading}
               />
@@ -298,14 +300,14 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="phone">Phone</FieldLabel>
+            <FieldLabel htmlFor="phone">{tenantsT.phone}</FieldLabel>
             <FieldContent>
               <Input
                 id="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange('phone')}
-                placeholder="+1 (555) 123-4567"
+                placeholder={tenantsT.phonePlaceholder}
                 disabled={isLoading}
               />
             </FieldContent>
@@ -322,7 +324,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                 disabled={isLoading}
               />
               <FieldLabel htmlFor="isActive" className="cursor-pointer">
-                Active Status
+                {tenantsT.activeStatus}
               </FieldLabel>
             </div>
           </Field>
@@ -333,7 +335,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              Farm Layout
+              {tenantsT.farmLayout.title}
             </p>
             <Button
               type="button"
@@ -343,13 +345,13 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
               disabled={isLoading}
             >
               <Plus className="mr-1 h-4 w-4" />
-              Add greenhouse
+              {tenantsT.farmLayout.add}
             </Button>
           </div>
 
           {formData.greenhouses.length === 0 && (
             <p className="text-muted-foreground text-sm">
-              No greenhouse added yet.
+              {tenantsT.farmLayout.noGreenhouses}
             </p>
           )}
 
@@ -360,7 +362,9 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                 className="rounded-md border p-3"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-medium">Greenhouse {index + 1}</p>
+                  <p className="text-sm font-medium">
+                    {`${tenantsT.farmLayout.greenhouseLabel} ${index + 1}`}
+                  </p>
                   <Button
                     type="button"
                     variant="ghost"
@@ -376,7 +380,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                     type="text"
                     value={greenhouse.name}
                     onChange={handleGreenhouseChange(index, 'name')}
-                    placeholder="Greenhouse name"
+                    placeholder={tenantsT.farmLayout.namePlaceholder}
                     disabled={isLoading}
                   />
                   <Input
@@ -385,7 +389,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                     step="0.1"
                     value={greenhouse.xDimension ?? ''}
                     onChange={handleGreenhouseChange(index, 'xDimension', true)}
-                    placeholder="X dimension"
+                    placeholder={tenantsT.farmLayout.xDimensionPlaceholder}
                     disabled={isLoading}
                   />
                   <Input
@@ -394,7 +398,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                     step="0.1"
                     value={greenhouse.yDimension ?? ''}
                     onChange={handleGreenhouseChange(index, 'yDimension', true)}
-                    placeholder="Y dimension"
+                    placeholder={tenantsT.farmLayout.yDimensionPlaceholder}
                     disabled={isLoading}
                   />
                   <Input
@@ -403,7 +407,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                     step="1"
                     value={greenhouse.bayCount ?? ''}
                     onChange={handleGreenhouseChange(index, 'bayCount', true)}
-                    placeholder="Number of bays"
+                    placeholder={tenantsT.farmLayout.bayCountPlaceholder}
                     disabled={isLoading}
                   />
                   <Select
@@ -427,7 +431,9 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
                     disabled={isLoading}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Door position" />
+                      <SelectValue
+                        placeholder={tenantsT.farmLayout.doorPositionPlaceholder}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {DOOR_POSITION_OPTIONS.map((option) => (

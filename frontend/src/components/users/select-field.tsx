@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useI18n } from '@/i18n';
 import type { UserFormErrors } from './user-form-types';
 
 export interface SelectOption {
@@ -47,6 +48,7 @@ export function SelectField({
   disabled = false,
   required = false,
 }: SelectFieldProps) {
+  const { t } = useI18n();
   const error = errorKey && errors ? errors[errorKey] : undefined;
 
   return (
@@ -62,7 +64,7 @@ export function SelectField({
           disabled={isLoading || disabled}
         >
           <SelectTrigger aria-invalid={!!error} id={id}>
-            <SelectValue placeholder={placeholder || 'Select...'} />
+            <SelectValue placeholder={placeholder || t.common.select} />
           </SelectTrigger>
           <SelectContent>
             {options.map((option) => (

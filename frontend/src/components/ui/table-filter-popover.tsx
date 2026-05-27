@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { StyledSelect } from '@/components/ui/styled-select';
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { Filter, X } from 'lucide-react';
 
@@ -30,6 +31,7 @@ export function TableFilterPopover({
   onClear,
   className,
 }: TableFilterPopoverProps) {
+  const { t } = useI18n();
   const [open, setOpen] = React.useState(false);
   const hasActiveFilter =
     filterConfig.value !== '' &&
@@ -56,7 +58,7 @@ export function TableFilterPopover({
           )}
         >
           <Filter className="h-4 w-4" aria-hidden />
-          <span>Filter</span>
+          <span>{t.common.filter}</span>
           {filterCount > 0 && (
             <span
               className="bg-primary text-primary-foreground flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium"
@@ -84,7 +86,7 @@ export function TableFilterPopover({
                 className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs"
               >
                 <X className="h-3 w-3" />
-                Clear
+                {t.common.clear}
               </button>
             )}
           </div>

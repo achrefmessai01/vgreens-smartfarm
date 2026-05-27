@@ -1,6 +1,7 @@
 'use client';
 
 import ErrorPage from '@/components/ui/error-page';
+import { useI18n } from '@/i18n';
 
 export default function ReportStatusError({
   error,
@@ -9,12 +10,13 @@ export default function ReportStatusError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <ErrorPage
       error={error}
       reset={reset}
-      title="Something went wrong!"
-      description="We encountered an error while loading your report status."
+      title={t.errors.reportStatus.title}
+      description={t.errors.reportStatus.description}
       theme="orange"
     />
   );

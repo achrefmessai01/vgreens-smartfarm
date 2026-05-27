@@ -91,8 +91,12 @@ export function SensorConfigForm({
   // a specific position.
   const def: DefaultPosition | null = row.defaultPosition;
   const placeholderKey: Record<SensorConfigFieldKey, string> = {
-    xPosition: def ? `Default: ${def.xPosition}` : sc.xPositionPlaceholder,
-    yPosition: def ? `Default: ${def.yPosition}` : sc.yPositionPlaceholder,
+    xPosition: def
+      ? sc.defaultPrefix.replace('{value}', String(def.xPosition))
+      : sc.xPositionPlaceholder,
+    yPosition: def
+      ? sc.defaultPrefix.replace('{value}', String(def.yPosition))
+      : sc.yPositionPlaceholder,
     greenhouse: sc.greenhousePlaceholder,
   };
 
@@ -206,13 +210,13 @@ export function SensorConfigForm({
                   disabled={greenhouseLoading}
                 >
                   <SelectTrigger id="field-greenhouse" className="h-9 w-full">
-                    <SelectValue placeholder="Select a greenhouse" />
+                    <SelectValue placeholder={sc.selectGreenhouse} />
                   </SelectTrigger>
                   <SelectContent>
                     {greenhouseOptions.length === 0 ? (
                       <div className="text-muted-foreground px-2 py-1.5 text-xs">
                         {hasNoConfiguredGreenhouses
-                          ? 'No greenhouses configured for this tenant.'
+                          ? sc.noGreenhousesConfigured
                           : '—'}
                       </div>
                     ) : (

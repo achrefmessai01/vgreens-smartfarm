@@ -149,7 +149,7 @@ export function YieldDataField({
                 setShowRowCoordinates(checked === true)
               }
             />
-            <span>Show row coordinates</span>
+            <span>{h?.showRowCoordinates ?? 'Show row coordinates'}</span>
           </label>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -220,7 +220,7 @@ export function YieldDataField({
                     placeholder={h?.enterRowX ?? 'Start row'}
                   />
                   <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
-                    rows
+                    {h?.rowsUnit ?? 'rows'}
                   </span>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export function YieldDataField({
                     placeholder={h?.enterRowY ?? 'End row'}
                   />
                   <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
-                    rows
+                    {h?.rowsUnit ?? 'rows'}
                   </span>
                 </div>
               </div>

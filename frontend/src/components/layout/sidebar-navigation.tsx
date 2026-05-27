@@ -22,35 +22,35 @@ export interface NavItem {
   featureKey?: string; // Optional feature key to check if item should be shown
 }
 
-// Admin navigation items
-export const adminNavItems: NavItem[] = [
+// Get admin navigation items with translations
+export const getAdminNavItems = (t: Translations): NavItem[] => [
   {
-    label: 'Tenants',
+    label: t.navigation.tenants,
     href: '/admin/tenants',
     icon: Building2,
   },
   {
-    label: 'Users',
+    label: t.navigation.adminUsers,
     href: '/admin/users',
     icon: Users,
   },
   {
-    label: 'Feature Flags',
+    label: t.navigation.featureFlags,
     href: '/admin/feature-flags',
     icon: Flag,
   },
   {
-    label: 'Reports',
+    label: t.navigation.reports,
     href: '/admin/reports',
     icon: ClipboardList,
   },
   {
-    label: 'System Errors',
+    label: t.navigation.systemErrors,
     href: '/admin/system-errors',
     icon: Zap,
   },
   {
-    label: 'Settings',
+    label: t.navigation.settings,
     href: '/admin/settings',
     icon: Settings,
   },
@@ -121,7 +121,7 @@ export const getNavigationItems = (
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
 
   if (isVGreensAdmin) {
-    return adminNavItems;
+    return getAdminNavItems(t);
   }
 
   const allTenantItems = getTenantNavItems(t);

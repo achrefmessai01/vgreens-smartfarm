@@ -1,5 +1,6 @@
 'use client';
 
+import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { Sparkline } from './sparkline';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,10 +17,12 @@ export interface TrendsCardProps {
 }
 
 export function TrendsCard({
-  title = 'Trends (7d)',
+  title,
   trends,
   className,
 }: TrendsCardProps) {
+  const { t } = useI18n();
+  title = title ?? t.pages.tenant.dashboard.trendsTitle;
   return (
     <Card className={cn('bg-card rounded-lg border p-6', className)}>
       <h3 className="text-lg font-semibold">{title}</h3>

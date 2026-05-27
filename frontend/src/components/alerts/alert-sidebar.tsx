@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useI18n } from '@/i18n';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,6 +45,7 @@ export function AlertSidebar({
   isLoading = false,
 }: AlertSidebarProps) {
   const { t } = useI18n();
+  const { formatDateTime } = useLocaleFormatters();
 
   const canAcknowledge =
     alert?.status === AlertStatus.Open && alert?.acknowledgedBy == null;
@@ -78,7 +79,7 @@ export function AlertSidebar({
 
   const formatTimestamp = (timestamp?: string | null) => {
     if (!timestamp) return '-';
-    return new Date(timestamp).toLocaleString();
+    return formatDateTime(timestamp);
   };
 
   const formatRelativeOrAbsolute = (timestamp?: string | null) => {
@@ -90,11 +91,14 @@ export function AlertSidebar({
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} h ago`;
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return d.toLocaleString();
+    if (diffMins < 1) return t.common.justNow;
+    if (diffMins < 60)
+      return t.common.minutesAgoShort.replace('{count}', String(diffMins));
+    if (diffHours < 24)
+      return t.common.hoursAgoShort.replace('{count}', String(diffHours));
+    if (diffDays < 7)
+      return t.common.daysAgoShort.replace('{count}', String(diffDays));
+    return formatDateTime(d);
   };
 
   const formatUser = (user?: Alert['acknowledgedBy']) => {

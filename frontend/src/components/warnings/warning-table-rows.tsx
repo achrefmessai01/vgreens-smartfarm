@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { TableCell } from '@/components/ui/table';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import type { Warning } from '@/types/warning.types';
 import { useWarningCard } from './warning-table-cards';
 import { formatTimestamp, getStatusBadge } from './warning-table-utils';
@@ -28,6 +29,8 @@ export const useWarningRow = ({
   onResolve,
   translations,
 }: WarningRowProps) => {
+  const formatters = useLocaleFormatters();
+  const { t } = useI18n();
   // Get card renderer from dedicated card module
   const { renderCard } = useWarningCard({
     onAcknowledge,
@@ -42,7 +45,7 @@ export const useWarningRow = ({
       </TableCell>
       <TableCell className="dark:text-gray-300">{warning.value}</TableCell>
       <TableCell className="dark:text-gray-300">
-        {formatTimestamp(warning.timestamp)}
+        {formatTimestamp(warning.timestamp, formatters, t)}
       </TableCell>
       <TableCell className="hidden md:table-cell dark:text-gray-300">
         {warning.tunnel}

@@ -8,6 +8,7 @@ import {
   FileText,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useI18n } from '@/i18n';
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -202,14 +203,18 @@ const themeConfig = {
 export default function ErrorPage({
   error,
   reset,
-  title = 'Something went wrong!',
-  description = 'An unexpected error occurred. Please try again.',
+  title,
+  description,
   sectionName,
   theme = 'red',
   backLink,
-  resetLabel = 'Try again',
+  resetLabel,
 }: ErrorPageProps) {
+  const { t } = useI18n();
   const themeStyles = themeConfig[theme];
+  const resolvedTitle = title ?? t.errors.defaultTitle;
+  const resolvedDescription = description ?? t.errors.defaultDescription;
+  const resolvedResetLabel = resetLabel ?? t.common.tryAgain;
 
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center bg-gray-50 p-8 dark:bg-gray-900">
@@ -243,18 +248,18 @@ export default function ErrorPage({
             <h2
               className={`text-3xl font-bold ${themeStyles.lightTextPrimary} leading-tight`}
             >
-              {title}
+              {resolvedTitle}
             </h2>
             <p
               className={`${themeStyles.lightTextSecondary} mx-auto max-w-sm leading-relaxed`}
             >
-              {description}
+              {resolvedDescription}
             </p>
             {sectionName && (
               <div
                 className={`inline-flex items-center rounded-full px-3 py-1 ${themeStyles.lightSectionBadge} border text-sm font-medium`}
               >
-                {sectionName} Section
+                {sectionName} {t.common.sectionSuffix}
               </div>
             )}
           </div>
@@ -266,7 +271,7 @@ export default function ErrorPage({
               className={`group flex w-full items-center justify-center gap-3 px-6 py-4 ${themeStyles.buttonGradient} rounded-xl border border-white/10 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl dark:border-white/10`}
             >
               <RefreshCw className="h-5 w-5 transition-transform duration-500 group-hover:rotate-180" />
-              {resetLabel}
+              {resolvedResetLabel}
             </button>
 
             {backLink && (
@@ -287,7 +292,7 @@ export default function ErrorPage({
               className={`group flex w-full items-center justify-center gap-3 px-6 py-4 ${themeStyles.lightReportButton} rounded-xl border font-medium backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-lg`}
             >
               <FileText className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
-              Report Error
+              {t.common.reportError}
             </a>
           </div>
         </div>

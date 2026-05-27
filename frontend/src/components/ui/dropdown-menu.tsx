@@ -202,9 +202,17 @@ function DropdownMenuSubTrigger({
   className,
   inset,
   children,
+  chevron,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger> & {
   inset?: boolean;
+  /**
+   * Override the trailing indicator. Pass `false` to omit it (useful when
+   * the submenu may open on either side and a fixed-direction chevron
+   * would mislead). Pass a React node to use a custom icon. Defaults to
+   * `<ChevronRightIcon />`.
+   */
+  chevron?: React.ReactNode | false;
 }) {
   return (
     <DropdownMenuPrimitive.SubTrigger
@@ -217,7 +225,9 @@ function DropdownMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto size-4" />
+      {chevron === false
+        ? null
+        : (chevron ?? <ChevronRightIcon className="ml-auto size-4" />)}
     </DropdownMenuPrimitive.SubTrigger>
   );
 }

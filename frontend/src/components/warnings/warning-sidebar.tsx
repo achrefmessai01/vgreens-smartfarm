@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useI18n } from '@/i18n';
+import { useI18n, useLocaleFormatters } from '@/i18n';
 import type { Warning } from '@/types/warning.types';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +38,7 @@ export function WarningSidebar({
   isLoading = false,
 }: WarningSidebarProps) {
   const { t } = useI18n();
+  const { formatDateTime } = useLocaleFormatters();
 
   const canAcknowledge = warning?.status === 'open';
   const canResolve = warning ? warning.status !== 'resolved' : false;
@@ -63,7 +64,7 @@ export function WarningSidebar({
               />
               <ValueField value={warning.value} isLoading={isLoading} />
               <TimeStampField
-                timestamp={new Date(warning.timestamp).toLocaleString()}
+                timestamp={formatDateTime(warning.timestamp)}
                 isLoading={isLoading}
               />
               <TunnelField tunnel={warning.tunnel} isLoading={isLoading} />

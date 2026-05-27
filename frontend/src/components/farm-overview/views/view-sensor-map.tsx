@@ -504,6 +504,8 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
     invalidDropDescription = 'Drop the sensor inside the greenhouse layout.',
     readOnly,
   } = props;
+  const { t } = useI18n();
+  const farmOverviewT = t.pages.farmOverview;
   const { isVGreensAdmin } = useCurrentUser();
   const isReadOnly = readOnly || !isVGreensAdmin;
   const unit = getParameterUnit(parameter);
@@ -739,7 +741,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
         )}
       >
         <p className="text-muted-foreground text-sm">
-          Configure greenhouse dimensions to view layout
+          {farmOverviewT.configureDimensionsHint}
         </p>
       </div>
     );
@@ -758,7 +760,7 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
       )}
     >
       {resolvedSensors.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No sensor data</p>
+        <p className="text-muted-foreground text-sm">{farmOverviewT.noData}</p>
       ) : (
         <DndContext
           sensors={sensorsConfig}

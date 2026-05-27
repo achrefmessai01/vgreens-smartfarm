@@ -69,9 +69,9 @@ export function DateRangePicker({
     dateFrom && dateTo
       ? `${formatDate(dateFrom)} – ${formatDate(dateTo)}`
       : dateFrom
-        ? `From ${formatDate(dateFrom)}`
+        ? `${t.common.from} ${formatDate(dateFrom)}`
         : dateTo
-          ? `Until ${formatDate(dateTo)}`
+          ? `${t.common.to} ${formatDate(dateTo)}`
           : placeholder;
 
   return (
@@ -94,7 +94,7 @@ export function DateRangePicker({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-muted-foreground mb-1 block text-xs font-medium">
-                From
+                {t.common.from}
               </label>
               <input
                 type="date"
@@ -105,7 +105,7 @@ export function DateRangePicker({
             </div>
             <div>
               <label className="text-muted-foreground mb-1 block text-xs font-medium">
-                To
+                {t.common.to}
               </label>
               <input
                 type="date"
@@ -117,10 +117,10 @@ export function DateRangePicker({
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={handleClear}>
-              Clear
+              {t.common.clear}
             </Button>
             <Button size="sm" onClick={handleApply}>
-              Apply
+              {t.common.apply}
             </Button>
           </div>
         </div>

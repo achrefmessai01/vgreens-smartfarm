@@ -123,23 +123,30 @@ export function CameraControls({
           <span>
             {filteredCount === totalCameras ? (
               <>
-                Showing{' '}
+                {t.common.showing}{' '}
                 <span className="text-foreground font-semibold dark:text-white">
                   {totalCameras}
                 </span>{' '}
-                camera{totalCameras !== 1 ? 's' : ''}
+                {(totalCameras !== 1
+                  ? t.pages.cameraLivestream.camerasCountPlural
+                  : t.pages.cameraLivestream.camerasCountSingular
+                )
+                  .replace('{count} ', '')
+                  .trim()}
               </>
             ) : (
               <>
-                Showing{' '}
+                {t.common.showing}{' '}
                 <span className="text-foreground font-semibold dark:text-white">
                   {filteredCount}
                 </span>{' '}
-                of{' '}
+                {t.common.of}{' '}
                 <span className="text-foreground font-semibold dark:text-white">
                   {totalCameras}
                 </span>{' '}
-                cameras
+                {t.pages.cameraLivestream.camerasCountPlural
+                  .replace('{count} ', '')
+                  .trim()}
               </>
             )}
           </span>
@@ -155,7 +162,7 @@ export function CameraControls({
             )}
           >
             <X className="h-3.5 w-3.5" />
-            Clear filters
+            {t.pages.cameraLivestream.clearFilters}
           </button>
         )}
       </div>
