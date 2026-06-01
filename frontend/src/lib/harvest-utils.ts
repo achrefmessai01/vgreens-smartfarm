@@ -14,6 +14,20 @@ export function computeAvgBrix(readings: number[]): number {
   );
 }
 
+/**
+ * Average weight of a single fruit (kg) = total weight / fruit count.
+ * Returns 0 when the count is missing so an incomplete entry contributes
+ * nothing to the metric. Rounded to 3 decimals to preserve gram-level detail.
+ */
+export function computeAvgFruitWeight(
+  fruitCount: number,
+  totalFruitWeight: number,
+): number {
+  if (fruitCount <= 0 || totalFruitWeight <= 0) return 0;
+
+  return Math.round((totalFruitWeight / fruitCount) * 1000) / 1000;
+}
+
 export function extractStoragePathFromUrl(
   url: string | null | undefined,
 ): string | null {
@@ -115,6 +129,8 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
       rowY: h.rowY,
     },
     brixReadings: h.brixReadings.length > 0 ? [...h.brixReadings] : [0],
+    fruitCount: h.fruitCount,
+    totalFruitWeight: h.totalFruitWeight,
     photos: h.photoUrls ?? [],
   };
 }

@@ -17,6 +17,7 @@ import {
   YieldOverTimeData,
   ClassDistributionData,
   BrixTrendData,
+  FruitWeightTrendData,
   CumulativeYieldData,
 } from './dto/dashboard-metrics.dto';
 import { HarvestBatchListItem } from './dto/harvest-batch-list-item.dto';
@@ -264,6 +265,9 @@ export class HarvestsService extends BaseService<Harvest> {
             ? input.numberOfRowsHarvested
             : 0),
         brixReadings: input.brixReadings ?? [],
+        fruitCount: input.fruitCount ?? 0,
+        totalFruitWeight: input.totalFruitWeight ?? 0,
+        avgFruitWeight: input.avgFruitWeight ?? 0,
         photos: input.photos ?? 0,
         photoUrls: input.photoUrls ?? [],
       });
@@ -353,6 +357,15 @@ export class HarvestsService extends BaseService<Harvest> {
       }
       if (input.brixReadings !== undefined) {
         harvest.brixReadings = input.brixReadings;
+      }
+      if (input.fruitCount !== undefined) {
+        harvest.fruitCount = input.fruitCount;
+      }
+      if (input.totalFruitWeight !== undefined) {
+        harvest.totalFruitWeight = input.totalFruitWeight;
+      }
+      if (input.avgFruitWeight !== undefined) {
+        harvest.avgFruitWeight = input.avgFruitWeight;
       }
       if (input.photos !== undefined) harvest.photos = input.photos;
       if (input.photoUrls !== undefined) harvest.photoUrls = input.photoUrls;
@@ -520,6 +533,18 @@ export class HarvestsService extends BaseService<Harvest> {
             validBrixHarvests.length
           : 0;
 
+      // Calculate average fruit weight
+      const validFruitWeightHarvests = metricsHarvests.filter(
+        (h) => h.avgFruitWeight > 0,
+      );
+      const averageFruitWeight =
+        validFruitWeightHarvests.length > 0
+          ? validFruitWeightHarvests.reduce(
+              (sum, h) => sum + h.avgFruitWeight,
+              0,
+            ) / validFruitWeightHarvests.length
+          : 0;
+
       // Calculate days active (from earliest planting date to latest harvest date)
       const plantingDates = metricsHarvests.map(
         (h) => new Date(h.plantingDate),
@@ -546,6 +571,8 @@ export class HarvestsService extends BaseService<Harvest> {
       const classDistribution =
         this.generateClassDistributionData(metricsHarvests);
       const brixTrend = this.generateBrixTrendData(metricsHarvests);
+      const fruitWeightTrend =
+        this.generateFruitWeightTrendData(metricsHarvests);
       const cumulativeYield = this.generateCumulativeYieldData(metricsHarvests);
 
       return {
@@ -554,6 +581,7 @@ export class HarvestsService extends BaseService<Harvest> {
         harvestCount: metricsHarvests.length,
         totalYield: Math.round(totalYield * 10) / 10,
         averageBrix: Math.round(averageBrix * 10) / 10,
+        averageFruitWeight: Math.round(averageFruitWeight * 1000) / 1000,
         marketablePercent: Math.round(marketablePercent * 10) / 10,
         wastePercent: Math.round(wastePercent * 10) / 10,
         wasteTotal: Math.round(totalWaste * 10) / 10,
@@ -563,6 +591,7 @@ export class HarvestsService extends BaseService<Harvest> {
         yieldOverTime,
         classDistribution,
         brixTrend,
+        fruitWeightTrend,
         cumulativeYield,
       };
     } catch (error) {
@@ -583,6 +612,7 @@ export class HarvestsService extends BaseService<Harvest> {
       harvestCount: 0,
       totalYield: 0,
       averageBrix: 0,
+      averageFruitWeight: 0,
       marketablePercent: 0,
       wastePercent: 0,
       wasteTotal: 0,
@@ -592,6 +622,7 @@ export class HarvestsService extends BaseService<Harvest> {
       yieldOverTime: [],
       classDistribution: [],
       brixTrend: [],
+      fruitWeightTrend: [],
       cumulativeYield: [],
     };
   }
@@ -664,6 +695,30 @@ export class HarvestsService extends BaseService<Harvest> {
       .map(([date, data]) => ({
         date,
         brix: Math.round((data.total / data.count) * 10) / 10,
+      }));
+  }
+
+  private generateFruitWeightTrendData(
+    harvests: Harvest[],
+  ): FruitWeightTrendData[] {
+    const dailyWeight = new Map<string, { total: number; count: number }>();
+
+    harvests.forEach((harvest) => {
+      if (harvest.avgFruitWeight > 0) {
+        const dateStr = harvest.date.toISOString().split('T')[0];
+        const current = dailyWeight.get(dateStr) || { total: 0, count: 0 };
+        dailyWeight.set(dateStr, {
+          total: current.total + harvest.avgFruitWeight,
+          count: current.count + 1,
+        });
+      }
+    });
+
+    return Array.from(dailyWeight.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, data]) => ({
+        date,
+        weight: Math.round((data.total / data.count) * 1000) / 1000,
       }));
   }
 

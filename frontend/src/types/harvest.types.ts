@@ -44,5 +44,8 @@ export interface HarvestLike {
   rowY: number;
   avgBrix: number;
   brixReadings: number[];
+  fruitCount: number;
+  totalFruitWeight: number;
+  avgFruitWeight: number;
   photoUrls?: string[] | null;
 }

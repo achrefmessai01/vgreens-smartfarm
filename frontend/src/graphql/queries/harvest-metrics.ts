@@ -9,6 +9,7 @@ export const GET_HARVEST_METRICS = gql`
       harvestCount
       totalYield
       averageBrix
+      averageFruitWeight
       marketablePercent
       wastePercent
       wasteTotal
@@ -52,6 +53,18 @@ export const GET_BRIX_TREND = gql`
       brixTrend {
         date
         brix
+      }
+    }
+  }
+`;
+
+// Query for fruit weight trend chart data
+export const GET_FRUIT_WEIGHT_TREND = gql`
+  query GetFruitWeightTrend($filter: DashboardFilterInput) {
+    harvestDashboard(filter: $filter) {
+      fruitWeightTrend {
+        date
+        weight
       }
     }
   }

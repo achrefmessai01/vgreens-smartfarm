@@ -8,6 +8,7 @@ export const GET_HARVEST_DASHBOARD = gql`
       harvestCount
       totalYield
       averageBrix
+      averageFruitWeight
       marketablePercent
       wastePercent
       wasteTotal
@@ -27,6 +28,10 @@ export const GET_HARVEST_DASHBOARD = gql`
       brixTrend {
         date
         brix
+      }
+      fruitWeightTrend {
+        date
+        weight
       }
       cumulativeYield {
         date
@@ -65,6 +70,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       harvestCount
       totalYield
       averageBrix
+      averageFruitWeight
       marketablePercent
       wastePercent
       wasteTotal
@@ -84,6 +90,10 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       brixTrend {
         date
         brix
+      }
+      fruitWeightTrend {
+        date
+        weight
       }
       cumulativeYield {
         date

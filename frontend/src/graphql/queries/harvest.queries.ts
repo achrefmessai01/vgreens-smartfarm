@@ -28,6 +28,9 @@ export const HARVESTS_QUERY = gql`
       rowX
       rowY
       brixReadings
+      fruitCount
+      totalFruitWeight
+      avgFruitWeight
       photos
       photoUrls
       createdAt
@@ -70,6 +73,9 @@ export const HARVEST_QUERY = gql`
       rowX
       rowY
       brixReadings
+      fruitCount
+      totalFruitWeight
+      avgFruitWeight
       photos
       photoUrls
       createdAt
