@@ -3,6 +3,7 @@
 import { useI18n } from '@/i18n';
 import { Download, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { harvestsLoggedLabel } from '@/lib/harvest-utils';
 import type { HarvestSummary } from '@/types/harvest.types';
 
 interface HarvestPageHeaderProps {
@@ -20,7 +21,7 @@ export function HarvestPageHeader({
   onExportClick,
   isLoading = false,
 }: HarvestPageHeaderProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   return (
     <div className="space-y-4">
@@ -31,7 +32,11 @@ export function HarvestPageHeader({
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base">
             {summary.totalHarvests}{' '}
-            {t.pages.harvest?.harvestsLogged || 'harvests logged'}
+            {harvestsLoggedLabel(
+              summary.totalHarvests,
+              t.pages.harvest,
+              locale,
+            )}
           </p>
         </div>
 
@@ -41,7 +46,7 @@ export function HarvestPageHeader({
               onClick={onExportClick}
               disabled={isLoading}
               variant="outline"
-              className="group relative w-full overflow-hidden border-[#016f7c]/30 bg-gradient-to-br from-white to-[#016f7c]/[0.03] text-[#016f7c] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#016f7c] hover:from-[#016f7c]/10 hover:to-[#016f7c]/5 hover:text-[#016f7c] hover:shadow-md sm:w-auto dark:from-transparent dark:to-[#016f7c]/[0.06]"
+              className="group relative w-full overflow-hidden border-[#016f7c]/30 bg-gradient-to-br from-white to-[#016f7c]/[0.03] text-[#016f7c] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#016f7c] hover:from-[#016f7c]/10 hover:to-[#016f7c]/5 hover:text-[#016f7c] hover:shadow-md sm:w-auto dark:border-teal-300/40 dark:from-[#016f7c]/15 dark:to-[#016f7c]/25 dark:text-teal-200 dark:hover:border-teal-200 dark:hover:from-[#016f7c]/25 dark:hover:to-[#016f7c]/40 dark:hover:text-teal-100 dark:hover:shadow-[0_4px_14px_-2px_rgba(94,234,212,0.25)]"
             >
               <Download className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
               {t.pages.harvest?.exportCsv || 'Export CSV'}

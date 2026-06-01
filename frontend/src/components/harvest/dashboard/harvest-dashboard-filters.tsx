@@ -17,23 +17,16 @@ import {
 import { useI18n } from '@/i18n';
 import type { HarvestBatchListItem } from '@/lib/hooks/use-harvest-batches';
 import { type DateFilter } from '@/lib/hooks/use-harvest-dashboard';
-import {
-  ALL_BATCHES,
-  MAX_COMPARE_BATCHES,
-} from '@/lib/hooks/use-harvest-dashboard-url-state';
+import { MAX_COMPARE_BATCHES } from '@/lib/hooks/use-harvest-dashboard-url-state';
 import { cn } from '@/lib/utils';
-import { Leaf, Clock, GitCompareArrows, X } from 'lucide-react';
+import { Leaf, Clock } from 'lucide-react';
 
 export interface DashboardFiltersProps {
   period: DateFilter;
   onPeriodChange: (period: DateFilter) => void;
   batches: HarvestBatchListItem[];
   batchesLoading: boolean;
-  batchId: string | undefined;
-  onBatchChange: (batchId: string | undefined) => void;
-  compareMode: boolean;
   compareBatchIds: string[];
-  onCompareToggle: () => void;
   onCompareBatchesChange: (ids: string[]) => void;
   className?: string;
 }
@@ -43,11 +36,7 @@ export function DashboardFilters({
   onPeriodChange,
   batches,
   batchesLoading,
-  batchId,
-  onBatchChange,
-  compareMode,
   compareBatchIds,
-  onCompareToggle,
   onCompareBatchesChange,
   className,
 }: DashboardFiltersProps) {
@@ -76,7 +65,6 @@ export function DashboardFilters({
   ];
 
   const hasBatches = batches.length > 0;
-  const showCompareButton = hasBatches && batches.length >= 2;
 
   const toggleCompareBatch = (id: string) => {
     if (compareBatchIds.includes(id)) {
@@ -85,6 +73,24 @@ export function DashboardFilters({
       onCompareBatchesChange([...compareBatchIds, id]);
     }
   };
+
+  const triggerLabel = (() => {
+    if (!hasBatches) {
+      return batchesLoading
+        ? (h?.loadingBatches ?? 'Loading batches...')
+        : (h?.noBatchesYet ?? 'No batches yet');
+    }
+    if (compareBatchIds.length === 0) {
+      return h?.allBatches ?? 'All batches';
+    }
+    if (compareBatchIds.length === 1) {
+      const selected = batches.find((b) => b.id === compareBatchIds[0]);
+      return selected?.name ?? (h?.allBatches ?? 'All batches');
+    }
+    return (
+      h?.batchesSelectedPlural ?? '{count} batches selected'
+    ).replace('{count}', String(compareBatchIds.length));
+  })();
 
   return (
     <div
@@ -119,114 +125,56 @@ export function DashboardFilters({
         </SelectContent>
       </Select>
 
-      {compareMode ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 min-w-44 justify-start gap-2"
-            >
-              <GitCompareArrows className="h-4 w-4" aria-hidden />
-              <span className="truncate">
-                {compareBatchIds.length === 0
-                  ? (h?.selectBatches ?? 'Select batches')
-                  : (compareBatchIds.length === 1
-                      ? (h?.batchesSelectedSingular ?? '{count} batch selected')
-                      : (h?.batchesSelectedPlural ??
-                        '{count} batches selected')
-                    ).replace('{count}', String(compareBatchIds.length))}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={6} className="w-72 p-0">
-            <div className="text-muted-foreground px-3 pt-3 pb-2 text-xs font-medium">
-              {(h?.pickBatches ?? 'Pick up to {max} batches to compare').replace(
-                '{max}',
-                String(MAX_COMPARE_BATCHES),
-              )}
-            </div>
-            <div className="max-h-72 overflow-y-auto px-2 pb-2">
-              {batches.map((b) => {
-                const checked = compareBatchIds.includes(b.id);
-                const disabled =
-                  !checked && compareBatchIds.length >= MAX_COMPARE_BATCHES;
-                return (
-                  <label
-                    key={b.id}
-                    className={cn(
-                      'hover:bg-muted/50 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm',
-                      disabled && 'pointer-events-none opacity-50',
-                    )}
-                  >
-                    <Checkbox
-                      checked={checked}
-                      onCheckedChange={() => toggleCompareBatch(b.id)}
-                      disabled={disabled}
-                      aria-label={b.name}
-                    />
-                    <span className="truncate">
-                      {b.name}{' '}
-                      <span className="text-muted-foreground">
-                        ({b.species})
-                      </span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 min-w-44 justify-start gap-2"
+            disabled={!hasBatches && !batchesLoading}
+          >
+            <Leaf className="h-4 w-4" aria-hidden />
+            <span className="truncate">{triggerLabel}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" sideOffset={6} className="w-72 p-0">
+          <div className="text-muted-foreground px-3 pt-3 pb-2 text-xs font-medium">
+            {(h?.pickBatches ?? 'Pick up to {max} batches to compare').replace(
+              '{max}',
+              String(MAX_COMPARE_BATCHES),
+            )}
+          </div>
+          <div className="max-h-72 overflow-y-auto px-2 pb-2">
+            {batches.map((b) => {
+              const checked = compareBatchIds.includes(b.id);
+              const disabled =
+                !checked && compareBatchIds.length >= MAX_COMPARE_BATCHES;
+              return (
+                <label
+                  key={b.id}
+                  className={cn(
+                    'hover:bg-muted/50 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm',
+                    disabled && 'pointer-events-none opacity-50',
+                  )}
+                >
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={() => toggleCompareBatch(b.id)}
+                    disabled={disabled}
+                    aria-label={b.name}
+                  />
+                  <span className="truncate">
+                    {b.name}{' '}
+                    <span className="text-muted-foreground">
+                      ({b.species})
                     </span>
-                  </label>
-                );
-              })}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <Select
-          value={batchId ?? ALL_BATCHES}
-          onValueChange={(v) =>
-            onBatchChange(v === ALL_BATCHES ? undefined : v)
-          }
-          disabled={!hasBatches && !batchesLoading}
-        >
-          <SelectTrigger className="h-9 min-w-44">
-            <SelectValue
-              placeholder={
-                batchesLoading
-                  ? (h?.loadingBatches ?? 'Loading batches...')
-                  : hasBatches
-                    ? (h?.allBatches ?? 'All batches')
-                    : (h?.noBatchesYet ?? 'No batches yet')
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_BATCHES} className="text-sm">
-              <Leaf></Leaf> {h?.allBatches ?? 'All batches'}
-            </SelectItem>
-            {batches.map((b) => (
-              <SelectItem key={b.id} value={b.id} className="text-sm">
-                <Leaf></Leaf> {b.name}
-                <span className="text-muted-foreground">({b.species})</span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
-
-      {showCompareButton && (
-        <Button
-          variant={compareMode ? 'secondary' : 'outline'}
-          size="sm"
-          className="h-9 gap-2"
-          onClick={onCompareToggle}
-        >
-          {compareMode ? (
-            <X className="h-4 w-4" aria-hidden />
-          ) : (
-            <GitCompareArrows className="h-4 w-4" aria-hidden />
-          )}
-          {compareMode
-            ? (h?.exitCompare ?? 'Exit compare')
-            : (h?.compare ?? 'Compare')}
-        </Button>
-      )}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

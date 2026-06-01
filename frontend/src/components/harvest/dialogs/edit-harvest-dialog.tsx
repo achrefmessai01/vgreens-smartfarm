@@ -49,9 +49,9 @@ export function EditHarvestDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="flex max-h-[min(720px,90dvh)] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-md lg:max-w-lg">
+        <DialogHeader className="border-b px-4 pt-5 pb-4 sm:px-6">
+          <DialogTitle className="pr-8 leading-tight">
             {readOnly
               ? (h?.batchDetails ?? 'Batch Details')
               : (h?.editBatchTitle ?? 'Edit Batch')}
@@ -63,25 +63,32 @@ export function EditHarvestDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-6">
-          <CreateBatchFormFields
-            formData={formData}
-            setFormData={setFormData}
-            errors={errors}
-            disabled={readOnly}
-          />
+        <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+            <CreateBatchFormFields
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+              disabled={readOnly}
+            />
+          </div>
 
-          <div className="flex justify-end space-x-2">
+          <div className="bg-background/95 flex flex-col-reverse gap-2 border-t px-4 py-4 backdrop-blur-sm sm:flex-row sm:justify-end sm:px-6">
             <Button
               type="button"
               variant="outline"
               onClick={() => handleOpenChange(false)}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               {readOnly ? (h?.close ?? 'Close') : (h?.cancel ?? 'Cancel')}
             </Button>
             {!readOnly && (
-              <Button type="submit" disabled={loading}>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-auto"
+              >
                 {loading
                   ? (h?.updating ?? 'Updating...')
                   : (h?.update ?? 'Update')}

@@ -28,6 +28,9 @@ export const CREATE_HARVEST_MUTATION = gql`
       rowX
       rowY
       brixReadings
+      fruitCount
+      totalFruitWeight
+      avgFruitWeight
       photos
       photoUrls
       createdAt
@@ -64,6 +67,9 @@ export const UPDATE_HARVEST_MUTATION = gql`
       rowX
       rowY
       brixReadings
+      fruitCount
+      totalFruitWeight
+      avgFruitWeight
       photos
       photoUrls
       createdAt

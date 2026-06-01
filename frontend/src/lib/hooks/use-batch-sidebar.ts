@@ -9,7 +9,11 @@ import {
 } from '@/generated/graphql';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
-import { computeAvgBrix, extractStoragePathFromUrl } from '@/lib/harvest-utils';
+import {
+  computeAvgBrix,
+  computeAvgFruitWeight,
+  extractStoragePathFromUrl,
+} from '@/lib/harvest-utils';
 import * as React from 'react';
 
 export type SidebarMode = 'create' | 'edit';
@@ -44,6 +48,7 @@ export function useBatchSidebar({
     null,
   );
   const [showBrix, setShowBrix] = React.useState(false);
+  const [showFruitWeight, setShowFruitWeight] = React.useState(false);
   const [harvestDate, setHarvestDate] = React.useState<string>(todayIsoDate);
   const [createHarvest, { loading: createLoading }] =
     useCreateHarvestMutation();
@@ -58,6 +63,9 @@ export function useBatchSidebar({
     setShowBrix(
       mode === 'edit' && (batchData?.brixReadings?.some((v) => v > 0) ?? false),
     );
+    // In edit mode, expand the fruit-weight section when the batch already
+    // has a fruit count so existing values stay visible.
+    setShowFruitWeight(mode === 'edit' && (batchData?.fruitCount ?? 0) > 0);
     setHarvestDate(
       mode === 'edit' ? toIsoDateInput(initialDate) : todayIsoDate(),
     );
@@ -98,6 +106,10 @@ export function useBatchSidebar({
         brixReadings: prev.brixReadings.filter((_, i) => i !== index),
       };
     });
+  }, []);
+
+  const handleFruitCountChange = React.useCallback((value: number) => {
+    setLocalData((prev) => (prev ? { ...prev, fruitCount: value } : prev));
   }, []);
 
   const handleYieldChange = React.useCallback(
@@ -155,6 +167,14 @@ export function useBatchSidebar({
     if (!harvestId || !currentData) return;
     const brixReadings = showBrix ? currentData.brixReadings : [];
     const avgBrix = computeAvgBrix(brixReadings);
+    const fruitCount = showFruitWeight ? currentData.fruitCount : 0;
+    // Total fruit weight is the sellable yield (Class A + Class B) the user
+    // entered in the yield section above. Either field alone is sufficient.
+    const totalFruitWeight = showFruitWeight
+      ? (currentData.todaysHarvest.marketable || 0) +
+        (currentData.todaysHarvest.classB || 0)
+      : 0;
+    const avgFruitWeight = computeAvgFruitWeight(fruitCount, totalFruitWeight);
     // Re-fetch the harvest list after every save so the entry tab updates
     // immediately. awaitRefetchQueries makes the mutation promise resolve only
     // after the refetch lands, so onCompleted fires against fresh data.
@@ -189,6 +209,9 @@ export function useBatchSidebar({
               rowX: currentData.todaysHarvest.rowX,
               rowY: currentData.todaysHarvest.rowY,
               brixReadings,
+              fruitCount,
+              totalFruitWeight,
+              avgFruitWeight,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,
               date: isoDate,
@@ -209,6 +232,9 @@ export function useBatchSidebar({
               rowX: currentData.todaysHarvest.rowX,
               rowY: currentData.todaysHarvest.rowY,
               brixReadings,
+              fruitCount,
+              totalFruitWeight,
+              avgFruitWeight,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,
               date: isoDate,
@@ -227,6 +253,7 @@ export function useBatchSidebar({
     currentData,
     mode,
     showBrix,
+    showFruitWeight,
     harvestDate,
     updateHarvest,
     createHarvest,
@@ -239,11 +266,14 @@ export function useBatchSidebar({
     mode,
     showBrix,
     setShowBrix,
+    showFruitWeight,
+    setShowFruitWeight,
     harvestDate,
     setHarvestDate,
     handleBrixChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
+    handleFruitCountChange,
     handleYieldChange,
     handlePhotoUpload,
     handleRemovePhoto,

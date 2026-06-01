@@ -150,6 +150,44 @@ export function HarvestDetails({
                 </div>
               )}
             </div>
+
+            <div className="bg-card rounded-lg border p-6 shadow-sm">
+              <div className="mb-6 flex items-center justify-between">
+                <h3 className="text-foreground text-xl font-bold">
+                  {h?.fruitWeightMeasurement ?? 'Fruit Weight'}
+                </h3>
+                <span className="text-muted-foreground text-sm">
+                  {h?.averageFruitWeight ?? 'Average Fruit Weight'}:{' '}
+                  <span className="text-lg font-medium text-orange-500">
+                    {harvest.avgFruitWeight.toFixed(3)} kg
+                  </span>
+                </span>
+              </div>
+              {harvest.fruitCount === 0 && harvest.totalFruitWeight === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  {h?.noFruitWeightRecorded ?? 'No fruit weight recorded.'}
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-muted-foreground font-medium">
+                      {h?.fruitCount ?? 'Fruit count'}:
+                    </span>
+                    <span className="text-foreground text-lg font-bold">
+                      {harvest.fruitCount}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-muted-foreground font-medium">
+                      {h?.totalWeight ?? 'Total weight'}:
+                    </span>
+                    <span className="text-foreground text-lg font-bold">
+                      {harvest.totalFruitWeight.toFixed(2)} kg
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </SheetContent>

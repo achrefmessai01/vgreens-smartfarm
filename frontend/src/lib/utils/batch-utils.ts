@@ -42,6 +42,8 @@ export function createBatchDetailsFromForm(
       rowY: 0,
     },
     brixReadings: [0],
+    fruitCount: 0,
+    totalFruitWeight: 0,
     photos: [],
   };
 }

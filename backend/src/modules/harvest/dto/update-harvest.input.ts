@@ -154,6 +154,26 @@ export class UpdateHarvestInput {
   @Min(0, { each: true })
   brixReadings?: number[];
 
+  // --- Fruit weight measurement ---
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  fruitCount?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  totalFruitWeight?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  avgFruitWeight?: number;
+
   // --- Photos ---
 
   @Field(() => Int, { nullable: true })

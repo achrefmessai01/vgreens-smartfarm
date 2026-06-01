@@ -27,6 +27,8 @@ export interface BatchDetailsData {
     rowY: number;
   };
   brixReadings: number[];
+  fruitCount: number;
+  totalFruitWeight: number;
   photos: string[];
 }
 
@@ -67,6 +69,16 @@ export interface BrixMeasurementsFieldProps {
   onReadingChange?: (index: number, value: number) => void;
   onAddReading?: () => void;
   onRemoveReading?: (index: number) => void;
+  isLoading?: boolean;
+}
+
+export interface FruitWeightFieldProps {
+  fruitCount: number;
+  marketable: number;
+  classB: number;
+  showFruitWeight: boolean;
+  onShowFruitWeightChange: (show: boolean) => void;
+  onFruitCountChange?: (value: number) => void;
   isLoading?: boolean;
 }
 
