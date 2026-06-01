@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  type OnModuleInit,
 } from '@nestjs/common';
 import { BaseService } from '@common/services';
 import { Harvest } from './entities/harvest.entity';
@@ -25,7 +26,10 @@ import { HarvestStatus } from '@/common/enums/harvest-status.enum';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
 
 @Injectable()
-export class HarvestsService extends BaseService<Harvest> {
+export class HarvestsService
+  extends BaseService<Harvest>
+  implements OnModuleInit
+{
   private readonly logger = new Logger(HarvestsService.name);
 
   constructor(
@@ -33,6 +37,37 @@ export class HarvestsService extends BaseService<Harvest> {
     private readonly harvestRepository: Repository<Harvest>,
   ) {
     super(harvestRepository);
+  }
+
+  // Backfill historical harvest rows whose yieldPerPlant is still NULL because
+  // they were inserted before the column existed. Idempotent: subsequent boots
+  // hit zero matching rows and the UPDATE returns immediately.
+  async onModuleInit(): Promise<void> {
+    try {
+      const result: unknown = await this.harvestRepository.query(
+        `UPDATE harvests
+         SET "yieldPerPlant" = ROUND(
+           (("classA"::numeric + "classB"::numeric) / "totalPlants")::numeric,
+           2
+         )
+         WHERE "yieldPerPlant" IS NULL
+           AND "totalPlants" > 0
+           AND ("classA" > 0 OR "classB" > 0)`,
+      );
+      // The pg driver returns `[rows, rowCount]` for UPDATE statements.
+      const updated =
+        Array.isArray(result) && typeof result[1] === 'number' ? result[1] : 0;
+      if (updated > 0) {
+        this.logger.log(
+          `Backfilled yieldPerPlant for ${updated} historical harvest row(s).`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `yieldPerPlant backfill failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
   }
 
   private readonly harvestRelations = ['tenant', 'createdBy'] as const;
@@ -53,6 +88,19 @@ export class HarvestsService extends BaseService<Harvest> {
 
   private roundTo2(value: number): number {
     return Math.round(value * 100) / 100;
+  }
+
+  // Per-harvest yield-per-plant: (classA + classB) / totalPlants. Stored on
+  // each Harvest row by create/update so the value is queryable without
+  // re-deriving it. Null when the harvest has no plant count (typical for
+  // child harvest rows — totalPlants lives on the parent batch).
+  private computeYieldPerPlant(
+    classA: number,
+    classB: number,
+    totalPlants: number,
+  ): number | null {
+    if (totalPlants <= 0) return null;
+    return this.roundTo2((classA + classB) / totalPlants);
   }
 
   // Per-row avg fruit weight: (classA + classB) / fruitCount, computed on the
@@ -263,6 +311,9 @@ export class HarvestsService extends BaseService<Harvest> {
   ): Promise<Harvest> {
     try {
       const batchName = input.batch ?? `${input.species} - ${input.variety}`;
+      const classA = input.classA ?? 0;
+      const classB = input.classB ?? 0;
+      const totalPlants = input.totalPlants ?? 0;
 
       const harvest = this.harvestRepository.create({
         tenantId,
@@ -284,13 +335,14 @@ export class HarvestsService extends BaseService<Harvest> {
             input.numberOfRows,
             input.rowLength,
           ),
-        totalPlants: input.totalPlants ?? 0,
+        totalPlants,
         lostPlants: input.lostPlants ?? 0,
         status: input.status ?? HarvestStatus.ACTIVE,
         date: new Date(input.date),
-        classA: input.classA ?? 0,
-        classB: input.classB ?? 0,
+        classA,
+        classB,
         waste: input.waste ?? 0,
+        yieldPerPlant: this.computeYieldPerPlant(classA, classB, totalPlants),
         avgBrix: input.avgBrix ?? 0,
         rowX:
           input.rowX ??
@@ -380,6 +432,11 @@ export class HarvestsService extends BaseService<Harvest> {
       if (input.classA !== undefined) harvest.classA = input.classA;
       if (input.classB !== undefined) harvest.classB = input.classB;
       if (input.waste !== undefined) harvest.waste = input.waste;
+      harvest.yieldPerPlant = this.computeYieldPerPlant(
+        harvest.classA,
+        harvest.classB,
+        harvest.totalPlants,
+      );
       if (input.avgBrix !== undefined) harvest.avgBrix = input.avgBrix;
       if (input.rowX !== undefined) harvest.rowX = input.rowX;
       if (input.rowY !== undefined) harvest.rowY = input.rowY;
