@@ -1,5 +1,48 @@
 import type { HarvestStatus } from '@/generated/graphql';
 
+// One repeatable "Today Harvest" sub-entry: its own yield, row coordinates,
+// brix readings and fruit-weight measurement. `showBrix`/`showFruitWeight`
+// control whether the optional sections are expanded for this entry.
+export interface HarvestEntryData {
+  marketable: number;
+  waste: number;
+  classB: number;
+  rowX: number;
+  rowY: number;
+  brixReadings: number[];
+  showBrix: boolean;
+  fruitCount: number;
+  showFruitWeight: boolean;
+}
+
+// True when the entry carries any harvest data — used to auto-expand its card
+// when viewing/editing an existing harvest.
+export function entryHasData(entry: HarvestEntryData): boolean {
+  return (
+    entry.marketable > 0 ||
+    entry.waste > 0 ||
+    entry.classB > 0 ||
+    entry.rowX > 0 ||
+    entry.rowY > 0 ||
+    entry.fruitCount > 0 ||
+    entry.brixReadings.some((v) => v > 0)
+  );
+}
+
+export function createEmptyEntry(): HarvestEntryData {
+  return {
+    marketable: 0,
+    waste: 0,
+    classB: 0,
+    rowX: 0,
+    rowY: 0,
+    brixReadings: [0],
+    showBrix: false,
+    fruitCount: 0,
+    showFruitWeight: false,
+  };
+}
+
 export interface BatchDetailsData {
   id: string;
   name: string;
@@ -19,16 +62,9 @@ export interface BatchDetailsData {
   totalPlants: number;
   lostPlants: number;
   plantingDate: string;
-  todaysHarvest: {
-    marketable: number;
-    waste: number;
-    classB: number;
-    rowX: number;
-    rowY: number;
-  };
-  brixReadings: number[];
-  fruitCount: number;
-  totalFruitWeight: number;
+  // Repeatable sub-entries; always at least one. Photos and the harvest date
+  // live at the record level, not per entry.
+  entries: HarvestEntryData[];
   photos: string[];
 }
 
@@ -52,9 +88,6 @@ export interface YieldDataFieldProps {
   classB: number;
   rowX: number;
   rowY: number;
-  harvestDate: string;
-  maxDate: string;
-  onHarvestDateChange: (value: string) => void;
   onYieldChange?: (
     field: 'marketable' | 'waste' | 'classB' | 'rowX' | 'rowY',
     value: number,
@@ -69,6 +102,8 @@ export interface BrixMeasurementsFieldProps {
   onReadingChange?: (index: number, value: number) => void;
   onAddReading?: () => void;
   onRemoveReading?: (index: number) => void;
+  // Namespaces input element ids so repeated entries don't collide.
+  idPrefix?: string;
   isLoading?: boolean;
 }
 
@@ -79,6 +114,8 @@ export interface FruitWeightFieldProps {
   showFruitWeight: boolean;
   onShowFruitWeightChange: (show: boolean) => void;
   onFruitCountChange?: (value: number) => void;
+  // Namespaces input element ids so repeated entries don't collide.
+  idPrefix?: string;
   isLoading?: boolean;
 }
 

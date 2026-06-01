@@ -33,6 +33,18 @@ export const HARVESTS_QUERY = gql`
       avgFruitWeight
       photos
       photoUrls
+      entries {
+        classA
+        classB
+        waste
+        rowX
+        rowY
+        avgBrix
+        brixReadings
+        fruitCount
+        totalFruitWeight
+        avgFruitWeight
+      }
       createdAt
       updatedAt
       createdBy {
@@ -78,6 +90,18 @@ export const HARVEST_QUERY = gql`
       avgFruitWeight
       photos
       photoUrls
+      entries {
+        classA
+        classB
+        waste
+        rowX
+        rowY
+        avgBrix
+        brixReadings
+        fruitCount
+        totalFruitWeight
+        avgFruitWeight
+      }
       createdAt
       updatedAt
       createdBy {

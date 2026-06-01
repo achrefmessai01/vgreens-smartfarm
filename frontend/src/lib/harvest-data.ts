@@ -121,7 +121,9 @@ export function addCompletedBatchToHistory(
   const newId = (allHarvestData.length + 1).toString();
   const batchName = `${batchData.species} - ${batchData.variety}`;
 
-  const brixValues = batchData.brixReadings.filter((value) => value > 0);
+  const brixValues = batchData.entries
+    .flatMap((entry) => entry.brixReadings)
+    .filter((value) => value > 0);
 
   const avgBrix =
     brixValues.length > 0
@@ -139,9 +141,9 @@ export function addCompletedBatchToHistory(
       year: 'numeric',
     }),
     batch: batchName,
-    classA: batchData.todaysHarvest.marketable,
-    classB: batchData.todaysHarvest.classB,
-    waste: batchData.todaysHarvest.waste,
+    classA: batchData.entries.reduce((sum, e) => sum + e.marketable, 0),
+    classB: batchData.entries.reduce((sum, e) => sum + e.classB, 0),
+    waste: batchData.entries.reduce((sum, e) => sum + e.waste, 0),
     avgBrix,
     photos: batchData.photos.length,
     createdAt: new Date().toISOString(),

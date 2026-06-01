@@ -1,8 +1,15 @@
 import { HarvestStatus } from '@/generated/graphql';
 import type { Locale } from '@/i18n/config';
 import type { Translations } from '@/i18n/translations';
-import type { BatchDetailsData } from '@/types/batch-sidebar.types';
-import type { HarvestLike, HarvestSummary } from '@/types/harvest.types';
+import type {
+  BatchDetailsData,
+  HarvestEntryData,
+} from '@/types/batch-sidebar.types';
+import type {
+  HarvestEntryLike,
+  HarvestLike,
+  HarvestSummary,
+} from '@/types/harvest.types';
 
 type HarvestTranslations = Translations['pages']['harvest'];
 
@@ -135,6 +142,71 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
   };
 }
 
+// Map one stored sub-entry to the editable form shape, expanding the brix and
+// fruit-weight sections when they carry data.
+function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
+  const brixReadings =
+    entry.brixReadings.length > 0 ? [...entry.brixReadings] : [0];
+  return {
+    marketable: entry.classA,
+    waste: entry.waste,
+    classB: entry.classB,
+    rowX: entry.rowX,
+    rowY: entry.rowY,
+    brixReadings,
+    showBrix: entry.brixReadings.some((v) => v > 0),
+    fruitCount: entry.fruitCount,
+    showFruitWeight: entry.fruitCount > 0,
+  };
+}
+
+// Build the editable entries list for a harvest. Uses the stored `entries`
+// breakdown when present; otherwise synthesizes a single entry from the flat
+// top-level fields so harvests logged before sub-entries existed still edit
+// cleanly.
+export function harvestToEntries(h: HarvestLike): HarvestEntryData[] {
+  if (h.entries && h.entries.length > 0) {
+    return h.entries.map(entryLikeToEntryData);
+  }
+  return [
+    entryLikeToEntryData({
+      classA: h.classA,
+      classB: h.classB,
+      waste: h.waste,
+      rowX: h.rowX,
+      rowY: h.rowY,
+      avgBrix: h.avgBrix,
+      brixReadings: h.brixReadings,
+      fruitCount: h.fruitCount,
+      totalFruitWeight: h.totalFruitWeight,
+      avgFruitWeight: h.avgFruitWeight,
+    }),
+  ];
+}
+
+// Per-entry breakdown for the read-only detail view. Uses the stored entries
+// when present; otherwise synthesizes a single entry from the flat top-level
+// fields so legacy harvests still render one card.
+export function harvestToDisplayEntries(h: HarvestLike): HarvestEntryLike[] {
+  if (h.entries && h.entries.length > 0) {
+    return h.entries;
+  }
+  return [
+    {
+      classA: h.classA,
+      classB: h.classB,
+      waste: h.waste,
+      rowX: h.rowX,
+      rowY: h.rowY,
+      avgBrix: h.avgBrix,
+      brixReadings: h.brixReadings,
+      fruitCount: h.fruitCount,
+      totalFruitWeight: h.totalFruitWeight,
+      avgFruitWeight: h.avgFruitWeight,
+    },
+  ];
+}
+
 export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
   const plantingDate = new Date(h.plantingDate);
   const days = Math.max(
@@ -161,16 +233,7 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
     totalPlants: h.totalPlants,
     lostPlants: h.lostPlants,
     plantingDate: h.plantingDate,
-    todaysHarvest: {
-      marketable: h.classA,
-      waste: h.waste,
-      classB: h.classB,
-      rowX: h.rowX,
-      rowY: h.rowY,
-    },
-    brixReadings: h.brixReadings.length > 0 ? [...h.brixReadings] : [0],
-    fruitCount: h.fruitCount,
-    totalFruitWeight: h.totalFruitWeight,
+    entries: harvestToEntries(h),
     photos: h.photoUrls ?? [],
   };
 }

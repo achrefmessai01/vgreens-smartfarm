@@ -11,6 +11,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateHarvestInput } from './dto/create-harvest.input';
 import { UpdateHarvestInput } from './dto/update-harvest.input';
+import { HarvestEntryInput } from './dto/harvest-entry.input';
+import { HarvestEntry } from './entities/harvest-entry';
 import { HarvestFilterInput } from './dto/harvest-filter.input';
 import { DashboardFilterInput } from './dto/dashboard-filter.input';
 import {
@@ -112,6 +114,88 @@ export class HarvestsService
     const sellable = harvest.classA + harvest.classB;
     if (sellable <= 0) return null;
     return sellable / harvest.fruitCount;
+  }
+
+  // Average of the positive readings, rounded to 1 decimal. Mirrors the
+  // frontend computeAvgBrix so brix shown in the UI matches what we store.
+  private avgOfPositive(values: number[]): number {
+    const positive = values.filter((v) => v > 0);
+    if (positive.length === 0) return 0;
+    return (
+      Math.round(
+        (positive.reduce((sum, v) => sum + v, 0) / positive.length) * 10,
+      ) / 10
+    );
+  }
+
+  // Fill defaults and re-derive a single sub-entry's avgBrix and avgFruitWeight
+  // so the backend stays the source of truth for the derived fields.
+  private normalizeEntry(entry: HarvestEntryInput): HarvestEntry {
+    const brixReadings = entry.brixReadings ?? [];
+    const fruitCount = entry.fruitCount ?? 0;
+    const totalFruitWeight = entry.totalFruitWeight ?? 0;
+    return {
+      classA: entry.classA ?? 0,
+      classB: entry.classB ?? 0,
+      waste: entry.waste ?? 0,
+      rowX: entry.rowX ?? 0,
+      rowY: entry.rowY ?? 0,
+      brixReadings,
+      avgBrix: this.avgOfPositive(brixReadings),
+      fruitCount,
+      totalFruitWeight,
+      avgFruitWeight:
+        fruitCount > 0 && totalFruitWeight > 0
+          ? Math.round((totalFruitWeight / fruitCount) * 1000) / 1000
+          : 0,
+    };
+  }
+
+  // Derive the flat top-level aggregate fields from a set of sub-entries.
+  // classA/classB/waste/fruitCount/totalFruitWeight are summed; brix is pooled
+  // and averaged; avgFruitWeight is Σweight ÷ Σcount; rowX/rowY become the span
+  // (min start row, max end row) across entries.
+  private aggregateEntries(rawEntries: HarvestEntryInput[]): {
+    entries: HarvestEntry[];
+    classA: number;
+    classB: number;
+    waste: number;
+    avgBrix: number;
+    brixReadings: number[];
+    fruitCount: number;
+    totalFruitWeight: number;
+    avgFruitWeight: number;
+    rowX: number;
+    rowY: number;
+  } {
+    const entries = rawEntries.map((e) => this.normalizeEntry(e));
+    const classA = entries.reduce((s, e) => s + e.classA, 0);
+    const classB = entries.reduce((s, e) => s + e.classB, 0);
+    const waste = entries.reduce((s, e) => s + e.waste, 0);
+    const fruitCount = entries.reduce((s, e) => s + e.fruitCount, 0);
+    const totalFruitWeight = entries.reduce(
+      (s, e) => s + e.totalFruitWeight,
+      0,
+    );
+    const brixReadings = entries.flatMap((e) => e.brixReadings);
+    const rowXs = entries.map((e) => e.rowX).filter((v) => v > 0);
+    const rowYs = entries.map((e) => e.rowY).filter((v) => v > 0);
+    return {
+      entries,
+      classA,
+      classB,
+      waste,
+      avgBrix: this.avgOfPositive(brixReadings),
+      brixReadings,
+      fruitCount,
+      totalFruitWeight,
+      avgFruitWeight:
+        fruitCount > 0 && totalFruitWeight > 0
+          ? Math.round((totalFruitWeight / fruitCount) * 1000) / 1000
+          : 0,
+      rowX: rowXs.length > 0 ? Math.min(...rowXs) : 0,
+      rowY: rowYs.length > 0 ? Math.max(...rowYs) : 0,
+    };
   }
 
   private isDashboardPlaceholder(harvest: Harvest): boolean {
@@ -311,8 +395,13 @@ export class HarvestsService
   ): Promise<Harvest> {
     try {
       const batchName = input.batch ?? `${input.species} - ${input.variety}`;
-      const classA = input.classA ?? 0;
-      const classB = input.classB ?? 0;
+      // When sub-entries are supplied the flat yield/brix/fruit/row fields are
+      // derived from them; otherwise fall back to the flat input (legacy path).
+      const agg = input.entries?.length
+        ? this.aggregateEntries(input.entries)
+        : null;
+      const classA = agg?.classA ?? input.classA ?? 0;
+      const classB = agg?.classB ?? input.classB ?? 0;
       const totalPlants = input.totalPlants ?? 0;
 
       const harvest = this.harvestRepository.create({
@@ -341,25 +430,28 @@ export class HarvestsService
         date: new Date(input.date),
         classA,
         classB,
-        waste: input.waste ?? 0,
+        waste: agg?.waste ?? input.waste ?? 0,
         yieldPerPlant: this.computeYieldPerPlant(classA, classB, totalPlants),
-        avgBrix: input.avgBrix ?? 0,
+        avgBrix: agg?.avgBrix ?? input.avgBrix ?? 0,
         rowX:
+          agg?.rowX ??
           input.rowX ??
           (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
             ? 1
             : 0),
         rowY:
+          agg?.rowY ??
           input.rowY ??
           (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
             ? input.numberOfRowsHarvested
             : 0),
-        brixReadings: input.brixReadings ?? [],
-        fruitCount: input.fruitCount ?? 0,
-        totalFruitWeight: input.totalFruitWeight ?? 0,
-        avgFruitWeight: input.avgFruitWeight ?? 0,
+        brixReadings: agg?.brixReadings ?? input.brixReadings ?? [],
+        fruitCount: agg?.fruitCount ?? input.fruitCount ?? 0,
+        totalFruitWeight: agg?.totalFruitWeight ?? input.totalFruitWeight ?? 0,
+        avgFruitWeight: agg?.avgFruitWeight ?? input.avgFruitWeight ?? 0,
         photos: input.photos ?? 0,
         photoUrls: input.photoUrls ?? [],
+        entries: agg?.entries ?? [],
       });
 
       const saved = await this.harvestRepository.save(harvest);
@@ -463,6 +555,34 @@ export class HarvestsService
       }
       if (input.photos !== undefined) harvest.photos = input.photos;
       if (input.photoUrls !== undefined) harvest.photoUrls = input.photoUrls;
+
+      // Sub-entries are authoritative when supplied: re-derive every flat
+      // aggregate from them (overriding any flat fields above) and recompute
+      // yieldPerPlant from the aggregated sellable yield. An explicit empty
+      // array clears the breakdown without touching the flat fields.
+      if (input.entries !== undefined) {
+        if (input.entries.length > 0) {
+          const agg = this.aggregateEntries(input.entries);
+          harvest.entries = agg.entries;
+          harvest.classA = agg.classA;
+          harvest.classB = agg.classB;
+          harvest.waste = agg.waste;
+          harvest.avgBrix = agg.avgBrix;
+          harvest.brixReadings = agg.brixReadings;
+          harvest.fruitCount = agg.fruitCount;
+          harvest.totalFruitWeight = agg.totalFruitWeight;
+          harvest.avgFruitWeight = agg.avgFruitWeight;
+          harvest.rowX = agg.rowX;
+          harvest.rowY = agg.rowY;
+          harvest.yieldPerPlant = this.computeYieldPerPlant(
+            harvest.classA,
+            harvest.classB,
+            harvest.totalPlants,
+          );
+        } else {
+          harvest.entries = [];
+        }
+      }
 
       const saved = await this.harvestRepository.save(harvest);
       const result = await this.harvestRepository.findOne({
