@@ -7,10 +7,13 @@ import {
   IsDateString,
   IsEnum,
   IsArray,
+  ValidateNested,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { InputType, Field, ID, Float, Int } from '@nestjs/graphql';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
+import { HarvestEntryInput } from './harvest-entry.input';
 
 @InputType()
 export class CreateHarvestInput {
@@ -190,4 +193,15 @@ export class CreateHarvestInput {
   @IsArray()
   @IsString({ each: true })
   photoUrls?: string[];
+
+  // --- Sub-entries ---
+
+  // When provided, the service derives the top-level classA/classB/waste/brix/
+  // fruit-weight/row aggregates from these and persists the breakdown as-is.
+  @Field(() => [HarvestEntryInput], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => HarvestEntryInput)
+  entries?: HarvestEntryInput[];
 }

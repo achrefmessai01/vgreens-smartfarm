@@ -15,6 +15,7 @@ export function FruitWeightField({
   showFruitWeight,
   onShowFruitWeightChange,
   onFruitCountChange,
+  idPrefix = '',
   isLoading = false,
 }: FruitWeightFieldProps) {
   const { t } = useI18n();
@@ -64,12 +65,12 @@ export function FruitWeightField({
             </span>
           </div>
           <Field>
-            <FieldLabel htmlFor="fruit-count">
+            <FieldLabel htmlFor={`${idPrefix}fruit-count`}>
               {h?.fruitCount ?? 'Fruit count'}
             </FieldLabel>
             <FieldContent>
               <Input
-                id="fruit-count"
+                id={`${idPrefix}fruit-count`}
                 type="number"
                 min="0"
                 step="1"

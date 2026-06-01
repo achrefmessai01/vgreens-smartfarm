@@ -7,10 +7,13 @@ import {
   IsDateString,
   IsEnum,
   IsArray,
+  ValidateNested,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { InputType, Field, Float, Int } from '@nestjs/graphql';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
+import { HarvestEntryInput } from './harvest-entry.input';
 
 @InputType()
 export class UpdateHarvestInput {
@@ -187,4 +190,15 @@ export class UpdateHarvestInput {
   @IsArray()
   @IsString({ each: true })
   photoUrls?: string[];
+
+  // --- Sub-entries ---
+
+  // When provided, replaces the stored entries and the service re-derives the
+  // top-level aggregates from them.
+  @Field(() => [HarvestEntryInput], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => HarvestEntryInput)
+  entries?: HarvestEntryInput[];
 }

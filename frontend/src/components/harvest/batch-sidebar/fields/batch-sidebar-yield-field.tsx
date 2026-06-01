@@ -4,7 +4,6 @@ import * as React from 'react';
 import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CalendarDays } from 'lucide-react';
 import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
 
@@ -14,9 +13,6 @@ export function YieldDataField({
   classB,
   rowX,
   rowY,
-  harvestDate,
-  maxDate,
-  onHarvestDateChange,
   onYieldChange,
   isLoading = false,
 }: YieldDataFieldProps) {
@@ -26,49 +22,11 @@ export function YieldDataField({
   const [showRowCoordinates, setShowRowCoordinates] = React.useState(false);
   const marketableRef = React.useRef<HTMLInputElement>(null);
   const secondaryRef = React.useRef<HTMLInputElement>(null);
-  const dateInputRef = React.useRef<HTMLInputElement>(null);
 
-  const openDatePicker = () => {
-    const input = dateInputRef.current;
-    if (!input) return;
-    if (typeof input.showPicker === 'function') {
-      try {
-        input.showPicker();
-        return;
-      } catch {
-        // Fall through to focus fallback (Safari < 16, etc.)
-      }
-    }
-    input.focus();
-    input.click();
-  };
-
-  const isToday = harvestDate === maxDate;
-  const friendlyDate = React.useMemo(
-    () =>
-      new Date(harvestDate).toLocaleDateString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-    [harvestDate],
-  );
-  const titleLabel = isToday
-    ? (h?.todaysHarvest ?? 'Today Harvest')
-    : friendlyDate;
-
-  const handleKeyDown = (
-    e: React.KeyboardEvent,
-    nextField: 'secondary' | 'brix1',
-  ) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (nextField === 'secondary') {
-        secondaryRef.current?.focus();
-      } else if (nextField === 'brix1') {
-        document.getElementById('brix-1')?.focus();
-      }
+      secondaryRef.current?.focus();
     }
   };
 
@@ -87,7 +45,6 @@ export function YieldDataField({
 
   const secondaryValue = classBMode ? classB : waste;
   const secondaryField: 'classB' | 'waste' = classBMode ? 'classB' : 'waste';
-  const headlineValue = classBMode ? marketable + classB : marketable;
 
   if (isLoading) {
     return (
@@ -109,34 +66,6 @@ export function YieldDataField({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1.5">
-          <h3 className="font-medium">{titleLabel}</h3>
-          <button
-            type="button"
-            onClick={openDatePicker}
-            aria-label={h?.harvestDate ?? 'Harvest Date'}
-            className="border-border/60 bg-muted/40 text-muted-foreground hover:bg-muted/70 focus-visible:ring-ring/40 focus-visible:ring-offset-background relative inline-flex h-7 w-fit cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none"
-          >
-            <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>{friendlyDate}</span>
-            <input
-              ref={dateInputRef}
-              id="harvestDate"
-              type="date"
-              value={harvestDate}
-              max={maxDate}
-              onChange={(e) => onHarvestDateChange(e.target.value)}
-              tabIndex={-1}
-              aria-hidden="true"
-              className="pointer-events-none absolute h-0 w-0 opacity-0"
-            />
-          </button>
-        </div>
-        <span className="text-2xl font-bold text-teal-600">
-          {headlineValue.toFixed(1)} kg
-        </span>
-      </div>
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-muted-foreground text-sm font-medium">
@@ -165,7 +94,7 @@ export function YieldDataField({
                 onChange={(e) =>
                   onYieldChange?.('marketable', parseFloat(e.target.value) || 0)
                 }
-                onKeyDown={(e) => handleKeyDown(e, 'secondary')}
+                onKeyDown={handleKeyDown}
                 className="h-10 pr-12 text-left text-base"
                 placeholder={primaryPlaceholder}
               />
@@ -189,7 +118,7 @@ export function YieldDataField({
                     parseFloat(e.target.value) || 0,
                   )
                 }
-                onKeyDown={(e) => handleKeyDown(e, 'brix1')}
+                onKeyDown={handleKeyDown}
                 className="h-10 pr-12 text-left text-base"
                 placeholder={secondaryPlaceholder}
               />

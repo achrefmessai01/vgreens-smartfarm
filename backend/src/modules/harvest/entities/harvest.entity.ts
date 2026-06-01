@@ -12,6 +12,7 @@ import { User } from '@modules/users/entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
 import { ObjectType, Field, ID, Float, Int } from '@nestjs/graphql';
+import { HarvestEntry } from './harvest-entry';
 
 const dateTransformer: ValueTransformer = {
   to: (value: Date | string) =>
@@ -189,6 +190,19 @@ export class Harvest {
   @Field(() => [String], { nullable: true })
   @Column({ type: 'jsonb', nullable: true, default: [] })
   photoUrls?: string[];
+
+  // --- Sub-entries ---
+
+  // One "Log Harvest" submission may hold several sub-entries, each with its
+  // own yield / brix / fruit-weight measurement. The top-level classA, classB,
+  // waste, avgBrix, brixReadings, fruitCount, totalFruitWeight, avgFruitWeight,
+  // rowX and rowY fields above are SUM/derived aggregates over these entries
+  // (computed on create/update) so existing table, dashboard, CSV and
+  // yieldPerPlant logic keeps reading the flat columns unchanged. Empty for
+  // legacy rows logged before sub-entries existed.
+  @Field(() => [HarvestEntry], { nullable: true })
+  @Column({ type: 'jsonb', nullable: true, default: [] })
+  entries?: HarvestEntry[];
 
   // --- Timestamps ---
 

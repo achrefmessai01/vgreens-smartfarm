@@ -17,6 +17,7 @@ export function BrixMeasurementsField({
   onReadingChange,
   onAddReading,
   onRemoveReading,
+  idPrefix = '',
   isLoading = false,
 }: BrixMeasurementsFieldProps) {
   const { t } = useI18n();
@@ -77,14 +78,14 @@ export function BrixMeasurementsField({
           <div className="space-y-2">
             {readings.map((value, index) => (
               <Field key={index}>
-                <FieldLabel htmlFor={`brix-${index + 1}`}>
+                <FieldLabel htmlFor={`${idPrefix}brix-${index + 1}`}>
                   {brixLabel} {index + 1}
                 </FieldLabel>
                 <FieldContent>
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1">
                       <Input
-                        id={`brix-${index + 1}`}
+                        id={`${idPrefix}brix-${index + 1}`}
                         ref={(el) => {
                           inputRefs.current[index] = el;
                         }}
