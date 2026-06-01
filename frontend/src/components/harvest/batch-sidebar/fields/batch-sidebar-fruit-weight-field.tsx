@@ -10,11 +10,11 @@ import type { FruitWeightFieldProps } from '@/types/batch-sidebar.types';
 
 export function FruitWeightField({
   fruitCount,
-  totalFruitWeight,
+  marketable,
+  classB,
   showFruitWeight,
   onShowFruitWeightChange,
   onFruitCountChange,
-  onTotalFruitWeightChange,
   isLoading = false,
 }: FruitWeightFieldProps) {
   const { t } = useI18n();
@@ -24,15 +24,14 @@ export function FruitWeightField({
     return (
       <div className="space-y-4">
         <div className="bg-muted h-5 animate-pulse rounded" />
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="bg-muted h-10 animate-pulse rounded" />
-          ))}
-        </div>
+        <div className="bg-muted h-10 animate-pulse rounded" />
       </div>
     );
   }
 
+  // Total fruit weight is the sellable yield (Class A + Class B) entered above.
+  // Each one defaults to 0, so either alone is sufficient.
+  const totalFruitWeight = (marketable || 0) + (classB || 0);
   const avgFruitWeight = computeAvgFruitWeight(fruitCount, totalFruitWeight);
 
   return (
@@ -64,58 +63,27 @@ export function FruitWeightField({
               </span>
             </span>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="fruit-count">
-                {h?.fruitCount ?? 'Fruit count'}
-              </FieldLabel>
-              <FieldContent>
-                <Input
-                  id="fruit-count"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={fruitCount === 0 ? '' : fruitCount.toString()}
-                  onChange={(e) =>
-                    onFruitCountChange?.(
-                      Math.max(0, Math.trunc(parseFloat(e.target.value) || 0)),
-                    )
-                  }
-                  placeholder={h?.enterFruitCount ?? 'Enter fruit count'}
-                  disabled={isLoading}
-                />
-              </FieldContent>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="total-fruit-weight">
-                {h?.totalWeight ?? 'Total weight'}
-              </FieldLabel>
-              <FieldContent>
-                <div className="relative">
-                  <Input
-                    id="total-fruit-weight"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={
-                      totalFruitWeight === 0 ? '' : totalFruitWeight.toString()
-                    }
-                    onChange={(e) =>
-                      onTotalFruitWeightChange?.(
-                        Math.max(0, parseFloat(e.target.value) || 0),
-                      )
-                    }
-                    placeholder={h?.enterTotalWeight ?? 'Enter total weight'}
-                    disabled={isLoading}
-                    className="pr-10"
-                  />
-                  <span className="text-muted-foreground pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm">
-                    kg
-                  </span>
-                </div>
-              </FieldContent>
-            </Field>
-          </div>
+          <Field>
+            <FieldLabel htmlFor="fruit-count">
+              {h?.fruitCount ?? 'Fruit count'}
+            </FieldLabel>
+            <FieldContent>
+              <Input
+                id="fruit-count"
+                type="number"
+                min="0"
+                step="1"
+                value={fruitCount === 0 ? '' : fruitCount.toString()}
+                onChange={(e) =>
+                  onFruitCountChange?.(
+                    Math.max(0, Math.trunc(parseFloat(e.target.value) || 0)),
+                  )
+                }
+                placeholder={h?.enterFruitCount ?? 'Enter fruit count'}
+                disabled={isLoading}
+              />
+            </FieldContent>
+          </Field>
         </div>
       )}
     </div>

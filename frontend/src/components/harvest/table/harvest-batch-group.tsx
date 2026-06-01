@@ -162,6 +162,12 @@ export function HarvestBatchGroup({
                       <TableHead>{primaryHeader}</TableHead>
                       <TableHead>{secondaryHeader}</TableHead>
                       <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
+                      <TableHead>
+                        {h?.avgFruitWeight ?? 'Avg Fruit Weight'}
+                      </TableHead>
+                      <TableHead>
+                        {h?.yieldPerPlantShort ?? 'Yield/Plant'}
+                      </TableHead>
                       <TableHead>{h?.createdBy ?? 'Created By'}</TableHead>
                       <TableHead className="text-right">
                         {h?.actions ?? 'Actions'}
@@ -169,7 +175,13 @@ export function HarvestBatchGroup({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {visibleEntries.map((entry) => (
+                    {visibleEntries.map((entry) => {
+                      const rowYieldPerPlant =
+                        group.root.totalPlants > 0
+                          ? (entry.classA + entry.classB) /
+                            group.root.totalPlants
+                          : null;
+                      return (
                       <TableRow key={entry.id}>
                         <TableCell>{formatHarvestDate(entry.date)}</TableCell>
                         <TableCell className="text-green-600">
@@ -183,6 +195,16 @@ export function HarvestBatchGroup({
                           {classBMode ? entry.classB : entry.waste}
                         </TableCell>
                         <TableCell>{entry.avgBrix}&deg;Bx</TableCell>
+                        <TableCell>
+                          {entry.avgFruitWeight > 0
+                            ? `${entry.avgFruitWeight.toFixed(3)} kg`
+                            : '—'}
+                        </TableCell>
+                        <TableCell>
+                          {rowYieldPerPlant == null
+                            ? '—'
+                            : `${rowYieldPerPlant.toFixed(2)} kg`}
+                        </TableCell>
                         <TableCell className="max-w-[220px] truncate">
                           {getCreatedByLabel(entry)}
                         </TableCell>
@@ -207,7 +229,8 @@ export function HarvestBatchGroup({
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}

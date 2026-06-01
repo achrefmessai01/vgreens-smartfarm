@@ -64,12 +64,8 @@ export function useBatchSidebar({
       mode === 'edit' && (batchData?.brixReadings?.some((v) => v > 0) ?? false),
     );
     // In edit mode, expand the fruit-weight section when the batch already
-    // has a measurement so existing values stay visible.
-    setShowFruitWeight(
-      mode === 'edit' &&
-        ((batchData?.fruitCount ?? 0) > 0 ||
-          (batchData?.totalFruitWeight ?? 0) > 0),
-    );
+    // has a fruit count so existing values stay visible.
+    setShowFruitWeight(mode === 'edit' && (batchData?.fruitCount ?? 0) > 0);
     setHarvestDate(
       mode === 'edit' ? toIsoDateInput(initialDate) : todayIsoDate(),
     );
@@ -114,12 +110,6 @@ export function useBatchSidebar({
 
   const handleFruitCountChange = React.useCallback((value: number) => {
     setLocalData((prev) => (prev ? { ...prev, fruitCount: value } : prev));
-  }, []);
-
-  const handleTotalFruitWeightChange = React.useCallback((value: number) => {
-    setLocalData((prev) =>
-      prev ? { ...prev, totalFruitWeight: value } : prev,
-    );
   }, []);
 
   const handleYieldChange = React.useCallback(
@@ -178,7 +168,12 @@ export function useBatchSidebar({
     const brixReadings = showBrix ? currentData.brixReadings : [];
     const avgBrix = computeAvgBrix(brixReadings);
     const fruitCount = showFruitWeight ? currentData.fruitCount : 0;
-    const totalFruitWeight = showFruitWeight ? currentData.totalFruitWeight : 0;
+    // Total fruit weight is the sellable yield (Class A + Class B) the user
+    // entered in the yield section above. Either field alone is sufficient.
+    const totalFruitWeight = showFruitWeight
+      ? (currentData.todaysHarvest.marketable || 0) +
+        (currentData.todaysHarvest.classB || 0)
+      : 0;
     const avgFruitWeight = computeAvgFruitWeight(fruitCount, totalFruitWeight);
     // Re-fetch the harvest list after every save so the entry tab updates
     // immediately. awaitRefetchQueries makes the mutation promise resolve only
@@ -279,7 +274,6 @@ export function useBatchSidebar({
     handleAddBrixReading,
     handleRemoveBrixReading,
     handleFruitCountChange,
-    handleTotalFruitWeightChange,
     handleYieldChange,
     handlePhotoUpload,
     handleRemovePhoto,

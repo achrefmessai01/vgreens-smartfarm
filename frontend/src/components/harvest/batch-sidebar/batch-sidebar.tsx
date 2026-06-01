@@ -62,7 +62,6 @@ export function BatchSidebar({
     handleAddBrixReading,
     handleRemoveBrixReading,
     handleFruitCountChange,
-    handleTotalFruitWeightChange,
     handleYieldChange,
     handlePhotoUpload,
     handleRemovePhoto,
@@ -157,11 +156,11 @@ export function BatchSidebar({
                 <div className="bg-card rounded-xl border p-3 shadow-sm">
                   <FruitWeightField
                     fruitCount={currentData.fruitCount}
-                    totalFruitWeight={currentData.totalFruitWeight}
+                    marketable={currentData.todaysHarvest.marketable}
+                    classB={currentData.todaysHarvest.classB}
                     showFruitWeight={showFruitWeight}
                     onShowFruitWeightChange={setShowFruitWeight}
                     onFruitCountChange={handleFruitCountChange}
-                    onTotalFruitWeightChange={handleTotalFruitWeightChange}
                     isLoading={busy}
                   />
                 </div>

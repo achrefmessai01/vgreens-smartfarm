@@ -172,6 +172,7 @@ export function HarvestDashboardCompare({
           const wastePercent = data?.wastePercent ?? 0;
           const averageBrix = data?.averageBrix ?? 0;
           const averageFruitWeight = data?.averageFruitWeight ?? 0;
+          const yieldPerPlant = data?.yieldPerPlant ?? null;
           const criticalAlerts = data?.criticalAlerts ?? 0;
           const daysActive = data?.daysActive ?? 0;
           const harvestCount = data?.harvestCount ?? 0;
@@ -216,6 +217,18 @@ export function HarvestDashboardCompare({
                   </p>
                   <p className="text-sm font-semibold">
                     {isLoading ? '–' : `${averageFruitWeight.toFixed(3)} kg`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">
+                    {h?.yieldPerPlantShort ?? 'Yield/Plant'}
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {isLoading
+                      ? '–'
+                      : yieldPerPlant == null
+                        ? '—'
+                        : `${yieldPerPlant.toFixed(2)} kg`}
                   </p>
                 </div>
                 <div>

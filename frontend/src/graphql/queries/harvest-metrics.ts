@@ -10,6 +10,7 @@ export const GET_HARVEST_METRICS = gql`
       totalYield
       averageBrix
       averageFruitWeight
+      yieldPerPlant
       marketablePercent
       wastePercent
       wasteTotal

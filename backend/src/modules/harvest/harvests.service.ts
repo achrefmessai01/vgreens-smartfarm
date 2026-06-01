@@ -47,6 +47,14 @@ export class HarvestsService extends BaseService<Harvest> {
     return cultivationArea / denominator;
   }
 
+  private getBatchKey(harvest: Harvest): string {
+    return harvest.parentBatchId ?? harvest.id;
+  }
+
+  private roundTo2(value: number): number {
+    return Math.round(value * 100) / 100;
+  }
+
   private isDashboardPlaceholder(harvest: Harvest): boolean {
     return (
       harvest.status === HarvestStatus.DRAFT &&
@@ -143,7 +151,6 @@ export class HarvestsService extends BaseService<Harvest> {
     try {
       const qb = this.harvestRepository
         .createQueryBuilder('harvest')
-        .where('harvest.parentBatchId IS NULL')
         .orderBy('harvest.createdAt', OrderDirection.ASC);
 
       if (tenantId !== undefined) {
@@ -152,8 +159,22 @@ export class HarvestsService extends BaseService<Harvest> {
 
       const rows = await qb.getMany();
 
-      const representatives = new Map<string, Harvest>();
+      // Sum sellable yield (classA + classB) per batch, skipping placeholder
+      // rows that carry no real harvest data. Child harvest entries share their
+      // parent's batch key via getBatchKey.
+      const sellableByBatch = new Map<string, number>();
       for (const row of rows) {
+        if (this.isDashboardPlaceholder(row)) continue;
+        const key = this.getBatchKey(row);
+        sellableByBatch.set(
+          key,
+          (sellableByBatch.get(key) ?? 0) + row.classA + row.classB,
+        );
+      }
+
+      const parents = rows.filter((row) => row.parentBatchId === null);
+      const representatives = new Map<string, Harvest>();
+      for (const row of parents) {
         const key = this.getLegacyGroupKey(row);
         if (!representatives.has(key)) representatives.set(key, row);
       }
@@ -164,15 +185,21 @@ export class HarvestsService extends BaseService<Harvest> {
             new Date(b.plantingDate).getTime() -
             new Date(a.plantingDate).getTime(),
         )
-        .map((h) => ({
-          id: h.id,
-          name: h.batch,
-          species: h.species,
-          variety: h.variety,
-          greenhouse: h.greenhouse,
-          plantingDate: h.plantingDate,
-          status: h.status,
-        }));
+        .map((h) => {
+          const sellable = sellableByBatch.get(h.id) ?? 0;
+          const yieldPerPlant =
+            h.totalPlants > 0 ? this.roundTo2(sellable / h.totalPlants) : null;
+          return {
+            id: h.id,
+            name: h.batch,
+            species: h.species,
+            variety: h.variety,
+            greenhouse: h.greenhouse,
+            plantingDate: h.plantingDate,
+            status: h.status,
+            yieldPerPlant,
+          };
+        });
     } catch (error) {
       this.logger.error(
         `findBatchesForSelector failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -336,8 +363,7 @@ export class HarvestsService extends BaseService<Harvest> {
       }
       if (input.totalPlants !== undefined)
         harvest.totalPlants = input.totalPlants;
-      if (input.lostPlants !== undefined)
-        harvest.lostPlants = input.lostPlants;
+      if (input.lostPlants !== undefined) harvest.lostPlants = input.lostPlants;
       if (input.status !== undefined) harvest.status = input.status;
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.classA !== undefined) harvest.classA = input.classA;
@@ -515,10 +541,7 @@ export class HarvestsService extends BaseService<Harvest> {
         0,
       );
       const totalWaste = metricsHarvests.reduce((sum, h) => sum + h.waste, 0);
-      const totalClassB = metricsHarvests.reduce(
-        (sum, h) => sum + h.classB,
-        0,
-      );
+      const totalClassB = metricsHarvests.reduce((sum, h) => sum + h.classB, 0);
       const totalYield = totalMarketable + totalWaste;
 
       const marketablePercent =
@@ -544,6 +567,36 @@ export class HarvestsService extends BaseService<Harvest> {
               0,
             ) / validFruitWeightHarvests.length
           : 0;
+
+      // Yield per plant: Σ (classA + classB) / Σ totalPlants, weighted by batch.
+      // totalPlants lives on the parent batch row only (children default to 0),
+      // so we read it from the unfiltered `harvests` list — a parent row that's
+      // currently a dashboard placeholder still owns the batch's plant count.
+      const totalPlantsByBatch = new Map<string, number>();
+      for (const h of harvests) {
+        if (h.parentBatchId === null) {
+          totalPlantsByBatch.set(h.id, h.totalPlants);
+        }
+      }
+      const sellableByBatch = new Map<string, number>();
+      for (const h of metricsHarvests) {
+        const key = this.getBatchKey(h);
+        sellableByBatch.set(
+          key,
+          (sellableByBatch.get(key) ?? 0) + h.classA + h.classB,
+        );
+      }
+      let sumSellable = 0;
+      let sumPlants = 0;
+      for (const [batchId, sellable] of sellableByBatch) {
+        const plants = totalPlantsByBatch.get(batchId) ?? 0;
+        if (plants > 0) {
+          sumSellable += sellable;
+          sumPlants += plants;
+        }
+      }
+      const yieldPerPlant =
+        sumPlants > 0 ? this.roundTo2(sumSellable / sumPlants) : null;
 
       // Calculate days active (from earliest planting date to latest harvest date)
       const plantingDates = metricsHarvests.map(
@@ -582,6 +635,7 @@ export class HarvestsService extends BaseService<Harvest> {
         totalYield: Math.round(totalYield * 10) / 10,
         averageBrix: Math.round(averageBrix * 10) / 10,
         averageFruitWeight: Math.round(averageFruitWeight * 1000) / 1000,
+        yieldPerPlant,
         marketablePercent: Math.round(marketablePercent * 10) / 10,
         wastePercent: Math.round(wastePercent * 10) / 10,
         wasteTotal: Math.round(totalWaste * 10) / 10,
@@ -613,6 +667,7 @@ export class HarvestsService extends BaseService<Harvest> {
       totalYield: 0,
       averageBrix: 0,
       averageFruitWeight: 0,
+      yieldPerPlant: null,
       marketablePercent: 0,
       wastePercent: 0,
       wasteTotal: 0,

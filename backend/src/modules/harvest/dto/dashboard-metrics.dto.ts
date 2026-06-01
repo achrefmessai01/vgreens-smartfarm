@@ -77,6 +77,13 @@ export class HarvestDashboardMetrics {
   @Field(() => Float)
   averageFruitWeight: number;
 
+  @Field(() => Float, {
+    nullable: true,
+    description:
+      'Weighted kg per plant across selected batches: Σ(classA+classB) / Σ totalPlants. Null when no batch in scope has totalPlants > 0.',
+  })
+  yieldPerPlant: number | null;
+
   @Field(() => Float)
   marketablePercent: number;
 
