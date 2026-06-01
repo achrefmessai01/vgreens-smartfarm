@@ -23,7 +23,12 @@ export function YieldDataField({
   const { t } = useI18n();
   const h = t.pages.harvest;
   const classBMode = useHarvestClassBMode();
-  const [showRowCoordinates, setShowRowCoordinates] = React.useState(false);
+  const hasRowData = rowX > 0 || rowY > 0;
+  const [showRowCoordinates, setShowRowCoordinates] =
+    React.useState(hasRowData);
+  React.useEffect(() => {
+    if (hasRowData) setShowRowCoordinates(true);
+  }, [hasRowData]);
   const marketableRef = React.useRef<HTMLInputElement>(null);
   const secondaryRef = React.useRef<HTMLInputElement>(null);
   const dateInputRef = React.useRef<HTMLInputElement>(null);

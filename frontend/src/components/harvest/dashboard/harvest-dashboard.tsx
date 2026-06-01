@@ -46,10 +46,7 @@ export function HarvestDashboard({
     compareBatchIds,
     compareMode,
     setPeriod,
-    setBatchId,
     setCompareBatchIds,
-    enterCompareMode,
-    exitCompareMode,
   } = useHarvestDashboardUrlState();
 
   const { batches, loading: batchesLoading } = useHarvestBatches();
@@ -77,11 +74,7 @@ export function HarvestDashboard({
       onPeriodChange={setPeriod}
       batches={batches}
       batchesLoading={batchesLoading}
-      batchId={batchId}
-      onBatchChange={setBatchId}
-      compareMode={compareMode}
       compareBatchIds={compareBatchIds}
-      onCompareToggle={() => (compareMode ? exitCompareMode() : enterCompareMode())}
       onCompareBatchesChange={setCompareBatchIds}
     />
   );
