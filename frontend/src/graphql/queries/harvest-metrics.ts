@@ -10,6 +10,7 @@ export const GET_HARVEST_METRICS = gql`
       totalYield
       averageBrix
       averageFruitWeight
+      yieldPerPlant
       marketablePercent
       wastePercent
       wasteTotal
@@ -76,7 +77,7 @@ export const GET_CUMULATIVE_YIELD = gql`
     harvestDashboard(filter: $filter) {
       cumulativeYield {
         date
-        cumulative
+        cumulativeClassA
         cumulativeClassB
         cumulativeWaste
       }

@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Package,
   Scale,
+  Sprout,
   Target,
   TrendingUp,
 } from 'lucide-react';
@@ -66,6 +67,21 @@ export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {
         subtitle={h?.avgWeightPerFruit ?? 'Average weight per fruit'}
         icon={<Scale className="h-4 w-4" />}
         color="info"
+      />
+      <MetricCard
+        title={h?.yieldPerPlant ?? 'Yield per Plant'}
+        value={
+          data.yieldPerPlant == null
+            ? '—'
+            : `${data.yieldPerPlant.toFixed(2)} kg`
+        }
+        subtitle={
+          data.yieldPerPlant == null
+            ? (h?.yieldPerPlantNoData ?? 'Set Total Plants on the batch')
+            : (h?.yieldPerPlantSubtitle ?? 'Sellable kg per plant')
+        }
+        icon={<Sprout className="h-4 w-4" />}
+        color="default"
       />
       <MetricCard
         title={primaryTitle}

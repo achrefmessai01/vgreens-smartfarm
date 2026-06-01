@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
 
 @ObjectType()
@@ -23,4 +23,11 @@ export class HarvestBatchListItem {
 
   @Field(() => HarvestStatus)
   status: HarvestStatus;
+
+  @Field(() => Float, {
+    nullable: true,
+    description:
+      'kg per plant for this batch: (Σ classA + classB across batch rows) / totalPlants. Null when totalPlants is 0 or missing.',
+  })
+  yieldPerPlant: number | null;
 }

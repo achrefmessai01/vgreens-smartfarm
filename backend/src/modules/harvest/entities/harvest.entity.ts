@@ -130,6 +130,14 @@ export class Harvest {
   @Column({ type: 'float', default: 0 })
   waste: number;
 
+  // Per-harvest sellable yield divided by the batch's plant count.
+  // Auto-computed by the service on create/update from
+  // `(classA + classB) / totalPlants`. Null when the harvest has no plant
+  // count (e.g. child harvest rows where totalPlants stays 0).
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'float', nullable: true })
+  yieldPerPlant: number | null;
+
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
   avgBrix: number;

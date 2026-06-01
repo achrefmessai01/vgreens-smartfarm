@@ -74,11 +74,11 @@ export interface BrixMeasurementsFieldProps {
 
 export interface FruitWeightFieldProps {
   fruitCount: number;
-  totalFruitWeight: number;
+  marketable: number;
+  classB: number;
   showFruitWeight: boolean;
   onShowFruitWeightChange: (show: boolean) => void;
   onFruitCountChange?: (value: number) => void;
-  onTotalFruitWeightChange?: (value: number) => void;
   isLoading?: boolean;
 }
 

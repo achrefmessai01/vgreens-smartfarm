@@ -226,7 +226,7 @@ export type CreateUserInput = {
 
 export type CumulativeYieldData = {
   __typename?: 'CumulativeYieldData';
-  cumulative: Scalars['Float']['output'];
+  cumulativeClassA: Scalars['Float']['output'];
   cumulativeClassB: Scalars['Float']['output'];
   cumulativeWaste: Scalars['Float']['output'];
   date: Scalars['String']['output'];
@@ -472,6 +472,7 @@ export type HarvestBatchListItem = {
   species: Scalars['String']['output'];
   status: HarvestStatus;
   variety: Scalars['String']['output'];
+  yieldPerPlant?: Maybe<Scalars['Float']['output']>;
 };
 
 export type HarvestDashboardMetrics = {
@@ -493,6 +494,7 @@ export type HarvestDashboardMetrics = {
   wastePercent: Scalars['Float']['output'];
   wasteTotal: Scalars['Float']['output'];
   yieldOverTime: Array<YieldOverTimeData>;
+  yieldPerPlant?: Maybe<Scalars['Float']['output']>;
 };
 
 export type HarvestFilterInput = {
@@ -1616,14 +1618,14 @@ export type TenantFeaturesQuery = { __typename?: 'Query', tenantFeatures: Array<
 export type GetHarvestBatchesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetHarvestBatchesQuery = { __typename?: 'Query', harvestBatches: Array<{ __typename?: 'HarvestBatchListItem', id: string, name: string, species: string, variety: string, greenhouse?: string | null, plantingDate: any, status: HarvestStatus }> };
+export type GetHarvestBatchesQuery = { __typename?: 'Query', harvestBatches: Array<{ __typename?: 'HarvestBatchListItem', id: string, name: string, species: string, variety: string, greenhouse?: string | null, plantingDate: any, status: HarvestStatus, yieldPerPlant?: number | null }> };
 
 export type GetHarvestDashboardQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
 }>;
 
 
-export type GetHarvestDashboardQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, averageFruitWeight: number, marketablePercent: number, wastePercent: number, wasteTotal: number, classBTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, classB: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, fruitWeightTrend: Array<{ __typename?: 'FruitWeightTrendData', date: string, weight: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeClassB: number, cumulativeWaste: number }> } };
+export type GetHarvestDashboardQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, averageFruitWeight: number, yieldPerPlant?: number | null, marketablePercent: number, wastePercent: number, wasteTotal: number, classBTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, classB: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, fruitWeightTrend: Array<{ __typename?: 'FruitWeightTrendData', date: string, weight: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulativeClassA: number, cumulativeClassB: number, cumulativeWaste: number }> } };
 
 export type GetHarvestDashboardWithVariablesQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
@@ -1637,14 +1639,14 @@ export type GetHarvestDashboardWithVariablesQueryVariables = Exact<{
 }>;
 
 
-export type GetHarvestDashboardWithVariablesQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, averageFruitWeight: number, marketablePercent: number, wastePercent: number, wasteTotal: number, classBTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, classB: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, fruitWeightTrend: Array<{ __typename?: 'FruitWeightTrendData', date: string, weight: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeClassB: number, cumulativeWaste: number }> } };
+export type GetHarvestDashboardWithVariablesQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, averageFruitWeight: number, yieldPerPlant?: number | null, marketablePercent: number, wastePercent: number, wasteTotal: number, classBTotal: number, criticalAlerts: number, daysActive: number, yieldOverTime: Array<{ __typename?: 'YieldOverTimeData', date: string, yield: number }>, classDistribution: Array<{ __typename?: 'ClassDistributionData', date: string, marketable: number, classB: number, waste: number }>, brixTrend: Array<{ __typename?: 'BrixTrendData', date: string, brix: number }>, fruitWeightTrend: Array<{ __typename?: 'FruitWeightTrendData', date: string, weight: number }>, cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulativeClassA: number, cumulativeClassB: number, cumulativeWaste: number }> } };
 
 export type GetHarvestMetricsQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
 }>;
 
 
-export type GetHarvestMetricsQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, averageFruitWeight: number, marketablePercent: number, wastePercent: number, wasteTotal: number, classBTotal: number, criticalAlerts: number, daysActive: number } };
+export type GetHarvestMetricsQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', species: string, variety: string, harvestCount: number, totalYield: number, averageBrix: number, averageFruitWeight: number, yieldPerPlant?: number | null, marketablePercent: number, wastePercent: number, wasteTotal: number, classBTotal: number, criticalAlerts: number, daysActive: number } };
 
 export type GetYieldOverTimeQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
@@ -1679,7 +1681,7 @@ export type GetCumulativeYieldQueryVariables = Exact<{
 }>;
 
 
-export type GetCumulativeYieldQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulative: number, cumulativeClassB: number, cumulativeWaste: number }> } };
+export type GetCumulativeYieldQuery = { __typename?: 'Query', harvestDashboard: { __typename?: 'HarvestDashboardMetrics', cumulativeYield: Array<{ __typename?: 'CumulativeYieldData', date: string, cumulativeClassA: number, cumulativeClassB: number, cumulativeWaste: number }> } };
 
 export type GetHarvestSummaryQueryVariables = Exact<{
   filter?: InputMaybe<HarvestFilterInput>;
@@ -3810,6 +3812,7 @@ export const GetHarvestBatchesDocument = gql`
     greenhouse
     plantingDate
     status
+    yieldPerPlant
   }
 }
     `;
@@ -3857,6 +3860,7 @@ export const GetHarvestDashboardDocument = gql`
     totalYield
     averageBrix
     averageFruitWeight
+    yieldPerPlant
     marketablePercent
     wastePercent
     wasteTotal
@@ -3883,7 +3887,7 @@ export const GetHarvestDashboardDocument = gql`
     }
     cumulativeYield {
       date
-      cumulative
+      cumulativeClassA
       cumulativeClassB
       cumulativeWaste
     }
@@ -3937,6 +3941,7 @@ export const GetHarvestDashboardWithVariablesDocument = gql`
     totalYield
     averageBrix
     averageFruitWeight
+    yieldPerPlant
     marketablePercent
     wastePercent
     wasteTotal
@@ -3963,7 +3968,7 @@ export const GetHarvestDashboardWithVariablesDocument = gql`
     }
     cumulativeYield {
       date
-      cumulative
+      cumulativeClassA
       cumulativeClassB
       cumulativeWaste
     }
@@ -4022,6 +4027,7 @@ export const GetHarvestMetricsDocument = gql`
     totalYield
     averageBrix
     averageFruitWeight
+    yieldPerPlant
     marketablePercent
     wastePercent
     wasteTotal
@@ -4258,7 +4264,7 @@ export const GetCumulativeYieldDocument = gql`
   harvestDashboard(filter: $filter) {
     cumulativeYield {
       date
-      cumulative
+      cumulativeClassA
       cumulativeClassB
       cumulativeWaste
     }

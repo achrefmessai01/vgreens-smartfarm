@@ -162,6 +162,12 @@ export function HarvestBatchGroup({
                       <TableHead>{primaryHeader}</TableHead>
                       <TableHead>{secondaryHeader}</TableHead>
                       <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
+                      <TableHead>
+                        {h?.avgFruitWeight ?? 'Avg Fruit Weight'}
+                      </TableHead>
+                      <TableHead>
+                        {h?.yieldPerPlantShort ?? 'Yield/Plant'}
+                      </TableHead>
                       <TableHead>{h?.createdBy ?? 'Created By'}</TableHead>
                       <TableHead className="text-right">
                         {h?.actions ?? 'Actions'}
@@ -169,7 +175,20 @@ export function HarvestBatchGroup({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {visibleEntries.map((entry) => (
+                    {visibleEntries.map((entry) => {
+                      const sellable = entry.classA + entry.classB;
+                      const rowYieldPerPlant =
+                        group.root.totalPlants > 0
+                          ? sellable / group.root.totalPlants
+                          : null;
+                      // Derive on the fly from current yield + count so stale
+                      // stored `avgFruitWeight` values (from before the total-
+                      // weight input was removed) don't show up here.
+                      const rowAvgFruitWeight =
+                        entry.fruitCount > 0 && sellable > 0
+                          ? sellable / entry.fruitCount
+                          : null;
+                      return (
                       <TableRow key={entry.id}>
                         <TableCell>{formatHarvestDate(entry.date)}</TableCell>
                         <TableCell className="text-green-600">
@@ -183,6 +202,16 @@ export function HarvestBatchGroup({
                           {classBMode ? entry.classB : entry.waste}
                         </TableCell>
                         <TableCell>{entry.avgBrix}&deg;Bx</TableCell>
+                        <TableCell>
+                          {rowAvgFruitWeight == null
+                            ? '—'
+                            : `${rowAvgFruitWeight.toFixed(3)} kg`}
+                        </TableCell>
+                        <TableCell>
+                          {rowYieldPerPlant == null
+                            ? '—'
+                            : `${rowYieldPerPlant.toFixed(2)} kg`}
+                        </TableCell>
                         <TableCell className="max-w-[220px] truncate">
                           {getCreatedByLabel(entry)}
                         </TableCell>
@@ -207,7 +236,8 @@ export function HarvestBatchGroup({
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
