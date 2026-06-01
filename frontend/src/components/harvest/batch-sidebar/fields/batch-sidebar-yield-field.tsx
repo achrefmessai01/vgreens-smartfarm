@@ -19,7 +19,11 @@ export function YieldDataField({
   const { t } = useI18n();
   const h = t.pages.harvest;
   const classBMode = useHarvestClassBMode();
-  const [showRowCoordinates, setShowRowCoordinates] = React.useState(false);
+  // Auto-reveal the row coordinates when the entry already carries values, so
+  // existing coordinates stay visible when viewing/editing a harvest.
+  const [showRowCoordinates, setShowRowCoordinates] = React.useState(
+    rowX > 0 || rowY > 0,
+  );
   const marketableRef = React.useRef<HTMLInputElement>(null);
   const secondaryRef = React.useRef<HTMLInputElement>(null);
 

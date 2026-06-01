@@ -15,6 +15,20 @@ export interface HarvestEntryData {
   showFruitWeight: boolean;
 }
 
+// True when the entry carries any harvest data — used to auto-expand its card
+// when viewing/editing an existing harvest.
+export function entryHasData(entry: HarvestEntryData): boolean {
+  return (
+    entry.marketable > 0 ||
+    entry.waste > 0 ||
+    entry.classB > 0 ||
+    entry.rowX > 0 ||
+    entry.rowY > 0 ||
+    entry.fruitCount > 0 ||
+    entry.brixReadings.some((v) => v > 0)
+  );
+}
+
 export function createEmptyEntry(): HarvestEntryData {
   return {
     marketable: 0,

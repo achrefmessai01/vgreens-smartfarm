@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { CalendarDays, Plus, Sparkles } from 'lucide-react';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
+import { entryHasData } from '@/types/batch-sidebar.types';
 import { HarvestEntryCard } from './fields/harvest-entry-card';
 
 export interface BatchSidebarProps {
@@ -183,7 +184,7 @@ export function BatchSidebar({
                     entry={entry}
                     index={index}
                     canRemove={currentData.entries.length > 1}
-                    defaultOpen={index === 0}
+                    defaultOpen={index === 0 || entryHasData(entry)}
                     onYieldChange={(field, value) =>
                       handleYieldChange(index, field, value)
                     }
