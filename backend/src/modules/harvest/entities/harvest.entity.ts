@@ -158,6 +158,20 @@ export class Harvest {
   @Column({ type: 'jsonb', default: [] })
   brixReadings: number[];
 
+  // --- Fruit weight measurement (fruit count + total weight → average) ---
+
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  fruitCount: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
+  totalFruitWeight: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
+  avgFruitWeight: number;
+
   // --- Photos ---
 
   @Field(() => Int)

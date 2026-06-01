@@ -5,6 +5,7 @@ import {
   Activity,
   AlertTriangle,
   Package,
+  Scale,
   Target,
   TrendingUp,
 } from 'lucide-react';
@@ -57,6 +58,13 @@ export function DashboardMetricsGrid({ data }: DashboardMetricsGridProps) {
         value={`${data.averageBrix?.toFixed(1) ?? 0}°Bx`}
         subtitle={h?.qualityIndicator ?? 'Quality indicator'}
         icon={<Target className="h-4 w-4" />}
+        color="info"
+      />
+      <MetricCard
+        title={h?.averageFruitWeight ?? 'Average Fruit Weight'}
+        value={`${data.averageFruitWeight?.toFixed(3) ?? 0} kg`}
+        subtitle={h?.avgWeightPerFruit ?? 'Average weight per fruit'}
+        icon={<Scale className="h-4 w-4" />}
         color="info"
       />
       <MetricCard

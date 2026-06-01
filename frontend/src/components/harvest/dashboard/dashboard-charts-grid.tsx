@@ -3,6 +3,7 @@ import {
   BrixTrendChart,
   ClassDistributionChart,
   CumulativeYieldChart,
+  FruitWeightTrendChart,
   YieldOverTimeChart,
 } from './charts';
 
@@ -16,6 +17,7 @@ export function DashboardChartsGrid({ data }: DashboardChartsGridProps) {
       <YieldOverTimeChart data={data.yieldOverTime ?? []} />
       <ClassDistributionChart data={data.classDistribution ?? []} />
       <BrixTrendChart data={data.brixTrend ?? []} />
+      <FruitWeightTrendChart data={data.fruitWeightTrend ?? []} />
       <CumulativeYieldChart
         data={
           (data.cumulativeYield as Array<{

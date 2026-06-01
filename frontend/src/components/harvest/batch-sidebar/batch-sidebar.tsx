@@ -24,6 +24,7 @@ import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { YieldDataField } from './fields/batch-sidebar-yield-field';
 import { BrixMeasurementsField } from './fields/batch-sidebar-brix-field';
+import { FruitWeightField } from './fields/batch-sidebar-fruit-weight-field';
 
 export interface BatchSidebarProps {
   open: boolean;
@@ -53,11 +54,15 @@ export function BatchSidebar({
     loading: isSaving,
     showBrix,
     setShowBrix,
+    showFruitWeight,
+    setShowFruitWeight,
     harvestDate,
     setHarvestDate,
     handleBrixChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
+    handleFruitCountChange,
+    handleTotalFruitWeightChange,
     handleYieldChange,
     handlePhotoUpload,
     handleRemovePhoto,
@@ -146,6 +151,17 @@ export function BatchSidebar({
                     onReadingChange={handleBrixChange}
                     onAddReading={handleAddBrixReading}
                     onRemoveReading={handleRemoveBrixReading}
+                    isLoading={busy}
+                  />
+                </div>
+                <div className="bg-card rounded-xl border p-3 shadow-sm">
+                  <FruitWeightField
+                    fruitCount={currentData.fruitCount}
+                    totalFruitWeight={currentData.totalFruitWeight}
+                    showFruitWeight={showFruitWeight}
+                    onShowFruitWeightChange={setShowFruitWeight}
+                    onFruitCountChange={handleFruitCountChange}
+                    onTotalFruitWeightChange={handleTotalFruitWeightChange}
                     isLoading={busy}
                   />
                 </div>

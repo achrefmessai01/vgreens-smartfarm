@@ -34,6 +34,15 @@ export class BrixTrendData {
 }
 
 @ObjectType()
+export class FruitWeightTrendData {
+  @Field()
+  date: string;
+
+  @Field(() => Float)
+  weight: number;
+}
+
+@ObjectType()
 export class CumulativeYieldData {
   @Field()
   date: string;
@@ -66,6 +75,9 @@ export class HarvestDashboardMetrics {
   averageBrix: number;
 
   @Field(() => Float)
+  averageFruitWeight: number;
+
+  @Field(() => Float)
   marketablePercent: number;
 
   @Field(() => Float)
@@ -91,6 +103,9 @@ export class HarvestDashboardMetrics {
 
   @Field(() => [BrixTrendData])
   brixTrend: BrixTrendData[];
+
+  @Field(() => [FruitWeightTrendData])
+  fruitWeightTrend: FruitWeightTrendData[];
 
   @Field(() => [CumulativeYieldData])
   cumulativeYield: CumulativeYieldData[];
