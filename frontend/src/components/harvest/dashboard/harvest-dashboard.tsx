@@ -8,6 +8,7 @@ import {
   type DateFilter,
 } from '@/lib/hooks/use-harvest-dashboard';
 import { useHarvestDashboardUrlState } from '@/lib/hooks/use-harvest-dashboard-url-state';
+import { harvestsLoggedForLabel } from '@/lib/harvest-utils';
 import { AlertTriangle, Package } from 'lucide-react';
 import { DashboardChartsGrid } from './dashboard-charts-grid';
 import { DashboardMetricsGrid } from './dashboard-metrics-grid';
@@ -36,7 +37,7 @@ export function HarvestDashboard({
   species,
   variety,
 }: HarvestDashboardProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const h = t.pages.harvest;
 
   const {
@@ -156,9 +157,13 @@ export function HarvestDashboard({
               {h?.performanceDashboard ?? 'Performance Dashboard'}
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              {selectedBatch
-                ? `${selectedBatch.name} · ${data?.harvestCount ?? 0} ${h?.harvestsLogged ?? 'harvests logged'} for ${filterLabel}`
-                : `${data?.harvestCount ?? 0} ${h?.harvestsLogged ?? 'harvests logged'} for ${filterLabel}`}
+              {(() => {
+                const count = data?.harvestCount ?? 0;
+                const phrase = `${count} ${harvestsLoggedForLabel(count, h, locale)} ${filterLabel}`;
+                return selectedBatch
+                  ? `${selectedBatch.name} · ${phrase}`
+                  : phrase;
+              })()}
             </p>
             {isStaleBatchId && (
               <p className="text-amber-600 mt-1 text-xs">

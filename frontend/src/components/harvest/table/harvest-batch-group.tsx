@@ -19,7 +19,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
-import { formatHarvestDate, getGreenhouseLabel } from '@/lib/harvest-utils';
+import {
+  formatHarvestDate,
+  getGreenhouseLabel,
+  harvestsLoggedLabel,
+} from '@/lib/harvest-utils';
 import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import {
@@ -48,7 +52,7 @@ export function HarvestBatchGroup({
   onEditBatch,
   onDeleteBatch,
 }: HarvestBatchGroupProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const h = t.pages.harvest;
   const classBMode = useHarvestClassBMode();
   const secondaryHeader = classBMode
@@ -89,7 +93,7 @@ export function HarvestBatchGroup({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8"
+                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-200"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -97,12 +101,12 @@ export function HarvestBatchGroup({
                 }}
                 aria-label={h?.viewDetails ?? 'View Batch'}
               >
-                <Eye className="h-4 w-4" />
+                <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               </Button>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8"
+                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500/10 hover:text-blue-600 hover:shadow-sm dark:hover:bg-blue-500/20 dark:hover:text-blue-300"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -110,12 +114,12 @@ export function HarvestBatchGroup({
                 }}
                 aria-label={h?.editBatch ?? 'Edit Batch'}
               >
-                <Pencil className="h-4 w-4" />
+                <Pencil className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               </Button>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8"
+                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-destructive/10 hover:shadow-sm dark:hover:bg-destructive/20"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -123,12 +127,12 @@ export function HarvestBatchGroup({
                 }}
                 aria-label={h?.deleteBatch ?? 'Delete Batch'}
               >
-                <Trash2 className="text-destructive h-4 w-4" />
+                <Trash2 className="text-destructive h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               </Button>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8"
+                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-green-500/10 hover:text-green-600 hover:shadow-sm dark:hover:bg-green-500/20 dark:hover:text-green-300"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -136,14 +140,15 @@ export function HarvestBatchGroup({
                 }}
                 aria-label={h?.logEntry ?? 'Log Entry'}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
               </Button>
             </div>
           </div>
         </div>
         <div className="text-muted-foreground mt-1 mb-2 flex flex-wrap items-center gap-2 pl-6 text-xs">
           <Badge variant="secondary" className="text-[10px]">
-            {visibleEntries.length} {h?.harvestsLogged ?? 'harvests logged'}
+            {visibleEntries.length}{' '}
+            {harvestsLoggedLabel(visibleEntries.length, h, locale)}
           </Badge>
           <span>{getGreenhouseLabel(group.root.greenhouse)}</span>
         </div>
@@ -220,18 +225,20 @@ export function HarvestBatchGroup({
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-200"
                               onClick={() => onSidebarEdit?.(entry)}
+                              aria-label={h?.viewDetails ?? 'View Details'}
                             >
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-destructive/10 hover:shadow-sm dark:hover:bg-destructive/20"
                               onClick={() => onDelete?.(entry)}
+                              aria-label={h?.deleteHarvest ?? 'Delete Harvest'}
                             >
-                              <Trash2 className="text-destructive h-4 w-4" />
+                              <Trash2 className="text-destructive h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                             </Button>
                           </div>
                         </TableCell>
@@ -303,21 +310,21 @@ export function HarvestBatchGroup({
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-9"
+                            className="group h-9 border-[#016f7c]/30 text-[#016f7c] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#016f7c] hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:border-teal-300/40 dark:text-teal-200 dark:hover:border-teal-200 dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-100"
                             onClick={() => onSidebarEdit?.(entry)}
                             aria-label={h?.viewDetails ?? 'View Details'}
                           >
-                            <Eye className="mr-1 h-4 w-4" />
+                            <Eye className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                             {h?.viewDetails ?? 'View Details'}
                           </Button>
                           <Button
                             variant="destructive"
                             size="sm"
-                            className="h-9"
+                            className="group h-9 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
                             onClick={() => onDelete?.(entry)}
                             aria-label={h?.deleteHarvest ?? 'Delete Harvest'}
                           >
-                            <Trash2 className="mr-1 h-4 w-4" />
+                            <Trash2 className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                             {h?.deleteHarvest ?? 'Delete'}
                           </Button>
                         </div>

@@ -171,10 +171,15 @@ export default function HarvestPage() {
           onOpenChange={setDeleteOpen}
           onConfirm={handleDeleteConfirm}
           loading={deleteLoading}
-          title={isBatchDelete ? 'Delete Batch' : undefined}
+          title={
+            isBatchDelete
+              ? (t.pages.harvest?.deleteBatch ?? 'Delete Batch')
+              : undefined
+          }
           description={
             isBatchDelete
-              ? 'Are you sure you want to delete this batch and all linked harvest entries? This action cannot be undone.'
+              ? (t.pages.harvest?.deleteBatchDescription ??
+                'Are you sure you want to delete this batch and all linked harvest entries? This action cannot be undone.')
               : undefined
           }
         />

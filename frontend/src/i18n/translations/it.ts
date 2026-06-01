@@ -375,6 +375,7 @@ export const it = {
       subtitle: 'Tieni traccia e gestisci i tuoi record di raccolta',
       performanceDashboard: 'Dashboard delle performance',
       harvestsLogged: 'raccolti registrati',
+      harvestLogged: 'raccolto registrato',
       yieldPredictionTitle: 'Previsione di resa',
       yieldPredictionSubtitle:
         'Anteprima delle performance del prossimo raccolto.',
@@ -415,6 +416,7 @@ export const it = {
       actions: 'Azioni',
       viewDetails: 'Visualizza dettagli',
       harvestsLoggedFor: 'raccolti registrati per',
+      harvestLoggedFor: 'raccolto registrato per',
       noHarvestsYet: 'Ancora nessun raccolto',
       createBatch: 'Crea lotto',
       exportCsv: 'Esporta CSV',
@@ -456,6 +458,8 @@ export const it = {
       editBatchTitle: 'Modifica lotto',
       editBatchDescription: 'Aggiorna i dettagli del lotto.',
       deleteBatch: 'Elimina lotto',
+      deleteBatchDescription:
+        'Sei sicuro di voler eliminare questo lotto e tutte le voci di raccolto collegate? Questa azione non può essere annullata.',
       completeBatch: 'Completa lotto',
       harvestDate: 'Data del raccolto',
       logHarvest: 'Registra raccolto',
