@@ -176,10 +176,17 @@ export function HarvestBatchGroup({
                   </TableHeader>
                   <TableBody>
                     {visibleEntries.map((entry) => {
+                      const sellable = entry.classA + entry.classB;
                       const rowYieldPerPlant =
                         group.root.totalPlants > 0
-                          ? (entry.classA + entry.classB) /
-                            group.root.totalPlants
+                          ? sellable / group.root.totalPlants
+                          : null;
+                      // Derive on the fly from current yield + count so stale
+                      // stored `avgFruitWeight` values (from before the total-
+                      // weight input was removed) don't show up here.
+                      const rowAvgFruitWeight =
+                        entry.fruitCount > 0 && sellable > 0
+                          ? sellable / entry.fruitCount
                           : null;
                       return (
                       <TableRow key={entry.id}>
@@ -196,9 +203,9 @@ export function HarvestBatchGroup({
                         </TableCell>
                         <TableCell>{entry.avgBrix}&deg;Bx</TableCell>
                         <TableCell>
-                          {entry.avgFruitWeight > 0
-                            ? `${entry.avgFruitWeight.toFixed(3)} kg`
-                            : '—'}
+                          {rowAvgFruitWeight == null
+                            ? '—'
+                            : `${rowAvgFruitWeight.toFixed(3)} kg`}
                         </TableCell>
                         <TableCell>
                           {rowYieldPerPlant == null

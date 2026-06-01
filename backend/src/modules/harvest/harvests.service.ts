@@ -55,6 +55,17 @@ export class HarvestsService extends BaseService<Harvest> {
     return Math.round(value * 100) / 100;
   }
 
+  // Per-row avg fruit weight: (classA + classB) / fruitCount, computed on the
+  // fly so old rows with stale `avgFruitWeight` columns (left over from when
+  // total fruit weight was a user input) don't poison the dashboard.
+  // Returns null when there's no fruit-count measurement or no sellable yield.
+  private computeRowAvgFruitWeight(harvest: Harvest): number | null {
+    if (harvest.fruitCount <= 0) return null;
+    const sellable = harvest.classA + harvest.classB;
+    if (sellable <= 0) return null;
+    return sellable / harvest.fruitCount;
+  }
+
   private isDashboardPlaceholder(harvest: Harvest): boolean {
     return (
       harvest.status === HarvestStatus.DRAFT &&
@@ -556,16 +567,16 @@ export class HarvestsService extends BaseService<Harvest> {
             validBrixHarvests.length
           : 0;
 
-      // Calculate average fruit weight
-      const validFruitWeightHarvests = metricsHarvests.filter(
-        (h) => h.avgFruitWeight > 0,
-      );
+      // Calculate average fruit weight: mean of each row's avg, derived live
+      // from current yield + fruit count. Rows without a measurement don't
+      // contribute.
+      const perRowAvgFruitWeights = metricsHarvests
+        .map((h) => this.computeRowAvgFruitWeight(h))
+        .filter((v): v is number => v !== null);
       const averageFruitWeight =
-        validFruitWeightHarvests.length > 0
-          ? validFruitWeightHarvests.reduce(
-              (sum, h) => sum + h.avgFruitWeight,
-              0,
-            ) / validFruitWeightHarvests.length
+        perRowAvgFruitWeights.length > 0
+          ? perRowAvgFruitWeights.reduce((sum, v) => sum + v, 0) /
+            perRowAvgFruitWeights.length
           : 0;
 
       // Yield per plant: Σ (classA + classB) / Σ totalPlants, weighted by batch.
@@ -759,11 +770,12 @@ export class HarvestsService extends BaseService<Harvest> {
     const dailyWeight = new Map<string, { total: number; count: number }>();
 
     harvests.forEach((harvest) => {
-      if (harvest.avgFruitWeight > 0) {
+      const avg = this.computeRowAvgFruitWeight(harvest);
+      if (avg !== null) {
         const dateStr = harvest.date.toISOString().split('T')[0];
         const current = dailyWeight.get(dateStr) || { total: 0, count: 0 };
         dailyWeight.set(dateStr, {
-          total: current.total + harvest.avgFruitWeight,
+          total: current.total + avg,
           count: current.count + 1,
         });
       }
