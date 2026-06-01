@@ -77,7 +77,7 @@ export const GET_CUMULATIVE_YIELD = gql`
     harvestDashboard(filter: $filter) {
       cumulativeYield {
         date
-        cumulative
+        cumulativeClassA
         cumulativeClassB
         cumulativeWaste
       }

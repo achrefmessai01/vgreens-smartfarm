@@ -36,7 +36,7 @@ export const GET_HARVEST_DASHBOARD = gql`
       }
       cumulativeYield {
         date
-        cumulative
+        cumulativeClassA
         cumulativeClassB
         cumulativeWaste
       }
@@ -99,7 +99,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       }
       cumulativeYield {
         date
-        cumulative
+        cumulativeClassA
         cumulativeClassB
         cumulativeWaste
       }

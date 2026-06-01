@@ -547,16 +547,13 @@ export class HarvestsService extends BaseService<Harvest> {
       )[0][0];
 
       // Calculate metrics
-      const totalMarketable = metricsHarvests.reduce(
-        (sum, h) => sum + h.classA,
-        0,
-      );
+      const totalClassA = metricsHarvests.reduce((sum, h) => sum + h.classA, 0);
       const totalWaste = metricsHarvests.reduce((sum, h) => sum + h.waste, 0);
       const totalClassB = metricsHarvests.reduce((sum, h) => sum + h.classB, 0);
-      const totalYield = totalMarketable + totalWaste;
+      const totalYield = totalClassA + totalWaste;
 
       const marketablePercent =
-        totalYield > 0 ? (totalMarketable / totalYield) * 100 : 0;
+        totalYield > 0 ? (totalClassA / totalYield) * 100 : 0;
       const wastePercent = totalYield > 0 ? (totalWaste / totalYield) * 100 : 0;
 
       // Calculate average brix
@@ -715,18 +712,18 @@ export class HarvestsService extends BaseService<Harvest> {
   ): ClassDistributionData[] {
     const dailyData = new Map<
       string,
-      { marketable: number; classB: number; waste: number }
+      { classA: number; classB: number; waste: number }
     >();
 
     harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
       const current = dailyData.get(dateStr) || {
-        marketable: 0,
+        classA: 0,
         classB: 0,
         waste: 0,
       };
       dailyData.set(dateStr, {
-        marketable: current.marketable + harvest.classA,
+        classA: current.classA + harvest.classA,
         classB: current.classB + harvest.classB,
         waste: current.waste + harvest.waste,
       });
@@ -736,7 +733,7 @@ export class HarvestsService extends BaseService<Harvest> {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, data]) => ({
         date,
-        marketable: Math.round(data.marketable * 10) / 10,
+        marketable: Math.round(data.classA * 10) / 10,
         classB: Math.round(data.classB * 10) / 10,
         waste: Math.round(data.waste * 10) / 10,
       }));
@@ -794,18 +791,18 @@ export class HarvestsService extends BaseService<Harvest> {
   ): CumulativeYieldData[] {
     const dailyData = new Map<
       string,
-      { marketable: number; classB: number; waste: number }
+      { classA: number; classB: number; waste: number }
     >();
 
     harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
       const current = dailyData.get(dateStr) || {
-        marketable: 0,
+        classA: 0,
         classB: 0,
         waste: 0,
       };
       dailyData.set(dateStr, {
-        marketable: current.marketable + harvest.classA,
+        classA: current.classA + harvest.classA,
         classB: current.classB + harvest.classB,
         waste: current.waste + harvest.waste,
       });
@@ -815,17 +812,17 @@ export class HarvestsService extends BaseService<Harvest> {
       a.localeCompare(b),
     );
 
-    let cumulative = 0;
+    let cumulativeClassA = 0;
     let cumulativeClassB = 0;
     let cumulativeWaste = 0;
 
     return sortedEntries.map(([date, data]) => {
-      cumulative += data.marketable;
+      cumulativeClassA += data.classA;
       cumulativeClassB += data.classB;
       cumulativeWaste += data.waste;
       return {
         date,
-        cumulative: Math.round(cumulative * 10) / 10,
+        cumulativeClassA: Math.round(cumulativeClassA * 10) / 10,
         cumulativeClassB: Math.round(cumulativeClassB * 10) / 10,
         cumulativeWaste: Math.round(cumulativeWaste * 10) / 10,
       };

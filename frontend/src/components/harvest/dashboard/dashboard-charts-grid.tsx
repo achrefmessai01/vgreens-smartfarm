@@ -22,7 +22,7 @@ export function DashboardChartsGrid({ data }: DashboardChartsGridProps) {
         data={
           (data.cumulativeYield as Array<{
             date: string;
-            cumulative: number;
+            cumulativeClassA: number;
             cumulativeClassB: number;
             cumulativeWaste: number;
           }>) ?? []

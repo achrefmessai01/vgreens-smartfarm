@@ -19,7 +19,7 @@ import {
 
 interface CumulativeYieldData {
   date: string;
-  cumulative: number;
+  cumulativeClassA: number;
   cumulativeClassB: number;
   cumulativeWaste: number;
 }
@@ -48,7 +48,7 @@ function mergeSeries(
   for (const s of series) {
     for (const point of s.data) {
       const existing = byDate.get(point.date) ?? { date: point.date };
-      existing[s.batchId] = point.cumulative;
+      existing[s.batchId] = point.cumulativeClassA + point.cumulativeClassB;
       byDate.set(point.date, existing);
     }
   }
@@ -70,6 +70,13 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
   const secondaryLabel = classBMode
     ? (h?.quality2 ?? 'Quality 2')
     : (h?.waste ?? 'Waste');
+  // In classBMode the primary area represents Quality 1 (classA only), so we
+  // use the backend's `cumulativeClassA` field directly. In waste mode the
+  // primary is "total yield" — sellable produce, i.e. classA + classB — which
+  // we derive on the fly as `cumulativeSellable`.
+  const primaryDataKey: 'cumulativeClassA' | 'cumulativeSellable' = classBMode
+    ? 'cumulativeClassA'
+    : 'cumulativeSellable';
   const secondaryDataKey: 'cumulativeClassB' | 'cumulativeWaste' = classBMode
     ? 'cumulativeClassB'
     : 'cumulativeWaste';
@@ -102,7 +109,7 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
       );
     }
     const yieldVal =
-      payload.find((p) => p.dataKey === 'cumulative')?.value ?? 0;
+      payload.find((p) => p.dataKey === primaryDataKey)?.value ?? 0;
     const secondaryVal =
       payload.find((p) => p.dataKey === secondaryDataKey)?.value ?? 0;
     return (
@@ -116,7 +123,20 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
     );
   };
 
-  const chartData = isMulti ? mergeSeries(props.series) : props.data;
+  const chartData = isMulti
+    ? mergeSeries(props.series)
+    : props.data.map((d) => ({
+        ...d,
+        cumulativeSellable: d.cumulativeClassA + d.cumulativeClassB,
+      }));
+
+  const isEmpty =
+    !chartData?.length ||
+    chartData.every((point) =>
+      Object.entries(point).every(
+        ([key, value]) => key === 'date' || !value,
+      ),
+    );
 
   return (
     <Card className={className}>
@@ -125,6 +145,11 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
           {title ?? h?.cumulativeYieldProgress ?? 'Cumulative Yield Progress'}
         </h3>
         <div className="h-64">
+          {isEmpty ? (
+            <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
+              {h?.noHarvestsInPeriod ?? 'No yield data'}
+            </div>
+          ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={chartData}
@@ -212,7 +237,7 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
                 <>
                   <Area
                     type="monotone"
-                    dataKey="cumulative"
+                    dataKey={primaryDataKey}
                     stroke="#10b981"
                     strokeWidth={3}
                     fill="url(#cumulativeGradient)"
@@ -239,8 +264,9 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
               )}
             </AreaChart>
           </ResponsiveContainer>
+          )}
         </div>
-        {!isMulti && (
+        {!isMulti && !isEmpty && (
           <div className="mt-4 flex items-center justify-center gap-6">
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-emerald-500" />

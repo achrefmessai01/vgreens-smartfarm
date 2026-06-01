@@ -48,7 +48,7 @@ export class CumulativeYieldData {
   date: string;
 
   @Field(() => Float)
-  cumulative: number;
+  cumulativeClassA: number;
 
   @Field(() => Float)
   cumulativeClassB: number;
