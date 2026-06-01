@@ -10,6 +10,7 @@ export const GET_HARVEST_BATCHES = gql`
       greenhouse
       plantingDate
       status
+      yieldPerPlant
     }
   }
 `;

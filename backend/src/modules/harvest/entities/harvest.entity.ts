@@ -12,6 +12,7 @@ import { User } from '@modules/users/entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
 import { ObjectType, Field, ID, Float, Int } from '@nestjs/graphql';
+import { HarvestEntry } from './harvest-entry';
 
 const dateTransformer: ValueTransformer = {
   to: (value: Date | string) =>
@@ -130,6 +131,14 @@ export class Harvest {
   @Column({ type: 'float', default: 0 })
   waste: number;
 
+  // Per-harvest sellable yield divided by the batch's plant count.
+  // Auto-computed by the service on create/update from
+  // `(classA + classB) / totalPlants`. Null when the harvest has no plant
+  // count (e.g. child harvest rows where totalPlants stays 0).
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'float', nullable: true })
+  yieldPerPlant: number | null;
+
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
   avgBrix: number;
@@ -158,6 +167,20 @@ export class Harvest {
   @Column({ type: 'jsonb', default: [] })
   brixReadings: number[];
 
+  // --- Fruit weight measurement (fruit count + total weight → average) ---
+
+  @Field(() => Int)
+  @Column({ type: 'int', default: 0 })
+  fruitCount: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
+  totalFruitWeight: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
+  avgFruitWeight: number;
+
   // --- Photos ---
 
   @Field(() => Int)
@@ -167,6 +190,19 @@ export class Harvest {
   @Field(() => [String], { nullable: true })
   @Column({ type: 'jsonb', nullable: true, default: [] })
   photoUrls?: string[];
+
+  // --- Sub-entries ---
+
+  // One "Log Harvest" submission may hold several sub-entries, each with its
+  // own yield / brix / fruit-weight measurement. The top-level classA, classB,
+  // waste, avgBrix, brixReadings, fruitCount, totalFruitWeight, avgFruitWeight,
+  // rowX and rowY fields above are SUM/derived aggregates over these entries
+  // (computed on create/update) so existing table, dashboard, CSV and
+  // yieldPerPlant logic keeps reading the flat columns unchanged. Empty for
+  // legacy rows logged before sub-entries existed.
+  @Field(() => [HarvestEntry], { nullable: true })
+  @Column({ type: 'jsonb', nullable: true, default: [] })
+  entries?: HarvestEntry[];
 
   // --- Timestamps ---
 

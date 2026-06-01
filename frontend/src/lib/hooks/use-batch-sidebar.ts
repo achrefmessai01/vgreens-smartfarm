@@ -7,9 +7,17 @@ import {
   useDeleteHarvestImageMutation,
   useUpdateHarvestMutation,
 } from '@/generated/graphql';
-import type { BatchDetailsData } from '@/types/batch-sidebar.types';
+import type {
+  BatchDetailsData,
+  HarvestEntryData,
+} from '@/types/batch-sidebar.types';
+import { createEmptyEntry } from '@/types/batch-sidebar.types';
 import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
-import { computeAvgBrix, extractStoragePathFromUrl } from '@/lib/harvest-utils';
+import {
+  computeAvgBrix,
+  computeAvgFruitWeight,
+  extractStoragePathFromUrl,
+} from '@/lib/harvest-utils';
 import * as React from 'react';
 
 export type SidebarMode = 'create' | 'edit';
@@ -43,7 +51,6 @@ export function useBatchSidebar({
   const [localData, setLocalData] = React.useState<BatchDetailsData | null>(
     null,
   );
-  const [showBrix, setShowBrix] = React.useState(false);
   const [harvestDate, setHarvestDate] = React.useState<string>(todayIsoDate);
   const [createHarvest, { loading: createLoading }] =
     useCreateHarvestMutation();
@@ -53,15 +60,27 @@ export function useBatchSidebar({
 
   React.useEffect(() => {
     setLocalData(batchData);
-    // In edit mode, expand the brix section automatically when the batch
-    // already has readings — otherwise existing values would appear lost.
-    setShowBrix(
-      mode === 'edit' && (batchData?.brixReadings?.some((v) => v > 0) ?? false),
-    );
     setHarvestDate(
       mode === 'edit' ? toIsoDateInput(initialDate) : todayIsoDate(),
     );
   }, [batchData, mode, initialDate]);
+
+  // Update one entry in place via an updater function.
+  const updateEntry = React.useCallback(
+    (
+      entryIndex: number,
+      updater: (entry: HarvestEntryData) => HarvestEntryData,
+    ) => {
+      setLocalData((prev) => {
+        if (!prev) return prev;
+        const entries = prev.entries.map((entry, i) =>
+          i === entryIndex ? updater(entry) : entry,
+        );
+        return { ...prev, entries };
+      });
+    },
+    [],
+  );
 
   React.useEffect(() => {
     const photos = localData?.photos ?? [];
@@ -74,48 +93,89 @@ export function useBatchSidebar({
 
   const currentData = localData ?? batchData;
 
-  const handleBrixChange = React.useCallback((index: number, value: number) => {
-    setLocalData((prev) => {
-      if (!prev) return prev;
-      const next = [...prev.brixReadings];
-      next[index] = value;
-      return { ...prev, brixReadings: next };
-    });
-  }, []);
+  const handleBrixChange = React.useCallback(
+    (entryIndex: number, readingIndex: number, value: number) => {
+      updateEntry(entryIndex, (entry) => {
+        const brixReadings = [...entry.brixReadings];
+        brixReadings[readingIndex] = value;
+        return { ...entry, brixReadings };
+      });
+    },
+    [updateEntry],
+  );
 
-  const handleAddBrixReading = React.useCallback(() => {
-    setLocalData((prev) =>
-      prev ? { ...prev, brixReadings: [...prev.brixReadings, 0] } : prev,
-    );
-  }, []);
+  const handleAddBrixReading = React.useCallback(
+    (entryIndex: number) => {
+      updateEntry(entryIndex, (entry) => ({
+        ...entry,
+        brixReadings: [...entry.brixReadings, 0],
+      }));
+    },
+    [updateEntry],
+  );
 
-  const handleRemoveBrixReading = React.useCallback((index: number) => {
-    setLocalData((prev) => {
-      if (!prev) return prev;
-      if (prev.brixReadings.length <= 1) return prev;
-      return {
-        ...prev,
-        brixReadings: prev.brixReadings.filter((_, i) => i !== index),
-      };
-    });
-  }, []);
+  const handleRemoveBrixReading = React.useCallback(
+    (entryIndex: number, readingIndex: number) => {
+      updateEntry(entryIndex, (entry) => {
+        if (entry.brixReadings.length <= 1) return entry;
+        return {
+          ...entry,
+          brixReadings: entry.brixReadings.filter((_, i) => i !== readingIndex),
+        };
+      });
+    },
+    [updateEntry],
+  );
+
+  const handleFruitCountChange = React.useCallback(
+    (entryIndex: number, value: number) => {
+      updateEntry(entryIndex, (entry) => ({ ...entry, fruitCount: value }));
+    },
+    [updateEntry],
+  );
 
   const handleYieldChange = React.useCallback(
     (
+      entryIndex: number,
       field: 'marketable' | 'waste' | 'classB' | 'rowX' | 'rowY',
       value: number,
     ) => {
-      setLocalData((prev) =>
-        prev
-          ? {
-              ...prev,
-              todaysHarvest: { ...prev.todaysHarvest, [field]: value },
-            }
-          : prev,
-      );
+      updateEntry(entryIndex, (entry) => ({ ...entry, [field]: value }));
     },
-    [],
+    [updateEntry],
   );
+
+  const handleSetShowBrix = React.useCallback(
+    (entryIndex: number, show: boolean) => {
+      updateEntry(entryIndex, (entry) => ({ ...entry, showBrix: show }));
+    },
+    [updateEntry],
+  );
+
+  const handleSetShowFruitWeight = React.useCallback(
+    (entryIndex: number, show: boolean) => {
+      updateEntry(entryIndex, (entry) => ({ ...entry, showFruitWeight: show }));
+    },
+    [updateEntry],
+  );
+
+  const handleAddEntry = React.useCallback(() => {
+    setLocalData((prev) =>
+      prev ? { ...prev, entries: [...prev.entries, createEmptyEntry()] } : prev,
+    );
+  }, []);
+
+  const handleRemoveEntry = React.useCallback((entryIndex: number) => {
+    setLocalData((prev) => {
+      if (!prev) return prev;
+      // At least one entry must always remain.
+      if (prev.entries.length <= 1) return prev;
+      return {
+        ...prev,
+        entries: prev.entries.filter((_, i) => i !== entryIndex),
+      };
+    });
+  }, []);
 
   const handlePhotoUpload = React.useCallback(
     async (files: File[]) => {
@@ -153,8 +213,29 @@ export function useBatchSidebar({
 
   const handleSave = React.useCallback(async () => {
     if (!harvestId || !currentData) return;
-    const brixReadings = showBrix ? currentData.brixReadings : [];
-    const avgBrix = computeAvgBrix(brixReadings);
+    // Map each sub-entry to the GraphQL input shape. Brix readings and fruit
+    // count only count when their section is expanded; total fruit weight is
+    // the entry's sellable yield (Class A + Class B). The backend re-derives the
+    // top-level aggregates from these entries.
+    const entries = currentData.entries.map((entry) => {
+      const brixReadings = entry.showBrix ? entry.brixReadings : [];
+      const fruitCount = entry.showFruitWeight ? entry.fruitCount : 0;
+      const totalFruitWeight = entry.showFruitWeight
+        ? (entry.marketable || 0) + (entry.classB || 0)
+        : 0;
+      return {
+        classA: entry.marketable,
+        classB: entry.classB,
+        waste: entry.waste,
+        rowX: entry.rowX,
+        rowY: entry.rowY,
+        avgBrix: computeAvgBrix(brixReadings),
+        brixReadings,
+        fruitCount,
+        totalFruitWeight,
+        avgFruitWeight: computeAvgFruitWeight(fruitCount, totalFruitWeight),
+      };
+    });
     // Re-fetch the harvest list after every save so the entry tab updates
     // immediately. awaitRefetchQueries makes the mutation promise resolve only
     // after the refetch lands, so onCompleted fires against fresh data.
@@ -182,13 +263,7 @@ export function useBatchSidebar({
               rowSpacing: currentData.rowSpacing,
               totalPlants: currentData.totalPlants,
               lostPlants: currentData.lostPlants,
-              classA: currentData.todaysHarvest.marketable,
-              classB: currentData.todaysHarvest.classB,
-              waste: currentData.todaysHarvest.waste,
-              avgBrix,
-              rowX: currentData.todaysHarvest.rowX,
-              rowY: currentData.todaysHarvest.rowY,
-              brixReadings,
+              entries,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,
               date: isoDate,
@@ -202,13 +277,7 @@ export function useBatchSidebar({
           variables: {
             id: harvestId,
             input: {
-              classA: currentData.todaysHarvest.marketable,
-              classB: currentData.todaysHarvest.classB,
-              waste: currentData.todaysHarvest.waste,
-              avgBrix,
-              rowX: currentData.todaysHarvest.rowX,
-              rowY: currentData.todaysHarvest.rowY,
-              brixReadings,
+              entries,
               photos: currentData.photos.length,
               photoUrls: currentData.photos,
               date: isoDate,
@@ -226,7 +295,6 @@ export function useBatchSidebar({
     harvestId,
     currentData,
     mode,
-    showBrix,
     harvestDate,
     updateHarvest,
     createHarvest,
@@ -237,14 +305,17 @@ export function useBatchSidebar({
     currentData,
     loading: loading || createLoading || uploading,
     mode,
-    showBrix,
-    setShowBrix,
     harvestDate,
     setHarvestDate,
     handleBrixChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
+    handleFruitCountChange,
     handleYieldChange,
+    handleSetShowBrix,
+    handleSetShowFruitWeight,
+    handleAddEntry,
+    handleRemoveEntry,
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,

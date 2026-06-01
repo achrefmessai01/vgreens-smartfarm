@@ -1,6 +1,7 @@
 import { HarvestStatus } from '@/generated/graphql';
 import type { BatchFormData } from '@/types/batch.types';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
+import { createEmptyEntry } from '@/types/batch-sidebar.types';
 
 export function getGreenhouseName(greenhouseId: string): string {
   return greenhouseId.trim() || '-';
@@ -34,14 +35,7 @@ export function createBatchDetailsFromForm(
     totalPlants: formData.totalPlants,
     lostPlants: formData.lostPlants,
     plantingDate: formData.plantingDate,
-    todaysHarvest: {
-      marketable: 0,
-      waste: 0,
-      classB: 0,
-      rowX: 0,
-      rowY: 0,
-    },
-    brixReadings: [0],
+    entries: [createEmptyEntry()],
     photos: [],
   };
 }

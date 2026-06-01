@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { BrixTrendChart } from './charts/brix-trend-chart';
 import { ClassDistributionChart } from './charts/class-distribution-chart';
 import { CumulativeYieldChart } from './charts/cumulative-yield-chart';
+import { FruitWeightTrendChart } from './charts/fruit-weight-trend-chart';
 import { YieldOverTimeChart } from './charts/yield-over-time-chart';
 
 const COMPARE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
@@ -103,6 +104,13 @@ export function HarvestDashboardCompare({
     data: loaded[batch.id]?.data?.brixTrend ?? [],
   }));
 
+  const fruitWeightSeries = selected.map(({ batch, color }) => ({
+    batchId: batch.id,
+    batchName: batch.name,
+    color,
+    data: loaded[batch.id]?.data?.fruitWeightTrend ?? [],
+  }));
+
   const cumulativeSeries = selected.map(({ batch, color }) => ({
     batchId: batch.id,
     batchName: batch.name,
@@ -163,6 +171,8 @@ export function HarvestDashboardCompare({
           const marketablePercent = data?.marketablePercent ?? 0;
           const wastePercent = data?.wastePercent ?? 0;
           const averageBrix = data?.averageBrix ?? 0;
+          const averageFruitWeight = data?.averageFruitWeight ?? 0;
+          const yieldPerPlant = data?.yieldPerPlant ?? null;
           const criticalAlerts = data?.criticalAlerts ?? 0;
           const daysActive = data?.daysActive ?? 0;
           const harvestCount = data?.harvestCount ?? 0;
@@ -199,6 +209,26 @@ export function HarvestDashboardCompare({
                   </p>
                   <p className="text-sm font-semibold">
                     {isLoading ? '–' : `${averageBrix.toFixed(1)}°Bx`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">
+                    {h?.averageFruitWeight ?? 'Avg Fruit Weight'}
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {isLoading ? '–' : `${averageFruitWeight.toFixed(3)} kg`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">
+                    {h?.yieldPerPlantShort ?? 'Yield/Plant'}
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {isLoading
+                      ? '–'
+                      : yieldPerPlant == null
+                        ? '—'
+                        : `${yieldPerPlant.toFixed(2)} kg`}
                   </p>
                 </div>
                 <div>
@@ -248,6 +278,7 @@ export function HarvestDashboardCompare({
         <YieldOverTimeChart series={yieldSeries} />
         <ClassDistributionChart series={classSeries} />
         <BrixTrendChart series={brixSeries} />
+        <FruitWeightTrendChart series={fruitWeightSeries} />
         <CumulativeYieldChart series={cumulativeSeries} />
       </div>
     </div>

@@ -9,6 +9,8 @@ export const GET_HARVEST_METRICS = gql`
       harvestCount
       totalYield
       averageBrix
+      averageFruitWeight
+      yieldPerPlant
       marketablePercent
       wastePercent
       wasteTotal
@@ -57,13 +59,25 @@ export const GET_BRIX_TREND = gql`
   }
 `;
 
+// Query for fruit weight trend chart data
+export const GET_FRUIT_WEIGHT_TREND = gql`
+  query GetFruitWeightTrend($filter: DashboardFilterInput) {
+    harvestDashboard(filter: $filter) {
+      fruitWeightTrend {
+        date
+        weight
+      }
+    }
+  }
+`;
+
 // Query for cumulative yield chart data
 export const GET_CUMULATIVE_YIELD = gql`
   query GetCumulativeYield($filter: DashboardFilterInput) {
     harvestDashboard(filter: $filter) {
       cumulativeYield {
         date
-        cumulative
+        cumulativeClassA
         cumulativeClassB
         cumulativeWaste
       }

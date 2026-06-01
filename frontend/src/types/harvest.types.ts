@@ -22,6 +22,19 @@ export interface HarvestSummary {
   avgBrix: number;
 }
 
+export interface HarvestEntryLike {
+  classA: number;
+  classB: number;
+  waste: number;
+  rowX: number;
+  rowY: number;
+  avgBrix: number;
+  brixReadings: number[];
+  fruitCount: number;
+  totalFruitWeight: number;
+  avgFruitWeight: number;
+}
+
 export interface HarvestLike {
   id: string;
   batch: string;
@@ -44,5 +57,9 @@ export interface HarvestLike {
   rowY: number;
   avgBrix: number;
   brixReadings: number[];
+  fruitCount: number;
+  totalFruitWeight: number;
+  avgFruitWeight: number;
   photoUrls?: string[] | null;
+  entries?: HarvestEntryLike[] | null;
 }

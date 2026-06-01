@@ -14,7 +14,7 @@ const VALID_PERIODS: ReadonlySet<DateFilter> = new Set<DateFilter>([
 ]);
 
 export const ALL_BATCHES = '__all__';
-export const MAX_COMPARE_BATCHES = 4;
+export const MAX_COMPARE_BATCHES = 10;
 
 export interface HarvestDashboardUrlState {
   period: DateFilter;
@@ -22,10 +22,7 @@ export interface HarvestDashboardUrlState {
   compareBatchIds: string[];
   compareMode: boolean;
   setPeriod: (period: DateFilter) => void;
-  setBatchId: (batchId: string | undefined) => void;
   setCompareBatchIds: (ids: string[]) => void;
-  enterCompareMode: (seed?: string) => void;
-  exitCompareMode: () => void;
 }
 
 function parseCompareParam(raw: string | null): string[] {
@@ -46,16 +43,15 @@ export function useHarvestDashboardUrlState(): HarvestDashboardUrlState {
     return raw && VALID_PERIODS.has(raw) ? raw : 'thisMonth';
   }, [searchParams]);
 
-  const batchIdParam = searchParams.get('batch');
-  const batchId =
-    batchIdParam && batchIdParam !== ALL_BATCHES ? batchIdParam : undefined;
-
   const compareParam = searchParams.get('compare');
   const compareBatchIds = useMemo(
     () => parseCompareParam(compareParam),
     [compareParam],
   );
-  const compareMode = compareParam !== null;
+
+  const batchId =
+    compareBatchIds.length === 1 ? compareBatchIds[0] : undefined;
+  const compareMode = compareBatchIds.length >= 2;
 
   const writeParams = useCallback(
     (mutator: (params: URLSearchParams) => void) => {
@@ -76,53 +72,16 @@ export function useHarvestDashboardUrlState(): HarvestDashboardUrlState {
     [writeParams],
   );
 
-  const setBatchId = useCallback(
-    (next: string | undefined) => {
-      writeParams((params) => {
-        if (!next || next === ALL_BATCHES) params.delete('batch');
-        else params.set('batch', next);
-      });
-    },
-    [writeParams],
-  );
-
   const setCompareBatchIds = useCallback(
     (ids: string[]) => {
       const capped = ids.slice(0, MAX_COMPARE_BATCHES);
       writeParams((params) => {
-        params.set('compare', capped.join(','));
+        if (capped.length === 0) params.delete('compare');
+        else params.set('compare', capped.join(','));
       });
     },
     [writeParams],
   );
-
-  const enterCompareMode = useCallback(
-    (seed?: string) => {
-      writeParams((params) => {
-        const seeds: string[] = [];
-        const current = parseCompareParam(params.get('compare'));
-        if (current.length > 0) seeds.push(...current);
-        const existingSingle = params.get('batch');
-        if (
-          existingSingle &&
-          existingSingle !== ALL_BATCHES &&
-          !seeds.includes(existingSingle)
-        ) {
-          seeds.push(existingSingle);
-        }
-        if (seed && !seeds.includes(seed)) seeds.push(seed);
-        params.set('compare', seeds.slice(0, MAX_COMPARE_BATCHES).join(','));
-        params.delete('batch');
-      });
-    },
-    [writeParams],
-  );
-
-  const exitCompareMode = useCallback(() => {
-    writeParams((params) => {
-      params.delete('compare');
-    });
-  }, [writeParams]);
 
   return {
     period,
@@ -130,9 +89,6 @@ export function useHarvestDashboardUrlState(): HarvestDashboardUrlState {
     compareBatchIds,
     compareMode,
     setPeriod,
-    setBatchId,
     setCompareBatchIds,
-    enterCompareMode,
-    exitCompareMode,
   };
 }

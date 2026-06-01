@@ -7,7 +7,11 @@ import {
   SheetHeader,
   SheetContent,
 } from '@/components/ui/sheet';
-import { formatHarvestDate, getGreenhouseLabel } from '@/lib/harvest-utils';
+import {
+  formatHarvestDate,
+  getGreenhouseLabel,
+  harvestToDisplayEntries,
+} from '@/lib/harvest-utils';
 import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import type { HarvestsQuery } from '@/generated/graphql';
 
@@ -32,8 +36,6 @@ export function HarvestDetails({
 
   const secondaryValue = classBMode ? harvest.classB : harvest.waste;
   const totalYield = harvest.classA + secondaryValue;
-  const secondaryRatio =
-    totalYield > 0 ? (secondaryValue / totalYield) * 100 : 0;
   const primaryLabel = classBMode
     ? (h?.quality1 ?? 'Quality 1')
     : (h?.marketable ?? 'Marketable');
@@ -43,7 +45,9 @@ export function HarvestDetails({
   const ratioLabel = classBMode
     ? (h?.quality2Ratio ?? 'Quality 2 Ratio')
     : (h?.wasteRatio ?? 'Waste Ratio');
-  const brixValues = harvest.brixReadings;
+  // Per sub-entry breakdown; legacy harvests synthesize a single entry.
+  const entries = harvestToDisplayEntries(harvest);
+  const showEntryLabels = entries.length > 1;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -83,73 +87,133 @@ export function HarvestDetails({
               </div>
             </div>
 
-            <div className="bg-card rounded-lg border p-6 shadow-sm">
-              <h3 className="text-foreground mb-4 text-xl font-bold">
-                {h?.harvestBreakdown ?? 'Harvest Breakdown'}
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3">
-                  <span className="text-muted-foreground font-medium">
-                    {primaryLabel}:
-                  </span>
-                  <span className="text-xl font-bold text-teal-600">
-                    {harvest.classA} kg
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <span className="text-muted-foreground font-medium">
-                    {secondaryLabel}:
-                  </span>
-                  <span
-                    className={`text-xl font-bold ${classBMode ? 'text-teal-600' : 'text-red-500'}`}
-                  >
-                    {secondaryValue} kg
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <span className="text-muted-foreground font-medium">
-                    {ratioLabel}:
-                  </span>
-                  <span className="bg-muted rounded px-3 py-1 text-sm font-medium">
-                    {secondaryRatio.toFixed(1)}%
-                  </span>
-                </div>
-              </div>
-            </div>
+            {entries.map((entry, entryIndex) => {
+              const entrySecondary = classBMode ? entry.classB : entry.waste;
+              const entryTotal = entry.classA + entrySecondary;
+              const entryRatio =
+                entryTotal > 0 ? (entrySecondary / entryTotal) * 100 : 0;
+              return (
+                <div
+                  key={entryIndex}
+                  className="bg-card space-y-6 rounded-lg border p-6 shadow-sm"
+                >
+                  {showEntryLabels && (
+                    <h3 className="text-foreground text-lg font-bold">
+                      {(h?.entryLabel ?? 'Entry {n}').replace(
+                        '{n}',
+                        String(entryIndex + 1),
+                      )}
+                    </h3>
+                  )}
 
-            <div className="bg-card rounded-lg border p-6 shadow-sm">
-              <div className="mb-6 flex items-center justify-between">
-                <h3 className="text-foreground text-xl font-bold">
-                  {h?.brixMeasurements ?? 'Brix Measurements'}
-                </h3>
-                <span className="text-muted-foreground text-sm">
-                  {h?.average ?? 'Average'}:{' '}
-                  <span className="text-lg font-medium text-orange-500">
-                    {harvest.avgBrix}°Bx
-                  </span>
-                </span>
-              </div>
-              {brixValues.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                  No Brix readings recorded.
-                </p>
-              ) : (
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-                  {brixValues.map((value, index) => (
-                    <div key={index} className="text-center">
-                      <div className="text-muted-foreground mb-2 text-xs font-medium">
-                        #{index + 1}
+                  <div>
+                    <h4 className="text-foreground mb-4 font-semibold">
+                      {h?.harvestBreakdown ?? 'Harvest Breakdown'}
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between py-3">
+                        <span className="text-muted-foreground font-medium">
+                          {primaryLabel}:
+                        </span>
+                        <span className="text-xl font-bold text-teal-600">
+                          {entry.classA} kg
+                        </span>
                       </div>
-                      <div className="bg-muted rounded-lg border p-4">
-                        <span className="text-foreground text-lg font-bold">
-                          {value.toFixed(1)}
+                      <div className="flex items-center justify-between py-3">
+                        <span className="text-muted-foreground font-medium">
+                          {secondaryLabel}:
+                        </span>
+                        <span
+                          className={`text-xl font-bold ${classBMode ? 'text-teal-600' : 'text-red-500'}`}
+                        >
+                          {entrySecondary} kg
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <span className="text-muted-foreground font-medium">
+                          {ratioLabel}:
+                        </span>
+                        <span className="bg-muted rounded px-3 py-1 text-sm font-medium">
+                          {entryRatio.toFixed(1)}%
                         </span>
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="border-t pt-6">
+                    <div className="mb-6 flex items-center justify-between">
+                      <h4 className="text-foreground font-semibold">
+                        {h?.brixMeasurements ?? 'Brix Measurements'}
+                      </h4>
+                      <span className="text-muted-foreground text-sm">
+                        {h?.average ?? 'Average'}:{' '}
+                        <span className="text-lg font-medium text-orange-500">
+                          {entry.avgBrix}°Bx
+                        </span>
+                      </span>
+                    </div>
+                    {entry.brixReadings.length === 0 ? (
+                      <p className="text-muted-foreground text-sm">
+                        No Brix readings recorded.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+                        {entry.brixReadings.map((value, index) => (
+                          <div key={index} className="text-center">
+                            <div className="text-muted-foreground mb-2 text-xs font-medium">
+                              #{index + 1}
+                            </div>
+                            <div className="bg-muted rounded-lg border p-4">
+                              <span className="text-foreground text-lg font-bold">
+                                {value.toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t pt-6">
+                    <div className="mb-6 flex items-center justify-between">
+                      <h4 className="text-foreground font-semibold">
+                        {h?.fruitWeightMeasurement ?? 'Fruit Weight'}
+                      </h4>
+                      <span className="text-muted-foreground text-sm">
+                        {h?.averageFruitWeight ?? 'Average Fruit Weight'}:{' '}
+                        <span className="text-lg font-medium text-orange-500">
+                          {entry.avgFruitWeight.toFixed(3)} kg
+                        </span>
+                      </span>
+                    </div>
+                    {entry.fruitCount === 0 && entry.totalFruitWeight === 0 ? (
+                      <p className="text-muted-foreground text-sm">
+                        {h?.noFruitWeightRecorded ?? 'No fruit weight recorded.'}
+                      </p>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-2">
+                          <span className="text-muted-foreground font-medium">
+                            {h?.fruitCount ?? 'Fruit count'}:
+                          </span>
+                          <span className="text-foreground text-lg font-bold">
+                            {entry.fruitCount}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <span className="text-muted-foreground font-medium">
+                            {h?.totalWeight ?? 'Total weight'}:
+                          </span>
+                          <span className="text-foreground text-lg font-bold">
+                            {entry.totalFruitWeight.toFixed(2)} kg
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
+              );
+            })}
           </div>
         </div>
       </SheetContent>

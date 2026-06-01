@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  type OnModuleInit,
 } from '@nestjs/common';
 import { BaseService } from '@common/services';
 import { Harvest } from './entities/harvest.entity';
@@ -10,6 +11,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateHarvestInput } from './dto/create-harvest.input';
 import { UpdateHarvestInput } from './dto/update-harvest.input';
+import { HarvestEntryInput } from './dto/harvest-entry.input';
+import { HarvestEntry } from './entities/harvest-entry';
 import { HarvestFilterInput } from './dto/harvest-filter.input';
 import { DashboardFilterInput } from './dto/dashboard-filter.input';
 import {
@@ -17,6 +20,7 @@ import {
   YieldOverTimeData,
   ClassDistributionData,
   BrixTrendData,
+  FruitWeightTrendData,
   CumulativeYieldData,
 } from './dto/dashboard-metrics.dto';
 import { HarvestBatchListItem } from './dto/harvest-batch-list-item.dto';
@@ -24,7 +28,10 @@ import { HarvestStatus } from '@/common/enums/harvest-status.enum';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
 
 @Injectable()
-export class HarvestsService extends BaseService<Harvest> {
+export class HarvestsService
+  extends BaseService<Harvest>
+  implements OnModuleInit
+{
   private readonly logger = new Logger(HarvestsService.name);
 
   constructor(
@@ -32,6 +39,37 @@ export class HarvestsService extends BaseService<Harvest> {
     private readonly harvestRepository: Repository<Harvest>,
   ) {
     super(harvestRepository);
+  }
+
+  // Backfill historical harvest rows whose yieldPerPlant is still NULL because
+  // they were inserted before the column existed. Idempotent: subsequent boots
+  // hit zero matching rows and the UPDATE returns immediately.
+  async onModuleInit(): Promise<void> {
+    try {
+      const result: unknown = await this.harvestRepository.query(
+        `UPDATE harvests
+         SET "yieldPerPlant" = ROUND(
+           (("classA"::numeric + "classB"::numeric) / "totalPlants")::numeric,
+           2
+         )
+         WHERE "yieldPerPlant" IS NULL
+           AND "totalPlants" > 0
+           AND ("classA" > 0 OR "classB" > 0)`,
+      );
+      // The pg driver returns `[rows, rowCount]` for UPDATE statements.
+      const updated =
+        Array.isArray(result) && typeof result[1] === 'number' ? result[1] : 0;
+      if (updated > 0) {
+        this.logger.log(
+          `Backfilled yieldPerPlant for ${updated} historical harvest row(s).`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `yieldPerPlant backfill failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
   }
 
   private readonly harvestRelations = ['tenant', 'createdBy'] as const;
@@ -44,6 +82,120 @@ export class HarvestsService extends BaseService<Harvest> {
     const denominator = numberOfRows * rowLength;
     if (denominator <= 0) return 0;
     return cultivationArea / denominator;
+  }
+
+  private getBatchKey(harvest: Harvest): string {
+    return harvest.parentBatchId ?? harvest.id;
+  }
+
+  private roundTo2(value: number): number {
+    return Math.round(value * 100) / 100;
+  }
+
+  // Per-harvest yield-per-plant: (classA + classB) / totalPlants. Stored on
+  // each Harvest row by create/update so the value is queryable without
+  // re-deriving it. Null when the harvest has no plant count (typical for
+  // child harvest rows — totalPlants lives on the parent batch).
+  private computeYieldPerPlant(
+    classA: number,
+    classB: number,
+    totalPlants: number,
+  ): number | null {
+    if (totalPlants <= 0) return null;
+    return this.roundTo2((classA + classB) / totalPlants);
+  }
+
+  // Per-row avg fruit weight: (classA + classB) / fruitCount, computed on the
+  // fly so old rows with stale `avgFruitWeight` columns (left over from when
+  // total fruit weight was a user input) don't poison the dashboard.
+  // Returns null when there's no fruit-count measurement or no sellable yield.
+  private computeRowAvgFruitWeight(harvest: Harvest): number | null {
+    if (harvest.fruitCount <= 0) return null;
+    const sellable = harvest.classA + harvest.classB;
+    if (sellable <= 0) return null;
+    return sellable / harvest.fruitCount;
+  }
+
+  // Average of the positive readings, rounded to 1 decimal. Mirrors the
+  // frontend computeAvgBrix so brix shown in the UI matches what we store.
+  private avgOfPositive(values: number[]): number {
+    const positive = values.filter((v) => v > 0);
+    if (positive.length === 0) return 0;
+    return (
+      Math.round(
+        (positive.reduce((sum, v) => sum + v, 0) / positive.length) * 10,
+      ) / 10
+    );
+  }
+
+  // Fill defaults and re-derive a single sub-entry's avgBrix and avgFruitWeight
+  // so the backend stays the source of truth for the derived fields.
+  private normalizeEntry(entry: HarvestEntryInput): HarvestEntry {
+    const brixReadings = entry.brixReadings ?? [];
+    const fruitCount = entry.fruitCount ?? 0;
+    const totalFruitWeight = entry.totalFruitWeight ?? 0;
+    return {
+      classA: entry.classA ?? 0,
+      classB: entry.classB ?? 0,
+      waste: entry.waste ?? 0,
+      rowX: entry.rowX ?? 0,
+      rowY: entry.rowY ?? 0,
+      brixReadings,
+      avgBrix: this.avgOfPositive(brixReadings),
+      fruitCount,
+      totalFruitWeight,
+      avgFruitWeight:
+        fruitCount > 0 && totalFruitWeight > 0
+          ? Math.round((totalFruitWeight / fruitCount) * 1000) / 1000
+          : 0,
+    };
+  }
+
+  // Derive the flat top-level aggregate fields from a set of sub-entries.
+  // classA/classB/waste/fruitCount/totalFruitWeight are summed; brix is pooled
+  // and averaged; avgFruitWeight is Σweight ÷ Σcount; rowX/rowY become the span
+  // (min start row, max end row) across entries.
+  private aggregateEntries(rawEntries: HarvestEntryInput[]): {
+    entries: HarvestEntry[];
+    classA: number;
+    classB: number;
+    waste: number;
+    avgBrix: number;
+    brixReadings: number[];
+    fruitCount: number;
+    totalFruitWeight: number;
+    avgFruitWeight: number;
+    rowX: number;
+    rowY: number;
+  } {
+    const entries = rawEntries.map((e) => this.normalizeEntry(e));
+    const classA = entries.reduce((s, e) => s + e.classA, 0);
+    const classB = entries.reduce((s, e) => s + e.classB, 0);
+    const waste = entries.reduce((s, e) => s + e.waste, 0);
+    const fruitCount = entries.reduce((s, e) => s + e.fruitCount, 0);
+    const totalFruitWeight = entries.reduce(
+      (s, e) => s + e.totalFruitWeight,
+      0,
+    );
+    const brixReadings = entries.flatMap((e) => e.brixReadings);
+    const rowXs = entries.map((e) => e.rowX).filter((v) => v > 0);
+    const rowYs = entries.map((e) => e.rowY).filter((v) => v > 0);
+    return {
+      entries,
+      classA,
+      classB,
+      waste,
+      avgBrix: this.avgOfPositive(brixReadings),
+      brixReadings,
+      fruitCount,
+      totalFruitWeight,
+      avgFruitWeight:
+        fruitCount > 0 && totalFruitWeight > 0
+          ? Math.round((totalFruitWeight / fruitCount) * 1000) / 1000
+          : 0,
+      rowX: rowXs.length > 0 ? Math.min(...rowXs) : 0,
+      rowY: rowYs.length > 0 ? Math.max(...rowYs) : 0,
+    };
   }
 
   private isDashboardPlaceholder(harvest: Harvest): boolean {
@@ -142,7 +294,6 @@ export class HarvestsService extends BaseService<Harvest> {
     try {
       const qb = this.harvestRepository
         .createQueryBuilder('harvest')
-        .where('harvest.parentBatchId IS NULL')
         .orderBy('harvest.createdAt', OrderDirection.ASC);
 
       if (tenantId !== undefined) {
@@ -151,8 +302,22 @@ export class HarvestsService extends BaseService<Harvest> {
 
       const rows = await qb.getMany();
 
-      const representatives = new Map<string, Harvest>();
+      // Sum sellable yield (classA + classB) per batch, skipping placeholder
+      // rows that carry no real harvest data. Child harvest entries share their
+      // parent's batch key via getBatchKey.
+      const sellableByBatch = new Map<string, number>();
       for (const row of rows) {
+        if (this.isDashboardPlaceholder(row)) continue;
+        const key = this.getBatchKey(row);
+        sellableByBatch.set(
+          key,
+          (sellableByBatch.get(key) ?? 0) + row.classA + row.classB,
+        );
+      }
+
+      const parents = rows.filter((row) => row.parentBatchId === null);
+      const representatives = new Map<string, Harvest>();
+      for (const row of parents) {
         const key = this.getLegacyGroupKey(row);
         if (!representatives.has(key)) representatives.set(key, row);
       }
@@ -163,15 +328,21 @@ export class HarvestsService extends BaseService<Harvest> {
             new Date(b.plantingDate).getTime() -
             new Date(a.plantingDate).getTime(),
         )
-        .map((h) => ({
-          id: h.id,
-          name: h.batch,
-          species: h.species,
-          variety: h.variety,
-          greenhouse: h.greenhouse,
-          plantingDate: h.plantingDate,
-          status: h.status,
-        }));
+        .map((h) => {
+          const sellable = sellableByBatch.get(h.id) ?? 0;
+          const yieldPerPlant =
+            h.totalPlants > 0 ? this.roundTo2(sellable / h.totalPlants) : null;
+          return {
+            id: h.id,
+            name: h.batch,
+            species: h.species,
+            variety: h.variety,
+            greenhouse: h.greenhouse,
+            plantingDate: h.plantingDate,
+            status: h.status,
+            yieldPerPlant,
+          };
+        });
     } catch (error) {
       this.logger.error(
         `findBatchesForSelector failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -224,6 +395,14 @@ export class HarvestsService extends BaseService<Harvest> {
   ): Promise<Harvest> {
     try {
       const batchName = input.batch ?? `${input.species} - ${input.variety}`;
+      // When sub-entries are supplied the flat yield/brix/fruit/row fields are
+      // derived from them; otherwise fall back to the flat input (legacy path).
+      const agg = input.entries?.length
+        ? this.aggregateEntries(input.entries)
+        : null;
+      const classA = agg?.classA ?? input.classA ?? 0;
+      const classB = agg?.classB ?? input.classB ?? 0;
+      const totalPlants = input.totalPlants ?? 0;
 
       const harvest = this.harvestRepository.create({
         tenantId,
@@ -245,27 +424,34 @@ export class HarvestsService extends BaseService<Harvest> {
             input.numberOfRows,
             input.rowLength,
           ),
-        totalPlants: input.totalPlants ?? 0,
+        totalPlants,
         lostPlants: input.lostPlants ?? 0,
         status: input.status ?? HarvestStatus.ACTIVE,
         date: new Date(input.date),
-        classA: input.classA ?? 0,
-        classB: input.classB ?? 0,
-        waste: input.waste ?? 0,
-        avgBrix: input.avgBrix ?? 0,
+        classA,
+        classB,
+        waste: agg?.waste ?? input.waste ?? 0,
+        yieldPerPlant: this.computeYieldPerPlant(classA, classB, totalPlants),
+        avgBrix: agg?.avgBrix ?? input.avgBrix ?? 0,
         rowX:
+          agg?.rowX ??
           input.rowX ??
           (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
             ? 1
             : 0),
         rowY:
+          agg?.rowY ??
           input.rowY ??
           (input.numberOfRowsHarvested && input.numberOfRowsHarvested > 0
             ? input.numberOfRowsHarvested
             : 0),
-        brixReadings: input.brixReadings ?? [],
+        brixReadings: agg?.brixReadings ?? input.brixReadings ?? [],
+        fruitCount: agg?.fruitCount ?? input.fruitCount ?? 0,
+        totalFruitWeight: agg?.totalFruitWeight ?? input.totalFruitWeight ?? 0,
+        avgFruitWeight: agg?.avgFruitWeight ?? input.avgFruitWeight ?? 0,
         photos: input.photos ?? 0,
         photoUrls: input.photoUrls ?? [],
+        entries: agg?.entries ?? [],
       });
 
       const saved = await this.harvestRepository.save(harvest);
@@ -332,13 +518,17 @@ export class HarvestsService extends BaseService<Harvest> {
       }
       if (input.totalPlants !== undefined)
         harvest.totalPlants = input.totalPlants;
-      if (input.lostPlants !== undefined)
-        harvest.lostPlants = input.lostPlants;
+      if (input.lostPlants !== undefined) harvest.lostPlants = input.lostPlants;
       if (input.status !== undefined) harvest.status = input.status;
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.classA !== undefined) harvest.classA = input.classA;
       if (input.classB !== undefined) harvest.classB = input.classB;
       if (input.waste !== undefined) harvest.waste = input.waste;
+      harvest.yieldPerPlant = this.computeYieldPerPlant(
+        harvest.classA,
+        harvest.classB,
+        harvest.totalPlants,
+      );
       if (input.avgBrix !== undefined) harvest.avgBrix = input.avgBrix;
       if (input.rowX !== undefined) harvest.rowX = input.rowX;
       if (input.rowY !== undefined) harvest.rowY = input.rowY;
@@ -354,8 +544,45 @@ export class HarvestsService extends BaseService<Harvest> {
       if (input.brixReadings !== undefined) {
         harvest.brixReadings = input.brixReadings;
       }
+      if (input.fruitCount !== undefined) {
+        harvest.fruitCount = input.fruitCount;
+      }
+      if (input.totalFruitWeight !== undefined) {
+        harvest.totalFruitWeight = input.totalFruitWeight;
+      }
+      if (input.avgFruitWeight !== undefined) {
+        harvest.avgFruitWeight = input.avgFruitWeight;
+      }
       if (input.photos !== undefined) harvest.photos = input.photos;
       if (input.photoUrls !== undefined) harvest.photoUrls = input.photoUrls;
+
+      // Sub-entries are authoritative when supplied: re-derive every flat
+      // aggregate from them (overriding any flat fields above) and recompute
+      // yieldPerPlant from the aggregated sellable yield. An explicit empty
+      // array clears the breakdown without touching the flat fields.
+      if (input.entries !== undefined) {
+        if (input.entries.length > 0) {
+          const agg = this.aggregateEntries(input.entries);
+          harvest.entries = agg.entries;
+          harvest.classA = agg.classA;
+          harvest.classB = agg.classB;
+          harvest.waste = agg.waste;
+          harvest.avgBrix = agg.avgBrix;
+          harvest.brixReadings = agg.brixReadings;
+          harvest.fruitCount = agg.fruitCount;
+          harvest.totalFruitWeight = agg.totalFruitWeight;
+          harvest.avgFruitWeight = agg.avgFruitWeight;
+          harvest.rowX = agg.rowX;
+          harvest.rowY = agg.rowY;
+          harvest.yieldPerPlant = this.computeYieldPerPlant(
+            harvest.classA,
+            harvest.classB,
+            harvest.totalPlants,
+          );
+        } else {
+          harvest.entries = [];
+        }
+      }
 
       const saved = await this.harvestRepository.save(harvest);
       const result = await this.harvestRepository.findOne({
@@ -497,19 +724,13 @@ export class HarvestsService extends BaseService<Harvest> {
       )[0][0];
 
       // Calculate metrics
-      const totalMarketable = metricsHarvests.reduce(
-        (sum, h) => sum + h.classA,
-        0,
-      );
+      const totalClassA = metricsHarvests.reduce((sum, h) => sum + h.classA, 0);
       const totalWaste = metricsHarvests.reduce((sum, h) => sum + h.waste, 0);
-      const totalClassB = metricsHarvests.reduce(
-        (sum, h) => sum + h.classB,
-        0,
-      );
-      const totalYield = totalMarketable + totalWaste;
+      const totalClassB = metricsHarvests.reduce((sum, h) => sum + h.classB, 0);
+      const totalYield = totalClassA + totalWaste;
 
       const marketablePercent =
-        totalYield > 0 ? (totalMarketable / totalYield) * 100 : 0;
+        totalYield > 0 ? (totalClassA / totalYield) * 100 : 0;
       const wastePercent = totalYield > 0 ? (totalWaste / totalYield) * 100 : 0;
 
       // Calculate average brix
@@ -519,6 +740,48 @@ export class HarvestsService extends BaseService<Harvest> {
           ? validBrixHarvests.reduce((sum, h) => sum + h.avgBrix, 0) /
             validBrixHarvests.length
           : 0;
+
+      // Calculate average fruit weight: mean of each row's avg, derived live
+      // from current yield + fruit count. Rows without a measurement don't
+      // contribute.
+      const perRowAvgFruitWeights = metricsHarvests
+        .map((h) => this.computeRowAvgFruitWeight(h))
+        .filter((v): v is number => v !== null);
+      const averageFruitWeight =
+        perRowAvgFruitWeights.length > 0
+          ? perRowAvgFruitWeights.reduce((sum, v) => sum + v, 0) /
+            perRowAvgFruitWeights.length
+          : 0;
+
+      // Yield per plant: Σ (classA + classB) / Σ totalPlants, weighted by batch.
+      // totalPlants lives on the parent batch row only (children default to 0),
+      // so we read it from the unfiltered `harvests` list — a parent row that's
+      // currently a dashboard placeholder still owns the batch's plant count.
+      const totalPlantsByBatch = new Map<string, number>();
+      for (const h of harvests) {
+        if (h.parentBatchId === null) {
+          totalPlantsByBatch.set(h.id, h.totalPlants);
+        }
+      }
+      const sellableByBatch = new Map<string, number>();
+      for (const h of metricsHarvests) {
+        const key = this.getBatchKey(h);
+        sellableByBatch.set(
+          key,
+          (sellableByBatch.get(key) ?? 0) + h.classA + h.classB,
+        );
+      }
+      let sumSellable = 0;
+      let sumPlants = 0;
+      for (const [batchId, sellable] of sellableByBatch) {
+        const plants = totalPlantsByBatch.get(batchId) ?? 0;
+        if (plants > 0) {
+          sumSellable += sellable;
+          sumPlants += plants;
+        }
+      }
+      const yieldPerPlant =
+        sumPlants > 0 ? this.roundTo2(sumSellable / sumPlants) : null;
 
       // Calculate days active (from earliest planting date to latest harvest date)
       const plantingDates = metricsHarvests.map(
@@ -546,6 +809,8 @@ export class HarvestsService extends BaseService<Harvest> {
       const classDistribution =
         this.generateClassDistributionData(metricsHarvests);
       const brixTrend = this.generateBrixTrendData(metricsHarvests);
+      const fruitWeightTrend =
+        this.generateFruitWeightTrendData(metricsHarvests);
       const cumulativeYield = this.generateCumulativeYieldData(metricsHarvests);
 
       return {
@@ -554,6 +819,8 @@ export class HarvestsService extends BaseService<Harvest> {
         harvestCount: metricsHarvests.length,
         totalYield: Math.round(totalYield * 10) / 10,
         averageBrix: Math.round(averageBrix * 10) / 10,
+        averageFruitWeight: Math.round(averageFruitWeight * 1000) / 1000,
+        yieldPerPlant,
         marketablePercent: Math.round(marketablePercent * 10) / 10,
         wastePercent: Math.round(wastePercent * 10) / 10,
         wasteTotal: Math.round(totalWaste * 10) / 10,
@@ -563,6 +830,7 @@ export class HarvestsService extends BaseService<Harvest> {
         yieldOverTime,
         classDistribution,
         brixTrend,
+        fruitWeightTrend,
         cumulativeYield,
       };
     } catch (error) {
@@ -583,6 +851,8 @@ export class HarvestsService extends BaseService<Harvest> {
       harvestCount: 0,
       totalYield: 0,
       averageBrix: 0,
+      averageFruitWeight: 0,
+      yieldPerPlant: null,
       marketablePercent: 0,
       wastePercent: 0,
       wasteTotal: 0,
@@ -592,6 +862,7 @@ export class HarvestsService extends BaseService<Harvest> {
       yieldOverTime: [],
       classDistribution: [],
       brixTrend: [],
+      fruitWeightTrend: [],
       cumulativeYield: [],
     };
   }
@@ -618,18 +889,18 @@ export class HarvestsService extends BaseService<Harvest> {
   ): ClassDistributionData[] {
     const dailyData = new Map<
       string,
-      { marketable: number; classB: number; waste: number }
+      { classA: number; classB: number; waste: number }
     >();
 
     harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
       const current = dailyData.get(dateStr) || {
-        marketable: 0,
+        classA: 0,
         classB: 0,
         waste: 0,
       };
       dailyData.set(dateStr, {
-        marketable: current.marketable + harvest.classA,
+        classA: current.classA + harvest.classA,
         classB: current.classB + harvest.classB,
         waste: current.waste + harvest.waste,
       });
@@ -639,7 +910,7 @@ export class HarvestsService extends BaseService<Harvest> {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, data]) => ({
         date,
-        marketable: Math.round(data.marketable * 10) / 10,
+        marketable: Math.round(data.classA * 10) / 10,
         classB: Math.round(data.classB * 10) / 10,
         waste: Math.round(data.waste * 10) / 10,
       }));
@@ -667,23 +938,48 @@ export class HarvestsService extends BaseService<Harvest> {
       }));
   }
 
+  private generateFruitWeightTrendData(
+    harvests: Harvest[],
+  ): FruitWeightTrendData[] {
+    const dailyWeight = new Map<string, { total: number; count: number }>();
+
+    harvests.forEach((harvest) => {
+      const avg = this.computeRowAvgFruitWeight(harvest);
+      if (avg !== null) {
+        const dateStr = harvest.date.toISOString().split('T')[0];
+        const current = dailyWeight.get(dateStr) || { total: 0, count: 0 };
+        dailyWeight.set(dateStr, {
+          total: current.total + avg,
+          count: current.count + 1,
+        });
+      }
+    });
+
+    return Array.from(dailyWeight.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, data]) => ({
+        date,
+        weight: Math.round((data.total / data.count) * 1000) / 1000,
+      }));
+  }
+
   private generateCumulativeYieldData(
     harvests: Harvest[],
   ): CumulativeYieldData[] {
     const dailyData = new Map<
       string,
-      { marketable: number; classB: number; waste: number }
+      { classA: number; classB: number; waste: number }
     >();
 
     harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
       const current = dailyData.get(dateStr) || {
-        marketable: 0,
+        classA: 0,
         classB: 0,
         waste: 0,
       };
       dailyData.set(dateStr, {
-        marketable: current.marketable + harvest.classA,
+        classA: current.classA + harvest.classA,
         classB: current.classB + harvest.classB,
         waste: current.waste + harvest.waste,
       });
@@ -693,17 +989,17 @@ export class HarvestsService extends BaseService<Harvest> {
       a.localeCompare(b),
     );
 
-    let cumulative = 0;
+    let cumulativeClassA = 0;
     let cumulativeClassB = 0;
     let cumulativeWaste = 0;
 
     return sortedEntries.map(([date, data]) => {
-      cumulative += data.marketable;
+      cumulativeClassA += data.classA;
       cumulativeClassB += data.classB;
       cumulativeWaste += data.waste;
       return {
         date,
-        cumulative: Math.round(cumulative * 10) / 10,
+        cumulativeClassA: Math.round(cumulativeClassA * 10) / 10,
         cumulativeClassB: Math.round(cumulativeClassB * 10) / 10,
         cumulativeWaste: Math.round(cumulativeWaste * 10) / 10,
       };
