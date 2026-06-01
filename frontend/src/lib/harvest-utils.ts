@@ -1,6 +1,46 @@
 import { HarvestStatus } from '@/generated/graphql';
+import type { Locale } from '@/i18n/config';
+import type { Translations } from '@/i18n/translations';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import type { HarvestLike, HarvestSummary } from '@/types/harvest.types';
+
+type HarvestTranslations = Translations['pages']['harvest'];
+
+// Pick the right "harvest(s) logged" string for the count, using the locale's
+// CLDR plural rules. Falls back to the plural form when the singular key is
+// missing or PluralRules isn't available.
+export function harvestsLoggedLabel(
+  count: number,
+  h: HarvestTranslations | undefined,
+  locale: Locale,
+): string {
+  const fallbackPlural = h?.harvestsLogged ?? 'harvests logged';
+  try {
+    if (new Intl.PluralRules(locale).select(count) === 'one') {
+      return h?.harvestLogged ?? 'harvest logged';
+    }
+  } catch {
+    // Intl.PluralRules unavailable — fall through to plural form.
+  }
+  return fallbackPlural;
+}
+
+// Same as harvestsLoggedLabel for the "logged for" variant used on dashboards.
+export function harvestsLoggedForLabel(
+  count: number,
+  h: HarvestTranslations | undefined,
+  locale: Locale,
+): string {
+  const fallbackPlural = h?.harvestsLoggedFor ?? 'harvests logged for';
+  try {
+    if (new Intl.PluralRules(locale).select(count) === 'one') {
+      return h?.harvestLoggedFor ?? 'harvest logged for';
+    }
+  } catch {
+    // Intl.PluralRules unavailable — fall through to plural form.
+  }
+  return fallbackPlural;
+}
 
 export function computeAvgBrix(readings: number[]): number {
   const values = readings.filter((v) => v > 0);

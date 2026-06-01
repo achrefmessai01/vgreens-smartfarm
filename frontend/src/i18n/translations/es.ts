@@ -363,6 +363,7 @@ export const es = {
       subtitle: 'Realiza el seguimiento y la gestión de tus cosechas',
       performanceDashboard: 'Panel de rendimiento',
       harvestsLogged: 'cosechas registradas',
+      harvestLogged: 'cosecha registrada',
       yieldPredictionTitle: 'Predicción de rendimiento',
       yieldPredictionSubtitle:
         'Vista previa del rendimiento de la próxima cosecha.',
@@ -403,6 +404,7 @@ export const es = {
       actions: 'Acciones',
       viewDetails: 'Ver detalles',
       harvestsLoggedFor: 'cosechas registradas para',
+      harvestLoggedFor: 'cosecha registrada para',
       noHarvestsYet: 'Aún no hay cosechas',
       createBatch: 'Crear lote',
       exportCsv: 'Exportar CSV',
@@ -444,6 +446,8 @@ export const es = {
       editBatchTitle: 'Editar lote',
       editBatchDescription: 'Actualizar los detalles del lote.',
       deleteBatch: 'Eliminar lote',
+      deleteBatchDescription:
+        '¿Seguro que quieres eliminar este lote y todas las entradas de cosecha vinculadas? Esta acción no se puede deshacer.',
       completeBatch: 'Completar lote',
       harvestDate: 'Fecha de cosecha',
       logHarvest: 'Registrar cosecha',

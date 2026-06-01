@@ -374,6 +374,7 @@ export const ro = {
       subtitle: 'Urmărește și gestionează înregistrările tale de recoltă',
       performanceDashboard: 'Tablou de bord de performanță',
       harvestsLogged: 'recolte înregistrate',
+      harvestLogged: 'recoltă înregistrată',
       yieldPredictionTitle: 'Predicția producției',
       yieldPredictionSubtitle:
         'Previzualizarea performanței recoltei viitoare.',
@@ -414,6 +415,7 @@ export const ro = {
       actions: 'Acțiuni',
       viewDetails: 'Vezi detaliile',
       harvestsLoggedFor: 'recolte înregistrate pentru',
+      harvestLoggedFor: 'recoltă înregistrată pentru',
       noHarvestsYet: 'Încă fără recolte',
       createBatch: 'Creează lot',
       exportCsv: 'Exportă CSV',
@@ -455,6 +457,8 @@ export const ro = {
       editBatchTitle: 'Editează lot',
       editBatchDescription: 'Actualizează detaliile lotului.',
       deleteBatch: 'Șterge lot',
+      deleteBatchDescription:
+        'Sigur doriți să ștergeți acest lot și toate înregistrările de recoltă asociate? Această acțiune nu poate fi anulată.',
       completeBatch: 'Finalizează lot',
       harvestDate: 'Data recoltei',
       logHarvest: 'Înregistrează recoltă',
