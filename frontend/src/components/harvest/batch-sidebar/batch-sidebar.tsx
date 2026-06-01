@@ -19,12 +19,11 @@ import {
   BatchHeaderField,
 } from './fields/batch-sidebar-basic-fields';
 import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
+import { CalendarDays, Plus, Sparkles } from 'lucide-react';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
-import { YieldDataField } from './fields/batch-sidebar-yield-field';
-import { BrixMeasurementsField } from './fields/batch-sidebar-brix-field';
-import { FruitWeightField } from './fields/batch-sidebar-fruit-weight-field';
+import { entryHasData } from '@/types/batch-sidebar.types';
+import { HarvestEntryCard } from './fields/harvest-entry-card';
 
 export interface BatchSidebarProps {
   open: boolean;
@@ -52,10 +51,6 @@ export function BatchSidebar({
   const {
     currentData,
     loading: isSaving,
-    showBrix,
-    setShowBrix,
-    showFruitWeight,
-    setShowFruitWeight,
     harvestDate,
     setHarvestDate,
     handleBrixChange,
@@ -63,6 +58,10 @@ export function BatchSidebar({
     handleRemoveBrixReading,
     handleFruitCountChange,
     handleYieldChange,
+    handleSetShowBrix,
+    handleSetShowFruitWeight,
+    handleAddEntry,
+    handleRemoveEntry,
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
@@ -70,6 +69,31 @@ export function BatchSidebar({
   const todayIso = React.useMemo(
     () => new Date().toISOString().split('T')[0],
     [],
+  );
+  const dateInputRef = React.useRef<HTMLInputElement>(null);
+  const openDatePicker = () => {
+    const input = dateInputRef.current;
+    if (!input) return;
+    if (typeof input.showPicker === 'function') {
+      try {
+        input.showPicker();
+        return;
+      } catch {
+        // Fall through to focus fallback (Safari < 16, etc.)
+      }
+    }
+    input.focus();
+    input.click();
+  };
+  const friendlyDate = React.useMemo(
+    () =>
+      new Date(harvestDate).toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    [harvestDate],
   );
 
   const busy = isLoading || isSaving;
@@ -128,42 +152,72 @@ export function BatchSidebar({
               </div>
 
               <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
-                <div className="bg-card rounded-xl border p-3 shadow-sm">
-                  <YieldDataField
-                    marketable={currentData.todaysHarvest.marketable}
-                    waste={currentData.todaysHarvest.waste}
-                    classB={currentData.todaysHarvest.classB}
-                    rowX={currentData.todaysHarvest.rowX}
-                    rowY={currentData.todaysHarvest.rowY}
-                    harvestDate={harvestDate}
-                    maxDate={todayIso}
-                    onHarvestDateChange={setHarvestDate}
-                    onYieldChange={handleYieldChange}
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-medium">
+                    {h?.todaysHarvest ?? 'Today Harvest'}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={openDatePicker}
+                    aria-label={h?.harvestDate ?? 'Harvest Date'}
+                    className="border-border/60 bg-muted/40 text-muted-foreground hover:bg-muted/70 focus-visible:ring-ring/40 focus-visible:ring-offset-background relative inline-flex h-7 w-fit cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none"
+                  >
+                    <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>{friendlyDate}</span>
+                    <input
+                      ref={dateInputRef}
+                      id="harvestDate"
+                      type="date"
+                      value={harvestDate}
+                      max={todayIso}
+                      onChange={(e) => setHarvestDate(e.target.value)}
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      className="pointer-events-none absolute h-0 w-0 opacity-0"
+                    />
+                  </button>
+                </div>
+
+                {currentData.entries.map((entry, index) => (
+                  <HarvestEntryCard
+                    key={index}
+                    entry={entry}
+                    index={index}
+                    canRemove={currentData.entries.length > 1}
+                    defaultOpen={index === 0 || entryHasData(entry)}
+                    onYieldChange={(field, value) =>
+                      handleYieldChange(index, field, value)
+                    }
+                    onBrixChange={(readingIndex, value) =>
+                      handleBrixChange(index, readingIndex, value)
+                    }
+                    onAddBrixReading={() => handleAddBrixReading(index)}
+                    onRemoveBrixReading={(readingIndex) =>
+                      handleRemoveBrixReading(index, readingIndex)
+                    }
+                    onSetShowBrix={(show) => handleSetShowBrix(index, show)}
+                    onFruitCountChange={(value) =>
+                      handleFruitCountChange(index, value)
+                    }
+                    onSetShowFruitWeight={(show) =>
+                      handleSetShowFruitWeight(index, show)
+                    }
+                    onRemove={() => handleRemoveEntry(index)}
                     isLoading={busy}
                   />
-                </div>
-                <div className="bg-card rounded-xl border p-3 shadow-sm">
-                  <BrixMeasurementsField
-                    readings={currentData.brixReadings}
-                    showBrix={showBrix}
-                    onShowBrixChange={setShowBrix}
-                    onReadingChange={handleBrixChange}
-                    onAddReading={handleAddBrixReading}
-                    onRemoveReading={handleRemoveBrixReading}
-                    isLoading={busy}
-                  />
-                </div>
-                <div className="bg-card rounded-xl border p-3 shadow-sm">
-                  <FruitWeightField
-                    fruitCount={currentData.fruitCount}
-                    marketable={currentData.todaysHarvest.marketable}
-                    classB={currentData.todaysHarvest.classB}
-                    showFruitWeight={showFruitWeight}
-                    onShowFruitWeightChange={setShowFruitWeight}
-                    onFruitCountChange={handleFruitCountChange}
-                    isLoading={busy}
-                  />
-                </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddEntry}
+                  disabled={busy}
+                  className="w-full"
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  {h?.addEntry ?? 'Add entry'}
+                </Button>
+
                 <div className="bg-card rounded-xl border p-3 shadow-sm">
                   <PhotosField
                     photos={currentData.photos}
