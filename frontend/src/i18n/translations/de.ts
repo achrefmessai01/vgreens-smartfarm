@@ -404,6 +404,7 @@ export const de = {
       totalYieldKg: 'Gesamtertrag (kg)',
       date: 'Datum',
       batch: 'Batch',
+      batchNumber: 'Chargennummer',
       greenhouse: 'Gewächshaus',
       classA: 'Klasse A (kg)',
       wasteColumn: 'Abfall (kg)',

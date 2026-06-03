@@ -407,6 +407,7 @@ export const el = {
       totalYieldKg: 'Συνολική απόδοση (kg)',
       date: 'Ημερομηνία',
       batch: 'Παρτίδα',
+      batchNumber: 'Αριθμός παρτίδας',
       greenhouse: 'Θερμοκήπιο',
       classA: 'Κατηγορία A (kg)',
       wasteColumn: 'Απόβλητα (kg)',

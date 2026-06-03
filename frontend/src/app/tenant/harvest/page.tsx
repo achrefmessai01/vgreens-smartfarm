@@ -55,6 +55,7 @@ export default function HarvestPage() {
     editOpen,
     setEditOpen,
     editReadOnly,
+    editBatchNumber,
     editHarvest,
     deleteOpen,
     setDeleteOpen,
@@ -164,6 +165,7 @@ export default function HarvestPage() {
           onSubmit={editHarvest.handleSubmit}
           onReset={editHarvest.reset}
           readOnly={editReadOnly}
+          batchNumber={editBatchNumber}
         />
 
         <DeleteHarvestDialog

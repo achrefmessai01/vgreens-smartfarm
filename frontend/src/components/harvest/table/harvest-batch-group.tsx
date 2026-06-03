@@ -150,6 +150,15 @@ export function HarvestBatchGroup({
             {visibleEntries.length}{' '}
             {harvestsLoggedLabel(visibleEntries.length, h, locale)}
           </Badge>
+          {group.root.batchNumber && (
+            <Badge
+              variant="outline"
+              className="font-mono text-[10px]"
+              title={h?.batchNumber ?? 'Batch Number'}
+            >
+              {group.root.batchNumber}
+            </Badge>
+          )}
           <span>{getGreenhouseLabel(group.root.greenhouse)}</span>
         </div>
         <AccordionContent className="border-t">

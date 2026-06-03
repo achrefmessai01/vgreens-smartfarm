@@ -34,6 +34,12 @@ export function useHarvestPage() {
   const [sidebarMode, setSidebarMode] = React.useState<SidebarMode>('create');
   const [editOpen, setEditOpen] = React.useState(false);
   const [editReadOnly, setEditReadOnly] = React.useState(false);
+  // batchNumber of the batch currently shown in the edit/view dialog. Read-only
+  // (frozen field), so it lives alongside the dialog state rather than in the
+  // editable BatchFormData.
+  const [editBatchNumber, setEditBatchNumber] = React.useState<string | null>(
+    null,
+  );
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState<HarvestItem | null>(
     null,
@@ -95,6 +101,7 @@ export function useHarvestPage() {
   const handleBatchView = React.useCallback(
     (harvest: HarvestItem) => {
       setEditReadOnly(true);
+      setEditBatchNumber(harvest.batchNumber ?? null);
       editHarvest.populate(harvest);
       setEditOpen(true);
     },
@@ -104,6 +111,7 @@ export function useHarvestPage() {
   const handleBatchEdit = React.useCallback(
     (harvest: HarvestItem) => {
       setEditReadOnly(false);
+      setEditBatchNumber(harvest.batchNumber ?? null);
       editHarvest.populate(harvest);
       setEditOpen(true);
     },
@@ -181,6 +189,7 @@ export function useHarvestPage() {
     editOpen,
     setEditOpen,
     editReadOnly,
+    editBatchNumber,
     editHarvest,
     handleEditRequest,
     deleteOpen,

@@ -399,6 +399,7 @@ export const tr = {
       totalYieldKg: 'Toplam verim (kg)',
       date: 'Tarih',
       batch: 'Parti',
+      batchNumber: 'Parti Numarası',
       greenhouse: 'Sera',
       classA: 'A Sınıfı (kg)',
       wasteColumn: 'Atık (kg)',

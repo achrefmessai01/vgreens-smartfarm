@@ -407,6 +407,7 @@ export const it = {
       totalYieldKg: 'Resa totale (kg)',
       date: 'Data',
       batch: 'Lotto',
+      batchNumber: 'Numero di lotto',
       greenhouse: 'Serra',
       classA: 'Classe A (kg)',
       wasteColumn: 'Scarto (kg)',

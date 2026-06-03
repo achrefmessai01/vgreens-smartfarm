@@ -402,6 +402,7 @@ export const pl = {
       totalYieldKg: 'Plon całkowity (kg)',
       date: 'Data',
       batch: 'Partia',
+      batchNumber: 'Numer partii',
       greenhouse: 'Szklarnia',
       classA: 'Klasa A (kg)',
       wasteColumn: 'Odpady (kg)',
