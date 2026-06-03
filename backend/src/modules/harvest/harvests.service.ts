@@ -26,6 +26,7 @@ import {
 import { HarvestBatchListItem } from './dto/harvest-batch-list-item.dto';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
+import { buildBatchNumber } from './utils/batch-number.util';
 
 @Injectable()
 export class HarvestsService
@@ -67,6 +68,44 @@ export class HarvestsService
     } catch (error) {
       this.logger.error(
         `yieldPerPlant backfill failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+
+    await this.backfillBatchNumbers();
+  }
+
+  // Generate batchNumber for historical rows inserted before the column existed.
+  // The varietyLetters logic is awkward in SQL, so compute it in JS: fetch the
+  // rows still missing a value (plantingDate cast to text to read its YYYY-MM-DD
+  // form unshifted) and update each. Idempotent — once filled, the SELECT
+  // returns zero rows on subsequent boots.
+  private async backfillBatchNumbers(): Promise<void> {
+    try {
+      const rows: Array<{
+        id: string;
+        variety: string;
+        plantingDate: string;
+      }> = await this.harvestRepository.query(
+        `SELECT id, variety, "plantingDate"::text AS "plantingDate"
+         FROM harvests
+         WHERE "batchNumber" IS NULL`,
+      );
+
+      for (const row of rows) {
+        await this.harvestRepository.update(row.id, {
+          batchNumber: buildBatchNumber(row.variety, row.plantingDate),
+        });
+      }
+
+      if (rows.length > 0) {
+        this.logger.log(
+          `Backfilled batchNumber for ${rows.length} historical harvest row(s).`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `batchNumber backfill failed: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
       );
     }
@@ -411,6 +450,9 @@ export class HarvestsService
         species: input.species,
         variety: input.variety,
         batch: batchName,
+        // Frozen at creation: derived once from variety + planting date and never
+        // regenerated when those fields are later edited (see updateHarvest).
+        batchNumber: buildBatchNumber(input.variety, input.plantingDate),
         greenhouse: input.greenhouse ?? undefined,
         plantingDate: new Date(input.plantingDate),
         cultivationArea: input.cultivationArea,

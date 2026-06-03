@@ -9,6 +9,7 @@ export const HARVESTS_QUERY = gql`
       species
       variety
       batch
+      batchNumber
       parentBatchId
       greenhouse
       plantingDate
@@ -66,6 +67,7 @@ export const HARVEST_QUERY = gql`
       species
       variety
       batch
+      batchNumber
       parentBatchId
       greenhouse
       plantingDate

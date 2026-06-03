@@ -406,6 +406,7 @@ export const ro = {
       totalYieldKg: 'Producție totală (kg)',
       date: 'Data',
       batch: 'Lot',
+      batchNumber: 'Număr lot',
       greenhouse: 'Seră',
       classA: 'Clasa A (kg)',
       wasteColumn: 'Deșeuri (kg)',

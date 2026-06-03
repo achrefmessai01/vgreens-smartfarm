@@ -405,6 +405,7 @@ export const pt = {
       totalYieldKg: 'Produção total (kg)',
       date: 'Data',
       batch: 'Lote',
+      batchNumber: 'Número do lote',
       greenhouse: 'Estufa',
       classA: 'Classe A (kg)',
       wasteColumn: 'Desperdício (kg)',

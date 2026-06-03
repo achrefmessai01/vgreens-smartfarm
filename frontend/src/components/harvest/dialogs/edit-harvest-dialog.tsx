@@ -23,6 +23,9 @@ interface EditHarvestDialogProps {
   onSubmit: (e: React.FormEvent) => void;
   onReset: () => void;
   readOnly?: boolean;
+  // Auto-generated, frozen batch identifier. Shown read-only above the form;
+  // not part of the editable BatchFormData.
+  batchNumber?: string | null;
 }
 
 export function EditHarvestDialog({
@@ -35,6 +38,7 @@ export function EditHarvestDialog({
   onSubmit,
   onReset,
   readOnly = false,
+  batchNumber,
 }: EditHarvestDialogProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -65,6 +69,16 @@ export function EditHarvestDialog({
 
         <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+            {batchNumber && (
+              <div className="mb-4 space-y-2">
+                <label className="text-sm font-medium">
+                  {h?.batchNumber ?? 'Batch Number'}
+                </label>
+                <div className="border-input bg-muted/40 text-muted-foreground flex h-10 w-full items-center rounded-md border px-3 font-mono text-sm">
+                  {batchNumber}
+                </div>
+              </div>
+            )}
             <CreateBatchFormFields
               formData={formData}
               setFormData={setFormData}

@@ -395,6 +395,7 @@ export const ar = {
       totalYieldKg: 'إجمالي الإنتاج (kg)',
       date: 'التاريخ',
       batch: 'الدفعة',
+      batchNumber: 'رقم الدفعة',
       greenhouse: 'البيت المحمي',
       classA: 'الفئة A (kg)',
       wasteColumn: 'الفاقد (kg)',

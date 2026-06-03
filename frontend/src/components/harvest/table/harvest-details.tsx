@@ -71,6 +71,13 @@ export function HarvestDetails({
                   value={formatHarvestDate(harvest.date)}
                 />
                 <DetailRow label={h?.batch ?? 'Batch'} value={harvest.batch} />
+                {harvest.batchNumber && (
+                  <DetailRow
+                    label={h?.batchNumber ?? 'Batch Number'}
+                    value={harvest.batchNumber}
+                    valueClassName="font-mono"
+                  />
+                )}
                 <DetailRow
                   label={h?.greenhouse ?? 'Greenhouse'}
                   value={getGreenhouseLabel(harvest.greenhouse)}
