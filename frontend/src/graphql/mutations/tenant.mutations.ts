@@ -59,3 +59,18 @@ export const SET_TENANT_DISABLED_SENSOR_FIELDS_MUTATION = gql`
     }
   }
 `;
+
+export const SET_TENANT_HARVEST_DASHBOARD_ITEMS_MUTATION = gql`
+  mutation SetTenantHarvestDashboardItems(
+    $hiddenItems: [String!]!
+    $tenantId: ID
+  ) {
+    setTenantHarvestDashboardItems(
+      hiddenItems: $hiddenItems
+      tenantId: $tenantId
+    ) {
+      id
+      hiddenHarvestDashboardItems
+    }
+  }
+`;

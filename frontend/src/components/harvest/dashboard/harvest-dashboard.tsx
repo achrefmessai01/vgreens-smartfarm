@@ -8,9 +8,12 @@ import {
   type DateFilter,
 } from '@/lib/hooks/use-harvest-dashboard';
 import { useHarvestDashboardUrlState } from '@/lib/hooks/use-harvest-dashboard-url-state';
+import { useHarvestDashboardVisibility } from '@/lib/hooks/use-harvest-dashboard-visibility';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { harvestsLoggedForLabel } from '@/lib/harvest-utils';
-import { AlertTriangle, Package } from 'lucide-react';
+import { AlertTriangle, LayoutDashboard, Package } from 'lucide-react';
 import { DashboardChartsGrid } from './dashboard-charts-grid';
+import { DashboardConfigMenu } from './dashboard-config-menu';
 import { DashboardMetricsGrid } from './dashboard-metrics-grid';
 import { HarvestDashboardCompare } from './harvest-dashboard-compare';
 import { DashboardFilters } from './harvest-dashboard-filters';
@@ -50,6 +53,11 @@ export function HarvestDashboard({
   } = useHarvestDashboardUrlState();
 
   const { batches, loading: batchesLoading } = useHarvestBatches();
+
+  const { isTenantAdmin } = useCurrentUser();
+  const { isVisible, allHidden, tenantId, hiddenSet } =
+    useHarvestDashboardVisibility();
+  const canEditDashboard = isTenantAdmin && Boolean(tenantId);
 
   const selectedBatch = batchId
     ? batches.find((b) => b.id === batchId)
@@ -165,7 +173,12 @@ export function HarvestDashboard({
               </p>
             )}
           </div>
-          {filterBar}
+          <div className="flex flex-wrap items-center gap-2">
+            {canEditDashboard && tenantId && (
+              <DashboardConfigMenu tenantId={tenantId} hiddenSet={hiddenSet} />
+            )}
+            {filterBar}
+          </div>
         </div>
       </div>
 
@@ -182,11 +195,27 @@ export function HarvestDashboard({
             </p>
           </div>
         </div>
+      ) : allHidden ? (
+        <div className="flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px]">
+          <div className="max-w-md text-center">
+            <LayoutDashboard className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
+            <p className="text-foreground mb-1 text-sm font-medium sm:text-base">
+              {h?.configEmptyTitle ?? 'No dashboard items selected'}
+            </p>
+            <p className="text-muted-foreground text-sm">
+              {canEditDashboard
+                ? (h?.configEmptyHintAdmin ??
+                  'Use "Edit dashboard" to choose what appears here.')
+                : (h?.configEmptyHint ??
+                  'No visualizations are enabled for this dashboard.')}
+            </p>
+          </div>
+        </div>
       ) : (
         <>
-          <DashboardMetricsGrid data={data} />
+          <DashboardMetricsGrid data={data} isVisible={isVisible} />
           <YieldPredictionCard />
-          <DashboardChartsGrid data={data} />
+          <DashboardChartsGrid data={data} isVisible={isVisible} />
         </>
       )}
     </div>

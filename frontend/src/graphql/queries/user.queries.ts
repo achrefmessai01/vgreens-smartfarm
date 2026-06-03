@@ -19,6 +19,7 @@ export const ME_QUERY = gql`
         isActive
         updatedAt
         disabledSensorFields
+        hiddenHarvestDashboardItems
         greenhouses {
           name
           xDimension
