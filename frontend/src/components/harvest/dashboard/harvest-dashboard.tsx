@@ -174,10 +174,10 @@ export function HarvestDashboard({
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {filterBar}
             {canEditDashboard && tenantId && (
               <DashboardConfigMenu tenantId={tenantId} hiddenSet={hiddenSet} />
             )}
-            {filterBar}
           </div>
         </div>
       </div>
