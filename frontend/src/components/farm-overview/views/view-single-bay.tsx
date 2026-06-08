@@ -64,16 +64,26 @@ export function ViewSingleBay({
               greenhouseDimensions.bayCount > 1 &&
               Array.from(
                 { length: greenhouseDimensions.bayCount - 1 },
-                (_, i) => (
-                  <div
-                    key={`bay-line-${i}`}
-                    aria-hidden="true"
-                    className="bg-foreground/15 pointer-events-none absolute inset-y-0 z-10 w-px"
-                    style={{
-                      left: `${((i + 1) / greenhouseDimensions.bayCount!) * 100}%`,
-                    }}
-                  />
-                ),
+                (_, i) => {
+                  const offset = `${((i + 1) / greenhouseDimensions.bayCount!) * 100}%`;
+                  return (
+                    <div
+                      key={`bay-line-${i}`}
+                      aria-hidden="true"
+                      className={cn(
+                        'bg-foreground/15 pointer-events-none absolute z-10',
+                        greenhouseDimensions.isVertical
+                          ? 'inset-x-0 h-px'
+                          : 'inset-y-0 w-px',
+                      )}
+                      style={
+                        greenhouseDimensions.isVertical
+                          ? { top: offset }
+                          : { left: offset }
+                      }
+                    />
+                  );
+                },
               )}
             <HeatmapBackground
               grid={heatmapGrid}

@@ -21,6 +21,9 @@ export class TenantGreenhouse {
 
   @Field(() => Int, { nullable: true })
   bayCount?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  isVertical?: boolean;
 }
 
 @ObjectType()
@@ -75,6 +78,10 @@ export class Tenant extends BaseEntity {
   @Field(() => [String], { defaultValue: [] })
   @Column({ type: 'jsonb', default: () => "'[]'" })
   disabledSensorFields: string[];
+
+  @Field(() => [String], { defaultValue: [] })
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  hiddenHarvestDashboardItems: string[];
 
   @Field(() => Date)
   createdAt: Date;

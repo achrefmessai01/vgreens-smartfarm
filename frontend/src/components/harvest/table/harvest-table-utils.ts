@@ -18,7 +18,24 @@ export function getCreatedByLabel(harvest: HarvestItem) {
   return fullName || harvest.createdBy.email || '-';
 }
 
-export function isAutoDraftPlaceholder(entry: HarvestItem): boolean {
+// Only the fields needed to detect an empty auto-draft placeholder. Kept narrow
+// so the predicate can be reused by lighter queries (e.g. the export count).
+type AutoDraftPlaceholderFields = Pick<
+  HarvestItem,
+  | 'parentBatchId'
+  | 'status'
+  | 'classA'
+  | 'classB'
+  | 'waste'
+  | 'avgBrix'
+  | 'rowX'
+  | 'rowY'
+  | 'photos'
+>;
+
+export function isAutoDraftPlaceholder(
+  entry: AutoDraftPlaceholderFields,
+): boolean {
   return (
     !entry.parentBatchId &&
     entry.status === HarvestStatus.Draft &&

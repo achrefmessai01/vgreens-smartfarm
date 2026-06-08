@@ -25,6 +25,7 @@ import {
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useFullMapData } from '@/lib/hooks/use-full-map-data';
 import {
+  getXYFromPosition,
   type GreenhouseDimensions,
   parseLiveSensorSlotId,
 } from '@/lib/sensor-map-positions';
@@ -89,13 +90,14 @@ function getPositionFromPercents(
   topPercent: number,
   greenhouseDimensions: GreenhouseDimensions,
 ) {
+  const { xPosition, yPosition } = getXYFromPosition(
+    leftPercent,
+    topPercent,
+    greenhouseDimensions,
+  );
   return {
-    xPosition: roundPosition(
-      (leftPercent / 100) * greenhouseDimensions.xDimension,
-    ),
-    yPosition: roundPosition(
-      (1 - topPercent / 100) * greenhouseDimensions.yDimension,
-    ),
+    xPosition: roundPosition(xPosition),
+    yPosition: roundPosition(yPosition),
   };
 }
 
@@ -619,13 +621,20 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
         pixelY >= 0 &&
         pixelY <= rect.height;
 
+      const leftPercent = (pixelX / rect.width) * 100;
+      const topPercent = (pixelY / rect.height) * 100;
+      const { xPosition, yPosition } = getXYFromPosition(
+        leftPercent,
+        topPercent,
+        greenhouseDimensions!,
+      );
+
       return {
         isValid,
-        leftPercent: (pixelX / rect.width) * 100,
-        topPercent: (pixelY / rect.height) * 100,
-        xPosition: (pixelX / rect.width) * greenhouseDimensions!.xDimension,
-        yPosition:
-          (1 - pixelY / rect.height) * greenhouseDimensions!.yDimension,
+        leftPercent,
+        topPercent,
+        xPosition,
+        yPosition,
       };
     },
     [greenhouseDimensions],
@@ -776,16 +785,26 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
               greenhouseDimensions.bayCount > 1 &&
               Array.from(
                 { length: greenhouseDimensions.bayCount - 1 },
-                (_, i) => (
-                  <div
-                    key={`bay-line-${i}`}
-                    aria-hidden="true"
-                    className="bg-foreground/15 pointer-events-none absolute inset-y-0 w-px"
-                    style={{
-                      left: `${((i + 1) / greenhouseDimensions.bayCount!) * 100}%`,
-                    }}
-                  />
-                ),
+                (_, i) => {
+                  const offset = `${((i + 1) / greenhouseDimensions.bayCount!) * 100}%`;
+                  return (
+                    <div
+                      key={`bay-line-${i}`}
+                      aria-hidden="true"
+                      className={cn(
+                        'bg-foreground/15 pointer-events-none absolute',
+                        greenhouseDimensions.isVertical
+                          ? 'inset-x-0 h-px'
+                          : 'inset-y-0 w-px',
+                      )}
+                      style={
+                        greenhouseDimensions.isVertical
+                          ? { top: offset }
+                          : { left: offset }
+                      }
+                    />
+                  );
+                },
               )}
             {resolvedSensors.map((sensor) => (
               <SensorPill

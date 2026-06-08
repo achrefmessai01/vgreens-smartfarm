@@ -14,6 +14,8 @@ export const CREATE_TENANT_MUTATION = gql`
         doorPosition
         xDimension
         yDimension
+        bayCount
+        isVertical
       }
       createdAt
       updatedAt
@@ -35,6 +37,8 @@ export const UPDATE_TENANT_MUTATION = gql`
         doorPosition
         xDimension
         yDimension
+        bayCount
+        isVertical
       }
       createdAt
       updatedAt
@@ -56,6 +60,21 @@ export const SET_TENANT_DISABLED_SENSOR_FIELDS_MUTATION = gql`
     setTenantDisabledSensorFields(fields: $fields, tenantId: $tenantId) {
       id
       disabledSensorFields
+    }
+  }
+`;
+
+export const SET_TENANT_HARVEST_DASHBOARD_ITEMS_MUTATION = gql`
+  mutation SetTenantHarvestDashboardItems(
+    $hiddenItems: [String!]!
+    $tenantId: ID
+  ) {
+    setTenantHarvestDashboardItems(
+      hiddenItems: $hiddenItems
+      tenantId: $tenantId
+    ) {
+      id
+      hiddenHarvestDashboardItems
     }
   }
 `;

@@ -71,6 +71,7 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
               yLabel={fl.yLabel}
               doorLabel={fl.doorLabel}
               bayCountLabel={fl.bayCountLabel}
+              orientationLabel={fl.orientationLabel}
               namePlaceholder={fl.namePlaceholder}
               xPlaceholder={fl.xDimensionPlaceholder}
               yPlaceholder={fl.yDimensionPlaceholder}

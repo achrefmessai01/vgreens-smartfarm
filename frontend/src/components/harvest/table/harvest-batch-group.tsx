@@ -150,6 +150,15 @@ export function HarvestBatchGroup({
             {visibleEntries.length}{' '}
             {harvestsLoggedLabel(visibleEntries.length, h, locale)}
           </Badge>
+          {group.root.batchNumber && (
+            <Badge
+              variant="outline"
+              className="font-mono text-[10px]"
+              title={h?.batchNumber ?? 'Batch Number'}
+            >
+              {group.root.batchNumber}
+            </Badge>
+          )}
           <span>{getGreenhouseLabel(group.root.greenhouse)}</span>
         </div>
         <AccordionContent className="border-t">
@@ -173,6 +182,9 @@ export function HarvestBatchGroup({
                       <TableHead>
                         {h?.yieldPerPlantShort ?? 'Yield/Plant'}
                       </TableHead>
+                      <TableHead>
+                        {h?.yieldPerMeterShort ?? 'Yield/m'}
+                      </TableHead>
                       <TableHead>{h?.createdBy ?? 'Created By'}</TableHead>
                       <TableHead className="text-right">
                         {h?.actions ?? 'Actions'}
@@ -185,6 +197,10 @@ export function HarvestBatchGroup({
                       const rowYieldPerPlant =
                         group.root.totalPlants > 0
                           ? sellable / group.root.totalPlants
+                          : null;
+                      const rowYieldPerMeter =
+                        group.root.rowLength > 0
+                          ? sellable / group.root.rowLength
                           : null;
                       // Derive on the fly from current yield + count so stale
                       // stored `avgFruitWeight` values (from before the total-
@@ -216,6 +232,11 @@ export function HarvestBatchGroup({
                           {rowYieldPerPlant == null
                             ? '—'
                             : `${rowYieldPerPlant.toFixed(2)} kg`}
+                        </TableCell>
+                        <TableCell>
+                          {rowYieldPerMeter == null
+                            ? '—'
+                            : `${rowYieldPerMeter.toFixed(2)} kg/m`}
                         </TableCell>
                         <TableCell className="max-w-[220px] truncate">
                           {getCreatedByLabel(entry)}

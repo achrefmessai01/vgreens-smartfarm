@@ -92,6 +92,18 @@ export class TenantsService {
     return this.tenantRepository.save(tenant);
   }
 
+  async setHiddenHarvestDashboardItems(
+    id: string,
+    items: string[],
+  ): Promise<Tenant> {
+    const tenant = await this.findOne(id);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with id ${id} not found`);
+    }
+    tenant.hiddenHarvestDashboardItems = Array.from(new Set(items));
+    return this.tenantRepository.save(tenant);
+  }
+
   private buildBucketName(
     tenant: Pick<Tenant, 'id' | 'companyName' | 'name'>,
   ): string {

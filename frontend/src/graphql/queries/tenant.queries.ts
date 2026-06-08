@@ -10,12 +10,14 @@ export const TENANTS_QUERY = gql`
       phone
       isActive
       disabledSensorFields
+      hiddenHarvestDashboardItems
       greenhouses {
         name
         doorPosition
         xDimension
         yDimension
         bayCount
+        isVertical
       }
       createdAt
       updatedAt
@@ -33,12 +35,14 @@ export const TENANT_QUERY = gql`
       phone
       isActive
       disabledSensorFields
+      hiddenHarvestDashboardItems
       greenhouses {
         name
         doorPosition
         xDimension
         yDimension
         bayCount
+        isVertical
       }
       createdAt
       updatedAt

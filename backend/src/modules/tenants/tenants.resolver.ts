@@ -79,4 +79,21 @@ export class TenantsResolver {
         : currentUser.tenantId;
     return this.tenantsService.setDisabledSensorFields(targetTenantId, fields);
   }
+
+  @Mutation(() => Tenant)
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  async setTenantHarvestDashboardItems(
+    @CurrentUser() currentUser: User,
+    @Args('hiddenItems', { type: () => [String] }) hiddenItems: string[],
+    @Args('tenantId', { type: () => ID, nullable: true }) tenantId?: string,
+  ): Promise<Tenant> {
+    const targetTenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? (tenantId ?? currentUser.tenantId)
+        : currentUser.tenantId;
+    return this.tenantsService.setHiddenHarvestDashboardItems(
+      targetTenantId,
+      hiddenItems,
+    );
+  }
 }
