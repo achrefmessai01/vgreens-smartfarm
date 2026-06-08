@@ -360,6 +360,17 @@ export class HarvestsService
     }
   }
 
+  // CSV export must exclude empty draft placeholders (auto-created blank batch
+  // roots). They render as blank rows and reappear as a stray empty entry when a
+  // batch is re-created from the export. Drafts with real data are kept.
+  async findAllForExport(
+    tenantId: string | undefined,
+    filter?: HarvestFilterInput | null,
+  ): Promise<Harvest[]> {
+    const harvests = await this.findAllFiltered(tenantId, filter);
+    return harvests.filter((h) => !this.isDashboardPlaceholder(h));
+  }
+
   private getLegacyGroupKey(harvest: Harvest): string {
     const batch = harvest.batch.trim().toLowerCase();
     const greenhouse = (harvest.greenhouse ?? '').trim().toLowerCase();

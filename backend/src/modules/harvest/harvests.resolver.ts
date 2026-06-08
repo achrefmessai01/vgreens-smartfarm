@@ -72,7 +72,7 @@ export class HarvestsResolver {
       throw new Error('Tenant ID is required');
     }
 
-    const harvests = await this.harvestsService.findAllFiltered(
+    const harvests = await this.harvestsService.findAllForExport(
       tenantId,
       filter ?? undefined,
     );
