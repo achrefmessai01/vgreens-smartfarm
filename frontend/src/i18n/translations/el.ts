@@ -408,6 +408,8 @@ export const el = {
       daysActive: 'Ενεργές ημέρες',
       sincePlanting: 'Από τη φύτευση',
       yieldOverTime: 'Απόδοση στον χρόνο',
+      yieldPerMeterOverTime: 'Απόδοση ανά μέτρο στον χρόνο',
+      yieldPerMeterUnit: 'Απόδοση (kg/m)',
       classDistribution: 'Κατανομή ανά κατηγορία',
       brixTrendOverTime: 'Τάση Brix στον χρόνο',
       cumulativeYieldProgress: 'Σωρευτική πρόοδος απόδοσης',

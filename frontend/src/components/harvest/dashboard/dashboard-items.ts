@@ -35,6 +35,7 @@ export const DASHBOARD_METRIC_IDS = {
 
 export const DASHBOARD_CHART_IDS = {
   yieldOverTime: 'yieldOverTime',
+  yieldPerMeter: 'yieldPerMeter',
   classDistribution: 'classDistribution',
   brixTrend: 'brixTrend',
   fruitWeightTrend: 'fruitWeightTrend',
@@ -96,6 +97,12 @@ export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
     id: DASHBOARD_CHART_IDS.yieldOverTime,
     labelKey: 'yieldOverTime',
     fallback: 'Yield Over Time',
+    category: 'charts',
+  },
+  {
+    id: DASHBOARD_CHART_IDS.yieldPerMeter,
+    labelKey: 'yieldPerMeterOverTime',
+    fallback: 'Yield per Meter Over Time',
     category: 'charts',
   },
   {

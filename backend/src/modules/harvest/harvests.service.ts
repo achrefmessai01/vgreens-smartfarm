@@ -18,6 +18,7 @@ import { DashboardFilterInput } from './dto/dashboard-filter.input';
 import {
   HarvestDashboardMetrics,
   YieldOverTimeData,
+  YieldPerMeterData,
   ClassDistributionData,
   BrixTrendData,
   FruitWeightTrendData,
@@ -42,9 +43,10 @@ export class HarvestsService
     super(harvestRepository);
   }
 
-  // Backfill historical harvest rows whose yieldPerPlant is still NULL because
-  // they were inserted before the column existed. Idempotent: subsequent boots
-  // hit zero matching rows and the UPDATE returns immediately.
+  // Backfill historical harvest rows whose yieldPerPlant / yieldPerMeter are
+  // still NULL because they were inserted before the column existed.
+  // Idempotent: subsequent boots hit zero matching rows and the UPDATE returns
+  // immediately.
   async onModuleInit(): Promise<void> {
     try {
       const result: unknown = await this.harvestRepository.query(
@@ -68,6 +70,31 @@ export class HarvestsService
     } catch (error) {
       this.logger.error(
         `yieldPerPlant backfill failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
+
+    try {
+      const result: unknown = await this.harvestRepository.query(
+        `UPDATE harvests
+         SET "yieldPerMeter" = ROUND(
+           (("classA"::numeric + "classB"::numeric) / "rowLength")::numeric,
+           2
+         )
+         WHERE "yieldPerMeter" IS NULL
+           AND "rowLength" > 0
+           AND ("classA" > 0 OR "classB" > 0)`,
+      );
+      const updated =
+        Array.isArray(result) && typeof result[1] === 'number' ? result[1] : 0;
+      if (updated > 0) {
+        this.logger.log(
+          `Backfilled yieldPerMeter for ${updated} historical harvest row(s).`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `yieldPerMeter backfill failed: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
       );
     }
@@ -142,6 +169,18 @@ export class HarvestsService
   ): number | null {
     if (totalPlants <= 0) return null;
     return this.roundTo2((classA + classB) / totalPlants);
+  }
+
+  // Per-harvest yield-per-metre: (classA + classB) / rowLength. Stored on each
+  // Harvest row by create/update so the value is queryable without re-deriving
+  // it. Null when the harvest has no recorded row length (rowLength <= 0).
+  private computeYieldPerMeter(
+    classA: number,
+    classB: number,
+    rowLength: number,
+  ): number | null {
+    if (rowLength <= 0) return null;
+    return this.roundTo2((classA + classB) / rowLength);
   }
 
   // Per-row avg fruit weight: (classA + classB) / fruitCount, computed on the
@@ -474,6 +513,11 @@ export class HarvestsService
         classB,
         waste: agg?.waste ?? input.waste ?? 0,
         yieldPerPlant: this.computeYieldPerPlant(classA, classB, totalPlants),
+        yieldPerMeter: this.computeYieldPerMeter(
+          classA,
+          classB,
+          input.rowLength,
+        ),
         avgBrix: agg?.avgBrix ?? input.avgBrix ?? 0,
         rowX:
           agg?.rowX ??
@@ -571,6 +615,11 @@ export class HarvestsService
         harvest.classB,
         harvest.totalPlants,
       );
+      harvest.yieldPerMeter = this.computeYieldPerMeter(
+        harvest.classA,
+        harvest.classB,
+        harvest.rowLength,
+      );
       if (input.avgBrix !== undefined) harvest.avgBrix = input.avgBrix;
       if (input.rowX !== undefined) harvest.rowX = input.rowX;
       if (input.rowY !== undefined) harvest.rowY = input.rowY;
@@ -620,6 +669,11 @@ export class HarvestsService
             harvest.classA,
             harvest.classB,
             harvest.totalPlants,
+          );
+          harvest.yieldPerMeter = this.computeYieldPerMeter(
+            harvest.classA,
+            harvest.classB,
+            harvest.rowLength,
           );
         } else {
           harvest.entries = [];
@@ -848,6 +902,8 @@ export class HarvestsService
 
       // Generate time series data
       const yieldOverTime = this.generateYieldOverTimeData(metricsHarvests);
+      const yieldPerMeterTrend =
+        this.generateYieldPerMeterData(metricsHarvests);
       const classDistribution =
         this.generateClassDistributionData(metricsHarvests);
       const brixTrend = this.generateBrixTrendData(metricsHarvests);
@@ -870,6 +926,7 @@ export class HarvestsService
         criticalAlerts,
         daysActive,
         yieldOverTime,
+        yieldPerMeterTrend,
         classDistribution,
         brixTrend,
         fruitWeightTrend,
@@ -902,6 +959,7 @@ export class HarvestsService
       criticalAlerts: 0,
       daysActive: 0,
       yieldOverTime: [],
+      yieldPerMeterTrend: [],
       classDistribution: [],
       brixTrend: [],
       fruitWeightTrend: [],
@@ -923,6 +981,29 @@ export class HarvestsService
       .map(([date, yieldAmount]) => ({
         date,
         yield: Math.round(yieldAmount * 10) / 10,
+      }));
+  }
+
+  // Weighted daily yield-per-metre: Σ(classA + classB) / Σ rowLength across all
+  // harvest rows on that date. Days where no row has a recorded row length
+  // (Σ rowLength <= 0) are omitted, mirroring the per-row null convention.
+  private generateYieldPerMeterData(harvests: Harvest[]): YieldPerMeterData[] {
+    const daily = new Map<string, { sellable: number; rowLength: number }>();
+
+    harvests.forEach((harvest) => {
+      const dateStr = harvest.date.toISOString().split('T')[0];
+      const current = daily.get(dateStr) ?? { sellable: 0, rowLength: 0 };
+      current.sellable += harvest.classA + harvest.classB;
+      current.rowLength += harvest.rowLength;
+      daily.set(dateStr, current);
+    });
+
+    return Array.from(daily.entries())
+      .filter(([, v]) => v.rowLength > 0)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, v]) => ({
+        date,
+        yieldPerMeter: this.roundTo2(v.sellable / v.rowLength),
       }));
   }
 

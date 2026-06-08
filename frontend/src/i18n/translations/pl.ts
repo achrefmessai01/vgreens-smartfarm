@@ -403,6 +403,8 @@ export const pl = {
       daysActive: 'Dni aktywności',
       sincePlanting: 'Od posadzenia',
       yieldOverTime: 'Plon w czasie',
+      yieldPerMeterOverTime: 'Plon na metr w czasie',
+      yieldPerMeterUnit: 'Plon (kg/m)',
       classDistribution: 'Rozkład klas',
       brixTrendOverTime: 'Trend Brix w czasie',
       cumulativeYieldProgress: 'Postęp plonu skumulowanego',

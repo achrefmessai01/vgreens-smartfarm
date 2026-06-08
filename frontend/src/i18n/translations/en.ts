@@ -398,6 +398,8 @@ export const en = {
       daysActive: 'Days Active',
       sincePlanting: 'Since planting',
       yieldOverTime: 'Yield Over Time',
+      yieldPerMeterOverTime: 'Yield per Meter Over Time',
+      yieldPerMeterUnit: 'Yield (kg/m)',
       classDistribution: 'Class Distribution',
       brixTrendOverTime: 'Brix Trend Over Time',
       cumulativeYieldProgress: 'Cumulative Yield Progress',

@@ -147,6 +147,14 @@ export class Harvest {
   @Column({ type: 'float', nullable: true })
   yieldPerPlant: number | null;
 
+  // Per-harvest sellable yield divided by the row length in metres:
+  // `(classA + classB) / rowLength`. Auto-computed by the service on
+  // create/update. Null when the harvest has no recorded row length
+  // (rowLength <= 0).
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'float', nullable: true })
+  yieldPerMeter: number | null;
+
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
   avgBrix: number;

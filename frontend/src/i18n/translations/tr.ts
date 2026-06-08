@@ -400,6 +400,8 @@ export const tr = {
       daysActive: 'Etkin gün sayısı',
       sincePlanting: 'Dikimden bu yana',
       yieldOverTime: 'Zamana göre verim',
+      yieldPerMeterOverTime: 'Zamana göre metre başına verim',
+      yieldPerMeterUnit: 'Verim (kg/m)',
       classDistribution: 'Sınıf dağılımı',
       brixTrendOverTime: 'Zamana göre Brix eğilimi',
       cumulativeYieldProgress: 'Birikmiş verim ilerlemesi',

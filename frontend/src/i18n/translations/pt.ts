@@ -406,6 +406,8 @@ export const pt = {
       daysActive: 'Dias ativos',
       sincePlanting: 'Desde a plantação',
       yieldOverTime: 'Produção ao longo do tempo',
+      yieldPerMeterOverTime: 'Produção por metro ao longo do tempo',
+      yieldPerMeterUnit: 'Produção (kg/m)',
       classDistribution: 'Distribuição por classe',
       brixTrendOverTime: 'Tendência Brix ao longo do tempo',
       cumulativeYieldProgress: 'Progresso cumulativo da produção',

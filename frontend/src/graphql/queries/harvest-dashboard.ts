@@ -20,6 +20,10 @@ export const GET_HARVEST_DASHBOARD = gql`
         date
         yield
       }
+      yieldPerMeterTrend {
+        date
+        yieldPerMeter
+      }
       classDistribution {
         date
         marketable
@@ -82,6 +86,10 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       yieldOverTime {
         date
         yield
+      }
+      yieldPerMeterTrend {
+        date
+        yieldPerMeter
       }
       classDistribution {
         date

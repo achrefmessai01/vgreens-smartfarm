@@ -396,6 +396,8 @@ export const ar = {
       daysActive: 'أيام النشاط',
       sincePlanting: 'منذ الزراعة',
       yieldOverTime: 'الإنتاج عبر الزمن',
+      yieldPerMeterOverTime: 'الإنتاج لكل متر عبر الزمن',
+      yieldPerMeterUnit: 'الإنتاج (كجم/م)',
       classDistribution: 'توزيع الفئات',
       brixTrendOverTime: 'اتجاه Brix عبر الزمن',
       cumulativeYieldProgress: 'تقدّم الإنتاج التراكمي',

@@ -407,6 +407,8 @@ export const ro = {
       daysActive: 'Zile active',
       sincePlanting: 'De la plantare',
       yieldOverTime: 'Producție în timp',
+      yieldPerMeterOverTime: 'Producție pe metru în timp',
+      yieldPerMeterUnit: 'Producție (kg/m)',
       classDistribution: 'Distribuție pe clase',
       brixTrendOverTime: 'Tendința Brix în timp',
       cumulativeYieldProgress: 'Progresul producției cumulate',

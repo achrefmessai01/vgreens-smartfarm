@@ -392,6 +392,8 @@ export const fr = {
       daysActive: 'Jours actifs',
       sincePlanting: 'Depuis la plantation',
       yieldOverTime: 'Rendement dans le temps',
+      yieldPerMeterOverTime: 'Rendement par mètre dans le temps',
+      yieldPerMeterUnit: 'Rendement (kg/m)',
       classDistribution: 'Distribution par classe',
       brixTrendOverTime: 'Tendance Brix',
       cumulativeYieldProgress: 'Progression cumulée',
