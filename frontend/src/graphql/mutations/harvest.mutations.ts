@@ -23,6 +23,7 @@ export const CREATE_HARVEST_MUTATION = gql`
       date
       classA
       classB
+      classC
       waste
       avgBrix
       rowX
@@ -36,6 +37,7 @@ export const CREATE_HARVEST_MUTATION = gql`
       entries {
         classA
         classB
+        classC
         waste
         rowX
         rowY
@@ -74,6 +76,7 @@ export const UPDATE_HARVEST_MUTATION = gql`
       date
       classA
       classB
+      classC
       waste
       avgBrix
       rowX
@@ -87,6 +90,7 @@ export const UPDATE_HARVEST_MUTATION = gql`
       entries {
         classA
         classB
+        classC
         waste
         rowX
         rowY

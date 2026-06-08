@@ -119,6 +119,12 @@ export class UpdateHarvestInput {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  classC?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   waste?: number;
 
   @Field(() => Float, { nullable: true })

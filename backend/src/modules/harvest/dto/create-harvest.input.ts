@@ -122,6 +122,12 @@ export class CreateHarvestInput {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  classC?: number;
+
+  @Field(() => Float, { defaultValue: 0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   waste?: number;
 
   @Field(() => Float, { defaultValue: 0 })

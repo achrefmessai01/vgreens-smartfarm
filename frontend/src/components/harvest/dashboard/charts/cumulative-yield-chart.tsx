@@ -10,7 +10,6 @@ import {
 } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
-import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import {
   ChartTooltipContainer,
   type ChartTooltipProps,
@@ -20,6 +19,7 @@ interface CumulativeYieldPoint {
   date: string;
   cumulativeClassA: number;
   cumulativeClassB: number;
+  cumulativeClassC: number;
   cumulativeWaste: number;
 }
 
@@ -39,12 +39,10 @@ type CumulativeYieldChartProps = {
 );
 
 const COLOR_CLASS_A = '#10b981';
-const COLOR_CLASS_B = '#14b8a6';
 const COLOR_WASTE = '#ef4444';
 
 export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
   const { t } = useI18n();
-  const classBMode = useHarvestClassBMode();
   const h = t.pages.harvest;
 
   const cardTitle =
@@ -67,19 +65,10 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
         ) : (
           <SingleBatchView
             data={props.data}
-            classBMode={classBMode}
             yAxisLabel={yAxisLabel}
             emptyLabel={emptyLabel}
-            primaryLabel={
-              classBMode
-                ? (h?.quality1 ?? 'Quality 1')
-                : (h?.yieldKg ?? 'Yield (kg)')
-            }
-            secondaryLabel={
-              classBMode
-                ? (h?.quality2 ?? 'Quality 2')
-                : (h?.waste ?? 'Waste')
-            }
+            primaryLabel={h?.yieldKg ?? 'Yield (kg)'}
+            secondaryLabel={h?.waste ?? 'Waste'}
           />
         )}
       </div>
@@ -89,7 +78,6 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
 
 interface SingleBatchViewProps {
   data: CumulativeYieldPoint[];
-  classBMode: boolean;
   yAxisLabel: string;
   emptyLabel: string;
   primaryLabel: string;
@@ -98,7 +86,6 @@ interface SingleBatchViewProps {
 
 function SingleBatchView({
   data,
-  classBMode,
   yAxisLabel,
   emptyLabel,
   primaryLabel,
@@ -106,24 +93,27 @@ function SingleBatchView({
 }: SingleBatchViewProps) {
   // Build the chart rows from the GraphQL response — explicit field extraction
   // (don't spread the Apollo object, that drags in __typename and risks stale
-  // fields). `sellable` is the derived total used as the primary in waste mode.
+  // fields). `sellable` is the cumulative of every saleable grade (A + B + C),
+  // plotted against cumulative waste.
   const chartData = data.map((p) => ({
     date: p.date,
     classA: p.cumulativeClassA,
     classB: p.cumulativeClassB,
+    classC: p.cumulativeClassC,
     waste: p.cumulativeWaste,
-    sellable: p.cumulativeClassA + p.cumulativeClassB,
+    sellable:
+      p.cumulativeClassA + p.cumulativeClassB + p.cumulativeClassC,
   }));
 
   const isEmpty =
     chartData.length === 0 ||
     chartData.every(
-      (r) => r.classA === 0 && r.classB === 0 && r.waste === 0,
+      (r) => r.classA === 0 && r.classB === 0 && r.classC === 0 && r.waste === 0,
     );
 
-  const primaryKey = classBMode ? 'classA' : 'sellable';
-  const secondaryKey = classBMode ? 'classB' : 'waste';
-  const secondaryColor = classBMode ? COLOR_CLASS_B : COLOR_WASTE;
+  const primaryKey = 'sellable';
+  const secondaryKey = 'waste';
+  const secondaryColor = COLOR_WASTE;
 
   const TooltipContent = ({ active, payload, label }: ChartTooltipProps) => {
     if (!active || !payload?.length) return null;
@@ -218,13 +208,14 @@ function MultiBatchView({
   yAxisLabel,
   emptyLabel,
 }: MultiBatchViewProps) {
-  // Merge each batch's sellable cumulative (classA + classB) by date so every
-  // batch is a separate dataKey on the same chart.
+  // Merge each batch's sellable cumulative (classA + classB + classC) by date so
+  // every batch is a separate dataKey on the same chart.
   const byDate = new Map<string, Record<string, number | string>>();
   for (const s of series) {
     for (const p of s.data) {
       const row = byDate.get(p.date) ?? { date: p.date };
-      row[s.batchId] = p.cumulativeClassA + p.cumulativeClassB;
+      row[s.batchId] =
+        p.cumulativeClassA + p.cumulativeClassB + p.cumulativeClassC;
       byDate.set(p.date, row);
     }
   }

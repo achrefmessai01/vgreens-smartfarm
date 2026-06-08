@@ -12,6 +12,7 @@ export function FruitWeightField({
   fruitCount,
   marketable,
   classB,
+  classC,
   showFruitWeight,
   onShowFruitWeightChange,
   onFruitCountChange,
@@ -30,9 +31,9 @@ export function FruitWeightField({
     );
   }
 
-  // Total fruit weight is the sellable yield (Class A + Class B) entered above.
-  // Each one defaults to 0, so either alone is sufficient.
-  const totalFruitWeight = (marketable || 0) + (classB || 0);
+  // Total fruit weight is the sellable yield (Class A + Class B + Class C)
+  // entered above. Each one defaults to 0, so any subset is sufficient.
+  const totalFruitWeight = (marketable || 0) + (classB || 0) + (classC || 0);
   const avgFruitWeight = computeAvgFruitWeight(fruitCount, totalFruitWeight);
 
   return (

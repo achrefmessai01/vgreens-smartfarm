@@ -4,7 +4,6 @@ import * as React from 'react';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { Button } from '@/components/ui/button';
-import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import type { HarvestEntryData } from '@/types/batch-sidebar.types';
 import { YieldDataField } from './batch-sidebar-yield-field';
 import { BrixMeasurementsField } from './batch-sidebar-brix-field';
@@ -16,7 +15,7 @@ export interface HarvestEntryCardProps {
   canRemove: boolean;
   defaultOpen?: boolean;
   onYieldChange: (
-    field: 'marketable' | 'waste' | 'classB' | 'rowX' | 'rowY',
+    field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
     value: number,
   ) => void;
   onBrixChange: (readingIndex: number, value: number) => void;
@@ -46,13 +45,11 @@ export function HarvestEntryCard({
 }: HarvestEntryCardProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const classBMode = useHarvestClassBMode();
   const [open, setOpen] = React.useState(defaultOpen);
 
   const idPrefix = `entry-${index}-`;
-  const headlineValue = classBMode
-    ? entry.marketable + entry.classB
-    : entry.marketable;
+  // Headline is the entry's total sellable yield: Quality A + B + C.
+  const headlineValue = entry.marketable + entry.classB + entry.classC;
   const entryTitle = (h?.entryLabel ?? 'Entry {n}').replace(
     '{n}',
     String(index + 1),
@@ -95,6 +92,7 @@ export function HarvestEntryCard({
             marketable={entry.marketable}
             waste={entry.waste}
             classB={entry.classB}
+            classC={entry.classC}
             rowX={entry.rowX}
             rowY={entry.rowY}
             onYieldChange={onYieldChange}
@@ -117,6 +115,7 @@ export function HarvestEntryCard({
               fruitCount={entry.fruitCount}
               marketable={entry.marketable}
               classB={entry.classB}
+              classC={entry.classC}
               showFruitWeight={entry.showFruitWeight}
               onShowFruitWeightChange={onSetShowFruitWeight}
               onFruitCountChange={onFruitCountChange}

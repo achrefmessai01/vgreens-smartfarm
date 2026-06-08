@@ -21,6 +21,17 @@ const dateTransformer: ValueTransformer = {
     value == null ? value : typeof value === 'string' ? new Date(value) : value,
 };
 
+// Backfill numeric sub-entry fields added after rows were written. classC is
+// new, so entries persisted before it existed have no `classC` key; default it
+// to 0 on read so the non-null GraphQL field never resolves to undefined.
+const entriesTransformer: ValueTransformer = {
+  to: (value: HarvestEntry[] | undefined) => value,
+  from: (value: HarvestEntry[] | null) =>
+    value == null
+      ? value
+      : value.map((entry) => ({ ...entry, classC: entry?.classC ?? 0 })),
+};
+
 @ObjectType()
 @Entity('harvests')
 export class Harvest {
@@ -137,18 +148,22 @@ export class Harvest {
 
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
+  classC: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   waste: number;
 
   // Per-harvest sellable yield divided by the batch's plant count.
   // Auto-computed by the service on create/update from
-  // `(classA + classB) / totalPlants`. Null when the harvest has no plant
-  // count (e.g. child harvest rows where totalPlants stays 0).
+  // `(classA + classB + classC) / totalPlants`. Null when the harvest has no
+  // plant count (e.g. child harvest rows where totalPlants stays 0).
   @Field(() => Float, { nullable: true })
   @Column({ type: 'float', nullable: true })
   yieldPerPlant: number | null;
 
   // Per-harvest sellable yield divided by the row length in metres:
-  // `(classA + classB) / rowLength`. Auto-computed by the service on
+  // `(classA + classB + classC) / rowLength`. Auto-computed by the service on
   // create/update. Null when the harvest has no recorded row length
   // (rowLength <= 0).
   @Field(() => Float, { nullable: true })
@@ -217,7 +232,12 @@ export class Harvest {
   // yieldPerPlant logic keeps reading the flat columns unchanged. Empty for
   // legacy rows logged before sub-entries existed.
   @Field(() => [HarvestEntry], { nullable: true })
-  @Column({ type: 'jsonb', nullable: true, default: [] })
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    default: [],
+    transformer: entriesTransformer,
+  })
   entries?: HarvestEntry[];
 
   // --- Timestamps ---

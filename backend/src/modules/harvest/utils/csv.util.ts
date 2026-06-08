@@ -48,6 +48,7 @@ const COLUMN_DEFS: ColumnDef[] = [
   { key: 'lostPlants', value: (h) => String(h.lostPlants ?? 0) },
   { key: 'classA', value: (h) => String(h.classA ?? 0) },
   { key: 'classB', value: (h) => String(h.classB ?? 0) },
+  { key: 'classC', value: (h) => String(h.classC ?? 0) },
   { key: 'waste', value: (h) => String(h.waste ?? 0) },
   { key: 'avgBrix', value: (h) => String(h.avgBrix ?? 0) },
   {

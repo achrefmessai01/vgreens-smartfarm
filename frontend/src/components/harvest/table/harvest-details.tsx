@@ -12,7 +12,6 @@ import {
   getGreenhouseLabel,
   harvestToDisplayEntries,
 } from '@/lib/harvest-utils';
-import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import type { HarvestsQuery } from '@/generated/graphql';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
@@ -30,21 +29,20 @@ export function HarvestDetails({
 }: HarvestDetailsProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const classBMode = useHarvestClassBMode();
 
   if (!harvest) return null;
 
-  const secondaryValue = classBMode ? harvest.classB : harvest.waste;
-  const totalYield = harvest.classA + secondaryValue;
-  const primaryLabel = classBMode
-    ? (h?.quality1 ?? 'Quality 1')
-    : (h?.marketable ?? 'Marketable');
-  const secondaryLabel = classBMode
-    ? (h?.quality2 ?? 'Quality 2')
-    : (h?.waste ?? 'Waste');
-  const ratioLabel = classBMode
-    ? (h?.quality2Ratio ?? 'Quality 2 Ratio')
-    : (h?.wasteRatio ?? 'Waste Ratio');
+  // Total yield = every picked grade plus waste (Quality A + B + C + Waste).
+  const totalYield =
+    harvest.classA +
+    harvest.classB +
+    (harvest.classC ?? 0) +
+    harvest.waste;
+  const qualityALabel = h?.qualityA ?? 'Quality A';
+  const qualityBLabel = h?.qualityB ?? 'Quality B';
+  const qualityCLabel = h?.qualityC ?? 'Quality C';
+  const wasteLabel = h?.waste ?? 'Waste';
+  const ratioLabel = h?.wasteRatio ?? 'Waste Ratio';
   // Per sub-entry breakdown; legacy harvests synthesize a single entry.
   const entries = harvestToDisplayEntries(harvest);
   const showEntryLabels = entries.length > 1;
@@ -95,10 +93,11 @@ export function HarvestDetails({
             </div>
 
             {entries.map((entry, entryIndex) => {
-              const entrySecondary = classBMode ? entry.classB : entry.waste;
-              const entryTotal = entry.classA + entrySecondary;
+              const entryClassC = entry.classC ?? 0;
+              const entryTotal =
+                entry.classA + entry.classB + entryClassC + entry.waste;
               const entryRatio =
-                entryTotal > 0 ? (entrySecondary / entryTotal) * 100 : 0;
+                entryTotal > 0 ? (entry.waste / entryTotal) * 100 : 0;
               return (
                 <div
                   key={entryIndex}
@@ -120,20 +119,34 @@ export function HarvestDetails({
                     <div className="space-y-4">
                       <div className="flex items-center justify-between py-3">
                         <span className="text-muted-foreground font-medium">
-                          {primaryLabel}:
+                          {qualityALabel}:
                         </span>
-                        <span className="text-xl font-bold text-teal-600">
+                        <span className="text-xl font-bold text-green-600">
                           {entry.classA} kg
                         </span>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <span className="text-muted-foreground font-medium">
-                          {secondaryLabel}:
+                          {qualityBLabel}:
                         </span>
-                        <span
-                          className={`text-xl font-bold ${classBMode ? 'text-teal-600' : 'text-red-500'}`}
-                        >
-                          {entrySecondary} kg
+                        <span className="text-xl font-bold text-teal-600">
+                          {entry.classB} kg
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <span className="text-muted-foreground font-medium">
+                          {qualityCLabel}:
+                        </span>
+                        <span className="text-xl font-bold text-amber-600">
+                          {entryClassC} kg
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between py-3">
+                        <span className="text-muted-foreground font-medium">
+                          {wasteLabel}:
+                        </span>
+                        <span className="text-xl font-bold text-red-500">
+                          {entry.waste} kg
                         </span>
                       </div>
                       <div className="flex items-center justify-between py-3">

@@ -115,6 +115,7 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
       variety: '-',
       totalClassA: 0,
       totalClassB: 0,
+      totalClassC: 0,
       totalWaste: 0,
       avgBrix: 0,
     };
@@ -122,6 +123,7 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
 
   const totalClassA = harvests.reduce((s, h) => s + h.classA, 0);
   const totalClassB = harvests.reduce((s, h) => s + h.classB, 0);
+  const totalClassC = harvests.reduce((s, h) => s + (h.classC ?? 0), 0);
   const totalWaste = harvests.reduce((s, h) => s + h.waste, 0);
   const avgBrix = harvests.reduce((s, h) => s + h.avgBrix, 0) / harvests.length;
 
@@ -137,6 +139,7 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
     variety,
     totalClassA: Math.round(totalClassA * 10) / 10,
     totalClassB: Math.round(totalClassB * 10) / 10,
+    totalClassC: Math.round(totalClassC * 10) / 10,
     totalWaste: Math.round(totalWaste * 10) / 10,
     avgBrix: Math.round(avgBrix * 10) / 10,
   };
@@ -151,6 +154,7 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     marketable: entry.classA,
     waste: entry.waste,
     classB: entry.classB,
+    classC: entry.classC ?? 0,
     rowX: entry.rowX,
     rowY: entry.rowY,
     brixReadings,
@@ -172,6 +176,7 @@ export function harvestToEntries(h: HarvestLike): HarvestEntryData[] {
     entryLikeToEntryData({
       classA: h.classA,
       classB: h.classB,
+      classC: h.classC ?? 0,
       waste: h.waste,
       rowX: h.rowX,
       rowY: h.rowY,
@@ -195,6 +200,7 @@ export function harvestToDisplayEntries(h: HarvestLike): HarvestEntryLike[] {
     {
       classA: h.classA,
       classB: h.classB,
+      classC: h.classC ?? 0,
       waste: h.waste,
       rowX: h.rowX,
       rowY: h.rowY,

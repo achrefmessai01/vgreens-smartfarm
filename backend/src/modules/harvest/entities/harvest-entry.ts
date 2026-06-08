@@ -14,6 +14,9 @@ export class HarvestEntry {
   classB: number;
 
   @Field(() => Float)
+  classC: number;
+
+  @Field(() => Float)
   waste: number;
 
   @Field(() => Float)

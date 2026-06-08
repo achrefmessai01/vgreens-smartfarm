@@ -21,6 +21,12 @@ export class HarvestEntryInput {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  classC?: number;
+
+  @Field(() => Float, { defaultValue: 0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   waste?: number;
 
   @Field(() => Float, { defaultValue: 0 })

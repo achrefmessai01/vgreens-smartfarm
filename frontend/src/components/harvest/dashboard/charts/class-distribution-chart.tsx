@@ -9,7 +9,6 @@ import {
 } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
-import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import {
   ChartTooltipContainer,
   type ChartTooltipProps,
@@ -19,6 +18,7 @@ interface ClassDistributionData {
   date: string;
   marketable: number;
   classB: number;
+  classC: number;
   waste: number;
 }
 
@@ -28,6 +28,7 @@ interface ClassDistributionSeries {
   color: string;
   marketable: number;
   classB: number;
+  classC: number;
   waste: number;
 }
 
@@ -55,30 +56,21 @@ const ClassTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 
 export function ClassDistributionChart(props: ClassDistributionChartProps) {
   const { t } = useI18n();
-  const classBMode = useHarvestClassBMode();
   const h = t.pages.harvest;
   const { className, title } = props;
   const isMulti = 'series' in props && props.series !== undefined;
 
-  const primaryName = classBMode
-    ? (h?.quality1 ?? 'Quality 1')
-    : (h?.marketable ?? 'Marketable');
-  const secondaryName = classBMode
-    ? (h?.quality2 ?? 'Quality 2')
-    : (h?.waste ?? 'Waste');
-  const secondaryDataKey: 'classB' | 'waste' = classBMode ? 'classB' : 'waste';
-  const secondaryGradientId = classBMode
-    ? 'classBGradient'
-    : 'wasteGradient';
-  const secondaryShadow = classBMode
-    ? 'drop-shadow(0 4px 6px rgba(20, 184, 166, 0.3))'
-    : 'drop-shadow(0 4px 6px rgba(239, 68, 68, 0.3))';
+  const qualityAName = h?.qualityA ?? 'Quality A';
+  const qualityBName = h?.qualityB ?? 'Quality B';
+  const qualityCName = h?.qualityC ?? 'Quality C';
+  const wasteName = h?.waste ?? 'Waste';
 
   const chartData = isMulti
     ? props.series.map((s) => ({
         name: s.batchName,
         marketable: s.marketable,
         classB: s.classB,
+        classC: s.classC,
         waste: s.waste,
         color: s.color,
       }))
@@ -116,6 +108,10 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
                   <stop offset="5%" stopColor="#14b8a6" stopOpacity={1} />
                   <stop offset="95%" stopColor="#0d9488" stopOpacity={1} />
                 </linearGradient>
+                <linearGradient id="classCGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={1} />
+                  <stop offset="95%" stopColor="#d97706" stopOpacity={1} />
+                </linearGradient>
               </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -142,20 +138,38 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
                 dataKey="marketable"
                 stackId="a"
                 fill="url(#marketableGradient)"
-                name={primaryName}
+                name={qualityAName}
                 radius={[0, 0, 4, 4]}
                 style={{
                   filter: 'drop-shadow(0 4px 6px rgba(16, 185, 129, 0.3))',
                 }}
               />
               <Bar
-                dataKey={secondaryDataKey}
+                dataKey="classB"
                 stackId="a"
-                fill={`url(#${secondaryGradientId})`}
-                name={secondaryName}
+                fill="url(#classBGradient)"
+                name={qualityBName}
+                style={{
+                  filter: 'drop-shadow(0 4px 6px rgba(20, 184, 166, 0.3))',
+                }}
+              />
+              <Bar
+                dataKey="classC"
+                stackId="a"
+                fill="url(#classCGradient)"
+                name={qualityCName}
+                style={{
+                  filter: 'drop-shadow(0 4px 6px rgba(245, 158, 11, 0.3))',
+                }}
+              />
+              <Bar
+                dataKey="waste"
+                stackId="a"
+                fill="url(#wasteGradient)"
+                name={wasteName}
                 radius={[4, 4, 0, 0]}
                 style={{
-                  filter: secondaryShadow,
+                  filter: 'drop-shadow(0 4px 6px rgba(239, 68, 68, 0.3))',
                 }}
               />
             </BarChart>

@@ -7,6 +7,7 @@ export interface HarvestEntryData {
   marketable: number;
   waste: number;
   classB: number;
+  classC: number;
   rowX: number;
   rowY: number;
   brixReadings: number[];
@@ -22,6 +23,7 @@ export function entryHasData(entry: HarvestEntryData): boolean {
     entry.marketable > 0 ||
     entry.waste > 0 ||
     entry.classB > 0 ||
+    entry.classC > 0 ||
     entry.rowX > 0 ||
     entry.rowY > 0 ||
     entry.fruitCount > 0 ||
@@ -34,6 +36,7 @@ export function createEmptyEntry(): HarvestEntryData {
     marketable: 0,
     waste: 0,
     classB: 0,
+    classC: 0,
     rowX: 0,
     rowY: 0,
     brixReadings: [0],
@@ -86,10 +89,11 @@ export interface YieldDataFieldProps {
   marketable: number;
   waste: number;
   classB: number;
+  classC: number;
   rowX: number;
   rowY: number;
   onYieldChange?: (
-    field: 'marketable' | 'waste' | 'classB' | 'rowX' | 'rowY',
+    field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
     value: number,
   ) => void;
   isLoading?: boolean;
@@ -111,6 +115,7 @@ export interface FruitWeightFieldProps {
   fruitCount: number;
   marketable: number;
   classB: number;
+  classC: number;
   showFruitWeight: boolean;
   onShowFruitWeightChange: (show: boolean) => void;
   onFruitCountChange?: (value: number) => void;
