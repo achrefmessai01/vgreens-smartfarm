@@ -2,6 +2,7 @@
 
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -32,6 +33,7 @@ interface GreenhouseRowProps {
   yLabel: string;
   doorLabel: string;
   bayCountLabel: string;
+  orientationLabel: string;
   namePlaceholder: string;
   xPlaceholder: string;
   yPlaceholder: string;
@@ -51,6 +53,7 @@ export function GreenhouseRow({
   yLabel,
   doorLabel,
   bayCountLabel,
+  orientationLabel,
   namePlaceholder,
   xPlaceholder,
   yPlaceholder,
@@ -167,6 +170,23 @@ export function GreenhouseRow({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="border-border/40 flex items-center gap-2 border-t px-4 py-3">
+        <Checkbox
+          id={`gh-vertical-${index}`}
+          checked={row.isVertical ?? false}
+          disabled={disabled}
+          onCheckedChange={(checked) =>
+            onChange(index, { isVertical: checked === true })
+          }
+        />
+        <label
+          htmlFor={`gh-vertical-${index}`}
+          className="text-muted-foreground cursor-pointer text-xs font-medium select-none"
+        >
+          {orientationLabel}
+        </label>
       </div>
     </div>
   );

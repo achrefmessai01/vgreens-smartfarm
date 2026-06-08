@@ -26,6 +26,7 @@ export const ME_QUERY = gql`
           yDimension
           doorPosition
           bayCount
+          isVertical
         }
       }
       isActive

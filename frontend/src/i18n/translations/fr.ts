@@ -836,6 +836,7 @@ export const fr = {
           yLabel: 'Longueur (m)',
           doorLabel: 'Position de la porte',
           bayCountLabel: 'Travées',
+          orientationLabel: 'Disposition verticale',
           bayCountPlaceholder: '0',
           namePlaceholder: 'ex. Halle Fraises',
           xDimensionPlaceholder: '0,0',

@@ -864,6 +864,7 @@ export const it = {
           yLabel: 'Lunghezza (m)',
           doorLabel: 'Posizione della porta',
           bayCountLabel: 'Campate',
+          orientationLabel: 'Layout verticale',
           bayCountPlaceholder: '0',
           namePlaceholder: 'es. Sala fragole',
           xDimensionPlaceholder: '0,0',

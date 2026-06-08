@@ -852,6 +852,7 @@ export const es = {
           yLabel: 'Longitud (m)',
           doorLabel: 'Posición de la puerta',
           bayCountLabel: 'Naves',
+          orientationLabel: 'Disposición vertical',
           bayCountPlaceholder: '0',
           namePlaceholder: 'p. ej., Sala de fresas',
           xDimensionPlaceholder: '0,0',

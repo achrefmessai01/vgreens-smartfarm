@@ -22,6 +22,12 @@ export interface GreenhouseDimensions {
   yDimension: number;
   doorPosition?: DoorPosition | null;
   bayCount?: number | null;
+  /**
+   * When true the greenhouse is rendered rotated 90° (portrait): the width
+   * (x) axis runs top→bottom and the length (y) axis runs left→right. When
+   * false/undefined the default landscape layout is used.
+   */
+  isVertical?: boolean | null;
 }
 
 /** Default layout values — chambersCount used for greenhouse tabs. */
@@ -31,20 +37,55 @@ export const DEFAULT_FARM_LAYOUT: FarmLayoutConfig = {
   chambersCount: 2,
 };
 
+function clampPercent(value: number): number {
+  return Math.max(0, Math.min(100, value));
+}
+
 /**
  * Convert an x/y coordinate (in meters) to percentage positions on the canvas.
  * leftPercent: 0 = left edge, 100 = right edge.
  * topPercent: 0 = top edge, 100 = bottom edge.
+ *
+ * Default (landscape): x runs left→right, y runs bottom→top.
+ * Vertical (portrait): the layout is rotated 90° CCW, so the length axis (y)
+ * runs left→right and the width axis (x) runs top→bottom.
  */
 export function getPositionFromXY(
   x: number,
   y: number,
   dims: GreenhouseDimensions,
 ): { leftPercent: number; topPercent: number } {
+  if (dims.isVertical) {
+    return {
+      leftPercent: clampPercent((y / dims.yDimension) * 100),
+      topPercent: clampPercent((x / dims.xDimension) * 100),
+    };
+  }
   return {
-    leftPercent: Math.max(0, Math.min(100, (x / dims.xDimension) * 100)),
+    leftPercent: clampPercent((x / dims.xDimension) * 100),
     // y=0 is bottom-left (entrance); invert so y increases upward
-    topPercent: Math.max(0, Math.min(100, (1 - y / dims.yDimension) * 100)),
+    topPercent: clampPercent((1 - y / dims.yDimension) * 100),
+  };
+}
+
+/**
+ * Inverse of {@link getPositionFromXY}: convert canvas percentage positions
+ * back to x/y coordinates (in meters), accounting for orientation.
+ */
+export function getXYFromPosition(
+  leftPercent: number,
+  topPercent: number,
+  dims: GreenhouseDimensions,
+): { xPosition: number; yPosition: number } {
+  if (dims.isVertical) {
+    return {
+      xPosition: (topPercent / 100) * dims.xDimension,
+      yPosition: (leftPercent / 100) * dims.yDimension,
+    };
+  }
+  return {
+    xPosition: (leftPercent / 100) * dims.xDimension,
+    yPosition: (1 - topPercent / 100) * dims.yDimension,
   };
 }
 

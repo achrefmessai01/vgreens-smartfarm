@@ -858,6 +858,7 @@ export const ro = {
           yLabel: 'Lungime (m)',
           doorLabel: 'Poziția ușii',
           bayCountLabel: 'Travee',
+          orientationLabel: 'Aspect vertical',
           bayCountPlaceholder: '0',
           namePlaceholder: 'ex. Sala căpșunilor',
           xDimensionPlaceholder: '0,0',

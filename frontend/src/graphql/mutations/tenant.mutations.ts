@@ -14,6 +14,8 @@ export const CREATE_TENANT_MUTATION = gql`
         doorPosition
         xDimension
         yDimension
+        bayCount
+        isVertical
       }
       createdAt
       updatedAt
@@ -35,6 +37,8 @@ export const UPDATE_TENANT_MUTATION = gql`
         doorPosition
         xDimension
         yDimension
+        bayCount
+        isVertical
       }
       createdAt
       updatedAt

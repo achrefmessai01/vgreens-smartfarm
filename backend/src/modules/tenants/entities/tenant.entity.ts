@@ -21,6 +21,9 @@ export class TenantGreenhouse {
 
   @Field(() => Int, { nullable: true })
   bayCount?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  isVertical?: boolean;
 }
 
 @ObjectType()
