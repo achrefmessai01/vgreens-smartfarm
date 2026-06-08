@@ -23,11 +23,13 @@ export const CREATE_HARVEST_MUTATION = gql`
       date
       classA
       classB
+      classC
       waste
       avgBrix
       rowX
       rowY
       brixReadings
+      brixClasses
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -36,11 +38,13 @@ export const CREATE_HARVEST_MUTATION = gql`
       entries {
         classA
         classB
+        classC
         waste
         rowX
         rowY
         avgBrix
         brixReadings
+        brixClasses
         fruitCount
         totalFruitWeight
         avgFruitWeight
@@ -74,11 +78,13 @@ export const UPDATE_HARVEST_MUTATION = gql`
       date
       classA
       classB
+      classC
       waste
       avgBrix
       rowX
       rowY
       brixReadings
+      brixClasses
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -87,11 +93,13 @@ export const UPDATE_HARVEST_MUTATION = gql`
       entries {
         classA
         classB
+        classC
         waste
         rowX
         rowY
         avgBrix
         brixReadings
+        brixClasses
         fruitCount
         totalFruitWeight
         avgFruitWeight

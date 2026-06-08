@@ -9,6 +9,7 @@ const mockHarvestData: HarvestRecord[] = [
     batch: 'Strawberry - Elsanta',
     classA: 11.8,
     classB: 0,
+    classC: 0,
     waste: 0.6,
     avgBrix: 7.1,
     photos: 0,
@@ -21,6 +22,7 @@ const mockHarvestData: HarvestRecord[] = [
     batch: 'Tomato - Roma',
     classA: 12.9,
     classB: 0,
+    classC: 0,
     waste: 0.7,
     avgBrix: 4.8,
     photos: 0,
@@ -33,6 +35,7 @@ const mockHarvestData: HarvestRecord[] = [
     batch: 'Strawberry - Elsanta',
     classA: 14.3,
     classB: 0,
+    classC: 0,
     waste: 0.9,
     avgBrix: 7.9,
     photos: 0,
@@ -45,6 +48,7 @@ const mockHarvestData: HarvestRecord[] = [
     batch: 'Lettuce - Butterhead',
     classA: 14.1,
     classB: 0,
+    classC: 0,
     waste: 0.5,
     avgBrix: 1.2,
     photos: 0,
@@ -57,6 +61,7 @@ const mockHarvestData: HarvestRecord[] = [
     batch: 'Basil - Genovese',
     classA: 13.2,
     classB: 0,
+    classC: 0,
     waste: 0.8,
     avgBrix: 2.1,
     photos: 0,
@@ -69,6 +74,7 @@ const mockHarvestData: HarvestRecord[] = [
     batch: 'Strawberry - Sonata',
     classA: 15.6,
     classB: 0,
+    classC: 0,
     waste: 1.1,
     avgBrix: 8.3,
     photos: 0,
@@ -104,6 +110,7 @@ export function addNewHarvest(batchData: BatchFormData): HarvestRecord {
     batch: batchName,
     classA,
     classB: 0,
+    classC: 0,
     waste,
     avgBrix,
     photos: 0,
@@ -143,6 +150,7 @@ export function addCompletedBatchToHistory(
     batch: batchName,
     classA: batchData.entries.reduce((sum, e) => sum + e.marketable, 0),
     classB: batchData.entries.reduce((sum, e) => sum + e.classB, 0),
+    classC: batchData.entries.reduce((sum, e) => sum + e.classC, 0),
     waste: batchData.entries.reduce((sum, e) => sum + e.waste, 0),
     avgBrix,
     photos: batchData.photos.length,
@@ -162,6 +170,10 @@ export function getHarvestSummary(): HarvestSummary {
   );
   const totalClassB = harvests.reduce(
     (sum, harvest) => sum + harvest.classB,
+    0,
+  );
+  const totalClassC = harvests.reduce(
+    (sum, harvest) => sum + harvest.classC,
     0,
   );
   const totalWaste = harvests.reduce((sum, harvest) => sum + harvest.waste, 0);
@@ -188,6 +200,7 @@ export function getHarvestSummary(): HarvestSummary {
     variety: mostCommonVariety,
     totalClassA: Math.round(totalClassA * 10) / 10,
     totalClassB: Math.round(totalClassB * 10) / 10,
+    totalClassC: Math.round(totalClassC * 10) / 10,
     totalWaste: Math.round(totalWaste * 10) / 10,
     avgBrix: Math.round(avgBrix * 10) / 10,
   };

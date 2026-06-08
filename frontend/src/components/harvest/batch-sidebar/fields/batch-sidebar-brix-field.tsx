@@ -6,15 +6,25 @@ import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { computeAvgBrix } from '@/lib/harvest-utils';
 import { Field, FieldContent, FieldLabel } from '@/components/ui/field';
+import { HarvestQualityClass } from '@/generated/graphql';
 import type { BrixMeasurementsFieldProps } from '@/types/batch-sidebar.types';
 
 export function BrixMeasurementsField({
   readings,
+  classes,
   showBrix,
   onShowBrixChange,
   onReadingChange,
+  onClassChange,
   onAddReading,
   onRemoveReading,
   idPrefix = '',
@@ -23,6 +33,12 @@ export function BrixMeasurementsField({
   const { t } = useI18n();
   const h = t.pages.harvest;
   const inputRefs = React.useRef<Array<HTMLInputElement | null>>([]);
+
+  const classOptions = [
+    { value: HarvestQualityClass.A, label: h?.qualityA ?? 'Quality A' },
+    { value: HarvestQualityClass.B, label: h?.qualityB ?? 'Quality B' },
+    { value: HarvestQualityClass.C, label: h?.qualityC ?? 'Quality C' },
+  ];
 
   const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
     if (e.key === 'Enter') {
@@ -109,6 +125,27 @@ export function BrixMeasurementsField({
                         &deg;Bx
                       </span>
                     </div>
+                    <Select
+                      value={classes[index] ?? HarvestQualityClass.A}
+                      onValueChange={(v) =>
+                        onClassChange?.(index, v as HarvestQualityClass)
+                      }
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger
+                        className="h-9 w-28 shrink-0"
+                        aria-label={h?.qualityClass ?? 'Quality class'}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {classOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <Button
                       type="button"
                       size="icon"

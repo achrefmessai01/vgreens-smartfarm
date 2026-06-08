@@ -11,6 +11,7 @@ import {
 import { User } from '@modules/users/entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
+import { HarvestQualityClass } from '@/common/enums/harvest-quality-class.enum';
 import { ObjectType, Field, ID, Float, Int } from '@nestjs/graphql';
 import { HarvestEntry } from './harvest-entry';
 
@@ -19,6 +20,29 @@ const dateTransformer: ValueTransformer = {
     typeof value === 'string' ? value : value?.toISOString?.().split('T')[0],
   from: (value: string | Date | null) =>
     value == null ? value : typeof value === 'string' ? new Date(value) : value,
+};
+
+// Backfill sub-entry fields added after rows were written so the non-null
+// GraphQL fields never resolve to undefined for legacy entries:
+//   - classC is new → default missing values to 0.
+//   - brixClasses is new → default to a Quality A grade per existing Brix
+//     reading, keeping the array index-aligned with brixReadings.
+const entriesTransformer: ValueTransformer = {
+  to: (value: HarvestEntry[] | undefined) => value,
+  from: (value: HarvestEntry[] | null) =>
+    value == null
+      ? value
+      : value.map((entry) => {
+          const brixReadings = entry?.brixReadings ?? [];
+          const brixClasses = entry?.brixClasses ?? [];
+          return {
+            ...entry,
+            classC: entry?.classC ?? 0,
+            brixClasses: brixReadings.map(
+              (_, i) => brixClasses[i] ?? HarvestQualityClass.A,
+            ),
+          };
+        }),
 };
 
 @ObjectType()
@@ -137,18 +161,22 @@ export class Harvest {
 
   @Field(() => Float)
   @Column({ type: 'float', default: 0 })
+  classC: number;
+
+  @Field(() => Float)
+  @Column({ type: 'float', default: 0 })
   waste: number;
 
   // Per-harvest sellable yield divided by the batch's plant count.
   // Auto-computed by the service on create/update from
-  // `(classA + classB) / totalPlants`. Null when the harvest has no plant
-  // count (e.g. child harvest rows where totalPlants stays 0).
+  // `(classA + classB + classC) / totalPlants`. Null when the harvest has no
+  // plant count (e.g. child harvest rows where totalPlants stays 0).
   @Field(() => Float, { nullable: true })
   @Column({ type: 'float', nullable: true })
   yieldPerPlant: number | null;
 
   // Per-harvest sellable yield divided by the row length in metres:
-  // `(classA + classB) / rowLength`. Auto-computed by the service on
+  // `(classA + classB + classC) / rowLength`. Auto-computed by the service on
   // create/update. Null when the harvest has no recorded row length
   // (rowLength <= 0).
   @Field(() => Float, { nullable: true })
@@ -182,6 +210,13 @@ export class Harvest {
   @Field(() => [Float])
   @Column({ type: 'jsonb', default: [] })
   brixReadings: number[];
+
+  // Quality grade per Brix reading, index-aligned with brixReadings (pooled
+  // across sub-entries on create/update). Empty for harvests logged before
+  // grades were captured.
+  @Field(() => [HarvestQualityClass])
+  @Column({ type: 'jsonb', default: [] })
+  brixClasses: HarvestQualityClass[];
 
   // --- Fruit weight measurement (fruit count + total weight → average) ---
 
@@ -217,7 +252,12 @@ export class Harvest {
   // yieldPerPlant logic keeps reading the flat columns unchanged. Empty for
   // legacy rows logged before sub-entries existed.
   @Field(() => [HarvestEntry], { nullable: true })
-  @Column({ type: 'jsonb', nullable: true, default: [] })
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    default: [],
+    transformer: entriesTransformer,
+  })
   entries?: HarvestEntry[];
 
   // --- Timestamps ---

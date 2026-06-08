@@ -24,7 +24,6 @@ import {
   getGreenhouseLabel,
   harvestsLoggedLabel,
 } from '@/lib/harvest-utils';
-import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import {
   getCreatedByLabel,
@@ -54,19 +53,10 @@ export function HarvestBatchGroup({
 }: HarvestBatchGroupProps) {
   const { t, locale } = useI18n();
   const h = t.pages.harvest;
-  const classBMode = useHarvestClassBMode();
-  const secondaryHeader = classBMode
-    ? (h?.quality2 ?? 'Quality 2')
-    : (h?.waste ?? 'Waste (kg)');
-  const primaryHeader = classBMode
-    ? (h?.quality1 ?? 'Quality 1')
-    : (h?.classA ?? 'Class A (kg)');
-  const primaryMobileLabel = classBMode
-    ? (h?.quality1 ?? 'Quality 1')
-    : (h?.classA ?? 'Class A');
-  const secondaryMobileLabel = classBMode
-    ? (h?.quality2 ?? 'Quality 2')
-    : (h?.waste ?? 'Waste');
+  const qualityALabel = h?.qualityA ?? 'Quality A';
+  const qualityBLabel = h?.qualityB ?? 'Quality B';
+  const qualityCLabel = h?.qualityC ?? 'Quality C';
+  const wasteLabel = h?.waste ?? 'Waste';
   const { isMobile } = useResponsiveBreakpoint('lg');
   const visibleEntries = React.useMemo(
     () =>
@@ -173,8 +163,10 @@ export function HarvestBatchGroup({
                   <TableHeader>
                     <TableRow>
                       <TableHead>{h?.date ?? 'Date'}</TableHead>
-                      <TableHead>{primaryHeader}</TableHead>
-                      <TableHead>{secondaryHeader}</TableHead>
+                      <TableHead>{qualityALabel}</TableHead>
+                      <TableHead>{qualityBLabel}</TableHead>
+                      <TableHead>{qualityCLabel}</TableHead>
+                      <TableHead>{wasteLabel}</TableHead>
                       <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
                       <TableHead>
                         {h?.avgFruitWeight ?? 'Avg Fruit Weight'}
@@ -193,7 +185,8 @@ export function HarvestBatchGroup({
                   </TableHeader>
                   <TableBody>
                     {visibleEntries.map((entry) => {
-                      const sellable = entry.classA + entry.classB;
+                      const sellable =
+                        entry.classA + entry.classB + (entry.classC ?? 0);
                       const rowYieldPerPlant =
                         group.root.totalPlants > 0
                           ? sellable / group.root.totalPlants
@@ -215,12 +208,14 @@ export function HarvestBatchGroup({
                         <TableCell className="text-green-600">
                           {entry.classA}
                         </TableCell>
-                        <TableCell
-                          className={
-                            classBMode ? 'text-teal-600' : 'text-red-500'
-                          }
-                        >
-                          {classBMode ? entry.classB : entry.waste}
+                        <TableCell className="text-teal-600">
+                          {entry.classB}
+                        </TableCell>
+                        <TableCell className="text-amber-600">
+                          {entry.classC ?? 0}
+                        </TableCell>
+                        <TableCell className="text-red-500">
+                          {entry.waste}
                         </TableCell>
                         <TableCell>{entry.avgBrix}&deg;Bx</TableCell>
                         <TableCell>
@@ -299,7 +294,7 @@ export function HarvestBatchGroup({
                       <div className="grid grid-cols-2 gap-2.5 px-0.5 pt-1 text-sm">
                         <div className="bg-muted/40 rounded-lg p-2.5">
                           <span className="text-muted-foreground block text-[11px]">
-                            {primaryMobileLabel}
+                            {qualityALabel}
                           </span>
                           <span className="text-base font-semibold text-green-600">
                             {entry.classA}
@@ -307,12 +302,26 @@ export function HarvestBatchGroup({
                         </div>
                         <div className="bg-muted/40 rounded-lg p-2.5">
                           <span className="text-muted-foreground block text-[11px]">
-                            {secondaryMobileLabel}
+                            {qualityBLabel}
                           </span>
-                          <span
-                            className={`text-base font-semibold ${classBMode ? 'text-teal-600' : 'text-red-500'}`}
-                          >
-                            {classBMode ? entry.classB : entry.waste}
+                          <span className="text-base font-semibold text-teal-600">
+                            {entry.classB}
+                          </span>
+                        </div>
+                        <div className="bg-muted/40 rounded-lg p-2.5">
+                          <span className="text-muted-foreground block text-[11px]">
+                            {qualityCLabel}
+                          </span>
+                          <span className="text-base font-semibold text-amber-600">
+                            {entry.classC ?? 0}
+                          </span>
+                        </div>
+                        <div className="bg-muted/40 rounded-lg p-2.5">
+                          <span className="text-muted-foreground block text-[11px]">
+                            {wasteLabel}
+                          </span>
+                          <span className="text-base font-semibold text-red-500">
+                            {entry.waste}
                           </span>
                         </div>
                       </div>

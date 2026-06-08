@@ -49,6 +49,7 @@ export function DashboardChartsGrid({
               date: string;
               cumulativeClassA: number;
               cumulativeClassB: number;
+              cumulativeClassC: number;
               cumulativeWaste: number;
             }>) ?? []
           }

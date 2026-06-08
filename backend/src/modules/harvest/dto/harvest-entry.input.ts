@@ -1,5 +1,13 @@
-import { IsNumber, IsInt, IsOptional, IsArray, Min } from 'class-validator';
+import {
+  IsNumber,
+  IsInt,
+  IsOptional,
+  IsArray,
+  IsEnum,
+  Min,
+} from 'class-validator';
 import { InputType, Field, Float, Int } from '@nestjs/graphql';
+import { HarvestQualityClass } from '@common/enums';
 
 // Input shape for a single harvest sub-entry. Mirrors HarvestEntry; all numeric
 // fields default to 0 so a sparsely-filled entry still validates.
@@ -16,6 +24,12 @@ export class HarvestEntryInput {
   @IsNumber()
   @Min(0)
   classB?: number;
+
+  @Field(() => Float, { defaultValue: 0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  classC?: number;
 
   @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
@@ -47,6 +61,13 @@ export class HarvestEntryInput {
   @IsNumber({}, { each: true })
   @Min(0, { each: true })
   brixReadings?: number[];
+
+  // Quality grade per Brix reading, aligned by index with brixReadings.
+  @Field(() => [HarvestQualityClass], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(HarvestQualityClass, { each: true })
+  brixClasses?: HarvestQualityClass[];
 
   @Field(() => Int, { defaultValue: 0 })
   @IsOptional()

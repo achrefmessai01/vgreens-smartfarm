@@ -30,6 +30,9 @@ export class ClassDistributionData {
   classB: number;
 
   @Field(() => Float)
+  classC: number;
+
+  @Field(() => Float)
   waste: number;
 }
 
@@ -63,6 +66,9 @@ export class CumulativeYieldData {
   cumulativeClassB: number;
 
   @Field(() => Float)
+  cumulativeClassC: number;
+
+  @Field(() => Float)
   cumulativeWaste: number;
 }
 
@@ -89,14 +95,14 @@ export class HarvestDashboardMetrics {
   @Field(() => Float, {
     nullable: true,
     description:
-      'Weighted kg per plant across selected batches: Σ(classA+classB) / Σ totalPlants. Null when no batch in scope has totalPlants > 0.',
+      'Weighted kg per plant across selected batches: Σ(classA+classB+classC) / Σ totalPlants. Null when no batch in scope has totalPlants > 0.',
   })
   yieldPerPlant: number | null;
 
   @Field(() => Float, {
     nullable: true,
     description:
-      'Weighted kg per row metre across selected batches: Σ(classA+classB) / Σ rowLength. Null when no batch in scope has rowLength > 0.',
+      'Weighted kg per row metre across selected batches: Σ(classA+classB+classC) / Σ rowLength. Null when no batch in scope has rowLength > 0.',
   })
   yieldPerMeter: number | null;
 
@@ -111,6 +117,9 @@ export class HarvestDashboardMetrics {
 
   @Field(() => Float)
   classBTotal: number;
+
+  @Field(() => Float)
+  classCTotal: number;
 
   @Field(() => Int)
   criticalAlerts: number;
