@@ -15,7 +15,10 @@ import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
-import { serializeHarvestsToCsv } from './utils/csv.util';
+import {
+  serializeHarvestsToCsv,
+  permittedColumnsForRole,
+} from './utils/csv.util';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @UseInterceptors(UserInterceptor, TenantInterceptor)
@@ -62,6 +65,8 @@ export class HarvestsResolver {
     @CurrentUser() currentUser: User,
     @Args('filter', { type: () => HarvestFilterInput, nullable: true })
     filter?: HarvestFilterInput | null,
+    @Args('columns', { type: () => [String], nullable: true })
+    columns?: string[] | null,
   ): Promise<string> {
     const tenantId =
       currentUser.role === UserRole.VGREENS_ADMIN
@@ -72,11 +77,18 @@ export class HarvestsResolver {
       throw new Error('Tenant ID is required');
     }
 
-    const harvests = await this.harvestsService.findAllFiltered(
+    // Role is the real boundary: a tenant user requesting ID columns directly
+    // via GraphQL still only gets the columns their role permits. Intersecting
+    // against `permitted` also drops any unknown/garbage column names.
+    const permitted = permittedColumnsForRole(currentUser.role);
+    const requested = columns && columns.length > 0 ? columns : permitted;
+    const selected = permitted.filter((key) => requested.includes(key));
+
+    const harvests = await this.harvestsService.findAllForExport(
       tenantId,
       filter ?? undefined,
     );
-    return serializeHarvestsToCsv(harvests);
+    return serializeHarvestsToCsv(harvests, selected);
   }
 
   @Query(() => [HarvestBatchListItem], { name: 'harvestBatches' })

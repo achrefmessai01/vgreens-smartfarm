@@ -9,6 +9,7 @@ export const HARVESTS_QUERY = gql`
       species
       variety
       batch
+      batchNumber
       parentBatchId
       greenhouse
       plantingDate
@@ -66,6 +67,7 @@ export const HARVEST_QUERY = gql`
       species
       variety
       batch
+      batchNumber
       parentBatchId
       greenhouse
       plantingDate
@@ -115,8 +117,8 @@ export const HARVEST_QUERY = gql`
 `;
 
 export const HARVESTS_CSV_EXPORT_QUERY = gql`
-  query HarvestsCsvExport($filter: HarvestFilterInput) {
-    harvestsCsvExport(filter: $filter)
+  query HarvestsCsvExport($filter: HarvestFilterInput, $columns: [String!]) {
+    harvestsCsvExport(filter: $filter, columns: $columns)
   }
 `;
 
@@ -124,6 +126,15 @@ export const HARVESTS_COUNT_QUERY = gql`
   query HarvestsCount($filter: HarvestFilterInput) {
     harvests(filter: $filter) {
       id
+      parentBatchId
+      status
+      classA
+      classB
+      waste
+      avgBrix
+      rowX
+      rowY
+      photos
     }
   }
 `;

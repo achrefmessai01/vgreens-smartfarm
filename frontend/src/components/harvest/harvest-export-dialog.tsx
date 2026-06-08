@@ -25,6 +25,14 @@ import {
   useHarvestExport,
   type HarvestExportFilter,
 } from '@/lib/hooks/use-harvest-export';
+import { isAutoDraftPlaceholder } from '@/components/harvest/table/harvest-table-utils';
+import { HarvestStatus } from '@/generated/graphql';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import {
+  availableExportColumns,
+  DEFAULT_COLUMN_LABELS,
+} from '@/lib/harvest-export-columns';
 
 type Preset =
   | 'allTime'
@@ -98,18 +106,29 @@ export function HarvestExportDialog({
   const { t } = useI18n();
   const h = t.pages.harvest;
   const { exportCsv, isExporting } = useHarvestExport();
+  const { isVGreensAdmin } = useCurrentUser();
+
+  const available = React.useMemo(
+    () => availableExportColumns(isVGreensAdmin),
+    [isVGreensAdmin],
+  );
 
   const [preset, setPreset] = React.useState<Preset>('allTime');
   const [customFrom, setCustomFrom] = React.useState('');
   const [customTo, setCustomTo] = React.useState('');
+  const [selectedColumns, setSelectedColumns] = React.useState<Set<string>>(
+    () => new Set(available),
+  );
 
   React.useEffect(() => {
     if (open) {
       setPreset('allTime');
       setCustomFrom('');
       setCustomTo('');
+      // Default: all columns available to this role are checked.
+      setSelectedColumns(new Set(available));
     }
-  }, [open]);
+  }, [open, available]);
 
   const computedRange: HarvestExportFilter = React.useMemo(() => {
     if (preset === 'custom') {
@@ -133,7 +152,18 @@ export function HarvestExportDialog({
     customFrom > customTo;
 
   const { data: countData, loading: countLoading } = useQuery<{
-    harvests: Array<{ id: string }>;
+    harvests: Array<{
+      id: string;
+      parentBatchId: string | null;
+      status: HarvestStatus;
+      classA: number;
+      classB: number;
+      waste: number;
+      avgBrix: number;
+      rowX: number;
+      rowY: number;
+      photos: number;
+    }>;
   }>(HARVESTS_COUNT_QUERY, {
     variables: {
       filter:
@@ -143,14 +173,34 @@ export function HarvestExportDialog({
     fetchPolicy: 'cache-and-network',
   });
 
-  const count = countData?.harvests?.length;
+  // Empty draft placeholders are excluded from the export, so they must not be
+  // counted here either.
+  const count = countData?.harvests?.filter(
+    (entry) => !isAutoDraftPlaceholder(entry),
+  ).length;
 
   const handleDownload = async () => {
-    const ok = await exportCsv(computedRange);
+    const ok = await exportCsv(computedRange, [...selectedColumns]);
     if (ok) {
       onOpenChange(false);
     }
   };
+
+  const toggleColumn = (key: string) =>
+    setSelectedColumns((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+
+  const columnLabel = (key: string): string =>
+    (h?.exportColumnLabels as Record<string, string> | undefined)?.[key] ??
+    DEFAULT_COLUMN_LABELS[key as keyof typeof DEFAULT_COLUMN_LABELS] ??
+    key;
 
   const presets: { id: Preset; label: string }[] = [
     { id: 'allTime', label: h?.presetAllTime || 'All time' },
@@ -201,7 +251,7 @@ export function HarvestExportDialog({
         <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:space-y-5 sm:px-6 sm:py-5 sm:pb-2">
           {/* Preset chips */}
           <div className="space-y-2 sm:space-y-2.5">
-            <div className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">
+            <div className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
               {h?.timeRange || 'Time range'}
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -216,14 +266,11 @@ export function HarvestExportDialog({
                       'group relative flex min-h-[2.5rem] items-center justify-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium transition-all duration-150 sm:px-3 sm:text-sm',
                       selected
                         ? 'border-[#016f7c] bg-[#016f7c]/10 text-[#016f7c] shadow-sm ring-1 ring-[#016f7c]/20'
-                        : 'border-border bg-background text-foreground/80 hover:-translate-y-px hover:border-[#016f7c]/40 hover:bg-[#016f7c]/5 hover:text-foreground hover:shadow-sm',
+                        : 'border-border bg-background text-foreground/80 hover:text-foreground hover:-translate-y-px hover:border-[#016f7c]/40 hover:bg-[#016f7c]/5 hover:shadow-sm',
                     )}
                   >
                     {selected && (
-                      <Check
-                        className="h-3.5 w-3.5 shrink-0"
-                        strokeWidth={3}
-                      />
+                      <Check className="h-3.5 w-3.5 shrink-0" strokeWidth={3} />
                     )}
                     <span className="truncate">{p.label}</span>
                   </button>
@@ -234,7 +281,7 @@ export function HarvestExportDialog({
 
           {/* Custom date inputs — only when Custom preset is selected */}
           {preset === 'custom' && (
-            <div className="animate-in fade-in-0 slide-in-from-top-1 rounded-lg border bg-muted/20 p-3 duration-200">
+            <div className="animate-in fade-in-0 slide-in-from-top-1 bg-muted/20 rounded-lg border p-3 duration-200">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="min-w-0">
                   <label className="text-muted-foreground mb-1.5 flex items-center gap-1.5 text-xs font-medium">
@@ -245,7 +292,7 @@ export function HarvestExportDialog({
                     type="date"
                     value={customFrom}
                     onChange={(e) => setCustomFrom(e.target.value)}
-                    className="border-input bg-background focus:border-[#016f7c] focus:ring-[#016f7c]/20 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-sm transition-colors focus:ring-2 focus:outline-none"
+                    className="border-input bg-background flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-sm transition-colors focus:border-[#016f7c] focus:ring-2 focus:ring-[#016f7c]/20 focus:outline-none"
                   />
                 </div>
                 <div className="min-w-0">
@@ -257,12 +304,51 @@ export function HarvestExportDialog({
                     type="date"
                     value={customTo}
                     onChange={(e) => setCustomTo(e.target.value)}
-                    className="border-input bg-background focus:border-[#016f7c] focus:ring-[#016f7c]/20 flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-sm transition-colors focus:ring-2 focus:outline-none"
+                    className="border-input bg-background flex h-9 w-full min-w-0 rounded-md border px-3 py-1 text-sm transition-colors focus:border-[#016f7c] focus:ring-2 focus:ring-[#016f7c]/20 focus:outline-none"
                   />
                 </div>
               </div>
             </div>
           )}
+
+          {/* Column selection */}
+          <div className="space-y-2 sm:space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="text-muted-foreground text-[11px] font-semibold tracking-wider uppercase">
+                {h?.exportColumnsTitle || 'Columns'}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedColumns(new Set(available))}
+                  className="text-xs font-medium text-[#016f7c] hover:underline"
+                >
+                  {h?.exportSelectAll || 'Select all'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedColumns(new Set())}
+                  className="text-muted-foreground text-xs font-medium hover:underline"
+                >
+                  {h?.exportClearAll || 'Clear all'}
+                </button>
+              </div>
+            </div>
+            <div className="bg-muted/20 grid grid-cols-2 gap-x-3 gap-y-2 rounded-lg border p-3 sm:grid-cols-3">
+              {available.map((key) => (
+                <label
+                  key={key}
+                  className="flex cursor-pointer items-center gap-2 text-xs"
+                >
+                  <Checkbox
+                    checked={selectedColumns.has(key)}
+                    onCheckedChange={() => toggleColumn(key)}
+                  />
+                  <span className="truncate">{columnLabel(key)}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
           {/* Summary card */}
           <div
@@ -276,9 +362,8 @@ export function HarvestExportDialog({
             {invalidRange ? (
               <div className="flex items-start gap-2 text-sm">
                 <AlertCircle className="text-destructive mt-0.5 h-4 w-4 shrink-0" />
-                <span className="text-destructive font-medium leading-snug">
-                  {h?.invalidRange ||
-                    '"From" date must be before "To" date'}
+                <span className="text-destructive leading-snug font-medium">
+                  {h?.invalidRange || '"From" date must be before "To" date'}
                 </span>
               </div>
             ) : (
@@ -321,7 +406,7 @@ export function HarvestExportDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex shrink-0 flex-col-reverse gap-2 border-t bg-muted/20 px-4 py-3 sm:flex-row sm:justify-end sm:gap-2 sm:px-6 sm:py-4">
+        <div className="bg-muted/20 flex shrink-0 flex-col-reverse gap-2 border-t px-4 py-3 sm:flex-row sm:justify-end sm:gap-2 sm:px-6 sm:py-4">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -332,7 +417,7 @@ export function HarvestExportDialog({
           </Button>
           <Button
             onClick={handleDownload}
-            disabled={isExporting || invalidRange}
+            disabled={isExporting || invalidRange || selectedColumns.size === 0}
             className="group relative w-full overflow-hidden bg-[#016f7c] text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#015862] hover:shadow-lg active:translate-y-0 sm:w-auto sm:min-w-[10rem]"
           >
             {isExporting ? (
