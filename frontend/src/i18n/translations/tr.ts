@@ -888,6 +888,7 @@ export const tr = {
           yLabel: 'Uzunluk (m)',
           doorLabel: 'Kapı konumu',
           bayCountLabel: 'Bölmeler',
+          orientationLabel: 'Dikey yerleşim',
           bayCountPlaceholder: '0',
           namePlaceholder: 'örn. Çilek salonu',
           xDimensionPlaceholder: '0,0',

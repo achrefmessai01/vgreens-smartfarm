@@ -897,6 +897,7 @@ export const en = {
           yLabel: 'Length (m)',
           doorLabel: 'Door Position',
           bayCountLabel: 'Bays',
+          orientationLabel: 'Vertical layout',
           bayCountPlaceholder: '0',
           namePlaceholder: 'e.g. Strawberry Hall',
           xDimensionPlaceholder: '0.0',

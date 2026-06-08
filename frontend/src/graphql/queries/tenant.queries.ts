@@ -17,6 +17,7 @@ export const TENANTS_QUERY = gql`
         xDimension
         yDimension
         bayCount
+        isVertical
       }
       createdAt
       updatedAt
@@ -41,6 +42,7 @@ export const TENANT_QUERY = gql`
         xDimension
         yDimension
         bayCount
+        isVertical
       }
       createdAt
       updatedAt

@@ -983,6 +983,7 @@ export const de = {
           yLabel: 'Länge (m)',
           doorLabel: 'Türposition',
           bayCountLabel: 'Reihen',
+          orientationLabel: 'Vertikale Anordnung',
           bayCountPlaceholder: '0',
           namePlaceholder: 'z. B. Erdbeer-Halle',
           xDimensionPlaceholder: '0,0',
