@@ -27,6 +27,12 @@ import {
 } from '@/lib/hooks/use-harvest-export';
 import { isAutoDraftPlaceholder } from '@/components/harvest/table/harvest-table-utils';
 import { HarvestStatus } from '@/generated/graphql';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import {
+  availableExportColumns,
+  DEFAULT_COLUMN_LABELS,
+} from '@/lib/harvest-export-columns';
 
 type Preset =
   | 'allTime'
@@ -100,18 +106,29 @@ export function HarvestExportDialog({
   const { t } = useI18n();
   const h = t.pages.harvest;
   const { exportCsv, isExporting } = useHarvestExport();
+  const { isVGreensAdmin } = useCurrentUser();
+
+  const available = React.useMemo(
+    () => availableExportColumns(isVGreensAdmin),
+    [isVGreensAdmin],
+  );
 
   const [preset, setPreset] = React.useState<Preset>('allTime');
   const [customFrom, setCustomFrom] = React.useState('');
   const [customTo, setCustomTo] = React.useState('');
+  const [selectedColumns, setSelectedColumns] = React.useState<Set<string>>(
+    () => new Set(available),
+  );
 
   React.useEffect(() => {
     if (open) {
       setPreset('allTime');
       setCustomFrom('');
       setCustomTo('');
+      // Default: all columns available to this role are checked.
+      setSelectedColumns(new Set(available));
     }
-  }, [open]);
+  }, [open, available]);
 
   const computedRange: HarvestExportFilter = React.useMemo(() => {
     if (preset === 'custom') {
@@ -163,11 +180,27 @@ export function HarvestExportDialog({
   ).length;
 
   const handleDownload = async () => {
-    const ok = await exportCsv(computedRange);
+    const ok = await exportCsv(computedRange, [...selectedColumns]);
     if (ok) {
       onOpenChange(false);
     }
   };
+
+  const toggleColumn = (key: string) =>
+    setSelectedColumns((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+
+  const columnLabel = (key: string): string =>
+    (h?.exportColumnLabels as Record<string, string> | undefined)?.[key] ??
+    DEFAULT_COLUMN_LABELS[key as keyof typeof DEFAULT_COLUMN_LABELS] ??
+    key;
 
   const presets: { id: Preset; label: string }[] = [
     { id: 'allTime', label: h?.presetAllTime || 'All time' },
@@ -281,6 +314,45 @@ export function HarvestExportDialog({
             </div>
           )}
 
+          {/* Column selection */}
+          <div className="space-y-2 sm:space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">
+                {h?.exportColumnsTitle || 'Columns'}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedColumns(new Set(available))}
+                  className="text-[#016f7c] text-xs font-medium hover:underline"
+                >
+                  {h?.exportSelectAll || 'Select all'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedColumns(new Set())}
+                  className="text-muted-foreground text-xs font-medium hover:underline"
+                >
+                  {h?.exportClearAll || 'Clear all'}
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2 rounded-lg border bg-muted/20 p-3 sm:grid-cols-3">
+              {available.map((key) => (
+                <label
+                  key={key}
+                  className="flex cursor-pointer items-center gap-2 text-xs"
+                >
+                  <Checkbox
+                    checked={selectedColumns.has(key)}
+                    onCheckedChange={() => toggleColumn(key)}
+                  />
+                  <span className="truncate">{columnLabel(key)}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
           {/* Summary card */}
           <div
             className={cn(
@@ -349,7 +421,7 @@ export function HarvestExportDialog({
           </Button>
           <Button
             onClick={handleDownload}
-            disabled={isExporting || invalidRange}
+            disabled={isExporting || invalidRange || selectedColumns.size === 0}
             className="group relative w-full overflow-hidden bg-[#016f7c] text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#015862] hover:shadow-lg active:translate-y-0 sm:w-auto sm:min-w-[10rem]"
           >
             {isExporting ? (
