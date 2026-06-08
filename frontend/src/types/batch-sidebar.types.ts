@@ -1,3 +1,4 @@
+import { HarvestQualityClass } from '@/generated/graphql';
 import type { HarvestStatus } from '@/generated/graphql';
 
 // One repeatable "Today Harvest" sub-entry: its own yield, row coordinates,
@@ -11,6 +12,8 @@ export interface HarvestEntryData {
   rowX: number;
   rowY: number;
   brixReadings: number[];
+  // Quality grade per Brix reading, index-aligned with brixReadings.
+  brixClasses: HarvestQualityClass[];
   showBrix: boolean;
   fruitCount: number;
   showFruitWeight: boolean;
@@ -40,6 +43,7 @@ export function createEmptyEntry(): HarvestEntryData {
     rowX: 0,
     rowY: 0,
     brixReadings: [0],
+    brixClasses: [HarvestQualityClass.A],
     showBrix: false,
     fruitCount: 0,
     showFruitWeight: false,
@@ -101,9 +105,12 @@ export interface YieldDataFieldProps {
 
 export interface BrixMeasurementsFieldProps {
   readings: number[];
+  // Quality grade per reading, index-aligned with `readings`.
+  classes: HarvestQualityClass[];
   showBrix: boolean;
   onShowBrixChange: (show: boolean) => void;
   onReadingChange?: (index: number, value: number) => void;
+  onClassChange?: (index: number, value: HarvestQualityClass) => void;
   onAddReading?: () => void;
   onRemoveReading?: (index: number) => void;
   // Namespaces input element ids so repeated entries don't collide.

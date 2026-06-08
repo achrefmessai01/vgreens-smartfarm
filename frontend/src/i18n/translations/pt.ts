@@ -545,6 +545,7 @@ export const pt = {
       qualityA: 'Qualidade A',
       qualityB: 'Qualidade B',
       qualityC: 'Qualidade C',
+      qualityClass: 'Classe de qualidade',
       enterQualityAYield: 'Introduza a produção de Qualidade A',
       enterQualityBYield: 'Introduza a produção de Qualidade B',
       enterQualityCYield: 'Introduza a produção de Qualidade C',

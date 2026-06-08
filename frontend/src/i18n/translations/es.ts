@@ -535,6 +535,7 @@ export const es = {
       qualityA: 'Calidad A',
       qualityB: 'Calidad B',
       qualityC: 'Calidad C',
+      qualityClass: 'Clase de calidad',
       enterQualityAYield: 'Introduce el rendimiento de Calidad A',
       enterQualityBYield: 'Introduce el rendimiento de Calidad B',
       enterQualityCYield: 'Introduce el rendimiento de Calidad C',

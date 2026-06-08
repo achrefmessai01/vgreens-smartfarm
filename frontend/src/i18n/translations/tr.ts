@@ -539,6 +539,7 @@ export const tr = {
       qualityA: 'Kalite A',
       qualityB: 'Kalite B',
       qualityC: 'Kalite C',
+      qualityClass: 'Kalite sınıfı',
       enterQualityAYield: 'Kalite A verimi girin',
       enterQualityBYield: 'Kalite B verimi girin',
       enterQualityCYield: 'Kalite C verimi girin',

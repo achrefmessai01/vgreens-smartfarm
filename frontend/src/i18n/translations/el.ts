@@ -549,6 +549,7 @@ export const el = {
       qualityA: 'Ποιότητα A',
       qualityB: 'Ποιότητα B',
       qualityC: 'Ποιότητα C',
+      qualityClass: 'Κατηγορία ποιότητας',
       enterQualityAYield: 'Εισαγάγετε την απόδοση Ποιότητας A',
       enterQualityBYield: 'Εισαγάγετε την απόδοση Ποιότητας B',
       enterQualityCYield: 'Εισαγάγετε την απόδοση Ποιότητας C',

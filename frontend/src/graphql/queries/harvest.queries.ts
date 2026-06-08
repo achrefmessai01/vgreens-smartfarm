@@ -30,6 +30,7 @@ export const HARVESTS_QUERY = gql`
       rowX
       rowY
       brixReadings
+      brixClasses
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -44,6 +45,7 @@ export const HARVESTS_QUERY = gql`
         rowY
         avgBrix
         brixReadings
+        brixClasses
         fruitCount
         totalFruitWeight
         avgFruitWeight
@@ -90,6 +92,7 @@ export const HARVEST_QUERY = gql`
       rowX
       rowY
       brixReadings
+      brixClasses
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -104,6 +107,7 @@ export const HARVEST_QUERY = gql`
         rowY
         avgBrix
         brixReadings
+        brixClasses
         fruitCount
         totalFruitWeight
         avgFruitWeight

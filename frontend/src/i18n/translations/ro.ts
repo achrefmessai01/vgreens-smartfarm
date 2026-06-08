@@ -547,6 +547,7 @@ export const ro = {
       qualityA: 'Calitate A',
       qualityB: 'Calitate B',
       qualityC: 'Calitate C',
+      qualityClass: 'Clasă de calitate',
       enterQualityAYield: 'Introdu producția de Calitate A',
       enterQualityBYield: 'Introdu producția de Calitate B',
       enterQualityCYield: 'Introdu producția de Calitate C',

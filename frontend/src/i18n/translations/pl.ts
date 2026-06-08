@@ -542,6 +542,7 @@ export const pl = {
       qualityA: 'Jakość A',
       qualityB: 'Jakość B',
       qualityC: 'Jakość C',
+      qualityClass: 'Klasa jakości',
       enterQualityAYield: 'Wprowadź plon Jakości A',
       enterQualityBYield: 'Wprowadź plon Jakości B',
       enterQualityCYield: 'Wprowadź plon Jakości C',

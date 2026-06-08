@@ -543,6 +543,7 @@ export const de = {
       qualityA: 'Qualität A',
       qualityB: 'Qualität B',
       qualityC: 'Qualität C',
+      qualityClass: 'Qualitätsklasse',
       enterQualityAYield: 'Qualität A Ertrag eingeben',
       enterQualityBYield: 'Qualität B Ertrag eingeben',
       enterQualityCYield: 'Qualität C Ertrag eingeben',

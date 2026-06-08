@@ -1,4 +1,5 @@
 import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
+import { HarvestQualityClass } from '@common/enums';
 
 // Shape of a single sub-entry stored inside the Harvest.entries jsonb column.
 // One "Log Harvest" submission can hold several of these — each carries its own
@@ -30,6 +31,11 @@ export class HarvestEntry {
 
   @Field(() => [Float])
   brixReadings: number[];
+
+  // Quality grade each Brix reading belongs to, aligned by index with
+  // brixReadings (brixClasses[i] is the grade of brixReadings[i]).
+  @Field(() => [HarvestQualityClass])
+  brixClasses: HarvestQualityClass[];
 
   @Field(() => Int)
   fruitCount: number;

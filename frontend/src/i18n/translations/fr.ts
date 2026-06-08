@@ -533,6 +533,7 @@ export const fr = {
       qualityA: 'Qualité A',
       qualityB: 'Qualité B',
       qualityC: 'Qualité C',
+      qualityClass: 'Classe de qualité',
       enterQualityAYield: 'Saisir le rendement Qualité A',
       enterQualityBYield: 'Saisir le rendement Qualité B',
       enterQualityCYield: 'Saisir le rendement Qualité C',

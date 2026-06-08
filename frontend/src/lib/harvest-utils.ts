@@ -1,4 +1,4 @@
-import { HarvestStatus } from '@/generated/graphql';
+import { HarvestStatus, HarvestQualityClass } from '@/generated/graphql';
 import type { Locale } from '@/i18n/config';
 import type { Translations } from '@/i18n/translations';
 import type {
@@ -150,6 +150,10 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
 function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
   const brixReadings =
     entry.brixReadings.length > 0 ? [...entry.brixReadings] : [0];
+  // One grade per reading, index-aligned; default any missing grade to A.
+  const brixClasses = brixReadings.map(
+    (_, i) => entry.brixClasses?.[i] ?? HarvestQualityClass.A,
+  );
   return {
     marketable: entry.classA,
     waste: entry.waste,
@@ -158,6 +162,7 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     rowX: entry.rowX,
     rowY: entry.rowY,
     brixReadings,
+    brixClasses,
     showBrix: entry.brixReadings.some((v) => v > 0),
     fruitCount: entry.fruitCount,
     showFruitWeight: entry.fruitCount > 0,
@@ -182,6 +187,7 @@ export function harvestToEntries(h: HarvestLike): HarvestEntryData[] {
       rowY: h.rowY,
       avgBrix: h.avgBrix,
       brixReadings: h.brixReadings,
+      brixClasses: h.brixClasses,
       fruitCount: h.fruitCount,
       totalFruitWeight: h.totalFruitWeight,
       avgFruitWeight: h.avgFruitWeight,
@@ -206,6 +212,7 @@ export function harvestToDisplayEntries(h: HarvestLike): HarvestEntryLike[] {
       rowY: h.rowY,
       avgBrix: h.avgBrix,
       brixReadings: h.brixReadings,
+      brixClasses: h.brixClasses,
       fruitCount: h.fruitCount,
       totalFruitWeight: h.totalFruitWeight,
       avgFruitWeight: h.avgFruitWeight,

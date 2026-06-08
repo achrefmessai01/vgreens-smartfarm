@@ -56,6 +56,11 @@ const COLUMN_DEFS: ColumnDef[] = [
     value: (h) =>
       Array.isArray(h.brixReadings) ? h.brixReadings.join('|') : '',
   },
+  {
+    key: 'brixClasses',
+    value: (h) =>
+      Array.isArray(h.brixClasses) ? h.brixClasses.join('|') : '',
+  },
   { key: 'fruitCount', value: (h) => String(h.fruitCount ?? 0) },
   { key: 'totalFruitWeight', value: (h) => String(h.totalFruitWeight ?? 0) },
   { key: 'avgFruitWeight', value: (h) => String(h.avgFruitWeight ?? 0) },

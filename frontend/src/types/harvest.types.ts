@@ -1,4 +1,4 @@
-import { HarvestStatus } from '@/generated/graphql';
+import { HarvestStatus, type HarvestQualityClass } from '@/generated/graphql';
 
 export interface HarvestRecord {
   id: string;
@@ -33,6 +33,7 @@ export interface HarvestEntryLike {
   rowY: number;
   avgBrix: number;
   brixReadings: number[];
+  brixClasses: HarvestQualityClass[];
   fruitCount: number;
   totalFruitWeight: number;
   avgFruitWeight: number;
@@ -61,6 +62,7 @@ export interface HarvestLike {
   rowY: number;
   avgBrix: number;
   brixReadings: number[];
+  brixClasses: HarvestQualityClass[];
   fruitCount: number;
   totalFruitWeight: number;
   avgFruitWeight: number;

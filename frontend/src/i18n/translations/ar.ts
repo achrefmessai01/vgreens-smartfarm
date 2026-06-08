@@ -535,6 +535,7 @@ export const ar = {
       qualityA: 'الجودة A',
       qualityB: 'الجودة B',
       qualityC: 'الجودة C',
+      qualityClass: 'فئة الجودة',
       enterQualityAYield: 'أدخل إنتاج الجودة A',
       enterQualityBYield: 'أدخل إنتاج الجودة B',
       enterQualityCYield: 'أدخل إنتاج الجودة C',

@@ -2,6 +2,7 @@
 
 import {
   HarvestStatus,
+  HarvestQualityClass,
   HarvestsDocument,
   useCreateHarvestMutation,
   useDeleteHarvestImageMutation,
@@ -104,11 +105,25 @@ export function useBatchSidebar({
     [updateEntry],
   );
 
+  // Each reading carries a quality grade at the same index; add/remove keep the
+  // two arrays aligned and new readings default to Quality A.
+  const handleBrixClassChange = React.useCallback(
+    (entryIndex: number, readingIndex: number, value: HarvestQualityClass) => {
+      updateEntry(entryIndex, (entry) => {
+        const brixClasses = [...entry.brixClasses];
+        brixClasses[readingIndex] = value;
+        return { ...entry, brixClasses };
+      });
+    },
+    [updateEntry],
+  );
+
   const handleAddBrixReading = React.useCallback(
     (entryIndex: number) => {
       updateEntry(entryIndex, (entry) => ({
         ...entry,
         brixReadings: [...entry.brixReadings, 0],
+        brixClasses: [...entry.brixClasses, HarvestQualityClass.A],
       }));
     },
     [updateEntry],
@@ -121,6 +136,7 @@ export function useBatchSidebar({
         return {
           ...entry,
           brixReadings: entry.brixReadings.filter((_, i) => i !== readingIndex),
+          brixClasses: entry.brixClasses.filter((_, i) => i !== readingIndex),
         };
       });
     },
@@ -219,6 +235,8 @@ export function useBatchSidebar({
     // re-derives the top-level aggregates from these entries.
     const entries = currentData.entries.map((entry) => {
       const brixReadings = entry.showBrix ? entry.brixReadings : [];
+      // Keep grades index-aligned with the readings actually sent.
+      const brixClasses = entry.showBrix ? entry.brixClasses : [];
       const fruitCount = entry.showFruitWeight ? entry.fruitCount : 0;
       const totalFruitWeight = entry.showFruitWeight
         ? (entry.marketable || 0) + (entry.classB || 0) + (entry.classC || 0)
@@ -232,6 +250,7 @@ export function useBatchSidebar({
         rowY: entry.rowY,
         avgBrix: computeAvgBrix(brixReadings),
         brixReadings,
+        brixClasses,
         fruitCount,
         totalFruitWeight,
         avgFruitWeight: computeAvgFruitWeight(fruitCount, totalFruitWeight),
@@ -309,6 +328,7 @@ export function useBatchSidebar({
     harvestDate,
     setHarvestDate,
     handleBrixChange,
+    handleBrixClassChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
     handleFruitCountChange,

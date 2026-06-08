@@ -535,6 +535,7 @@ export const en = {
       qualityA: 'Quality A',
       qualityB: 'Quality B',
       qualityC: 'Quality C',
+      qualityClass: 'Quality class',
       enterQualityAYield: 'Enter Quality A yield',
       enterQualityBYield: 'Enter Quality B yield',
       enterQualityCYield: 'Enter Quality C yield',

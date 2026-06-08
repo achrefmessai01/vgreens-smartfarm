@@ -4,6 +4,7 @@ import * as React from 'react';
 import { ChevronDown, Trash2 } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { Button } from '@/components/ui/button';
+import type { HarvestQualityClass } from '@/generated/graphql';
 import type { HarvestEntryData } from '@/types/batch-sidebar.types';
 import { YieldDataField } from './batch-sidebar-yield-field';
 import { BrixMeasurementsField } from './batch-sidebar-brix-field';
@@ -19,6 +20,7 @@ export interface HarvestEntryCardProps {
     value: number,
   ) => void;
   onBrixChange: (readingIndex: number, value: number) => void;
+  onBrixClassChange: (readingIndex: number, value: HarvestQualityClass) => void;
   onAddBrixReading: () => void;
   onRemoveBrixReading: (readingIndex: number) => void;
   onSetShowBrix: (show: boolean) => void;
@@ -35,6 +37,7 @@ export function HarvestEntryCard({
   defaultOpen = false,
   onYieldChange,
   onBrixChange,
+  onBrixClassChange,
   onAddBrixReading,
   onRemoveBrixReading,
   onSetShowBrix,
@@ -101,9 +104,11 @@ export function HarvestEntryCard({
           <div className="border-t pt-4">
             <BrixMeasurementsField
               readings={entry.brixReadings}
+              classes={entry.brixClasses}
               showBrix={entry.showBrix}
               onShowBrixChange={onSetShowBrix}
               onReadingChange={onBrixChange}
+              onClassChange={onBrixClassChange}
               onAddReading={onAddBrixReading}
               onRemoveReading={onRemoveBrixReading}
               idPrefix={idPrefix}

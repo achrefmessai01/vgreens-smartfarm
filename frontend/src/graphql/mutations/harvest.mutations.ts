@@ -29,6 +29,7 @@ export const CREATE_HARVEST_MUTATION = gql`
       rowX
       rowY
       brixReadings
+      brixClasses
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -43,6 +44,7 @@ export const CREATE_HARVEST_MUTATION = gql`
         rowY
         avgBrix
         brixReadings
+        brixClasses
         fruitCount
         totalFruitWeight
         avgFruitWeight
@@ -82,6 +84,7 @@ export const UPDATE_HARVEST_MUTATION = gql`
       rowX
       rowY
       brixReadings
+      brixClasses
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -96,6 +99,7 @@ export const UPDATE_HARVEST_MUTATION = gql`
         rowY
         avgBrix
         brixReadings
+        brixClasses
         fruitCount
         totalFruitWeight
         avgFruitWeight

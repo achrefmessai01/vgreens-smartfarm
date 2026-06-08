@@ -181,7 +181,8 @@ export function HarvestDetails({
                         {entry.brixReadings.map((value, index) => (
                           <div key={index} className="text-center">
                             <div className="text-muted-foreground mb-2 text-xs font-medium">
-                              #{index + 1}
+                              #{index + 1} &middot;{' '}
+                              {entry.brixClasses?.[index] ?? 'A'}
                             </div>
                             <div className="bg-muted rounded-lg border p-4">
                               <span className="text-foreground text-lg font-bold">

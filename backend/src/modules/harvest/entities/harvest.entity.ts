@@ -11,6 +11,7 @@ import {
 import { User } from '@modules/users/entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
+import { HarvestQualityClass } from '@/common/enums/harvest-quality-class.enum';
 import { ObjectType, Field, ID, Float, Int } from '@nestjs/graphql';
 import { HarvestEntry } from './harvest-entry';
 
@@ -21,15 +22,27 @@ const dateTransformer: ValueTransformer = {
     value == null ? value : typeof value === 'string' ? new Date(value) : value,
 };
 
-// Backfill numeric sub-entry fields added after rows were written. classC is
-// new, so entries persisted before it existed have no `classC` key; default it
-// to 0 on read so the non-null GraphQL field never resolves to undefined.
+// Backfill sub-entry fields added after rows were written so the non-null
+// GraphQL fields never resolve to undefined for legacy entries:
+//   - classC is new → default missing values to 0.
+//   - brixClasses is new → default to a Quality A grade per existing Brix
+//     reading, keeping the array index-aligned with brixReadings.
 const entriesTransformer: ValueTransformer = {
   to: (value: HarvestEntry[] | undefined) => value,
   from: (value: HarvestEntry[] | null) =>
     value == null
       ? value
-      : value.map((entry) => ({ ...entry, classC: entry?.classC ?? 0 })),
+      : value.map((entry) => {
+          const brixReadings = entry?.brixReadings ?? [];
+          const brixClasses = entry?.brixClasses ?? [];
+          return {
+            ...entry,
+            classC: entry?.classC ?? 0,
+            brixClasses: brixReadings.map(
+              (_, i) => brixClasses[i] ?? HarvestQualityClass.A,
+            ),
+          };
+        }),
 };
 
 @ObjectType()
@@ -197,6 +210,13 @@ export class Harvest {
   @Field(() => [Float])
   @Column({ type: 'jsonb', default: [] })
   brixReadings: number[];
+
+  // Quality grade per Brix reading, index-aligned with brixReadings (pooled
+  // across sub-entries on create/update). Empty for harvests logged before
+  // grades were captured.
+  @Field(() => [HarvestQualityClass])
+  @Column({ type: 'jsonb', default: [] })
+  brixClasses: HarvestQualityClass[];
 
   // --- Fruit weight measurement (fruit count + total weight → average) ---
 

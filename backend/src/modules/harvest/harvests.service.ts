@@ -26,6 +26,7 @@ import {
 } from './dto/dashboard-metrics.dto';
 import { HarvestBatchListItem } from './dto/harvest-batch-list-item.dto';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
+import { HarvestQualityClass } from '@/common/enums/harvest-quality-class.enum';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
 import { buildBatchNumber } from './utils/batch-number.util';
 
@@ -213,6 +214,10 @@ export class HarvestsService
   // so the backend stays the source of truth for the derived fields.
   private normalizeEntry(entry: HarvestEntryInput): HarvestEntry {
     const brixReadings = entry.brixReadings ?? [];
+    // One grade per reading, index-aligned; default any missing grade to A.
+    const brixClasses = brixReadings.map(
+      (_, i) => entry.brixClasses?.[i] ?? HarvestQualityClass.A,
+    );
     const fruitCount = entry.fruitCount ?? 0;
     const totalFruitWeight = entry.totalFruitWeight ?? 0;
     return {
@@ -223,6 +228,7 @@ export class HarvestsService
       rowX: entry.rowX ?? 0,
       rowY: entry.rowY ?? 0,
       brixReadings,
+      brixClasses,
       avgBrix: this.avgOfPositive(brixReadings),
       fruitCount,
       totalFruitWeight,
@@ -245,6 +251,7 @@ export class HarvestsService
     waste: number;
     avgBrix: number;
     brixReadings: number[];
+    brixClasses: HarvestQualityClass[];
     fruitCount: number;
     totalFruitWeight: number;
     avgFruitWeight: number;
@@ -261,7 +268,10 @@ export class HarvestsService
       (s, e) => s + e.totalFruitWeight,
       0,
     );
+    // Pool readings and their grades in the same entry order so the two arrays
+    // stay index-aligned at the top level.
     const brixReadings = entries.flatMap((e) => e.brixReadings);
+    const brixClasses = entries.flatMap((e) => e.brixClasses);
     const rowXs = entries.map((e) => e.rowX).filter((v) => v > 0);
     const rowYs = entries.map((e) => e.rowY).filter((v) => v > 0);
     return {
@@ -272,6 +282,7 @@ export class HarvestsService
       waste,
       avgBrix: this.avgOfPositive(brixReadings),
       brixReadings,
+      brixClasses,
       fruitCount,
       totalFruitWeight,
       avgFruitWeight:
@@ -559,6 +570,7 @@ export class HarvestsService
             ? input.numberOfRowsHarvested
             : 0),
         brixReadings: agg?.brixReadings ?? input.brixReadings ?? [],
+        brixClasses: agg?.brixClasses ?? input.brixClasses ?? [],
         fruitCount: agg?.fruitCount ?? input.fruitCount ?? 0,
         totalFruitWeight: agg?.totalFruitWeight ?? input.totalFruitWeight ?? 0,
         avgFruitWeight: agg?.avgFruitWeight ?? input.avgFruitWeight ?? 0,
@@ -665,6 +677,9 @@ export class HarvestsService
       if (input.brixReadings !== undefined) {
         harvest.brixReadings = input.brixReadings;
       }
+      if (input.brixClasses !== undefined) {
+        harvest.brixClasses = input.brixClasses;
+      }
       if (input.fruitCount !== undefined) {
         harvest.fruitCount = input.fruitCount;
       }
@@ -691,6 +706,7 @@ export class HarvestsService
           harvest.waste = agg.waste;
           harvest.avgBrix = agg.avgBrix;
           harvest.brixReadings = agg.brixReadings;
+          harvest.brixClasses = agg.brixClasses;
           harvest.fruitCount = agg.fruitCount;
           harvest.totalFruitWeight = agg.totalFruitWeight;
           harvest.avgFruitWeight = agg.avgFruitWeight;
