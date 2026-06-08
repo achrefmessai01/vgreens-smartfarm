@@ -384,8 +384,10 @@ export const el = {
       configQualityPrimary: 'Πρωτεύουσα ποιότητα %',
       configQualitySecondary: 'Δευτερεύουσα ποιότητα %',
       configEmptyTitle: 'Δεν έχουν επιλεγεί στοιχεία πίνακα',
-      configEmptyHintAdmin: 'Χρησιμοποιήστε την «Επεξεργασία πίνακα» για να επιλέξετε τι εμφανίζεται εδώ.',
-      configEmptyHint: 'Δεν έχει ενεργοποιηθεί καμία οπτικοποίηση για αυτόν τον πίνακα.',
+      configEmptyHintAdmin:
+        'Χρησιμοποιήστε την «Επεξεργασία πίνακα» για να επιλέξετε τι εμφανίζεται εδώ.',
+      configEmptyHint:
+        'Δεν έχει ενεργοποιηθεί καμία οπτικοποίηση για αυτόν τον πίνακα.',
       configSaveFailed: 'Αποτυχία αποθήκευσης της διαμόρφωσης του πίνακα',
       harvestsLogged: 'συγκομιδές καταχωρήθηκαν',
       harvestLogged: 'συγκομιδή καταχωρήθηκε',
@@ -492,6 +494,7 @@ export const el = {
         photos: 'Φωτογραφίες',
         photoUrls: 'URL φωτογραφιών',
         tenantId: 'ID ενοικιαστή',
+        createdById: 'ID δημιουργού',
         createdAt: 'Δημιουργήθηκε',
         updatedAt: 'Ενημερώθηκε',
       },
@@ -688,7 +691,8 @@ export const el = {
         allStatuses: 'Όλες οι καταστάσεις',
         showResolved: 'Εμφάνιση επιλυμένων',
         recentSystemErrors: 'Πρόσφατα σφάλματα συστήματος ({count})',
-        noErrorsMatch: 'Δεν βρέθηκαν σφάλματα που να ταιριάζουν στα φίλτρα σας.',
+        noErrorsMatch:
+          'Δεν βρέθηκαν σφάλματα που να ταιριάζουν στα φίλτρα σας.',
         emptyTitle: 'Δεν βρέθηκαν σφάλματα συστήματος',
         active: 'Ενεργό',
         component: 'Στοιχείο: {value}',

@@ -376,7 +376,8 @@ export const tr = {
       configQualityPrimary: 'Birincil kalite %',
       configQualitySecondary: 'İkincil kalite %',
       configEmptyTitle: 'Seçili pano öğesi yok',
-      configEmptyHintAdmin: '“Panoyu düzenle” ile burada nelerin görüneceğini seçin.',
+      configEmptyHintAdmin:
+        '“Panoyu düzenle” ile burada nelerin görüneceğini seçin.',
       configEmptyHint: 'Bu pano için hiçbir görselleştirme etkin değil.',
       configSaveFailed: 'Pano yapılandırması kaydedilemedi',
       harvestsLogged: 'kayıtlı hasat',
@@ -484,6 +485,7 @@ export const tr = {
         photos: 'Fotoğraflar',
         photoUrls: 'Fotoğraf URL adresleri',
         tenantId: 'Kiracı ID',
+        createdById: 'Oluşturan ID',
         createdAt: 'Oluşturulma',
         updatedAt: 'Güncellenme',
       },
@@ -1151,7 +1153,8 @@ export const tr = {
         'Karşılaştığınız sorunları bildirerek geliştirmemize yardımcı olun.',
       emailLabel: 'E-postanız (İsteğe bağlı)',
       emailPlaceholder: 'eposta@ornek.com',
-      emailHint: 'Bunu yalnızca gerekirse sizinle iletişime geçmek için kullanırız.',
+      emailHint:
+        'Bunu yalnızca gerekirse sizinle iletişime geçmek için kullanırız.',
       errorTitleLabel: 'Hata başlığı',
       errorTitlePlaceholder: 'Sorunun kısa açıklaması',
       severityLabel: 'Önem seviyesi',
@@ -1338,8 +1341,7 @@ export const tr = {
     },
     reportStatus: {
       title: 'Bir şeyler ters gitti',
-      description:
-        'Rapor durumunuz yüklenirken bir hatayla karşılaştık.',
+      description: 'Rapor durumunuz yüklenirken bir hatayla karşılaştık.',
     },
   },
 } as const;

@@ -372,7 +372,8 @@ export const ar = {
       configQualityPrimary: 'الجودة الأساسية %',
       configQualitySecondary: 'الجودة الثانوية %',
       configEmptyTitle: 'لم يتم تحديد أي عناصر للوحة المعلومات',
-      configEmptyHintAdmin: 'استخدم «تعديل لوحة المعلومات» لاختيار ما يظهر هنا.',
+      configEmptyHintAdmin:
+        'استخدم «تعديل لوحة المعلومات» لاختيار ما يظهر هنا.',
       configEmptyHint: 'لا توجد أي رسوم بيانية مفعّلة لهذه اللوحة.',
       configSaveFailed: 'فشل حفظ إعدادات لوحة المعلومات',
       harvestsLogged: 'حصاد مسجل',
@@ -480,6 +481,7 @@ export const ar = {
         photos: 'الصور',
         photoUrls: 'روابط الصور',
         tenantId: 'معرّف المستأجر',
+        createdById: 'معرّف المُنشئ',
         createdAt: 'تاريخ الإنشاء',
         updatedAt: 'تاريخ التحديث',
       },
@@ -588,7 +590,8 @@ export const ar = {
       batchDetailsFor: '{label} لـ {greenhouse}',
       comparing: 'مقارنة {count} دفعة لـ {filter}',
       comparingPlural: 'مقارنة {count} دفعات لـ {filter}',
-      selectedBatchNotFound: 'لم يتم العثور على الدفعة المحددة — يتم عرض جميع الدفعات.',
+      selectedBatchNotFound:
+        'لم يتم العثور على الدفعة المحددة — يتم عرض جميع الدفعات.',
       noHarvestsForBatch: 'لا يوجد حصاد لـ {name} في {filter}',
       selectBatches: 'اختر الدفعات',
       batchesSelectedSingular: 'تم تحديد {count} دفعة',
@@ -795,8 +798,7 @@ export const ar = {
         detailsSubtitle: 'عرض وإدارة تفاصيل المستأجر',
         nameRequired: 'الاسم مطلوب',
         emailInvalid: 'صيغة البريد الإلكتروني غير صالحة',
-        greenhousesInvalid:
-          'كل بيت محمي يحتاج إلى اسم وأبعاد X/Y موجبة',
+        greenhousesInvalid: 'كل بيت محمي يحتاج إلى اسم وأبعاد X/Y موجبة',
         namePlaceholder: 'اسم المستأجر',
         companyName: 'اسم الشركة',
         companyPlaceholder: 'اسم الشركة',
@@ -1161,8 +1163,7 @@ export const ar = {
       uploadHint: 'صور حتى 10 ميجابايت (3 ملفات بحد أقصى)',
       submit: 'إرسال التقرير',
       submitting: 'جارٍ الإرسال...',
-      footerNote:
-        'يساعدنا تقريرك على تحسين المنصة للجميع. شكرًا على ملاحظاتك!',
+      footerNote: 'يساعدنا تقريرك على تحسين المنصة للجميع. شكرًا على ملاحظاتك!',
       successTitle: 'تم إرسال التقرير!',
       successDescription:
         'شكرًا على تقريرك. سيقوم فريقنا بمراجعته والرد عليك قريبًا.',

@@ -381,9 +381,12 @@ export const de = {
       configQualityPrimary: 'Primäre Qualität %',
       configQualitySecondary: 'Sekundäre Qualität %',
       configEmptyTitle: 'Keine Dashboard-Elemente ausgewählt',
-      configEmptyHintAdmin: 'Verwenden Sie „Dashboard bearbeiten“, um auszuwählen, was hier angezeigt wird.',
-      configEmptyHint: 'Für dieses Dashboard sind keine Visualisierungen aktiviert.',
-      configSaveFailed: 'Dashboard-Konfiguration konnte nicht gespeichert werden',
+      configEmptyHintAdmin:
+        'Verwenden Sie „Dashboard bearbeiten“, um auszuwählen, was hier angezeigt wird.',
+      configEmptyHint:
+        'Für dieses Dashboard sind keine Visualisierungen aktiviert.',
+      configSaveFailed:
+        'Dashboard-Konfiguration konnte nicht gespeichert werden',
       harvestsLogged: 'Ernten protokolliert',
       harvestLogged: 'Ernte protokolliert',
       yieldPredictionTitle: 'Ertragsprognose',
@@ -485,6 +488,7 @@ export const de = {
         photos: 'Fotos',
         photoUrls: 'Foto-URLs',
         tenantId: 'Mandanten-ID',
+        createdById: 'Erstellt-von-ID',
         createdAt: 'Erstellt am',
         updatedAt: 'Aktualisiert am',
       },
@@ -1212,12 +1216,10 @@ export const de = {
     },
     report: {
       title: 'Fehler melden',
-      subtitle:
-        'Helfen Sie uns, indem Sie aufgetretene Probleme melden.',
+      subtitle: 'Helfen Sie uns, indem Sie aufgetretene Probleme melden.',
       emailLabel: 'Ihre E-Mail (optional)',
       emailPlaceholder: 'ihre.email@beispiel.de',
-      emailHint:
-        'Wir verwenden diese nur, um bei Bedarf nachzufragen.',
+      emailHint: 'Wir verwenden diese nur, um bei Bedarf nachzufragen.',
       errorTitleLabel: 'Fehlertitel',
       errorTitlePlaceholder: 'Kurze Beschreibung des Problems',
       severityLabel: 'Schweregradstufe',
@@ -1321,8 +1323,7 @@ export const de = {
       'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.',
     notFound: {
       title: 'Seite nicht gefunden',
-      description:
-        'Die gesuchte Seite existiert nicht oder wurde verschoben.',
+      description: 'Die gesuchte Seite existiert nicht oder wurde verschoben.',
     },
     offline: {
       title: 'Keine Internetverbindung',
@@ -1414,8 +1415,7 @@ export const de = {
     },
     reportStatus: {
       title: 'Etwas ist schiefgelaufen!',
-      description:
-        'Beim Laden Ihres Berichtstatus ist ein Fehler aufgetreten.',
+      description: 'Beim Laden Ihres Berichtstatus ist ein Fehler aufgetreten.',
     },
   },
 } as const;

@@ -371,7 +371,8 @@ export const es = {
       configQualityPrimary: 'Calidad primaria %',
       configQualitySecondary: 'Calidad secundaria %',
       configEmptyTitle: 'No hay elementos del panel seleccionados',
-      configEmptyHintAdmin: 'Usa «Editar panel» para elegir lo que aparece aquí.',
+      configEmptyHintAdmin:
+        'Usa «Editar panel» para elegir lo que aparece aquí.',
       configEmptyHint: 'No hay visualizaciones habilitadas para este panel.',
       configSaveFailed: 'No se pudo guardar la configuración del panel',
       harvestsLogged: 'cosechas registradas',
@@ -480,6 +481,7 @@ export const es = {
         photos: 'Fotos',
         photoUrls: 'URL de fotos',
         tenantId: 'ID del inquilino',
+        createdById: 'ID del creador',
         createdAt: 'Creado el',
         updatedAt: 'Actualizado el',
       },
@@ -675,7 +677,8 @@ export const es = {
         allStatuses: 'Todos los estados',
         showResolved: 'Mostrar resueltos',
         recentSystemErrors: 'Errores recientes del sistema ({count})',
-        noErrorsMatch: 'No se encontraron errores que coincidan con tus filtros.',
+        noErrorsMatch:
+          'No se encontraron errores que coincidan con tus filtros.',
         emptyTitle: 'No se encontraron errores del sistema',
         active: 'Activo',
         component: 'Componente: {value}',
@@ -1259,8 +1262,7 @@ export const es = {
     },
     offline: {
       title: 'Sin conexión a internet',
-      description:
-        'Por favor, comprueba tu conexión e inténtalo de nuevo.',
+      description: 'Por favor, comprueba tu conexión e inténtalo de nuevo.',
       hint: 'Conéctate a Wi-Fi o a datos móviles para seguir usando vGreens Lab.',
       footer: 'Asegúrate de estar conectado a internet',
     },
@@ -1347,8 +1349,7 @@ export const es = {
     },
     reportStatus: {
       title: '¡Algo salió mal!',
-      description:
-        'Encontramos un error al cargar el estado de tu informe.',
+      description: 'Encontramos un error al cargar el estado de tu informe.',
     },
   },
 } as const;

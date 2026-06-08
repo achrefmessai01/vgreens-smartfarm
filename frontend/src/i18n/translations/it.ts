@@ -383,8 +383,10 @@ export const it = {
       configQualityPrimary: 'Qualità primaria %',
       configQualitySecondary: 'Qualità secondaria %',
       configEmptyTitle: 'Nessun elemento della dashboard selezionato',
-      configEmptyHintAdmin: 'Usa «Modifica dashboard» per scegliere cosa appare qui.',
-      configEmptyHint: 'Nessuna visualizzazione è abilitata per questa dashboard.',
+      configEmptyHintAdmin:
+        'Usa «Modifica dashboard» per scegliere cosa appare qui.',
+      configEmptyHint:
+        'Nessuna visualizzazione è abilitata per questa dashboard.',
       configSaveFailed: 'Impossibile salvare la configurazione della dashboard',
       harvestsLogged: 'raccolti registrati',
       harvestLogged: 'raccolto registrato',
@@ -492,6 +494,7 @@ export const it = {
         photos: 'Foto',
         photoUrls: 'URL foto',
         tenantId: 'ID tenant',
+        createdById: 'ID creatore',
         createdAt: 'Creato il',
         updatedAt: 'Aggiornato il',
       },
@@ -677,8 +680,7 @@ export const it = {
         dashboardTitle: 'Dashboard errori di sistema',
         dashboardSubtitle:
           'Monitora e risolvi gli errori dell’applicazione in tempo reale',
-        loadFailed:
-          'Impossibile caricare gli errori di sistema: {message}',
+        loadFailed: 'Impossibile caricare gli errori di sistema: {message}',
         totalErrors24h: 'Errori totali (24h)',
         unresolved: 'Non risolti',
         criticalErrors: 'Errori critici',
@@ -1067,7 +1069,8 @@ export const it = {
     },
     report: {
       title: 'Segnala un errore',
-      subtitle: 'Aiutaci a migliorare segnalando eventuali problemi riscontrati.',
+      subtitle:
+        'Aiutaci a migliorare segnalando eventuali problemi riscontrati.',
       emailLabel: 'La tua email (facoltativa)',
       emailPlaceholder: 'tua.email@esempio.com',
       emailHint: 'La useremo solo per ricontattarti se necessario.',
@@ -1262,12 +1265,10 @@ export const it = {
         'Si è verificato un errore imprevisto. Riprova o torna alla home.',
     },
     defaultTitle: 'Qualcosa è andato storto!',
-    defaultDescription:
-      'Si è verificato un errore imprevisto. Riprova.',
+    defaultDescription: 'Si è verificato un errore imprevisto. Riprova.',
     notFound: {
       title: 'Pagina non trovata',
-      description:
-        'La pagina che stai cercando non esiste o è stata spostata.',
+      description: 'La pagina che stai cercando non esiste o è stata spostata.',
     },
     offline: {
       title: 'Nessuna connessione internet',

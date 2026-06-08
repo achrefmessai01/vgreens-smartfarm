@@ -379,7 +379,8 @@ export const pl = {
       configQualityPrimary: 'Jakość podstawowa %',
       configQualitySecondary: 'Jakość drugorzędna %',
       configEmptyTitle: 'Nie wybrano żadnych elementów pulpitu',
-      configEmptyHintAdmin: 'Użyj „Edytuj pulpit”, aby wybrać, co ma się tu pojawić.',
+      configEmptyHintAdmin:
+        'Użyj „Edytuj pulpit”, aby wybrać, co ma się tu pojawić.',
       configEmptyHint: 'Dla tego pulpitu nie włączono żadnych wizualizacji.',
       configSaveFailed: 'Nie udało się zapisać konfiguracji pulpitu',
       harvestsLogged: 'zarejestrowanych zbiorów',
@@ -487,6 +488,7 @@ export const pl = {
         photos: 'Zdjęcia',
         photoUrls: 'Adresy URL zdjęć',
         tenantId: 'ID najemcy',
+        createdById: 'ID twórcy',
         createdAt: 'Utworzono',
         updatedAt: 'Zaktualizowano',
       },
@@ -1153,8 +1155,7 @@ export const pl = {
     },
     report: {
       title: 'Zgłoś błąd',
-      subtitle:
-        'Pomóż nam się ulepszać, zgłaszając napotkane problemy.',
+      subtitle: 'Pomóż nam się ulepszać, zgłaszając napotkane problemy.',
       emailLabel: 'Twój e-mail (opcjonalnie)',
       emailPlaceholder: 'twoj.email@przyklad.com',
       emailHint:
@@ -1186,8 +1187,7 @@ export const pl = {
       successDescription:
         'Dziękujemy za zgłoszenie. Nasz zespół je rozpatrzy i wkrótce się odezwie.',
       viewReportStatus: 'Zobacz status zgłoszenia',
-      redirectingHint:
-        'Przekierowywanie do statusu zgłoszenia za 3 sekundy...',
+      redirectingHint: 'Przekierowywanie do statusu zgłoszenia za 3 sekundy...',
     },
     reportStatus: {
       title: 'Status zgłoszenia',

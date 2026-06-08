@@ -381,7 +381,8 @@ export const pt = {
       configQualityPrimary: 'Qualidade primária %',
       configQualitySecondary: 'Qualidade secundária %',
       configEmptyTitle: 'Nenhum item do painel selecionado',
-      configEmptyHintAdmin: 'Use «Editar painel» para escolher o que aparece aqui.',
+      configEmptyHintAdmin:
+        'Use «Editar painel» para escolher o que aparece aqui.',
       configEmptyHint: 'Nenhuma visualização está ativada para este painel.',
       configSaveFailed: 'Falha ao salvar a configuração do painel',
       harvestsLogged: 'colheitas registadas',
@@ -490,6 +491,7 @@ export const pt = {
         photos: 'Fotos',
         photoUrls: 'URLs das fotos',
         tenantId: 'ID do inquilino',
+        createdById: 'ID do criador',
         createdAt: 'Criado em',
         updatedAt: 'Atualizado em',
       },
@@ -1193,7 +1195,8 @@ export const pt = {
       successDescription:
         'Obrigado pelo seu relatório. A nossa equipa irá analisá-lo e entrar em contacto consigo em breve.',
       viewReportStatus: 'Ver estado do relatório',
-      redirectingHint: 'A redirecionar para o estado do relatório em 3 segundos...',
+      redirectingHint:
+        'A redirecionar para o estado do relatório em 3 segundos...',
     },
     reportStatus: {
       title: 'Estado do relatório',
@@ -1353,8 +1356,7 @@ export const pt = {
     },
     reportStatus: {
       title: 'Algo correu mal!',
-      description:
-        'Encontrámos um erro ao carregar o estado do seu relatório.',
+      description: 'Encontrámos um erro ao carregar o estado do seu relatório.',
     },
   },
 } as const;

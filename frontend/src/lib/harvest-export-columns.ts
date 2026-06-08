@@ -31,6 +31,7 @@ export const EXPORT_COLUMN_KEYS = [
   'photos',
   'photoUrls',
   'tenantId',
+  'createdById',
   'createdAt',
   'updatedAt',
 ] as const;
@@ -87,6 +88,7 @@ export const DEFAULT_COLUMN_LABELS: Record<ExportColumnKey, string> = {
   photos: 'Photos',
   photoUrls: 'Photo URLs',
   tenantId: 'Tenant ID',
+  createdById: 'Created By ID',
   createdAt: 'Created At',
   updatedAt: 'Updated At',
 };

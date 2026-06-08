@@ -66,6 +66,7 @@ const COLUMN_DEFS: ColumnDef[] = [
     value: (h) => (Array.isArray(h.photoUrls) ? h.photoUrls.join('|') : ''),
   },
   { key: 'tenantId', value: (h) => h.tenantId ?? '' },
+  { key: 'createdById', value: (h) => h.createdById ?? '' },
   { key: 'createdAt', value: (h) => toIsoTimestamp(h.createdAt) },
   { key: 'updatedAt', value: (h) => toIsoTimestamp(h.updatedAt) },
 ];

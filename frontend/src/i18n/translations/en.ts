@@ -478,6 +478,7 @@ export const en = {
         photos: 'Photos',
         photoUrls: 'Photo URLs',
         tenantId: 'Tenant ID',
+        createdById: 'Created By ID',
         createdAt: 'Created At',
         updatedAt: 'Updated At',
       },
@@ -675,7 +676,8 @@ export const en = {
         filtersActive: '{count} filter active',
         filtersActivePlural: '{count} filters active',
         dashboardTitle: 'System Error Dashboard',
-        dashboardSubtitle: 'Monitor and resolve application errors in real-time',
+        dashboardSubtitle:
+          'Monitor and resolve application errors in real-time',
         loadFailed: 'Failed to load system errors: {message}',
         totalErrors24h: 'Total Errors (24h)',
         unresolved: 'Unresolved',
@@ -1395,8 +1397,7 @@ export const en = {
     },
     reportStatus: {
       title: 'Something went wrong!',
-      description:
-        'We encountered an error while loading your report status.',
+      description: 'We encountered an error while loading your report status.',
     },
   },
 } as const;
