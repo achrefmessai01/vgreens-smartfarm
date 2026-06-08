@@ -76,6 +76,10 @@ export class Tenant extends BaseEntity {
   @Column({ type: 'jsonb', default: () => "'[]'" })
   disabledSensorFields: string[];
 
+  @Field(() => [String], { defaultValue: [] })
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  hiddenHarvestDashboardItems: string[];
+
   @Field(() => Date)
   createdAt: Date;
 

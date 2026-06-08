@@ -10,6 +10,7 @@ export const TENANTS_QUERY = gql`
       phone
       isActive
       disabledSensorFields
+      hiddenHarvestDashboardItems
       greenhouses {
         name
         doorPosition
@@ -33,6 +34,7 @@ export const TENANT_QUERY = gql`
       phone
       isActive
       disabledSensorFields
+      hiddenHarvestDashboardItems
       greenhouses {
         name
         doorPosition
