@@ -27,6 +27,7 @@ export const DASHBOARD_METRIC_IDS = {
   averageBrix: 'averageBrix',
   averageFruitWeight: 'averageFruitWeight',
   yieldPerPlant: 'yieldPerPlant',
+  yieldPerMeter: 'yieldPerMeter',
   qualityPrimary: 'qualityPrimary',
   qualitySecondary: 'qualitySecondary',
   criticalAlerts: 'criticalAlerts',
@@ -35,7 +36,7 @@ export const DASHBOARD_METRIC_IDS = {
 
 export const DASHBOARD_CHART_IDS = {
   yieldOverTime: 'yieldOverTime',
-  yieldPerMeter: 'yieldPerMeter',
+  yieldPerMeterTrend: 'yieldPerMeterTrend',
   classDistribution: 'classDistribution',
   brixTrend: 'brixTrend',
   fruitWeightTrend: 'fruitWeightTrend',
@@ -66,6 +67,12 @@ export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
     id: DASHBOARD_METRIC_IDS.yieldPerPlant,
     labelKey: 'yieldPerPlant',
     fallback: 'Yield per Plant',
+    category: 'metrics',
+  },
+  {
+    id: DASHBOARD_METRIC_IDS.yieldPerMeter,
+    labelKey: 'yieldPerMeter',
+    fallback: 'Yield per Meter',
     category: 'metrics',
   },
   {
@@ -100,7 +107,7 @@ export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
     category: 'charts',
   },
   {
-    id: DASHBOARD_CHART_IDS.yieldPerMeter,
+    id: DASHBOARD_CHART_IDS.yieldPerMeterTrend,
     labelKey: 'yieldPerMeterOverTime',
     fallback: 'Yield per Meter Over Time',
     category: 'charts',

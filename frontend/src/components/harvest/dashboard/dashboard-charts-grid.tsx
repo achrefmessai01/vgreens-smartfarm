@@ -25,7 +25,7 @@ export function DashboardChartsGrid({
       node: <YieldOverTimeChart data={data.yieldOverTime ?? []} />,
     },
     {
-      id: DASHBOARD_CHART_IDS.yieldPerMeter,
+      id: DASHBOARD_CHART_IDS.yieldPerMeterTrend,
       node: <YieldPerMeterChart data={data.yieldPerMeterTrend ?? []} />,
     },
     {

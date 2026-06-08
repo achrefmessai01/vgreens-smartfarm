@@ -10,6 +10,7 @@ export const GET_HARVEST_DASHBOARD = gql`
       averageBrix
       averageFruitWeight
       yieldPerPlant
+      yieldPerMeter
       marketablePercent
       wastePercent
       wasteTotal
@@ -77,6 +78,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       averageBrix
       averageFruitWeight
       yieldPerPlant
+      yieldPerMeter
       marketablePercent
       wastePercent
       wasteTotal

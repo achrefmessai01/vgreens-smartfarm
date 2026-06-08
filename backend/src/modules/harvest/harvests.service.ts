@@ -879,6 +879,28 @@ export class HarvestsService
       const yieldPerPlant =
         sumPlants > 0 ? this.roundTo2(sumSellable / sumPlants) : null;
 
+      // Yield per metre: Σ (classA + classB) / Σ rowLength, weighted by batch.
+      // rowLength is a batch cultivation property carried on the parent batch
+      // row (children default to 0), so read it from the unfiltered `harvests`
+      // list like totalPlants above.
+      const rowLengthByBatch = new Map<string, number>();
+      for (const h of harvests) {
+        if (h.parentBatchId === null) {
+          rowLengthByBatch.set(h.id, h.rowLength);
+        }
+      }
+      let sumSellableMeters = 0;
+      let sumRowLength = 0;
+      for (const [batchId, sellable] of sellableByBatch) {
+        const rowLength = rowLengthByBatch.get(batchId) ?? 0;
+        if (rowLength > 0) {
+          sumSellableMeters += sellable;
+          sumRowLength += rowLength;
+        }
+      }
+      const yieldPerMeter =
+        sumRowLength > 0 ? this.roundTo2(sumSellableMeters / sumRowLength) : null;
+
       // Calculate days active (from earliest planting date to latest harvest date)
       const plantingDates = metricsHarvests.map(
         (h) => new Date(h.plantingDate),
@@ -919,6 +941,7 @@ export class HarvestsService
         averageBrix: Math.round(averageBrix * 10) / 10,
         averageFruitWeight: Math.round(averageFruitWeight * 1000) / 1000,
         yieldPerPlant,
+        yieldPerMeter,
         marketablePercent: Math.round(marketablePercent * 10) / 10,
         wastePercent: Math.round(wastePercent * 10) / 10,
         wasteTotal: Math.round(totalWaste * 10) / 10,
@@ -952,6 +975,7 @@ export class HarvestsService
       averageBrix: 0,
       averageFruitWeight: 0,
       yieldPerPlant: null,
+      yieldPerMeter: null,
       marketablePercent: 0,
       wastePercent: 0,
       wasteTotal: 0,
