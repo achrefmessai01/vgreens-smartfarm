@@ -126,6 +126,15 @@ export const HARVESTS_COUNT_QUERY = gql`
   query HarvestsCount($filter: HarvestFilterInput) {
     harvests(filter: $filter) {
       id
+      parentBatchId
+      status
+      classA
+      classB
+      waste
+      avgBrix
+      rowX
+      rowY
+      photos
     }
   }
 `;
