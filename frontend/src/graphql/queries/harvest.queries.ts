@@ -117,8 +117,8 @@ export const HARVEST_QUERY = gql`
 `;
 
 export const HARVESTS_CSV_EXPORT_QUERY = gql`
-  query HarvestsCsvExport($filter: HarvestFilterInput) {
-    harvestsCsvExport(filter: $filter)
+  query HarvestsCsvExport($filter: HarvestFilterInput, $columns: [String!]) {
+    harvestsCsvExport(filter: $filter, columns: $columns)
   }
 `;
 

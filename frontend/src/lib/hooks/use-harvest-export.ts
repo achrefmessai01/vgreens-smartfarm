@@ -29,13 +29,16 @@ export function useHarvestExport() {
   const { toast } = useToast();
   const { t } = useI18n();
   const [isExporting, setIsExporting] = useState(false);
-  const [runExport] = useLazyQuery<{ harvestsCsvExport: string }>(
-    HARVESTS_CSV_EXPORT_QUERY,
-    { fetchPolicy: 'network-only' },
-  );
+  const [runExport] = useLazyQuery<
+    { harvestsCsvExport: string },
+    { filter: HarvestExportFilter | null; columns: string[] | null }
+  >(HARVESTS_CSV_EXPORT_QUERY, { fetchPolicy: 'network-only' });
 
   const exportCsv = useCallback(
-    async (filter?: HarvestExportFilter): Promise<boolean> => {
+    async (
+      filter?: HarvestExportFilter,
+      columns?: string[],
+    ): Promise<boolean> => {
       setIsExporting(true);
       try {
         const variables = {
@@ -46,6 +49,7 @@ export function useHarvestExport() {
                   ...(filter.dateTo ? { dateTo: filter.dateTo } : {}),
                 }
               : null,
+          columns: columns && columns.length > 0 ? columns : null,
         };
         const { data, error } = await runExport({ variables });
         if (error || data?.harvestsCsvExport == null) {
