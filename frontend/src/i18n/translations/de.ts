@@ -552,6 +552,7 @@ export const de = {
       avgWeightPerFruit: 'Durchschnittsgewicht pro Frucht',
       yieldPerPlant: 'Ertrag pro Pflanze',
       yieldPerPlantShort: 'Ertrag/Pflanze',
+      yieldPerMeterShort: 'Ertrag/m',
       yieldPerPlantSubtitle: 'Verkaufsfähige kg pro Pflanze',
       yieldPerPlantNoData: 'Gesamtpflanzen für die Charge festlegen',
       fruitWeightTrendOverTime: 'Fruchtgewichts-Trend im Zeitverlauf',

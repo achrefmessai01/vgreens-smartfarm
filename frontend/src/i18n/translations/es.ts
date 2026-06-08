@@ -398,6 +398,7 @@ export const es = {
       yieldOverTime: 'Rendimiento a lo largo del tiempo',
       yieldPerMeterOverTime: 'Rendimiento por metro a lo largo del tiempo',
       yieldPerMeterUnit: 'Rendimiento (kg/m)',
+      yieldPerMeterShort: 'Rendimiento/m',
       classDistribution: 'Distribución por clase',
       brixTrendOverTime: 'Tendencia Brix a lo largo del tiempo',
       cumulativeYieldProgress: 'Progreso acumulado del rendimiento',

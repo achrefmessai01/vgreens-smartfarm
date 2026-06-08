@@ -408,6 +408,7 @@ export const pt = {
       yieldOverTime: 'Produção ao longo do tempo',
       yieldPerMeterOverTime: 'Produção por metro ao longo do tempo',
       yieldPerMeterUnit: 'Produção (kg/m)',
+      yieldPerMeterShort: 'Produção/m',
       classDistribution: 'Distribuição por classe',
       brixTrendOverTime: 'Tendência Brix ao longo do tempo',
       cumulativeYieldProgress: 'Progresso cumulativo da produção',

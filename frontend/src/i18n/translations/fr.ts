@@ -394,6 +394,7 @@ export const fr = {
       yieldOverTime: 'Rendement dans le temps',
       yieldPerMeterOverTime: 'Rendement par mètre dans le temps',
       yieldPerMeterUnit: 'Rendement (kg/m)',
+      yieldPerMeterShort: 'Rendement/m',
       classDistribution: 'Distribution par classe',
       brixTrendOverTime: 'Tendance Brix',
       cumulativeYieldProgress: 'Progression cumulée',

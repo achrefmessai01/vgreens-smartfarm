@@ -410,6 +410,7 @@ export const el = {
       yieldOverTime: 'Απόδοση στον χρόνο',
       yieldPerMeterOverTime: 'Απόδοση ανά μέτρο στον χρόνο',
       yieldPerMeterUnit: 'Απόδοση (kg/m)',
+      yieldPerMeterShort: 'Απόδοση/m',
       classDistribution: 'Κατανομή ανά κατηγορία',
       brixTrendOverTime: 'Τάση Brix στον χρόνο',
       cumulativeYieldProgress: 'Σωρευτική πρόοδος απόδοσης',

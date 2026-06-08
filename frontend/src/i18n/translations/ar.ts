@@ -398,6 +398,7 @@ export const ar = {
       yieldOverTime: 'الإنتاج عبر الزمن',
       yieldPerMeterOverTime: 'الإنتاج لكل متر عبر الزمن',
       yieldPerMeterUnit: 'الإنتاج (كجم/م)',
+      yieldPerMeterShort: 'الإنتاج/م',
       classDistribution: 'توزيع الفئات',
       brixTrendOverTime: 'اتجاه Brix عبر الزمن',
       cumulativeYieldProgress: 'تقدّم الإنتاج التراكمي',

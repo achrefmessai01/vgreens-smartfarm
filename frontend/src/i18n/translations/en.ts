@@ -549,6 +549,7 @@ export const en = {
       avgWeightPerFruit: 'Average weight per fruit',
       yieldPerPlant: 'Yield per Plant',
       yieldPerPlantShort: 'Yield/Plant',
+      yieldPerMeterShort: 'Yield/m',
       yieldPerPlantSubtitle: 'Sellable kg per plant',
       yieldPerPlantNoData: 'Set Total Plants on the batch',
       fruitWeightTrendOverTime: 'Fruit Weight Trend Over Time',

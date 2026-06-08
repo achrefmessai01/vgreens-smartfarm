@@ -402,6 +402,7 @@ export const tr = {
       yieldOverTime: 'Zamana göre verim',
       yieldPerMeterOverTime: 'Zamana göre metre başına verim',
       yieldPerMeterUnit: 'Verim (kg/m)',
+      yieldPerMeterShort: 'Verim/m',
       classDistribution: 'Sınıf dağılımı',
       brixTrendOverTime: 'Zamana göre Brix eğilimi',
       cumulativeYieldProgress: 'Birikmiş verim ilerlemesi',
