@@ -24,11 +24,13 @@ export const HARVESTS_QUERY = gql`
       date
       classA
       classB
+      classC
       waste
       avgBrix
       rowX
       rowY
       brixReadings
+      brixClasses
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -37,11 +39,13 @@ export const HARVESTS_QUERY = gql`
       entries {
         classA
         classB
+        classC
         waste
         rowX
         rowY
         avgBrix
         brixReadings
+        brixClasses
         fruitCount
         totalFruitWeight
         avgFruitWeight
@@ -82,11 +86,13 @@ export const HARVEST_QUERY = gql`
       date
       classA
       classB
+      classC
       waste
       avgBrix
       rowX
       rowY
       brixReadings
+      brixClasses
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -95,11 +101,13 @@ export const HARVEST_QUERY = gql`
       entries {
         classA
         classB
+        classC
         waste
         rowX
         rowY
         avgBrix
         brixReadings
+        brixClasses
         fruitCount
         totalFruitWeight
         avgFruitWeight
@@ -130,6 +138,7 @@ export const HARVESTS_COUNT_QUERY = gql`
       status
       classA
       classB
+      classC
       waste
       avgBrix
       rowX

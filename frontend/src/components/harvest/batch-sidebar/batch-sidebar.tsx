@@ -54,6 +54,7 @@ export function BatchSidebar({
     harvestDate,
     setHarvestDate,
     handleBrixChange,
+    handleBrixClassChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
     handleFruitCountChange,
@@ -190,6 +191,9 @@ export function BatchSidebar({
                     }
                     onBrixChange={(readingIndex, value) =>
                       handleBrixChange(index, readingIndex, value)
+                    }
+                    onBrixClassChange={(readingIndex, value) =>
+                      handleBrixClassChange(index, readingIndex, value)
                     }
                     onAddBrixReading={() => handleAddBrixReading(index)}
                     onRemoveBrixReading={(readingIndex) =>

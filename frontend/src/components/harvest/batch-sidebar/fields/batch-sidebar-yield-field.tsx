@@ -4,13 +4,13 @@ import * as React from 'react';
 import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
 
 export function YieldDataField({
   marketable,
   waste,
   classB,
+  classC,
   rowX,
   rowY,
   onYieldChange,
@@ -18,43 +18,53 @@ export function YieldDataField({
 }: YieldDataFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const classBMode = useHarvestClassBMode();
   // Auto-reveal the row coordinates when the entry already carries values, so
   // existing coordinates stay visible when viewing/editing a harvest.
   const [showRowCoordinates, setShowRowCoordinates] = React.useState(
     rowX > 0 || rowY > 0,
   );
-  const marketableRef = React.useRef<HTMLInputElement>(null);
-  const secondaryRef = React.useRef<HTMLInputElement>(null);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      secondaryRef.current?.focus();
-    }
-  };
-
-  const primaryLabel = classBMode
-    ? (h?.quality1 ?? 'Quality 1')
-    : (h?.marketable ?? 'Marketable');
-  const secondaryLabel = classBMode
-    ? (h?.quality2 ?? 'Quality 2')
-    : (h?.waste ?? 'Waste');
-  const primaryPlaceholder = classBMode
-    ? (h?.enterQuality1Yield ?? 'Enter Quality 1 yield')
-    : (h?.enterMarketableYield ?? 'Enter marketable yield');
-  const secondaryPlaceholder = classBMode
-    ? (h?.enterQuality2Yield ?? 'Enter Quality 2 yield')
-    : (h?.enterWasteAmount ?? 'Enter waste amount');
-
-  const secondaryValue = classBMode ? classB : waste;
-  const secondaryField: 'classB' | 'waste' = classBMode ? 'classB' : 'waste';
+  // The four crop-grade inputs, rendered in order. Quality A maps to the
+  // `marketable` (classA) field; Quality D is the existing `waste` field.
+  const yieldFields: ReadonlyArray<{
+    field: 'marketable' | 'classB' | 'classC' | 'waste';
+    label: string;
+    placeholder: string;
+    value: number;
+  }> = [
+    {
+      field: 'marketable',
+      label: h?.qualityA ?? 'Quality A',
+      placeholder: h?.enterQualityAYield ?? 'Enter Quality A yield',
+      value: marketable,
+    },
+    {
+      field: 'classB',
+      label: h?.qualityB ?? 'Quality B',
+      placeholder: h?.enterQualityBYield ?? 'Enter Quality B yield',
+      value: classB,
+    },
+    {
+      field: 'classC',
+      label: h?.qualityC ?? 'Quality C',
+      placeholder: h?.enterQualityCYield ?? 'Enter Quality C yield',
+      value: classC,
+    },
+    {
+      field: 'waste',
+      label: h?.waste ?? 'Waste',
+      placeholder: h?.enterWasteAmount ?? 'Enter waste amount',
+      value: waste,
+    },
+  ];
 
   if (isLoading) {
     return (
       <div className="space-y-4">
         <div className="bg-muted h-5 animate-pulse rounded" />
         <div className="grid grid-cols-2 gap-4">
+          <div className="bg-muted h-10 animate-pulse rounded" />
+          <div className="bg-muted h-10 animate-pulse rounded" />
           <div className="bg-muted h-10 animate-pulse rounded" />
           <div className="bg-muted h-10 animate-pulse rounded" />
           {showRowCoordinates && (
@@ -86,51 +96,27 @@ export function YieldDataField({
           </label>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2 text-left">
-            <p className="text-muted-foreground text-sm">{primaryLabel}</p>
-            <div className="relative">
-              <Input
-                ref={marketableRef}
-                type="number"
-                min="0"
-                step="0.1"
-                value={marketable === 0 ? '' : marketable.toString()}
-                onChange={(e) =>
-                  onYieldChange?.('marketable', parseFloat(e.target.value) || 0)
-                }
-                onKeyDown={handleKeyDown}
-                className="h-10 pr-12 text-left text-base"
-                placeholder={primaryPlaceholder}
-              />
-              <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
-                kg
-              </span>
+          {yieldFields.map(({ field, label, placeholder, value }) => (
+            <div key={field} className="space-y-2 text-left">
+              <p className="text-muted-foreground text-sm">{label}</p>
+              <div className="relative">
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={value === 0 ? '' : value.toString()}
+                  onChange={(e) =>
+                    onYieldChange?.(field, parseFloat(e.target.value) || 0)
+                  }
+                  className="h-10 pr-12 text-left text-base"
+                  placeholder={placeholder}
+                />
+                <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
+                  kg
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="space-y-2 text-left">
-            <p className="text-muted-foreground text-sm">{secondaryLabel}</p>
-            <div className="relative">
-              <Input
-                ref={secondaryRef}
-                type="number"
-                min="0"
-                step="0.1"
-                value={secondaryValue === 0 ? '' : secondaryValue.toString()}
-                onChange={(e) =>
-                  onYieldChange?.(
-                    secondaryField,
-                    parseFloat(e.target.value) || 0,
-                  )
-                }
-                onKeyDown={handleKeyDown}
-                className="h-10 pr-12 text-left text-base"
-                placeholder={secondaryPlaceholder}
-              />
-              <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
-                kg
-              </span>
-            </div>
-          </div>
+          ))}
           {showRowCoordinates && (
             <>
               <div className="space-y-2 text-left">

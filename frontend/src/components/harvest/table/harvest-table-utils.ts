@@ -26,6 +26,7 @@ type AutoDraftPlaceholderFields = Pick<
   | 'status'
   | 'classA'
   | 'classB'
+  | 'classC'
   | 'waste'
   | 'avgBrix'
   | 'rowX'
@@ -41,6 +42,7 @@ export function isAutoDraftPlaceholder(
     entry.status === HarvestStatus.Draft &&
     entry.classA === 0 &&
     entry.classB === 0 &&
+    (entry.classC ?? 0) === 0 &&
     entry.waste === 0 &&
     entry.avgBrix === 0 &&
     entry.rowX === 0 &&

@@ -1,5 +1,4 @@
 import { useI18n } from '@/i18n';
-import { useHarvestClassBMode } from '@/lib/harvest-class-b-mode';
 import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
 import {
   Activity,
@@ -26,31 +25,21 @@ export function DashboardMetricsGrid({
 }: DashboardMetricsGridProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const classBMode = useHarvestClassBMode();
 
   const acrossHarvests =
     h?.acrossHarvests?.replace('{count}', data.harvestCount.toString()) ??
     `Across ${data.harvestCount} harvests`;
 
-  const classATotal = (data.totalYield ?? 0) - (data.wasteTotal ?? 0);
-  const classBTotal = data.classBTotal ?? 0;
-  const qualityYield = classATotal + classBTotal;
+  // Total yield (= Quality A + B + C + waste) comes straight from the backend.
+  // Sellable (marketable) total is everything except waste.
+  const totalYieldDisplay = data.totalYield ?? 0;
+  const sellableTotal = totalYieldDisplay - (data.wasteTotal ?? 0);
+  const primaryPercent = data.marketablePercent ?? 0;
+  const secondaryPercent = data.wastePercent ?? 0;
+  const secondaryTotal = data.wasteTotal ?? 0;
 
-  const totalYieldDisplay = classBMode ? qualityYield : (data.totalYield ?? 0);
-  const primaryPercent = classBMode
-    ? (qualityYield > 0 ? (classATotal / qualityYield) * 100 : 0)
-    : (data.marketablePercent ?? 0);
-  const secondaryPercent = classBMode
-    ? (qualityYield > 0 ? (classBTotal / qualityYield) * 100 : 0)
-    : (data.wastePercent ?? 0);
-  const secondaryTotal = classBMode ? classBTotal : (data.wasteTotal ?? 0);
-
-  const primaryTitle = classBMode
-    ? (h?.quality1Percent ?? 'Quality 1 %')
-    : (h?.marketablePercent ?? 'Marketable %');
-  const secondaryTitle = classBMode
-    ? (h?.quality2Percent ?? 'Quality 2 %')
-    : (h?.wastePercent ?? 'Waste %');
+  const primaryTitle = h?.marketablePercent ?? 'Marketable %';
+  const secondaryTitle = h?.wastePercent ?? 'Waste %';
 
   const cards: Array<{ id: string; node: React.ReactNode }> = [
     {
@@ -135,7 +124,7 @@ export function DashboardMetricsGrid({
         <MetricCard
           title={primaryTitle}
           value={`${primaryPercent.toFixed(1)}%`}
-          subtitle={`${classATotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
+          subtitle={`${sellableTotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
           icon={<Package className="h-4 w-4" />}
           color="success"
         />
@@ -148,7 +137,7 @@ export function DashboardMetricsGrid({
           title={secondaryTitle}
           value={`${secondaryPercent.toFixed(1)}%`}
           subtitle={`${secondaryTotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
-          color={classBMode ? 'success' : 'error'}
+          color="error"
         />
       ),
     },

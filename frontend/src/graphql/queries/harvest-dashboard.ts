@@ -15,6 +15,7 @@ export const GET_HARVEST_DASHBOARD = gql`
       wastePercent
       wasteTotal
       classBTotal
+      classCTotal
       criticalAlerts
       daysActive
       yieldOverTime {
@@ -29,6 +30,7 @@ export const GET_HARVEST_DASHBOARD = gql`
         date
         marketable
         classB
+        classC
         waste
       }
       brixTrend {
@@ -43,6 +45,7 @@ export const GET_HARVEST_DASHBOARD = gql`
         date
         cumulativeClassA
         cumulativeClassB
+        cumulativeClassC
         cumulativeWaste
       }
     }
@@ -83,6 +86,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       wastePercent
       wasteTotal
       classBTotal
+      classCTotal
       criticalAlerts
       daysActive
       yieldOverTime {
@@ -97,6 +101,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
         date
         marketable
         classB
+        classC
         waste
       }
       brixTrend {
@@ -111,6 +116,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
         date
         cumulativeClassA
         cumulativeClassB
+        cumulativeClassC
         cumulativeWaste
       }
     }
