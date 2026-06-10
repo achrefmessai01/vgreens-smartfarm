@@ -1,5 +1,6 @@
 'use client';
 
+import { VideoOff } from 'lucide-react';
 import { CameraCard } from './camera-card';
 import type { CameraLivestreamFeed } from '@/types/camera.types';
 
@@ -41,12 +42,15 @@ export function CameraGrid({
 
   if (!loading && cameras.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center px-4 py-16">
-        <div className="space-y-3 text-center">
-          <p className="text-muted-foreground text-lg font-semibold dark:text-white/70">
+      <div className="border-border/60 bg-muted/30 flex flex-col items-center justify-center rounded-xl border border-dashed px-4 py-20">
+        <div className="bg-muted-foreground/10 mb-4 flex h-14 w-14 items-center justify-center rounded-full">
+          <VideoOff className="text-muted-foreground h-7 w-7" />
+        </div>
+        <div className="space-y-1.5 text-center">
+          <p className="text-foreground text-lg font-semibold">
             Camera feeds currently unavailable
           </p>
-          <p className="text-muted-foreground text-sm dark:text-white/50">
+          <p className="text-muted-foreground text-sm">
             Please try again later.
           </p>
         </div>
