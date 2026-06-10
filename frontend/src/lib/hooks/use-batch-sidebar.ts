@@ -2,6 +2,7 @@
 
 import {
   HarvestStatus,
+  HarvestQualityClass,
   HarvestsDocument,
   useCreateHarvestMutation,
   useDeleteHarvestImageMutation,
@@ -104,11 +105,25 @@ export function useBatchSidebar({
     [updateEntry],
   );
 
+  // Each reading carries a quality grade at the same index; add/remove keep the
+  // two arrays aligned and new readings default to Quality A.
+  const handleBrixClassChange = React.useCallback(
+    (entryIndex: number, readingIndex: number, value: HarvestQualityClass) => {
+      updateEntry(entryIndex, (entry) => {
+        const brixClasses = [...entry.brixClasses];
+        brixClasses[readingIndex] = value;
+        return { ...entry, brixClasses };
+      });
+    },
+    [updateEntry],
+  );
+
   const handleAddBrixReading = React.useCallback(
     (entryIndex: number) => {
       updateEntry(entryIndex, (entry) => ({
         ...entry,
         brixReadings: [...entry.brixReadings, 0],
+        brixClasses: [...entry.brixClasses, HarvestQualityClass.A],
       }));
     },
     [updateEntry],
@@ -121,6 +136,7 @@ export function useBatchSidebar({
         return {
           ...entry,
           brixReadings: entry.brixReadings.filter((_, i) => i !== readingIndex),
+          brixClasses: entry.brixClasses.filter((_, i) => i !== readingIndex),
         };
       });
     },
@@ -137,7 +153,7 @@ export function useBatchSidebar({
   const handleYieldChange = React.useCallback(
     (
       entryIndex: number,
-      field: 'marketable' | 'waste' | 'classB' | 'rowX' | 'rowY',
+      field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
       value: number,
     ) => {
       updateEntry(entryIndex, (entry) => ({ ...entry, [field]: value }));
@@ -215,22 +231,26 @@ export function useBatchSidebar({
     if (!harvestId || !currentData) return;
     // Map each sub-entry to the GraphQL input shape. Brix readings and fruit
     // count only count when their section is expanded; total fruit weight is
-    // the entry's sellable yield (Class A + Class B). The backend re-derives the
-    // top-level aggregates from these entries.
+    // the entry's sellable yield (Class A + Class B + Class C). The backend
+    // re-derives the top-level aggregates from these entries.
     const entries = currentData.entries.map((entry) => {
       const brixReadings = entry.showBrix ? entry.brixReadings : [];
+      // Keep grades index-aligned with the readings actually sent.
+      const brixClasses = entry.showBrix ? entry.brixClasses : [];
       const fruitCount = entry.showFruitWeight ? entry.fruitCount : 0;
       const totalFruitWeight = entry.showFruitWeight
-        ? (entry.marketable || 0) + (entry.classB || 0)
+        ? (entry.marketable || 0) + (entry.classB || 0) + (entry.classC || 0)
         : 0;
       return {
         classA: entry.marketable,
         classB: entry.classB,
+        classC: entry.classC,
         waste: entry.waste,
         rowX: entry.rowX,
         rowY: entry.rowY,
         avgBrix: computeAvgBrix(brixReadings),
         brixReadings,
+        brixClasses,
         fruitCount,
         totalFruitWeight,
         avgFruitWeight: computeAvgFruitWeight(fruitCount, totalFruitWeight),
@@ -308,6 +328,7 @@ export function useBatchSidebar({
     harvestDate,
     setHarvestDate,
     handleBrixChange,
+    handleBrixClassChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
     handleFruitCountChange,

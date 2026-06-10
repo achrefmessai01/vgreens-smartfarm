@@ -158,6 +158,7 @@ export function HarvestExportDialog({
       status: HarvestStatus;
       classA: number;
       classB: number;
+      classC: number;
       waste: number;
       avgBrix: number;
       rowX: number;

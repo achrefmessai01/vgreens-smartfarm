@@ -13,6 +13,7 @@ import {
 import { Type } from 'class-transformer';
 import { InputType, Field, ID, Float, Int } from '@nestjs/graphql';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
+import { HarvestQualityClass } from '@/common/enums/harvest-quality-class.enum';
 import { HarvestEntryInput } from './harvest-entry.input';
 
 @InputType()
@@ -122,6 +123,12 @@ export class CreateHarvestInput {
   @IsOptional()
   @IsNumber()
   @Min(0)
+  classC?: number;
+
+  @Field(() => Float, { defaultValue: 0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
   waste?: number;
 
   @Field(() => Float, { defaultValue: 0 })
@@ -159,6 +166,12 @@ export class CreateHarvestInput {
   @IsNumber({}, { each: true })
   @Min(0, { each: true })
   brixReadings?: number[];
+
+  @Field(() => [HarvestQualityClass], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(HarvestQualityClass, { each: true })
+  brixClasses?: HarvestQualityClass[];
 
   // --- Fruit weight measurement ---
 

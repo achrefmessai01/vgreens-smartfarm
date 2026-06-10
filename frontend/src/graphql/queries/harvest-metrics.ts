@@ -15,6 +15,7 @@ export const GET_HARVEST_METRICS = gql`
       wastePercent
       wasteTotal
       classBTotal
+      classCTotal
       criticalAlerts
       daysActive
     }
@@ -41,6 +42,7 @@ export const GET_CLASS_DISTRIBUTION = gql`
         date
         marketable
         classB
+        classC
         waste
       }
     }
@@ -79,6 +81,7 @@ export const GET_CUMULATIVE_YIELD = gql`
         date
         cumulativeClassA
         cumulativeClassB
+        cumulativeClassC
         cumulativeWaste
       }
     }
@@ -92,6 +95,8 @@ export const GET_HARVEST_SUMMARY = gql`
       id
       date
       classA
+      classB
+      classC
       waste
       avgBrix
       species

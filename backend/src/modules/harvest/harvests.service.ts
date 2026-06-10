@@ -26,6 +26,7 @@ import {
 } from './dto/dashboard-metrics.dto';
 import { HarvestBatchListItem } from './dto/harvest-batch-list-item.dto';
 import { HarvestStatus } from '@/common/enums/harvest-status.enum';
+import { HarvestQualityClass } from '@/common/enums/harvest-quality-class.enum';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
 import { buildBatchNumber } from './utils/batch-number.util';
 
@@ -52,12 +53,12 @@ export class HarvestsService
       const result: unknown = await this.harvestRepository.query(
         `UPDATE harvests
          SET "yieldPerPlant" = ROUND(
-           (("classA"::numeric + "classB"::numeric) / "totalPlants")::numeric,
+           (("classA"::numeric + "classB"::numeric + "classC"::numeric) / "totalPlants")::numeric,
            2
          )
          WHERE "yieldPerPlant" IS NULL
            AND "totalPlants" > 0
-           AND ("classA" > 0 OR "classB" > 0)`,
+           AND ("classA" > 0 OR "classB" > 0 OR "classC" > 0)`,
       );
       // The pg driver returns `[rows, rowCount]` for UPDATE statements.
       const updated =
@@ -78,12 +79,12 @@ export class HarvestsService
       const result: unknown = await this.harvestRepository.query(
         `UPDATE harvests
          SET "yieldPerMeter" = ROUND(
-           (("classA"::numeric + "classB"::numeric) / "rowLength")::numeric,
+           (("classA"::numeric + "classB"::numeric + "classC"::numeric) / "rowLength")::numeric,
            2
          )
          WHERE "yieldPerMeter" IS NULL
            AND "rowLength" > 0
-           AND ("classA" > 0 OR "classB" > 0)`,
+           AND ("classA" > 0 OR "classB" > 0 OR "classC" > 0)`,
       );
       const updated =
         Array.isArray(result) && typeof result[1] === 'number' ? result[1] : 0;
@@ -158,38 +159,41 @@ export class HarvestsService
     return Math.round(value * 100) / 100;
   }
 
-  // Per-harvest yield-per-plant: (classA + classB) / totalPlants. Stored on
-  // each Harvest row by create/update so the value is queryable without
-  // re-deriving it. Null when the harvest has no plant count (typical for
-  // child harvest rows — totalPlants lives on the parent batch).
+  // Per-harvest yield-per-plant: (classA + classB + classC) / totalPlants.
+  // Stored on each Harvest row by create/update so the value is queryable
+  // without re-deriving it. Null when the harvest has no plant count (typical
+  // for child harvest rows — totalPlants lives on the parent batch).
   private computeYieldPerPlant(
     classA: number,
     classB: number,
+    classC: number,
     totalPlants: number,
   ): number | null {
     if (totalPlants <= 0) return null;
-    return this.roundTo2((classA + classB) / totalPlants);
+    return this.roundTo2((classA + classB + classC) / totalPlants);
   }
 
-  // Per-harvest yield-per-metre: (classA + classB) / rowLength. Stored on each
-  // Harvest row by create/update so the value is queryable without re-deriving
-  // it. Null when the harvest has no recorded row length (rowLength <= 0).
+  // Per-harvest yield-per-metre: (classA + classB + classC) / rowLength. Stored
+  // on each Harvest row by create/update so the value is queryable without
+  // re-deriving it. Null when the harvest has no recorded row length
+  // (rowLength <= 0).
   private computeYieldPerMeter(
     classA: number,
     classB: number,
+    classC: number,
     rowLength: number,
   ): number | null {
     if (rowLength <= 0) return null;
-    return this.roundTo2((classA + classB) / rowLength);
+    return this.roundTo2((classA + classB + classC) / rowLength);
   }
 
-  // Per-row avg fruit weight: (classA + classB) / fruitCount, computed on the
-  // fly so old rows with stale `avgFruitWeight` columns (left over from when
-  // total fruit weight was a user input) don't poison the dashboard.
+  // Per-row avg fruit weight: (classA + classB + classC) / fruitCount, computed
+  // on the fly so old rows with stale `avgFruitWeight` columns (left over from
+  // when total fruit weight was a user input) don't poison the dashboard.
   // Returns null when there's no fruit-count measurement or no sellable yield.
   private computeRowAvgFruitWeight(harvest: Harvest): number | null {
     if (harvest.fruitCount <= 0) return null;
-    const sellable = harvest.classA + harvest.classB;
+    const sellable = harvest.classA + harvest.classB + harvest.classC;
     if (sellable <= 0) return null;
     return sellable / harvest.fruitCount;
   }
@@ -210,15 +214,21 @@ export class HarvestsService
   // so the backend stays the source of truth for the derived fields.
   private normalizeEntry(entry: HarvestEntryInput): HarvestEntry {
     const brixReadings = entry.brixReadings ?? [];
+    // One grade per reading, index-aligned; default any missing grade to A.
+    const brixClasses = brixReadings.map(
+      (_, i) => entry.brixClasses?.[i] ?? HarvestQualityClass.A,
+    );
     const fruitCount = entry.fruitCount ?? 0;
     const totalFruitWeight = entry.totalFruitWeight ?? 0;
     return {
       classA: entry.classA ?? 0,
       classB: entry.classB ?? 0,
+      classC: entry.classC ?? 0,
       waste: entry.waste ?? 0,
       rowX: entry.rowX ?? 0,
       rowY: entry.rowY ?? 0,
       brixReadings,
+      brixClasses,
       avgBrix: this.avgOfPositive(brixReadings),
       fruitCount,
       totalFruitWeight,
@@ -237,9 +247,11 @@ export class HarvestsService
     entries: HarvestEntry[];
     classA: number;
     classB: number;
+    classC: number;
     waste: number;
     avgBrix: number;
     brixReadings: number[];
+    brixClasses: HarvestQualityClass[];
     fruitCount: number;
     totalFruitWeight: number;
     avgFruitWeight: number;
@@ -249,22 +261,28 @@ export class HarvestsService
     const entries = rawEntries.map((e) => this.normalizeEntry(e));
     const classA = entries.reduce((s, e) => s + e.classA, 0);
     const classB = entries.reduce((s, e) => s + e.classB, 0);
+    const classC = entries.reduce((s, e) => s + e.classC, 0);
     const waste = entries.reduce((s, e) => s + e.waste, 0);
     const fruitCount = entries.reduce((s, e) => s + e.fruitCount, 0);
     const totalFruitWeight = entries.reduce(
       (s, e) => s + e.totalFruitWeight,
       0,
     );
+    // Pool readings and their grades in the same entry order so the two arrays
+    // stay index-aligned at the top level.
     const brixReadings = entries.flatMap((e) => e.brixReadings);
+    const brixClasses = entries.flatMap((e) => e.brixClasses);
     const rowXs = entries.map((e) => e.rowX).filter((v) => v > 0);
     const rowYs = entries.map((e) => e.rowY).filter((v) => v > 0);
     return {
       entries,
       classA,
       classB,
+      classC,
       waste,
       avgBrix: this.avgOfPositive(brixReadings),
       brixReadings,
+      brixClasses,
       fruitCount,
       totalFruitWeight,
       avgFruitWeight:
@@ -282,6 +300,7 @@ export class HarvestsService
       harvest.parentBatchId == null &&
       harvest.classA === 0 &&
       harvest.classB === 0 &&
+      harvest.classC === 0 &&
       harvest.waste === 0 &&
       harvest.avgBrix === 0 &&
       harvest.rowX === 0 &&
@@ -491,6 +510,7 @@ export class HarvestsService
         : null;
       const classA = agg?.classA ?? input.classA ?? 0;
       const classB = agg?.classB ?? input.classB ?? 0;
+      const classC = agg?.classC ?? input.classC ?? 0;
       const totalPlants = input.totalPlants ?? 0;
 
       const harvest = this.harvestRepository.create({
@@ -522,11 +542,18 @@ export class HarvestsService
         date: new Date(input.date),
         classA,
         classB,
+        classC,
         waste: agg?.waste ?? input.waste ?? 0,
-        yieldPerPlant: this.computeYieldPerPlant(classA, classB, totalPlants),
+        yieldPerPlant: this.computeYieldPerPlant(
+          classA,
+          classB,
+          classC,
+          totalPlants,
+        ),
         yieldPerMeter: this.computeYieldPerMeter(
           classA,
           classB,
+          classC,
           input.rowLength,
         ),
         avgBrix: agg?.avgBrix ?? input.avgBrix ?? 0,
@@ -543,6 +570,7 @@ export class HarvestsService
             ? input.numberOfRowsHarvested
             : 0),
         brixReadings: agg?.brixReadings ?? input.brixReadings ?? [],
+        brixClasses: agg?.brixClasses ?? input.brixClasses ?? [],
         fruitCount: agg?.fruitCount ?? input.fruitCount ?? 0,
         totalFruitWeight: agg?.totalFruitWeight ?? input.totalFruitWeight ?? 0,
         avgFruitWeight: agg?.avgFruitWeight ?? input.avgFruitWeight ?? 0,
@@ -620,15 +648,18 @@ export class HarvestsService
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.classA !== undefined) harvest.classA = input.classA;
       if (input.classB !== undefined) harvest.classB = input.classB;
+      if (input.classC !== undefined) harvest.classC = input.classC;
       if (input.waste !== undefined) harvest.waste = input.waste;
       harvest.yieldPerPlant = this.computeYieldPerPlant(
         harvest.classA,
         harvest.classB,
+        harvest.classC,
         harvest.totalPlants,
       );
       harvest.yieldPerMeter = this.computeYieldPerMeter(
         harvest.classA,
         harvest.classB,
+        harvest.classC,
         harvest.rowLength,
       );
       if (input.avgBrix !== undefined) harvest.avgBrix = input.avgBrix;
@@ -645,6 +676,9 @@ export class HarvestsService
       }
       if (input.brixReadings !== undefined) {
         harvest.brixReadings = input.brixReadings;
+      }
+      if (input.brixClasses !== undefined) {
+        harvest.brixClasses = input.brixClasses;
       }
       if (input.fruitCount !== undefined) {
         harvest.fruitCount = input.fruitCount;
@@ -668,9 +702,11 @@ export class HarvestsService
           harvest.entries = agg.entries;
           harvest.classA = agg.classA;
           harvest.classB = agg.classB;
+          harvest.classC = agg.classC;
           harvest.waste = agg.waste;
           harvest.avgBrix = agg.avgBrix;
           harvest.brixReadings = agg.brixReadings;
+          harvest.brixClasses = agg.brixClasses;
           harvest.fruitCount = agg.fruitCount;
           harvest.totalFruitWeight = agg.totalFruitWeight;
           harvest.avgFruitWeight = agg.avgFruitWeight;
@@ -679,11 +715,13 @@ export class HarvestsService
           harvest.yieldPerPlant = this.computeYieldPerPlant(
             harvest.classA,
             harvest.classB,
+            harvest.classC,
             harvest.totalPlants,
           );
           harvest.yieldPerMeter = this.computeYieldPerMeter(
             harvest.classA,
             harvest.classB,
+            harvest.classC,
             harvest.rowLength,
           );
         } else {
@@ -832,12 +870,16 @@ export class HarvestsService
 
       // Calculate metrics
       const totalClassA = metricsHarvests.reduce((sum, h) => sum + h.classA, 0);
-      const totalWaste = metricsHarvests.reduce((sum, h) => sum + h.waste, 0);
       const totalClassB = metricsHarvests.reduce((sum, h) => sum + h.classB, 0);
-      const totalYield = totalClassA + totalWaste;
+      const totalClassC = metricsHarvests.reduce((sum, h) => sum + h.classC, 0);
+      const totalWaste = metricsHarvests.reduce((sum, h) => sum + h.waste, 0);
+      // Total picked = every sellable grade (A + B + C) plus waste. Marketable
+      // share is the sellable grades over that total.
+      const totalSellable = totalClassA + totalClassB + totalClassC;
+      const totalYield = totalSellable + totalWaste;
 
       const marketablePercent =
-        totalYield > 0 ? (totalClassA / totalYield) * 100 : 0;
+        totalYield > 0 ? (totalSellable / totalYield) * 100 : 0;
       const wastePercent = totalYield > 0 ? (totalWaste / totalYield) * 100 : 0;
 
       // Calculate average brix
@@ -860,7 +902,8 @@ export class HarvestsService
             perRowAvgFruitWeights.length
           : 0;
 
-      // Yield per plant: Σ (classA + classB) / Σ totalPlants, weighted by batch.
+      // Yield per plant: Σ (classA + classB + classC) / Σ totalPlants, weighted
+      // by batch.
       // totalPlants lives on the parent batch row only (children default to 0),
       // so we read it from the unfiltered `harvests` list — a parent row that's
       // currently a dashboard placeholder still owns the batch's plant count.
@@ -875,7 +918,7 @@ export class HarvestsService
         const key = this.getBatchKey(h);
         sellableByBatch.set(
           key,
-          (sellableByBatch.get(key) ?? 0) + h.classA + h.classB,
+          (sellableByBatch.get(key) ?? 0) + h.classA + h.classB + h.classC,
         );
       }
       let sumSellable = 0;
@@ -890,7 +933,8 @@ export class HarvestsService
       const yieldPerPlant =
         sumPlants > 0 ? this.roundTo2(sumSellable / sumPlants) : null;
 
-      // Yield per metre: Σ (classA + classB) / Σ rowLength, weighted by batch.
+      // Yield per metre: Σ (classA + classB + classC) / Σ rowLength, weighted by
+      // batch.
       // rowLength is a batch cultivation property carried on the parent batch
       // row (children default to 0), so read it from the unfiltered `harvests`
       // list like totalPlants above.
@@ -930,7 +974,9 @@ export class HarvestsService
 
       // Critical alerts (harvests with low brix or high waste percentage)
       const criticalAlerts = metricsHarvests.filter(
-        (h) => h.avgBrix < 6.0 || h.waste / (h.classA + h.waste) > 0.15,
+        (h) =>
+          h.avgBrix < 6.0 ||
+          h.waste / (h.classA + h.classB + h.classC + h.waste) > 0.15,
       ).length;
 
       // Generate time series data
@@ -957,6 +1003,7 @@ export class HarvestsService
         wastePercent: Math.round(wastePercent * 10) / 10,
         wasteTotal: Math.round(totalWaste * 10) / 10,
         classBTotal: Math.round(totalClassB * 10) / 10,
+        classCTotal: Math.round(totalClassC * 10) / 10,
         criticalAlerts,
         daysActive,
         yieldOverTime,
@@ -991,6 +1038,7 @@ export class HarvestsService
       wastePercent: 0,
       wasteTotal: 0,
       classBTotal: 0,
+      classCTotal: 0,
       criticalAlerts: 0,
       daysActive: 0,
       yieldOverTime: [],
@@ -1002,13 +1050,17 @@ export class HarvestsService
     };
   }
 
+  // Daily sellable yield over time: Σ(classA + classB + classC) per day.
   private generateYieldOverTimeData(harvests: Harvest[]): YieldOverTimeData[] {
     const dailyYield = new Map<string, number>();
 
     harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
       const currentYield = dailyYield.get(dateStr) || 0;
-      dailyYield.set(dateStr, currentYield + harvest.classA);
+      dailyYield.set(
+        dateStr,
+        currentYield + harvest.classA + harvest.classB + harvest.classC,
+      );
     });
 
     return Array.from(dailyYield.entries())
@@ -1019,8 +1071,8 @@ export class HarvestsService
       }));
   }
 
-  // Weighted daily yield-per-metre: Σ(classA + classB) / Σ rowLength across all
-  // harvest rows on that date. Days where no row has a recorded row length
+  // Weighted daily yield-per-metre: Σ(classA + classB + classC) / Σ rowLength
+  // across all harvest rows on that date. Days where no row has a recorded row length
   // (Σ rowLength <= 0) are omitted, mirroring the per-row null convention.
   private generateYieldPerMeterData(harvests: Harvest[]): YieldPerMeterData[] {
     const daily = new Map<string, { sellable: number; rowLength: number }>();
@@ -1028,7 +1080,7 @@ export class HarvestsService
     harvests.forEach((harvest) => {
       const dateStr = harvest.date.toISOString().split('T')[0];
       const current = daily.get(dateStr) ?? { sellable: 0, rowLength: 0 };
-      current.sellable += harvest.classA + harvest.classB;
+      current.sellable += harvest.classA + harvest.classB + harvest.classC;
       current.rowLength += harvest.rowLength;
       daily.set(dateStr, current);
     });
@@ -1047,7 +1099,7 @@ export class HarvestsService
   ): ClassDistributionData[] {
     const dailyData = new Map<
       string,
-      { classA: number; classB: number; waste: number }
+      { classA: number; classB: number; classC: number; waste: number }
     >();
 
     harvests.forEach((harvest) => {
@@ -1055,11 +1107,13 @@ export class HarvestsService
       const current = dailyData.get(dateStr) || {
         classA: 0,
         classB: 0,
+        classC: 0,
         waste: 0,
       };
       dailyData.set(dateStr, {
         classA: current.classA + harvest.classA,
         classB: current.classB + harvest.classB,
+        classC: current.classC + harvest.classC,
         waste: current.waste + harvest.waste,
       });
     });
@@ -1070,6 +1124,7 @@ export class HarvestsService
         date,
         marketable: Math.round(data.classA * 10) / 10,
         classB: Math.round(data.classB * 10) / 10,
+        classC: Math.round(data.classC * 10) / 10,
         waste: Math.round(data.waste * 10) / 10,
       }));
   }
@@ -1126,7 +1181,7 @@ export class HarvestsService
   ): CumulativeYieldData[] {
     const dailyData = new Map<
       string,
-      { classA: number; classB: number; waste: number }
+      { classA: number; classB: number; classC: number; waste: number }
     >();
 
     harvests.forEach((harvest) => {
@@ -1134,11 +1189,13 @@ export class HarvestsService
       const current = dailyData.get(dateStr) || {
         classA: 0,
         classB: 0,
+        classC: 0,
         waste: 0,
       };
       dailyData.set(dateStr, {
         classA: current.classA + harvest.classA,
         classB: current.classB + harvest.classB,
+        classC: current.classC + harvest.classC,
         waste: current.waste + harvest.waste,
       });
     });
@@ -1149,16 +1206,19 @@ export class HarvestsService
 
     let cumulativeClassA = 0;
     let cumulativeClassB = 0;
+    let cumulativeClassC = 0;
     let cumulativeWaste = 0;
 
     return sortedEntries.map(([date, data]) => {
       cumulativeClassA += data.classA;
       cumulativeClassB += data.classB;
+      cumulativeClassC += data.classC;
       cumulativeWaste += data.waste;
       return {
         date,
         cumulativeClassA: Math.round(cumulativeClassA * 10) / 10,
         cumulativeClassB: Math.round(cumulativeClassB * 10) / 10,
+        cumulativeClassC: Math.round(cumulativeClassC * 10) / 10,
         cumulativeWaste: Math.round(cumulativeWaste * 10) / 10,
       };
     });

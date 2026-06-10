@@ -131,13 +131,20 @@ export function HarvestDashboardCompare({
     const totalYield = data?.totalYield ?? 0;
     const wasteTotal = data?.wasteTotal ?? 0;
     const classBTotal = data?.classBTotal ?? 0;
-    const marketable = Math.max(totalYield - wasteTotal, 0);
+    const classCTotal = data?.classCTotal ?? 0;
+    // "marketable" is the Quality A bar only; B and C stack on top of it, so
+    // back them out of the sellable total to avoid double-counting.
+    const marketable = Math.max(
+      totalYield - wasteTotal - classBTotal - classCTotal,
+      0,
+    );
     return {
       batchId: batch.id,
       batchName: batch.name,
       color,
       marketable,
       classB: classBTotal,
+      classC: classCTotal,
       waste: wasteTotal,
     };
   });
