@@ -1,0 +1,153 @@
+import { UserRole } from '@common/enums';
+import { Tenant } from '@modules/tenants/entities/tenant.entity';
+import { User } from '@modules/users/entities/user.entity';
+
+export const CAMERA_LIVESTREAM_FEATURE_KEY = 'camera_livestream';
+export const SNAPSHOT_FILENAME = 'latest.jpg';
+export const SIGNED_URL_TTL_SECONDS = 600;
+
+export interface CameraLivestreamCameraConfig {
+  id: string;
+  name?: string;
+  path?: string;
+}
+
+export interface CameraLivestreamTenantConfig {
+  folder: string;
+  cameras: CameraLivestreamCameraConfig[];
+}
+
+interface LocalTenantConfig extends CameraLivestreamTenantConfig {
+  tenantIdentifiers: string[];
+}
+
+const FRUTANIA_CAMERA_IDS = ['Cam01_', 'Cam02_', 'Cam03_', 'Cam04_', 'Cam05_'];
+
+const LOCAL_CAMERA_LIVESTREAM_TENANT_CONFIGS: LocalTenantConfig[] = [
+  {
+    tenantIdentifiers: ['frutania'],
+    folder: 'frutania-livestream',
+    cameras: FRUTANIA_CAMERA_IDS.map((id) => ({
+      id,
+      name: formatCameraName(id),
+    })),
+  },
+];
+
+function normalizeIdentifier(value?: string | null): string {
+  return (
+    value
+      ?.toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim() ?? ''
+  );
+}
+
+function tenantIdentifiers(tenant?: Tenant | null): string[] {
+  return [
+    tenant?.id,
+    tenant?.name,
+    tenant?.companyName,
+    tenant?.influxBucketName,
+  ].filter((value): value is string => Boolean(value));
+}
+
+export function formatCameraName(cameraId: string): string {
+  const numericId = cameraId.replace(/\D/g, '');
+  return numericId ? `Camera ${numericId}` : cameraId;
+}
+
+export function parseCameraLivestreamConfig(
+  config?: Record<string, any> | null,
+): CameraLivestreamTenantConfig | null {
+  if (!config || typeof config !== 'object') {
+    return null;
+  }
+
+  const folder =
+    typeof config.folder === 'string' && config.folder.trim()
+      ? config.folder.trim()
+      : null;
+
+  const cameras = Array.isArray(config.cameras)
+    ? config.cameras
+        .map((camera: unknown): CameraLivestreamCameraConfig | null => {
+          if (!camera || typeof camera !== 'object') {
+            return null;
+          }
+
+          const rawCamera = camera as Record<string, unknown>;
+          const id =
+            typeof rawCamera.id === 'string' ? rawCamera.id.trim() : '';
+          if (!id) {
+            return null;
+          }
+
+          return {
+            id,
+            name:
+              typeof rawCamera.name === 'string' && rawCamera.name.trim()
+                ? rawCamera.name.trim()
+                : undefined,
+            path:
+              typeof rawCamera.path === 'string' && rawCamera.path.trim()
+                ? rawCamera.path.trim()
+                : undefined,
+          };
+        })
+        .filter((camera): camera is CameraLivestreamCameraConfig =>
+          Boolean(camera),
+        )
+    : [];
+
+  if (!folder && cameras.every((camera) => !camera.path)) {
+    return null;
+  }
+
+  return {
+    folder: folder ?? '',
+    cameras,
+  };
+}
+
+export function getLocalCameraLivestreamConfig(
+  tenant?: Tenant | null,
+): CameraLivestreamTenantConfig | null {
+  const normalizedTenantIdentifiers = new Set(
+    tenantIdentifiers(tenant).map(normalizeIdentifier).filter(Boolean),
+  );
+
+  const match = LOCAL_CAMERA_LIVESTREAM_TENANT_CONFIGS.find((config) =>
+    config.tenantIdentifiers.some((identifier) =>
+      normalizedTenantIdentifiers.has(normalizeIdentifier(identifier)),
+    ),
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    folder: match.folder,
+    cameras: match.cameras,
+  };
+}
+
+export function canAccessCameraLivestream(params: {
+  user?: User | null;
+  hasTenantFeature: boolean;
+  hasTenantConfig: boolean;
+}): boolean {
+  const { user, hasTenantFeature, hasTenantConfig } = params;
+
+  if (!user?.tenantId) {
+    return false;
+  }
+
+  if (user.role === UserRole.VGREENS_ADMIN) {
+    return hasTenantFeature || hasTenantConfig;
+  }
+
+  // Camera livestream is a tenant-specific capability. It should only be enabled for tenants explicitly configured for this feature.
+  return hasTenantFeature || hasTenantConfig;
+}

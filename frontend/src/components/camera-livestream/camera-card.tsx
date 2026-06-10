@@ -1,116 +1,83 @@
 'use client';
 
-import {
-  getCameraStatusColor,
-  getCameraStatusVariant,
-  formatCameraLastActive,
-} from '@/lib/camera-utils';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { useI18n } from '@/i18n';
+import type { CameraLivestreamFeed } from '@/types/camera.types';
+import { AlertCircle, Loader2, Radio } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import type { Camera, CameraStatus } from '@/types/camera.types';
-import { Video, Circle, Clock, Monitor } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 interface CameraCardProps {
-  camera: Camera;
+  camera: CameraLivestreamFeed;
+  imageUrl: string | null;
+  loading?: boolean;
   onClick?: () => void;
 }
 
-const STATUS_LABEL_KEY: Record<CameraStatus, string> = {
-  online: 'statusOnline',
-  recording: 'statusRecording',
-  offline: 'statusOffline',
-  error: 'statusError',
-};
-
-export function CameraCard({ camera, onClick }: CameraCardProps) {
-  const { t } = useI18n();
-  const filters = t.pages.cameraLivestream;
-  const [currentTime, setCurrentTime] = React.useState(() => Date.now());
+export function CameraCard({
+  camera,
+  imageUrl,
+  loading = false,
+  onClick,
+}: CameraCardProps) {
+  const [imageFailed, setImageFailed] = React.useState(false);
+  const canShowImage = camera.available && imageUrl && !imageFailed;
 
   React.useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
+    setImageFailed(false);
+  }, [imageUrl]);
 
   return (
     <Card
       className={cn(
-        'group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl',
-        'from-card to-card/50 overflow-hidden border-2 bg-gradient-to-br',
-        onClick && 'hover:border-primary/50',
+        'group overflow-hidden transition-all duration-200',
+        canShowImage && onClick && 'hover:border-primary/50 cursor-pointer',
       )}
-      onClick={onClick}
+      onClick={canShowImage ? onClick : undefined}
     >
       <CardHeader className="relative p-0">
-        <div className="from-muted/50 to-muted/30 dark:from-muted/30 dark:to-muted/10 relative flex aspect-video w-full items-center justify-center overflow-hidden bg-gradient-to-br">
-          <div className="absolute inset-0 opacity-10 dark:opacity-5">
-            <div className="grid h-full w-full grid-cols-8 grid-rows-6">
-              {Array.from({ length: 48 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="border-foreground/10 border dark:border-white/5"
-                />
-              ))}
+        <div className="bg-muted relative flex aspect-video w-full items-center justify-center overflow-hidden">
+          {loading ? (
+            <div className="text-muted-foreground flex flex-col items-center gap-2 text-sm">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span>Connecting to camera</span>
             </div>
-          </div>
-
-          <div className="text-muted-foreground/50 relative z-10 flex flex-col items-center gap-2 dark:text-white/30">
-            <Monitor className="h-12 w-12" />
-            <span className="text-xs font-medium">
-              {camera.resolution || '1080p'}
-            </span>
-          </div>
-
-          <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
-            <Badge
-              variant={getCameraStatusVariant(camera.status)}
-              className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold"
-            >
-              <Circle
-                className={cn('h-2 w-2', getCameraStatusColor(camera.status))}
-              />
-              {filters[STATUS_LABEL_KEY[camera.status] as keyof typeof filters] as string}
-            </Badge>
-          </div>
-
-          {camera.status === 'recording' && (
-            <div className="absolute top-3 left-3 z-20">
-              <Badge
-                variant="destructive"
-                className="flex animate-pulse items-center gap-1.5 px-2 py-1 text-xs font-semibold"
-              >
-                <Video className="h-3 w-3" />
-                {filters.recordingBadge}
+          ) : canShowImage ? (
+            <img
+              src={imageUrl}
+              alt={`${camera.name} live camera feed`}
+              className="h-full w-full object-cover"
+              onError={() => setImageFailed(true)}
+            />
+          ) : (
+            <div className="text-muted-foreground flex flex-col items-center gap-2 px-4 text-center text-sm">
+              <AlertCircle className="h-8 w-8" />
+              <span>Camera feed currently unavailable</span>
+            </div>
+          )}
+          {canShowImage && (
+            <div className="absolute top-3 left-3">
+              <Badge className="gap-1.5 bg-black/70 px-2 py-1 text-[11px] font-semibold tracking-wide text-white uppercase hover:bg-black/70">
+                <span className="h-2 w-2 rounded-full bg-red-500" />
+                Live
               </Badge>
             </div>
           )}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/50 to-transparent opacity-70 transition-opacity group-hover:opacity-100" />
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3 p-4">
-        <div>
-          <h3 className="text-foreground line-clamp-1 text-base font-bold dark:text-white">
+      <CardContent className="space-y-2 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-foreground line-clamp-1 text-base font-semibold">
             {camera.name}
           </h3>
-          <p className="text-muted-foreground mt-0.5 text-sm dark:text-white/70">
-            {camera.tunnelName} • {camera.location}
-          </p>
-        </div>
-
-        <div className="text-muted-foreground flex items-center justify-between text-xs dark:text-white/60">
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5" />
-            <span>
-              {formatCameraLastActive(camera.lastActive, currentTime)}
-            </span>
-          </div>
-          {camera.fps && <span className="font-medium">{camera.fps} FPS</span>}
+          <Radio
+            className={cn(
+              'h-4 w-4 shrink-0',
+              canShowImage ? 'text-red-500' : 'text-muted-foreground',
+            )}
+          />
         </div>
       </CardContent>
     </Card>
