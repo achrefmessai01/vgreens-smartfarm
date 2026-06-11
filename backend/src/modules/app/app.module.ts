@@ -21,6 +21,7 @@ import { SystemErrorsModule } from '../system-errors/system-errors.module';
 import { SensorConfigModule } from '../sensor-config/sensor-config.module';
 import { TenantFarmConfigModule } from '../tenant-farm-config/tenant-farm-config.module';
 import { ParGraphModule } from '../par-graph/par-graph.module';
+import { CameraLivestreamModule } from '../camera-livestream/camera-livestream.module';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import {
   TenantInterceptor,
@@ -53,6 +54,7 @@ import {
     SensorConfigModule,
     TenantFarmConfigModule,
     ParGraphModule,
+    CameraLivestreamModule,
   ],
   providers: [
     AppResolver,

@@ -23,7 +23,7 @@ export class TenantGreenhouse {
   bayCount?: number;
 
   @Field(() => Boolean, { nullable: true })
-  isVertical?: boolean;
+  isHorizontal?: boolean;
 }
 
 @ObjectType()

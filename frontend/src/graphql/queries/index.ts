@@ -1,6 +1,7 @@
 export * from './user.queries';
 export * from './tenant.queries';
 export * from './feature.queries';
+export * from './camera-livestream.queries';
 export * from './influxdb.queries';
 export * from './harvest.queries';
 export * from './harvest-batches';
