@@ -794,13 +794,13 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                       className={cn(
                         'bg-foreground/15 pointer-events-none absolute',
                         greenhouseDimensions.isVertical
-                          ? 'inset-x-0 h-px'
-                          : 'inset-y-0 w-px',
+                          ? 'inset-y-0 w-px'
+                          : 'inset-x-0 h-px',
                       )}
                       style={
                         greenhouseDimensions.isVertical
-                          ? { top: offset }
-                          : { left: offset }
+                          ? { left: offset }
+                          : { top: offset }
                       }
                     />
                   );
