@@ -27,8 +27,16 @@ export class GreenhouseResolver {
 
   @Query(() => [Greenhouse], { name: 'greenhouses' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
-  async findAll(@CurrentUser() currentUser: User): Promise<Greenhouse[]> {
-    return this.greenhouseService.findAllScoped(this.resolveTenantId(currentUser));
+  async findAll(
+    @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
+  ): Promise<Greenhouse[]> {
+    // Tenant users are always pinned to their own tenant; admins may pass a
+    // tenantId to scope to one tenant (omit it to list every tenant's).
+    const scoped = this.resolveTenantId(currentUser);
+    const effective = scoped ?? tenantId ?? undefined;
+    return this.greenhouseService.findAllScoped(effective);
   }
 
   @Query(() => Greenhouse, { name: 'greenhouse', nullable: true })

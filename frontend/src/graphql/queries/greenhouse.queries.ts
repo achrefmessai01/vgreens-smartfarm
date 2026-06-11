@@ -9,15 +9,15 @@ const GREENHOUSE_FIELDS = gql`
     xDimension
     yDimension
     bayCount
-    isVertical
+    isHorizontal
     createdAt
     updatedAt
   }
 `;
 
 export const GREENHOUSES_QUERY = gql`
-  query Greenhouses {
-    greenhouses {
+  query Greenhouses($tenantId: ID) {
+    greenhouses(tenantId: $tenantId) {
       ...GreenhouseFields
     }
   }
