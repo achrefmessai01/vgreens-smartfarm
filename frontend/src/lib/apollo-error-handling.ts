@@ -2,6 +2,31 @@ import { onError } from '@apollo/client/link/error';
 import { ApolloLink, Observable } from '@apollo/client';
 import type { ServerError } from '@apollo/client/link/utils';
 
+const EXPECTED_LIVESTREAM_UNAVAILABLE_MESSAGE =
+  'Camera livestream is not available for this account';
+
+function isExpectedLivestreamUnavailableError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const maybeError = error as {
+    message?: unknown;
+    graphQLErrors?: Array<{ message?: unknown }>;
+  };
+
+  if (maybeError.message === EXPECTED_LIVESTREAM_UNAVAILABLE_MESSAGE) {
+    return true;
+  }
+
+  return (
+    maybeError.graphQLErrors?.some(
+      (graphQLError) =>
+        graphQLError.message === EXPECTED_LIVESTREAM_UNAVAILABLE_MESSAGE,
+    ) ?? false
+  );
+}
+
 /**
  * Apollo error link — console-only logging.
  * GraphQL errors (auth, validation, rate limits) are not app crashes
@@ -11,6 +36,10 @@ export const apolloErrorLink = onError(
   ({ graphQLErrors, networkError, operation }) => {
     if (graphQLErrors) {
       graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+        if (message === EXPECTED_LIVESTREAM_UNAVAILABLE_MESSAGE) {
+          return;
+        }
+
         console.error(
           `[GraphQL error] op=${operation.operationName} message=${message}`,
           { locations, path, extensions },
@@ -39,6 +68,11 @@ export const apolloRequestLoggingLink = new ApolloLink((operation, forward) => {
     forward(operation).subscribe({
       next: (result) => observer.next(result),
       error: (error) => {
+        if (isExpectedLivestreamUnavailableError(error)) {
+          observer.error(error);
+          return;
+        }
+
         console.error(
           `[GraphQL operation failed] op=${operation.operationName}`,
           error,

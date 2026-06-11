@@ -1,118 +1,113 @@
 'use client';
 
-import {
-  getCameraStatusColor,
-  getCameraStatusVariant,
-  formatCameraLastActive,
-} from '@/lib/camera-utils';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { useI18n } from '@/i18n';
+import type { CameraLivestreamFeed } from '@/types/camera.types';
+import { Loader2, VideoOff } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import type { Camera, CameraStatus } from '@/types/camera.types';
-import { Video, Circle, Clock, Monitor } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 interface CameraCardProps {
-  camera: Camera;
+  camera: CameraLivestreamFeed;
+  imageUrl: string | null;
+  loading?: boolean;
   onClick?: () => void;
 }
 
-const STATUS_LABEL_KEY: Record<CameraStatus, string> = {
-  online: 'statusOnline',
-  recording: 'statusRecording',
-  offline: 'statusOffline',
-  error: 'statusError',
-};
-
-export function CameraCard({ camera, onClick }: CameraCardProps) {
-  const { t } = useI18n();
-  const filters = t.pages.cameraLivestream;
-  const [currentTime, setCurrentTime] = React.useState(() => Date.now());
+export function CameraCard({
+  camera,
+  imageUrl,
+  loading = false,
+  onClick,
+}: CameraCardProps) {
+  const [imageFailed, setImageFailed] = React.useState(false);
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const canShowImage = camera.available && imageUrl && !imageFailed;
+  const isInteractive = Boolean(canShowImage && onClick);
 
   React.useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(Date.now());
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
+    setImageFailed(false);
+  }, [imageUrl]);
 
   return (
     <Card
+      role={isInteractive ? 'button' : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      aria-label={isInteractive ? `View ${camera.name} live feed` : undefined}
       className={cn(
-        'group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl',
-        'from-card to-card/50 overflow-hidden border-2 bg-gradient-to-br',
-        onClick && 'hover:border-primary/50',
+        'group relative overflow-hidden p-0 transition-all duration-300',
+        isInteractive &&
+          'hover:border-primary/50 hover:shadow-primary/10 focus-visible:ring-primary/50 cursor-pointer hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-2 focus-visible:outline-none',
       )}
-      onClick={onClick}
+      onClick={isInteractive ? onClick : undefined}
+      onKeyDown={
+        isInteractive
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onClick?.();
+              }
+            }
+          : undefined
+      }
     >
-      <CardHeader className="relative p-0">
-        <div className="from-muted/50 to-muted/30 dark:from-muted/30 dark:to-muted/10 relative flex aspect-video w-full items-center justify-center overflow-hidden bg-gradient-to-br">
-          <div className="absolute inset-0 opacity-10 dark:opacity-5">
-            <div className="grid h-full w-full grid-cols-8 grid-rows-6">
-              {Array.from({ length: 48 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="border-foreground/10 border dark:border-white/5"
-                />
-              ))}
+      <div className="bg-muted dark:bg-black/40 relative flex aspect-video w-full items-center justify-center overflow-hidden">
+        {loading ? (
+          <div className="text-muted-foreground flex flex-col items-center gap-2 text-sm">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="animate-pulse">Connecting to camera</span>
+          </div>
+        ) : canShowImage ? (
+          <img
+            src={imageUrl}
+            alt={`${camera.name} live camera feed`}
+            className={cn(
+              'h-full w-full object-cover transition-all duration-500',
+              'group-hover:scale-[1.04]',
+              imageLoaded ? 'opacity-100' : 'opacity-0',
+            )}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <div className="text-muted-foreground flex flex-col items-center gap-2.5 px-4 text-center text-sm">
+            <div className="bg-muted-foreground/10 flex h-12 w-12 items-center justify-center rounded-full">
+              <VideoOff className="h-6 w-6" />
             </div>
+            <span>Camera feed currently unavailable</span>
           </div>
+        )}
 
-          <div className="text-muted-foreground/50 relative z-10 flex flex-col items-center gap-2 dark:text-white/30">
-            <Monitor className="h-12 w-12" />
-            <span className="text-xs font-medium">
-              {camera.resolution || '1080p'}
-            </span>
-          </div>
-
-          <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
-            <Badge
-              variant={getCameraStatusVariant(camera.status)}
-              className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold"
-            >
-              <Circle
-                className={cn('h-2 w-2', getCameraStatusColor(camera.status))}
-              />
-              {filters[STATUS_LABEL_KEY[camera.status] as keyof typeof filters] as string}
+        {/* Live badge */}
+        {canShowImage && (
+          <div className="absolute top-3 left-3">
+            <Badge className="gap-1.5 border-white/10 bg-black/70 px-2 py-1 text-[11px] font-semibold tracking-wide text-white uppercase backdrop-blur-sm hover:bg-black/70">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+              </span>
+              Live
             </Badge>
           </div>
+        )}
 
-          {camera.status === 'recording' && (
-            <div className="absolute top-3 left-3 z-20">
-              <Badge
-                variant="destructive"
-                className="flex animate-pulse items-center gap-1.5 px-2 py-1 text-xs font-semibold"
-              >
-                <Video className="h-3 w-3" />
-                {filters.recordingBadge}
-              </Badge>
-            </div>
-          )}
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-3 p-4">
-        <div>
-          <h3 className="text-foreground line-clamp-1 text-base font-bold dark:text-white">
-            {camera.name}
-          </h3>
-          <p className="text-muted-foreground mt-0.5 text-sm dark:text-white/70">
-            {camera.tunnelName} • {camera.location}
-          </p>
-        </div>
-
-        <div className="text-muted-foreground flex items-center justify-between text-xs dark:text-white/60">
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5" />
-            <span>
-              {formatCameraLastActive(camera.lastActive, currentTime)}
-            </span>
+        {/* Bottom gradient with camera name */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-10 pb-3">
+          <div className="flex items-center justify-between gap-3 px-4">
+            <h3 className="line-clamp-1 text-sm font-semibold text-white drop-shadow-sm">
+              {camera.name}
+            </h3>
+            <span
+              className={cn(
+                'h-2 w-2 shrink-0 rounded-full',
+                canShowImage
+                  ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]'
+                  : 'bg-white/30',
+              )}
+            />
           </div>
-          {camera.fps && <span className="font-medium">{camera.fps} FPS</span>}
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }
