@@ -1124,6 +1124,11 @@ export type QueryGreenhouseOptionsArgs = {
 };
 
 
+export type QueryGreenhousesArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type QueryHarvestArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1897,7 +1902,9 @@ export type TenantFeaturesQuery = { __typename?: 'Query', tenantFeatures: Array<
 
 export type GreenhouseFieldsFragment = { __typename?: 'Greenhouse', id: string, tenantId: string, name: string, doorPosition?: DoorPosition | null, xDimension?: number | null, yDimension?: number | null, bayCount?: number | null, isVertical?: boolean | null, createdAt: any, updatedAt: any };
 
-export type GreenhousesQueryVariables = Exact<{ [key: string]: never; }>;
+export type GreenhousesQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
 export type GreenhousesQuery = { __typename?: 'Query', greenhouses: Array<{ __typename?: 'Greenhouse', id: string, tenantId: string, name: string, doorPosition?: DoorPosition | null, xDimension?: number | null, yDimension?: number | null, bayCount?: number | null, isVertical?: boolean | null, createdAt: any, updatedAt: any }> };
@@ -4656,8 +4663,8 @@ export type TenantFeaturesLazyQueryHookResult = ReturnType<typeof useTenantFeatu
 export type TenantFeaturesSuspenseQueryHookResult = ReturnType<typeof useTenantFeaturesSuspenseQuery>;
 export type TenantFeaturesQueryResult = Apollo.QueryResult<TenantFeaturesQuery, TenantFeaturesQueryVariables>;
 export const GreenhousesDocument = gql`
-    query Greenhouses {
-  greenhouses {
+    query Greenhouses($tenantId: ID) {
+  greenhouses(tenantId: $tenantId) {
     ...GreenhouseFields
   }
 }
@@ -4675,6 +4682,7 @@ export const GreenhousesDocument = gql`
  * @example
  * const { data, loading, error } = useGreenhousesQuery({
  *   variables: {
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
