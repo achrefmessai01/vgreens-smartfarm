@@ -13,11 +13,14 @@ import {
 } from '@/lib/harvest-utils';
 import {
   useHarvestsQuery,
+  useBatchesQuery,
   type HarvestsQuery,
+  type BatchesQuery,
   type CreateBatchMutation,
 } from '@/generated/graphql';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
+export type BatchItem = BatchesQuery['batches'][number];
 type CreatedBatch = CreateBatchMutation['createBatch'];
 
 // What the batch sidebar needs to create/edit a harvest: the batch it belongs
@@ -31,11 +34,31 @@ interface PendingBatch {
 }
 
 export function useHarvestPage() {
-  const { data, loading, refetch } = useHarvestsQuery({
-    fetchPolicy: 'cache-and-network',
-  });
+  const {
+    data: harvestsData,
+    loading: harvestsLoading,
+    refetch: refetchHarvests,
+  } = useHarvestsQuery({ fetchPolicy: 'cache-and-network' });
 
-  const harvests = data?.harvests;
+  // Batches drive the table so a batch with no harvests yet still shows up.
+  const {
+    data: batchesData,
+    loading: batchesLoading,
+    refetch: refetchBatches,
+  } = useBatchesQuery({ fetchPolicy: 'cache-and-network' });
+
+  const harvests = harvestsData?.harvests;
+  const batches = React.useMemo(
+    () => batchesData?.batches ?? [],
+    [batchesData?.batches],
+  );
+  const loading = harvestsLoading || batchesLoading;
+
+  const refetchAll = React.useCallback(() => {
+    void refetchHarvests();
+    void refetchBatches();
+  }, [refetchHarvests, refetchBatches]);
+
   const summary: HarvestSummary = React.useMemo(
     () => computeSummary(harvests ?? []),
     [harvests],
@@ -67,7 +90,7 @@ export function useHarvestPage() {
   const editHarvest = useEditHarvest({
     onSuccess: () => {
       setEditOpen(false);
-      refetch();
+      refetchAll();
     },
   });
 
@@ -75,7 +98,7 @@ export function useHarvestPage() {
     onSuccess: () => {
       setDeleteOpen(false);
       setDeleteTarget(null);
-      refetch();
+      refetchAll();
     },
   });
 
@@ -83,48 +106,44 @@ export function useHarvestPage() {
     setCreateBatchOpen(true);
   }, []);
 
-  // A new batch was created: open the sidebar to log its first harvest.
-  const handleBatchCreated = React.useCallback((batch: CreatedBatch) => {
-    setPendingBatch({
-      batchId: batch.id,
-      harvestId: null,
-      details: batchToBatchDetails(batch),
-      initialDate: null,
-    });
-    setSidebarMode('create');
-    setBatchSidebarOpen(true);
-  }, []);
+  // A new batch was created: refresh the list (so the empty batch appears) and
+  // open the sidebar to log its first harvest.
+  const handleBatchCreated = React.useCallback(
+    (batch: CreatedBatch) => {
+      refetchBatches();
+      setPendingBatch({
+        batchId: batch.id,
+        harvestId: null,
+        details: batchToBatchDetails(batch),
+        initialDate: null,
+      });
+      setSidebarMode('create');
+      setBatchSidebarOpen(true);
+    },
+    [refetchBatches],
+  );
 
   const handleSidebarCompleted = React.useCallback(() => {
     setBatchSidebarOpen(false);
     setPendingBatch(null);
-    refetch();
-  }, [refetch]);
-
-  const handleEditRequest = React.useCallback(
-    (harvest: HarvestItem) => {
-      setEditReadOnly(false);
-      editHarvest.populate(harvest);
-      setEditOpen(true);
-    },
-    [editHarvest],
-  );
+    refetchAll();
+  }, [refetchAll]);
 
   const handleBatchView = React.useCallback(
-    (harvest: HarvestItem) => {
+    (batch: BatchItem) => {
       setEditReadOnly(true);
-      setEditBatchNumber(harvest.batch?.batchNumber ?? null);
-      editHarvest.populate(harvest);
+      setEditBatchNumber(batch.batchNumber ?? null);
+      editHarvest.populate(batch);
       setEditOpen(true);
     },
     [editHarvest],
   );
 
   const handleBatchEdit = React.useCallback(
-    (harvest: HarvestItem) => {
+    (batch: BatchItem) => {
       setEditReadOnly(false);
-      setEditBatchNumber(harvest.batch?.batchNumber ?? null);
-      editHarvest.populate(harvest);
+      setEditBatchNumber(batch.batchNumber ?? null);
+      editHarvest.populate(batch);
       setEditOpen(true);
     },
     [editHarvest],
@@ -143,14 +162,11 @@ export function useHarvestPage() {
   }, []);
 
   // Log a brand-new harvest for an existing batch.
-  const handleLogEntry = React.useCallback((harvest: HarvestItem) => {
-    const details = harvest.batch
-      ? batchToBatchDetails(harvest.batch)
-      : harvestToBatchDetails(harvest);
+  const handleLogEntry = React.useCallback((batch: BatchItem) => {
     setPendingBatch({
-      batchId: harvest.batchId,
+      batchId: batch.id,
       harvestId: null,
-      details,
+      details: batchToBatchDetails(batch),
       initialDate: null,
     });
     setSidebarMode('create');
@@ -165,7 +181,7 @@ export function useHarvestPage() {
   }, []);
 
   const handleBatchDeleteRequest = React.useCallback(
-    (_batch: HarvestItem, entries: HarvestItem[]) => {
+    (_batch: BatchItem, entries: HarvestItem[]) => {
       setIsBatchDelete(true);
       setDeleteTarget(null);
       setDeleteBatchTargetIds(entries.map((entry) => entry.id));
@@ -182,20 +198,15 @@ export function useHarvestPage() {
       setDeleteOpen(false);
       setDeleteBatchTargetIds([]);
       setIsBatchDelete(false);
-      refetch();
+      refetchAll();
       return;
     }
     if (deleteTarget) handleDelete(deleteTarget.id);
-  }, [
-    isBatchDelete,
-    deleteBatchTargetIds,
-    deleteTarget,
-    handleDelete,
-    refetch,
-  ]);
+  }, [isBatchDelete, deleteBatchTargetIds, deleteTarget, handleDelete, refetchAll]);
 
   return {
     harvests,
+    batches,
     summary,
     loading,
     createBatchOpen,
@@ -216,7 +227,7 @@ export function useHarvestPage() {
     editReadOnly,
     editBatchNumber,
     editHarvest,
-    handleEditRequest,
+    handleEditRequest: handleBatchEdit,
     deleteOpen,
     setDeleteOpen,
     deleteLoading,

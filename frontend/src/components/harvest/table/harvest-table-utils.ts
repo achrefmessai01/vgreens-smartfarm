@@ -1,12 +1,13 @@
 'use client';
 
-import { type HarvestsQuery } from '@/generated/graphql';
+import { type HarvestsQuery, type BatchesQuery } from '@/generated/graphql';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
+export type BatchItem = BatchesQuery['batches'][number];
 
 export type BatchGroup = {
   key: string;
-  root: HarvestItem;
+  batch: BatchItem;
   entries: HarvestItem[];
 };
 
@@ -18,21 +19,32 @@ export function getCreatedByLabel(harvest: HarvestItem) {
   return fullName || harvest.createdBy.email || '-';
 }
 
-// Group harvest events by their parent batch. `root` is a representative
-// harvest from which the batch info (harvest.batch) is read.
-export function groupByBatch(harvests: HarvestItem[]): BatchGroup[] {
-  const groups = new Map<string, HarvestItem[]>();
-  for (const item of harvests) {
-    const current = groups.get(item.batchId) ?? [];
-    current.push(item);
-    groups.set(item.batchId, current);
+// Build one group per batch, attaching that batch's harvest events. Batches
+// with no harvests yet are still returned (with an empty entries list) so they
+// remain visible in the harvest-entry tab.
+export function groupByBatch(
+  batches: BatchItem[],
+  harvests: HarvestItem[],
+): BatchGroup[] {
+  const entriesByBatch = new Map<string, HarvestItem[]>();
+  for (const h of harvests) {
+    const list = entriesByBatch.get(h.batchId) ?? [];
+    list.push(h);
+    entriesByBatch.set(h.batchId, list);
   }
 
-  return [...groups.entries()]
-    .map(([key, entries]) => ({
-      key,
-      root: entries[0],
-      entries: entries.sort((a, b) => +new Date(b.date) - +new Date(a.date)),
+  return [...batches]
+    .map((batch) => ({
+      key: batch.id,
+      batch,
+      entries: (entriesByBatch.get(batch.id) ?? []).sort(
+        (a, b) => +new Date(b.date) - +new Date(a.date),
+      ),
     }))
-    .sort((a, b) => +new Date(b.root.date) - +new Date(a.root.date));
+    .sort((a, b) => {
+      const byPlanting =
+        +new Date(b.batch.plantingDate) - +new Date(a.batch.plantingDate);
+      if (byPlanting !== 0) return byPlanting;
+      return +new Date(b.batch.createdAt) - +new Date(a.batch.createdAt);
+    });
 }

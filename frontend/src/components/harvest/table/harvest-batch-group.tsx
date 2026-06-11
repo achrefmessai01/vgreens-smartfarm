@@ -28,6 +28,7 @@ import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import {
   getCreatedByLabel,
   type BatchGroup,
+  type BatchItem,
   type HarvestItem,
 } from './harvest-table-utils';
 
@@ -35,10 +36,10 @@ interface HarvestBatchGroupProps {
   group: BatchGroup;
   onDelete?: (harvest: HarvestItem) => void;
   onSidebarEdit?: (harvest: HarvestItem) => void;
-  onLogEntry?: (harvest: HarvestItem) => void;
-  onViewBatch?: (batch: HarvestItem) => void;
-  onEditBatch?: (batch: HarvestItem) => void;
-  onDeleteBatch?: (batch: HarvestItem, entries: HarvestItem[]) => void;
+  onLogEntry?: (batch: BatchItem) => void;
+  onViewBatch?: (batch: BatchItem) => void;
+  onEditBatch?: (batch: BatchItem) => void;
+  onDeleteBatch?: (batch: BatchItem, entries: HarvestItem[]) => void;
 }
 
 export function HarvestBatchGroup({
@@ -58,7 +59,7 @@ export function HarvestBatchGroup({
   const wasteLabel = h?.waste ?? 'Waste';
   const { isMobile } = useResponsiveBreakpoint('lg');
   const visibleEntries = group.entries;
-  const batch = group.root.batch;
+  const batch = group.batch;
 
   return (
     <Accordion type="single" collapsible defaultValue={group.key}>
@@ -81,7 +82,7 @@ export function HarvestBatchGroup({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  onViewBatch?.(group.root);
+                  onViewBatch?.(group.batch);
                 }}
                 aria-label={h?.viewDetails ?? 'View Batch'}
               >
@@ -94,7 +95,7 @@ export function HarvestBatchGroup({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  onEditBatch?.(group.root);
+                  onEditBatch?.(group.batch);
                 }}
                 aria-label={h?.editBatch ?? 'Edit Batch'}
               >
@@ -107,7 +108,7 @@ export function HarvestBatchGroup({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  onDeleteBatch?.(group.root, visibleEntries);
+                  onDeleteBatch?.(group.batch, visibleEntries);
                 }}
                 aria-label={h?.deleteBatch ?? 'Delete Batch'}
               >
@@ -120,7 +121,7 @@ export function HarvestBatchGroup({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  onLogEntry?.(group.root);
+                  onLogEntry?.(group.batch);
                 }}
                 aria-label={h?.logEntry ?? 'Log Entry'}
               >
