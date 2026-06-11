@@ -5,12 +5,14 @@ import { SensorConfigService } from './sensor-config.service';
 import { SensorConfigResolver } from './sensor-config.resolver';
 import { InfluxDBModule } from '@modules/influxdb/influxdb.module';
 import { TenantsModule } from '@modules/tenants/tenants.module';
+import { GreenhouseModule } from '@modules/greenhouse/greenhouse.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([SensorConfig]),
     InfluxDBModule,
     TenantsModule,
+    GreenhouseModule,
   ],
   providers: [SensorConfigResolver, SensorConfigService],
   exports: [SensorConfigService],

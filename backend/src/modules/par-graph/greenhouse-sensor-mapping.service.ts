@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { SensorConfigService } from '@modules/sensor-config/sensor-config.service';
 import { TenantsService } from '@modules/tenants/tenants.service';
+import { GreenhouseService } from '@modules/greenhouse/greenhouse.service';
 
 /**
  * One greenhouse and the device IDs that belong to it, as derived from
@@ -43,6 +44,7 @@ export class GreenhouseSensorMappingService {
   constructor(
     private readonly tenantsService: TenantsService,
     private readonly sensorConfigService: SensorConfigService,
+    private readonly greenhouseService: GreenhouseService,
   ) {}
 
   /**
@@ -68,44 +70,46 @@ export class GreenhouseSensorMappingService {
     const bucketName = tenant.influxBucketName;
     const timezone = tenant.timezone ?? undefined;
 
-    const declaredGreenhouseNames = new Set(
-      (tenant.greenhouses ?? []).map((g) => g.name),
-    );
-    if (declaredGreenhouseNames.size === 0) {
+    // Greenhouses are the single source of truth in the dedicated table.
+    const declaredGreenhouses =
+      await this.greenhouseService.findAllScoped(tenantId);
+    if (declaredGreenhouses.length === 0) {
       return { kind: 'fallback', bucketName, timezone };
     }
+    const declaredIds = new Set(declaredGreenhouses.map((g) => g.id));
 
     const sensorConfigs =
       await this.sensorConfigService.findAllByTenant(tenantId);
 
-    const byGreenhouse = new Map<string, string[]>();
+    // Match sensors to greenhouses by greenhouseId (the FK) rather than by
+    // name, so a name typo/mismatch can never silently drop a sensor.
+    const byGreenhouseId = new Map<string, string[]>();
     for (const config of sensorConfigs) {
-      const greenhouseName = config.greenhouse?.trim();
-      if (!greenhouseName) continue;
-      if (!declaredGreenhouseNames.has(greenhouseName)) {
+      const greenhouseId = config.greenhouseId;
+      if (!greenhouseId) continue;
+      if (!declaredIds.has(greenhouseId)) {
         this.logger.debug(
-          `Tenant ${tenantId}: sensor_config "${config.device}" maps to greenhouse "${greenhouseName}" which is not declared on the tenant — ignored`,
+          `Tenant ${tenantId}: sensor_config "${config.device}" references greenhouse ${greenhouseId} which is not in the tenant's greenhouses — ignored`,
         );
         continue;
       }
 
-      const list = byGreenhouse.get(greenhouseName);
+      const list = byGreenhouseId.get(greenhouseId);
       if (list) {
         if (!list.includes(config.device)) list.push(config.device);
       } else {
-        byGreenhouse.set(greenhouseName, [config.device]);
+        byGreenhouseId.set(greenhouseId, [config.device]);
       }
     }
 
-    if (byGreenhouse.size === 0) {
+    if (byGreenhouseId.size === 0) {
       return { kind: 'fallback', bucketName, timezone };
     }
 
-    // Preserve the order in which the tenant declared greenhouses so the
-    // response is stable for the frontend (tabs/labels read directly off
-    // `tenant.greenhouses`).
-    const greenhouses: GreenhouseDevices[] = (tenant.greenhouses ?? [])
-      .map((g) => ({ name: g.name, devices: byGreenhouse.get(g.name) ?? [] }))
+    // Preserve the order in which greenhouses are declared so the response is
+    // stable for the frontend tabs/labels.
+    const greenhouses: GreenhouseDevices[] = declaredGreenhouses
+      .map((g) => ({ name: g.name, devices: byGreenhouseId.get(g.id) ?? [] }))
       .filter((g) => g.devices.length > 0);
 
     const seen = new Set<string>();

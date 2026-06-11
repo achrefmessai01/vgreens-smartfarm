@@ -19,7 +19,7 @@ interface DashboardFilter {
   batchId?: string;
   dateFrom?: string;
   dateTo?: string;
-  greenhouse?: string;
+  greenhouseId?: string;
   dateFilter?: DateFilter;
 }
 
@@ -148,7 +148,7 @@ export function useHarvestDashboard(filter?: DashboardFilter) {
         ...(filter.batchId && { batchId: filter.batchId }),
         ...(dateRange.dateFrom && { dateFrom: dateRange.dateFrom }),
         ...(dateRange.dateTo && { dateTo: dateRange.dateTo }),
-        ...(filter.greenhouse && { greenhouse: filter.greenhouse }),
+        ...(filter.greenhouseId && { greenhouseId: filter.greenhouseId }),
       }
     : undefined;
 

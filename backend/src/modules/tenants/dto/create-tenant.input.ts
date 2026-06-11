@@ -1,14 +1,5 @@
-import {
-  IsArray,
-  IsEmail,
-  IsString,
-  IsBoolean,
-  IsOptional,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsEmail, IsString, IsBoolean, IsOptional } from 'class-validator';
 import { InputType, Field } from '@nestjs/graphql';
-import { GreenhouseInput } from './greenhouse.input';
 
 @InputType()
 export class CreateTenantInput {
@@ -35,11 +26,4 @@ export class CreateTenantInput {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
-
-  @Field(() => [GreenhouseInput], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => GreenhouseInput)
-  greenhouses?: GreenhouseInput[];
 }

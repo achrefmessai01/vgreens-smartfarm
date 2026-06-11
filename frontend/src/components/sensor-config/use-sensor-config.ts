@@ -125,7 +125,7 @@ export function useSensorConfig(tenantId: string) {
       device: string;
       xPosition?: number;
       yPosition?: number;
-      greenhouse?: string;
+      greenhouseId?: string;
       hiddenInFarmOverview?: boolean;
     }) => {
       setSaving(true);
