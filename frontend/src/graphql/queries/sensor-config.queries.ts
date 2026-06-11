@@ -8,6 +8,7 @@ export const SENSOR_CONFIGS_QUERY = gql`
       device
       xPosition
       yPosition
+      greenhouseId
       greenhouse
       city
       hiddenInFarmOverview

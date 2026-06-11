@@ -10,6 +10,7 @@ import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
 import {
   useFarmConfigQuery,
   UserRole,
+  useGreenhousesQuery,
   useSensorConfigsQuery,
   useSetTenantDisabledSensorFieldsMutation,
   useTenantsQuery,
@@ -199,6 +200,19 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     fetchPolicy: 'cache-and-network',
   });
 
+  // Resolve a greenhouse name -> id so a position commit can persist the
+  // sensor's greenhouseId (the FK). Sourced from the greenhouses table.
+  const { data: greenhousesData } = useGreenhousesQuery({
+    variables: { tenantId: configQueryTenantId },
+    skip: !configQueryTenantId,
+    fetchPolicy: 'cache-and-network',
+  });
+  const greenhouseIdByName = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const g of greenhousesData?.greenhouses ?? []) map.set(g.name, g.id);
+    return map;
+  }, [greenhousesData?.greenhouses]);
+
   const tenantGreenhouses = React.useMemo(() => {
     if (isVGreensAdmin) {
       const tenant = tenants.find((tn) => tn.id === selectedTenantId);
@@ -336,12 +350,18 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         return next;
       });
 
+      const greenhouseId =
+        (greenhouse ? greenhouseIdByName.get(greenhouse) : undefined) ??
+        (persisted?.greenhouse
+          ? greenhouseIdByName.get(persisted.greenhouse)
+          : undefined);
+
       try {
         await upsertSensorConfig({
           variables: {
             input: {
               device: deviceId,
-              greenhouse: greenhouse || persisted?.greenhouse || undefined,
+              greenhouseId: greenhouseId || undefined,
               xPosition: nextX,
               yPosition: nextY,
             },
@@ -369,6 +389,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     [
       canEditSensorPositions,
       configQueryTenantId,
+      greenhouseIdByName,
       persistedSensorConfigMap,
       refetchSensorConfigs,
       t.positionSaveFailedDescription,

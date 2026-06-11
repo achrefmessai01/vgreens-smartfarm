@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { useTenantGreenhousesQuery } from '@/generated/graphql';
+import { useGreenhousesQuery } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import {
   SENSOR_CONFIG_FIELD_KEYS,
@@ -31,7 +31,7 @@ interface SensorConfigFormProps {
     device: string;
     xPosition?: number;
     yPosition?: number;
-    greenhouse?: string;
+    greenhouseId?: string;
     hiddenInFarmOverview?: boolean;
   }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
@@ -62,22 +62,22 @@ export function SensorConfigForm({
   // Also include the current override value so legacy entries always have
   // a matching option.
   const { data: greenhouseData, loading: greenhouseLoading } =
-    useTenantGreenhousesQuery({
+    useGreenhousesQuery({
       variables: { tenantId },
       skip: !tenantId,
       fetchPolicy: 'network-only',
       nextFetchPolicy: 'network-only',
     });
-  const configuredGreenhouses = React.useMemo(
-    () => greenhouseData?.tenantGreenhouses ?? [],
-    [greenhouseData?.tenantGreenhouses],
+  // Options come from the dedicated greenhouses table; the selected value is the
+  // greenhouse id (stored on the sensor as greenhouseId).
+  const greenhouseOptions = React.useMemo(
+    () =>
+      [...(greenhouseData?.greenhouses ?? [])].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      ),
+    [greenhouseData?.greenhouses],
   );
-  const greenhouseOptions = React.useMemo(() => {
-    // Only use the configured greenhouses from the database
-    // Don't include legacy InfluxDB values from old overrides
-    return [...configuredGreenhouses].sort();
-  }, [configuredGreenhouses]);
-  const hasNoConfiguredGreenhouses = configuredGreenhouses.length === 0;
+  const hasNoConfiguredGreenhouses = greenhouseOptions.length === 0;
 
   const hintKey: Record<SensorConfigFieldKey, string> = {
     xPosition: sc.xPositionHint,
@@ -123,7 +123,7 @@ export function SensorConfigForm({
       isLegacyZero || row.config?.yPosition == null
         ? ''
         : row.config.yPosition.toString(),
-    greenhouse: row.config?.greenhouse ?? '',
+    greenhouse: row.config?.greenhouseId ?? '',
     visible: !(row.config?.hiddenInFarmOverview ?? false),
   });
 
@@ -139,7 +139,7 @@ export function SensorConfigForm({
         values.xPosition.trim() === '' ? undefined : Number(values.xPosition),
       yPosition:
         values.yPosition.trim() === '' ? undefined : Number(values.yPosition),
-      greenhouse: (values.greenhouse as string) || undefined,
+      greenhouseId: (values.greenhouse as string) || undefined,
       hiddenInFarmOverview: !values.visible,
     });
     onClose();
@@ -221,8 +221,8 @@ export function SensorConfigForm({
                       </div>
                     ) : (
                       greenhouseOptions.map((gh) => (
-                        <SelectItem key={gh} value={gh}>
-                          {gh}
+                        <SelectItem key={gh.id} value={gh.id}>
+                          {gh.name}
                         </SelectItem>
                       ))
                     )}
