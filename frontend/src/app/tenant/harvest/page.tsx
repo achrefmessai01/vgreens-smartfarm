@@ -37,6 +37,7 @@ export default function HarvestPage() {
 
   const {
     harvests,
+    batches,
     summary,
     loading,
     createBatchOpen,
@@ -136,6 +137,7 @@ export default function HarvestPage() {
                 onExportClick={() => setExportDialogOpen(true)}
               />
               <HarvestTable
+                batches={batches ?? []}
                 harvests={harvests ?? []}
                 onDelete={handleDeleteRequest}
                 onSidebarEdit={handleSidebarEdit}

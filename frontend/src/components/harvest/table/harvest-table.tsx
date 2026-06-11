@@ -2,22 +2,28 @@
 
 import * as React from 'react';
 import { useI18n } from '@/i18n';
-import { groupByBatch, type HarvestItem } from './harvest-table-utils';
+import {
+  groupByBatch,
+  type BatchItem,
+  type HarvestItem,
+} from './harvest-table-utils';
 import { HarvestTableSkeleton } from './harvest-table-skeleton';
 import { HarvestBatchGroup } from './harvest-batch-group';
 
 interface HarvestTableProps {
+  batches: BatchItem[];
   harvests: HarvestItem[];
   onDelete?: (harvest: HarvestItem) => void;
   onSidebarEdit?: (harvest: HarvestItem) => void;
-  onLogEntry?: (harvest: HarvestItem) => void;
-  onViewBatch?: (batch: HarvestItem) => void;
-  onEditBatch?: (batch: HarvestItem) => void;
-  onDeleteBatch?: (batch: HarvestItem, entries: HarvestItem[]) => void;
+  onLogEntry?: (batch: BatchItem) => void;
+  onViewBatch?: (batch: BatchItem) => void;
+  onEditBatch?: (batch: BatchItem) => void;
+  onDeleteBatch?: (batch: BatchItem, entries: HarvestItem[]) => void;
   isLoading?: boolean;
 }
 
 export function HarvestTable({
+  batches,
   harvests,
   onDelete,
   onSidebarEdit,
@@ -29,7 +35,10 @@ export function HarvestTable({
 }: HarvestTableProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const groups = React.useMemo(() => groupByBatch(harvests), [harvests]);
+  const groups = React.useMemo(
+    () => groupByBatch(batches, harvests),
+    [batches, harvests],
+  );
 
   if (isLoading) return <HarvestTableSkeleton />;
   if (groups.length === 0) {

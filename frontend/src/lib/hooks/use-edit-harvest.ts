@@ -3,11 +3,11 @@
 import * as React from 'react';
 import {
   useUpdateBatchMutation,
-  type HarvestsQuery,
+  type BatchesQuery,
 } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
-type HarvestItem = HarvestsQuery['harvests'][number];
+type BatchItem = BatchesQuery['batches'][number];
 
 const EMPTY_FORM: BatchFormData = {
   species: '',
@@ -29,23 +29,22 @@ function computeRowSpacing(data: BatchFormData): number {
   return Number((data.cultivationArea / denominator).toFixed(4));
 }
 
-// Pull the editable planting fields off a harvest's parent batch.
-function harvestToFormData(harvest: HarvestItem): BatchFormData {
-  const batch = harvest.batch;
+// Pull the editable planting fields off a batch.
+function batchToFormData(batch: BatchItem): BatchFormData {
   return {
-    species: batch?.species ?? '',
-    variety: batch?.variety ?? '',
-    plantingDate: batch?.plantingDate
+    species: batch.species ?? '',
+    variety: batch.variety ?? '',
+    plantingDate: batch.plantingDate
       ? new Date(batch.plantingDate).toISOString().split('T')[0]
       : '',
-    cultivationArea: batch?.cultivationArea ?? 0,
-    sourceGreenhouse: batch?.greenhouseId ?? '',
-    numberOfRows: batch?.numberOfRows ?? 0,
-    rowLength: batch?.rowLength ?? 0,
-    plantsPerMeter: batch?.plantsPerMeter ?? 0,
-    rowSpacing: batch?.rowSpacing ?? 0,
-    totalPlants: batch?.totalPlants ?? 0,
-    lostPlants: batch?.lostPlants ?? 0,
+    cultivationArea: batch.cultivationArea ?? 0,
+    sourceGreenhouse: batch.greenhouseId ?? '',
+    numberOfRows: batch.numberOfRows ?? 0,
+    rowLength: batch.rowLength ?? 0,
+    plantsPerMeter: batch.plantsPerMeter ?? 0,
+    rowSpacing: batch.rowSpacing ?? 0,
+    totalPlants: batch.totalPlants ?? 0,
+    lostPlants: batch.lostPlants ?? 0,
   };
 }
 
@@ -79,9 +78,9 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
   const [batchId, setBatchId] = React.useState<string | null>(null);
   const [updateBatch, { loading }] = useUpdateBatchMutation();
 
-  const populate = React.useCallback((harvest: HarvestItem) => {
-    setBatchId(harvest.batchId);
-    setFormData(harvestToFormData(harvest));
+  const populate = React.useCallback((batch: BatchItem) => {
+    setBatchId(batch.id);
+    setFormData(batchToFormData(batch));
     setErrors({});
   }, []);
 
