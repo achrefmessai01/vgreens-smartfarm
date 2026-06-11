@@ -15,12 +15,18 @@ import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { useUsersQuery } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { useAlertsPage } from '@/lib/hooks/use-alerts-page';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 
 export default function AlertsPage() {
   const { t } = useI18n();
   const { isMobile } = useResponsiveBreakpoint('lg');
-  const { data: usersData } = useUsersQuery();
+  const { isVGreensAdmin, isTenantAdmin } = useCurrentUser();
+  // The `users` query is restricted to admins; skip it for tenant users to
+  // avoid a guaranteed permission error.
+  const { data: usersData } = useUsersQuery({
+    skip: !(isVGreensAdmin || isTenantAdmin),
+  });
   const users = usersData?.users ?? [];
   const page = useAlertsPage();
 

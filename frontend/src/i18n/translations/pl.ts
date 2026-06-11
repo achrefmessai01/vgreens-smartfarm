@@ -900,7 +900,7 @@ export const pl = {
           yLabel: 'Długość (m)',
           doorLabel: 'Pozycja drzwi',
           bayCountLabel: 'Boksy',
-          orientationLabel: 'Układ pionowy',
+          orientationLabel: 'Układ poziomy',
           bayCountPlaceholder: '0',
           namePlaceholder: 'np. Hala truskawkowa',
           xDimensionPlaceholder: '0,0',

@@ -174,15 +174,15 @@ export function GreenhouseRow({
 
       <div className="border-border/40 flex items-center gap-2 border-t px-4 py-3">
         <Checkbox
-          id={`gh-vertical-${index}`}
-          checked={row.isVertical ?? false}
+          id={`gh-horizontal-${index}`}
+          checked={row.isHorizontal ?? false}
           disabled={disabled}
           onCheckedChange={(checked) =>
-            onChange(index, { isVertical: checked === true })
+            onChange(index, { isHorizontal: checked === true })
           }
         />
         <label
-          htmlFor={`gh-vertical-${index}`}
+          htmlFor={`gh-horizontal-${index}`}
           className="text-muted-foreground cursor-pointer text-xs font-medium select-none"
         >
           {orientationLabel}

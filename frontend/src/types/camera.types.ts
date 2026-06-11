@@ -11,3 +11,14 @@ export interface Camera {
   resolution?: string;
   fps?: number;
 }
+
+export interface CameraLivestreamFeed {
+  id: string;
+  name: string;
+  path: string;
+  snapshotUrl?: string | null;
+  updatedAt?: string | null;
+  expiresAt?: string | null;
+  available: boolean;
+  error?: string | null;
+}

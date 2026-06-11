@@ -910,7 +910,7 @@ export const el = {
           yLabel: 'Μήκος (m)',
           doorLabel: 'Θέση πόρτας',
           bayCountLabel: 'Διαμερίσματα',
-          orientationLabel: 'Κατακόρυφη διάταξη',
+          orientationLabel: 'Οριζόντια διάταξη',
           bayCountPlaceholder: '0',
           namePlaceholder: 'π.χ. Αίθουσα φράουλας',
           xDimensionPlaceholder: '0,0',

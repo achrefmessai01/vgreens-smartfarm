@@ -40,5 +40,5 @@ export class GreenhouseInput {
   @Field(() => Boolean, { nullable: true })
   @IsOptional()
   @IsBoolean()
-  isVertical?: boolean;
+  isHorizontal?: boolean;
 }
