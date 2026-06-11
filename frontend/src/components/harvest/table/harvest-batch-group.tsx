@@ -27,7 +27,6 @@ import {
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import {
   getCreatedByLabel,
-  isAutoDraftPlaceholder,
   type BatchGroup,
   type HarvestItem,
 } from './harvest-table-utils';
@@ -58,13 +57,8 @@ export function HarvestBatchGroup({
   const qualityCLabel = h?.qualityC ?? 'Quality C';
   const wasteLabel = h?.waste ?? 'Waste';
   const { isMobile } = useResponsiveBreakpoint('lg');
-  const visibleEntries = React.useMemo(
-    () =>
-      group.entries.filter(
-        (entry) => !(isAutoDraftPlaceholder(entry) && group.entries.length > 1),
-      ),
-    [group.entries],
-  );
+  const visibleEntries = group.entries;
+  const batch = group.root.batch;
 
   return (
     <Accordion type="single" collapsible defaultValue={group.key}>
@@ -76,7 +70,7 @@ export function HarvestBatchGroup({
           <div className="flex items-center justify-between gap-2">
             <AccordionTrigger className="min-w-0 flex-1 py-0 hover:no-underline">
               <p className="truncate text-base font-semibold sm:text-lg">
-                {group.root.batch}
+                {batch?.name ?? '-'}
               </p>
             </AccordionTrigger>
             <div className="flex shrink-0 items-center gap-1">
@@ -140,16 +134,16 @@ export function HarvestBatchGroup({
             {visibleEntries.length}{' '}
             {harvestsLoggedLabel(visibleEntries.length, h, locale)}
           </Badge>
-          {group.root.batchNumber && (
+          {batch?.batchNumber && (
             <Badge
               variant="outline"
               className="font-mono text-[10px]"
               title={h?.batchNumber ?? 'Batch Number'}
             >
-              {group.root.batchNumber}
+              {batch.batchNumber}
             </Badge>
           )}
-          <span>{getGreenhouseLabel(group.root.greenhouse)}</span>
+          <span>{getGreenhouseLabel(batch?.greenhouse?.name)}</span>
         </div>
         <AccordionContent className="border-t">
           {visibleEntries.length === 0 ? (
@@ -185,39 +179,28 @@ export function HarvestBatchGroup({
                   </TableHeader>
                   <TableBody>
                     {visibleEntries.map((entry) => {
-                      const sellable =
-                        entry.classA + entry.classB + (entry.classC ?? 0);
-                      const rowYieldPerPlant =
-                        group.root.totalPlants > 0
-                          ? sellable / group.root.totalPlants
-                          : null;
-                      const rowYieldPerMeter =
-                        group.root.rowLength > 0
-                          ? sellable / group.root.rowLength
-                          : null;
-                      // Derive on the fly from current yield + count so stale
-                      // stored `avgFruitWeight` values (from before the total-
-                      // weight input was removed) don't show up here.
-                      const rowAvgFruitWeight =
-                        entry.fruitCount > 0 && sellable > 0
-                          ? sellable / entry.fruitCount
-                          : null;
+                      // All measurement figures come from the backend-computed
+                      // totals on each harvest.
+                      const totals = entry.totals;
+                      const rowYieldPerPlant = totals.yieldPerPlant;
+                      const rowYieldPerMeter = totals.yieldPerMeter;
+                      const rowAvgFruitWeight = totals.avgFruitWeight;
                       return (
                       <TableRow key={entry.id}>
                         <TableCell>{formatHarvestDate(entry.date)}</TableCell>
                         <TableCell className="text-green-600">
-                          {entry.classA}
+                          {totals.classA}
                         </TableCell>
                         <TableCell className="text-teal-600">
-                          {entry.classB}
+                          {totals.classB}
                         </TableCell>
                         <TableCell className="text-amber-600">
-                          {entry.classC ?? 0}
+                          {totals.classC}
                         </TableCell>
                         <TableCell className="text-red-500">
-                          {entry.waste}
+                          {totals.waste}
                         </TableCell>
-                        <TableCell>{entry.avgBrix}&deg;Bx</TableCell>
+                        <TableCell>{totals.avgBrix ?? 0}&deg;Bx</TableCell>
                         <TableCell>
                           {rowAvgFruitWeight == null
                             ? '—'
@@ -286,7 +269,7 @@ export function HarvestBatchGroup({
                             {h?.avgBrix ?? 'Avg Brix'}
                           </p>
                           <span className="text-sm leading-none font-semibold">
-                            {entry.avgBrix}&deg;Bx
+                            {entry.totals.avgBrix ?? 0}&deg;Bx
                           </span>
                         </div>
                       </div>
@@ -297,7 +280,7 @@ export function HarvestBatchGroup({
                             {qualityALabel}
                           </span>
                           <span className="text-base font-semibold text-green-600">
-                            {entry.classA}
+                            {entry.totals.classA}
                           </span>
                         </div>
                         <div className="bg-muted/40 rounded-lg p-2.5">
@@ -305,7 +288,7 @@ export function HarvestBatchGroup({
                             {qualityBLabel}
                           </span>
                           <span className="text-base font-semibold text-teal-600">
-                            {entry.classB}
+                            {entry.totals.classB}
                           </span>
                         </div>
                         <div className="bg-muted/40 rounded-lg p-2.5">
@@ -313,7 +296,7 @@ export function HarvestBatchGroup({
                             {qualityCLabel}
                           </span>
                           <span className="text-base font-semibold text-amber-600">
-                            {entry.classC ?? 0}
+                            {entry.totals.classC}
                           </span>
                         </div>
                         <div className="bg-muted/40 rounded-lg p-2.5">
@@ -321,7 +304,7 @@ export function HarvestBatchGroup({
                             {wasteLabel}
                           </span>
                           <span className="text-base font-semibold text-red-500">
-                            {entry.waste}
+                            {entry.totals.waste}
                           </span>
                         </div>
                       </div>

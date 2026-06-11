@@ -6,11 +6,29 @@ import { useEditHarvest } from '@/lib/hooks/use-edit-harvest';
 import type { SidebarMode } from '@/lib/hooks/use-batch-sidebar';
 import { useDeleteHarvest } from '@/lib/hooks/use-delete-harvest';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
-import { computeSummary, harvestToBatchDetails } from '@/lib/harvest-utils';
-import { isAutoDraftPlaceholder } from '@/components/harvest/table/harvest-table-utils';
-import { useHarvestsQuery, type HarvestsQuery } from '@/generated/graphql';
+import {
+  computeSummary,
+  harvestToBatchDetails,
+  batchToBatchDetails,
+} from '@/lib/harvest-utils';
+import {
+  useHarvestsQuery,
+  type HarvestsQuery,
+  type CreateBatchMutation,
+} from '@/generated/graphql';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
+type CreatedBatch = CreateBatchMutation['createBatch'];
+
+// What the batch sidebar needs to create/edit a harvest: the batch it belongs
+// to, the harvest being edited (null when creating a new one) and the prefilled
+// details.
+interface PendingBatch {
+  batchId: string;
+  harvestId: string | null;
+  details: BatchDetailsData;
+  initialDate?: string | null;
+}
 
 export function useHarvestPage() {
   const { data, loading, refetch } = useHarvestsQuery({
@@ -18,14 +36,8 @@ export function useHarvestPage() {
   });
 
   const harvests = data?.harvests;
-  // Exclude the auto-draft placeholder rows from the summary count. Each new
-  // batch creates an empty draft entry in the DB; counting it would
-  // overstate the harvest total by 1 per batch.
   const summary: HarvestSummary = React.useMemo(
-    () =>
-      computeSummary(
-        (harvests || []).filter((h) => !isAutoDraftPlaceholder(h)),
-      ),
+    () => computeSummary(harvests ?? []),
     [harvests],
   );
 
@@ -48,11 +60,9 @@ export function useHarvestPage() {
     string[]
   >([]);
   const [isBatchDelete, setIsBatchDelete] = React.useState(false);
-  const [pendingBatch, setPendingBatch] = React.useState<{
-    id: string;
-    details: BatchDetailsData;
-    initialDate?: string | null;
-  } | null>(null);
+  const [pendingBatch, setPendingBatch] = React.useState<PendingBatch | null>(
+    null,
+  );
 
   const editHarvest = useEditHarvest({
     onSuccess: () => {
@@ -73,15 +83,17 @@ export function useHarvestPage() {
     setCreateBatchOpen(true);
   }, []);
 
-  const handleBatchCreated = React.useCallback(
-    (harvest: Parameters<typeof harvestToBatchDetails>[0]) => {
-      const details = harvestToBatchDetails(harvest);
-      setPendingBatch({ id: harvest.id, details, initialDate: null });
-      setSidebarMode('create');
-      setBatchSidebarOpen(true);
-    },
-    [],
-  );
+  // A new batch was created: open the sidebar to log its first harvest.
+  const handleBatchCreated = React.useCallback((batch: CreatedBatch) => {
+    setPendingBatch({
+      batchId: batch.id,
+      harvestId: null,
+      details: batchToBatchDetails(batch),
+      initialDate: null,
+    });
+    setSidebarMode('create');
+    setBatchSidebarOpen(true);
+  }, []);
 
   const handleSidebarCompleted = React.useCallback(() => {
     setBatchSidebarOpen(false);
@@ -101,7 +113,7 @@ export function useHarvestPage() {
   const handleBatchView = React.useCallback(
     (harvest: HarvestItem) => {
       setEditReadOnly(true);
-      setEditBatchNumber(harvest.batchNumber ?? null);
+      setEditBatchNumber(harvest.batch?.batchNumber ?? null);
       editHarvest.populate(harvest);
       setEditOpen(true);
     },
@@ -111,23 +123,36 @@ export function useHarvestPage() {
   const handleBatchEdit = React.useCallback(
     (harvest: HarvestItem) => {
       setEditReadOnly(false);
-      setEditBatchNumber(harvest.batchNumber ?? null);
+      setEditBatchNumber(harvest.batch?.batchNumber ?? null);
       editHarvest.populate(harvest);
       setEditOpen(true);
     },
     [editHarvest],
   );
 
+  // Edit an existing harvest event.
   const handleSidebarEdit = React.useCallback((harvest: HarvestItem) => {
-    const details = harvestToBatchDetails(harvest);
-    setPendingBatch({ id: harvest.id, details, initialDate: harvest.date });
+    setPendingBatch({
+      batchId: harvest.batchId,
+      harvestId: harvest.id,
+      details: harvestToBatchDetails(harvest),
+      initialDate: harvest.date,
+    });
     setSidebarMode('edit');
     setBatchSidebarOpen(true);
   }, []);
 
+  // Log a brand-new harvest for an existing batch.
   const handleLogEntry = React.useCallback((harvest: HarvestItem) => {
-    const details = harvestToBatchDetails(harvest);
-    setPendingBatch({ id: harvest.id, details, initialDate: null });
+    const details = harvest.batch
+      ? batchToBatchDetails(harvest.batch)
+      : harvestToBatchDetails(harvest);
+    setPendingBatch({
+      batchId: harvest.batchId,
+      harvestId: null,
+      details,
+      initialDate: null,
+    });
     setSidebarMode('create');
     setBatchSidebarOpen(true);
   }, []);

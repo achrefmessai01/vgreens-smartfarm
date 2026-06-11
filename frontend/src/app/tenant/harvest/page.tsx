@@ -189,7 +189,8 @@ export default function HarvestPage() {
         <BatchSidebar
           open={batchSidebarOpen}
           onOpenChange={setBatchSidebarOpen}
-          harvestId={pendingBatch?.id ?? null}
+          batchId={pendingBatch?.batchId ?? null}
+          harvestId={pendingBatch?.harvestId ?? null}
           batchData={pendingBatch?.details ?? null}
           mode={sidebarMode}
           initialDate={pendingBatch?.initialDate ?? null}

@@ -1,6 +1,8 @@
 import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
-import { HarvestStatus } from '@/common/enums/harvest-status.enum';
+import { BatchStatus } from '@common/enums';
 
+// Lightweight batch summary for the harvest batch selector. Sourced from the
+// batches table; yieldPerPlant is derived from the batch's harvest entries.
 @ObjectType()
 export class HarvestBatchListItem {
   @Field(() => ID)
@@ -9,11 +11,11 @@ export class HarvestBatchListItem {
   @Field()
   name: string;
 
-  @Field()
-  species: string;
+  @Field({ nullable: true })
+  species?: string;
 
-  @Field()
-  variety: string;
+  @Field({ nullable: true })
+  variety?: string;
 
   @Field({ nullable: true })
   greenhouse?: string;
@@ -21,13 +23,13 @@ export class HarvestBatchListItem {
   @Field()
   plantingDate: Date;
 
-  @Field(() => HarvestStatus)
-  status: HarvestStatus;
+  @Field(() => BatchStatus)
+  status: BatchStatus;
 
   @Field(() => Float, {
     nullable: true,
     description:
-      'kg per plant for this batch: (Σ classA + classB across batch rows) / totalPlants. Null when totalPlants is 0 or missing.',
+      'kg per plant for this batch: Σ(totalFruitWeight across the batch entries) / totalPlants. Null when totalPlants is 0 or missing.',
   })
   yieldPerPlant: number | null;
 }

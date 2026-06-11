@@ -1,4 +1,4 @@
-import { HarvestStatus } from '@/generated/graphql';
+import { BatchStatus } from '@/generated/graphql';
 import type { BatchFormData } from '@/types/batch.types';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { createEmptyEntry } from '@/types/batch-sidebar.types';
@@ -21,7 +21,7 @@ export function createBatchDetailsFromForm(
     species:
       formData.species.charAt(0).toUpperCase() + formData.species.slice(1),
     variety: formData.variety,
-    status: HarvestStatus.Draft,
+    status: BatchStatus.Active,
     greenhouse: {
       id: formData.sourceGreenhouse,
       name: getGreenhouseName(formData.sourceGreenhouse),

@@ -1,11 +1,13 @@
-import { HarvestStatus, HarvestQualityClass } from '@/generated/graphql';
+import { BatchStatus } from '@/generated/graphql';
 import type { Locale } from '@/i18n/config';
 import type { Translations } from '@/i18n/translations';
 import type {
   BatchDetailsData,
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
+import { createEmptyEntry } from '@/types/batch-sidebar.types';
 import type {
+  BatchLike,
   HarvestEntryLike,
   HarvestLike,
   HarvestSummary,
@@ -108,6 +110,8 @@ export function formatHarvestDate(dateStr: string): string {
   });
 }
 
+// Aggregate a set of harvests into the summary card figures, reading the
+// service-computed `totals` and the parent batch name.
 export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
   if (harvests.length === 0) {
     return {
@@ -121,15 +125,22 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
     };
   }
 
-  const totalClassA = harvests.reduce((s, h) => s + h.classA, 0);
-  const totalClassB = harvests.reduce((s, h) => s + h.classB, 0);
-  const totalClassC = harvests.reduce((s, h) => s + (h.classC ?? 0), 0);
-  const totalWaste = harvests.reduce((s, h) => s + h.waste, 0);
-  const avgBrix = harvests.reduce((s, h) => s + h.avgBrix, 0) / harvests.length;
+  const totalClassA = harvests.reduce((s, h) => s + h.totals.classA, 0);
+  const totalClassB = harvests.reduce((s, h) => s + h.totals.classB, 0);
+  const totalClassC = harvests.reduce((s, h) => s + h.totals.classC, 0);
+  const totalWaste = harvests.reduce((s, h) => s + h.totals.waste, 0);
+  const brixValues = harvests
+    .map((h) => h.totals.avgBrix)
+    .filter((v): v is number => v != null && v > 0);
+  const avgBrix =
+    brixValues.length > 0
+      ? brixValues.reduce((s, v) => s + v, 0) / brixValues.length
+      : 0;
 
   const counts: Record<string, number> = {};
   for (const h of harvests) {
-    counts[h.batch] = (counts[h.batch] ?? 0) + 1;
+    const name = h.batch?.name ?? '-';
+    counts[name] = (counts[name] ?? 0) + 1;
   }
   const variety =
     Object.entries(counts).sort(([, a], [, b]) => b - a)[0]?.[0] ?? '-';
@@ -145,108 +156,105 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
   };
 }
 
-// Map one stored sub-entry to the editable form shape, expanding the brix and
-// fruit-weight sections when they carry data.
+// Map one stored entry to the editable form shape. The normalized
+// {class,value} brix objects are split back into the form's index-aligned
+// readings / classes arrays.
 function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
-  const brixReadings =
-    entry.brixReadings.length > 0 ? [...entry.brixReadings] : [0];
-  // One grade per reading, index-aligned; default any missing grade to A.
-  const brixClasses = brixReadings.map(
-    (_, i) => entry.brixClasses?.[i] ?? HarvestQualityClass.A,
-  );
+  const readings =
+    entry.brixReadings.length > 0
+      ? entry.brixReadings.map((b) => b.value)
+      : [0];
+  const classes =
+    entry.brixReadings.length > 0
+      ? entry.brixReadings.map((b) => b.class)
+      : createEmptyEntry().brixClasses;
   return {
     marketable: entry.classA,
     waste: entry.waste,
     classB: entry.classB,
-    classC: entry.classC ?? 0,
+    classC: entry.classC,
     rowX: entry.rowX,
     rowY: entry.rowY,
-    brixReadings,
-    brixClasses,
-    showBrix: entry.brixReadings.some((v) => v > 0),
+    brixReadings: readings,
+    brixClasses: classes,
+    showBrix: entry.brixReadings.some((b) => b.value > 0),
     fruitCount: entry.fruitCount,
     showFruitWeight: entry.fruitCount > 0,
   };
 }
 
-// Build the editable entries list for a harvest. Uses the stored `entries`
-// breakdown when present; otherwise synthesizes a single entry from the flat
-// top-level fields so harvests logged before sub-entries existed still edit
-// cleanly.
+// Editable entries for a harvest. A harvest with no entries yet starts with one
+// blank entry so the sidebar always has a card to fill in.
 export function harvestToEntries(h: HarvestLike): HarvestEntryData[] {
   if (h.entries && h.entries.length > 0) {
     return h.entries.map(entryLikeToEntryData);
   }
-  return [
-    entryLikeToEntryData({
-      classA: h.classA,
-      classB: h.classB,
-      classC: h.classC ?? 0,
-      waste: h.waste,
-      rowX: h.rowX,
-      rowY: h.rowY,
-      avgBrix: h.avgBrix,
-      brixReadings: h.brixReadings,
-      brixClasses: h.brixClasses,
-      fruitCount: h.fruitCount,
-      totalFruitWeight: h.totalFruitWeight,
-      avgFruitWeight: h.avgFruitWeight,
-    }),
-  ];
+  return [createEmptyEntry()];
 }
 
-// Per-entry breakdown for the read-only detail view. Uses the stored entries
-// when present; otherwise synthesizes a single entry from the flat top-level
-// fields so legacy harvests still render one card.
+// Per-entry breakdown for the read-only detail view.
 export function harvestToDisplayEntries(h: HarvestLike): HarvestEntryLike[] {
-  if (h.entries && h.entries.length > 0) {
-    return h.entries;
-  }
-  return [
-    {
-      classA: h.classA,
-      classB: h.classB,
-      classC: h.classC ?? 0,
-      waste: h.waste,
-      rowX: h.rowX,
-      rowY: h.rowY,
-      avgBrix: h.avgBrix,
-      brixReadings: h.brixReadings,
-      brixClasses: h.brixClasses,
-      fruitCount: h.fruitCount,
-      totalFruitWeight: h.totalFruitWeight,
-      avgFruitWeight: h.avgFruitWeight,
-    },
-  ];
+  return h.entries ?? [];
 }
 
-export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
-  const plantingDate = new Date(h.plantingDate);
-  const days = Math.max(
-    0,
-    Math.floor((Date.now() - plantingDate.getTime()) / 86_400_000),
-  );
+function daysSince(plantingDate: string): number {
+  const planted = new Date(plantingDate);
+  if (Number.isNaN(planted.getTime())) return 0;
+  return Math.max(0, Math.floor((Date.now() - planted.getTime()) / 86_400_000));
+}
 
+// Build the sidebar's batch-details view-model from a batch's planting fields.
+function batchToDetails(
+  batch: BatchLike,
+  entries: HarvestEntryData[],
+  photos: string[],
+): BatchDetailsData {
   return {
-    id: h.id,
-    name: h.batch,
-    species: h.species,
-    variety: h.variety,
-    status: h.status ?? HarvestStatus.Draft,
+    id: batch.id,
+    name: batch.name ?? `${batch.species ?? ''} - ${batch.variety ?? ''}`,
+    species: batch.species ?? '',
+    variety: batch.variety ?? '',
+    status: batch.status ?? BatchStatus.Active,
     greenhouse: {
-      id: h.greenhouse ?? '',
-      name: getGreenhouseLabel(h.greenhouse),
+      id: batch.greenhouseId ?? batch.greenhouse?.id ?? '',
+      name: batch.greenhouse?.name ?? '-',
     },
-    daysAfterPlanting: days,
-    area: h.cultivationArea,
-    numberOfRows: h.numberOfRows,
-    rowLength: h.rowLength,
-    plantsPerMeter: h.plantsPerMeter,
-    rowSpacing: h.rowSpacing,
-    totalPlants: h.totalPlants,
-    lostPlants: h.lostPlants,
-    plantingDate: h.plantingDate,
-    entries: harvestToEntries(h),
-    photos: h.photoUrls ?? [],
+    daysAfterPlanting: daysSince(batch.plantingDate),
+    area: batch.cultivationArea,
+    numberOfRows: batch.numberOfRows,
+    rowLength: batch.rowLength,
+    plantsPerMeter: batch.plantsPerMeter,
+    rowSpacing: batch.rowSpacing,
+    totalPlants: batch.totalPlants,
+    lostPlants: batch.lostPlants,
+    plantingDate: batch.plantingDate,
+    entries,
+    photos,
   };
+}
+
+// Sidebar view-model for an existing harvest (its batch + its entries).
+export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
+  const batch: BatchLike =
+    h.batch ??
+    ({
+      id: h.batchId,
+      name: '',
+      status: BatchStatus.Active,
+      plantingDate: h.date,
+      cultivationArea: 0,
+      numberOfRows: 0,
+      rowLength: 0,
+      plantsPerMeter: 0,
+      rowSpacing: 0,
+      totalPlants: 0,
+      lostPlants: 0,
+    } as BatchLike);
+  return batchToDetails(batch, harvestToEntries(h), h.photoUrls ?? []);
+}
+
+// Sidebar view-model for a freshly created batch (no harvest yet): one blank
+// entry, no photos.
+export function batchToBatchDetails(batch: BatchLike): BatchDetailsData {
+  return batchToDetails(batch, [createEmptyEntry()], []);
 }

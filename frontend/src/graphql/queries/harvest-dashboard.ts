@@ -61,7 +61,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
     $batch: String
     $dateFrom: String
     $dateTo: String
-    $greenhouse: String
+    $greenhouseId: ID
   ) {
     harvestDashboard(
       filter: {
@@ -71,7 +71,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
         batch: $batch
         dateFrom: $dateFrom
         dateTo: $dateTo
-        greenhouse: $greenhouse
+        greenhouseId: $greenhouseId
       }
     ) {
       species

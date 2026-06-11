@@ -3,6 +3,8 @@ export * from './user-status.enum';
 export * from './alert-status.enum';
 export * from './alert-severity.enum';
 export * from './harvest-status.enum';
+export * from './batch-status.enum';
+export * from './door-position.enum';
 export * from './harvest-quality-class.enum';
 export * from './order-direction.enum';
 export * from './report-severity.enum';
