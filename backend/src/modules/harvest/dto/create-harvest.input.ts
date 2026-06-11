@@ -1,21 +1,17 @@
 import {
   IsUUID,
   IsString,
-  IsNumber,
-  IsInt,
   IsOptional,
   IsDateString,
-  IsEnum,
   IsArray,
   ValidateNested,
-  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { InputType, Field, ID, Float, Int } from '@nestjs/graphql';
-import { HarvestStatus } from '@/common/enums/harvest-status.enum';
-import { HarvestQualityClass } from '@/common/enums/harvest-quality-class.enum';
+import { InputType, Field, ID } from '@nestjs/graphql';
 import { HarvestEntryInput } from './harvest-entry.input';
 
+// A harvest event belongs to a batch and carries one or more measured entries.
+// All measurement totals are derived from the entries by the service.
 @InputType()
 export class CreateHarvestInput {
   @Field(() => ID, { nullable: true })
@@ -23,183 +19,13 @@ export class CreateHarvestInput {
   @IsUUID()
   tenantId?: string;
 
-  @Field(() => ID, { nullable: true })
-  @IsOptional()
+  @Field(() => ID)
   @IsUUID()
-  parentBatchId?: string;
-
-  // --- Batch creation fields (dialog) ---
-
-  @Field()
-  @IsString()
-  species: string;
-
-  @Field()
-  @IsString()
-  variety: string;
-
-  @Field({
-    nullable: true,
-    description: 'Defaults to "species - variety" if omitted',
-  })
-  @IsOptional()
-  @IsString()
-  batch?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  greenhouse?: string;
-
-  @Field({ description: 'Planting date (ISO date string)' })
-  @IsDateString()
-  plantingDate: string;
-
-  @Field(() => Float, { description: 'Cultivation area in m²' })
-  @IsNumber()
-  @Min(0)
-  cultivationArea: number;
-
-  @Field(() => Float)
-  @IsNumber()
-  @Min(0)
-  numberOfRows: number;
-
-  @Field(() => Float)
-  @IsNumber()
-  @Min(0)
-  rowLength: number;
-
-  @Field(() => Float)
-  @IsNumber()
-  @Min(0)
-  plantsPerMeter: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  rowSpacing?: number;
-
-  @Field(() => Int, { defaultValue: 0 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  totalPlants?: number;
-
-  @Field(() => Int, { defaultValue: 0 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  lostPlants?: number;
-
-  @Field(() => HarvestStatus, {
-    nullable: true,
-    defaultValue: HarvestStatus.ACTIVE,
-  })
-  @IsOptional()
-  @IsEnum(HarvestStatus)
-  status?: HarvestStatus;
-
-  // --- Harvest log fields (sidebar) ---
+  batchId: string;
 
   @Field({ description: 'Harvest date (ISO date string)' })
   @IsDateString()
   date: string;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classA?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classB?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classC?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  waste?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  avgBrix?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  rowX?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  rowY?: number;
-
-  @Field(() => Float, {
-    defaultValue: 0,
-    deprecationReason: 'Use rowX and rowY instead.',
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  numberOfRowsHarvested?: number;
-
-  // --- Brix measurements ---
-
-  @Field(() => [Float], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @IsNumber({}, { each: true })
-  @Min(0, { each: true })
-  brixReadings?: number[];
-
-  @Field(() => [HarvestQualityClass], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @IsEnum(HarvestQualityClass, { each: true })
-  brixClasses?: HarvestQualityClass[];
-
-  // --- Fruit weight measurement ---
-
-  @Field(() => Int, { defaultValue: 0 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  fruitCount?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  totalFruitWeight?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  avgFruitWeight?: number;
-
-  // --- Photos ---
-
-  @Field(() => Int, { defaultValue: 0 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  photos?: number;
 
   @Field(() => [String], { nullable: true })
   @IsOptional()
@@ -207,10 +33,6 @@ export class CreateHarvestInput {
   @IsString({ each: true })
   photoUrls?: string[];
 
-  // --- Sub-entries ---
-
-  // When provided, the service derives the top-level classA/classB/waste/brix/
-  // fruit-weight/row aggregates from these and persists the breakdown as-is.
   @Field(() => [HarvestEntryInput], { nullable: true })
   @IsOptional()
   @IsArray()

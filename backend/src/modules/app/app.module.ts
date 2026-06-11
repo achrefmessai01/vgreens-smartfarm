@@ -13,6 +13,8 @@ import { GraphQLExceptionFilter } from '@common/filters';
 import { TenantsModule } from '../tenants/tenants.module';
 import { AuthGuard, ClerkAuthGuard } from '@common/guards';
 import { HarvestsModule } from '../harvest/harvests.module';
+import { BatchModule } from '../batch/batch.module';
+import { GreenhouseModule } from '../greenhouse/greenhouse.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FeaturesModule } from '../features/features.module';
 import { InfluxDBModule } from '../influxdb/influxdb.module';
@@ -46,6 +48,8 @@ import {
     UsersModule,
     FeaturesModule,
     AlertsModule,
+    GreenhouseModule,
+    BatchModule,
     HarvestsModule,
     InfluxDBModule,
     FilesModule,

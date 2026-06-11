@@ -1,5 +1,6 @@
 import { UserRole } from '@common/enums';
 import { Harvest } from './entities/harvest.entity';
+import { HarvestTotals } from './dto/harvest-totals.dto';
 import { HarvestsService } from './harvests.service';
 import { Roles, CurrentUser } from '@common/decorators';
 import {
@@ -13,7 +14,15 @@ import {
 import { User } from '@modules/users/entities/user.entity';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ID,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
 import {
   serializeHarvestsToCsv,
@@ -26,6 +35,20 @@ import {
 export class HarvestsResolver {
   constructor(private readonly harvestsService: HarvestsService) {}
 
+  private resolveTenantId(currentUser: User, requireForNonAdmin = true): string | undefined {
+    if (currentUser.role === UserRole.VGREENS_ADMIN) return undefined;
+    if (requireForNonAdmin && !currentUser.tenantId) {
+      throw new Error('Tenant ID is required');
+    }
+    return currentUser.tenantId;
+  }
+
+  // Computed aggregate of the harvest's entries — replaces the omitted DB view.
+  @ResolveField(() => HarvestTotals, { name: 'totals' })
+  totals(@Parent() harvest: Harvest): HarvestTotals {
+    return this.harvestsService.computeTotals(harvest.entries, harvest.batch);
+  }
+
   @Query(() => [Harvest], { name: 'harvests' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
   async findAll(
@@ -33,16 +56,10 @@ export class HarvestsResolver {
     @Args('filter', { type: () => HarvestFilterInput, nullable: true })
     filter?: HarvestFilterInput | null,
   ): Promise<Harvest[]> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
-      throw new Error('Tenant ID is required');
-    }
-
-    return this.harvestsService.findAllFiltered(tenantId, filter);
+    return this.harvestsService.findAllFiltered(
+      this.resolveTenantId(currentUser),
+      filter,
+    );
   }
 
   @Query(() => Harvest, { name: 'harvest', nullable: true })
@@ -51,12 +68,10 @@ export class HarvestsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
   ): Promise<Harvest | null> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    return this.harvestsService.findOneWithRelations(id, tenantId);
+    return this.harvestsService.findOneWithRelations(
+      id,
+      this.resolveTenantId(currentUser, false),
+    );
   }
 
   @Query(() => String, { name: 'harvestsCsvExport' })
@@ -68,18 +83,8 @@ export class HarvestsResolver {
     @Args('columns', { type: () => [String], nullable: true })
     columns?: string[] | null,
   ): Promise<string> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
+    const tenantId = this.resolveTenantId(currentUser);
 
-    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
-      throw new Error('Tenant ID is required');
-    }
-
-    // Role is the real boundary: a tenant user requesting ID columns directly
-    // via GraphQL still only gets the columns their role permits. Intersecting
-    // against `permitted` also drops any unknown/garbage column names.
     const permitted = permittedColumnsForRole(currentUser.role);
     const requested = columns && columns.length > 0 ? columns : permitted;
     const selected = permitted.filter((key) => requested.includes(key));
@@ -96,16 +101,9 @@ export class HarvestsResolver {
   async findBatches(
     @CurrentUser() currentUser: User,
   ): Promise<HarvestBatchListItem[]> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
-      throw new Error('Tenant ID is required');
-    }
-
-    return this.harvestsService.findBatchesForSelector(tenantId);
+    return this.harvestsService.findBatchesForSelector(
+      this.resolveTenantId(currentUser),
+    );
   }
 
   @Query(() => HarvestDashboardMetrics, { name: 'harvestDashboard' })
@@ -115,16 +113,10 @@ export class HarvestsResolver {
     @Args('filter', { type: () => DashboardFilterInput, nullable: true })
     filter?: DashboardFilterInput | null,
   ): Promise<HarvestDashboardMetrics> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
-      throw new Error('Tenant ID is required');
-    }
-
-    return this.harvestsService.getDashboardMetrics(tenantId, filter);
+    return this.harvestsService.getDashboardMetrics(
+      this.resolveTenantId(currentUser),
+      filter,
+    );
   }
 
   @Mutation(() => Harvest)
@@ -134,15 +126,12 @@ export class HarvestsResolver {
     @CurrentUser() currentUser: User,
   ): Promise<Harvest> {
     const tenantId = input.tenantId ?? currentUser.tenantId;
-
     if (!tenantId) {
       throw new Error('Tenant ID is required');
     }
-
     if (!currentUser.id) {
       throw new Error('User ID is required');
     }
-
     return this.harvestsService.createHarvest(input, tenantId, currentUser.id);
   }
 
@@ -153,12 +142,11 @@ export class HarvestsResolver {
     @Args('input') input: UpdateHarvestInput,
     @CurrentUser() currentUser: User,
   ): Promise<Harvest> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    return this.harvestsService.updateHarvest(id, input, tenantId);
+    return this.harvestsService.updateHarvest(
+      id,
+      input,
+      this.resolveTenantId(currentUser, false),
+    );
   }
 
   @Mutation(() => Boolean)
@@ -167,12 +155,11 @@ export class HarvestsResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
   ): Promise<boolean> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    await this.harvestsService.deleteHarvest(id, tenantId);
+    await this.harvestsService.deleteHarvest(
+      id,
+      currentUser.id,
+      this.resolveTenantId(currentUser, false),
+    );
     return true;
   }
 }

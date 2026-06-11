@@ -33,11 +33,10 @@ export function HarvestDetails({
   if (!harvest) return null;
 
   // Total yield = every picked grade plus waste (Quality A + B + C + Waste).
+  const totals = harvest.totals;
   const totalYield =
-    harvest.classA +
-    harvest.classB +
-    (harvest.classC ?? 0) +
-    harvest.waste;
+    totals.classA + totals.classB + totals.classC + totals.waste;
+  const greenhouseName = harvest.batch?.greenhouse?.name ?? null;
   const qualityALabel = h?.qualityA ?? 'Quality A';
   const qualityBLabel = h?.qualityB ?? 'Quality B';
   const qualityCLabel = h?.qualityC ?? 'Quality C';
@@ -53,7 +52,7 @@ export function HarvestDetails({
         <SheetHeader className="from-background to-muted/20 border-b bg-gradient-to-r px-6 pt-6 pb-4">
           <SheetTitle className="text-xl font-bold">
             {h?.harvestDetails ?? 'Harvest Details'} -{' '}
-            {getGreenhouseLabel(harvest.greenhouse)}
+            {getGreenhouseLabel(greenhouseName)}
           </SheetTitle>
         </SheetHeader>
 
@@ -68,17 +67,20 @@ export function HarvestDetails({
                   label={h?.date ?? 'Date'}
                   value={formatHarvestDate(harvest.date)}
                 />
-                <DetailRow label={h?.batch ?? 'Batch'} value={harvest.batch} />
-                {harvest.batchNumber && (
+                <DetailRow
+                  label={h?.batch ?? 'Batch'}
+                  value={harvest.batch?.name ?? '-'}
+                />
+                {harvest.batch?.batchNumber && (
                   <DetailRow
                     label={h?.batchNumber ?? 'Batch Number'}
-                    value={harvest.batchNumber}
+                    value={harvest.batch.batchNumber}
                     valueClassName="font-mono"
                   />
                 )}
                 <DetailRow
                   label={h?.greenhouse ?? 'Greenhouse'}
-                  value={getGreenhouseLabel(harvest.greenhouse)}
+                  value={getGreenhouseLabel(greenhouseName)}
                   valueClassName="text-blue-600"
                 />
                 <div className="flex items-center justify-between py-2">
@@ -178,15 +180,14 @@ export function HarvestDetails({
                       </p>
                     ) : (
                       <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-                        {entry.brixReadings.map((value, index) => (
+                        {entry.brixReadings.map((reading, index) => (
                           <div key={index} className="text-center">
                             <div className="text-muted-foreground mb-2 text-xs font-medium">
-                              #{index + 1} &middot;{' '}
-                              {entry.brixClasses?.[index] ?? 'A'}
+                              #{index + 1} &middot; {reading.class}
                             </div>
                             <div className="bg-muted rounded-lg border p-4">
                               <span className="text-foreground text-lg font-bold">
-                                {value.toFixed(1)}
+                                {reading.value.toFixed(1)}
                               </span>
                             </div>
                           </div>
