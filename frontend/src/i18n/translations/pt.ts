@@ -905,7 +905,7 @@ export const pt = {
           yLabel: 'Comprimento (m)',
           doorLabel: 'Posição da porta',
           bayCountLabel: 'Naves',
-          orientationLabel: 'Disposição vertical',
+          orientationLabel: 'Disposição horizontal',
           bayCountPlaceholder: '0',
           namePlaceholder: 'p. ex., Sala dos morangos',
           xDimensionPlaceholder: '0,0',

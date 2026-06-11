@@ -888,7 +888,7 @@ export const ar = {
           yLabel: 'الطول (m)',
           doorLabel: 'موقع الباب',
           bayCountLabel: 'الفسحات',
-          orientationLabel: 'تخطيط عمودي',
+          orientationLabel: 'تخطيط أفقي',
           bayCountPlaceholder: '0',
           namePlaceholder: 'مثال: قاعة الفراولة',
           xDimensionPlaceholder: '0.0',
