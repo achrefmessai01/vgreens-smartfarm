@@ -5,6 +5,7 @@ import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useGreenhousesQuery } from '@/generated/graphql';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 interface FormFieldProps {
@@ -24,7 +25,14 @@ export function GreenhouseField({
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const { data, loading } = useGreenhousesQuery();
+  // Scope to the tenant the batch will belong to (the current user's tenant).
+  // For a VGREENS_ADMIN the greenhouses query is otherwise unscoped and would
+  // return every tenant's greenhouses, so pass the tenantId explicitly.
+  const { user } = useCurrentUser();
+  const { data, loading } = useGreenhousesQuery({
+    variables: { tenantId: user?.tenantId ?? undefined },
+    skip: !user?.tenantId,
+  });
   const greenhouses = data?.greenhouses ?? [];
 
   return (
