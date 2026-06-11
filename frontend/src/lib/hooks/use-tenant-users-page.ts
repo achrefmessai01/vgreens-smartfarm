@@ -14,10 +14,18 @@ import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import type { UserFormData } from '@/components/users';
 
 export function useTenantUsersPage() {
-  const { user: currentUser } = useCurrentUser();
+  const {
+    user: currentUser,
+    isVGreensAdmin,
+    isTenantAdmin,
+  } = useCurrentUser();
   const tenantId = currentUser?.tenantId;
 
-  const { data, loading, refetch } = useUsersQuery();
+  // The `users` query is restricted to admins; skip it for tenant users to
+  // avoid a guaranteed permission error.
+  const { data, loading, refetch } = useUsersQuery({
+    skip: !(isVGreensAdmin || isTenantAdmin),
+  });
   const [createUser] = useCreateUserMutation();
   const [updateUser] = useUpdateUserMutation();
   const [deleteUser] = useDeleteUserMutation();
