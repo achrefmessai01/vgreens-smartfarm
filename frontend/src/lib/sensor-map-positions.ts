@@ -23,11 +23,13 @@ export interface GreenhouseDimensions {
   doorPosition?: DoorPosition | null;
   bayCount?: number | null;
   /**
-   * When true the greenhouse is rendered rotated 90° (portrait): the width
-   * (x) axis runs top→bottom and the length (y) axis runs left→right. When
-   * false/undefined the default landscape layout is used.
+   * Horizontal layout (true): the layout is rotated 90° — length (y) runs
+   * left→right, width (x) runs top→bottom, with horizontal bay divider lines.
+   * Vertical layout (false/undefined, the default): the original orientation —
+   * width (x) runs left→right, length (y) runs bottom→top, with vertical bay
+   * divider lines.
    */
-  isVertical?: boolean | null;
+  isHorizontal?: boolean | null;
 }
 
 /** Default layout values — chambersCount used for greenhouse tabs. */
@@ -46,16 +48,16 @@ function clampPercent(value: number): number {
  * leftPercent: 0 = left edge, 100 = right edge.
  * topPercent: 0 = top edge, 100 = bottom edge.
  *
- * Default (landscape): x runs left→right, y runs bottom→top.
- * Vertical (portrait): the layout is rotated 90° CCW, so the length axis (y)
- * runs left→right and the width axis (x) runs top→bottom.
+ * Vertical layout (default): x runs left→right, y runs bottom→top.
+ * Horizontal layout (isHorizontal): the layout is rotated 90°, so the length
+ * axis (y) runs left→right and the width axis (x) runs top→bottom.
  */
 export function getPositionFromXY(
   x: number,
   y: number,
   dims: GreenhouseDimensions,
 ): { leftPercent: number; topPercent: number } {
-  if (dims.isVertical) {
+  if (dims.isHorizontal) {
     return {
       leftPercent: clampPercent((y / dims.yDimension) * 100),
       topPercent: clampPercent((x / dims.xDimension) * 100),
@@ -77,7 +79,7 @@ export function getXYFromPosition(
   topPercent: number,
   dims: GreenhouseDimensions,
 ): { xPosition: number; yPosition: number } {
-  if (dims.isVertical) {
+  if (dims.isHorizontal) {
     return {
       xPosition: (topPercent / 100) * dims.xDimension,
       yPosition: (leftPercent / 100) * dims.yDimension,

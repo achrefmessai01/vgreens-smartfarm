@@ -15,7 +15,7 @@ export const CREATE_TENANT_MUTATION = gql`
         xDimension
         yDimension
         bayCount
-        isVertical
+        isHorizontal
       }
       createdAt
       updatedAt
@@ -38,7 +38,7 @@ export const UPDATE_TENANT_MUTATION = gql`
         xDimension
         yDimension
         bayCount
-        isVertical
+        isHorizontal
       }
       createdAt
       updatedAt

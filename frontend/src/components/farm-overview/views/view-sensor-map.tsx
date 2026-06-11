@@ -793,12 +793,12 @@ export function ViewSensorMap(props: ViewSensorMapProps) {
                       aria-hidden="true"
                       className={cn(
                         'bg-foreground/15 pointer-events-none absolute',
-                        greenhouseDimensions.isVertical
+                        greenhouseDimensions.isHorizontal
                           ? 'inset-x-0 h-px'
                           : 'inset-y-0 w-px',
                       )}
                       style={
-                        greenhouseDimensions.isVertical
+                        greenhouseDimensions.isHorizontal
                           ? { top: offset }
                           : { left: offset }
                       }
