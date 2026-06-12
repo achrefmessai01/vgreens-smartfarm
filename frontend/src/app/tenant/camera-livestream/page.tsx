@@ -1,35 +1,36 @@
 'use client';
 
 import * as React from 'react';
-import { useQuery } from '@apollo/client/react';
+import { useLazyQuery, useQuery } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
-import { Radio } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
-import {
-  CameraGrid,
-  withCacheBust,
-} from '@/components/camera-livestream/camera-grid';
+import { CameraGrid } from '@/components/camera-livestream/camera-grid';
+import { CameraLivestreamPlayer } from '@/components/camera-livestream/camera-livestream-player';
 import { CameraLivestreamUnavailable } from '@/components/camera-livestream/camera-livestream-unavailable';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { Badge } from '@/components/ui/badge';
-import { CAMERA_LIVESTREAM_FEEDS_QUERY } from '@/graphql/queries/camera-livestream.queries';
+import {
+  CAMERA_LIVESTREAM_FEEDS_QUERY,
+  CAMERA_LIVESTREAM_STREAM_URL_QUERY,
+} from '@/graphql/queries/camera-livestream.queries';
 import { canAccessCameraLivestream } from '@/lib/camera-livestream-access';
+import { resolveLivestreamUrl } from '@/lib/livestream-url';
 import { useI18n } from '@/i18n';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features';
-import type { CameraLivestreamFeed } from '@/types/camera.types';
+import type {
+  CameraLivestreamFeed,
+  CameraLivestreamStream,
+} from '@/types/camera.types';
 
 const LIVESTREAM_REFRESH_MS = 5 * 60 * 1000;
 
 interface CameraLivestreamFeedsResult {
   cameraLivestreamFeeds: CameraLivestreamFeed[];
+}
+
+interface CameraLivestreamStreamResult {
+  cameraLivestreamStreamUrl: CameraLivestreamStream;
 }
 
 export default function CameraLivestreamPage() {
@@ -50,7 +51,6 @@ export default function CameraLivestreamPage() {
   const [selectedCameraId, setSelectedCameraId] = React.useState<string | null>(
     null,
   );
-  const [modalImageFailed, setModalImageFailed] = React.useState(false);
 
   const { data, loading, refetch, error } =
     useQuery<CameraLivestreamFeedsResult>(CAMERA_LIVESTREAM_FEEDS_QUERY, {
@@ -59,12 +59,22 @@ export default function CameraLivestreamPage() {
       notifyOnNetworkStatusChange: true,
     });
 
+  const [
+    fetchStreamUrl,
+    { data: streamData, loading: streamLoading, error: streamError },
+  ] = useLazyQuery<CameraLivestreamStreamResult>(
+    CAMERA_LIVESTREAM_STREAM_URL_QUERY,
+    { fetchPolicy: 'network-only' },
+  );
+
   const cameras = data?.cameraLivestreamFeeds ?? [];
   const selectedCamera =
     cameras.find((camera) => camera.id === selectedCameraId) ?? null;
 
+  // Refresh preview images every 5 minutes while the grid is visible. The
+  // interval is paused while a live stream is open and cleared on unmount.
   React.useEffect(() => {
-    if (!hasAccess) {
+    if (!hasAccess || selectedCameraId) {
       return;
     }
 
@@ -79,11 +89,19 @@ export default function CameraLivestreamPage() {
     );
 
     return () => window.clearInterval(intervalId);
-  }, [hasAccess, refetch]);
+  }, [hasAccess, refetch, selectedCameraId]);
 
-  React.useEffect(() => {
-    setModalImageFailed(false);
-  }, [selectedCamera?.snapshotUrl, refreshToken]);
+  const handleCameraClick = React.useCallback(
+    (camera: CameraLivestreamFeed) => {
+      setSelectedCameraId(camera.id);
+      void fetchStreamUrl({ variables: { cameraId: camera.id } });
+    },
+    [fetchStreamUrl],
+  );
+
+  const handleBack = React.useCallback(() => {
+    setSelectedCameraId(null);
+  }, []);
 
   if (userLoading || (!hasAccess && (featuresLoading || !featuresDataLoaded))) {
     return <PageSkeleton />;
@@ -94,6 +112,27 @@ export default function CameraLivestreamPage() {
       <CameraLivestreamUnavailable
         onRedirect={() => router.push('/tenant/farm-overview')}
         redirectLabel="Go to Farm Overview"
+      />
+    );
+  }
+
+  if (selectedCamera) {
+    const stream =
+      streamData?.cameraLivestreamStreamUrl?.cameraId === selectedCamera.id
+        ? streamData.cameraLivestreamStreamUrl
+        : null;
+    const streamUrl = resolveLivestreamUrl(stream?.url);
+    const unavailable = Boolean(
+      streamError || (stream && (!stream.available || !streamUrl)),
+    );
+
+    return (
+      <CameraLivestreamPlayer
+        cameraName={selectedCamera.name}
+        streamUrl={unavailable ? null : streamUrl}
+        urlLoading={streamLoading}
+        unavailable={unavailable}
+        onBack={handleBack}
       />
     );
   }
@@ -122,73 +161,8 @@ export default function CameraLivestreamPage() {
         cameras={cameras}
         loading={loading && cameras.length === 0}
         refreshToken={refreshToken}
-        onCameraClick={(camera) => setSelectedCameraId(camera.id)}
+        onCameraClick={handleCameraClick}
       />
-
-      <Dialog
-        open={Boolean(selectedCamera)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedCameraId(null);
-          }
-        }}
-      >
-        <DialogContent className="max-h-[90vh] max-w-5xl overflow-hidden p-0">
-          {selectedCamera && (
-            <div className="flex max-h-[90vh] flex-col">
-              <DialogHeader className="border-b px-6 py-4">
-                <div className="flex items-center justify-between gap-4 pr-8">
-                  <div>
-                    <DialogTitle>{selectedCamera.name}</DialogTitle>
-                    <DialogDescription>Live camera feed</DialogDescription>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="gap-1.5 px-3 py-1 text-xs font-semibold tracking-wide uppercase"
-                  >
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
-                    </span>
-                    Live
-                  </Badge>
-                </div>
-              </DialogHeader>
-              <div className="flex min-h-[320px] items-center justify-center bg-black/95 p-2 sm:p-4">
-                {selectedCamera.available && selectedCamera.snapshotUrl ? (
-                  modalImageFailed ? (
-                    <div className="flex flex-col items-center gap-2.5 px-4 text-center text-sm text-white/60">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
-                        <Radio className="h-6 w-6" />
-                      </div>
-                      Camera feed currently unavailable
-                    </div>
-                  ) : (
-                    <img
-                      src={
-                        withCacheBust(
-                          selectedCamera.snapshotUrl,
-                          refreshToken,
-                        ) ?? undefined
-                      }
-                      alt={`${selectedCamera.name} live camera feed`}
-                      className="max-h-[70vh] w-auto max-w-full rounded-md object-contain shadow-2xl"
-                      onError={() => setModalImageFailed(true)}
-                    />
-                  )
-                ) : (
-                  <div className="flex flex-col items-center gap-2.5 px-4 text-center text-sm text-white/60">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
-                      <Radio className="h-6 w-6" />
-                    </div>
-                    Camera feed currently unavailable
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -23,7 +23,10 @@ export function CameraCard({
   const [imageFailed, setImageFailed] = React.useState(false);
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const canShowImage = camera.available && imageUrl && !imageFailed;
-  const isInteractive = Boolean(canShowImage && onClick);
+  // Clickable whenever a handler exists: the live stream may be available
+  // even when the preview image is not (and vice versa) — the player view
+  // handles its own unavailable state.
+  const isInteractive = Boolean(onClick) && !loading;
 
   React.useEffect(() => {
     setImageFailed(false);

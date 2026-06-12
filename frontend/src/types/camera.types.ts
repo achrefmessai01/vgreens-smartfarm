@@ -22,3 +22,11 @@ export interface CameraLivestreamFeed {
   available: boolean;
   error?: string | null;
 }
+
+export interface CameraLivestreamStream {
+  cameraId: string;
+  url?: string | null;
+  expiresAt?: string | null;
+  available: boolean;
+  error?: string | null;
+}

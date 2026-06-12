@@ -14,3 +14,15 @@ export const CAMERA_LIVESTREAM_FEEDS_QUERY = gql`
     }
   }
 `;
+
+export const CAMERA_LIVESTREAM_STREAM_URL_QUERY = gql`
+  query CameraLivestreamStreamUrl($cameraId: String!) {
+    cameraLivestreamStreamUrl(cameraId: $cameraId) {
+      cameraId
+      url
+      expiresAt
+      available
+      error
+    }
+  }
+`;
