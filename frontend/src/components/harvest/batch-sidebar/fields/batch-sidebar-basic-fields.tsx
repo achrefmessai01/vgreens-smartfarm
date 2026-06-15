@@ -2,27 +2,25 @@
 
 import { useI18n } from '@/i18n';
 import { Badge } from '@/components/ui/badge';
-import { HarvestStatus } from '@/generated/graphql';
+import { BatchStatus } from '@/generated/graphql';
 import type {
   BatchHeaderFieldProps,
   BatchStatsFieldProps,
 } from '@/types/batch-sidebar.types';
 
 const STATUS_VARIANT: Record<
-  HarvestStatus,
+  BatchStatus,
   'default' | 'secondary' | 'outline'
 > = {
-  [HarvestStatus.Draft]: 'outline',
-  [HarvestStatus.Active]: 'default',
-  [HarvestStatus.Completed]: 'secondary',
-  [HarvestStatus.Inactive]: 'outline',
+  [BatchStatus.Active]: 'default',
+  [BatchStatus.Completed]: 'secondary',
+  [BatchStatus.Archived]: 'outline',
 };
 
-const STATUS_COLOR: Record<HarvestStatus, string> = {
-  [HarvestStatus.Draft]: 'bg-amber-500 hover:bg-amber-600',
-  [HarvestStatus.Active]: 'bg-green-500 hover:bg-green-600',
-  [HarvestStatus.Completed]: 'bg-blue-500 hover:bg-blue-600',
-  [HarvestStatus.Inactive]: 'bg-gray-500 hover:bg-gray-600',
+const STATUS_COLOR: Record<BatchStatus, string> = {
+  [BatchStatus.Active]: 'bg-green-500 hover:bg-green-600',
+  [BatchStatus.Completed]: 'bg-blue-500 hover:bg-blue-600',
+  [BatchStatus.Archived]: 'bg-gray-500 hover:bg-gray-600',
 };
 
 export function BatchHeaderField({
@@ -35,11 +33,10 @@ export function BatchHeaderField({
   const { t } = useI18n();
   const h = t.pages.harvest;
 
-  const STATUS_LABEL: Record<HarvestStatus, string> = {
-    [HarvestStatus.Draft]: h?.statusDraft ?? 'Draft',
-    [HarvestStatus.Active]: h?.statusActive ?? 'Active',
-    [HarvestStatus.Completed]: h?.statusCompleted ?? 'Completed',
-    [HarvestStatus.Inactive]: h?.statusInactive ?? 'Inactive',
+  const STATUS_LABEL: Record<BatchStatus, string> = {
+    [BatchStatus.Active]: h?.statusActive ?? 'Active',
+    [BatchStatus.Completed]: h?.statusCompleted ?? 'Completed',
+    [BatchStatus.Archived]: 'Archived',
   };
 
   if (isLoading) {

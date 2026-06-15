@@ -71,9 +71,9 @@ export class Tenant extends BaseEntity {
   @Field(() => ID, { nullable: true })
   tenantId?: string;
 
-  @Field(() => [TenantGreenhouse], { nullable: true })
-  @Column({ type: 'jsonb', default: () => "'[]'" })
-  greenhouses: TenantGreenhouse[];
+  // `greenhouses` is no longer stored on the tenant. It is a resolve field on
+  // TenantsResolver backed by the dedicated `greenhouses` table (the single
+  // source of truth). The TenantGreenhouse ObjectType above is the exposed shape.
 
   @Field(() => [String], { defaultValue: [] })
   @Column({ type: 'jsonb', default: () => "'[]'" })

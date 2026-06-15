@@ -8,12 +8,12 @@ export class DashboardFilterInput {
   @IsUUID()
   tenantId?: string;
 
-  @Field({ nullable: true, description: 'Filter by species' })
+  @Field({ nullable: true, description: 'Filter by species (batch)' })
   @IsOptional()
   @IsString()
   species?: string;
 
-  @Field({ nullable: true, description: 'Filter by variety' })
+  @Field({ nullable: true, description: 'Filter by variety (batch)' })
   @IsOptional()
   @IsString()
   variety?: string;
@@ -25,8 +25,7 @@ export class DashboardFilterInput {
 
   @Field(() => ID, {
     nullable: true,
-    description:
-      'Filter by batch root id; matches the batch row itself and all its harvest log entries (via parentBatchId)',
+    description: 'Filter to a single batch and all its harvests',
   })
   @IsOptional()
   @IsUUID()
@@ -48,8 +47,8 @@ export class DashboardFilterInput {
   @IsDateString()
   dateTo?: string;
 
-  @Field({ nullable: true, description: 'Filter by greenhouse' })
+  @Field(() => ID, { nullable: true, description: 'Filter by greenhouse' })
   @IsOptional()
-  @IsString()
-  greenhouse?: string;
+  @IsUUID()
+  greenhouseId?: string;
 }

@@ -28,6 +28,7 @@ import { HarvestEntryCard } from './fields/harvest-entry-card';
 export interface BatchSidebarProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  batchId: string | null;
   harvestId: string | null;
   batchData: BatchDetailsData | null;
   mode?: SidebarMode;
@@ -39,6 +40,7 @@ export interface BatchSidebarProps {
 export function BatchSidebar({
   open,
   onOpenChange,
+  batchId,
   harvestId,
   batchData,
   mode = 'create',
@@ -51,6 +53,7 @@ export function BatchSidebar({
   const {
     currentData,
     loading: isSaving,
+    canSave,
     harvestDate,
     setHarvestDate,
     handleBrixChange,
@@ -66,7 +69,14 @@ export function BatchSidebar({
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
-  } = useBatchSidebar({ harvestId, batchData, mode, initialDate, onCompleted });
+  } = useBatchSidebar({
+    batchId,
+    harvestId,
+    batchData,
+    mode,
+    initialDate,
+    onCompleted,
+  });
   const todayIso = React.useMemo(
     () => new Date().toISOString().split('T')[0],
     [],
@@ -245,7 +255,7 @@ export function BatchSidebar({
         <SheetFooter className="bg-background/95 dark:border-primary-foreground/30 border-t px-4 py-4 backdrop-blur-sm sm:px-6">
           <Button
             onClick={handleSave}
-            disabled={busy || !harvestId}
+            disabled={busy || !canSave}
             className="h-12 w-full text-base font-semibold shadow-sm sm:text-lg"
             size="lg"
           >

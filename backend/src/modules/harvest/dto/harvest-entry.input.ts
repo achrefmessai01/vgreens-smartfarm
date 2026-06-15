@@ -3,16 +3,34 @@ import {
   IsInt,
   IsOptional,
   IsArray,
-  IsEnum,
+  ValidateNested,
   Min,
 } from 'class-validator';
-import { InputType, Field, Float, Int } from '@nestjs/graphql';
-import { HarvestQualityClass } from '@common/enums';
+import { Type } from 'class-transformer';
+import { InputType, Field, ID, Float, Int } from '@nestjs/graphql';
+import { BrixReading } from '../entities/brix-reading';
 
-// Input shape for a single harvest sub-entry. Mirrors HarvestEntry; all numeric
-// fields default to 0 so a sparsely-filled entry still validates.
+// Input shape for a single measured position. avgFruitWeight and avgBrix are NOT
+// accepted — the service derives them on write. id is optional so an update can
+// keep/replace specific entries.
 @InputType()
 export class HarvestEntryInput {
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  id?: string;
+
+  @Field(() => Float, { defaultValue: 0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  rowX?: number;
+
+  @Field(() => Float, { defaultValue: 0 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  rowY?: number;
+
   @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
   @IsNumber()
@@ -37,38 +55,6 @@ export class HarvestEntryInput {
   @Min(0)
   waste?: number;
 
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  rowX?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  rowY?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  avgBrix?: number;
-
-  @Field(() => [Float], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @IsNumber({}, { each: true })
-  @Min(0, { each: true })
-  brixReadings?: number[];
-
-  // Quality grade per Brix reading, aligned by index with brixReadings.
-  @Field(() => [HarvestQualityClass], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @IsEnum(HarvestQualityClass, { each: true })
-  brixClasses?: HarvestQualityClass[];
-
   @Field(() => Int, { defaultValue: 0 })
   @IsOptional()
   @IsInt()
@@ -81,9 +67,10 @@ export class HarvestEntryInput {
   @Min(0)
   totalFruitWeight?: number;
 
-  @Field(() => Float, { defaultValue: 0 })
+  @Field(() => [BrixReading], { nullable: true })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  avgFruitWeight?: number;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BrixReading)
+  brixReadings?: BrixReading[];
 }

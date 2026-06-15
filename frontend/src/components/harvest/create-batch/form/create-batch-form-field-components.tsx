@@ -4,6 +4,8 @@ import * as React from 'react';
 import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useGreenhousesQuery } from '@/generated/graphql';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 interface FormFieldProps {
@@ -13,6 +15,8 @@ interface FormFieldProps {
   disabled?: boolean;
 }
 
+// Greenhouses are first-class rows now: pick one (its id is stored in
+// sourceGreenhouse) rather than typing a free-text name.
 export function GreenhouseField({
   formData,
   setFormData,
@@ -21,6 +25,15 @@ export function GreenhouseField({
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  // Scope to the tenant the batch will belong to (the current user's tenant).
+  // For a VGREENS_ADMIN the greenhouses query is otherwise unscoped and would
+  // return every tenant's greenhouses, so pass the tenantId explicitly.
+  const { user } = useCurrentUser();
+  const { data, loading } = useGreenhousesQuery({
+    variables: { tenantId: user?.tenantId ?? undefined },
+    skip: !user?.tenantId,
+  });
+  const greenhouses = data?.greenhouses ?? [];
 
   return (
     <div className="space-y-2">
@@ -28,17 +41,26 @@ export function GreenhouseField({
         {h?.greenhouse ?? 'Greenhouse'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Input
+      <select
         id="sourceGreenhouse"
-        type="text"
-        placeholder={h?.enterGreenhouse ?? 'Enter greenhouse...'}
         value={formData.sourceGreenhouse}
         onChange={(e) =>
           setFormData((prev) => ({ ...prev, sourceGreenhouse: e.target.value }))
         }
-        disabled={disabled}
-        className={`h-10 ${errors.sourceGreenhouse ? 'border-destructive' : ''}`}
-      />
+        disabled={disabled || loading}
+        className={`border-input bg-background ring-offset-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+          errors.sourceGreenhouse ? 'border-destructive' : ''
+        }`}
+      >
+        <option value="">
+          {h?.enterGreenhouse ?? 'Select greenhouse...'}
+        </option>
+        {greenhouses.map((g) => (
+          <option key={g.id} value={g.id}>
+            {g.name}
+          </option>
+        ))}
+      </select>
       {errors.sourceGreenhouse && (
         <p className="text-destructive text-sm">{errors.sourceGreenhouse}</p>
       )}

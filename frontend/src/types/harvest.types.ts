@@ -1,4 +1,4 @@
-import { HarvestStatus, type HarvestQualityClass } from '@/generated/graphql';
+import { BatchStatus, type HarvestQualityClass } from '@/generated/graphql';
 
 export interface HarvestRecord {
   id: string;
@@ -24,28 +24,54 @@ export interface HarvestSummary {
   avgBrix: number;
 }
 
+// A single brix measurement + the grade it belongs to (the normalized
+// {class,value} shape that replaced the old parallel arrays).
+export interface BrixReadingLike {
+  class: HarvestQualityClass;
+  value: number;
+}
+
+// One measured position within a harvest event. Mirrors the GraphQL
+// HarvestEntry; avgFruitWeight / avgBrix are derived by the backend.
 export interface HarvestEntryLike {
+  id?: string;
+  rowX: number;
+  rowY: number;
   classA: number;
   classB: number;
   classC: number;
   waste: number;
-  rowX: number;
-  rowY: number;
-  avgBrix: number;
-  brixReadings: number[];
-  brixClasses: HarvestQualityClass[];
   fruitCount: number;
   totalFruitWeight: number;
   avgFruitWeight: number;
+  avgBrix: number;
+  brixReadings: BrixReadingLike[];
 }
 
-export interface HarvestLike {
+// Service-computed totals for a harvest (the omitted-view replacement).
+export interface HarvestTotalsLike {
+  classA: number;
+  classB: number;
+  classC: number;
+  waste: number;
+  fruitCount: number;
+  totalFruitWeight: number;
+  avgFruitWeight?: number | null;
+  avgBrix?: number | null;
+  yieldPerPlant?: number | null;
+  yieldPerMeter?: number | null;
+}
+
+// Planting-level data, now its own table. Structural subset of the generated
+// Batch type so query results are assignable here.
+export interface BatchLike {
   id: string;
-  batch: string;
-  species: string;
-  variety: string;
-  status: HarvestStatus;
-  greenhouse?: string | null;
+  name?: string | null;
+  species?: string | null;
+  variety?: string | null;
+  status: BatchStatus;
+  batchNumber?: string | null;
+  greenhouseId?: string | null;
   plantingDate: string;
   cultivationArea: number;
   numberOfRows: number;
@@ -54,18 +80,17 @@ export interface HarvestLike {
   rowSpacing: number;
   totalPlants: number;
   lostPlants: number;
-  classA: number;
-  classB: number;
-  classC: number;
-  waste: number;
-  rowX: number;
-  rowY: number;
-  avgBrix: number;
-  brixReadings: number[];
-  brixClasses: HarvestQualityClass[];
-  fruitCount: number;
-  totalFruitWeight: number;
-  avgFruitWeight: number;
+  greenhouse?: { id: string; name: string } | null;
+}
+
+// The slim harvest event: planting data lives on `batch`, measurements on
+// `entries`, derived figures on `totals`.
+export interface HarvestLike {
+  id: string;
+  batchId: string;
+  date: string;
   photoUrls?: string[] | null;
-  entries?: HarvestEntryLike[] | null;
+  batch?: BatchLike | null;
+  entries: HarvestEntryLike[];
+  totals: HarvestTotalsLike;
 }

@@ -1,5 +1,5 @@
 import { HarvestQualityClass } from '@/generated/graphql';
-import type { HarvestStatus } from '@/generated/graphql';
+import type { BatchStatus } from '@/generated/graphql';
 
 // One repeatable "Today Harvest" sub-entry: its own yield, row coordinates,
 // brix readings and fruit-weight measurement. `showBrix`/`showFruitWeight`
@@ -55,7 +55,7 @@ export interface BatchDetailsData {
   name: string;
   species: string;
   variety: string;
-  status: HarvestStatus;
+  status: BatchStatus;
   greenhouse: {
     id: string;
     name: string;
@@ -79,7 +79,7 @@ export interface BatchHeaderFieldProps {
   name: string;
   species: string;
   variety: string;
-  status: HarvestStatus;
+  status: BatchStatus;
   isLoading?: boolean;
 }
 
