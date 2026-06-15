@@ -2,12 +2,16 @@ import {
   Logger,
   Injectable,
   NotFoundException,
+  BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { BaseService } from '@common/services';
 import { OrderDirection } from '@common/enums';
+import { Crop } from '@modules/crop/entities/crop.entity';
+import { Variety } from '@modules/variety/entities/variety.entity';
+import { GreenhouseCrop } from '@modules/greenhouse-crop/entities/greenhouse-crop.entity';
 import { Batch } from './entities/batch.entity';
 import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
@@ -20,11 +24,15 @@ export class BatchService extends BaseService<Batch> {
   constructor(
     @InjectRepository(Batch)
     private readonly batchRepository: Repository<Batch>,
+    @InjectRepository(Crop)
+    private readonly cropRepository: Repository<Crop>,
+    @InjectRepository(Variety)
+    private readonly varietyRepository: Repository<Variety>,
+    @InjectRepository(GreenhouseCrop)
+    private readonly greenhouseCropRepository: Repository<GreenhouseCrop>,
   ) {
     super(batchRepository);
   }
-
-  private readonly batchRelations = ['tenant', 'greenhouse', 'createdBy'];
 
   // rowSpacing = cultivationArea / (numberOfRows * rowLength); 0 when the
   // denominator is non-positive. Ported from the old HarvestsService.
@@ -65,11 +73,58 @@ export class BatchService extends BaseService<Batch> {
     return Math.round(rows * length * perMeter);
   }
 
+  // Validate the greenhouse -> crop -> variety chain and resolve the live crop
+  // (and variety) rows. Enforces:
+  //  - the crop is assigned to the greenhouse via greenhouse_crops, and
+  //  - the variety (if given) belongs to that crop and is not soft-deleted.
+  // Returns the catalog rows so callers can derive name/batchNumber.
+  private async validateCropSelection(
+    greenhouseId: string | null | undefined,
+    cropId: string,
+    varietyId: string | null | undefined,
+  ): Promise<{ crop: Crop; variety: Variety | null }> {
+    if (!greenhouseId) {
+      throw new BadRequestException(
+        'greenhouseId is required to select a crop',
+      );
+    }
+
+    const crop = await this.cropRepository.findOne({ where: { id: cropId } });
+    if (!crop) {
+      throw new BadRequestException(`Crop with ID ${cropId} not found`);
+    }
+
+    const assignment = await this.greenhouseCropRepository.findOne({
+      where: { greenhouseId, cropId },
+    });
+    if (!assignment) {
+      throw new BadRequestException(
+        `Crop ${cropId} is not assigned to greenhouse ${greenhouseId}`,
+      );
+    }
+
+    let variety: Variety | null = null;
+    if (varietyId) {
+      variety = await this.varietyRepository.findOne({
+        where: { id: varietyId, deletedAt: IsNull() },
+      });
+      if (!variety || variety.cropId !== cropId) {
+        throw new BadRequestException(
+          `Variety ${varietyId} does not belong to crop ${cropId}`,
+        );
+      }
+    }
+
+    return { crop, variety };
+  }
+
   async findAllScoped(tenantId: string | undefined): Promise<Batch[]> {
     const qb = this.batchRepository
       .createQueryBuilder('batch')
       .leftJoinAndSelect('batch.tenant', 'tenant')
       .leftJoinAndSelect('batch.greenhouse', 'greenhouse')
+      .leftJoinAndSelect('batch.crop', 'crop')
+      .leftJoinAndSelect('batch.variety', 'variety')
       .leftJoinAndSelect('batch.createdBy', 'createdBy')
       .orderBy('batch.plantingDate', OrderDirection.DESC)
       .addOrderBy('batch.createdAt', OrderDirection.DESC);
@@ -85,6 +140,8 @@ export class BatchService extends BaseService<Batch> {
       .createQueryBuilder('batch')
       .leftJoinAndSelect('batch.tenant', 'tenant')
       .leftJoinAndSelect('batch.greenhouse', 'greenhouse')
+      .leftJoinAndSelect('batch.crop', 'crop')
+      .leftJoinAndSelect('batch.variety', 'variety')
       .leftJoinAndSelect('batch.createdBy', 'createdBy')
       .where('batch.id = :id', { id });
     if (tenantId !== undefined) {
@@ -102,6 +159,14 @@ export class BatchService extends BaseService<Batch> {
     tenantId: string,
     createdById: string,
   ): Promise<Batch> {
+    // Validate the crop/variety selection up front; a BadRequestException here
+    // should surface to the client rather than become a 500.
+    const { crop, variety } = await this.validateCropSelection(
+      input.greenhouseId,
+      input.cropId,
+      input.varietyId,
+    );
+
     try {
       const numberOfRows = input.numberOfRows ?? 0;
       const rowLength = input.rowLength ?? 0;
@@ -113,19 +178,20 @@ export class BatchService extends BaseService<Batch> {
           rowLength,
         );
       const derivedName =
-        [input.species, input.variety].filter(Boolean).join(' - ') || undefined;
+        [crop.name, variety?.name].filter(Boolean).join(' - ') || undefined;
       const name = input.name ?? derivedName;
 
       const batch = this.batchRepository.create({
         tenantId,
         greenhouseId: input.greenhouseId ?? null,
         createdById,
-        species: input.species,
-        variety: input.variety,
+        cropId: input.cropId,
+        varietyId: input.varietyId ?? null,
         name,
-        batchNumber: input.variety
-          ? buildBatchNumber(input.variety, input.plantingDate)
-          : undefined,
+        batchNumber: buildBatchNumber(
+          variety?.name ?? crop.name,
+          input.plantingDate,
+        ),
         status: input.status,
         plantingDate: new Date(input.plantingDate),
         numberOfRows,
@@ -157,8 +223,22 @@ export class BatchService extends BaseService<Batch> {
 
     if (input.greenhouseId !== undefined)
       batch.greenhouseId = input.greenhouseId;
-    if (input.species !== undefined) batch.species = input.species;
-    if (input.variety !== undefined) batch.variety = input.variety;
+
+    // Re-validate the greenhouse -> crop -> variety chain whenever any link in
+    // it changes, against the resulting combination.
+    if (
+      input.greenhouseId !== undefined ||
+      input.cropId !== undefined ||
+      input.varietyId !== undefined
+    ) {
+      const cropId = input.cropId ?? batch.cropId;
+      const varietyId =
+        input.varietyId !== undefined ? input.varietyId : batch.varietyId;
+      await this.validateCropSelection(batch.greenhouseId, cropId, varietyId);
+      batch.cropId = cropId;
+      batch.varietyId = varietyId ?? null;
+    }
+
     if (input.name !== undefined) batch.name = input.name;
     if (input.status !== undefined) batch.status = input.status;
     if (input.plantingDate !== undefined)
@@ -189,7 +269,8 @@ export class BatchService extends BaseService<Batch> {
       batch.cultivationArea = input.cultivationArea;
     if (input.totalPlants !== undefined) batch.totalPlants = input.totalPlants;
 
-    return this.batchRepository.save(batch);
+    await this.batchRepository.save(batch);
+    return this.findOneById(id, tenantId);
   }
 
   async deleteBatch(

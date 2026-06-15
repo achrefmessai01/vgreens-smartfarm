@@ -211,9 +211,11 @@ function batchToDetails(
 ): BatchDetailsData {
   return {
     id: batch.id,
-    name: batch.name ?? `${batch.species ?? ''} - ${batch.variety ?? ''}`,
-    species: batch.species ?? '',
-    variety: batch.variety ?? '',
+    name:
+      batch.name ??
+      [batch.crop?.name, batch.variety?.name].filter(Boolean).join(' - '),
+    species: batch.crop?.name ?? '',
+    variety: batch.variety?.name ?? '',
     status: batch.status ?? BatchStatus.Active,
     greenhouse: {
       id: batch.greenhouseId ?? batch.greenhouse?.id ?? '',

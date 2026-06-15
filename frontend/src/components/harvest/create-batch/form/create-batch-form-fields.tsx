@@ -4,7 +4,7 @@ import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 import * as React from 'react';
 import {
   GreenhouseField,
-  SpeciesField,
+  CropField,
 } from './create-batch-form-field-components';
 import {
   CultivationAreaField,
@@ -38,7 +38,7 @@ export function CreateBatchFormFields({
         errors={errors}
         disabled={disabled}
       />
-      <SpeciesField
+      <CropField
         formData={formData}
         setFormData={setFormData}
         errors={errors}

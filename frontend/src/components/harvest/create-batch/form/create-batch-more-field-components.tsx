@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n';
+import { useVarietiesQuery } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 interface FormFieldProps {
@@ -18,6 +19,8 @@ function parsePositiveNumber(value: string): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
+// Variety selector. Optional, and scoped to the varieties of the chosen crop,
+// so the field is disabled until a crop is picked.
 export function VarietyField({
   formData,
   setFormData,
@@ -26,25 +29,42 @@ export function VarietyField({
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  const cropId = formData.cropId;
+  const { data, loading } = useVarietiesQuery({
+    variables: { cropId },
+    skip: !cropId,
+  });
+  const varieties = data?.varieties ?? [];
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="variety" className="text-sm font-medium">
-        {h?.variety ?? 'Variety'} <span className="text-destructive">*</span>
+      <Label htmlFor="varietyId" className="text-sm font-medium">
+        {h?.variety ?? 'Variety'}
       </Label>
-      <Input
-        id="variety"
-        type="text"
-        placeholder={h?.enterVariety ?? 'Enter variety...'}
-        value={formData.variety}
+      <select
+        id="varietyId"
+        value={formData.varietyId}
         onChange={(e) =>
-          setFormData((prev) => ({ ...prev, variety: e.target.value }))
+          setFormData((prev) => ({ ...prev, varietyId: e.target.value }))
         }
-        disabled={disabled}
-        className={`h-10 ${errors.variety ? 'border-destructive' : ''}`}
-      />
-      {errors.variety && (
-        <p className="text-destructive text-sm">{errors.variety}</p>
+        disabled={disabled || !cropId || loading}
+        className={`border-input bg-background ring-offset-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+          errors.varietyId ? 'border-destructive' : ''
+        }`}
+      >
+        <option value="">
+          {cropId
+            ? (h?.enterVariety ?? 'Select variety (optional)...')
+            : (h?.selectCropFirst ?? 'Select a crop first')}
+        </option>
+        {varieties.map((v) => (
+          <option key={v.id} value={v.id}>
+            {v.name}
+          </option>
+        ))}
+      </select>
+      {errors.varietyId && (
+        <p className="text-destructive text-sm">{errors.varietyId}</p>
       )}
     </div>
   );

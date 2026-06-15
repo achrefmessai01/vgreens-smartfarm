@@ -55,6 +55,8 @@ export class HarvestsService {
       .createQueryBuilder(alias)
       .leftJoinAndSelect(`${alias}.batch`, 'batch')
       .leftJoinAndSelect('batch.greenhouse', 'greenhouse')
+      .leftJoinAndSelect('batch.crop', 'crop')
+      .leftJoinAndSelect('batch.variety', 'variety')
       .leftJoinAndSelect(`${alias}.entries`, 'entries')
       .leftJoinAndSelect(`${alias}.tenant`, 'tenant')
       .leftJoinAndSelect(`${alias}.createdBy`, 'createdBy');
@@ -191,7 +193,7 @@ export class HarvestsService {
         if (filter.search?.trim()) {
           const term = `%${filter.search.trim()}%`;
           qb.andWhere(
-            '(batch.name ILIKE :term OR batch.species ILIKE :term OR batch.variety ILIKE :term)',
+            '(batch.name ILIKE :term OR crop.name ILIKE :term OR variety.name ILIKE :term)',
             { term },
           );
         }
@@ -351,8 +353,8 @@ export class HarvestsService {
       return {
         id: b.id,
         name: b.name ?? '',
-        species: b.species,
-        variety: b.variety,
+        species: b.crop?.name,
+        variety: b.variety?.name,
         greenhouse: b.greenhouse?.name,
         plantingDate: b.plantingDate,
         status: b.status,
@@ -390,12 +392,12 @@ export class HarvestsService {
           });
         }
         if (filter.species) {
-          qb.andWhere('batch.species ILIKE :species', {
+          qb.andWhere('crop.name ILIKE :species', {
             species: `%${filter.species}%`,
           });
         }
         if (filter.variety) {
-          qb.andWhere('batch.variety ILIKE :variety', {
+          qb.andWhere('variety.name ILIKE :variety', {
             variety: `%${filter.variety}%`,
           });
         }
@@ -424,8 +426,8 @@ export class HarvestsService {
       const speciesMap = new Map<string, number>();
       const varietyMap = new Map<string, number>();
       for (const { harvest } of items) {
-        const species = harvest.batch?.species ?? 'N/A';
-        const variety = harvest.batch?.variety ?? 'N/A';
+        const species = harvest.batch?.crop?.name ?? 'N/A';
+        const variety = harvest.batch?.variety?.name ?? 'N/A';
         speciesMap.set(species, (speciesMap.get(species) ?? 0) + 1);
         varietyMap.set(variety, (varietyMap.get(variety) ?? 0) + 1);
       }

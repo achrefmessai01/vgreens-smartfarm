@@ -16,8 +16,14 @@ const HARVEST_MUTATION_FIELDS = gql`
     batch {
       id
       name
-      species
-      variety
+      crop {
+        id
+        name
+      }
+      variety {
+        id
+        name
+      }
       status
       totalPlants
       rowLength

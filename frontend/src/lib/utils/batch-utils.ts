@@ -17,10 +17,11 @@ export function createBatchDetailsFromForm(
 
   return {
     id: `batch-${Date.now()}`,
-    name: `${formData.species.charAt(0).toUpperCase() + formData.species.slice(1)} - ${formData.variety}`,
-    species:
-      formData.species.charAt(0).toUpperCase() + formData.species.slice(1),
-    variety: formData.variety,
+    // crop/variety are now FK ids on the form; their display names come from the
+    // server after creation, so this optimistic view-model leaves them blank.
+    name: '',
+    species: '',
+    variety: '',
     status: BatchStatus.Active,
     greenhouse: {
       id: formData.sourceGreenhouse,

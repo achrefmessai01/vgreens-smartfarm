@@ -1,5 +1,6 @@
 import {
   Entity,
+  Index,
   Column,
   ManyToOne,
   JoinColumn,
@@ -14,6 +15,8 @@ import { User } from '@modules/users/entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { BatchStatus } from '@common/enums';
 import { Greenhouse } from '@modules/greenhouse/entities/greenhouse.entity';
+import { Crop } from '@modules/crop/entities/crop.entity';
+import { Variety } from '@modules/variety/entities/variety.entity';
 
 // Keep date columns as plain YYYY-MM-DD strings on the way in/out so a planting
 // date never shifts across timezones (mirrors the old harvest dateTransformer).
@@ -25,10 +28,12 @@ const dateTransformer: ValueTransformer = {
 };
 
 // Planting-level data split out of the old denormalized harvests table. A batch
-// owns many harvests (harvest events). species/variety stay free text this phase
-// (they become FKs to crops/varieties later).
+// owns many harvests (harvest events). species/variety are now FKs into the
+// global crops/varieties catalog (cropId required, varietyId optional).
 @ObjectType()
 @Entity('batches')
+@Index('idx_batches_crop', ['cropId'])
+@Index('idx_batches_variety', ['varietyId'])
 export class Batch {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
@@ -61,13 +66,23 @@ export class Batch {
   @JoinColumn({ name: 'createdById' })
   createdBy?: User | null;
 
-  @Field({ nullable: true })
-  @Column({ type: 'varchar', nullable: true })
-  species?: string;
+  @Field(() => ID)
+  @Column({ type: 'uuid' })
+  cropId: string;
 
-  @Field({ nullable: true })
-  @Column({ type: 'varchar', nullable: true })
-  variety?: string;
+  @Field(() => Crop, { nullable: true })
+  @ManyToOne(() => Crop)
+  @JoinColumn({ name: 'cropId' })
+  crop?: Crop;
+
+  @Field(() => ID, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  varietyId?: string | null;
+
+  @Field(() => Variety, { nullable: true })
+  @ManyToOne(() => Variety, { nullable: true })
+  @JoinColumn({ name: 'varietyId' })
+  variety?: Variety | null;
 
   @Field({ nullable: true })
   @Column({ type: 'varchar', nullable: true })
