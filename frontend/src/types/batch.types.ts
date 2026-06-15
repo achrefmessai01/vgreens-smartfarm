@@ -1,9 +1,11 @@
 export interface BatchFormData {
-  species: string;
-  variety: string;
+  // Cascading selection: greenhouse -> crop (required) -> variety (optional).
+  // sourceGreenhouse / cropId / varietyId hold the selected entity ids.
+  sourceGreenhouse: string;
+  cropId: string;
+  varietyId: string;
   plantingDate: string;
   cultivationArea: number;
-  sourceGreenhouse: string;
   numberOfRows: number;
   rowLength: number;
   plantsPerMeter: number;
@@ -13,11 +15,11 @@ export interface BatchFormData {
 }
 
 export interface BatchFormErrors {
-  species?: string;
-  variety?: string;
+  sourceGreenhouse?: string;
+  cropId?: string;
+  varietyId?: string;
   plantingDate?: string;
   cultivationArea?: string;
-  sourceGreenhouse?: string;
   numberOfRows?: string;
   rowLength?: string;
   plantsPerMeter?: string;

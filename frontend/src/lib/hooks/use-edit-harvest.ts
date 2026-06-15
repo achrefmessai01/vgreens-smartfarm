@@ -10,11 +10,11 @@ import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 type BatchItem = BatchesQuery['batches'][number];
 
 const EMPTY_FORM: BatchFormData = {
-  species: '',
-  variety: '',
+  sourceGreenhouse: '',
+  cropId: '',
+  varietyId: '',
   plantingDate: '',
   cultivationArea: 0,
-  sourceGreenhouse: '',
   numberOfRows: 0,
   rowLength: 0,
   plantsPerMeter: 0,
@@ -32,13 +32,13 @@ function computeRowSpacing(data: BatchFormData): number {
 // Pull the editable planting fields off a batch.
 function batchToFormData(batch: BatchItem): BatchFormData {
   return {
-    species: batch.species ?? '',
-    variety: batch.variety ?? '',
+    sourceGreenhouse: batch.greenhouseId ?? '',
+    cropId: batch.cropId ?? '',
+    varietyId: batch.varietyId ?? '',
     plantingDate: batch.plantingDate
       ? new Date(batch.plantingDate).toISOString().split('T')[0]
       : '',
     cultivationArea: batch.cultivationArea ?? 0,
-    sourceGreenhouse: batch.greenhouseId ?? '',
     numberOfRows: batch.numberOfRows ?? 0,
     rowLength: batch.rowLength ?? 0,
     plantsPerMeter: batch.plantsPerMeter ?? 0,
@@ -50,13 +50,12 @@ function batchToFormData(batch: BatchItem): BatchFormData {
 
 function validateEditForm(data: BatchFormData): BatchFormErrors {
   const errors: BatchFormErrors = {};
-  if (!data.species) errors.species = 'Species is required';
-  if (!data.variety) errors.variety = 'Variety is required';
+  if (!data.sourceGreenhouse.trim())
+    errors.sourceGreenhouse = 'Greenhouse is required';
+  if (!data.cropId) errors.cropId = 'Crop is required';
   if (!data.plantingDate) errors.plantingDate = 'Planting date is required';
   if (!data.cultivationArea || data.cultivationArea <= 0)
     errors.cultivationArea = 'Valid cultivation area is required';
-  if (!data.sourceGreenhouse.trim())
-    errors.sourceGreenhouse = 'Greenhouse is required';
   if (!data.numberOfRows || data.numberOfRows <= 0)
     errors.numberOfRows = 'Number of rows must be greater than 0';
   if (!data.rowLength || data.rowLength <= 0)
@@ -103,8 +102,8 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
           variables: {
             id: batchId,
             input: {
-              species: formData.species,
-              variety: formData.variety,
+              cropId: formData.cropId,
+              varietyId: formData.varietyId || undefined,
               plantingDate: formData.plantingDate,
               cultivationArea: formData.cultivationArea,
               greenhouseId: formData.sourceGreenhouse.trim() || undefined,
@@ -114,7 +113,7 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               rowSpacing,
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
-              name: `${formData.species} - ${formData.variety}`,
+              // name/batchNumber are re-derived from crop/variety by the backend.
             },
           },
         });

@@ -23,19 +23,22 @@ export class CreateBatchInput {
   @IsUUID()
   greenhouseId?: string;
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  species?: string;
+  // Required FK into the global crops catalog. Must be a crop assigned to the
+  // batch's greenhouse (validated in the service).
+  @Field(() => ID)
+  @IsUUID()
+  cropId: string;
 
-  @Field({ nullable: true })
+  // Optional FK into the global varieties catalog. When given, must belong to
+  // the selected crop (validated in the service).
+  @Field(() => ID, { nullable: true })
   @IsOptional()
-  @IsString()
-  variety?: string;
+  @IsUUID()
+  varietyId?: string;
 
   @Field({
     nullable: true,
-    description: 'Defaults to "species - variety" if omitted',
+    description: 'Defaults to "crop - variety" if omitted',
   })
   @IsOptional()
   @IsString()

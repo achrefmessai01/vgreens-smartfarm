@@ -14,7 +14,10 @@ import { TenantsModule } from '../tenants/tenants.module';
 import { AuthGuard, ClerkAuthGuard } from '@common/guards';
 import { HarvestsModule } from '../harvest/harvests.module';
 import { BatchModule } from '../batch/batch.module';
+import { CropModule } from '../crop/crop.module';
+import { VarietyModule } from '../variety/variety.module';
 import { GreenhouseModule } from '../greenhouse/greenhouse.module';
+import { GreenhouseCropModule } from '../greenhouse-crop/greenhouse-crop.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FeaturesModule } from '../features/features.module';
 import { InfluxDBModule } from '../influxdb/influxdb.module';
@@ -49,6 +52,9 @@ import {
     FeaturesModule,
     AlertsModule,
     GreenhouseModule,
+    CropModule,
+    VarietyModule,
+    GreenhouseCropModule,
     BatchModule,
     HarvestsModule,
     InfluxDBModule,

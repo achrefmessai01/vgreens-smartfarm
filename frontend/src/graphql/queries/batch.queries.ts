@@ -6,8 +6,8 @@ const BATCH_FIELDS = gql`
     tenantId
     createdById
     greenhouseId
-    species
-    variety
+    cropId
+    varietyId
     name
     batchNumber
     status
@@ -22,6 +22,14 @@ const BATCH_FIELDS = gql`
     createdAt
     updatedAt
     greenhouse {
+      id
+      name
+    }
+    crop {
+      id
+      name
+    }
+    variety {
       id
       name
     }
