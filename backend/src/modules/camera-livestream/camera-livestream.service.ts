@@ -40,10 +40,17 @@ export class CameraLivestreamService {
     private readonly configService: ConfigService,
     private readonly featuresService: FeaturesService,
   ) {
-    const url = this.configService.get<string>('SUPABASE_URL');
-    const serviceRoleKey = this.configService.get<string>(
-      'SUPABASE_SERVICE_ROLE_KEY',
-    );
+    // Previews can be sourced from a dedicated Supabase project via the
+    // SUPABASE_LIVESTREAM_* overrides (e.g. point staging at the production
+    // snapshots) without affecting the rest of the app's storage, which keeps
+    // using the global SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY. When the
+    // overrides are absent (e.g. in production) behaviour is unchanged.
+    const url =
+      this.configService.get<string>('SUPABASE_LIVESTREAM_URL') ??
+      this.configService.get<string>('SUPABASE_URL');
+    const serviceRoleKey =
+      this.configService.get<string>('SUPABASE_LIVESTREAM_SERVICE_ROLE_KEY') ??
+      this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!url || !serviceRoleKey) {
       throw new Error(
