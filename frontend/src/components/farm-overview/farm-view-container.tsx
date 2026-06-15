@@ -64,6 +64,18 @@ export function FarmDataDisplay({
   }
 
   const dims = viewMode !== 'graph' ? greenhouseDimensions : null;
+  // Horizontal layout renders the greenhouse rotated 90°, so the on-screen
+  // axes swap: the length (y) runs left→right and the width (x) runs top→bottom.
+  const horizontalAxisDim = dims
+    ? dims.isHorizontal
+      ? dims.yDimension
+      : dims.xDimension
+    : null;
+  const verticalAxisDim = dims
+    ? dims.isHorizontal
+      ? dims.xDimension
+      : dims.yDimension
+    : null;
 
   return (
     <div
@@ -103,8 +115,8 @@ export function FarmDataDisplay({
           />
           {dims && (
             <div className="pointer-events-none absolute right-8 bottom-6 left-5 flex items-center justify-between text-[10px] text-white/50 tabular-nums sm:right-12 sm:bottom-12 sm:left-10 sm:text-xs">
-              <span>← {dims.xDimension} m →</span>
-              <span>↕ {dims.yDimension} m</span>
+              <span>← {horizontalAxisDim} m →</span>
+              <span>↕ {verticalAxisDim} m</span>
             </div>
           )}
         </div>
@@ -123,8 +135,8 @@ export function FarmDataDisplay({
           />
           {dims && (
             <div className="pointer-events-none absolute right-8 bottom-6 left-5 flex items-center justify-between text-[10px] text-white/50 tabular-nums sm:right-12 sm:bottom-12 sm:left-10 sm:text-xs">
-              <span>← {dims.xDimension} m →</span>
-              <span>↕ {dims.yDimension} m</span>
+              <span>← {horizontalAxisDim} m →</span>
+              <span>↕ {verticalAxisDim} m</span>
             </div>
           )}
         </div>
