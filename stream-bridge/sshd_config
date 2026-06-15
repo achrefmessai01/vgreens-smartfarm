@@ -1,0 +1,39 @@
+# Hardened sshd for the vGreens stream bridge.
+# The only thing this server permits is: user `tunnel`, pubkey auth,
+# one remote forward bound to port 8090. No shells, no exec, no local
+# forwards, no agent/X11.
+
+Port 2222
+AddressFamily any
+ListenAddress 0.0.0.0
+ListenAddress ::
+
+HostKey /etc/ssh/keys/ssh_host_ed25519_key
+
+Protocol 2
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+ChallengeResponseAuthentication no
+PubkeyAuthentication yes
+AuthorizedKeysFile /home/tunnel/.ssh/authorized_keys
+
+AllowUsers tunnel
+
+# Reverse tunnel only, restricted to the stream port
+AllowTcpForwarding remote
+GatewayPorts clientspecified
+PermitListen 8090
+PermitOpen none
+
+PermitTTY no
+X11Forwarding no
+AllowAgentForwarding no
+AllowStreamLocalForwarding no
+PermitTunnel no
+
+ClientAliveInterval 15
+ClientAliveCountMax 4
+LoginGraceTime 30
+MaxAuthTries 3
+MaxSessions 4
