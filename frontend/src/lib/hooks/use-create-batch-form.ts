@@ -2,21 +2,20 @@
 
 import * as React from 'react';
 import {
-  HarvestStatus,
-  HarvestsDocument,
-  useCreateHarvestMutation,
-  type CreateHarvestMutation,
+  BatchStatus,
+  useCreateBatchMutation,
+  type CreateBatchMutation,
 } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
-type CreatedHarvest = CreateHarvestMutation['createHarvest'];
+type CreatedBatch = CreateBatchMutation['createBatch'];
 
 const INITIAL_FORM_DATA: BatchFormData = {
-  species: '',
-  variety: '',
+  sourceGreenhouse: '',
+  cropId: '',
+  varietyId: '',
   plantingDate: new Date().toISOString().split('T')[0],
   cultivationArea: 0,
-  sourceGreenhouse: '',
   numberOfRows: 0,
   rowLength: 0,
   plantsPerMeter: 0,
@@ -33,13 +32,13 @@ function computeRowSpacing(data: BatchFormData): number {
 
 function validateBatchForm(data: BatchFormData): BatchFormErrors {
   const errors: BatchFormErrors = {};
-  if (!data.species) errors.species = 'Species is required';
-  if (!data.variety) errors.variety = 'Variety is required';
+  // sourceGreenhouse / cropId hold the selected entity ids; variety is optional.
+  if (!data.sourceGreenhouse.trim())
+    errors.sourceGreenhouse = 'Greenhouse is required';
+  if (!data.cropId) errors.cropId = 'Crop is required';
   if (!data.plantingDate) errors.plantingDate = 'Planting date is required';
   if (!data.cultivationArea || data.cultivationArea <= 0)
     errors.cultivationArea = 'Valid cultivation area is required';
-  if (!data.sourceGreenhouse.trim())
-    errors.sourceGreenhouse = 'Greenhouse is required';
   if (!data.numberOfRows || data.numberOfRows <= 0)
     errors.numberOfRows = 'Number of rows must be greater than 0';
   if (!data.rowLength || data.rowLength <= 0)
@@ -50,7 +49,7 @@ function validateBatchForm(data: BatchFormData): BatchFormErrors {
 }
 
 interface UseCreateBatchFormOptions {
-  onSuccess?: (harvest: CreatedHarvest) => void;
+  onSuccess?: (batch: CreatedBatch) => void;
 }
 
 export function useCreateBatchForm({
@@ -59,7 +58,7 @@ export function useCreateBatchForm({
   const [formData, setFormData] =
     React.useState<BatchFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = React.useState<BatchFormErrors>({});
-  const [createHarvest, { loading }] = useCreateHarvestMutation();
+  const [createBatch, { loading }] = useCreateBatchMutation();
 
   const reset = React.useCallback(() => {
     setFormData({
@@ -78,38 +77,33 @@ export function useCreateBatchForm({
 
       try {
         const rowSpacing = computeRowSpacing(formData);
-        const { data } = await createHarvest({
+        const { data } = await createBatch({
           variables: {
             input: {
-              species: formData.species,
-              variety: formData.variety,
+              cropId: formData.cropId,
+              varietyId: formData.varietyId || undefined,
               plantingDate: formData.plantingDate,
               cultivationArea: formData.cultivationArea,
-              greenhouse: formData.sourceGreenhouse.trim(),
+              greenhouseId: formData.sourceGreenhouse.trim() || undefined,
               numberOfRows: formData.numberOfRows,
               rowLength: formData.rowLength,
               plantsPerMeter: formData.plantsPerMeter,
               rowSpacing,
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
-              date: new Date().toISOString(),
-              status: HarvestStatus.Draft,
+              status: BatchStatus.Active,
             },
           },
-          // Re-fetch the harvest list after creating so the table reflects the
-          // new row immediately without a manual page refresh.
-          refetchQueries: [{ query: HarvestsDocument }],
-          awaitRefetchQueries: true,
         });
-        if (data?.createHarvest) {
+        if (data?.createBatch) {
           reset();
-          onSuccess?.(data.createHarvest);
+          onSuccess?.(data.createBatch);
         }
       } catch (err) {
         console.error('Failed to create batch:', err);
       }
     },
-    [formData, createHarvest, reset, onSuccess],
+    [formData, createBatch, reset, onSuccess],
   );
 
   return { formData, setFormData, errors, loading, reset, handleSubmit };

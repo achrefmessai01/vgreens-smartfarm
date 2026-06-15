@@ -1,4 +1,12 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ID,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { BadRequestException, UseGuards } from '@nestjs/common';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import { Roles, CurrentUser } from '@common/decorators';
@@ -9,6 +17,7 @@ import { SensorConfig } from './entities/sensor-config.entity';
 import { UpsertSensorConfigInput } from './dto';
 import { InfluxDBService } from '@modules/influxdb/influxdb.service';
 import { TenantsService } from '@modules/tenants/tenants.service';
+import { GreenhouseService } from '@modules/greenhouse/greenhouse.service';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @Resolver(() => SensorConfig)
@@ -17,6 +26,7 @@ export class SensorConfigResolver {
     private readonly sensorConfigService: SensorConfigService,
     private readonly influxDBService: InfluxDBService,
     private readonly tenantsService: TenantsService,
+    private readonly greenhouseService: GreenhouseService,
   ) {}
 
   @Query(() => [SensorConfig], { name: 'sensorConfigs' })
@@ -100,58 +110,45 @@ export class SensorConfigResolver {
       tenantId,
       input.device,
     );
-    const greenhouseName = (
-      input.greenhouse ?? existingConfig?.greenhouse
-    )?.trim();
-    if (!greenhouseName) return;
+    const greenhouseId = input.greenhouseId ?? existingConfig?.greenhouseId;
+    if (!greenhouseId) return;
 
-    const tenant = await this.tenantsService.findOne(tenantId);
-    const greenhouse = this.resolveGreenhouseConfig(tenant, greenhouseName);
+    const greenhouse = await this.greenhouseService.findOne(
+      greenhouseId,
+      tenantId,
+    );
 
-    // Greenhouse may not be in the tenant's farm layout yet — sensors can be
-    // tagged with legacy InfluxDB identifiers (e.g. "greenhouse_01") that don't
-    // map to a configured greenhouse. Skip bounds validation in that case
-    // rather than blocking the save.
+    // The sensor may not reference a configured greenhouse yet — skip bounds
+    // validation rather than blocking the save.
     if (!greenhouse) {
       return;
     }
 
-    if (input.xPosition != null && input.xPosition > greenhouse.xDimension) {
+    if (
+      input.xPosition != null &&
+      greenhouse.xDimension != null &&
+      input.xPosition > greenhouse.xDimension
+    ) {
       throw new BadRequestException(
-        `xPosition must be between 0 and ${greenhouse.xDimension} for greenhouse "${greenhouseName}"`,
+        `xPosition must be between 0 and ${greenhouse.xDimension} for greenhouse "${greenhouse.name}"`,
       );
     }
 
-    if (input.yPosition != null && input.yPosition > greenhouse.yDimension) {
+    if (
+      input.yPosition != null &&
+      greenhouse.yDimension != null &&
+      input.yPosition > greenhouse.yDimension
+    ) {
       throw new BadRequestException(
-        `yPosition must be between 0 and ${greenhouse.yDimension} for greenhouse "${greenhouseName}"`,
+        `yPosition must be between 0 and ${greenhouse.yDimension} for greenhouse "${greenhouse.name}"`,
       );
     }
   }
 
-  private resolveGreenhouseConfig(
-    tenant: Awaited<ReturnType<TenantsService['findOne']>>,
-    greenhouseName: string,
-  ) {
-    const exactMatch = tenant?.greenhouses?.find(
-      (candidate) => candidate.name === greenhouseName,
-    );
-    if (exactMatch) {
-      return exactMatch;
-    }
-
-    const indexedMatch = greenhouseName.match(
-      /(?:greenhouse|chamber)\D*(\d+)$/i,
-    );
-    if (!indexedMatch) {
-      return null;
-    }
-
-    const greenhouseIndex = Number.parseInt(indexedMatch[1], 10) - 1;
-    if (!Number.isInteger(greenhouseIndex) || greenhouseIndex < 0) {
-      return null;
-    }
-
-    return tenant?.greenhouses?.[greenhouseIndex] ?? null;
+  // Expose the linked greenhouse's name as `greenhouse` so existing name-based
+  // consumers (farm overview, sensor map, default positions) keep working.
+  @ResolveField(() => String, { name: 'greenhouse', nullable: true })
+  greenhouse(@Parent() config: SensorConfig): string | null {
+    return config.greenhouseRef?.name ?? null;
   }
 }

@@ -13,12 +13,15 @@ import {
   CameraLivestreamTenantConfig,
   SIGNED_URL_TTL_SECONDS,
   SNAPSHOT_FILENAME,
+  STREAM_PLAYLIST_FILENAME,
+  STREAM_TOKEN_TTL_SECONDS,
   canAccessCameraLivestream,
   formatCameraName,
   getLocalCameraLivestreamConfig,
   parseCameraLivestreamConfig,
 } from './camera-livestream.config';
-import { CameraLivestreamFeed } from './objects';
+import { createStreamToken } from './camera-livestream-token';
+import { CameraLivestreamFeed, CameraLivestreamStream } from './objects';
 
 interface SupabaseFileObject {
   name: string;
@@ -62,7 +65,9 @@ export class CameraLivestreamService {
     });
   }
 
-  async listCameras(currentUser: User): Promise<CameraLivestreamFeed[]> {
+  private async resolveTenantContext(
+    currentUser: User,
+  ): Promise<CameraLivestreamTenantConfig | null> {
     const tenantFeatures = currentUser.tenantId
       ? await this.featuresService.getTenantFeatures(currentUser.tenantId)
       : [];
@@ -74,7 +79,15 @@ export class CameraLivestreamService {
 
     const localConfig = getLocalCameraLivestreamConfig(currentUser.tenant);
     const featureConfig = parseCameraLivestreamConfig(tenantFeature?.config);
-    const livestreamConfig = featureConfig ?? localConfig;
+    // DB feature config wins, but tenant feature configs created before the
+    // streamFolder field existed inherit the in-code default so live streams
+    // keep working without a config migration.
+    const livestreamConfig = featureConfig
+      ? {
+          ...featureConfig,
+          streamFolder: featureConfig.streamFolder ?? localConfig?.streamFolder,
+        }
+      : localConfig;
     const hasTenantFeature = Boolean(
       tenantFeature?.enabled && tenantFeature.feature?.isActive,
     );
@@ -86,8 +99,14 @@ export class CameraLivestreamService {
         hasTenantConfig: Boolean(livestreamConfig),
       })
     ) {
-      return [];
+      return null;
     }
+
+    return livestreamConfig;
+  }
+
+  async listCameras(currentUser: User): Promise<CameraLivestreamFeed[]> {
+    const livestreamConfig = await this.resolveTenantContext(currentUser);
 
     if (!livestreamConfig) {
       return [];
@@ -98,6 +117,58 @@ export class CameraLivestreamService {
         this.resolveCamera(livestreamConfig, camera),
       ),
     );
+  }
+
+  async createStream(
+    currentUser: User,
+    cameraId: string,
+  ): Promise<CameraLivestreamStream> {
+    const unavailable: CameraLivestreamStream = {
+      cameraId,
+      url: null,
+      expiresAt: null,
+      available: false,
+      error: 'Livestream currently unavailable',
+    };
+
+    const livestreamConfig = await this.resolveTenantContext(currentUser);
+    if (!livestreamConfig) {
+      return unavailable;
+    }
+
+    const camera = livestreamConfig.cameras.find(
+      (candidate) => candidate.id === cameraId,
+    );
+    if (!camera || !livestreamConfig.streamFolder) {
+      return unavailable;
+    }
+
+    const secret = this.configService.get<string>('LIVESTREAM_STREAM_SECRET');
+    if (!secret) {
+      this.logger.warn(
+        'LIVESTREAM_STREAM_SECRET is not configured; live streams are disabled',
+      );
+      return unavailable;
+    }
+
+    const expiresAtSeconds =
+      Math.floor(Date.now() / 1000) + STREAM_TOKEN_TTL_SECONDS;
+    const token = createStreamToken(
+      {
+        f: livestreamConfig.streamFolder,
+        c: camera.id,
+        e: expiresAtSeconds,
+      },
+      secret,
+    );
+
+    return {
+      cameraId: camera.id,
+      url: `/livestream/${encodeURIComponent(camera.id)}/${STREAM_PLAYLIST_FILENAME}?token=${encodeURIComponent(token)}`,
+      expiresAt: new Date(expiresAtSeconds * 1000),
+      available: true,
+      error: null,
+    };
   }
 
   private async resolveCamera(

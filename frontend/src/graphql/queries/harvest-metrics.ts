@@ -94,17 +94,31 @@ export const GET_HARVEST_SUMMARY = gql`
     harvests(filter: $filter) {
       id
       date
-      classA
-      classB
-      classC
-      waste
-      avgBrix
-      species
-      variety
-      batch
-      greenhouse
-      status
       createdAt
+      batch {
+        id
+        name
+        crop {
+          id
+          name
+        }
+        variety {
+          id
+          name
+        }
+        status
+        greenhouse {
+          id
+          name
+        }
+      }
+      totals {
+        classA
+        classB
+        classC
+        waste
+        avgBrix
+      }
     }
   }
 `;

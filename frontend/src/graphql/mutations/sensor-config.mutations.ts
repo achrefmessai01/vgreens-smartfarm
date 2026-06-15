@@ -8,6 +8,7 @@ export const UPSERT_SENSOR_CONFIG_MUTATION = gql`
       device
       xPosition
       yPosition
+      greenhouseId
       greenhouse
       city
       hiddenInFarmOverview

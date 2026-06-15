@@ -11,10 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  DoorPosition as DoorPositionEnum,
-  type GreenhouseInput,
-} from '@/generated/graphql';
+import { DoorPosition as DoorPositionEnum } from '@/generated/graphql';
+import type { GreenhouseRowData } from './use-farm-layout-config';
 
 const DOOR_POSITION_OPTIONS = Object.entries(DoorPositionEnum).map(
   ([key, value]) => ({
@@ -24,7 +22,7 @@ const DOOR_POSITION_OPTIONS = Object.entries(DoorPositionEnum).map(
 );
 
 interface GreenhouseRowProps {
-  row: GreenhouseInput;
+  row: GreenhouseRowData;
   index: number;
   disabled: boolean;
   greenhouseLabel: string;
@@ -39,7 +37,7 @@ interface GreenhouseRowProps {
   yPlaceholder: string;
   doorPositionPlaceholder: string;
   bayCountPlaceholder: string;
-  onChange: (index: number, patch: Partial<GreenhouseInput>) => void;
+  onChange: (index: number, patch: Partial<GreenhouseRowData>) => void;
   onRemove: (index: number) => void;
 }
 
