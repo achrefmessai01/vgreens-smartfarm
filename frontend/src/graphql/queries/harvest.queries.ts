@@ -16,8 +16,16 @@ const HARVEST_FIELDS = gql`
     batch {
       id
       name
-      species
-      variety
+      cropId
+      varietyId
+      crop {
+        id
+        name
+      }
+      variety {
+        id
+        name
+      }
       status
       batchNumber
       greenhouseId

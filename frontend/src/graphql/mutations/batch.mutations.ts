@@ -5,8 +5,8 @@ const BATCH_MUTATION_FIELDS = gql`
     id
     tenantId
     greenhouseId
-    species
-    variety
+    cropId
+    varietyId
     name
     batchNumber
     status
@@ -19,6 +19,14 @@ const BATCH_MUTATION_FIELDS = gql`
     cultivationArea
     totalPlants
     greenhouse {
+      id
+      name
+    }
+    crop {
+      id
+      name
+    }
+    variety {
       id
       name
     }

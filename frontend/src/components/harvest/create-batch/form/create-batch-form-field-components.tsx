@@ -2,9 +2,8 @@
 
 import * as React from 'react';
 import { useI18n } from '@/i18n';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useGreenhousesQuery } from '@/generated/graphql';
+import { useGreenhousesQuery, useCropsQuery } from '@/generated/graphql';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
@@ -45,7 +44,14 @@ export function GreenhouseField({
         id="sourceGreenhouse"
         value={formData.sourceGreenhouse}
         onChange={(e) =>
-          setFormData((prev) => ({ ...prev, sourceGreenhouse: e.target.value }))
+          // Changing the greenhouse invalidates the crop (and therefore the
+          // variety) chosen below it — reset both.
+          setFormData((prev) => ({
+            ...prev,
+            sourceGreenhouse: e.target.value,
+            cropId: '',
+            varietyId: '',
+          }))
         }
         disabled={disabled || loading}
         className={`border-input bg-background ring-offset-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -68,7 +74,10 @@ export function GreenhouseField({
   );
 }
 
-export function SpeciesField({
+// Crop selector. Only the crops assigned to the chosen greenhouse (via
+// greenhouse_crops) are offered, so the field is disabled until a greenhouse is
+// picked. Changing the crop resets the variety chosen below it.
+export function CropField({
   formData,
   setFormData,
   errors,
@@ -76,25 +85,46 @@ export function SpeciesField({
 }: FormFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  const greenhouseId = formData.sourceGreenhouse;
+  const { data, loading } = useCropsQuery({
+    variables: { greenhouseId: greenhouseId || undefined },
+    skip: !greenhouseId,
+  });
+  const crops = data?.crops ?? [];
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="species" className="text-sm font-medium">
+      <Label htmlFor="cropId" className="text-sm font-medium">
         {h?.crop ?? 'Crop'} <span className="text-destructive">*</span>
       </Label>
-      <Input
-        id="species"
-        type="text"
-        placeholder={h?.enterCrop ?? 'Enter crop...'}
-        value={formData.species}
+      <select
+        id="cropId"
+        value={formData.cropId}
         onChange={(e) =>
-          setFormData((prev) => ({ ...prev, species: e.target.value }))
+          setFormData((prev) => ({
+            ...prev,
+            cropId: e.target.value,
+            varietyId: '',
+          }))
         }
-        disabled={disabled}
-        className={`h-10 ${errors.species ? 'border-destructive' : ''}`}
-      />
-      {errors.species && (
-        <p className="text-destructive text-sm">{errors.species}</p>
+        disabled={disabled || !greenhouseId || loading}
+        className={`border-input bg-background ring-offset-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+          errors.cropId ? 'border-destructive' : ''
+        }`}
+      >
+        <option value="">
+          {greenhouseId
+            ? (h?.enterCrop ?? 'Select crop...')
+            : (h?.selectGreenhouseFirst ?? 'Select a greenhouse first')}
+        </option>
+        {crops.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+      {errors.cropId && (
+        <p className="text-destructive text-sm">{errors.cropId}</p>
       )}
     </div>
   );

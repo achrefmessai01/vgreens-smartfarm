@@ -11,11 +11,11 @@ import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 type CreatedBatch = CreateBatchMutation['createBatch'];
 
 const INITIAL_FORM_DATA: BatchFormData = {
-  species: '',
-  variety: '',
+  sourceGreenhouse: '',
+  cropId: '',
+  varietyId: '',
   plantingDate: new Date().toISOString().split('T')[0],
   cultivationArea: 0,
-  sourceGreenhouse: '',
   numberOfRows: 0,
   rowLength: 0,
   plantsPerMeter: 0,
@@ -32,14 +32,13 @@ function computeRowSpacing(data: BatchFormData): number {
 
 function validateBatchForm(data: BatchFormData): BatchFormErrors {
   const errors: BatchFormErrors = {};
-  if (!data.species) errors.species = 'Species is required';
-  if (!data.variety) errors.variety = 'Variety is required';
+  // sourceGreenhouse / cropId hold the selected entity ids; variety is optional.
+  if (!data.sourceGreenhouse.trim())
+    errors.sourceGreenhouse = 'Greenhouse is required';
+  if (!data.cropId) errors.cropId = 'Crop is required';
   if (!data.plantingDate) errors.plantingDate = 'Planting date is required';
   if (!data.cultivationArea || data.cultivationArea <= 0)
     errors.cultivationArea = 'Valid cultivation area is required';
-  // sourceGreenhouse now holds the selected greenhouse id.
-  if (!data.sourceGreenhouse.trim())
-    errors.sourceGreenhouse = 'Greenhouse is required';
   if (!data.numberOfRows || data.numberOfRows <= 0)
     errors.numberOfRows = 'Number of rows must be greater than 0';
   if (!data.rowLength || data.rowLength <= 0)
@@ -81,8 +80,8 @@ export function useCreateBatchForm({
         const { data } = await createBatch({
           variables: {
             input: {
-              species: formData.species,
-              variety: formData.variety,
+              cropId: formData.cropId,
+              varietyId: formData.varietyId || undefined,
               plantingDate: formData.plantingDate,
               cultivationArea: formData.cultivationArea,
               greenhouseId: formData.sourceGreenhouse.trim() || undefined,

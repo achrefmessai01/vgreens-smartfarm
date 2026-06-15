@@ -98,8 +98,14 @@ export const GET_HARVEST_SUMMARY = gql`
       batch {
         id
         name
-        species
-        variety
+        crop {
+          id
+          name
+        }
+        variety {
+          id
+          name
+        }
         status
         greenhouse {
           id

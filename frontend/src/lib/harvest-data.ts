@@ -93,7 +93,11 @@ export function getAllHarvests(): HarvestRecord[] {
 
 export function addNewHarvest(batchData: BatchFormData): HarvestRecord {
   const newId = (allHarvestData.length + 1).toString();
-  const batchName = `${batchData.species} - ${batchData.variety}`;
+  // crop/variety are FK ids on the form now; the human-readable name is built
+  // server-side, so this mock helper just joins the ids.
+  const batchName = [batchData.cropId, batchData.varietyId]
+    .filter(Boolean)
+    .join(' - ');
 
   // Generate realistic harvest data based on batch
   const classA = Math.round((8 + Math.random() * 8) * 10) / 10; // 8-16 kg

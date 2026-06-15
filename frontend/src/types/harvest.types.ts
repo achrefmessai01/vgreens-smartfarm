@@ -67,8 +67,12 @@ export interface HarvestTotalsLike {
 export interface BatchLike {
   id: string;
   name?: string | null;
-  species?: string | null;
-  variety?: string | null;
+  cropId?: string | null;
+  varietyId?: string | null;
+  // Crop is required on a batch; variety is optional. Both are read from the
+  // global catalog via the FK relations.
+  crop?: { id: string; name: string } | null;
+  variety?: { id: string; name: string } | null;
   status: BatchStatus;
   batchNumber?: string | null;
   greenhouseId?: string | null;
