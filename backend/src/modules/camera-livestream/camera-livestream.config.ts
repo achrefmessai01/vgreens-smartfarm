@@ -31,9 +31,13 @@ interface LocalTenantConfig extends CameraLivestreamTenantConfig {
 
 const FRUTANIA_CAMERA_IDS = ['Cam01_', 'Cam02_', 'Cam03_', 'Cam04_', 'Cam05_'];
 
+// Matched by the tenant's stable id — `name` and `companyName` can change, the
+// id cannot (per Ceng). This is the Frutania/Agrania tenant. Tenant ids differ
+// per database, so add each environment's id to this list when enabling the
+// feature there. Storage folders below stay 'frutania*' (unchanged by rename).
 const LOCAL_CAMERA_LIVESTREAM_TENANT_CONFIGS: LocalTenantConfig[] = [
   {
-    tenantIdentifiers: ['frutania'],
+    tenantIdentifiers: ['da6bd9d5-bce6-4b7f-bc81-6e2f2c9b99c2'],
     folder: 'frutania-livestream',
     streamFolder: 'frutania',
     cameras: FRUTANIA_CAMERA_IDS.map((id) => ({
