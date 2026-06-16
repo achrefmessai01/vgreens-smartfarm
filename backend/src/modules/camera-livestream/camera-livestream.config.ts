@@ -33,7 +33,12 @@ const FRUTANIA_CAMERA_IDS = ['Cam01_', 'Cam02_', 'Cam03_', 'Cam04_', 'Cam05_'];
 
 const LOCAL_CAMERA_LIVESTREAM_TENANT_CONFIGS: LocalTenantConfig[] = [
   {
-    tenantIdentifiers: ['frutania'],
+    // Matched against the tenant's normalized name/companyName/influxBucketName/id
+    // (exact match after lowercasing + collapsing non-alphanumerics to spaces).
+    // We match on companyName "Frutania GmbH" (-> 'frutania gmbh'), which was NOT
+    // changed by the Frutania -> Agrania rename, so it stays stable across the
+    // rename and across environments. Storage folders below stay 'frutania*'.
+    tenantIdentifiers: ['Frutania GmbH'],
     folder: 'frutania-livestream',
     streamFolder: 'frutania',
     cameras: FRUTANIA_CAMERA_IDS.map((id) => ({
