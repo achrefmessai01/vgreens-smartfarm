@@ -15,6 +15,7 @@ interface HarvestTableProps {
   harvests: HarvestItem[];
   onDelete?: (harvest: HarvestItem) => void;
   onSidebarEdit?: (harvest: HarvestItem) => void;
+  onSidebarView?: (harvest: HarvestItem) => void;
   onLogEntry?: (batch: BatchItem) => void;
   onViewBatch?: (batch: BatchItem) => void;
   onEditBatch?: (batch: BatchItem) => void;
@@ -32,6 +33,7 @@ export function HarvestTable({
   harvests,
   onDelete,
   onSidebarEdit,
+  onSidebarView,
   onLogEntry,
   onViewBatch,
   onEditBatch,
@@ -76,6 +78,7 @@ export function HarvestTable({
           onToggleCollapse={onToggleCollapse}
           onDelete={onDelete}
           onSidebarEdit={onSidebarEdit}
+          onSidebarView={onSidebarView}
           onLogEntry={onLogEntry}
           onViewBatch={onViewBatch}
           onEditBatch={onEditBatch}

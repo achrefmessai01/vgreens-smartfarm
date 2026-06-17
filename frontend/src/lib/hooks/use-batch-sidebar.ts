@@ -15,7 +15,7 @@ import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
 import { extractStoragePathFromUrl } from '@/lib/harvest-utils';
 import * as React from 'react';
 
-export type SidebarMode = 'create' | 'edit';
+export type SidebarMode = 'create' | 'edit' | 'view';
 
 interface UseBatchSidebarOptions {
   // Batch the harvest belongs to (used when creating a new harvest event).
@@ -63,8 +63,10 @@ export function useBatchSidebar({
 
   React.useEffect(() => {
     setLocalData(batchData);
+    // Both edit and view operate on an existing harvest, so they show its
+    // stored date; only a fresh create defaults to today.
     setHarvestDate(
-      mode === 'edit' ? toIsoDateInput(initialDate) : todayIsoDate(),
+      mode === 'create' ? todayIsoDate() : toIsoDateInput(initialDate),
     );
   }, [batchData, mode, initialDate]);
 

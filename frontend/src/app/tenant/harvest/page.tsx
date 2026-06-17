@@ -57,6 +57,7 @@ export default function HarvestPage() {
     handleBatchCreated,
     handleSidebarCompleted,
     handleSidebarEdit,
+    handleSidebarView,
     handleLogEntry,
     handleBatchView,
     handleBatchEdit,
@@ -160,6 +161,7 @@ export default function HarvestPage() {
                 harvests={harvests ?? []}
                 onDelete={handleDeleteRequest}
                 onSidebarEdit={handleSidebarEdit}
+                onSidebarView={handleSidebarView}
                 onLogEntry={handleLogEntry}
                 onViewBatch={handleBatchView}
                 onEditBatch={handleBatchEdit}

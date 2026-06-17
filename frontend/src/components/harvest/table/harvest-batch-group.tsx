@@ -40,6 +40,7 @@ interface HarvestBatchGroupProps {
   onToggleCollapse?: (batchId: string, collapsed: boolean) => void;
   onDelete?: (harvest: HarvestItem) => void;
   onSidebarEdit?: (harvest: HarvestItem) => void;
+  onSidebarView?: (harvest: HarvestItem) => void;
   onLogEntry?: (batch: BatchItem) => void;
   onViewBatch?: (batch: BatchItem) => void;
   onEditBatch?: (batch: BatchItem) => void;
@@ -52,6 +53,7 @@ export function HarvestBatchGroup({
   onToggleCollapse,
   onDelete,
   onSidebarEdit,
+  onSidebarView,
   onLogEntry,
   onViewBatch,
   onEditBatch,
@@ -367,10 +369,19 @@ export function HarvestBatchGroup({
                                 variant="ghost"
                                 size="icon"
                                 className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-200"
-                                onClick={() => onSidebarEdit?.(entry)}
+                                onClick={() => onSidebarView?.(entry)}
                                 aria-label={h?.viewDetails ?? 'View Details'}
                               >
                                 <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-200"
+                                onClick={() => onSidebarEdit?.(entry)}
+                                aria-label={h?.editHarvest ?? 'Edit Harvest'}
+                              >
+                                <Pencil className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -463,16 +474,26 @@ export function HarvestBatchGroup({
                           </span>
                         </div>
 
-                        <div className="mt-2.5 grid grid-cols-2 gap-2">
+                        <div className="mt-2.5 grid grid-cols-3 gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="group h-9 border-[#016f7c]/30 text-[#016f7c] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#016f7c] hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:border-teal-300/40 dark:text-teal-200 dark:hover:border-teal-200 dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-100"
+                            onClick={() => onSidebarView?.(entry)}
+                            aria-label={h?.viewDetails ?? 'View Details'}
+                          >
+                            <Eye className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                            {h?.viewDetails ?? 'View Details'}
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             className="group h-9 border-[#016f7c]/30 text-[#016f7c] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#016f7c] hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:border-teal-300/40 dark:text-teal-200 dark:hover:border-teal-200 dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-100"
                             onClick={() => onSidebarEdit?.(entry)}
-                            aria-label={h?.viewDetails ?? 'View Details'}
+                            aria-label={h?.editHarvest ?? 'Edit Harvest'}
                           >
-                            <Eye className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                            {h?.viewDetails ?? 'View Details'}
+                            <Pencil className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                            {h?.editHarvest ?? 'Edit'}
                           </Button>
                           <Button
                             variant="destructive"
