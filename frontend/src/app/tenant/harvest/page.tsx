@@ -4,12 +4,14 @@ import { FeatureGuard } from '@/components/features/feature-guard';
 import {
   BatchSidebar,
   CreateBatchDialog,
+  DateRangeFilter,
   DeleteHarvestDialog,
   EditHarvestDialog,
   HarvestDashboard,
   HarvestExportDialog,
   HarvestPageHeader,
   HarvestTable,
+  SortControls,
 } from '@/components/harvest';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n';
@@ -40,6 +42,10 @@ export default function HarvestPage() {
     batches,
     summary,
     loading,
+    view,
+    isFiltered,
+    handleSortToggle,
+    handleDateRangeChange,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,
@@ -136,6 +142,13 @@ export default function HarvestPage() {
                 onCreateBatch={handleCreateBatch}
                 onExportClick={() => setExportDialogOpen(true)}
               />
+              <div className="bg-card flex flex-col gap-4 rounded-xl border p-4 md:flex-row md:flex-wrap md:items-end md:justify-between">
+                <SortControls value={view.sort} onToggle={handleSortToggle} />
+                <DateRangeFilter
+                  value={view.dateRange}
+                  onChange={handleDateRangeChange}
+                />
+              </div>
               <HarvestTable
                 batches={batches ?? []}
                 harvests={harvests ?? []}
@@ -146,6 +159,7 @@ export default function HarvestPage() {
                 onEditBatch={handleBatchEdit}
                 onDeleteBatch={handleBatchDeleteRequest}
                 isLoading={loading}
+                isFiltered={isFiltered}
               />
             </div>
           </TabsContent>

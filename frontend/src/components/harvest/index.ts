@@ -8,3 +8,5 @@ export { EditHarvestDialog } from './dialogs/edit-harvest-dialog';
 export { DeleteHarvestDialog } from './dialogs/delete-harvest-dialog';
 export { CreateBatchDialog } from './create-batch/create-batch-dialog';
 export { HarvestExportDialog } from './harvest-export-dialog';
+export { SortControls } from './sort-controls';
+export { DateRangeFilter } from './date-range-filter';

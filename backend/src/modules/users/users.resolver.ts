@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { CurrentUser } from '@common/decorators';
 import { CreateUserInput, UpdateUserInput } from './dto';
+import { HarvestViewSettingsInput } from './dto/user-settings';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 
 @Resolver(() => User)
@@ -93,6 +94,23 @@ export class UsersResolver {
       throw new BadRequestException(`Invalid custom range: ${value}`);
     }
     throw new BadRequestException(`Unsupported time-range value: ${value}`);
+  }
+
+  /**
+   * Persist the signed-in user's harvest-entry view preferences (sort +
+   * plantingDate range). Field/direction enums and date-string formats are
+   * validated by the InputType; the from<=to relationship and the merge into
+   * the existing userSettings blob are handled in the service layer.
+   */
+  @Mutation(() => User)
+  async updateMyHarvestViewSettings(
+    @Args('input') input: HarvestViewSettingsInput,
+    @CurrentUser() user: User,
+  ): Promise<User> {
+    if (!user) {
+      throw new BadRequestException('Not authenticated');
+    }
+    return this.usersService.updateHarvestViewSettings(user.id, input);
   }
 
   @Query(() => [User])

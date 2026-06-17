@@ -18,6 +18,17 @@ import {
   type BatchesQuery,
   type CreateBatchMutation,
 } from '@/generated/graphql';
+import { useHarvestViewSettings } from '@/lib/hooks/use-harvest-view-settings';
+import {
+  cycleSort,
+  setDateRange,
+  isValidRange,
+  toBatchesVariables,
+  DEFAULT_HARVEST_VIEW,
+  type HarvestViewState,
+  type HarvestSortField,
+  type HarvestDateRange,
+} from '@/components/harvest/harvest-view-settings';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
 export type BatchItem = BatchesQuery['batches'][number];
@@ -34,6 +45,55 @@ interface PendingBatch {
 }
 
 export function useHarvestPage() {
+  // Combined sort + plantingDate-range view state, owned here and passed down to
+  // the presentational <SortControls> / <DateRangeFilter>. Hydrated once from
+  // the user's persisted preference; valid changes are persisted back.
+  const {
+    persistedValue,
+    persist: persistView,
+    loading: viewLoading,
+  } = useHarvestViewSettings();
+  const [view, setView] =
+    React.useState<HarvestViewState>(DEFAULT_HARVEST_VIEW);
+  const hydratedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!viewLoading && !hydratedRef.current) {
+      setView(persistedValue);
+      hydratedRef.current = true;
+    }
+  }, [viewLoading, persistedValue]);
+
+  const handleSortToggle = React.useCallback(
+    (field: HarvestSortField) => {
+      setView((current) => {
+        const next = cycleSort(current, field);
+        persistView(next);
+        return next;
+      });
+    },
+    [persistView],
+  );
+
+  const handleDateRangeChange = React.useCallback(
+    (patch: Partial<HarvestDateRange>) => {
+      setView((current) => {
+        const next = setDateRange(current, patch);
+        // Only persist coherent ranges; the UI may briefly hold from > to.
+        if (isValidRange(next.dateRange)) persistView(next);
+        return next;
+      });
+    },
+    [persistView],
+  );
+
+  // Server-side sort + filter: the batches query carries the order + range so
+  // results stay correct regardless of how many batches exist.
+  const batchesVariables = React.useMemo(
+    () => toBatchesVariables(view),
+    [view],
+  );
+  const isFiltered = Boolean(batchesVariables.filter);
+
   const {
     data: harvestsData,
     loading: harvestsLoading,
@@ -45,7 +105,10 @@ export function useHarvestPage() {
     data: batchesData,
     loading: batchesLoading,
     refetch: refetchBatches,
-  } = useBatchesQuery({ fetchPolicy: 'cache-and-network' });
+  } = useBatchesQuery({
+    fetchPolicy: 'cache-and-network',
+    variables: batchesVariables,
+  });
 
   const harvests = harvestsData?.harvests;
   const batches = React.useMemo(
@@ -202,13 +265,24 @@ export function useHarvestPage() {
       return;
     }
     if (deleteTarget) handleDelete(deleteTarget.id);
-  }, [isBatchDelete, deleteBatchTargetIds, deleteTarget, handleDelete, refetchAll]);
+  }, [
+    isBatchDelete,
+    deleteBatchTargetIds,
+    deleteTarget,
+    handleDelete,
+    refetchAll,
+  ]);
 
   return {
     harvests,
     batches,
     summary,
     loading,
+    // Sort + filter view state for the presentational controls.
+    view,
+    isFiltered,
+    handleSortToggle,
+    handleDateRangeChange,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,

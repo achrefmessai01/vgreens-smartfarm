@@ -7,7 +7,12 @@ import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
 import { User } from '@modules/users/entities/user.entity';
 import { Batch } from './entities/batch.entity';
 import { BatchService } from './batch.service';
-import { CreateBatchInput, UpdateBatchInput } from './dto';
+import {
+  CreateBatchInput,
+  UpdateBatchInput,
+  BatchFilterInput,
+  BatchSortInput,
+} from './dto';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @UseInterceptors(UserInterceptor, TenantInterceptor)
@@ -25,8 +30,18 @@ export class BatchResolver {
 
   @Query(() => [Batch], { name: 'batches' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
-  async findAll(@CurrentUser() currentUser: User): Promise<Batch[]> {
-    return this.batchService.findAllScoped(this.resolveTenantId(currentUser));
+  async findAll(
+    @CurrentUser() currentUser: User,
+    @Args('filter', { type: () => BatchFilterInput, nullable: true })
+    filter?: BatchFilterInput | null,
+    @Args('sort', { type: () => BatchSortInput, nullable: true })
+    sort?: BatchSortInput | null,
+  ): Promise<Batch[]> {
+    return this.batchService.findAllScoped(
+      this.resolveTenantId(currentUser),
+      filter,
+      sort,
+    );
   }
 
   @Query(() => Batch, { name: 'batch', nullable: true })

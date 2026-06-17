@@ -118,6 +118,20 @@ export type Batch = {
   varietyId?: Maybe<Scalars['ID']['output']>;
 };
 
+export type BatchFilterInput = {
+  /** Batches planted on or after this date (inclusive, YYYY-MM-DD) */
+  plantingDateFrom?: InputMaybe<Scalars['String']['input']>;
+  /** Batches planted on or before this date (inclusive, YYYY-MM-DD) */
+  plantingDateTo?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type BatchSortInput = {
+  /** Sort direction (default DESC) */
+  direction?: InputMaybe<OrderDirection>;
+  /** Field to sort by (default PLANTING_DATE) */
+  field?: InputMaybe<HarvestSortField>;
+};
+
 /** Batch lifecycle status */
 export enum BatchStatus {
   Active = 'ACTIVE',
@@ -647,6 +661,13 @@ export enum HarvestQualityClass {
   C = 'C'
 }
 
+/** Sortable fields for the batch-grouped harvest list */
+export enum HarvestSortField {
+  Crop = 'CROP',
+  Greenhouse = 'GREENHOUSE',
+  PlantingDate = 'PLANTING_DATE'
+}
+
 export type HarvestTotals = {
   __typename?: 'HarvestTotals';
   /** Unweighted MEAN of per-entry avgBrix. Null when there are no entries. */
@@ -669,6 +690,39 @@ export type HarvestTotals = {
   yieldPerMeter?: Maybe<Scalars['Float']['output']>;
   /** totalFruitWeight / batch.totalPlants. Null when totalPlants is 0/missing. */
   yieldPerPlant?: Maybe<Scalars['Float']['output']>;
+};
+
+export type HarvestViewDateRange = {
+  __typename?: 'HarvestViewDateRange';
+  from?: Maybe<Scalars['String']['output']>;
+  to?: Maybe<Scalars['String']['output']>;
+};
+
+export type HarvestViewDateRangeInput = {
+  from?: InputMaybe<Scalars['String']['input']>;
+  to?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type HarvestViewSettings = {
+  __typename?: 'HarvestViewSettings';
+  dateRange?: Maybe<HarvestViewDateRange>;
+  sort?: Maybe<HarvestViewSort>;
+};
+
+export type HarvestViewSettingsInput = {
+  dateRange?: InputMaybe<HarvestViewDateRangeInput>;
+  sort?: InputMaybe<HarvestViewSortInput>;
+};
+
+export type HarvestViewSort = {
+  __typename?: 'HarvestViewSort';
+  direction: OrderDirection;
+  field: HarvestSortField;
+};
+
+export type HarvestViewSortInput = {
+  direction: OrderDirection;
+  field: HarvestSortField;
 };
 
 export type ImageFile = {
@@ -751,6 +805,7 @@ export type Mutation = {
   updateFeature: Feature;
   updateGreenhouse: Greenhouse;
   updateHarvest: Harvest;
+  updateMyHarvestViewSettings: User;
   updateTenant: Tenant;
   updateUser: User;
   /** Upload an image file directly via GraphQL and store it in Supabase Storage. */
@@ -975,6 +1030,11 @@ export type MutationUpdateHarvestArgs = {
 };
 
 
+export type MutationUpdateMyHarvestViewSettingsArgs = {
+  input: HarvestViewSettingsInput;
+};
+
+
 export type MutationUpdateTenantArgs = {
   id: Scalars['ID']['input'];
   input: UpdateTenantInput;
@@ -1091,6 +1151,12 @@ export type QueryAlertsArgs = {
 
 export type QueryBatchArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryBatchesArgs = {
+  filter?: InputMaybe<BatchFilterInput>;
+  sort?: InputMaybe<BatchSortInput>;
 };
 
 
@@ -1517,6 +1583,7 @@ export type User = {
   tenant?: Maybe<Tenant>;
   tenantId?: Maybe<Scalars['ID']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+  userSettings?: Maybe<UserSettings>;
 };
 
 /** User role types */
@@ -1525,6 +1592,11 @@ export enum UserRole {
   TenantUser = 'TENANT_USER',
   VgreensAdmin = 'VGREENS_ADMIN'
 }
+
+export type UserSettings = {
+  __typename?: 'UserSettings';
+  harvestView?: Maybe<HarvestViewSettings>;
+};
 
 /** User invitation and activation status */
 export enum UserStatus {
@@ -1847,6 +1919,13 @@ export type SetMyFarmOverviewTimeRangeMutationVariables = Exact<{
 
 export type SetMyFarmOverviewTimeRangeMutation = { __typename?: 'Mutation', setMyFarmOverviewTimeRange: { __typename?: 'User', id: string, farmOverviewTimeRange?: string | null } };
 
+export type UpdateMyHarvestViewSettingsMutationVariables = Exact<{
+  input: HarvestViewSettingsInput;
+}>;
+
+
+export type UpdateMyHarvestViewSettingsMutation = { __typename?: 'Mutation', updateMyHarvestViewSettings: { __typename?: 'User', id: string, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null, dateRange?: { __typename?: 'HarvestViewDateRange', from?: string | null, to?: string | null } | null } | null } | null } };
+
 export type GetRecentSystemErrorsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Float']['input']>;
   severity?: InputMaybe<ReportSeverity>;
@@ -1931,7 +2010,10 @@ export type DeleteAlertMutation = { __typename?: 'Mutation', deleteAlert: boolea
 
 export type BatchFieldsFragment = { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null };
 
-export type BatchesQueryVariables = Exact<{ [key: string]: never; }>;
+export type BatchesQueryVariables = Exact<{
+  filter?: InputMaybe<BatchFilterInput>;
+  sort?: InputMaybe<BatchSortInput>;
+}>;
 
 
 export type BatchesQuery = { __typename?: 'Query', batches: Array<{ __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null }> };
@@ -2217,7 +2299,7 @@ export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null }> | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null, dateRange?: { __typename?: 'HarvestViewDateRange', from?: string | null, to?: string | null } | null } | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3875,6 +3957,51 @@ export function useSetMyFarmOverviewTimeRangeMutation(baseOptions?: Apollo.Mutat
 export type SetMyFarmOverviewTimeRangeMutationHookResult = ReturnType<typeof useSetMyFarmOverviewTimeRangeMutation>;
 export type SetMyFarmOverviewTimeRangeMutationResult = Apollo.MutationResult<SetMyFarmOverviewTimeRangeMutation>;
 export type SetMyFarmOverviewTimeRangeMutationOptions = Apollo.BaseMutationOptions<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>;
+export const UpdateMyHarvestViewSettingsDocument = gql`
+    mutation UpdateMyHarvestViewSettings($input: HarvestViewSettingsInput!) {
+  updateMyHarvestViewSettings(input: $input) {
+    id
+    userSettings {
+      harvestView {
+        sort {
+          field
+          direction
+        }
+        dateRange {
+          from
+          to
+        }
+      }
+    }
+  }
+}
+    `;
+export type UpdateMyHarvestViewSettingsMutationFn = Apollo.MutationFunction<UpdateMyHarvestViewSettingsMutation, UpdateMyHarvestViewSettingsMutationVariables>;
+
+/**
+ * __useUpdateMyHarvestViewSettingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateMyHarvestViewSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateMyHarvestViewSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateMyHarvestViewSettingsMutation, { data, loading, error }] = useUpdateMyHarvestViewSettingsMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateMyHarvestViewSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateMyHarvestViewSettingsMutation, UpdateMyHarvestViewSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateMyHarvestViewSettingsMutation, UpdateMyHarvestViewSettingsMutationVariables>(UpdateMyHarvestViewSettingsDocument, options);
+      }
+export type UpdateMyHarvestViewSettingsMutationHookResult = ReturnType<typeof useUpdateMyHarvestViewSettingsMutation>;
+export type UpdateMyHarvestViewSettingsMutationResult = Apollo.MutationResult<UpdateMyHarvestViewSettingsMutation>;
+export type UpdateMyHarvestViewSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateMyHarvestViewSettingsMutation, UpdateMyHarvestViewSettingsMutationVariables>;
 export const GetRecentSystemErrorsDocument = gql`
     query GetRecentSystemErrors($limit: Float, $severity: ReportSeverity, $source: ErrorSource, $isResolved: Boolean) {
   getRecentSystemErrors(
@@ -4432,8 +4559,8 @@ export type DeleteAlertMutationHookResult = ReturnType<typeof useDeleteAlertMuta
 export type DeleteAlertMutationResult = Apollo.MutationResult<DeleteAlertMutation>;
 export type DeleteAlertMutationOptions = Apollo.BaseMutationOptions<DeleteAlertMutation, DeleteAlertMutationVariables>;
 export const BatchesDocument = gql`
-    query Batches {
-  batches {
+    query Batches($filter: BatchFilterInput, $sort: BatchSortInput) {
+  batches(filter: $filter, sort: $sort) {
     ...BatchFields
   }
 }
@@ -4451,6 +4578,8 @@ export const BatchesDocument = gql`
  * @example
  * const { data, loading, error } = useBatchesQuery({
  *   variables: {
+ *      filter: // value for 'filter'
+ *      sort: // value for 'sort'
  *   },
  * });
  */
@@ -6502,6 +6631,18 @@ export const MeDocument = gql`
     status
     preferredLanguage
     farmOverviewTimeRange
+    userSettings {
+      harvestView {
+        sort {
+          field
+          direction
+        }
+        dateRange {
+          from
+          to
+        }
+      }
+    }
     createdAt
     updatedAt
   }
