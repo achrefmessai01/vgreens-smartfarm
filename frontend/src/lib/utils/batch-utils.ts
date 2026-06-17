@@ -14,6 +14,7 @@ export function createBatchDetailsFromForm(
   const today = new Date();
   const timeDiff = today.getTime() - plantingDate.getTime();
   const daysAfterPlanting = Math.floor(timeDiff / (1000 * 3600 * 24));
+  const replicates = Math.max(1, formData.replicates ?? 1);
 
   return {
     id: `batch-${Date.now()}`,
@@ -35,8 +36,9 @@ export function createBatchDetailsFromForm(
     rowSpacing: formData.rowSpacing,
     totalPlants: formData.totalPlants,
     lostPlants: formData.lostPlants,
+    replicates,
     plantingDate: formData.plantingDate,
-    entries: [createEmptyEntry()],
+    entries: Array.from({ length: replicates }, () => createEmptyEntry()),
     photos: [],
   };
 }

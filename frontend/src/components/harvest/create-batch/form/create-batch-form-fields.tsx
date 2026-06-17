@@ -12,6 +12,7 @@ import {
   NumberOfRowsField,
   PlantsPerMeterField,
   PlantingDateField,
+  ReplicatesField,
   RowLengthField,
   TotalPlantsField,
   VarietyField,
@@ -87,6 +88,12 @@ export function CreateBatchFormFields({
         disabled={disabled}
       />
       <LostPlantsField
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+        disabled={disabled}
+      />
+      <ReplicatesField
         formData={formData}
         setFormData={setFormData}
         errors={errors}

@@ -99,4 +99,11 @@ export class CreateBatchInput {
   @IsInt()
   @Min(0)
   totalPlants?: number;
+
+  // How many replicate input sets the harvest form should render. At least 1.
+  @Field(() => Int, { defaultValue: 1 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  replicates?: number;
 }

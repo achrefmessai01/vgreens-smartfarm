@@ -84,6 +84,10 @@ export interface BatchLike {
   rowSpacing: number;
   totalPlants: number;
   lostPlants: number;
+  // Number of replicate input sets the harvest form should render. Optional on
+  // the read model so older queries/fixtures without it still type-check; the
+  // form falls back to 1 when absent.
+  replicates?: number | null;
   greenhouse?: { id: string; name: string } | null;
 }
 

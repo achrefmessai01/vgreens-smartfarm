@@ -19,6 +19,7 @@ const BATCH_FIELDS = gql`
     lostPlants
     cultivationArea
     totalPlants
+    replicates
     createdAt
     updatedAt
     greenhouse {

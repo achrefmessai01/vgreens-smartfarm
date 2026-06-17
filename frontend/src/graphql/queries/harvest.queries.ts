@@ -37,6 +37,7 @@ const HARVEST_FIELDS = gql`
       rowSpacing
       totalPlants
       lostPlants
+      replicates
       greenhouse {
         id
         name

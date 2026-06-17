@@ -229,6 +229,7 @@ export class BatchService extends BaseService<Batch> {
         lostPlants: input.lostPlants ?? 0,
         cultivationArea: this.deriveCultivationArea({ ...input, rowSpacing }),
         totalPlants: this.deriveTotalPlants(input),
+        replicates: input.replicates ?? 1,
       });
 
       const saved = await this.batchRepository.save(batch);
@@ -296,6 +297,7 @@ export class BatchService extends BaseService<Batch> {
     if (input.cultivationArea !== undefined)
       batch.cultivationArea = input.cultivationArea;
     if (input.totalPlants !== undefined) batch.totalPlants = input.totalPlants;
+    if (input.replicates !== undefined) batch.replicates = input.replicates;
 
     await this.batchRepository.save(batch);
     return this.findOneById(id, tenantId);

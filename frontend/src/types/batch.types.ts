@@ -12,6 +12,8 @@ export interface BatchFormData {
   rowSpacing: number;
   totalPlants: number;
   lostPlants: number;
+  // Replicate samples per harvest; at least 1.
+  replicates: number;
 }
 
 export interface BatchFormErrors {
@@ -25,4 +27,5 @@ export interface BatchFormErrors {
   plantsPerMeter?: string;
   totalPlants?: string;
   lostPlants?: string;
+  replicates?: string;
 }

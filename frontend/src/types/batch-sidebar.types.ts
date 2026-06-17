@@ -68,6 +68,9 @@ export interface BatchDetailsData {
   rowSpacing: number;
   totalPlants: number;
   lostPlants: number;
+  // Replicate samples configured on the batch; drives how many entry cards a
+  // fresh harvest starts with. Always at least 1.
+  replicates: number;
   plantingDate: string;
   // Repeatable sub-entries; always at least one. Photos and the harvest date
   // live at the record level, not per entry.

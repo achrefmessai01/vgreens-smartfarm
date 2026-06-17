@@ -21,6 +21,7 @@ const EMPTY_FORM: BatchFormData = {
   rowSpacing: 0,
   totalPlants: 0,
   lostPlants: 0,
+  replicates: 1,
 };
 
 function computeRowSpacing(data: BatchFormData): number {
@@ -45,6 +46,7 @@ function batchToFormData(batch: BatchItem): BatchFormData {
     rowSpacing: batch.rowSpacing ?? 0,
     totalPlants: batch.totalPlants ?? 0,
     lostPlants: batch.lostPlants ?? 0,
+    replicates: batch.replicates ?? 1,
   };
 }
 
@@ -62,6 +64,8 @@ function validateEditForm(data: BatchFormData): BatchFormErrors {
     errors.rowLength = 'Row length must be greater than 0';
   if (!data.plantsPerMeter || data.plantsPerMeter <= 0)
     errors.plantsPerMeter = 'Plants per meter must be greater than 0';
+  if (!data.replicates || data.replicates < 1)
+    errors.replicates = 'Replicates must be at least 1';
   return errors;
 }
 
@@ -113,6 +117,7 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               rowSpacing,
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
+              replicates: formData.replicates,
               // name/batchNumber are re-derived from crop/variety by the backend.
             },
           },
