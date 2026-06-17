@@ -71,10 +71,24 @@ export function HarvestBatchGroup({
           <div className="flex items-center justify-between gap-2">
             <AccordionTrigger className="min-w-0 flex-1 py-0 hover:no-underline">
               <p className="truncate text-base font-semibold sm:text-lg">
-                {batch?.name ?? '-'}
+                {getGreenhouseLabel(batch?.greenhouse?.name)}
+                {batch?.variety?.name ? ` - ${batch.variety.name}` : ''}
               </p>
             </AccordionTrigger>
             <div className="flex shrink-0 items-center gap-1">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-green-500/10 hover:text-green-600 hover:shadow-sm dark:hover:bg-green-500/20 dark:hover:text-green-300"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onLogEntry?.(group.batch);
+                }}
+                aria-label={h?.logEntry ?? 'Log Entry'}
+              >
+                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+              </Button>
               <Button
                 size="icon"
                 variant="ghost"
@@ -114,19 +128,6 @@ export function HarvestBatchGroup({
               >
                 <Trash2 className="text-destructive h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-green-500/10 hover:text-green-600 hover:shadow-sm dark:hover:bg-green-500/20 dark:hover:text-green-300"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onLogEntry?.(group.batch);
-                }}
-                aria-label={h?.logEntry ?? 'Log Entry'}
-              >
-                <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-              </Button>
             </div>
           </div>
         </div>
@@ -144,7 +145,7 @@ export function HarvestBatchGroup({
               {batch.batchNumber}
             </Badge>
           )}
-          <span>{getGreenhouseLabel(batch?.greenhouse?.name)}</span>
+          <span>{batch?.crop?.name ?? '-'}</span>
         </div>
         <AccordionContent className="border-t">
           {visibleEntries.length === 0 ? (
