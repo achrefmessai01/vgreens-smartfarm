@@ -11,10 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ClerkSyncService } from './clerk-sync.service';
 import { CreateUserInput, UpdateUserInput } from './dto';
 import { HarvestViewSettingsInput } from './dto/user-settings';
-import {
-  mergeUserSettings,
-  assertValidHarvestViewSettings,
-} from './utils/user-settings.util';
+import { mergeUserSettings } from './utils/user-settings.util';
 import { OrderDirection, UserRole } from '@common/enums';
 import { UserStatus } from '@common/enums/user-status.enum';
 
@@ -272,7 +269,6 @@ export class UsersService extends BaseService<User> {
     userId: string,
     input: HarvestViewSettingsInput,
   ): Promise<User> {
-    assertValidHarvestViewSettings(input);
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -280,7 +276,7 @@ export class UsersService extends BaseService<User> {
     user.userSettings = mergeUserSettings(user.userSettings, {
       harvestView: {
         sort: input.sort ?? null,
-        dateRange: input.dateRange ?? null,
+        range: input.range ?? null,
       },
     });
     return this.userRepository.save(user);

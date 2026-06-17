@@ -1,89 +1,84 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+import { ArrowDownUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/i18n';
-import { Button } from '@/components/ui/button';
 import {
-  SORT_FIELDS,
-  type HarvestSort,
-  type HarvestSortField,
-} from './harvest-view-settings';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { type HarvestSort } from './harvest-view-settings';
 
 interface SortControlsProps {
   /** Currently active sort (single field + direction). */
   value: HarvestSort;
-  /** Fired with the clicked field; the parent decides how to cycle direction. */
-  onToggle: (field: HarvestSortField) => void;
+  /** Fired with the newly selected sort. */
+  onChange: (sort: HarvestSort) => void;
   className?: string;
 }
 
+// Encode field+direction into a single Select value, e.g. "CROP:ASC".
+const encode = (s: HarvestSort) => `${s.field}:${s.direction}`;
+const decode = (v: string): HarvestSort => {
+  const [field, direction] = v.split(':');
+  return { field, direction } as HarvestSort;
+};
+
 /**
- * Presentational sort selector. Renders one toggle button per sortable field;
- * exactly one is active at a time. The active button exposes its direction both
- * visually (arrow icon) and to assistive tech (aria-pressed + sr-only text), so
- * direction is never conveyed by icon alone.
+ * Compact sort selector: a single dropdown listing each field in both
+ * directions, so exactly one sort is ever active. Mirrors the dashboard's
+ * period <Select> styling.
  */
 export function SortControls({
   value,
-  onToggle,
+  onChange,
   className,
 }: SortControlsProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
 
-  const fieldLabel = (field: HarvestSortField): string => {
-    switch (field) {
-      case 'CROP':
-        return h.sortByCrop;
-      case 'GREENHOUSE':
-        return h.sortByGreenhouse;
-      case 'PLANTING_DATE':
-        return h.sortByPlantingDate;
-    }
-  };
+  const options: { value: string; label: string }[] = [
+    {
+      value: 'PLANTING_DATE:DESC',
+      label: `${h.sortByPlantingDate} (${h.newestFirst})`,
+    },
+    {
+      value: 'PLANTING_DATE:ASC',
+      label: `${h.sortByPlantingDate} (${h.oldestFirst})`,
+    },
+    { value: 'CROP:ASC', label: `${h.sortByCrop} (${h.azOrder})` },
+    { value: 'CROP:DESC', label: `${h.sortByCrop} (${h.zaOrder})` },
+    { value: 'GREENHOUSE:ASC', label: `${h.sortByGreenhouse} (${h.azOrder})` },
+    { value: 'GREENHOUSE:DESC', label: `${h.sortByGreenhouse} (${h.zaOrder})` },
+  ];
 
   return (
-    <div
-      role="group"
-      aria-label={h.sortBy}
-      className={cn('flex flex-wrap items-center gap-2', className)}
-    >
-      <span className="text-muted-foreground text-sm font-medium">
-        {h.sortBy}
-      </span>
-      {SORT_FIELDS.map((field) => {
-        const active = value.field === field;
-        const ascending = value.direction === 'ASC';
-        const directionLabel = active
-          ? ascending
-            ? h.sortedAscending
-            : h.sortedDescending
-          : h.notSorted;
-        return (
-          <Button
-            key={field}
-            type="button"
-            size="sm"
-            variant={active ? 'default' : 'outline'}
-            aria-pressed={active}
-            onClick={() => onToggle(field)}
+    <Select value={encode(value)} onValueChange={(v) => onChange(decode(v))}>
+      <SelectTrigger
+        className={cn('h-9 w-52', className)}
+        aria-label={h.sortBy}
+      >
+        <ArrowDownUp
+          className="text-muted-foreground h-3.5 w-3.5"
+          aria-hidden
+        />
+        <SelectValue placeholder={h.sortBy} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem
+            key={option.value}
+            value={option.value}
+            className="text-sm"
           >
-            <span>{fieldLabel(field)}</span>
-            {active ? (
-              ascending ? (
-                <ArrowUp aria-hidden="true" />
-              ) : (
-                <ArrowDown aria-hidden="true" />
-              )
-            ) : (
-              <ArrowUpDown aria-hidden="true" className="opacity-50" />
-            )}
-            <span className="sr-only">{`(${directionLabel})`}</span>
-          </Button>
-        );
-      })}
-    </div>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

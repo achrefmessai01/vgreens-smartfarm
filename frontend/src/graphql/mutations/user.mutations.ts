@@ -71,10 +71,7 @@ export const UPDATE_MY_HARVEST_VIEW_SETTINGS_MUTATION = gql`
             field
             direction
           }
-          dateRange {
-            from
-            to
-          }
+          range
         }
       }
     }

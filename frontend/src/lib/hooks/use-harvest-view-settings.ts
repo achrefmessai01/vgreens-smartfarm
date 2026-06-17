@@ -52,11 +52,7 @@ export function useHarvestViewSettings() {
                   field: input.sort.field,
                   direction: input.sort.direction,
                 },
-                dateRange: {
-                  __typename: 'HarvestViewDateRange',
-                  from: input.dateRange.from,
-                  to: input.dateRange.to,
-                },
+                range: input.range,
               },
             },
           },

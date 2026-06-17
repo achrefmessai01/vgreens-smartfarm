@@ -1,12 +1,11 @@
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsOptional,
-  IsDateString,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsOptional, ValidateNested } from 'class-validator';
 import { ObjectType, InputType, Field } from '@nestjs/graphql';
-import { HarvestSortField, OrderDirection } from '@common/enums';
+import {
+  HarvestSortField,
+  OrderDirection,
+  HarvestDateRangePreset,
+} from '@common/enums';
 
 // Typed shape of the freeform `users.userSettings` jsonb blob. Today it only
 // carries the harvest-entry view preferences; future features add sibling keys
@@ -23,22 +22,13 @@ export class HarvestViewSort {
 }
 
 @ObjectType()
-export class HarvestViewDateRange {
-  // Inclusive plantingDate bounds as YYYY-MM-DD strings. null = open-ended.
-  @Field({ nullable: true })
-  from?: string | null;
-
-  @Field({ nullable: true })
-  to?: string | null;
-}
-
-@ObjectType()
 export class HarvestViewSettings {
   @Field(() => HarvestViewSort, { nullable: true })
   sort?: HarvestViewSort | null;
 
-  @Field(() => HarvestViewDateRange, { nullable: true })
-  dateRange?: HarvestViewDateRange | null;
+  // Relative plantingDate range preset (resolved to dates client-side).
+  @Field(() => HarvestDateRangePreset, { nullable: true })
+  range?: HarvestDateRangePreset | null;
 }
 
 @ObjectType()
@@ -61,19 +51,6 @@ export class HarvestViewSortInput {
 }
 
 @InputType()
-export class HarvestViewDateRangeInput {
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsDateString()
-  from?: string | null;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsDateString()
-  to?: string | null;
-}
-
-@InputType()
 export class HarvestViewSettingsInput {
   @Field(() => HarvestViewSortInput, { nullable: true })
   @IsOptional()
@@ -81,9 +58,8 @@ export class HarvestViewSettingsInput {
   @Type(() => HarvestViewSortInput)
   sort?: HarvestViewSortInput | null;
 
-  @Field(() => HarvestViewDateRangeInput, { nullable: true })
+  @Field(() => HarvestDateRangePreset, { nullable: true })
   @IsOptional()
-  @ValidateNested()
-  @Type(() => HarvestViewDateRangeInput)
-  dateRange?: HarvestViewDateRangeInput | null;
+  @IsEnum(HarvestDateRangePreset)
+  range?: HarvestDateRangePreset | null;
 }

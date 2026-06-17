@@ -8,6 +8,7 @@ export * from './door-position.enum';
 export * from './harvest-quality-class.enum';
 export * from './order-direction.enum';
 export * from './harvest-sort-field.enum';
+export * from './harvest-date-range-preset.enum';
 export * from './report-severity.enum';
 export * from './report-status.enum';
 export * from './error-source.enum';

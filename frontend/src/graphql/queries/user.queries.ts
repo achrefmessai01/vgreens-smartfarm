@@ -39,10 +39,7 @@ export const ME_QUERY = gql`
             field
             direction
           }
-          dateRange {
-            from
-            to
-          }
+          range
         }
       }
       createdAt

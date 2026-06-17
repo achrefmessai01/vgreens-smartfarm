@@ -4,13 +4,13 @@ import { FeatureGuard } from '@/components/features/feature-guard';
 import {
   BatchSidebar,
   CreateBatchDialog,
-  DateRangeFilter,
   DeleteHarvestDialog,
   EditHarvestDialog,
   HarvestDashboard,
   HarvestExportDialog,
   HarvestPageHeader,
   HarvestTable,
+  PeriodFilter,
   SortControls,
 } from '@/components/harvest';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -44,8 +44,8 @@ export default function HarvestPage() {
     loading,
     view,
     isFiltered,
-    handleSortToggle,
-    handleDateRangeChange,
+    handleSortChange,
+    handleRangeChange,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,
@@ -141,14 +141,19 @@ export default function HarvestPage() {
                 title={t.pages.harvest?.harvestEntryTitle || 'Harvest Entry'}
                 onCreateBatch={handleCreateBatch}
                 onExportClick={() => setExportDialogOpen(true)}
+                filters={
+                  <>
+                    <SortControls
+                      value={view.sort}
+                      onChange={handleSortChange}
+                    />
+                    <PeriodFilter
+                      value={view.range}
+                      onChange={handleRangeChange}
+                    />
+                  </>
+                }
               />
-              <div className="bg-card flex flex-col gap-4 rounded-xl border p-4 md:flex-row md:flex-wrap md:items-end md:justify-between">
-                <SortControls value={view.sort} onToggle={handleSortToggle} />
-                <DateRangeFilter
-                  value={view.dateRange}
-                  onChange={handleDateRangeChange}
-                />
-              </div>
               <HarvestTable
                 batches={batches ?? []}
                 harvests={harvests ?? []}

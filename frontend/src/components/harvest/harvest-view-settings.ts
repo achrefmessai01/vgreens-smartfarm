@@ -1,52 +1,54 @@
-// Pure, framework-agnostic state + transforms for the harvest-entry view's
-// sort + plantingDate-range controls. Kept free of React/Apollo so the logic
-// stays simple and reusable. The persistence hook and presentational
-// components build on top of this.
+// Framework-agnostic state + transforms for the harvest-entry view's sort +
+// plantingDate-range controls. Types come from the generated GraphQL enums so
+// the values flow straight into query/mutation variables without translation.
 
-// String-union mirrors of the backend GraphQL enums (HarvestSortField,
-// OrderDirection). Values match the enum strings exactly, so they can be sent
-// as query/mutation variables without translation.
-export type HarvestSortField = 'CROP' | 'GREENHOUSE' | 'PLANTING_DATE';
-export type SortDirection = 'ASC' | 'DESC';
+import {
+  HarvestSortField,
+  OrderDirection,
+  HarvestDateRangePreset,
+} from '@/generated/graphql';
+
+export { HarvestSortField, OrderDirection, HarvestDateRangePreset };
 
 export interface HarvestSort {
   field: HarvestSortField;
-  direction: SortDirection;
-}
-
-// Inclusive plantingDate bounds as YYYY-MM-DD strings; null = open-ended.
-export interface HarvestDateRange {
-  from: string | null;
-  to: string | null;
+  direction: OrderDirection;
 }
 
 export interface HarvestViewState {
   sort: HarvestSort;
-  dateRange: HarvestDateRange;
+  range: HarvestDateRangePreset;
 }
 
-// Order the sort buttons render in.
-export const SORT_FIELDS: readonly HarvestSortField[] = [
-  'PLANTING_DATE',
-  'CROP',
-  'GREENHOUSE',
+// Order the range presets render in the dropdown (chronological, broad last).
+export const RANGE_PRESETS: readonly HarvestDateRangePreset[] = [
+  HarvestDateRangePreset.Today,
+  HarvestDateRangePreset.ThisWeek,
+  HarvestDateRangePreset.ThisMonth,
+  HarvestDateRangePreset.LastMonth,
+  HarvestDateRangePreset.ThisYear,
+  HarvestDateRangePreset.All,
 ];
 
 // Used when the user has no persisted preference (userSettings null/missing):
 // newest planting first, no date filter.
 export const DEFAULT_HARVEST_VIEW: HarvestViewState = {
-  sort: { field: 'PLANTING_DATE', direction: 'DESC' },
-  dateRange: { from: null, to: null },
+  sort: {
+    field: HarvestSortField.PlantingDate,
+    direction: OrderDirection.Desc,
+  },
+  range: HarvestDateRangePreset.All,
 };
 
-const SORT_FIELD_SET = new Set<string>(SORT_FIELDS);
-const DIRECTION_SET = new Set<string>(['ASC', 'DESC']);
+const SORT_FIELD_VALUES = new Set<string>(Object.values(HarvestSortField));
+const DIRECTION_VALUES = new Set<string>(Object.values(OrderDirection));
+const RANGE_VALUES = new Set<string>(Object.values(HarvestDateRangePreset));
 
 // A persisted harvestView blob from `me.userSettings` — loosely typed because
 // it crosses the network and may be partial / from an older client.
 export interface PersistedHarvestView {
   sort?: { field?: string | null; direction?: string | null } | null;
-  dateRange?: { from?: string | null; to?: string | null } | null;
+  range?: string | null;
 }
 
 /**
@@ -60,78 +62,100 @@ export function parseHarvestView(
   const direction = persisted?.sort?.direction;
   const sort: HarvestSort =
     field &&
-    SORT_FIELD_SET.has(field) &&
+    SORT_FIELD_VALUES.has(field) &&
     direction &&
-    DIRECTION_SET.has(direction)
+    DIRECTION_VALUES.has(direction)
       ? {
           field: field as HarvestSortField,
-          direction: direction as SortDirection,
+          direction: direction as OrderDirection,
         }
       : { ...DEFAULT_HARVEST_VIEW.sort };
 
-  return {
-    sort,
-    dateRange: {
-      from: persisted?.dateRange?.from ?? null,
-      to: persisted?.dateRange?.to ?? null,
-    },
-  };
+  const range =
+    persisted?.range && RANGE_VALUES.has(persisted.range)
+      ? (persisted.range as HarvestDateRangePreset)
+      : DEFAULT_HARVEST_VIEW.range;
+
+  return { sort, range };
 }
 
-/** YYYY-MM-DD strings compare correctly with `<=`. Open bounds are always ok. */
-export function isValidRange(range: HarvestDateRange): boolean {
-  if (!range.from || !range.to) return true;
-  return range.from <= range.to;
+/** Replace the active sort. */
+export function setSort(
+  state: HarvestViewState,
+  sort: HarvestSort,
+): HarvestViewState {
+  return { ...state, sort };
+}
+
+/** Replace the active range preset. */
+export function setRange(
+  state: HarvestViewState,
+  range: HarvestDateRangePreset,
+): HarvestViewState {
+  return { ...state, range };
+}
+
+/** Local YYYY-MM-DD (no timezone shift), matching the dashboard's date logic. */
+function toISODate(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
- * Toggle/select a sort field. Selecting a different field starts ascending;
- * clicking the already-active field flips its direction. Only ever one active
- * field (single sort), satisfying the single-active-sort requirement.
+ * Resolve a preset to an inclusive plantingDate range. `All` returns no bounds.
+ * `now` is injectable for determinism; defaults to the current date.
  */
-export function cycleSort(
-  state: HarvestViewState,
-  field: HarvestSortField,
-): HarvestViewState {
-  if (state.sort.field !== field) {
-    return { ...state, sort: { field, direction: 'ASC' } };
+export function resolveRangeBounds(
+  preset: HarvestDateRangePreset,
+  now: Date = new Date(),
+): { from?: string; to?: string } {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayISO = toISODate(today);
+
+  switch (preset) {
+    case HarvestDateRangePreset.All:
+      return {};
+    case HarvestDateRangePreset.Today:
+      return { from: todayISO, to: todayISO };
+    case HarvestDateRangePreset.ThisWeek: {
+      // Week starts Monday.
+      const dayOfWeek = today.getDay();
+      const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const start = new Date(today);
+      start.setDate(today.getDate() - daysToSubtract);
+      return { from: toISODate(start), to: todayISO };
+    }
+    case HarvestDateRangePreset.ThisMonth: {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      return { from: toISODate(start), to: todayISO };
+    }
+    case HarvestDateRangePreset.LastMonth: {
+      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const end = new Date(today.getFullYear(), today.getMonth(), 0);
+      return { from: toISODate(start), to: toISODate(end) };
+    }
+    case HarvestDateRangePreset.ThisYear: {
+      const start = new Date(today.getFullYear(), 0, 1);
+      return { from: toISODate(start), to: todayISO };
+    }
   }
-  return {
-    ...state,
-    sort: {
-      field,
-      direction: state.sort.direction === 'ASC' ? 'DESC' : 'ASC',
-    },
-  };
-}
-
-/** Replace one or both date bounds; empty-string inputs normalize to null. */
-export function setDateRange(
-  state: HarvestViewState,
-  patch: Partial<HarvestDateRange>,
-): HarvestViewState {
-  const norm = (v: string | null | undefined, fallback: string | null) =>
-    v === undefined ? fallback : v === '' ? null : v;
-  return {
-    ...state,
-    dateRange: {
-      from: norm(patch.from, state.dateRange.from),
-      to: norm(patch.to, state.dateRange.to),
-    },
-  };
 }
 
 /**
- * Variables for the `Batches` query. The date range is only sent when at least
- * one bound is set (and the range is valid); an invalid range is dropped so the
- * server isn't asked for an impossible window.
+ * Variables for the `Batches` query: the sort selection plus the resolved
+ * plantingDate bounds for the active preset (omitted entirely for `All`).
  */
-export function toBatchesVariables(state: HarvestViewState): {
+export function toBatchesVariables(
+  state: HarvestViewState,
+  now?: Date,
+): {
   filter?: { plantingDateFrom?: string; plantingDateTo?: string };
   sort: HarvestSort;
 } {
-  const { from, to } = state.dateRange;
-  const hasRange = (from || to) && isValidRange(state.dateRange);
+  const { from, to } = resolveRangeBounds(state.range, now);
+  const hasRange = Boolean(from || to);
   return {
     sort: state.sort,
     filter: hasRange
@@ -146,7 +170,7 @@ export function toBatchesVariables(state: HarvestViewState): {
 /** Input payload for the `updateMyHarvestViewSettings` mutation. */
 export function toSettingsInput(state: HarvestViewState): {
   sort: HarvestSort;
-  dateRange: HarvestDateRange;
+  range: HarvestDateRangePreset;
 } {
-  return { sort: state.sort, dateRange: state.dateRange };
+  return { sort: state.sort, range: state.range };
 }

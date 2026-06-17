@@ -603,6 +603,16 @@ export type HarvestDashboardMetrics = {
   yieldPerPlant?: Maybe<Scalars['Float']['output']>;
 };
 
+/** Relative plantingDate range presets for the harvest list */
+export enum HarvestDateRangePreset {
+  All = 'ALL',
+  LastMonth = 'LAST_MONTH',
+  ThisMonth = 'THIS_MONTH',
+  ThisWeek = 'THIS_WEEK',
+  ThisYear = 'THIS_YEAR',
+  Today = 'TODAY'
+}
+
 export type HarvestEntry = {
   __typename?: 'HarvestEntry';
   avgBrix: Scalars['Float']['output'];
@@ -692,25 +702,14 @@ export type HarvestTotals = {
   yieldPerPlant?: Maybe<Scalars['Float']['output']>;
 };
 
-export type HarvestViewDateRange = {
-  __typename?: 'HarvestViewDateRange';
-  from?: Maybe<Scalars['String']['output']>;
-  to?: Maybe<Scalars['String']['output']>;
-};
-
-export type HarvestViewDateRangeInput = {
-  from?: InputMaybe<Scalars['String']['input']>;
-  to?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type HarvestViewSettings = {
   __typename?: 'HarvestViewSettings';
-  dateRange?: Maybe<HarvestViewDateRange>;
+  range?: Maybe<HarvestDateRangePreset>;
   sort?: Maybe<HarvestViewSort>;
 };
 
 export type HarvestViewSettingsInput = {
-  dateRange?: InputMaybe<HarvestViewDateRangeInput>;
+  range?: InputMaybe<HarvestDateRangePreset>;
   sort?: InputMaybe<HarvestViewSortInput>;
 };
 
@@ -1924,7 +1923,7 @@ export type UpdateMyHarvestViewSettingsMutationVariables = Exact<{
 }>;
 
 
-export type UpdateMyHarvestViewSettingsMutation = { __typename?: 'Mutation', updateMyHarvestViewSettings: { __typename?: 'User', id: string, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null, dateRange?: { __typename?: 'HarvestViewDateRange', from?: string | null, to?: string | null } | null } | null } | null } };
+export type UpdateMyHarvestViewSettingsMutation = { __typename?: 'Mutation', updateMyHarvestViewSettings: { __typename?: 'User', id: string, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } };
 
 export type GetRecentSystemErrorsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Float']['input']>;
@@ -2299,7 +2298,7 @@ export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null, dateRange?: { __typename?: 'HarvestViewDateRange', from?: string | null, to?: string | null } | null } | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3967,10 +3966,7 @@ export const UpdateMyHarvestViewSettingsDocument = gql`
           field
           direction
         }
-        dateRange {
-          from
-          to
-        }
+        range
       }
     }
   }
@@ -6637,10 +6633,7 @@ export const MeDocument = gql`
           field
           direction
         }
-        dateRange {
-          from
-          to
-        }
+        range
       }
     }
     createdAt

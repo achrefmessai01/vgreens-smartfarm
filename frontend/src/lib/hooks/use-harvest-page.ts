@@ -20,14 +20,13 @@ import {
 } from '@/generated/graphql';
 import { useHarvestViewSettings } from '@/lib/hooks/use-harvest-view-settings';
 import {
-  cycleSort,
-  setDateRange,
-  isValidRange,
+  setSort,
+  setRange,
   toBatchesVariables,
   DEFAULT_HARVEST_VIEW,
   type HarvestViewState,
-  type HarvestSortField,
-  type HarvestDateRange,
+  type HarvestSort,
+  HarvestDateRangePreset,
 } from '@/components/harvest/harvest-view-settings';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
@@ -63,10 +62,10 @@ export function useHarvestPage() {
     }
   }, [viewLoading, persistedValue]);
 
-  const handleSortToggle = React.useCallback(
-    (field: HarvestSortField) => {
+  const handleSortChange = React.useCallback(
+    (sort: HarvestSort) => {
       setView((current) => {
-        const next = cycleSort(current, field);
+        const next = setSort(current, sort);
         persistView(next);
         return next;
       });
@@ -74,12 +73,11 @@ export function useHarvestPage() {
     [persistView],
   );
 
-  const handleDateRangeChange = React.useCallback(
-    (patch: Partial<HarvestDateRange>) => {
+  const handleRangeChange = React.useCallback(
+    (range: HarvestDateRangePreset) => {
       setView((current) => {
-        const next = setDateRange(current, patch);
-        // Only persist coherent ranges; the UI may briefly hold from > to.
-        if (isValidRange(next.dateRange)) persistView(next);
+        const next = setRange(current, range);
+        persistView(next);
         return next;
       });
     },
@@ -281,8 +279,8 @@ export function useHarvestPage() {
     // Sort + filter view state for the presentational controls.
     view,
     isFiltered,
-    handleSortToggle,
-    handleDateRangeChange,
+    handleSortChange,
+    handleRangeChange,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,

@@ -97,10 +97,10 @@ export class UsersResolver {
   }
 
   /**
-   * Persist the signed-in user's harvest-entry view preferences (sort +
-   * plantingDate range). Field/direction enums and date-string formats are
-   * validated by the InputType; the from<=to relationship and the merge into
-   * the existing userSettings blob are handled in the service layer.
+   * Persist the signed-in user's harvest-entry view preferences (sort field +
+   * direction and a relative plantingDate range preset). All values are enum-
+   * validated by the InputType; the service merges them into the existing
+   * userSettings blob without clobbering sibling keys.
    */
   @Mutation(() => User)
   async updateMyHarvestViewSettings(
