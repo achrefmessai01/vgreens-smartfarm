@@ -378,6 +378,9 @@ export const es = {
       configSaveFailed: 'No se pudo guardar la configuración del panel',
       harvestsLogged: 'cosechas registradas',
       harvestLogged: 'cosecha registrada',
+      collapseBatch: 'Contraer lote',
+      expandBatch: 'Expandir lote',
+      batchTotal: 'Total del lote',
       yieldPredictionTitle: 'Predicción de rendimiento',
       yieldPredictionSubtitle:
         'Vista previa del rendimiento de la próxima cosecha.',

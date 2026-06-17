@@ -391,6 +391,9 @@ export const it = {
       configSaveFailed: 'Impossibile salvare la configurazione della dashboard',
       harvestsLogged: 'raccolti registrati',
       harvestLogged: 'raccolto registrato',
+      collapseBatch: 'Comprimi lotto',
+      expandBatch: 'Espandi lotto',
+      batchTotal: 'Totale lotto',
       yieldPredictionTitle: 'Previsione di resa',
       yieldPredictionSubtitle:
         'Anteprima delle performance del prossimo raccolto.',
