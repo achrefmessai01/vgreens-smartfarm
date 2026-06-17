@@ -18,6 +18,9 @@ export interface HarvestSort {
 export interface HarvestViewState {
   sort: HarvestSort;
   range: HarvestDateRangePreset;
+  // Batch IDs the user has collapsed in the harvest list. Batches are expanded
+  // by default; this tracks only the collapsed ones.
+  collapsedBatchIds: string[];
 }
 
 // Order the range presets render in the dropdown (chronological, broad last).
@@ -38,6 +41,7 @@ export const DEFAULT_HARVEST_VIEW: HarvestViewState = {
     direction: OrderDirection.Desc,
   },
   range: HarvestDateRangePreset.All,
+  collapsedBatchIds: [],
 };
 
 const SORT_FIELD_VALUES = new Set<string>(Object.values(HarvestSortField));
@@ -49,6 +53,7 @@ const RANGE_VALUES = new Set<string>(Object.values(HarvestDateRangePreset));
 export interface PersistedHarvestView {
   sort?: { field?: string | null; direction?: string | null } | null;
   range?: string | null;
+  collapsedBatchIds?: readonly (string | null)[] | null;
 }
 
 /**
@@ -76,7 +81,19 @@ export function parseHarvestView(
       ? (persisted.range as HarvestDateRangePreset)
       : DEFAULT_HARVEST_VIEW.range;
 
-  return { sort, range };
+  // Keep only non-empty strings and de-duplicate, so a malformed/partial blob
+  // can never crash the list or collapse a phantom batch.
+  const collapsedBatchIds = Array.isArray(persisted?.collapsedBatchIds)
+    ? Array.from(
+        new Set(
+          persisted.collapsedBatchIds.filter(
+            (id): id is string => typeof id === 'string' && id.length > 0,
+          ),
+        ),
+      )
+    : [];
+
+  return { sort, range, collapsedBatchIds };
 }
 
 /** Replace the active sort. */
@@ -93,6 +110,31 @@ export function setRange(
   range: HarvestDateRangePreset,
 ): HarvestViewState {
   return { ...state, range };
+}
+
+/** Whether a batch is currently collapsed. */
+export function isBatchCollapsed(
+  state: HarvestViewState,
+  batchId: string,
+): boolean {
+  return state.collapsedBatchIds.includes(batchId);
+}
+
+/**
+ * Set a batch's collapsed flag. Returns the same reference when nothing
+ * changes, so callers can skip a needless persist.
+ */
+export function setBatchCollapsed(
+  state: HarvestViewState,
+  batchId: string,
+  collapsed: boolean,
+): HarvestViewState {
+  const already = state.collapsedBatchIds.includes(batchId);
+  if (collapsed === already) return state;
+  const collapsedBatchIds = collapsed
+    ? [...state.collapsedBatchIds, batchId]
+    : state.collapsedBatchIds.filter((id) => id !== batchId);
+  return { ...state, collapsedBatchIds };
 }
 
 /** Local YYYY-MM-DD (no timezone shift), matching the dashboard's date logic. */
@@ -171,6 +213,11 @@ export function toBatchesVariables(
 export function toSettingsInput(state: HarvestViewState): {
   sort: HarvestSort;
   range: HarvestDateRangePreset;
+  collapsedBatchIds: string[];
 } {
-  return { sort: state.sort, range: state.range };
+  return {
+    sort: state.sort,
+    range: state.range,
+    collapsedBatchIds: state.collapsedBatchIds,
+  };
 }

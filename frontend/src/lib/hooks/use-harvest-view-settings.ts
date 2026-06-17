@@ -53,6 +53,7 @@ export function useHarvestViewSettings() {
                   direction: input.sort.direction,
                 },
                 range: input.range,
+                collapsedBatchIds: input.collapsedBatchIds,
               },
             },
           },

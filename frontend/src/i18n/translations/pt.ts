@@ -388,6 +388,9 @@ export const pt = {
       configSaveFailed: 'Falha ao salvar a configuração do painel',
       harvestsLogged: 'colheitas registadas',
       harvestLogged: 'colheita registada',
+      collapseBatch: 'Recolher lote',
+      expandBatch: 'Expandir lote',
+      batchTotal: 'Total do lote',
       yieldPredictionTitle: 'Previsão de produção',
       yieldPredictionSubtitle:
         'Pré-visualização do desempenho da próxima colheita.',

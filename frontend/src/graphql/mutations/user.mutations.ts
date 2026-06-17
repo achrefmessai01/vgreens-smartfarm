@@ -72,6 +72,7 @@ export const UPDATE_MY_HARVEST_VIEW_SETTINGS_MUTATION = gql`
             direction
           }
           range
+          collapsedBatchIds
         }
       }
     }

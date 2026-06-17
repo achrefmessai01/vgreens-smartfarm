@@ -26,6 +26,7 @@ import {
 } from '@/lib/harvest-utils';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import {
+  aggregateBatchTotals,
   getCreatedByLabel,
   type BatchGroup,
   type BatchItem,
@@ -34,6 +35,9 @@ import {
 
 interface HarvestBatchGroupProps {
   group: BatchGroup;
+  /** Whether this batch is collapsed to its single aggregated row. */
+  collapsed?: boolean;
+  onToggleCollapse?: (batchId: string, collapsed: boolean) => void;
   onDelete?: (harvest: HarvestItem) => void;
   onSidebarEdit?: (harvest: HarvestItem) => void;
   onLogEntry?: (batch: BatchItem) => void;
@@ -44,6 +48,8 @@ interface HarvestBatchGroupProps {
 
 export function HarvestBatchGroup({
   group,
+  collapsed = false,
+  onToggleCollapse,
   onDelete,
   onSidebarEdit,
   onLogEntry,
@@ -60,9 +66,21 @@ export function HarvestBatchGroup({
   const { isMobile } = useResponsiveBreakpoint('lg');
   const visibleEntries = group.entries;
   const batch = group.batch;
+  const totalLabel = h?.batchTotal ?? 'Batch total';
+  const agg = React.useMemo(
+    () => aggregateBatchTotals(visibleEntries, batch),
+    [visibleEntries, batch],
+  );
 
   return (
-    <Accordion type="single" collapsible defaultValue={group.key}>
+    <Accordion
+      type="single"
+      collapsible
+      value={collapsed ? '' : group.key}
+      onValueChange={(value) =>
+        onToggleCollapse?.(group.key, value !== group.key)
+      }
+    >
       <AccordionItem
         value={group.key}
         className="bg-card rounded-xl border px-3 pb-2 shadow-sm sm:px-4"
@@ -147,6 +165,126 @@ export function HarvestBatchGroup({
           )}
           <span>{batch?.crop?.name ?? '-'}</span>
         </div>
+
+        {collapsed && visibleEntries.length > 0 && (
+          <div className="border-t pt-1">
+            {!isMobile && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{totalLabel}</TableHead>
+                    <TableHead>{qualityALabel}</TableHead>
+                    <TableHead>{qualityBLabel}</TableHead>
+                    <TableHead>{qualityCLabel}</TableHead>
+                    <TableHead>{wasteLabel}</TableHead>
+                    <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
+                    <TableHead>
+                      {h?.avgFruitWeight ?? 'Avg Fruit Weight'}
+                    </TableHead>
+                    <TableHead>
+                      {h?.yieldPerPlantShort ?? 'Yield/Plant'}
+                    </TableHead>
+                    <TableHead>{h?.yieldPerMeterShort ?? 'Yield/m'}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow className="font-medium">
+                    <TableCell className="text-muted-foreground">
+                      {visibleEntries.length}{' '}
+                      {harvestsLoggedLabel(visibleEntries.length, h, locale)}
+                    </TableCell>
+                    <TableCell className="text-green-600">
+                      {agg.classA}
+                    </TableCell>
+                    <TableCell className="text-teal-600">{agg.classB}</TableCell>
+                    <TableCell className="text-amber-600">
+                      {agg.classC}
+                    </TableCell>
+                    <TableCell className="text-red-500">{agg.waste}</TableCell>
+                    <TableCell>{agg.avgBrix ?? 0}&deg;Bx</TableCell>
+                    <TableCell>
+                      {agg.avgFruitWeight == null
+                        ? '—'
+                        : `${agg.avgFruitWeight.toFixed(3)} kg`}
+                    </TableCell>
+                    <TableCell>
+                      {agg.yieldPerPlant == null
+                        ? '—'
+                        : `${agg.yieldPerPlant.toFixed(2)} kg`}
+                    </TableCell>
+                    <TableCell>
+                      {agg.yieldPerMeter == null
+                        ? '—'
+                        : `${agg.yieldPerMeter.toFixed(2)} kg/m`}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            )}
+
+            {isMobile && (
+              <div className="px-1 py-2">
+                <div className="bg-card/80 border-border/70 space-y-3 rounded-xl border p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-muted-foreground text-[11px] tracking-wide uppercase">
+                        {totalLabel}
+                      </p>
+                      <span className="text-sm font-semibold">
+                        {visibleEntries.length}{' '}
+                        {harvestsLoggedLabel(visibleEntries.length, h, locale)}
+                      </span>
+                    </div>
+                    <div className="bg-muted/40 rounded-md px-2 py-1 text-right">
+                      <p className="text-muted-foreground text-[10px] uppercase">
+                        {h?.avgBrix ?? 'Avg Brix'}
+                      </p>
+                      <span className="text-sm leading-none font-semibold">
+                        {agg.avgBrix ?? 0}&deg;Bx
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5 px-0.5 pt-1 text-sm">
+                    <div className="bg-muted/40 rounded-lg p-2.5">
+                      <span className="text-muted-foreground block text-[11px]">
+                        {qualityALabel}
+                      </span>
+                      <span className="text-base font-semibold text-green-600">
+                        {agg.classA}
+                      </span>
+                    </div>
+                    <div className="bg-muted/40 rounded-lg p-2.5">
+                      <span className="text-muted-foreground block text-[11px]">
+                        {qualityBLabel}
+                      </span>
+                      <span className="text-base font-semibold text-teal-600">
+                        {agg.classB}
+                      </span>
+                    </div>
+                    <div className="bg-muted/40 rounded-lg p-2.5">
+                      <span className="text-muted-foreground block text-[11px]">
+                        {qualityCLabel}
+                      </span>
+                      <span className="text-base font-semibold text-amber-600">
+                        {agg.classC}
+                      </span>
+                    </div>
+                    <div className="bg-muted/40 rounded-lg p-2.5">
+                      <span className="text-muted-foreground block text-[11px]">
+                        {wasteLabel}
+                      </span>
+                      <span className="text-base font-semibold text-red-500">
+                        {agg.waste}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <AccordionContent className="border-t">
           {visibleEntries.length === 0 ? (
             <p className="text-muted-foreground py-4 text-sm">

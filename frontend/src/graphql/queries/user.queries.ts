@@ -40,6 +40,7 @@ export const ME_QUERY = gql`
             direction
           }
           range
+          collapsedBatchIds
         }
       }
       createdAt

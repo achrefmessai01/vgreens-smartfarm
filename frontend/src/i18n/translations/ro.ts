@@ -390,6 +390,9 @@ export const ro = {
       configSaveFailed: 'Salvarea configurației tabloului de bord a eșuat',
       harvestsLogged: 'recolte înregistrate',
       harvestLogged: 'recoltă înregistrată',
+      collapseBatch: 'Restrânge lotul',
+      expandBatch: 'Extinde lotul',
+      batchTotal: 'Total lot',
       yieldPredictionTitle: 'Predicția producției',
       yieldPredictionSubtitle:
         'Previzualizarea performanței recoltei viitoare.',
