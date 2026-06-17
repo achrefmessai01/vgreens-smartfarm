@@ -273,10 +273,19 @@ export class UsersService extends BaseService<User> {
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
+    // Read-modify-write at the harvestView sub-key level too: only fields
+    // present in the input overwrite their counterpart, so a sort-only update
+    // doesn't wipe the collapsed-batch list (and vice versa).
+    const existing = user.userSettings?.harvestView ?? {};
     user.userSettings = mergeUserSettings(user.userSettings, {
       harvestView: {
-        sort: input.sort ?? null,
-        range: input.range ?? null,
+        sort: input.sort !== undefined ? input.sort : (existing.sort ?? null),
+        range:
+          input.range !== undefined ? input.range : (existing.range ?? null),
+        collapsedBatchIds:
+          input.collapsedBatchIds !== undefined
+            ? input.collapsedBatchIds
+            : (existing.collapsedBatchIds ?? null),
       },
     });
     return this.userRepository.save(user);

@@ -46,6 +46,7 @@ export default function HarvestPage() {
     isFiltered,
     handleSortChange,
     handleRangeChange,
+    handleToggleCollapse,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,
@@ -165,6 +166,8 @@ export default function HarvestPage() {
                 onDeleteBatch={handleBatchDeleteRequest}
                 isLoading={loading}
                 isFiltered={isFiltered}
+                collapsedBatchIds={view.collapsedBatchIds}
+                onToggleCollapse={handleToggleCollapse}
               />
             </div>
           </TabsContent>

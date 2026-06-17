@@ -22,6 +22,9 @@ interface HarvestTableProps {
   isLoading?: boolean;
   /** True when a date-range filter is active — changes the empty-state copy. */
   isFiltered?: boolean;
+  /** Batch IDs the user has collapsed (per-user persisted preference). */
+  collapsedBatchIds?: string[];
+  onToggleCollapse?: (batchId: string, collapsed: boolean) => void;
 }
 
 export function HarvestTable({
@@ -35,12 +38,18 @@ export function HarvestTable({
   onDeleteBatch,
   isLoading = false,
   isFiltered = false,
+  collapsedBatchIds,
+  onToggleCollapse,
 }: HarvestTableProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
   const groups = React.useMemo(
     () => groupByBatch(batches, harvests),
     [batches, harvests],
+  );
+  const collapsedSet = React.useMemo(
+    () => new Set(collapsedBatchIds ?? []),
+    [collapsedBatchIds],
   );
 
   if (isLoading) return <HarvestTableSkeleton />;
@@ -63,6 +72,8 @@ export function HarvestTable({
         <HarvestBatchGroup
           key={group.key}
           group={group}
+          collapsed={collapsedSet.has(group.key)}
+          onToggleCollapse={onToggleCollapse}
           onDelete={onDelete}
           onSidebarEdit={onSidebarEdit}
           onLogEntry={onLogEntry}

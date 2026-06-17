@@ -22,6 +22,7 @@ import { useHarvestViewSettings } from '@/lib/hooks/use-harvest-view-settings';
 import {
   setSort,
   setRange,
+  setBatchCollapsed,
   toBatchesVariables,
   DEFAULT_HARVEST_VIEW,
   type HarvestViewState,
@@ -77,6 +78,19 @@ export function useHarvestPage() {
     (range: HarvestDateRangePreset) => {
       setView((current) => {
         const next = setRange(current, range);
+        persistView(next);
+        return next;
+      });
+    },
+    [persistView],
+  );
+
+  // Collapse / expand a single batch's row, persisting the per-user state.
+  const handleToggleCollapse = React.useCallback(
+    (batchId: string, collapsed: boolean) => {
+      setView((current) => {
+        const next = setBatchCollapsed(current, batchId, collapsed);
+        if (next === current) return current;
         persistView(next);
         return next;
       });
@@ -281,6 +295,7 @@ export function useHarvestPage() {
     isFiltered,
     handleSortChange,
     handleRangeChange,
+    handleToggleCollapse,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,

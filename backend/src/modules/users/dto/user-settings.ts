@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsOptional, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { ObjectType, InputType, Field } from '@nestjs/graphql';
 import {
   HarvestSortField,
@@ -29,6 +35,12 @@ export class HarvestViewSettings {
   // Relative plantingDate range preset (resolved to dates client-side).
   @Field(() => HarvestDateRangePreset, { nullable: true })
   range?: HarvestDateRangePreset | null;
+
+  // Batch IDs the user has collapsed in the harvest-entry list. Batches are
+  // expanded by default; only the collapsed ones are tracked here. Absent/null
+  // means "nothing collapsed".
+  @Field(() => [String], { nullable: true })
+  collapsedBatchIds?: string[] | null;
 }
 
 @ObjectType()
@@ -62,4 +74,10 @@ export class HarvestViewSettingsInput {
   @IsOptional()
   @IsEnum(HarvestDateRangePreset)
   range?: HarvestDateRangePreset | null;
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  collapsedBatchIds?: string[] | null;
 }
