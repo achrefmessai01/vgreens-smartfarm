@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -14,6 +15,7 @@ import { HarvestViewSettingsInput } from './dto/user-settings';
 import { mergeUserSettings } from './utils/user-settings.util';
 import { OrderDirection, UserRole } from '@common/enums';
 import { UserStatus } from '@common/enums/user-status.enum';
+import { getAdminEmailDomainError } from './utils/admin-email-domain';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -91,6 +93,18 @@ export class UsersService extends BaseService<User> {
         }
       }
 
+      // Admin roles require an email on an allowed domain (VSL-182).
+      // Checked before inviting so we never create a Clerk user for a
+      // request that will be rejected.
+      const domainError = getAdminEmailDomainError(
+        createUserInput.role,
+        createUserInput.email,
+        createUserInput.tenantId,
+      );
+      if (domainError) {
+        throw new BadRequestException(domainError);
+      }
+
       // If no clerkUserId provided, send invitation via Clerk
       let clerkUserId = createUserInput.clerkUserId;
       let invitationUrl: string | undefined;
@@ -148,8 +162,11 @@ export class UsersService extends BaseService<User> {
 
       return this.userRepository.save(user);
     } catch (error) {
-      // Re-throw known exceptions
-      if (error instanceof ForbiddenException) {
+      // Re-throw known exceptions (incl. the domain-rule validation error)
+      if (
+        error instanceof ForbiddenException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       // Log unexpected errors with full stack trace
