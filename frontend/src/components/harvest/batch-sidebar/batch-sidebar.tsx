@@ -19,7 +19,7 @@ import {
   BatchHeaderField,
 } from './fields/batch-sidebar-basic-fields';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Plus, Sparkles } from 'lucide-react';
+import { CalendarDays, Sparkles } from 'lucide-react';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { entryHasData } from '@/types/batch-sidebar.types';
@@ -64,8 +64,6 @@ export function BatchSidebar({
     handleYieldChange,
     handleSetShowBrix,
     handleSetShowFruitWeight,
-    handleAddEntry,
-    handleRemoveEntry,
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
@@ -194,7 +192,6 @@ export function BatchSidebar({
                     key={index}
                     entry={entry}
                     index={index}
-                    canRemove={currentData.entries.length > 1}
                     defaultOpen={index === 0 || entryHasData(entry)}
                     onYieldChange={(field, value) =>
                       handleYieldChange(index, field, value)
@@ -216,21 +213,9 @@ export function BatchSidebar({
                     onSetShowFruitWeight={(show) =>
                       handleSetShowFruitWeight(index, show)
                     }
-                    onRemove={() => handleRemoveEntry(index)}
                     isLoading={busy}
                   />
                 ))}
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAddEntry}
-                  disabled={busy}
-                  className="w-full"
-                >
-                  <Plus className="mr-1 h-4 w-4" />
-                  {h?.addEntry ?? 'Add entry'}
-                </Button>
 
                 <div className="bg-card rounded-xl border p-3 shadow-sm">
                   <PhotosField

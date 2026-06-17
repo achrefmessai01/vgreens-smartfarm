@@ -11,7 +11,6 @@ import type {
   BatchDetailsData,
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
-import { createEmptyEntry } from '@/types/batch-sidebar.types';
 import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
 import { extractStoragePathFromUrl } from '@/lib/harvest-utils';
 import * as React from 'react';
@@ -178,24 +177,6 @@ export function useBatchSidebar({
     [updateEntry],
   );
 
-  const handleAddEntry = React.useCallback(() => {
-    setLocalData((prev) =>
-      prev ? { ...prev, entries: [...prev.entries, createEmptyEntry()] } : prev,
-    );
-  }, []);
-
-  const handleRemoveEntry = React.useCallback((entryIndex: number) => {
-    setLocalData((prev) => {
-      if (!prev) return prev;
-      // At least one entry must always remain.
-      if (prev.entries.length <= 1) return prev;
-      return {
-        ...prev,
-        entries: prev.entries.filter((_, i) => i !== entryIndex),
-      };
-    });
-  }, []);
-
   const handlePhotoUpload = React.useCallback(
     async (files: File[]) => {
       const uploadedUrls = await uploadPhotos(files);
@@ -328,8 +309,6 @@ export function useBatchSidebar({
     handleYieldChange,
     handleSetShowBrix,
     handleSetShowFruitWeight,
-    handleAddEntry,
-    handleRemoveEntry,
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
