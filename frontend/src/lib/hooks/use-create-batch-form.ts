@@ -22,6 +22,7 @@ const INITIAL_FORM_DATA: BatchFormData = {
   rowSpacing: 0,
   totalPlants: 0,
   lostPlants: 0,
+  replicates: 1,
 };
 
 function computeRowSpacing(data: BatchFormData): number {
@@ -45,6 +46,8 @@ function validateBatchForm(data: BatchFormData): BatchFormErrors {
     errors.rowLength = 'Row length must be greater than 0';
   if (!data.plantsPerMeter || data.plantsPerMeter <= 0)
     errors.plantsPerMeter = 'Plants per meter must be greater than 0';
+  if (!data.replicates || data.replicates < 1)
+    errors.replicates = 'Replicates must be at least 1';
   return errors;
 }
 
@@ -91,6 +94,7 @@ export function useCreateBatchForm({
               rowSpacing,
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
+              replicates: formData.replicates,
               status: BatchStatus.Active,
             },
           },

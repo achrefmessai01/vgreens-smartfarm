@@ -40,6 +40,7 @@ interface HarvestBatchGroupProps {
   onToggleCollapse?: (batchId: string, collapsed: boolean) => void;
   onDelete?: (harvest: HarvestItem) => void;
   onSidebarEdit?: (harvest: HarvestItem) => void;
+  onSidebarView?: (harvest: HarvestItem) => void;
   onLogEntry?: (batch: BatchItem) => void;
   onViewBatch?: (batch: BatchItem) => void;
   onEditBatch?: (batch: BatchItem) => void;
@@ -52,6 +53,7 @@ export function HarvestBatchGroup({
   onToggleCollapse,
   onDelete,
   onSidebarEdit,
+  onSidebarView,
   onLogEntry,
   onViewBatch,
   onEditBatch,
@@ -136,7 +138,7 @@ export function HarvestBatchGroup({
               <Button
                 size="icon"
                 variant="ghost"
-                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-destructive/10 hover:shadow-sm dark:hover:bg-destructive/20"
+                className="group hover:bg-destructive/10 dark:hover:bg-destructive/20 h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -196,7 +198,9 @@ export function HarvestBatchGroup({
                     <TableCell className="text-green-600">
                       {agg.classA}
                     </TableCell>
-                    <TableCell className="text-teal-600">{agg.classB}</TableCell>
+                    <TableCell className="text-teal-600">
+                      {agg.classB}
+                    </TableCell>
                     <TableCell className="text-amber-600">
                       {agg.classC}
                     </TableCell>
@@ -326,62 +330,73 @@ export function HarvestBatchGroup({
                       const rowYieldPerMeter = totals.yieldPerMeter;
                       const rowAvgFruitWeight = totals.avgFruitWeight;
                       return (
-                      <TableRow key={entry.id}>
-                        <TableCell>{formatHarvestDate(entry.date)}</TableCell>
-                        <TableCell className="text-green-600">
-                          {totals.classA}
-                        </TableCell>
-                        <TableCell className="text-teal-600">
-                          {totals.classB}
-                        </TableCell>
-                        <TableCell className="text-amber-600">
-                          {totals.classC}
-                        </TableCell>
-                        <TableCell className="text-red-500">
-                          {totals.waste}
-                        </TableCell>
-                        <TableCell>{totals.avgBrix ?? 0}&deg;Bx</TableCell>
-                        <TableCell>
-                          {rowAvgFruitWeight == null
-                            ? '—'
-                            : `${rowAvgFruitWeight.toFixed(3)} kg`}
-                        </TableCell>
-                        <TableCell>
-                          {rowYieldPerPlant == null
-                            ? '—'
-                            : `${rowYieldPerPlant.toFixed(2)} kg`}
-                        </TableCell>
-                        <TableCell>
-                          {rowYieldPerMeter == null
-                            ? '—'
-                            : `${rowYieldPerMeter.toFixed(2)} kg/m`}
-                        </TableCell>
-                        <TableCell className="max-w-[220px] truncate">
-                          {getCreatedByLabel(entry)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-200"
-                              onClick={() => onSidebarEdit?.(entry)}
-                              aria-label={h?.viewDetails ?? 'View Details'}
-                            >
-                              <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-destructive/10 hover:shadow-sm dark:hover:bg-destructive/20"
-                              onClick={() => onDelete?.(entry)}
-                              aria-label={h?.deleteHarvest ?? 'Delete Harvest'}
-                            >
-                              <Trash2 className="text-destructive h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                        <TableRow key={entry.id}>
+                          <TableCell>{formatHarvestDate(entry.date)}</TableCell>
+                          <TableCell className="text-green-600">
+                            {totals.classA}
+                          </TableCell>
+                          <TableCell className="text-teal-600">
+                            {totals.classB}
+                          </TableCell>
+                          <TableCell className="text-amber-600">
+                            {totals.classC}
+                          </TableCell>
+                          <TableCell className="text-red-500">
+                            {totals.waste}
+                          </TableCell>
+                          <TableCell>{totals.avgBrix ?? 0}&deg;Bx</TableCell>
+                          <TableCell>
+                            {rowAvgFruitWeight == null
+                              ? '—'
+                              : `${rowAvgFruitWeight.toFixed(3)} kg`}
+                          </TableCell>
+                          <TableCell>
+                            {rowYieldPerPlant == null
+                              ? '—'
+                              : `${rowYieldPerPlant.toFixed(2)} kg`}
+                          </TableCell>
+                          <TableCell>
+                            {rowYieldPerMeter == null
+                              ? '—'
+                              : `${rowYieldPerMeter.toFixed(2)} kg/m`}
+                          </TableCell>
+                          <TableCell className="max-w-[220px] truncate">
+                            {getCreatedByLabel(entry)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-200"
+                                onClick={() => onSidebarView?.(entry)}
+                                aria-label={h?.viewDetails ?? 'View Details'}
+                              >
+                                <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="group h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-200"
+                                onClick={() => onSidebarEdit?.(entry)}
+                                aria-label={h?.editHarvest ?? 'Edit Harvest'}
+                              >
+                                <Pencil className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="group hover:bg-destructive/10 dark:hover:bg-destructive/20 h-8 w-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
+                                onClick={() => onDelete?.(entry)}
+                                aria-label={
+                                  h?.deleteHarvest ?? 'Delete Harvest'
+                                }
+                              >
+                                <Trash2 className="text-destructive h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
                       );
                     })}
                   </TableBody>
@@ -459,16 +474,26 @@ export function HarvestBatchGroup({
                           </span>
                         </div>
 
-                        <div className="mt-2.5 grid grid-cols-2 gap-2">
+                        <div className="mt-2.5 grid grid-cols-3 gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="group h-9 border-[#016f7c]/30 text-[#016f7c] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#016f7c] hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:border-teal-300/40 dark:text-teal-200 dark:hover:border-teal-200 dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-100"
+                            onClick={() => onSidebarView?.(entry)}
+                            aria-label={h?.viewDetails ?? 'View Details'}
+                          >
+                            <Eye className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                            {h?.viewDetails ?? 'View Details'}
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             className="group h-9 border-[#016f7c]/30 text-[#016f7c] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#016f7c] hover:bg-[#016f7c]/10 hover:text-[#016f7c] hover:shadow-sm dark:border-teal-300/40 dark:text-teal-200 dark:hover:border-teal-200 dark:hover:bg-[#016f7c]/25 dark:hover:text-teal-100"
                             onClick={() => onSidebarEdit?.(entry)}
-                            aria-label={h?.viewDetails ?? 'View Details'}
+                            aria-label={h?.editHarvest ?? 'Edit Harvest'}
                           >
-                            <Eye className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                            {h?.viewDetails ?? 'View Details'}
+                            <Pencil className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                            {h?.editHarvest ?? 'Edit'}
                           </Button>
                           <Button
                             variant="destructive"

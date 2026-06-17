@@ -229,10 +229,17 @@ function batchToDetails(
     rowSpacing: batch.rowSpacing,
     totalPlants: batch.totalPlants,
     lostPlants: batch.lostPlants,
+    replicates: replicateCount(batch),
     plantingDate: batch.plantingDate,
     entries,
     photos,
   };
+}
+
+// A batch's replicate count, clamped to at least 1 so the form always renders
+// at least one entry even for legacy/absent values.
+function replicateCount(batch: BatchLike): number {
+  return Math.max(1, batch.replicates ?? 1);
 }
 
 // Sidebar view-model for an existing harvest (its batch + its entries).
@@ -256,7 +263,10 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
 }
 
 // Sidebar view-model for a freshly created batch (no harvest yet): one blank
-// entry, no photos.
+// entry per configured replicate, no photos.
 export function batchToBatchDetails(batch: BatchLike): BatchDetailsData {
-  return batchToDetails(batch, [createEmptyEntry()], []);
+  const entries = Array.from({ length: replicateCount(batch) }, () =>
+    createEmptyEntry(),
+  );
+  return batchToDetails(batch, entries, []);
 }

@@ -236,6 +236,18 @@ export function useHarvestPage() {
     setBatchSidebarOpen(true);
   }, []);
 
+  // Open an existing harvest event read-only.
+  const handleSidebarView = React.useCallback((harvest: HarvestItem) => {
+    setPendingBatch({
+      batchId: harvest.batchId,
+      harvestId: harvest.id,
+      details: harvestToBatchDetails(harvest),
+      initialDate: harvest.date,
+    });
+    setSidebarMode('view');
+    setBatchSidebarOpen(true);
+  }, []);
+
   // Log a brand-new harvest for an existing batch.
   const handleLogEntry = React.useCallback((batch: BatchItem) => {
     setPendingBatch({
@@ -306,6 +318,7 @@ export function useHarvestPage() {
     handleBatchCreated,
     handleSidebarCompleted,
     handleSidebarEdit,
+    handleSidebarView,
     handleLogEntry,
     handleBatchView,
     handleBatchEdit,

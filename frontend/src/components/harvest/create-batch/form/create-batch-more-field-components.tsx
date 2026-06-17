@@ -337,6 +337,42 @@ export function LostPlantsField({
   );
 }
 
+export function ReplicatesField({
+  formData,
+  setFormData,
+  errors,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="replicates" className="text-sm font-medium">
+        {h?.replicates ?? 'Replicates'}
+      </Label>
+      <Input
+        id="replicates"
+        type="number"
+        min="1"
+        step="1"
+        value={formData.replicates || ''}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            replicates: Math.max(1, Number.parseInt(e.target.value, 10) || 1),
+          }))
+        }
+        disabled={disabled}
+        className={`h-10 ${errors.replicates ? 'border-destructive' : ''}`}
+      />
+      {errors.replicates && (
+        <p className="text-destructive text-sm">{errors.replicates}</p>
+      )}
+    </div>
+  );
+}
+
 export function RowSpacingField({
   formData,
   setFormData,

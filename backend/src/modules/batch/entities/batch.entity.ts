@@ -135,6 +135,13 @@ export class Batch {
   @Column({ type: 'int', default: 0 })
   totalPlants: number;
 
+  // Number of replicate samples taken per harvest for this batch. Drives how
+  // many sets of inputs the harvest entry form renders. Defaults to 1 so
+  // legacy batches (and any batch without an explicit value) still render one.
+  @Field(() => Int)
+  @Column({ type: 'int', default: 1 })
+  replicates: number;
+
   @Field()
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
