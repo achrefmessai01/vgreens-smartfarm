@@ -33,6 +33,15 @@ export const ME_QUERY = gql`
       status
       preferredLanguage
       farmOverviewTimeRange
+      userSettings {
+        harvestView {
+          sort {
+            field
+            direction
+          }
+          range
+        }
+      }
       createdAt
       updatedAt
     }

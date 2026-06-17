@@ -10,6 +10,8 @@ import { BaseService } from '@common/services';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClerkSyncService } from './clerk-sync.service';
 import { CreateUserInput, UpdateUserInput } from './dto';
+import { HarvestViewSettingsInput } from './dto/user-settings';
+import { mergeUserSettings } from './utils/user-settings.util';
 import { OrderDirection, UserRole } from '@common/enums';
 import { UserStatus } from '@common/enums/user-status.enum';
 
@@ -254,6 +256,29 @@ export class UsersService extends BaseService<User> {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
     user.farmOverviewTimeRange = value;
+    return this.userRepository.save(user);
+  }
+
+  /**
+   * Persist the signed-in user's harvest-entry view preferences (sort +
+   * plantingDate range). Validates the structure, then MERGES `harvestView`
+   * into the existing userSettings blob so other settings keys survive
+   * (read-modify-write).
+   */
+  async updateHarvestViewSettings(
+    userId: string,
+    input: HarvestViewSettingsInput,
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    user.userSettings = mergeUserSettings(user.userSettings, {
+      harvestView: {
+        sort: input.sort ?? null,
+        range: input.range ?? null,
+      },
+    });
     return this.userRepository.save(user);
   }
 }

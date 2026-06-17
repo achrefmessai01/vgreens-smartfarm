@@ -22,6 +22,11 @@ export function getCreatedByLabel(harvest: HarvestItem) {
 // Build one group per batch, attaching that batch's harvest events. Batches
 // with no harvests yet are still returned (with an empty entries list) so they
 // remain visible in the harvest-entry tab.
+//
+// Group order is intentionally NOT re-sorted here: the `batches` array already
+// arrives in the server-applied sort order (see the Batches query's `sort`
+// variable), so we preserve it to stay correct under pagination. Only the
+// harvest entries *within* a group are ordered (most recent first).
 export function groupByBatch(
   batches: BatchItem[],
   harvests: HarvestItem[],
@@ -33,18 +38,11 @@ export function groupByBatch(
     entriesByBatch.set(h.batchId, list);
   }
 
-  return [...batches]
-    .map((batch) => ({
-      key: batch.id,
-      batch,
-      entries: (entriesByBatch.get(batch.id) ?? []).sort(
-        (a, b) => +new Date(b.date) - +new Date(a.date),
-      ),
-    }))
-    .sort((a, b) => {
-      const byPlanting =
-        +new Date(b.batch.plantingDate) - +new Date(a.batch.plantingDate);
-      if (byPlanting !== 0) return byPlanting;
-      return +new Date(b.batch.createdAt) - +new Date(a.batch.createdAt);
-    });
+  return batches.map((batch) => ({
+    key: batch.id,
+    batch,
+    entries: [...(entriesByBatch.get(batch.id) ?? [])].sort(
+      (a, b) => +new Date(b.date) - +new Date(a.date),
+    ),
+  }));
 }

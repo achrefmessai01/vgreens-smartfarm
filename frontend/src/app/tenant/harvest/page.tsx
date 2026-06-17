@@ -10,6 +10,8 @@ import {
   HarvestExportDialog,
   HarvestPageHeader,
   HarvestTable,
+  PeriodFilter,
+  SortControls,
 } from '@/components/harvest';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n';
@@ -40,6 +42,10 @@ export default function HarvestPage() {
     batches,
     summary,
     loading,
+    view,
+    isFiltered,
+    handleSortChange,
+    handleRangeChange,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,
@@ -135,6 +141,18 @@ export default function HarvestPage() {
                 title={t.pages.harvest?.harvestEntryTitle || 'Harvest Entry'}
                 onCreateBatch={handleCreateBatch}
                 onExportClick={() => setExportDialogOpen(true)}
+                filters={
+                  <>
+                    <PeriodFilter
+                      value={view.range}
+                      onChange={handleRangeChange}
+                    />
+                    <SortControls
+                      value={view.sort}
+                      onChange={handleSortChange}
+                    />
+                  </>
+                }
               />
               <HarvestTable
                 batches={batches ?? []}
@@ -146,6 +164,7 @@ export default function HarvestPage() {
                 onEditBatch={handleBatchEdit}
                 onDeleteBatch={handleBatchDeleteRequest}
                 isLoading={loading}
+                isFiltered={isFiltered}
               />
             </div>
           </TabsContent>

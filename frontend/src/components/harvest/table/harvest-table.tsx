@@ -20,6 +20,8 @@ interface HarvestTableProps {
   onEditBatch?: (batch: BatchItem) => void;
   onDeleteBatch?: (batch: BatchItem, entries: HarvestItem[]) => void;
   isLoading?: boolean;
+  /** True when a date-range filter is active — changes the empty-state copy. */
+  isFiltered?: boolean;
 }
 
 export function HarvestTable({
@@ -32,6 +34,7 @@ export function HarvestTable({
   onEditBatch,
   onDeleteBatch,
   isLoading = false,
+  isFiltered = false,
 }: HarvestTableProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -45,10 +48,10 @@ export function HarvestTable({
     return (
       <div className="bg-card rounded-xl border p-8 text-center">
         <p className="text-muted-foreground text-sm">
-          {h?.noHarvestsYet ?? 'No harvests yet'}
+          {isFiltered ? h?.noMatchingBatches : h?.noHarvestsYet}
         </p>
         <p className="text-muted-foreground mt-1 text-xs">
-          {h?.logFirstEntryHint ?? 'Create a batch and log your first entry.'}
+          {isFiltered ? h?.adjustFiltersHint : h?.logFirstEntryHint}
         </p>
       </div>
     );
