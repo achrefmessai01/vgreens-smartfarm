@@ -143,13 +143,13 @@ export default function HarvestPage() {
                 onExportClick={() => setExportDialogOpen(true)}
                 filters={
                   <>
-                    <SortControls
-                      value={view.sort}
-                      onChange={handleSortChange}
-                    />
                     <PeriodFilter
                       value={view.range}
                       onChange={handleRangeChange}
+                    />
+                    <SortControls
+                      value={view.sort}
+                      onChange={handleSortChange}
                     />
                   </>
                 }

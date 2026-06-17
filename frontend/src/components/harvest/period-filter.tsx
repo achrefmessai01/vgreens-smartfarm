@@ -34,7 +34,7 @@ export function PeriodFilter({
   const c = t.common;
 
   const label: Record<HarvestDateRangePreset, string> = {
-    [HarvestDateRangePreset.All]: c?.allTime ?? 'All time',
+    [HarvestDateRangePreset.All]: c?.total ?? 'Total',
     [HarvestDateRangePreset.Today]: c?.today ?? 'Today',
     [HarvestDateRangePreset.ThisWeek]: c?.thisWeek ?? 'This Week',
     [HarvestDateRangePreset.ThisMonth]: c?.thisMonth ?? 'This Month',
@@ -51,13 +51,13 @@ export function PeriodFilter({
         className={cn('h-9 w-40', className)}
         aria-label={t.pages.harvest.plantingDateRange}
       >
-        <Clock className="text-muted-foreground h-3.5 w-3.5" aria-hidden />
         <SelectValue placeholder={c?.selectPeriod ?? 'Select period'} />
       </SelectTrigger>
       <SelectContent>
         {RANGE_PRESETS.map((preset) => (
           <SelectItem key={preset} value={preset} className="text-sm">
-            {label[preset]}
+            <Clock className="text-muted-foreground h-3.5 w-3.5" aria-hidden />
+            <span>{label[preset]}</span>
           </SelectItem>
         ))}
       </SelectContent>
