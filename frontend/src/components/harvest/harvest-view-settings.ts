@@ -1,7 +1,7 @@
 // Pure, framework-agnostic state + transforms for the harvest-entry view's
 // sort + plantingDate-range controls. Kept free of React/Apollo so the logic
-// can be unit-tested in isolation (see harvest-view-settings.test.ts). The
-// persistence hook and presentational components build on top of this.
+// stays simple and reusable. The persistence hook and presentational
+// components build on top of this.
 
 // String-union mirrors of the backend GraphQL enums (HarvestSortField,
 // OrderDirection). Values match the enum strings exactly, so they can be sent
