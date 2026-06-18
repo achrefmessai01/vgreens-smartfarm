@@ -64,12 +64,6 @@ interface HistoryDrawerProps {
   onOpenChange: (open: boolean) => void;
   parameter: ParameterType;
   slotId: string | null;
-  /**
-   * Real InfluxDB `greenhouse` tag for the selected sensor (from slot meta),
-   * used to scope the query to the exact series. NOT parsed from the slot id,
-   * whose greenhouse segment can be an assigned display name (VSL-221).
-   */
-  greenhouse?: string | null;
   parameterLabel: string;
   timeRangeLabel: string;
   oneDayLabel: string;
@@ -84,7 +78,6 @@ export function HistoryDrawer({
   onOpenChange,
   parameter,
   slotId,
-  greenhouse,
   parameterLabel,
   timeRangeLabel,
   oneDayLabel,
@@ -123,17 +116,6 @@ export function HistoryDrawer({
         stop: startStop.stop ?? undefined,
         limit: 2000,
         field: parameter,
-        // VSL-221: scope by the REAL InfluxDB `greenhouse` tag (passed via the
-        // `greenhouse` prop from the selected slot's meta) — NOT the slot id's
-        // greenhouse segment, which can be an assigned display name (e.g.
-        // "Haus 1") that never matches the tag "greenhouse_01" and returned 0
-        // rows (the original bug). Combined with `device`, this pins the exact
-        // series within the tenant's bucket; the query already only hits
-        // `tenant.influxBucketName`, and device names can repeat across
-        // greenhouses/tenants, so the greenhouse tag is the extra guard. When
-        // a tenant doesn't tag with `greenhouse`, this is undefined and we fall
-        // back to device + field within the tenant's own bucket.
-        greenhouse: greenhouse ?? undefined,
         device: slotFilters?.device ?? undefined,
         level:
           slotFilters?.level && slotFilters.level.toLowerCase() !== 'unknown'
