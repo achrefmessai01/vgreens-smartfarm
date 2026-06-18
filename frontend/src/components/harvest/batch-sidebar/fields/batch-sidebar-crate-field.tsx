@@ -17,7 +17,7 @@ export function CrateYieldField({
   remainingKgs,
   waste,
   crateWeight,
-  onCrateChange,
+  onChange,
   isLoading = false,
 }: CrateYieldFieldProps) {
   const { t } = useI18n();
@@ -79,7 +79,7 @@ export function CrateYieldField({
                     <button
                       type="button"
                       onClick={() =>
-                        onCrateChange?.({ kind: 'removeClass', index: i })
+                        onChange?.({ kind: 'removeClass', index: i })
                       }
                       aria-label={h?.removeQualityClass ?? 'Remove class'}
                       className="text-muted-foreground hover:text-destructive"
@@ -97,7 +97,7 @@ export function CrateYieldField({
                     step="1"
                     value={count === 0 ? '' : count.toString()}
                     onChange={(e) =>
-                      onCrateChange?.({
+                      onChange?.({
                         kind: 'crateCount',
                         index: i,
                         value: Math.max(
@@ -120,7 +120,7 @@ export function CrateYieldField({
                     step="0.1"
                     value={remainder === 0 ? '' : remainder.toString()}
                     onChange={(e) =>
-                      onCrateChange?.({
+                      onChange?.({
                         kind: 'remainingKg',
                         index: i,
                         value: Math.max(0, parseFloat(e.target.value) || 0),
@@ -145,7 +145,7 @@ export function CrateYieldField({
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => onCrateChange?.({ kind: 'addClass' })}
+          onClick={() => onChange?.({ kind: 'addClass' })}
           className="w-full"
         >
           <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
@@ -161,7 +161,7 @@ export function CrateYieldField({
               step="0.1"
               value={waste === 0 ? '' : waste.toString()}
               onChange={(e) =>
-                onCrateChange?.({
+                onChange?.({
                   kind: 'waste',
                   value: Math.max(0, parseFloat(e.target.value) || 0),
                 })

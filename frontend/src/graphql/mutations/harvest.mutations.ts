@@ -38,9 +38,7 @@ const HARVEST_MUTATION_FIELDS = gql`
       id
       rowX
       rowY
-      classA
-      classB
-      classC
+      classKgs
       waste
       crateCounts
       remainingKgs
@@ -54,6 +52,7 @@ const HARVEST_MUTATION_FIELDS = gql`
       }
     }
     totals {
+      classKgs
       classA
       classB
       classC

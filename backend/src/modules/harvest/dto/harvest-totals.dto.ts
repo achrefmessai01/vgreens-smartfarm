@@ -5,13 +5,26 @@ import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
 // omitted DB view would have produced; nothing here is stored on the harvest.
 @ObjectType()
 export class HarvestTotals {
-  @Field(() => Float, { description: 'SUM of entries.classA' })
+  @Field(() => [Float], {
+    description:
+      'Per-quality sellable kg sums, positional and dynamic (index 0=A, 1=B, ...). As wide as the widest entry. The authoritative per-class breakdown.',
+  })
+  classKgs: number[];
+
+  @Field(() => Float, {
+    description:
+      'classKgs[0] (Quality A). Convenience scalar for the first class.',
+  })
   classA: number;
 
-  @Field(() => Float, { description: 'SUM of entries.classB' })
+  @Field(() => Float, {
+    description: 'classKgs[1] (Quality B), 0 if absent. Convenience scalar.',
+  })
   classB: number;
 
-  @Field(() => Float, { description: 'SUM of entries.classC' })
+  @Field(() => Float, {
+    description: 'classKgs[2] (Quality C), 0 if absent. Convenience scalar.',
+  })
   classC: number;
 
   @Field(() => Float, { description: 'SUM of entries.waste' })

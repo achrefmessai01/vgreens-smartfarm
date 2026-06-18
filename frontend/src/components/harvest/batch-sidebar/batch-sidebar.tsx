@@ -61,8 +61,7 @@ export function BatchSidebar({
     handleAddBrixReading,
     handleRemoveBrixReading,
     handleFruitCountChange,
-    handleYieldChange,
-    handleCrateChange,
+    handleEntryChange,
     handleSetShowBrix,
     handleSetShowFruitWeight,
     handlePhotoUpload,
@@ -205,12 +204,7 @@ export function BatchSidebar({
                     batchStartRow={currentData.startRow}
                     batchEndRow={currentData.endRow}
                     defaultOpen={index === 0 || entryHasData(entry)}
-                    onYieldChange={(field, value) =>
-                      handleYieldChange(index, field, value)
-                    }
-                    onCrateChange={(change) =>
-                      handleCrateChange(index, change)
-                    }
+                    onChange={(change) => handleEntryChange(index, change)}
                     onBrixChange={(readingIndex, value) =>
                       handleBrixChange(index, readingIndex, value)
                     }

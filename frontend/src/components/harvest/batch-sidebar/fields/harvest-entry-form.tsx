@@ -4,7 +4,7 @@ import * as React from 'react';
 import { InputMode } from '@/generated/graphql';
 import type { HarvestQualityClass } from '@/generated/graphql';
 import type {
-  CrateChange,
+  EntryChange,
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
 import { crateEntryTotalKg } from '@/lib/harvest-utils';
@@ -24,11 +24,9 @@ export interface HarvestEntryFormProps {
   // Batch row range, forwarded to the weight-mode yield field.
   batchStartRow?: number | null;
   batchEndRow?: number | null;
-  onYieldChange: (
-    field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
-    value: number,
-  ) => void;
-  onCrateChange: (change: CrateChange) => void;
+  // Unified per-entry field change (per-class cells, waste, row coords,
+  // add/remove class) for both modes.
+  onChange: (change: EntryChange) => void;
   onBrixChange: (readingIndex: number, value: number) => void;
   onBrixClassChange: (readingIndex: number, value: HarvestQualityClass) => void;
   onAddBrixReading: () => void;
@@ -50,8 +48,7 @@ export function HarvestEntryForm({
   crateWeight,
   batchStartRow,
   batchEndRow,
-  onYieldChange,
-  onCrateChange,
+  onChange,
   onBrixChange,
   onBrixClassChange,
   onAddBrixReading,
@@ -64,11 +61,11 @@ export function HarvestEntryForm({
   const idPrefix = `entry-${index}-`;
   const isCrate = inputMode === InputMode.Crate;
 
-  // Total sellable yield the Fruit-weight section averages over. Crate mode sums
-  // every quality class (dynamic count); weight mode sums A + B + C.
+  // Total sellable yield the Fruit-weight section averages over. Both modes sum
+  // every quality class (dynamic count).
   const sellableWeight = isCrate
     ? crateEntryTotalKg(entry.crateCounts, entry.remainingKgs, crateWeight)
-    : entry.marketable + entry.classB + entry.classC;
+    : entry.classKgs.reduce((s, v) => s + (v || 0), 0);
 
   return (
     <div className="space-y-4">
@@ -78,20 +75,18 @@ export function HarvestEntryForm({
           remainingKgs={entry.remainingKgs}
           waste={entry.waste}
           crateWeight={crateWeight}
-          onCrateChange={onCrateChange}
+          onChange={onChange}
           isLoading={isLoading}
         />
       ) : (
         <YieldDataField
-          marketable={entry.marketable}
+          classKgs={entry.classKgs}
           waste={entry.waste}
-          classB={entry.classB}
-          classC={entry.classC}
           rowX={entry.rowX}
           rowY={entry.rowY}
           batchStartRow={batchStartRow}
           batchEndRow={batchEndRow}
-          onYieldChange={onYieldChange}
+          onChange={onChange}
           isLoading={isLoading}
         />
       )}

@@ -78,16 +78,16 @@ export class HarvestsService {
     return this.roundTo(this.mean(brixReadings.map((b) => b.value)), 1);
   }
 
-  // Non-blocking sanity check for crate-mode input: a per-class remainder at or
-  // above a full crate weight means another crate should probably have been
-  // counted. Logged, never rejected.
   // Quality-class label from a 0-based array index: 0 -> A, 1 -> B, 2 -> C, ...
-  // The crate classes are positional and unbounded; the letter is derived, never
-  // taken from a fixed enum.
+  // The classes are positional and unbounded; the letter is derived, never taken
+  // from a fixed enum.
   private classLetter(index: number): string {
     return String.fromCharCode(65 + index);
   }
 
+  // Non-blocking sanity check for crate-mode input: a per-class remainder at or
+  // above a full crate weight means another crate should probably have been
+  // counted. Logged, never rejected.
   private warnCrateRemainder(input: HarvestEntryInput, batch: Batch): void {
     if (batch.inputMode !== InputMode.CRATE) return;
     const crateWeight = batch.crateWeight ?? 0;
@@ -105,10 +105,11 @@ export class HarvestsService {
   // fields (avgFruitWeight, avgBrix) — the service is the source of truth for
   // these, never the client.
   //
-  // Crate mode (batch.inputMode === CRATE): store only the per-quality crate
-  // counts + remainders; classA/B/C, totalFruitWeight and avgFruitWeight are
-  // left at 0 because they are derived at read from the batch's current
-  // crateWeight (so a crateWeight edit propagates without rewriting rows).
+  // Both modes store per-quality arrays now: weight mode the kg directly
+  // (classKgs), crate mode the counts + remainders (kg derived at read from the
+  // batch's current crateWeight, so a crateWeight edit propagates). The derived
+  // fields (totalFruitWeight, avgFruitWeight) are always computed at read via the
+  // helpers below and left 0 in storage.
   private buildEntry(
     input: HarvestEntryInput,
     batch: Batch,
@@ -118,46 +119,41 @@ export class HarvestsService {
       value: b.value,
     }));
 
-    if (batch.inputMode === InputMode.CRATE) {
-      return {
-        rowX: input.rowX ?? 0,
-        rowY: input.rowY ?? 0,
-        classA: 0,
-        classB: 0,
-        classC: 0,
-        waste: input.waste ?? 0,
-        crateCounts: input.crateCounts ?? [],
-        remainingKgs: input.remainingKgs ?? [],
-        fruitCount: input.fruitCount ?? 0,
-        totalFruitWeight: 0,
-        avgFruitWeight: 0,
-        brixReadings,
-        avgBrix: this.entryAvgBrix(brixReadings),
-      };
-    }
-
-    const fruitCount = input.fruitCount ?? 0;
-    const totalFruitWeight = input.totalFruitWeight ?? 0;
-    return {
+    const common = {
       rowX: input.rowX ?? 0,
       rowY: input.rowY ?? 0,
-      classA: input.classA ?? 0,
-      classB: input.classB ?? 0,
-      classC: input.classC ?? 0,
       waste: input.waste ?? 0,
-      fruitCount,
-      totalFruitWeight,
-      avgFruitWeight:
-        fruitCount > 0 ? this.roundTo(totalFruitWeight / fruitCount, 3) : 0,
+      fruitCount: input.fruitCount ?? 0,
+      totalFruitWeight: 0,
+      avgFruitWeight: 0,
       brixReadings,
       avgBrix: this.entryAvgBrix(brixReadings),
     };
+
+    if (batch.inputMode === InputMode.CRATE) {
+      return {
+        ...common,
+        crateCounts: input.crateCounts ?? [],
+        remainingKgs: input.remainingKgs ?? [],
+      };
+    }
+    return { ...common, classKgs: input.classKgs ?? [] };
   }
 
-  // Effective kg for one quality class by 0-based index. Crate mode derives it
-  // from the batch's current crateWeight (count × crateWeight + remainder);
-  // weight mode reads the stored class kg (only indices 0/1/2 = A/B/C exist).
-  // Single source of truth — every total flows through here.
+  // Number of quality classes an entry carries (per-entry, dynamic).
+  private entryClassCount(
+    e: HarvestEntry,
+    batch: Batch | null | undefined,
+  ): number {
+    return batch?.inputMode === InputMode.CRATE
+      ? (e.crateCounts?.length ?? 0)
+      : (e.classKgs?.length ?? 0);
+  }
+
+  // Effective sellable kg for one quality class by 0-based index. Crate mode
+  // derives it from the batch's current crateWeight (count × crateWeight +
+  // remainder); weight mode reads the stored class kg. Single source of truth —
+  // every total flows through here.
   private entryClassKg(
     e: HarvestEntry,
     batch: Batch | null | undefined,
@@ -168,23 +164,19 @@ export class HarvestsService {
       const remainder = e.remainingKgs?.[index] ?? 0;
       return count * (batch.crateWeight ?? 0) + remainder;
     }
-    return [e.classA, e.classB, e.classC][index] ?? 0;
+    return e.classKgs?.[index] ?? 0;
   }
 
-  // Effective total sellable weight for an entry: in crate mode the sum across
-  // ALL quality classes present (dynamic, unbounded); in weight mode the stored
-  // totalFruitWeight.
+  // Effective total sellable weight for an entry: the sum across ALL quality
+  // classes present (dynamic, unbounded), in either mode.
   private entryTotalWeight(
     e: HarvestEntry,
     batch: Batch | null | undefined,
   ): number {
-    if (batch?.inputMode === InputMode.CRATE) {
-      const n = e.crateCounts?.length ?? 0;
-      let total = 0;
-      for (let i = 0; i < n; i++) total += this.entryClassKg(e, batch, i);
-      return total;
-    }
-    return e.totalFruitWeight ?? 0;
+    const n = this.entryClassCount(e, batch);
+    let total = 0;
+    for (let i = 0; i < n; i++) total += this.entryClassKg(e, batch, i);
+    return total;
   }
 
   // Effective average fruit weight, derived from the effective total so it also
@@ -213,22 +205,23 @@ export class HarvestsService {
     const sum = (pick: (e: HarvestEntry) => number): number =>
       list.reduce((s, e) => s + (pick(e) || 0), 0);
 
-    // Class kg and totals flow through the effective-weight helpers so crate-mode
-    // entries reflect the batch's current crateWeight. classA/B/C are the fixed
-    // first three indices (0/1/2); in crate mode any further classes still count
-    // in totalFruitWeight (below) but not in these three scalar fields.
-    const classA = this.roundTo(
-      sum((e) => this.entryClassKg(e, batch, 0)),
-      3,
+    // Per-class sellable kg, summed across entries through the effective-weight
+    // helper (so crate-mode entries reflect the batch's current crateWeight). The
+    // array is as wide as the widest entry — class count is per-entry and dynamic.
+    const classN = Math.max(
+      0,
+      ...list.map((e) => this.entryClassCount(e, batch)),
     );
-    const classB = this.roundTo(
-      sum((e) => this.entryClassKg(e, batch, 1)),
-      3,
+    const classKgs = Array.from({ length: classN }, (_, i) =>
+      this.roundTo(
+        sum((e) => this.entryClassKg(e, batch, i)),
+        3,
+      ),
     );
-    const classC = this.roundTo(
-      sum((e) => this.entryClassKg(e, batch, 2)),
-      3,
-    );
+    // Convenience scalars for the first three classes (CSV / summary / compare).
+    const classA = classKgs[0] ?? 0;
+    const classB = classKgs[1] ?? 0;
+    const classC = classKgs[2] ?? 0;
     const waste = this.roundTo(
       sum((e) => e.waste),
       3,
@@ -239,9 +232,8 @@ export class HarvestsService {
       3,
     );
 
-    // Crate-count rollups are meaningful only for crate-mode batches. The array
-    // length is dynamic: as wide as the widest entry's crateCounts (one slot per
-    // quality class, index 0=A, 1=B, ...).
+    // Crate-count rollups are meaningful only for crate-mode batches. Dynamic
+    // length: as wide as the widest entry's crateCounts (index 0=A, 1=B, ...).
     const isCrate = batch?.inputMode === InputMode.CRATE;
     const crateClassN = isCrate
       ? Math.max(0, ...list.map((e) => e.crateCounts?.length ?? 0))
@@ -272,6 +264,7 @@ export class HarvestsService {
       rowLength > 0 ? this.roundTo(totalFruitWeight / rowLength, 3) : null;
 
     return {
+      classKgs,
       classA,
       classB,
       classC,
@@ -787,34 +780,34 @@ export class HarvestsService {
       }));
   }
 
+  // Per-day per-class kg, with a dynamic number of classes (index 0=A, 1=B, ...).
+  // `classes` is padded to the widest day so every datum has the same length for
+  // the stacked chart.
   private generateClassDistribution(
     items: HarvestWithTotals[],
   ): ClassDistributionData[] {
-    const daily = new Map<
-      string,
-      { classA: number; classB: number; classC: number; waste: number }
-    >();
+    const daily = new Map<string, { classes: number[]; waste: number }>();
     for (const { harvest, totals } of items) {
       const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? {
-        classA: 0,
-        classB: 0,
-        classC: 0,
-        waste: 0,
-      };
-      cur.classA += totals.classA;
-      cur.classB += totals.classB;
-      cur.classC += totals.classC;
+      const cur = daily.get(key) ?? { classes: [], waste: 0 };
+      const kgs = totals.classKgs ?? [];
+      for (let i = 0; i < kgs.length; i++) {
+        cur.classes[i] = (cur.classes[i] ?? 0) + (kgs[i] ?? 0);
+      }
       cur.waste += totals.waste;
       daily.set(key, cur);
     }
+    const maxLen = Math.max(
+      0,
+      ...[...daily.values()].map((d) => d.classes.length),
+    );
     return [...daily.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, d]) => ({
         date,
-        marketable: this.roundTo(d.classA, 1),
-        classB: this.roundTo(d.classB, 1),
-        classC: this.roundTo(d.classC, 1),
+        classes: Array.from({ length: maxLen }, (_, i) =>
+          this.roundTo(d.classes[i] ?? 0, 1),
+        ),
         waste: this.roundTo(d.waste, 1),
       }));
   }
@@ -856,43 +849,30 @@ export class HarvestsService {
       }));
   }
 
+  // Cumulative sellable (all classes summed) and waste over time. The chart
+  // plots the sellable line, so per-class detail isn't needed here — and summing
+  // all classes keeps it correct for any class count.
   private generateCumulativeYield(
     items: HarvestWithTotals[],
   ): CumulativeYieldData[] {
-    const daily = new Map<
-      string,
-      { classA: number; classB: number; classC: number; waste: number }
-    >();
+    const daily = new Map<string, { sellable: number; waste: number }>();
     for (const { harvest, totals } of items) {
       const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? {
-        classA: 0,
-        classB: 0,
-        classC: 0,
-        waste: 0,
-      };
-      cur.classA += totals.classA;
-      cur.classB += totals.classB;
-      cur.classC += totals.classC;
+      const cur = daily.get(key) ?? { sellable: 0, waste: 0 };
+      cur.sellable += totals.totalFruitWeight;
       cur.waste += totals.waste;
       daily.set(key, cur);
     }
-    let a = 0;
-    let b = 0;
-    let c = 0;
+    let sellable = 0;
     let w = 0;
     return [...daily.entries()]
       .sort(([x], [y]) => x.localeCompare(y))
       .map(([date, d]) => {
-        a += d.classA;
-        b += d.classB;
-        c += d.classC;
+        sellable += d.sellable;
         w += d.waste;
         return {
           date,
-          cumulativeClassA: this.roundTo(a, 1),
-          cumulativeClassB: this.roundTo(b, 1),
-          cumulativeClassC: this.roundTo(c, 1),
+          cumulativeSellable: this.roundTo(sellable, 1),
           cumulativeWaste: this.roundTo(w, 1),
         };
       });

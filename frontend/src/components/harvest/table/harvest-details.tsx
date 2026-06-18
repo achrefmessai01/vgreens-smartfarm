@@ -36,9 +36,6 @@ export function HarvestDetails({
 
   const totals = harvest.totals;
   const greenhouseName = harvest.batch?.greenhouse?.name ?? null;
-  const qualityALabel = h?.qualityA ?? 'Quality A';
-  const qualityBLabel = h?.qualityB ?? 'Quality B';
-  const qualityCLabel = h?.qualityC ?? 'Quality C';
   const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
   const wasteLabel = h?.waste ?? 'Waste';
   const ratioLabel = h?.wasteRatio ?? 'Waste Ratio';
@@ -124,24 +121,20 @@ export function HarvestDetails({
             {entries.map((entry, entryIndex) => {
               const counts = entry.crateCounts ?? [];
               const rems = entry.remainingKgs ?? [];
-              // Per-class rows. Crate mode: one row per class present (dynamic),
-              // kg derived from count × crateWeight + remainder. Weight mode: the
-              // fixed A/B/C stored kg.
+              // Per-class rows, dynamic in both modes. Crate mode: kg derived
+              // from count × crateWeight + remainder, with a breakdown caption.
+              // Weight mode: the stored per-class kg.
               const classRows = isCrate
                 ? counts.map((count, i) => ({
                     label: classLabelTpl.replace('{class}', classLetter(i)),
                     kg: crateClassKg(count, rems[i] ?? 0, crateWeight),
                     breakdown: crateBreakdownText(count, rems[i] ?? 0),
                   }))
-                : [
-                    { label: qualityALabel, kg: entry.classA, breakdown: null },
-                    { label: qualityBLabel, kg: entry.classB, breakdown: null },
-                    {
-                      label: qualityCLabel,
-                      kg: entry.classC ?? 0,
-                      breakdown: null,
-                    },
-                  ];
+                : (entry.classKgs ?? []).map((kg, i) => ({
+                    label: classLabelTpl.replace('{class}', classLetter(i)),
+                    kg,
+                    breakdown: null,
+                  }));
               const sellable = classRows.reduce((s, r) => s + r.kg, 0);
               const entryTotal = sellable + entry.waste;
               const entryRatio =

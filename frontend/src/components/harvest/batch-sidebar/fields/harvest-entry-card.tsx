@@ -6,7 +6,7 @@ import { useI18n } from '@/i18n';
 import { InputMode } from '@/generated/graphql';
 import type { HarvestQualityClass } from '@/generated/graphql';
 import type {
-  CrateChange,
+  EntryChange,
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
 import { crateEntryTotalKg } from '@/lib/harvest-utils';
@@ -24,11 +24,7 @@ export interface HarvestEntryCardProps {
   batchStartRow?: number | null;
   batchEndRow?: number | null;
   defaultOpen?: boolean;
-  onYieldChange: (
-    field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
-    value: number,
-  ) => void;
-  onCrateChange: (change: CrateChange) => void;
+  onChange: (change: EntryChange) => void;
   onBrixChange: (readingIndex: number, value: number) => void;
   onBrixClassChange: (readingIndex: number, value: HarvestQualityClass) => void;
   onAddBrixReading: () => void;
@@ -47,8 +43,7 @@ export function HarvestEntryCard({
   batchStartRow,
   batchEndRow,
   defaultOpen = false,
-  onYieldChange,
-  onCrateChange,
+  onChange,
   onBrixChange,
   onBrixClassChange,
   onAddBrixReading,
@@ -62,12 +57,12 @@ export function HarvestEntryCard({
   const h = t.pages.harvest;
   const [open, setOpen] = React.useState(defaultOpen);
 
-  // Headline is the entry's total sellable yield: Quality A + B + C. In crate
-  // mode it's derived from the crate counts + the batch crate weight.
+  // Headline is the entry's total sellable yield across all quality classes. In
+  // crate mode it's derived from the crate counts + the batch crate weight.
   const headlineValue =
     inputMode === InputMode.Crate
       ? crateEntryTotalKg(entry.crateCounts, entry.remainingKgs, crateWeight)
-      : entry.marketable + entry.classB + entry.classC;
+      : entry.classKgs.reduce((s, v) => s + (v || 0), 0);
   const entryTitle = (h?.entryLabel ?? 'Entry {n}').replace(
     '{n}',
     String(index + 1),
@@ -102,8 +97,7 @@ export function HarvestEntryCard({
             crateWeight={crateWeight}
             batchStartRow={batchStartRow}
             batchEndRow={batchEndRow}
-            onYieldChange={onYieldChange}
-            onCrateChange={onCrateChange}
+            onChange={onChange}
             onBrixChange={onBrixChange}
             onBrixClassChange={onBrixClassChange}
             onAddBrixReading={onAddBrixReading}

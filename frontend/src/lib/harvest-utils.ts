@@ -77,26 +77,29 @@ export function computeAvgFruitWeight(
   return Math.round((totalFruitWeight / fruitCount) * 1000) / 1000;
 }
 
-// Number of quality classes a fresh crate entry starts with (A/B/C). The count
-// is not fixed — the form can add/remove classes — this is just the default.
-export const DEFAULT_CRATE_CLASS_COUNT = 3;
-
 // Quality-class label letter from a 0-based array index: 0 -> A, 1 -> B, ... The
-// crate classes are positional and unbounded; the letter is derived, not from an
-// enum. Mirrors the backend classLetter.
+// classes are positional and unbounded; the letter is derived, not from an enum.
+// Mirrors the backend classLetter.
 export function classLetter(index: number): string {
   return String.fromCharCode(65 + index);
 }
 
-// Align a count/remainder array pair to a common length (zero-filled), at least
-// `min`, so indexed access is safe and the two arrays always match in length.
-export function normalizeCratePair(
+// Align the three per-class form arrays (weight kg, crate counts, remainders) to
+// one common length (zero-filled), at least 1, so a single class index is valid
+// across all of them regardless of which mode the entry was saved in.
+export function normalizeEntryClasses(
+  classKgs: number[] | null | undefined,
   counts: number[] | null | undefined,
   rems: number[] | null | undefined,
-  min = 1,
-): { crateCounts: number[]; remainingKgs: number[] } {
-  const len = Math.max(counts?.length ?? 0, rems?.length ?? 0, min);
+): { classKgs: number[]; crateCounts: number[]; remainingKgs: number[] } {
+  const len = Math.max(
+    1,
+    classKgs?.length ?? 0,
+    counts?.length ?? 0,
+    rems?.length ?? 0,
+  );
   return {
+    classKgs: Array.from({ length: len }, (_, i) => classKgs?.[i] ?? 0),
     crateCounts: Array.from({ length: len }, (_, i) => counts?.[i] ?? 0),
     remainingKgs: Array.from({ length: len }, (_, i) => rems?.[i] ?? 0),
   };
@@ -220,22 +223,20 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     entry.brixReadings.length > 0
       ? entry.brixReadings.map((b) => b.class)
       : createEmptyEntry().brixClasses;
-  // Align the stored crate arrays; default to the standard class count when this
-  // is a weight-mode/empty entry so the crate layout still has rows if switched.
-  const crate = normalizeCratePair(
+  // Align the three per-class arrays to one length (>=1) so the form's class
+  // rows are consistent whichever mode the entry was saved in.
+  const cls = normalizeEntryClasses(
+    entry.classKgs,
     entry.crateCounts,
     entry.remainingKgs,
-    DEFAULT_CRATE_CLASS_COUNT,
   );
   return {
-    marketable: entry.classA,
+    classKgs: cls.classKgs,
+    crateCounts: cls.crateCounts,
+    remainingKgs: cls.remainingKgs,
     waste: entry.waste,
-    classB: entry.classB,
-    classC: entry.classC,
     rowX: entry.rowX,
     rowY: entry.rowY,
-    crateCounts: crate.crateCounts,
-    remainingKgs: crate.remainingKgs,
     brixReadings: readings,
     brixClasses: classes,
     showBrix: entry.brixReadings.some((b) => b.value > 0),

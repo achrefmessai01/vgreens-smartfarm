@@ -17,9 +17,8 @@ import {
 
 interface CumulativeYieldPoint {
   date: string;
-  cumulativeClassA: number;
-  cumulativeClassB: number;
-  cumulativeClassC: number;
+  // Cumulative sellable (all quality classes summed) and waste to date.
+  cumulativeSellable: number;
   cumulativeWaste: number;
 }
 
@@ -97,19 +96,13 @@ function SingleBatchView({
   // plotted against cumulative waste.
   const chartData = data.map((p) => ({
     date: p.date,
-    classA: p.cumulativeClassA,
-    classB: p.cumulativeClassB,
-    classC: p.cumulativeClassC,
     waste: p.cumulativeWaste,
-    sellable:
-      p.cumulativeClassA + p.cumulativeClassB + p.cumulativeClassC,
+    sellable: p.cumulativeSellable,
   }));
 
   const isEmpty =
     chartData.length === 0 ||
-    chartData.every(
-      (r) => r.classA === 0 && r.classB === 0 && r.classC === 0 && r.waste === 0,
-    );
+    chartData.every((r) => r.sellable === 0 && r.waste === 0);
 
   const primaryKey = 'sellable';
   const secondaryKey = 'waste';
@@ -214,8 +207,7 @@ function MultiBatchView({
   for (const s of series) {
     for (const p of s.data) {
       const row = byDate.get(p.date) ?? { date: p.date };
-      row[s.batchId] =
-        p.cumulativeClassA + p.cumulativeClassB + p.cumulativeClassC;
+      row[s.batchId] = p.cumulativeSellable;
       byDate.set(p.date, row);
     }
   }

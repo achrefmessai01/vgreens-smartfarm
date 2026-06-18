@@ -41,9 +41,9 @@ export interface HarvestEntryLike {
   id?: string;
   rowX: number;
   rowY: number;
-  classA: number;
-  classB: number;
-  classC: number;
+  // Weight mode: positional per-quality sellable kg (index 0=A, 1=B, ...).
+  // Null/empty in crate mode. Dynamic length.
+  classKgs?: number[] | null;
   waste: number;
   // Crate mode only (null in weight mode): positional per-quality arrays
   // (index 0=A, 1=B, 2=C) of crate counts and remaining-kg tails. kg/total are
@@ -59,6 +59,9 @@ export interface HarvestEntryLike {
 
 // Service-computed totals for a harvest (the omitted-view replacement).
 export interface HarvestTotalsLike {
+  // Per-quality sellable kg sums, positional and dynamic (index 0=A, 1=B, ...).
+  // The authoritative per-class breakdown; classA/B/C below are the first three.
+  classKgs: number[];
   classA: number;
   classB: number;
   classC: number;

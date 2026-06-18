@@ -31,23 +31,14 @@ export class HarvestEntryInput {
   @Min(0)
   rowY?: number;
 
-  @Field(() => Float, { defaultValue: 0 })
+  // Weight mode: positional per-quality sellable kg (index 0=A, 1=B, ...).
+  // Dynamic length, not capped. Omitted in crate mode.
+  @Field(() => [Float], { nullable: true })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classA?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classB?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classC?: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Min(0, { each: true })
+  classKgs?: number[];
 
   @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
