@@ -14,10 +14,6 @@ import {
   useBatchSidebar,
   type SidebarMode,
 } from '@/lib/hooks/use-batch-sidebar';
-import {
-  BatchStatsField,
-  BatchHeaderField,
-} from './fields/batch-sidebar-basic-fields';
 import { Button } from '@/components/ui/button';
 import { CalendarDays, Sparkles } from 'lucide-react';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
@@ -137,7 +133,9 @@ export function BatchSidebar({
               {badgeLabel}
             </Badge>
           </div>
-          <SheetTitle className="dark:text-card-foreground pr-8 text-left leading-tight break-words">
+          {/* Kept for dialog accessibility but visually hidden: the batch-detail
+              header is intentionally not shown in the harvest sidebar. */}
+          <SheetTitle className="sr-only">
             {currentData?.greenhouse?.name
               ? (h?.batchDetailsFor ?? '{label} for {greenhouse}')
                   .replace('{label}', h?.batchDetails ?? 'Batch Details')
@@ -149,21 +147,6 @@ export function BatchSidebar({
         <div className="flex min-h-0 flex-1 flex-col">
           {currentData ? (
             <>
-              <div className="dark:border-primary-foreground/30 shrink-0 space-y-6 border-b px-4 py-4 sm:px-6">
-                <BatchHeaderField
-                  name={currentData.name}
-                  species={currentData.species}
-                  variety={currentData.variety}
-                  status={currentData.status}
-                  isLoading={busy}
-                />
-                <BatchStatsField
-                  daysAfterPlanting={currentData.daysAfterPlanting}
-                  area={currentData.area}
-                  isLoading={busy}
-                />
-              </div>
-
               <fieldset
                 disabled={readOnly}
                 className="min-h-0 min-w-0 flex-1 space-y-4 overflow-y-auto px-3 py-3 disabled:opacity-90 sm:px-5 sm:py-4"
