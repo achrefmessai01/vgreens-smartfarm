@@ -1,4 +1,8 @@
-import { BatchStatus, type HarvestQualityClass } from '@/generated/graphql';
+import {
+  BatchStatus,
+  InputMode,
+  type HarvestQualityClass,
+} from '@/generated/graphql';
 
 export interface HarvestRecord {
   id: string;
@@ -41,6 +45,14 @@ export interface HarvestEntryLike {
   classB: number;
   classC: number;
   waste: number;
+  // Crate mode only (null in weight mode): per-quality crate counts + a
+  // remaining-kg tail. kg/total are derived from the batch crateWeight.
+  crateCountA?: number | null;
+  crateCountB?: number | null;
+  crateCountC?: number | null;
+  remainingKgA?: number | null;
+  remainingKgB?: number | null;
+  remainingKgC?: number | null;
   fruitCount: number;
   totalFruitWeight: number;
   avgFruitWeight: number;
@@ -56,6 +68,9 @@ export interface HarvestTotalsLike {
   waste: number;
   fruitCount: number;
   totalFruitWeight: number;
+  crateCountA?: number | null;
+  crateCountB?: number | null;
+  crateCountC?: number | null;
   avgFruitWeight?: number | null;
   avgBrix?: number | null;
   yieldPerPlant?: number | null;
@@ -92,6 +107,11 @@ export interface BatchLike {
   // the read model so older queries/fixtures without it still type-check; the
   // form falls back to 1 when absent.
   replicates?: number | null;
+  // Yield input mode, fixed at creation. Optional on the read model so older
+  // queries/fixtures without it still type-check; treated as weight when absent.
+  inputMode?: InputMode | null;
+  // Weight of one crate (kg) for crate-mode batches; null in weight mode.
+  crateWeight?: number | null;
   greenhouse?: { id: string; name: string } | null;
 }
 

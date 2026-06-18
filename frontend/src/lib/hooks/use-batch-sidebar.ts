@@ -3,6 +3,7 @@
 import {
   HarvestQualityClass,
   HarvestsDocument,
+  InputMode,
   useCreateHarvestMutation,
   useDeleteHarvestImageMutation,
   useUpdateHarvestMutation,
@@ -165,6 +166,26 @@ export function useBatchSidebar({
     [updateEntry],
   );
 
+  // Crate-mode field updates: the per-quality crate counts, remainders and the
+  // shared waste field.
+  const handleCrateChange = React.useCallback(
+    (
+      entryIndex: number,
+      field:
+        | 'crateCountA'
+        | 'crateCountB'
+        | 'crateCountC'
+        | 'remainingKgA'
+        | 'remainingKgB'
+        | 'remainingKgC'
+        | 'waste',
+      value: number,
+    ) => {
+      updateEntry(entryIndex, (entry) => ({ ...entry, [field]: value }));
+    },
+    [updateEntry],
+  );
+
   const handleSetShowBrix = React.useCallback(
     (entryIndex: number, show: boolean) => {
       updateEntry(entryIndex, (entry) => ({ ...entry, showBrix: show }));
@@ -217,9 +238,12 @@ export function useBatchSidebar({
     if (!currentData) return;
 
     // Map each sub-entry to the GraphQL input shape. Brix readings and fruit
-    // count only count when their section is expanded; total fruit weight is
-    // the entry's sellable yield (Class A + B + C). The backend derives
-    // per-entry avgBrix / avgFruitWeight and all totals.
+    // count only count when their section is expanded. In weight mode the entry
+    // carries its class kg directly; in crate mode it carries per-quality crate
+    // counts + remainders and the backend derives the kg/total from the batch
+    // crateWeight. The backend derives per-entry avgBrix / avgFruitWeight and
+    // all totals.
+    const isCrate = currentData.inputMode === InputMode.Crate;
     const entries = currentData.entries.map((entry) => {
       const brixReadings = entry.showBrix
         ? entry.brixReadings.map((value, i) => ({
@@ -228,6 +252,23 @@ export function useBatchSidebar({
           }))
         : [];
       const fruitCount = entry.showFruitWeight ? entry.fruitCount : 0;
+
+      if (isCrate) {
+        return {
+          rowX: entry.rowX,
+          rowY: entry.rowY,
+          waste: entry.waste,
+          crateCountA: entry.crateCountA,
+          crateCountB: entry.crateCountB,
+          crateCountC: entry.crateCountC,
+          remainingKgA: entry.remainingKgA,
+          remainingKgB: entry.remainingKgB,
+          remainingKgC: entry.remainingKgC,
+          fruitCount,
+          brixReadings,
+        };
+      }
+
       const totalFruitWeight = entry.showFruitWeight
         ? (entry.marketable || 0) + (entry.classB || 0) + (entry.classC || 0)
         : 0;
@@ -309,6 +350,7 @@ export function useBatchSidebar({
     handleRemoveBrixReading,
     handleFruitCountChange,
     handleYieldChange,
+    handleCrateChange,
     handleSetShowBrix,
     handleSetShowFruitWeight,
     handlePhotoUpload,

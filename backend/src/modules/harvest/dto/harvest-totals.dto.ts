@@ -23,6 +23,27 @@ export class HarvestTotals {
   @Field(() => Float, { description: 'SUM of entries.totalFruitWeight' })
   totalFruitWeight: number;
 
+  @Field(() => Int, {
+    nullable: true,
+    description:
+      'SUM of crate-mode entries.crateCountA. Null when the batch is not in crate mode.',
+  })
+  crateCountA: number | null;
+
+  @Field(() => Int, {
+    nullable: true,
+    description:
+      'SUM of crate-mode entries.crateCountB. Null when the batch is not in crate mode.',
+  })
+  crateCountB: number | null;
+
+  @Field(() => Int, {
+    nullable: true,
+    description:
+      'SUM of crate-mode entries.crateCountC. Null when the batch is not in crate mode.',
+  })
+  crateCountC: number | null;
+
   @Field(() => Float, {
     nullable: true,
     description:

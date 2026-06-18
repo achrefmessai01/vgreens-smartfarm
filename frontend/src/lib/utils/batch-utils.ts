@@ -1,4 +1,4 @@
-import { BatchStatus } from '@/generated/graphql';
+import { BatchStatus, InputMode } from '@/generated/graphql';
 import type { BatchFormData } from '@/types/batch.types';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { createEmptyEntry } from '@/types/batch-sidebar.types';
@@ -39,6 +39,8 @@ export function createBatchDetailsFromForm(
     totalPlants: formData.totalPlants,
     lostPlants: formData.lostPlants,
     replicates,
+    inputMode: formData.inputMode,
+    crateWeight: formData.inputMode === InputMode.Crate ? formData.crateWeight : null,
     plantingDate: formData.plantingDate,
     entries: Array.from({ length: replicates }, () => createEmptyEntry()),
     photos: [],

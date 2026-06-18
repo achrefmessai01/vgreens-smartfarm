@@ -8,11 +8,12 @@ import {
   SheetContent,
 } from '@/components/ui/sheet';
 import {
+  crateClassKg,
   formatHarvestDate,
   getGreenhouseLabel,
   harvestToDisplayEntries,
 } from '@/lib/harvest-utils';
-import type { HarvestsQuery } from '@/generated/graphql';
+import { InputMode, type HarvestsQuery } from '@/generated/graphql';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
 
@@ -45,6 +46,19 @@ export function HarvestDetails({
   // Per sub-entry breakdown; legacy harvests synthesize a single entry.
   const entries = harvestToDisplayEntries(harvest);
   const showEntryLabels = entries.length > 1;
+  // In crate mode the stored classA/B/C are 0; per-class kg are derived from the
+  // crate counts + the batch crate weight at display time.
+  const isCrate = harvest.batch?.inputMode === InputMode.Crate;
+  const crateWeight = harvest.batch?.crateWeight ?? null;
+  const cratesLabel = h?.cratesUnit ?? 'crates';
+  // "12 × 8 kg + 3.5 kg" caption for a crate-mode class; omitted when empty.
+  const crateBreakdownText = (count: number, remainder: number): string | null => {
+    if (!isCrate) return null;
+    const parts: string[] = [];
+    if (count > 0) parts.push(`${count} × ${crateWeight ?? 0} kg`);
+    if (remainder > 0) parts.push(`${remainder} kg`);
+    return parts.length > 0 ? parts.join(' + ') : null;
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -95,11 +109,54 @@ export function HarvestDetails({
             </div>
 
             {entries.map((entry, entryIndex) => {
-              const entryClassC = entry.classC ?? 0;
-              const entryTotal =
-                entry.classA + entry.classB + entryClassC + entry.waste;
+              // Per-class kg: derived from crate inputs in crate mode, the stored
+              // class kg otherwise.
+              const classAKg = isCrate
+                ? crateClassKg(
+                    entry.crateCountA ?? 0,
+                    entry.remainingKgA ?? 0,
+                    crateWeight,
+                  )
+                : entry.classA;
+              const classBKg = isCrate
+                ? crateClassKg(
+                    entry.crateCountB ?? 0,
+                    entry.remainingKgB ?? 0,
+                    crateWeight,
+                  )
+                : entry.classB;
+              const classCKg = isCrate
+                ? crateClassKg(
+                    entry.crateCountC ?? 0,
+                    entry.remainingKgC ?? 0,
+                    crateWeight,
+                  )
+                : (entry.classC ?? 0);
+              const entryTotal = classAKg + classBKg + classCKg + entry.waste;
               const entryRatio =
                 entryTotal > 0 ? (entry.waste / entryTotal) * 100 : 0;
+              const breakdownA = crateBreakdownText(
+                entry.crateCountA ?? 0,
+                entry.remainingKgA ?? 0,
+              );
+              const breakdownB = crateBreakdownText(
+                entry.crateCountB ?? 0,
+                entry.remainingKgB ?? 0,
+              );
+              const breakdownC = crateBreakdownText(
+                entry.crateCountC ?? 0,
+                entry.remainingKgC ?? 0,
+              );
+              // Fruit-weight figures are stored only in weight mode; in crate
+              // mode they're derived from the sellable total.
+              const displayTotalFruitWeight = isCrate
+                ? classAKg + classBKg + classCKg
+                : entry.totalFruitWeight;
+              const displayAvgFruitWeight = isCrate
+                ? entry.fruitCount > 0
+                  ? displayTotalFruitWeight / entry.fruitCount
+                  : 0
+                : entry.avgFruitWeight;
               return (
                 <div
                   key={entryIndex}
@@ -119,30 +176,37 @@ export function HarvestDetails({
                       {h?.harvestBreakdown ?? 'Harvest Breakdown'}
                     </h4>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between py-3">
-                        <span className="text-muted-foreground font-medium">
-                          {qualityALabel}:
-                        </span>
-                        <span className="text-xl font-bold text-green-600">
-                          {entry.classA} kg
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between py-3">
-                        <span className="text-muted-foreground font-medium">
-                          {qualityBLabel}:
-                        </span>
-                        <span className="text-xl font-bold text-teal-600">
-                          {entry.classB} kg
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between py-3">
-                        <span className="text-muted-foreground font-medium">
-                          {qualityCLabel}:
-                        </span>
-                        <span className="text-xl font-bold text-amber-600">
-                          {entryClassC} kg
-                        </span>
-                      </div>
+                      <QualityRow
+                        label={qualityALabel}
+                        kg={classAKg}
+                        breakdown={breakdownA}
+                        valueClassName="text-green-600"
+                      />
+                      <QualityRow
+                        label={qualityBLabel}
+                        kg={classBKg}
+                        breakdown={breakdownB}
+                        valueClassName="text-teal-600"
+                      />
+                      <QualityRow
+                        label={qualityCLabel}
+                        kg={classCKg}
+                        breakdown={breakdownC}
+                        valueClassName="text-amber-600"
+                      />
+                      {isCrate && (
+                        <div className="flex items-center justify-between py-3">
+                          <span className="text-muted-foreground font-medium">
+                            {h?.totalCrates ?? 'Total crates'}:
+                          </span>
+                          <span className="text-foreground text-lg font-bold">
+                            {(entry.crateCountA ?? 0) +
+                              (entry.crateCountB ?? 0) +
+                              (entry.crateCountC ?? 0)}{' '}
+                            {cratesLabel}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between py-3">
                         <span className="text-muted-foreground font-medium">
                           {wasteLabel}:
@@ -204,11 +268,11 @@ export function HarvestDetails({
                       <span className="text-muted-foreground text-sm">
                         {h?.averageFruitWeight ?? 'Average Fruit Weight'}:{' '}
                         <span className="text-lg font-medium text-orange-500">
-                          {entry.avgFruitWeight.toFixed(3)} kg
+                          {displayAvgFruitWeight.toFixed(3)} kg
                         </span>
                       </span>
                     </div>
-                    {entry.fruitCount === 0 && entry.totalFruitWeight === 0 ? (
+                    {entry.fruitCount === 0 && displayTotalFruitWeight === 0 ? (
                       <p className="text-muted-foreground text-sm">
                         {h?.noFruitWeightRecorded ?? 'No fruit weight recorded.'}
                       </p>
@@ -227,7 +291,7 @@ export function HarvestDetails({
                             {h?.totalWeight ?? 'Total weight'}:
                           </span>
                           <span className="text-foreground text-lg font-bold">
-                            {entry.totalFruitWeight.toFixed(2)} kg
+                            {displayTotalFruitWeight.toFixed(2)} kg
                           </span>
                         </div>
                       </div>
@@ -240,6 +304,36 @@ export function HarvestDetails({
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+// One quality line in the per-entry breakdown. `breakdown` is the crate-mode
+// "12 × 8 kg + 3.5 kg" caption (null in weight mode).
+function QualityRow({
+  label,
+  kg,
+  breakdown,
+  valueClassName,
+}: {
+  label: string;
+  kg: number;
+  breakdown: string | null;
+  valueClassName: string;
+}) {
+  return (
+    <div className="py-3">
+      <div className="flex items-center justify-between">
+        <span className="text-muted-foreground font-medium">{label}:</span>
+        <span className={`text-xl font-bold ${valueClassName}`}>
+          {kg.toFixed(1)} kg
+        </span>
+      </div>
+      {breakdown && (
+        <p className="text-muted-foreground mt-1 text-right text-xs">
+          {breakdown}
+        </p>
+      )}
+    </div>
   );
 }
 

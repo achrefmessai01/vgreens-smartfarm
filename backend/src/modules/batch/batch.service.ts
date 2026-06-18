@@ -18,6 +18,7 @@ import { BatchFilterInput } from './dto/batch-filter.input';
 import { BatchSortInput } from './dto/batch-sort.input';
 import { buildBatchOrderBy } from './utils/batch-order.util';
 import { buildBatchNumber } from '@modules/harvest/utils/batch-number.util';
+import { InputMode } from '@common/enums';
 
 @Injectable()
 export class BatchService extends BaseService<Batch> {
@@ -46,6 +47,24 @@ export class BatchService extends BaseService<Batch> {
     const denominator = numberOfRows * rowLength;
     if (denominator <= 0) return 0;
     return cultivationArea / denominator;
+  }
+
+  // Resolve and validate a batch's crate config. Crate mode demands a positive
+  // crateWeight; weight mode never carries one. Throws a BadRequest the client
+  // can surface rather than a 500.
+  private resolveCrateConfig(
+    inputMode: InputMode,
+    crateWeight: number | null | undefined,
+  ): { inputMode: InputMode; crateWeight: number | null } {
+    if (inputMode === InputMode.CRATE) {
+      if (crateWeight == null || crateWeight <= 0) {
+        throw new BadRequestException(
+          'crateWeight must be greater than 0 for a crate-mode batch',
+        );
+      }
+      return { inputMode, crateWeight };
+    }
+    return { inputMode: InputMode.WEIGHT, crateWeight: null };
   }
 
   // Backend-filled defaults that the user can override by passing explicit values.
@@ -210,6 +229,10 @@ export class BatchService extends BaseService<Batch> {
       input.varietyId,
     );
     this.validateRowRange(input.startRow, input.endRow);
+    const { inputMode, crateWeight } = this.resolveCrateConfig(
+      input.inputMode ?? InputMode.WEIGHT,
+      input.crateWeight,
+    );
 
     try {
       const numberOfRows = input.numberOfRows ?? 0;
@@ -248,6 +271,8 @@ export class BatchService extends BaseService<Batch> {
         cultivationArea: this.deriveCultivationArea({ ...input, rowSpacing }),
         totalPlants: this.deriveTotalPlants(input),
         replicates: input.replicates ?? 1,
+        inputMode,
+        crateWeight,
       });
 
       const saved = await this.batchRepository.save(batch);
@@ -316,6 +341,23 @@ export class BatchService extends BaseService<Batch> {
       batch.cultivationArea = input.cultivationArea;
     if (input.totalPlants !== undefined) batch.totalPlants = input.totalPlants;
     if (input.replicates !== undefined) batch.replicates = input.replicates;
+
+    // inputMode is fixed at creation, so it is intentionally not applied here.
+    // crateWeight stays editable: a new value re-validates against the batch's
+    // existing mode and propagates to every crate-mode entry's derived yield.
+    if (input.crateWeight !== undefined) {
+      if (batch.inputMode === InputMode.CRATE) {
+        const { crateWeight } = this.resolveCrateConfig(
+          InputMode.CRATE,
+          input.crateWeight,
+        );
+        batch.crateWeight = crateWeight;
+      } else {
+        throw new BadRequestException(
+          'crateWeight can only be set on a crate-mode batch',
+        );
+      }
+    }
 
     // Apply row-range changes, then validate the resulting (start, end) pair so
     // a partial update can't leave start > end.

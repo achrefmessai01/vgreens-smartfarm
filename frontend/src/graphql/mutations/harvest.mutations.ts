@@ -27,6 +27,8 @@ const HARVEST_MUTATION_FIELDS = gql`
       status
       totalPlants
       rowLength
+      inputMode
+      crateWeight
       greenhouse {
         id
         name
@@ -40,6 +42,12 @@ const HARVEST_MUTATION_FIELDS = gql`
       classB
       classC
       waste
+      crateCountA
+      crateCountB
+      crateCountC
+      remainingKgA
+      remainingKgB
+      remainingKgC
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -56,6 +64,9 @@ const HARVEST_MUTATION_FIELDS = gql`
       waste
       fruitCount
       totalFruitWeight
+      crateCountA
+      crateCountB
+      crateCountC
       avgFruitWeight
       avgBrix
       yieldPerPlant

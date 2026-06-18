@@ -9,6 +9,7 @@ import {
 import {
   CultivationAreaField,
   EndRowField,
+  InputModeField,
   LostPlantsField,
   NumberOfRowsField,
   PlantsPerMeterField,
@@ -25,6 +26,8 @@ interface CreateBatchFormFieldsProps {
   setFormData: React.Dispatch<React.SetStateAction<BatchFormData>>;
   errors: BatchFormErrors;
   disabled?: boolean;
+  // Lock the input-mode toggle (edit flow): mode is fixed at creation.
+  lockMode?: boolean;
 }
 
 export function CreateBatchFormFields({
@@ -32,6 +35,7 @@ export function CreateBatchFormFields({
   setFormData,
   errors,
   disabled = false,
+  lockMode = false,
 }: CreateBatchFormFieldsProps) {
   return (
     <div className="space-y-4">
@@ -114,6 +118,13 @@ export function CreateBatchFormFields({
         setFormData={setFormData}
         errors={errors}
         disabled={disabled}
+      />
+      <InputModeField
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+        disabled={disabled}
+        lockMode={lockMode}
       />
     </div>
   );

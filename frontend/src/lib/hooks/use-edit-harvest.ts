@@ -1,7 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { useUpdateBatchMutation, type BatchesQuery } from '@/generated/graphql';
+import {
+  InputMode,
+  useUpdateBatchMutation,
+  type BatchesQuery,
+} from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 import { validateRowRange } from '@/lib/hooks/use-create-batch-form';
 
@@ -22,6 +26,8 @@ const EMPTY_FORM: BatchFormData = {
   totalPlants: 0,
   lostPlants: 0,
   replicates: 1,
+  inputMode: InputMode.Weight,
+  crateWeight: 0,
 };
 
 function computeRowSpacing(data: BatchFormData): number {
@@ -50,6 +56,8 @@ function batchToFormData(batch: BatchItem): BatchFormData {
     totalPlants: batch.totalPlants ?? 0,
     lostPlants: batch.lostPlants ?? 0,
     replicates: batch.replicates ?? 1,
+    inputMode: batch.inputMode ?? InputMode.Weight,
+    crateWeight: batch.crateWeight ?? 0,
   };
 }
 
@@ -69,6 +77,8 @@ function validateEditForm(data: BatchFormData): BatchFormErrors {
     errors.plantsPerMeter = 'Plants per meter must be greater than 0';
   if (!data.replicates || data.replicates < 1)
     errors.replicates = 'Replicates must be at least 1';
+  if (data.inputMode === InputMode.Crate && (!data.crateWeight || data.crateWeight <= 0))
+    errors.crateWeight = 'Crate weight must be greater than 0';
   validateRowRange(data, errors);
   return errors;
 }
@@ -124,6 +134,13 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
               replicates: formData.replicates,
+              // inputMode is fixed at creation (the backend ignores it on
+              // update); crateWeight stays editable for crate batches and its
+              // change propagates to every crate-mode entry's derived yield.
+              crateWeight:
+                formData.inputMode === InputMode.Crate
+                  ? formData.crateWeight
+                  : undefined,
               // name/batchNumber are re-derived from crop/variety by the backend.
             },
           },

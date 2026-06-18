@@ -25,7 +25,7 @@ import {
   FruitWeightTrendData,
   CumulativeYieldData,
 } from './dto/dashboard-metrics.dto';
-import { OrderDirection } from '@common/enums';
+import { OrderDirection, InputMode } from '@common/enums';
 import { Batch } from '@modules/batch/entities/batch.entity';
 import { BatchService } from '@modules/batch/batch.service';
 
@@ -78,14 +78,62 @@ export class HarvestsService {
     return this.roundTo(this.mean(brixReadings.map((b) => b.value)), 1);
   }
 
+  // Non-blocking sanity check for crate-mode input: a per-class remainder at or
+  // above a full crate weight means another crate should probably have been
+  // counted. Logged, never rejected.
+  private warnCrateRemainder(input: HarvestEntryInput, batch: Batch): void {
+    if (batch.inputMode !== InputMode.CRATE) return;
+    const crateWeight = batch.crateWeight ?? 0;
+    if (crateWeight <= 0) return;
+    for (const cls of ['A', 'B', 'C'] as const) {
+      const remainder = input[`remainingKg${cls}`] ?? 0;
+      if (remainder >= crateWeight) {
+        this.logger.warn(
+          `Crate entry remainingKg${cls}=${remainder} >= crateWeight=${crateWeight} (batch ${batch.id}); that is another full crate.`,
+        );
+      }
+    }
+  }
+
   // Build a persistable entry from input, filling the two derived per-entry
   // fields (avgFruitWeight, avgBrix) — the service is the source of truth for
   // these, never the client.
-  private buildEntry(input: HarvestEntryInput): DeepPartial<HarvestEntry> {
+  //
+  // Crate mode (batch.inputMode === CRATE): store only the per-quality crate
+  // counts + remainders; classA/B/C, totalFruitWeight and avgFruitWeight are
+  // left at 0 because they are derived at read from the batch's current
+  // crateWeight (so a crateWeight edit propagates without rewriting rows).
+  private buildEntry(
+    input: HarvestEntryInput,
+    batch: Batch,
+  ): DeepPartial<HarvestEntry> {
     const brixReadings: BrixReading[] = (input.brixReadings ?? []).map((b) => ({
       class: b.class,
       value: b.value,
     }));
+
+    if (batch.inputMode === InputMode.CRATE) {
+      return {
+        rowX: input.rowX ?? 0,
+        rowY: input.rowY ?? 0,
+        classA: 0,
+        classB: 0,
+        classC: 0,
+        waste: input.waste ?? 0,
+        crateCountA: input.crateCountA ?? 0,
+        crateCountB: input.crateCountB ?? 0,
+        crateCountC: input.crateCountC ?? 0,
+        remainingKgA: input.remainingKgA ?? 0,
+        remainingKgB: input.remainingKgB ?? 0,
+        remainingKgC: input.remainingKgC ?? 0,
+        fruitCount: input.fruitCount ?? 0,
+        totalFruitWeight: 0,
+        avgFruitWeight: 0,
+        brixReadings,
+        avgBrix: this.entryAvgBrix(brixReadings),
+      };
+    }
+
     const fruitCount = input.fruitCount ?? 0;
     const totalFruitWeight = input.totalFruitWeight ?? 0;
     return {
@@ -104,6 +152,50 @@ export class HarvestsService {
     };
   }
 
+  // Effective kg for one quality class. Crate mode derives it from the batch's
+  // current crateWeight (count × crateWeight + remainder); weight mode reads the
+  // stored class kg. Single source of truth — every total flows through here.
+  private entryClass(
+    e: HarvestEntry,
+    batch: Batch | null | undefined,
+    cls: 'A' | 'B' | 'C',
+  ): number {
+    if (batch?.inputMode === InputMode.CRATE) {
+      const count = e[`crateCount${cls}`] ?? 0;
+      const remainder = e[`remainingKg${cls}`] ?? 0;
+      return count * (batch.crateWeight ?? 0) + remainder;
+    }
+    return e[`class${cls}`] ?? 0;
+  }
+
+  // Effective total sellable weight for an entry: sum of the three classes in
+  // crate mode, the stored totalFruitWeight in weight mode.
+  private entryTotalWeight(
+    e: HarvestEntry,
+    batch: Batch | null | undefined,
+  ): number {
+    if (batch?.inputMode === InputMode.CRATE) {
+      return (
+        this.entryClass(e, batch, 'A') +
+        this.entryClass(e, batch, 'B') +
+        this.entryClass(e, batch, 'C')
+      );
+    }
+    return e.totalFruitWeight ?? 0;
+  }
+
+  // Effective average fruit weight, derived from the effective total so it also
+  // tracks a crateWeight edit in crate mode.
+  private entryAvgFruitWeight(
+    e: HarvestEntry,
+    batch: Batch | null | undefined,
+  ): number {
+    const count = e.fruitCount ?? 0;
+    return count > 0
+      ? this.roundTo(this.entryTotalWeight(e, batch) / count, 3)
+      : 0;
+  }
+
   // Derive a harvest's totals from its entries (+ parent batch for the yields).
   // This is exactly what the omitted DB view would have produced.
   //
@@ -118,16 +210,42 @@ export class HarvestsService {
     const sum = (pick: (e: HarvestEntry) => number): number =>
       list.reduce((s, e) => s + (pick(e) || 0), 0);
 
-    const classA = this.roundTo(sum((e) => e.classA), 3);
-    const classB = this.roundTo(sum((e) => e.classB), 3);
-    const classC = this.roundTo(sum((e) => e.classC), 3);
-    const waste = this.roundTo(sum((e) => e.waste), 3);
+    // Class kg and totals flow through the effective-weight helpers so crate-mode
+    // entries reflect the batch's current crateWeight.
+    const classA = this.roundTo(
+      sum((e) => this.entryClass(e, batch, 'A')),
+      3,
+    );
+    const classB = this.roundTo(
+      sum((e) => this.entryClass(e, batch, 'B')),
+      3,
+    );
+    const classC = this.roundTo(
+      sum((e) => this.entryClass(e, batch, 'C')),
+      3,
+    );
+    const waste = this.roundTo(
+      sum((e) => e.waste),
+      3,
+    );
     const fruitCount = sum((e) => e.fruitCount);
-    const totalFruitWeight = this.roundTo(sum((e) => e.totalFruitWeight), 3);
+    const totalFruitWeight = this.roundTo(
+      sum((e) => this.entryTotalWeight(e, batch)),
+      3,
+    );
+
+    // Crate-count rollups are meaningful only for crate-mode batches.
+    const isCrate = batch?.inputMode === InputMode.CRATE;
+    const crateCountA = isCrate ? sum((e) => e.crateCountA ?? 0) : null;
+    const crateCountB = isCrate ? sum((e) => e.crateCountB ?? 0) : null;
+    const crateCountC = isCrate ? sum((e) => e.crateCountC ?? 0) : null;
 
     const hasEntries = list.length > 0;
     const avgFruitWeight = hasEntries
-      ? this.roundTo(this.mean(list.map((e) => e.avgFruitWeight || 0)), 3)
+      ? this.roundTo(
+          this.mean(list.map((e) => this.entryAvgFruitWeight(e, batch))),
+          3,
+        )
       : null;
     const avgBrix = hasEntries
       ? this.roundTo(this.mean(list.map((e) => e.avgBrix || 0)), 1)
@@ -148,6 +266,9 @@ export class HarvestsService {
       waste,
       fruitCount,
       totalFruitWeight,
+      crateCountA,
+      crateCountB,
+      crateCountC,
       avgFruitWeight,
       avgBrix,
       yieldPerPlant,
@@ -180,7 +301,9 @@ export class HarvestsService {
           });
         }
         if (filter.batchId) {
-          qb.andWhere('harvest.batchId = :batchId', { batchId: filter.batchId });
+          qb.andWhere('harvest.batchId = :batchId', {
+            batchId: filter.batchId,
+          });
         }
         if (filter.greenhouseId) {
           qb.andWhere('batch.greenhouseId = :greenhouseId', {
@@ -198,7 +321,9 @@ export class HarvestsService {
           );
         }
         if (filter.dateFrom) {
-          qb.andWhere('harvest.date >= :dateFrom', { dateFrom: filter.dateFrom });
+          qb.andWhere('harvest.date >= :dateFrom', {
+            dateFrom: filter.dateFrom,
+          });
         }
         if (filter.dateTo) {
           qb.andWhere('harvest.date <= :dateTo', { dateTo: filter.dateTo });
@@ -252,8 +377,13 @@ export class HarvestsService {
     createdById: string,
   ): Promise<Harvest> {
     try {
-      // Validates the batch exists and belongs to the tenant.
-      await this.batchService.findOneById(input.batchId, tenantId);
+      // Validates the batch exists and belongs to the tenant; also gives us the
+      // mode + crateWeight needed to build crate-mode entries.
+      const batch = await this.batchService.findOneById(
+        input.batchId,
+        tenantId,
+      );
+      (input.entries ?? []).forEach((e) => this.warnCrateRemainder(e, batch));
 
       const harvest = this.harvestRepository.create({
         tenantId,
@@ -261,7 +391,7 @@ export class HarvestsService {
         createdById,
         date: new Date(input.date),
         photoUrls: input.photoUrls ?? [],
-        entries: (input.entries ?? []).map((e) => this.buildEntry(e)),
+        entries: (input.entries ?? []).map((e) => this.buildEntry(e, batch)),
       });
 
       const saved = await this.harvestRepository.save(harvest);
@@ -284,8 +414,11 @@ export class HarvestsService {
     try {
       const harvest = await this.findOneById(id, tenantId);
 
+      // Resolve the batch we'll build entries against: the new one if the
+      // harvest is being reassigned, otherwise the already-loaded parent.
+      let batch = harvest.batch ?? null;
       if (input.batchId !== undefined) {
-        await this.batchService.findOneById(input.batchId, tenantId);
+        batch = await this.batchService.findOneById(input.batchId, tenantId);
         harvest.batchId = input.batchId;
       }
       if (input.date !== undefined) harvest.date = new Date(input.date);
@@ -297,8 +430,21 @@ export class HarvestsService {
       if (input.entries !== undefined) {
         await this.entryRepository.delete({ harvestId: id });
         if (input.entries.length > 0) {
+          if (!batch) {
+            batch = await this.batchService.findOneById(
+              harvest.batchId,
+              tenantId,
+            );
+          }
+          const resolvedBatch = batch;
+          input.entries.forEach((e) =>
+            this.warnCrateRemainder(e, resolvedBatch),
+          );
           const entries = input.entries.map((e) =>
-            this.entryRepository.create({ ...this.buildEntry(e), harvestId: id }),
+            this.entryRepository.create({
+              ...this.buildEntry(e, resolvedBatch),
+              harvestId: id,
+            }),
           );
           await this.entryRepository.save(entries);
         }
@@ -315,7 +461,11 @@ export class HarvestsService {
     }
   }
 
-  async deleteHarvest(id: string, deletedById: string, tenantId?: string): Promise<void> {
+  async deleteHarvest(
+    id: string,
+    deletedById: string,
+    tenantId?: string,
+  ): Promise<void> {
     try {
       const harvest = await this.findOneById(id, tenantId);
       harvest.deletedById = deletedById;
@@ -341,11 +491,16 @@ export class HarvestsService {
 
     const weightByBatch = new Map<string, number>();
     for (const h of harvests) {
+      // entryTotalWeight reads crate-mode entries off the batch's crateWeight;
+      // findAllFiltered already joins h.batch.
       const weight = (h.entries ?? []).reduce(
-        (s, e) => s + (e.totalFruitWeight || 0),
+        (s, e) => s + this.entryTotalWeight(e, h.batch),
         0,
       );
-      weightByBatch.set(h.batchId, (weightByBatch.get(h.batchId) ?? 0) + weight);
+      weightByBatch.set(
+        h.batchId,
+        (weightByBatch.get(h.batchId) ?? 0) + weight,
+      );
     }
 
     return batches.map((b) => {
@@ -384,7 +539,9 @@ export class HarvestsService {
           });
         }
         if (filter.batchId) {
-          qb.andWhere('harvest.batchId = :batchId', { batchId: filter.batchId });
+          qb.andWhere('harvest.batchId = :batchId', {
+            batchId: filter.batchId,
+          });
         }
         if (filter.greenhouseId) {
           qb.andWhere('batch.greenhouseId = :greenhouseId', {
@@ -402,10 +559,14 @@ export class HarvestsService {
           });
         }
         if (filter.batch) {
-          qb.andWhere('batch.name ILIKE :batch', { batch: `%${filter.batch}%` });
+          qb.andWhere('batch.name ILIKE :batch', {
+            batch: `%${filter.batch}%`,
+          });
         }
         if (filter.dateFrom) {
-          qb.andWhere('harvest.date >= :dateFrom', { dateFrom: filter.dateFrom });
+          qb.andWhere('harvest.date >= :dateFrom', {
+            dateFrom: filter.dateFrom,
+          });
         }
         if (filter.dateTo) {
           qb.andWhere('harvest.date <= :dateTo', { dateTo: filter.dateTo });
@@ -490,7 +651,9 @@ export class HarvestsService {
       const yieldPerPlant =
         sumPlants > 0 ? this.roundTo(sumWeightPlants / sumPlants, 3) : null;
       const yieldPerMeter =
-        sumRowLength > 0 ? this.roundTo(sumWeightMeters / sumRowLength, 3) : null;
+        sumRowLength > 0
+          ? this.roundTo(sumWeightMeters / sumRowLength, 3)
+          : null;
 
       // daysActive: earliest batch planting -> latest harvest date.
       const plantingTimes = items
@@ -499,7 +662,9 @@ export class HarvestsService {
         .map((d) => new Date(d).getTime());
       const harvestTimes = items.map((i) => new Date(i.harvest.date).getTime());
       const earliestPlanting =
-        plantingTimes.length > 0 ? Math.min(...plantingTimes) : Math.min(...harvestTimes);
+        plantingTimes.length > 0
+          ? Math.min(...plantingTimes)
+          : Math.min(...harvestTimes);
       const latestHarvest = Math.max(...harvestTimes);
       const daysActive = Math.max(
         0,
@@ -507,7 +672,8 @@ export class HarvestsService {
       );
 
       const criticalAlerts = items.filter(({ totals }) => {
-        const picked = totals.classA + totals.classB + totals.classC + totals.waste;
+        const picked =
+          totals.classA + totals.classB + totals.classC + totals.waste;
         const lowBrix = totals.avgBrix !== null && totals.avgBrix < 6.0;
         const highWaste = picked > 0 && totals.waste / picked > 0.15;
         return lowBrix || highWaste;
@@ -541,7 +707,9 @@ export class HarvestsService {
         `getDashboardMetrics failed: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
       );
-      throw new InternalServerErrorException('Failed to fetch dashboard metrics');
+      throw new InternalServerErrorException(
+        'Failed to fetch dashboard metrics',
+      );
     }
   }
 
@@ -575,7 +743,9 @@ export class HarvestsService {
     return new Date(date).toISOString().split('T')[0];
   }
 
-  private generateYieldOverTime(items: HarvestWithTotals[]): YieldOverTimeData[] {
+  private generateYieldOverTime(
+    items: HarvestWithTotals[],
+  ): YieldOverTimeData[] {
     const daily = new Map<string, number>();
     for (const { harvest, totals } of items) {
       const key = this.dateKey(harvest.date);
@@ -616,7 +786,12 @@ export class HarvestsService {
     >();
     for (const { harvest, totals } of items) {
       const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? { classA: 0, classB: 0, classC: 0, waste: 0 };
+      const cur = daily.get(key) ?? {
+        classA: 0,
+        classB: 0,
+        classC: 0,
+        waste: 0,
+      };
       cur.classA += totals.classA;
       cur.classB += totals.classB;
       cur.classC += totals.classC;
@@ -665,7 +840,10 @@ export class HarvestsService {
     }
     return [...daily.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, d]) => ({ date, weight: this.roundTo(d.total / d.count, 3) }));
+      .map(([date, d]) => ({
+        date,
+        weight: this.roundTo(d.total / d.count, 3),
+      }));
   }
 
   private generateCumulativeYield(
@@ -677,7 +855,12 @@ export class HarvestsService {
     >();
     for (const { harvest, totals } of items) {
       const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? { classA: 0, classB: 0, classC: 0, waste: 0 };
+      const cur = daily.get(key) ?? {
+        classA: 0,
+        classB: 0,
+        classC: 0,
+        waste: 0,
+      };
       cur.classA += totals.classA;
       cur.classB += totals.classB;
       cur.classC += totals.classC;

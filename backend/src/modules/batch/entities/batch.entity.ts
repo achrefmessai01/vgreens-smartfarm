@@ -13,7 +13,7 @@ import {
 import { ObjectType, Field, ID, Float, Int } from '@nestjs/graphql';
 import { User } from '@modules/users/entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
-import { BatchStatus } from '@common/enums';
+import { BatchStatus, InputMode } from '@common/enums';
 import { Greenhouse } from '@modules/greenhouse/entities/greenhouse.entity';
 import { Crop } from '@modules/crop/entities/crop.entity';
 import { Variety } from '@modules/variety/entities/variety.entity';
@@ -100,6 +100,25 @@ export class Batch {
     default: BatchStatus.ACTIVE,
   })
   status: BatchStatus;
+
+  // How this batch's harvests record yield. Fixed at creation. In crate mode,
+  // entries store per-quality crate counts + a remainder and the kg/total are
+  // derived from crateWeight at read time (so editing crateWeight propagates).
+  @Field(() => InputMode)
+  @Column({
+    type: 'enum',
+    enum: InputMode,
+    enumName: 'batches_input_mode_enum',
+    default: InputMode.WEIGHT,
+  })
+  inputMode: InputMode;
+
+  // Weight of one crate (kg) for crate-mode batches. Editable; the change
+  // intentionally propagates to every crate-mode entry's derived yield. Null
+  // for weight-mode batches. Never snapshotted onto entries.
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  crateWeight?: number | null;
 
   @Field()
   @Column({ type: 'date', transformer: dateTransformer })

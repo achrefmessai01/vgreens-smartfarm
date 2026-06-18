@@ -1,5 +1,5 @@
 import { HarvestQualityClass } from '@/generated/graphql';
-import type { BatchStatus } from '@/generated/graphql';
+import type { BatchStatus, InputMode } from '@/generated/graphql';
 
 // One repeatable "Today Harvest" sub-entry: its own yield, row coordinates,
 // brix readings and fruit-weight measurement. `showBrix`/`showFruitWeight`
@@ -11,6 +11,14 @@ export interface HarvestEntryData {
   classC: number;
   rowX: number;
   rowY: number;
+  // Crate-mode inputs (ignored in weight mode): per-quality crate counts and a
+  // remaining-kg tail. kg/total are derived from the batch crateWeight.
+  crateCountA: number;
+  crateCountB: number;
+  crateCountC: number;
+  remainingKgA: number;
+  remainingKgB: number;
+  remainingKgC: number;
   brixReadings: number[];
   // Quality grade per Brix reading, index-aligned with brixReadings.
   brixClasses: HarvestQualityClass[];
@@ -29,6 +37,12 @@ export function entryHasData(entry: HarvestEntryData): boolean {
     entry.classC > 0 ||
     entry.rowX > 0 ||
     entry.rowY > 0 ||
+    entry.crateCountA > 0 ||
+    entry.crateCountB > 0 ||
+    entry.crateCountC > 0 ||
+    entry.remainingKgA > 0 ||
+    entry.remainingKgB > 0 ||
+    entry.remainingKgC > 0 ||
     entry.fruitCount > 0 ||
     entry.brixReadings.some((v) => v > 0)
   );
@@ -42,6 +56,12 @@ export function createEmptyEntry(): HarvestEntryData {
     classC: 0,
     rowX: 0,
     rowY: 0,
+    crateCountA: 0,
+    crateCountB: 0,
+    crateCountC: 0,
+    remainingKgA: 0,
+    remainingKgB: 0,
+    remainingKgC: 0,
     brixReadings: [0],
     brixClasses: [HarvestQualityClass.A],
     showBrix: false,
@@ -75,6 +95,11 @@ export interface BatchDetailsData {
   // Replicate samples configured on the batch; drives how many entry cards a
   // fresh harvest starts with. Always at least 1.
   replicates: number;
+  // Yield input mode (fixed at creation) and the per-batch crate weight (kg).
+  // crateWeight is null in weight mode. Drive which form layout renders and how
+  // crate-mode totals are derived.
+  inputMode: InputMode;
+  crateWeight: number | null;
   plantingDate: string;
   // Repeatable sub-entries; always at least one. Photos and the harvest date
   // live at the record level, not per entry.
@@ -109,6 +134,34 @@ export interface YieldDataFieldProps {
   batchEndRow?: number | null;
   onYieldChange?: (
     field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
+    value: number,
+  ) => void;
+  isLoading?: boolean;
+}
+
+// Crate-mode yield inputs: per-quality crate counts + remainders and the shared
+// waste field. crateWeight (kg per crate) drives the derived per-class kg and
+// the entry total. Presentational — the parent owns state.
+export interface CrateYieldFieldProps {
+  crateCountA: number;
+  crateCountB: number;
+  crateCountC: number;
+  remainingKgA: number;
+  remainingKgB: number;
+  remainingKgC: number;
+  waste: number;
+  // Per-batch crate weight (kg). Null/0 means it hasn't been set; the field
+  // still renders but derived kg show as 0.
+  crateWeight: number | null;
+  onCrateChange?: (
+    field:
+      | 'crateCountA'
+      | 'crateCountB'
+      | 'crateCountC'
+      | 'remainingKgA'
+      | 'remainingKgB'
+      | 'remainingKgC'
+      | 'waste',
     value: number,
   ) => void;
   isLoading?: boolean;

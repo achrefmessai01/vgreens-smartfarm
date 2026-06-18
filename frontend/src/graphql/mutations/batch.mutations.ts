@@ -20,6 +20,8 @@ const BATCH_MUTATION_FIELDS = gql`
     lostPlants
     cultivationArea
     totalPlants
+    inputMode
+    crateWeight
     greenhouse {
       id
       name

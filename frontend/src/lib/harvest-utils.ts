@@ -1,4 +1,4 @@
-import { BatchStatus } from '@/generated/graphql';
+import { BatchStatus, InputMode } from '@/generated/graphql';
 import type { Locale } from '@/i18n/config';
 import type { Translations } from '@/i18n/translations';
 import type {
@@ -75,6 +75,41 @@ export function computeAvgFruitWeight(
   if (fruitCount <= 0 || totalFruitWeight <= 0) return 0;
 
   return Math.round((totalFruitWeight / fruitCount) * 1000) / 1000;
+}
+
+// Derived sellable kg for one quality class in crate mode:
+// crateCount × crateWeight + remainder. crateWeight is read live (never
+// snapshotted), so editing it shifts every crate-mode entry's kg.
+export function crateClassKg(
+  count: number,
+  remainder: number,
+  crateWeight: number | null | undefined,
+): number {
+  return (count || 0) * (crateWeight ?? 0) + (remainder || 0);
+}
+
+// Per-class crate inputs an entry total is summed from. Mirrors the backend's
+// entryTotalWeight for crate-mode entries.
+export interface CrateEntryInput {
+  crateCountA: number;
+  crateCountB: number;
+  crateCountC: number;
+  remainingKgA: number;
+  remainingKgB: number;
+  remainingKgC: number;
+}
+
+// Total sellable kg for a crate-mode entry: the sum of the three derived class
+// kg. Waste is tracked separately and never part of this total.
+export function crateEntryTotalKg(
+  e: CrateEntryInput,
+  crateWeight: number | null | undefined,
+): number {
+  return (
+    crateClassKg(e.crateCountA, e.remainingKgA, crateWeight) +
+    crateClassKg(e.crateCountB, e.remainingKgB, crateWeight) +
+    crateClassKg(e.crateCountC, e.remainingKgC, crateWeight)
+  );
 }
 
 export function extractStoragePathFromUrl(
@@ -175,6 +210,12 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     classC: entry.classC,
     rowX: entry.rowX,
     rowY: entry.rowY,
+    crateCountA: entry.crateCountA ?? 0,
+    crateCountB: entry.crateCountB ?? 0,
+    crateCountC: entry.crateCountC ?? 0,
+    remainingKgA: entry.remainingKgA ?? 0,
+    remainingKgB: entry.remainingKgB ?? 0,
+    remainingKgC: entry.remainingKgC ?? 0,
     brixReadings: readings,
     brixClasses: classes,
     showBrix: entry.brixReadings.some((b) => b.value > 0),
@@ -256,6 +297,8 @@ function batchToDetails(
     totalPlants: batch.totalPlants,
     lostPlants: batch.lostPlants,
     replicates: replicateCount(batch),
+    inputMode: batch.inputMode ?? InputMode.Weight,
+    crateWeight: batch.crateWeight ?? null,
     plantingDate: batch.plantingDate,
     entries,
     photos,
