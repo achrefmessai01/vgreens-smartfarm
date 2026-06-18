@@ -548,6 +548,27 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     return bay ? [bay] : [];
   }, [activeGreenhouseTab, bays]);
 
+  // Map each slot id to its REAL InfluxDB `greenhouse` tag (from slot meta),
+  // so the history drawer can scope its query to the exact series. The slot
+  // id's own greenhouse segment can be an assigned display name, so it must
+  // not be used as a tag filter (VSL-221).
+  const selectedSlotGreenhouse = React.useMemo<string | null>(() => {
+    if (!selectedSlotId) return null;
+    for (const bay of bays) {
+      for (const row of bay.rows) {
+        for (const col of row.columns) {
+          for (const slot of col.slots) {
+            if (slot.id === selectedSlotId) {
+              const gh = slot.meta?.influxGreenhouse;
+              return typeof gh === 'string' && gh ? gh : null;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }, [bays, selectedSlotId]);
+
   const ghLabels = [t.greenHouse1, t.greenHouse2];
 
   const greenhouseLabel = React.useMemo(() => {
@@ -626,6 +647,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     setViewMode,
     selectedSlotId,
     setSelectedSlotId,
+    selectedSlotGreenhouse,
     historyDrawerOpen,
     setHistoryDrawerOpen,
     bays: selectedBays,

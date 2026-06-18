@@ -131,6 +131,7 @@ export default function FarmOverviewPage() {
             onOpenChange={state.setHistoryDrawerOpen}
             parameter={state.effectiveParameter}
             slotId={state.selectedSlotId}
+            greenhouse={state.selectedSlotGreenhouse}
             parameterLabel={state.getParameterLabel(state.effectiveParameter)}
             timeRangeLabel={t.pages.farmOverview.timeRange}
             oneDayLabel={t.pages.farmOverview.oneDay}

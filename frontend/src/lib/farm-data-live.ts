@@ -74,6 +74,13 @@ function buildSlotsFromRows(
     xPosition?: number;
     yPosition?: number;
     hiddenInFarmOverview?: boolean;
+    /**
+     * Raw InfluxDB `greenhouse` tag for this slot (e.g. "greenhouse_01"), kept
+     * separate from the slot id's first segment which may be an assigned
+     * greenhouse *display name*. Used to scope history queries to the exact
+     * series. Undefined for tenants that don't use the `greenhouse` tag.
+     */
+    influxGreenhouse?: string;
   };
 
   const bySlot = new Map<SlotKey, FieldValues>();
@@ -123,6 +130,9 @@ function buildSlotsFromRows(
       area: (row.area as string) ?? undefined,
       profile: (row.profile as string) ?? undefined,
       side: (row.side as string) ?? undefined,
+      // Real `greenhouse` tag only (not `chamber`) — used to scope history
+      // queries. Left undefined when the tenant doesn't tag with `greenhouse`.
+      influxGreenhouse: (row.greenhouse as string) || undefined,
       ...(Number.isFinite(xPos) && xPos != null && { xPosition: xPos }),
       ...(Number.isFinite(yPos) && yPos != null && { yPosition: yPos }),
       ...(config?.hiddenInFarmOverview === true && {
