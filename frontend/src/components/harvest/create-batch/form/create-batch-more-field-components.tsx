@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n';
-import { useVarietiesQuery } from '@/generated/graphql';
+import { InputMode, useVarietiesQuery } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 interface FormFieldProps {
@@ -445,6 +445,81 @@ export function ReplicatesField({
       />
       {errors.replicates && (
         <p className="text-destructive text-sm">{errors.replicates}</p>
+      )}
+    </div>
+  );
+}
+
+// Yield input mode toggle (weight vs crate), fixed at batch creation. In crate
+// mode it reveals the per-batch crate-weight input; harvests for this batch then
+// open in crate layout and derive kg from this weight.
+export function InputModeField({
+  formData,
+  setFormData,
+  errors,
+  disabled = false,
+  // inputMode is fixed at creation: when editing an existing batch the toggle is
+  // locked, but crateWeight remains editable.
+  lockMode = false,
+}: FormFieldProps & { lockMode?: boolean }) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+  const isCrate = formData.inputMode === InputMode.Crate;
+
+  const modes: ReadonlyArray<{ mode: InputMode; label: string }> = [
+    { mode: InputMode.Weight, label: h?.weightMode ?? 'Weight (kg)' },
+    { mode: InputMode.Crate, label: h?.crateMode ?? 'Crates' },
+  ];
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-sm font-medium">
+        {h?.inputMode ?? 'Yield input mode'}
+      </Label>
+      <div className="grid grid-cols-2 gap-2">
+        {modes.map(({ mode, label }) => (
+          <button
+            key={mode}
+            type="button"
+            disabled={disabled || lockMode}
+            onClick={() => setFormData((prev) => ({ ...prev, inputMode: mode }))}
+            className={`h-10 rounded-md border px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              formData.inputMode === mode
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-input bg-background text-muted-foreground hover:bg-muted/50'
+            }`}
+            aria-pressed={formData.inputMode === mode}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {isCrate && (
+        <div className="space-y-2 pt-2">
+          <Label htmlFor="crateWeight" className="text-sm font-medium">
+            {h?.crateWeight ?? 'Crate Weight (kg)'}{' '}
+            <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="crateWeight"
+            type="number"
+            min="0"
+            step="0.1"
+            placeholder={h?.enterCrateWeight ?? 'Weight of one full crate'}
+            value={formData.crateWeight || ''}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                crateWeight: parsePositiveNumber(e.target.value),
+              }))
+            }
+            disabled={disabled}
+            className={`h-10 ${errors.crateWeight ? 'border-destructive' : ''}`}
+          />
+          {errors.crateWeight && (
+            <p className="text-destructive text-sm">{errors.crateWeight}</p>
+          )}
+        </div>
       )}
     </div>
   );

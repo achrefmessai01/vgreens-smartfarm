@@ -1,14 +1,18 @@
 import { HarvestQualityClass } from '@/generated/graphql';
-import type { BatchStatus } from '@/generated/graphql';
+import type { BatchStatus, InputMode } from '@/generated/graphql';
 
 // One repeatable "Today Harvest" sub-entry: its own yield, row coordinates,
 // brix readings and fruit-weight measurement. `showBrix`/`showFruitWeight`
 // control whether the optional sections are expanded for this entry.
 export interface HarvestEntryData {
-  marketable: number;
+  // Per-quality inputs, positional and dynamic (index 0=A, 1=B, 2=C, ...). Both
+  // modes start with one class (A) and the form can add/remove classes. Weight
+  // mode uses classKgs (kg per class); crate mode uses crateCounts + remainingKgs
+  // (kg derived from the batch crateWeight). All kept the same length.
+  classKgs: number[];
+  crateCounts: number[];
+  remainingKgs: number[];
   waste: number;
-  classB: number;
-  classC: number;
   rowX: number;
   rowY: number;
   brixReadings: number[];
@@ -19,27 +23,41 @@ export interface HarvestEntryData {
   showFruitWeight: boolean;
 }
 
+// How an entry field change is addressed. Per-class edits target an array cell
+// by class index; addClass/removeClass grow/shrink the class list (both modes'
+// arrays stay in sync); the rest are shared scalars.
+export type EntryChange =
+  | { kind: 'classKg'; index: number; value: number }
+  | { kind: 'crateCount'; index: number; value: number }
+  | { kind: 'remainingKg'; index: number; value: number }
+  | { kind: 'waste'; value: number }
+  | { kind: 'rowX'; value: number }
+  | { kind: 'rowY'; value: number }
+  | { kind: 'addClass' }
+  | { kind: 'removeClass'; index: number };
+
 // True when the entry carries any harvest data — used to auto-expand its card
 // when viewing/editing an existing harvest.
 export function entryHasData(entry: HarvestEntryData): boolean {
   return (
-    entry.marketable > 0 ||
+    entry.classKgs.some((v) => v > 0) ||
     entry.waste > 0 ||
-    entry.classB > 0 ||
-    entry.classC > 0 ||
     entry.rowX > 0 ||
     entry.rowY > 0 ||
+    entry.crateCounts.some((v) => v > 0) ||
+    entry.remainingKgs.some((v) => v > 0) ||
     entry.fruitCount > 0 ||
     entry.brixReadings.some((v) => v > 0)
   );
 }
 
 export function createEmptyEntry(): HarvestEntryData {
+  // Start with a single quality class (A); more can be added in the form.
   return {
-    marketable: 0,
+    classKgs: [0],
+    crateCounts: [0],
+    remainingKgs: [0],
     waste: 0,
-    classB: 0,
-    classC: 0,
     rowX: 0,
     rowY: 0,
     brixReadings: [0],
@@ -75,6 +93,11 @@ export interface BatchDetailsData {
   // Replicate samples configured on the batch; drives how many entry cards a
   // fresh harvest starts with. Always at least 1.
   replicates: number;
+  // Yield input mode (fixed at creation) and the per-batch crate weight (kg).
+  // crateWeight is null in weight mode. Drive which form layout renders and how
+  // crate-mode totals are derived.
+  inputMode: InputMode;
+  crateWeight: number | null;
   plantingDate: string;
   // Repeatable sub-entries; always at least one. Photos and the harvest date
   // live at the record level, not per entry.
@@ -96,21 +119,34 @@ export interface BatchStatsFieldProps {
   isLoading?: boolean;
 }
 
+// Weight-mode yield inputs: positional per-quality kg (index 0=A, 1=B, ...),
+// dynamic count with add/remove, plus the shared waste field and optional row
+// coordinates. Presentational — the parent owns state.
 export interface YieldDataFieldProps {
-  marketable: number;
+  classKgs: number[];
   waste: number;
-  classB: number;
-  classC: number;
   rowX: number;
   rowY: number;
   // The batch's row range (inclusive). null bounds leave the row inputs
   // unconstrained; when set, inputs are limited and out-of-range values warn.
   batchStartRow?: number | null;
   batchEndRow?: number | null;
-  onYieldChange?: (
-    field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
-    value: number,
-  ) => void;
+  onChange?: (change: EntryChange) => void;
+  isLoading?: boolean;
+}
+
+// Crate-mode yield inputs: positional per-quality arrays (index 0=A, 1=B, ...)
+// of crate counts + remainders, dynamic count with add/remove, plus the shared
+// waste field. crateWeight (kg per crate) drives the derived per-class kg and
+// the entry total. Presentational — the parent owns state.
+export interface CrateYieldFieldProps {
+  crateCounts: number[];
+  remainingKgs: number[];
+  waste: number;
+  // Per-batch crate weight (kg). Null/0 means it hasn't been set; the field
+  // still renders but derived kg show as 0.
+  crateWeight: number | null;
+  onChange?: (change: EntryChange) => void;
   isLoading?: boolean;
 }
 
@@ -131,9 +167,9 @@ export interface BrixMeasurementsFieldProps {
 
 export interface FruitWeightFieldProps {
   fruitCount: number;
-  marketable: number;
-  classB: number;
-  classC: number;
+  // Total sellable yield (kg) the average fruit weight is derived from. The
+  // parent computes it per mode (weight: A+B+C; crate: sum of all classes).
+  sellableWeight: number;
   showFruitWeight: boolean;
   onShowFruitWeightChange: (show: boolean) => void;
   onFruitCountChange?: (value: number) => void;

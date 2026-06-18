@@ -40,9 +40,7 @@ export const GET_CLASS_DISTRIBUTION = gql`
     harvestDashboard(filter: $filter) {
       classDistribution {
         date
-        marketable
-        classB
-        classC
+        classes
         waste
       }
     }
@@ -79,9 +77,7 @@ export const GET_CUMULATIVE_YIELD = gql`
     harvestDashboard(filter: $filter) {
       cumulativeYield {
         date
-        cumulativeClassA
-        cumulativeClassB
-        cumulativeClassC
+        cumulativeSellable
         cumulativeWaste
       }
     }

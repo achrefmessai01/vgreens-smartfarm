@@ -1,4 +1,8 @@
-import { BatchStatus, type HarvestQualityClass } from '@/generated/graphql';
+import {
+  BatchStatus,
+  InputMode,
+  type HarvestQualityClass,
+} from '@/generated/graphql';
 
 export interface HarvestRecord {
   id: string;
@@ -37,10 +41,15 @@ export interface HarvestEntryLike {
   id?: string;
   rowX: number;
   rowY: number;
-  classA: number;
-  classB: number;
-  classC: number;
+  // Weight mode: positional per-quality sellable kg (index 0=A, 1=B, ...).
+  // Null/empty in crate mode. Dynamic length.
+  classKgs?: number[] | null;
   waste: number;
+  // Crate mode only (null in weight mode): positional per-quality arrays
+  // (index 0=A, 1=B, 2=C) of crate counts and remaining-kg tails. kg/total are
+  // derived from the batch crateWeight.
+  crateCounts?: number[] | null;
+  remainingKgs?: number[] | null;
   fruitCount: number;
   totalFruitWeight: number;
   avgFruitWeight: number;
@@ -50,12 +59,17 @@ export interface HarvestEntryLike {
 
 // Service-computed totals for a harvest (the omitted-view replacement).
 export interface HarvestTotalsLike {
+  // Per-quality sellable kg sums, positional and dynamic (index 0=A, 1=B, ...).
+  // The authoritative per-class breakdown; classA/B/C below are the first three.
+  classKgs: number[];
   classA: number;
   classB: number;
   classC: number;
   waste: number;
   fruitCount: number;
   totalFruitWeight: number;
+  // Per-quality crate-count sums, indexed 0=A,1=B,2=C; null off crate mode.
+  crateCounts?: number[] | null;
   avgFruitWeight?: number | null;
   avgBrix?: number | null;
   yieldPerPlant?: number | null;
@@ -92,6 +106,11 @@ export interface BatchLike {
   // the read model so older queries/fixtures without it still type-check; the
   // form falls back to 1 when absent.
   replicates?: number | null;
+  // Yield input mode, fixed at creation. Optional on the read model so older
+  // queries/fixtures without it still type-check; treated as weight when absent.
+  inputMode?: InputMode | null;
+  // Weight of one crate (kg) for crate-mode batches; null in weight mode.
+  crateWeight?: number | null;
   greenhouse?: { id: string; name: string } | null;
 }
 

@@ -1,4 +1,4 @@
-import { BatchStatus } from '@/generated/graphql';
+import { BatchStatus, InputMode } from '@/generated/graphql';
 import type { Locale } from '@/i18n/config';
 import type { Translations } from '@/i18n/translations';
 import type {
@@ -75,6 +75,61 @@ export function computeAvgFruitWeight(
   if (fruitCount <= 0 || totalFruitWeight <= 0) return 0;
 
   return Math.round((totalFruitWeight / fruitCount) * 1000) / 1000;
+}
+
+// Quality-class label letter from a 0-based array index: 0 -> A, 1 -> B, ... The
+// classes are positional and unbounded; the letter is derived, not from an enum.
+// Mirrors the backend classLetter.
+export function classLetter(index: number): string {
+  return String.fromCharCode(65 + index);
+}
+
+// Align the three per-class form arrays (weight kg, crate counts, remainders) to
+// one common length (zero-filled), at least 1, so a single class index is valid
+// across all of them regardless of which mode the entry was saved in.
+export function normalizeEntryClasses(
+  classKgs: number[] | null | undefined,
+  counts: number[] | null | undefined,
+  rems: number[] | null | undefined,
+): { classKgs: number[]; crateCounts: number[]; remainingKgs: number[] } {
+  const len = Math.max(
+    1,
+    classKgs?.length ?? 0,
+    counts?.length ?? 0,
+    rems?.length ?? 0,
+  );
+  return {
+    classKgs: Array.from({ length: len }, (_, i) => classKgs?.[i] ?? 0),
+    crateCounts: Array.from({ length: len }, (_, i) => counts?.[i] ?? 0),
+    remainingKgs: Array.from({ length: len }, (_, i) => rems?.[i] ?? 0),
+  };
+}
+
+// Derived sellable kg for one quality class in crate mode:
+// crateCount × crateWeight + remainder. crateWeight is read live (never
+// snapshotted), so editing it shifts every crate-mode entry's kg.
+export function crateClassKg(
+  count: number,
+  remainder: number,
+  crateWeight: number | null | undefined,
+): number {
+  return (count || 0) * (crateWeight ?? 0) + (remainder || 0);
+}
+
+// Total sellable kg for a crate-mode entry: the sum of the derived per-class kg
+// across all classes present (dynamic count). Waste is tracked separately and
+// never part of this total.
+export function crateEntryTotalKg(
+  crateCounts: number[] | null | undefined,
+  remainingKgs: number[] | null | undefined,
+  crateWeight: number | null | undefined,
+): number {
+  const len = Math.max(crateCounts?.length ?? 0, remainingKgs?.length ?? 0);
+  let total = 0;
+  for (let i = 0; i < len; i++) {
+    total += crateClassKg(crateCounts?.[i] ?? 0, remainingKgs?.[i] ?? 0, crateWeight);
+  }
+  return total;
 }
 
 export function extractStoragePathFromUrl(
@@ -168,11 +223,18 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     entry.brixReadings.length > 0
       ? entry.brixReadings.map((b) => b.class)
       : createEmptyEntry().brixClasses;
+  // Align the three per-class arrays to one length (>=1) so the form's class
+  // rows are consistent whichever mode the entry was saved in.
+  const cls = normalizeEntryClasses(
+    entry.classKgs,
+    entry.crateCounts,
+    entry.remainingKgs,
+  );
   return {
-    marketable: entry.classA,
+    classKgs: cls.classKgs,
+    crateCounts: cls.crateCounts,
+    remainingKgs: cls.remainingKgs,
     waste: entry.waste,
-    classB: entry.classB,
-    classC: entry.classC,
     rowX: entry.rowX,
     rowY: entry.rowY,
     brixReadings: readings,
@@ -256,6 +318,8 @@ function batchToDetails(
     totalPlants: batch.totalPlants,
     lostPlants: batch.lostPlants,
     replicates: replicateCount(batch),
+    inputMode: batch.inputMode ?? InputMode.Weight,
+    crateWeight: batch.crateWeight ?? null,
     plantingDate: batch.plantingDate,
     entries,
     photos,

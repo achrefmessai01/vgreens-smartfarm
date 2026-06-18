@@ -31,29 +31,39 @@ export class HarvestEntryInput {
   @Min(0)
   rowY?: number;
 
-  @Field(() => Float, { defaultValue: 0 })
+  // Weight mode: positional per-quality sellable kg (index 0=A, 1=B, ...).
+  // Dynamic length, not capped. Omitted in crate mode.
+  @Field(() => [Float], { nullable: true })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classA?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classB?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classC?: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Min(0, { each: true })
+  classKgs?: number[];
 
   @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   waste?: number;
+
+  // Crate mode only: positional per-quality arrays of crate counts and
+  // remaining-kg tails. Index maps to a quality class by position (0=A, 1=B,
+  // 2=C, 3=D, ...) — count is dynamic, not capped. Omitted in weight mode. The
+  // service derives kg/total from the batch crateWeight; totalFruitWeight is not
+  // accepted for crate entries.
+  @Field(() => [Int], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(0, { each: true })
+  crateCounts?: number[];
+
+  @Field(() => [Float], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Min(0, { each: true })
+  remainingKgs?: number[];
 
   @Field(() => Int, { defaultValue: 0 })
   @IsOptional()

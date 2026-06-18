@@ -10,9 +10,7 @@ import type { FruitWeightFieldProps } from '@/types/batch-sidebar.types';
 
 export function FruitWeightField({
   fruitCount,
-  marketable,
-  classB,
-  classC,
+  sellableWeight,
   showFruitWeight,
   onShowFruitWeightChange,
   onFruitCountChange,
@@ -31,10 +29,9 @@ export function FruitWeightField({
     );
   }
 
-  // Total fruit weight is the sellable yield (Class A + Class B + Class C)
-  // entered above. Each one defaults to 0, so any subset is sufficient.
-  const totalFruitWeight = (marketable || 0) + (classB || 0) + (classC || 0);
-  const avgFruitWeight = computeAvgFruitWeight(fruitCount, totalFruitWeight);
+  // Total fruit weight is the entry's sellable yield, computed by the parent
+  // (weight mode: A+B+C; crate mode: sum of all crate classes).
+  const avgFruitWeight = computeAvgFruitWeight(fruitCount, sellableWeight);
 
   return (
     <div className="space-y-4">

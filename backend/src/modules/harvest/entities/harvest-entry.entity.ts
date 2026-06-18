@@ -41,21 +41,30 @@ export class HarvestEntry {
   @Column({ type: 'double precision', default: 0 })
   rowY: number;
 
-  @Field(() => Float)
-  @Column({ type: 'double precision', default: 0 })
-  classA: number;
-
-  @Field(() => Float)
-  @Column({ type: 'double precision', default: 0 })
-  classB: number;
-
-  @Field(() => Float)
-  @Column({ type: 'double precision', default: 0 })
-  classC: number;
+  // Weight mode: per-quality sellable kg, positional and dynamic — index maps to
+  // a class by position (0 = A, 1 = B, 2 = C, 3 = D, ...). Class count is
+  // per-entry and unbounded; not tied to an enum. Null/empty in crate mode.
+  @Field(() => [Float], { nullable: true })
+  @Column({ type: 'double precision', array: true, nullable: true })
+  classKgs?: number[] | null;
 
   @Field(() => Float)
   @Column({ type: 'double precision', default: 0 })
   waste: number;
+
+  // Crate mode only (null in weight mode). Positional per-quality arrays where
+  // the index maps to a class by position (0 = A, 1 = B, 2 = C, ...): crate counts
+  // and the remaining-kg tail. Class count is per-entry and unbounded. The
+  // per-class kg and entry total are derived at read from the batch's current
+  // crateWeight — never snapshotted — so editing crateWeight propagates.
+  // totalFruitWeight and avgFruitWeight stay 0 for crate-mode entries.
+  @Field(() => [Int], { nullable: true })
+  @Column({ type: 'int', array: true, nullable: true })
+  crateCounts?: number[] | null;
+
+  @Field(() => [Float], { nullable: true })
+  @Column({ type: 'double precision', array: true, nullable: true })
+  remainingKgs?: number[] | null;
 
   @Field(() => Int)
   @Column({ type: 'int', default: 0 })

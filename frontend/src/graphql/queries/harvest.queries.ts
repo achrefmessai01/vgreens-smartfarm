@@ -40,6 +40,8 @@ const HARVEST_FIELDS = gql`
       totalPlants
       lostPlants
       replicates
+      inputMode
+      crateWeight
       greenhouse {
         id
         name
@@ -49,10 +51,10 @@ const HARVEST_FIELDS = gql`
       id
       rowX
       rowY
-      classA
-      classB
-      classC
+      classKgs
       waste
+      crateCounts
+      remainingKgs
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -63,12 +65,14 @@ const HARVEST_FIELDS = gql`
       }
     }
     totals {
+      classKgs
       classA
       classB
       classC
       waste
       fruitCount
       totalFruitWeight
+      crateCounts
       avgFruitWeight
       avgBrix
       yieldPerPlant

@@ -18,9 +18,9 @@ export type BatchGroup = {
 // the two yields recompute from the summed weight over the batch's
 // plants / row length.
 export interface AggregatedBatchTotals {
-  classA: number;
-  classB: number;
-  classC: number;
+  // Per-quality kg sums, positional and dynamic (index 0=A, 1=B, ...), as wide as
+  // the widest entry in the group.
+  classKgs: number[];
   waste: number;
   fruitCount: number;
   totalFruitWeight: number;
@@ -39,9 +39,7 @@ export function aggregateBatchTotals(
   entries: HarvestItem[],
   batch: BatchItem,
 ): AggregatedBatchTotals {
-  let classA = 0;
-  let classB = 0;
-  let classC = 0;
+  const classKgs: number[] = [];
   let waste = 0;
   let fruitCount = 0;
   let totalFruitWeight = 0;
@@ -49,9 +47,10 @@ export function aggregateBatchTotals(
   const fruitWeightValues: number[] = [];
 
   for (const { totals } of entries) {
-    classA += totals.classA;
-    classB += totals.classB;
-    classC += totals.classC;
+    const kgs = totals.classKgs ?? [];
+    for (let i = 0; i < kgs.length; i++) {
+      classKgs[i] = (classKgs[i] ?? 0) + (kgs[i] ?? 0);
+    }
     waste += totals.waste;
     fruitCount += totals.fruitCount;
     totalFruitWeight += totals.totalFruitWeight;
@@ -76,9 +75,7 @@ export function aggregateBatchTotals(
     rowLength > 0 ? roundTo(totalFruitWeight / rowLength, 3) : null;
 
   return {
-    classA,
-    classB,
-    classC,
+    classKgs: classKgs.map((v) => roundTo(v ?? 0, 3)),
     waste,
     fruitCount,
     totalFruitWeight,

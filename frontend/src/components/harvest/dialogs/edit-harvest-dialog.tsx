@@ -84,6 +84,7 @@ export function EditHarvestDialog({
               setFormData={setFormData}
               errors={errors}
               disabled={readOnly}
+              lockMode
             />
           </div>
 
