@@ -11,6 +11,7 @@ import { BaseService } from '@common/services';
 import { Crop } from '@modules/crop/entities/crop.entity';
 import { Variety } from '@modules/variety/entities/variety.entity';
 import { GreenhouseCrop } from '@modules/greenhouse-crop/entities/greenhouse-crop.entity';
+import { Harvest } from '@modules/harvest/entities/harvest.entity';
 import { Batch } from './entities/batch.entity';
 import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
@@ -33,6 +34,8 @@ export class BatchService extends BaseService<Batch> {
     private readonly varietyRepository: Repository<Variety>,
     @InjectRepository(GreenhouseCrop)
     private readonly greenhouseCropRepository: Repository<GreenhouseCrop>,
+    @InjectRepository(Harvest)
+    private readonly harvestRepository: Repository<Harvest>,
   ) {
     super(batchRepository);
   }
@@ -369,12 +372,23 @@ export class BatchService extends BaseService<Batch> {
     return this.findOneById(id, tenantId);
   }
 
+  // Soft-delete a batch and cascade the soft-delete to its harvests, so a
+  // deleted batch takes its linked harvest events with it (no dangling rows
+  // that would resurface if the batch were ever restored). Both the batch and
+  // harvest list queries already exclude soft-deleted rows automatically.
   async deleteBatch(
     id: string,
     deletedById: string,
     tenantId?: string,
   ): Promise<void> {
     const batch = await this.findOneById(id, tenantId);
+
+    // Stamp who deleted them, then soft-delete the harvests followed by the
+    // batch. softDelete only touches rows whose deletedAt IS NULL, so this is
+    // idempotent for harvests that were already removed individually.
+    await this.harvestRepository.update({ batchId: id }, { deletedById });
+    await this.harvestRepository.softDelete({ batchId: id });
+
     batch.deletedById = deletedById;
     await this.batchRepository.save(batch);
     await this.batchRepository.softDelete(id);

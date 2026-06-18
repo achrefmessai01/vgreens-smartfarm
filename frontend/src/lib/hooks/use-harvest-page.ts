@@ -5,6 +5,7 @@ import type { HarvestSummary } from '@/types/harvest.types';
 import { useEditHarvest } from '@/lib/hooks/use-edit-harvest';
 import type { SidebarMode } from '@/lib/hooks/use-batch-sidebar';
 import { useDeleteHarvest } from '@/lib/hooks/use-delete-harvest';
+import { useDeleteBatch } from '@/lib/hooks/use-delete-batch';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import {
   computeSummary,
@@ -154,9 +155,9 @@ export function useHarvestPage() {
   const [deleteTarget, setDeleteTarget] = React.useState<HarvestItem | null>(
     null,
   );
-  const [deleteBatchTargetIds, setDeleteBatchTargetIds] = React.useState<
-    string[]
-  >([]);
+  // Id of the batch queued for deletion (null when the dialog is targeting a
+  // single harvest instead).
+  const [deleteBatchId, setDeleteBatchId] = React.useState<string | null>(null);
   const [isBatchDelete, setIsBatchDelete] = React.useState(false);
   const [pendingBatch, setPendingBatch] = React.useState<PendingBatch | null>(
     null,
@@ -173,6 +174,15 @@ export function useHarvestPage() {
     onSuccess: () => {
       setDeleteOpen(false);
       setDeleteTarget(null);
+      refetchAll();
+    },
+  });
+
+  const { handleDeleteBatch, loading: deleteBatchLoading } = useDeleteBatch({
+    onSuccess: () => {
+      setDeleteOpen(false);
+      setDeleteBatchId(null);
+      setIsBatchDelete(false);
       refetchAll();
     },
   });
@@ -262,39 +272,32 @@ export function useHarvestPage() {
 
   const handleDeleteRequest = React.useCallback((harvest: HarvestItem) => {
     setIsBatchDelete(false);
-    setDeleteBatchTargetIds([]);
+    setDeleteBatchId(null);
     setDeleteTarget(harvest);
     setDeleteOpen(true);
   }, []);
 
-  const handleBatchDeleteRequest = React.useCallback(
-    (_batch: BatchItem, entries: HarvestItem[]) => {
-      setIsBatchDelete(true);
-      setDeleteTarget(null);
-      setDeleteBatchTargetIds(entries.map((entry) => entry.id));
-      setDeleteOpen(true);
-    },
-    [],
-  );
+  // Deleting a batch soft-deletes the batch itself (the backend cascades to its
+  // harvests); we no longer delete the harvest rows one by one.
+  const handleBatchDeleteRequest = React.useCallback((batch: BatchItem) => {
+    setIsBatchDelete(true);
+    setDeleteTarget(null);
+    setDeleteBatchId(batch.id);
+    setDeleteOpen(true);
+  }, []);
 
   const handleDeleteConfirm = React.useCallback(async () => {
     if (isBatchDelete) {
-      for (const id of deleteBatchTargetIds) {
-        await handleDelete(id, { skipSuccess: true });
-      }
-      setDeleteOpen(false);
-      setDeleteBatchTargetIds([]);
-      setIsBatchDelete(false);
-      refetchAll();
+      if (deleteBatchId) await handleDeleteBatch(deleteBatchId);
       return;
     }
     if (deleteTarget) handleDelete(deleteTarget.id);
   }, [
     isBatchDelete,
-    deleteBatchTargetIds,
+    deleteBatchId,
     deleteTarget,
     handleDelete,
-    refetchAll,
+    handleDeleteBatch,
   ]);
 
   return {
@@ -330,7 +333,7 @@ export function useHarvestPage() {
     handleEditRequest: handleBatchEdit,
     deleteOpen,
     setDeleteOpen,
-    deleteLoading,
+    deleteLoading: deleteLoading || deleteBatchLoading,
     handleDeleteRequest,
     handleBatchDeleteRequest,
     isBatchDelete,
