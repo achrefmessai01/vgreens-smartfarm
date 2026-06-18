@@ -81,18 +81,24 @@ export class HarvestsService {
   // Non-blocking sanity check for crate-mode input: a per-class remainder at or
   // above a full crate weight means another crate should probably have been
   // counted. Logged, never rejected.
+  // Quality-class label from a 0-based array index: 0 -> A, 1 -> B, 2 -> C, ...
+  // The crate classes are positional and unbounded; the letter is derived, never
+  // taken from a fixed enum.
+  private classLetter(index: number): string {
+    return String.fromCharCode(65 + index);
+  }
+
   private warnCrateRemainder(input: HarvestEntryInput, batch: Batch): void {
     if (batch.inputMode !== InputMode.CRATE) return;
     const crateWeight = batch.crateWeight ?? 0;
     if (crateWeight <= 0) return;
-    for (const cls of ['A', 'B', 'C'] as const) {
-      const remainder = input[`remainingKg${cls}`] ?? 0;
-      if (remainder >= crateWeight) {
+    (input.remainingKgs ?? []).forEach((remainder, i) => {
+      if ((remainder ?? 0) >= crateWeight) {
         this.logger.warn(
-          `Crate entry remainingKg${cls}=${remainder} >= crateWeight=${crateWeight} (batch ${batch.id}); that is another full crate.`,
+          `Crate entry remainingKg[${this.classLetter(i)}]=${remainder} >= crateWeight=${crateWeight} (batch ${batch.id}); that is another full crate.`,
         );
       }
-    }
+    });
   }
 
   // Build a persistable entry from input, filling the two derived per-entry
@@ -120,12 +126,8 @@ export class HarvestsService {
         classB: 0,
         classC: 0,
         waste: input.waste ?? 0,
-        crateCountA: input.crateCountA ?? 0,
-        crateCountB: input.crateCountB ?? 0,
-        crateCountC: input.crateCountC ?? 0,
-        remainingKgA: input.remainingKgA ?? 0,
-        remainingKgB: input.remainingKgB ?? 0,
-        remainingKgC: input.remainingKgC ?? 0,
+        crateCounts: input.crateCounts ?? [],
+        remainingKgs: input.remainingKgs ?? [],
         fruitCount: input.fruitCount ?? 0,
         totalFruitWeight: 0,
         avgFruitWeight: 0,
@@ -152,34 +154,35 @@ export class HarvestsService {
     };
   }
 
-  // Effective kg for one quality class. Crate mode derives it from the batch's
-  // current crateWeight (count × crateWeight + remainder); weight mode reads the
-  // stored class kg. Single source of truth — every total flows through here.
-  private entryClass(
+  // Effective kg for one quality class by 0-based index. Crate mode derives it
+  // from the batch's current crateWeight (count × crateWeight + remainder);
+  // weight mode reads the stored class kg (only indices 0/1/2 = A/B/C exist).
+  // Single source of truth — every total flows through here.
+  private entryClassKg(
     e: HarvestEntry,
     batch: Batch | null | undefined,
-    cls: 'A' | 'B' | 'C',
+    index: number,
   ): number {
     if (batch?.inputMode === InputMode.CRATE) {
-      const count = e[`crateCount${cls}`] ?? 0;
-      const remainder = e[`remainingKg${cls}`] ?? 0;
+      const count = e.crateCounts?.[index] ?? 0;
+      const remainder = e.remainingKgs?.[index] ?? 0;
       return count * (batch.crateWeight ?? 0) + remainder;
     }
-    return e[`class${cls}`] ?? 0;
+    return [e.classA, e.classB, e.classC][index] ?? 0;
   }
 
-  // Effective total sellable weight for an entry: sum of the three classes in
-  // crate mode, the stored totalFruitWeight in weight mode.
+  // Effective total sellable weight for an entry: in crate mode the sum across
+  // ALL quality classes present (dynamic, unbounded); in weight mode the stored
+  // totalFruitWeight.
   private entryTotalWeight(
     e: HarvestEntry,
     batch: Batch | null | undefined,
   ): number {
     if (batch?.inputMode === InputMode.CRATE) {
-      return (
-        this.entryClass(e, batch, 'A') +
-        this.entryClass(e, batch, 'B') +
-        this.entryClass(e, batch, 'C')
-      );
+      const n = e.crateCounts?.length ?? 0;
+      let total = 0;
+      for (let i = 0; i < n; i++) total += this.entryClassKg(e, batch, i);
+      return total;
     }
     return e.totalFruitWeight ?? 0;
   }
@@ -211,17 +214,19 @@ export class HarvestsService {
       list.reduce((s, e) => s + (pick(e) || 0), 0);
 
     // Class kg and totals flow through the effective-weight helpers so crate-mode
-    // entries reflect the batch's current crateWeight.
+    // entries reflect the batch's current crateWeight. classA/B/C are the fixed
+    // first three indices (0/1/2); in crate mode any further classes still count
+    // in totalFruitWeight (below) but not in these three scalar fields.
     const classA = this.roundTo(
-      sum((e) => this.entryClass(e, batch, 'A')),
+      sum((e) => this.entryClassKg(e, batch, 0)),
       3,
     );
     const classB = this.roundTo(
-      sum((e) => this.entryClass(e, batch, 'B')),
+      sum((e) => this.entryClassKg(e, batch, 1)),
       3,
     );
     const classC = this.roundTo(
-      sum((e) => this.entryClass(e, batch, 'C')),
+      sum((e) => this.entryClassKg(e, batch, 2)),
       3,
     );
     const waste = this.roundTo(
@@ -234,11 +239,18 @@ export class HarvestsService {
       3,
     );
 
-    // Crate-count rollups are meaningful only for crate-mode batches.
+    // Crate-count rollups are meaningful only for crate-mode batches. The array
+    // length is dynamic: as wide as the widest entry's crateCounts (one slot per
+    // quality class, index 0=A, 1=B, ...).
     const isCrate = batch?.inputMode === InputMode.CRATE;
-    const crateCountA = isCrate ? sum((e) => e.crateCountA ?? 0) : null;
-    const crateCountB = isCrate ? sum((e) => e.crateCountB ?? 0) : null;
-    const crateCountC = isCrate ? sum((e) => e.crateCountC ?? 0) : null;
+    const crateClassN = isCrate
+      ? Math.max(0, ...list.map((e) => e.crateCounts?.length ?? 0))
+      : 0;
+    const crateCounts = isCrate
+      ? Array.from({ length: crateClassN }, (_, i) =>
+          sum((e) => e.crateCounts?.[i] ?? 0),
+        )
+      : null;
 
     const hasEntries = list.length > 0;
     const avgFruitWeight = hasEntries
@@ -266,9 +278,7 @@ export class HarvestsService {
       waste,
       fruitCount,
       totalFruitWeight,
-      crateCountA,
-      crateCountB,
-      crateCountC,
+      crateCounts,
       avgFruitWeight,
       avgBrix,
       yieldPerPlant,

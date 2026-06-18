@@ -8,6 +8,7 @@ import {
   SheetContent,
 } from '@/components/ui/sheet';
 import {
+  classLetter,
   crateClassKg,
   formatHarvestDate,
   getGreenhouseLabel,
@@ -33,24 +34,36 @@ export function HarvestDetails({
 
   if (!harvest) return null;
 
-  // Total yield = every picked grade plus waste (Quality A + B + C + Waste).
   const totals = harvest.totals;
-  const totalYield =
-    totals.classA + totals.classB + totals.classC + totals.waste;
   const greenhouseName = harvest.batch?.greenhouse?.name ?? null;
   const qualityALabel = h?.qualityA ?? 'Quality A';
   const qualityBLabel = h?.qualityB ?? 'Quality B';
   const qualityCLabel = h?.qualityC ?? 'Quality C';
+  const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
   const wasteLabel = h?.waste ?? 'Waste';
   const ratioLabel = h?.wasteRatio ?? 'Waste Ratio';
   // Per sub-entry breakdown; legacy harvests synthesize a single entry.
   const entries = harvestToDisplayEntries(harvest);
   const showEntryLabels = entries.length > 1;
   // In crate mode the stored classA/B/C are 0; per-class kg are derived from the
-  // crate counts + the batch crate weight at display time.
+  // crate counts + the batch crate weight at display time, across a dynamic
+  // number of classes.
   const isCrate = harvest.batch?.inputMode === InputMode.Crate;
   const crateWeight = harvest.batch?.crateWeight ?? null;
   const cratesLabel = h?.cratesUnit ?? 'crates';
+  // Total yield = sellable + waste. Crate mode sums all classes via the
+  // service-computed totalFruitWeight; weight mode uses the A/B/C scalars.
+  const totalYield = isCrate
+    ? totals.totalFruitWeight + totals.waste
+    : totals.classA + totals.classB + totals.classC + totals.waste;
+  // A muted color cycle for the per-class value labels.
+  const classColors = [
+    'text-green-600',
+    'text-teal-600',
+    'text-amber-600',
+    'text-blue-600',
+    'text-purple-600',
+  ];
   // "12 × 8 kg + 3.5 kg" caption for a crate-mode class; omitted when empty.
   const crateBreakdownText = (count: number, remainder: number): string | null => {
     if (!isCrate) return null;
@@ -109,48 +122,35 @@ export function HarvestDetails({
             </div>
 
             {entries.map((entry, entryIndex) => {
-              // Per-class kg: derived from crate inputs in crate mode, the stored
-              // class kg otherwise.
-              const classAKg = isCrate
-                ? crateClassKg(
-                    entry.crateCountA ?? 0,
-                    entry.remainingKgA ?? 0,
-                    crateWeight,
-                  )
-                : entry.classA;
-              const classBKg = isCrate
-                ? crateClassKg(
-                    entry.crateCountB ?? 0,
-                    entry.remainingKgB ?? 0,
-                    crateWeight,
-                  )
-                : entry.classB;
-              const classCKg = isCrate
-                ? crateClassKg(
-                    entry.crateCountC ?? 0,
-                    entry.remainingKgC ?? 0,
-                    crateWeight,
-                  )
-                : (entry.classC ?? 0);
-              const entryTotal = classAKg + classBKg + classCKg + entry.waste;
+              const counts = entry.crateCounts ?? [];
+              const rems = entry.remainingKgs ?? [];
+              // Per-class rows. Crate mode: one row per class present (dynamic),
+              // kg derived from count × crateWeight + remainder. Weight mode: the
+              // fixed A/B/C stored kg.
+              const classRows = isCrate
+                ? counts.map((count, i) => ({
+                    label: classLabelTpl.replace('{class}', classLetter(i)),
+                    kg: crateClassKg(count, rems[i] ?? 0, crateWeight),
+                    breakdown: crateBreakdownText(count, rems[i] ?? 0),
+                  }))
+                : [
+                    { label: qualityALabel, kg: entry.classA, breakdown: null },
+                    { label: qualityBLabel, kg: entry.classB, breakdown: null },
+                    {
+                      label: qualityCLabel,
+                      kg: entry.classC ?? 0,
+                      breakdown: null,
+                    },
+                  ];
+              const sellable = classRows.reduce((s, r) => s + r.kg, 0);
+              const entryTotal = sellable + entry.waste;
               const entryRatio =
                 entryTotal > 0 ? (entry.waste / entryTotal) * 100 : 0;
-              const breakdownA = crateBreakdownText(
-                entry.crateCountA ?? 0,
-                entry.remainingKgA ?? 0,
-              );
-              const breakdownB = crateBreakdownText(
-                entry.crateCountB ?? 0,
-                entry.remainingKgB ?? 0,
-              );
-              const breakdownC = crateBreakdownText(
-                entry.crateCountC ?? 0,
-                entry.remainingKgC ?? 0,
-              );
+              const totalCrates = counts.reduce((s, c) => s + (c ?? 0), 0);
               // Fruit-weight figures are stored only in weight mode; in crate
               // mode they're derived from the sellable total.
               const displayTotalFruitWeight = isCrate
-                ? classAKg + classBKg + classCKg
+                ? sellable
                 : entry.totalFruitWeight;
               const displayAvgFruitWeight = isCrate
                 ? entry.fruitCount > 0
@@ -176,34 +176,22 @@ export function HarvestDetails({
                       {h?.harvestBreakdown ?? 'Harvest Breakdown'}
                     </h4>
                     <div className="space-y-4">
-                      <QualityRow
-                        label={qualityALabel}
-                        kg={classAKg}
-                        breakdown={breakdownA}
-                        valueClassName="text-green-600"
-                      />
-                      <QualityRow
-                        label={qualityBLabel}
-                        kg={classBKg}
-                        breakdown={breakdownB}
-                        valueClassName="text-teal-600"
-                      />
-                      <QualityRow
-                        label={qualityCLabel}
-                        kg={classCKg}
-                        breakdown={breakdownC}
-                        valueClassName="text-amber-600"
-                      />
+                      {classRows.map((row, i) => (
+                        <QualityRow
+                          key={i}
+                          label={row.label}
+                          kg={row.kg}
+                          breakdown={row.breakdown}
+                          valueClassName={classColors[i % classColors.length]}
+                        />
+                      ))}
                       {isCrate && (
                         <div className="flex items-center justify-between py-3">
                           <span className="text-muted-foreground font-medium">
                             {h?.totalCrates ?? 'Total crates'}:
                           </span>
                           <span className="text-foreground text-lg font-bold">
-                            {(entry.crateCountA ?? 0) +
-                              (entry.crateCountB ?? 0) +
-                              (entry.crateCountC ?? 0)}{' '}
-                            {cratesLabel}
+                            {totalCrates} {cratesLabel}
                           </span>
                         </div>
                       )}

@@ -77,6 +77,31 @@ export function computeAvgFruitWeight(
   return Math.round((totalFruitWeight / fruitCount) * 1000) / 1000;
 }
 
+// Number of quality classes a fresh crate entry starts with (A/B/C). The count
+// is not fixed — the form can add/remove classes — this is just the default.
+export const DEFAULT_CRATE_CLASS_COUNT = 3;
+
+// Quality-class label letter from a 0-based array index: 0 -> A, 1 -> B, ... The
+// crate classes are positional and unbounded; the letter is derived, not from an
+// enum. Mirrors the backend classLetter.
+export function classLetter(index: number): string {
+  return String.fromCharCode(65 + index);
+}
+
+// Align a count/remainder array pair to a common length (zero-filled), at least
+// `min`, so indexed access is safe and the two arrays always match in length.
+export function normalizeCratePair(
+  counts: number[] | null | undefined,
+  rems: number[] | null | undefined,
+  min = 1,
+): { crateCounts: number[]; remainingKgs: number[] } {
+  const len = Math.max(counts?.length ?? 0, rems?.length ?? 0, min);
+  return {
+    crateCounts: Array.from({ length: len }, (_, i) => counts?.[i] ?? 0),
+    remainingKgs: Array.from({ length: len }, (_, i) => rems?.[i] ?? 0),
+  };
+}
+
 // Derived sellable kg for one quality class in crate mode:
 // crateCount × crateWeight + remainder. crateWeight is read live (never
 // snapshotted), so editing it shifts every crate-mode entry's kg.
@@ -88,28 +113,20 @@ export function crateClassKg(
   return (count || 0) * (crateWeight ?? 0) + (remainder || 0);
 }
 
-// Per-class crate inputs an entry total is summed from. Mirrors the backend's
-// entryTotalWeight for crate-mode entries.
-export interface CrateEntryInput {
-  crateCountA: number;
-  crateCountB: number;
-  crateCountC: number;
-  remainingKgA: number;
-  remainingKgB: number;
-  remainingKgC: number;
-}
-
-// Total sellable kg for a crate-mode entry: the sum of the three derived class
-// kg. Waste is tracked separately and never part of this total.
+// Total sellable kg for a crate-mode entry: the sum of the derived per-class kg
+// across all classes present (dynamic count). Waste is tracked separately and
+// never part of this total.
 export function crateEntryTotalKg(
-  e: CrateEntryInput,
+  crateCounts: number[] | null | undefined,
+  remainingKgs: number[] | null | undefined,
   crateWeight: number | null | undefined,
 ): number {
-  return (
-    crateClassKg(e.crateCountA, e.remainingKgA, crateWeight) +
-    crateClassKg(e.crateCountB, e.remainingKgB, crateWeight) +
-    crateClassKg(e.crateCountC, e.remainingKgC, crateWeight)
-  );
+  const len = Math.max(crateCounts?.length ?? 0, remainingKgs?.length ?? 0);
+  let total = 0;
+  for (let i = 0; i < len; i++) {
+    total += crateClassKg(crateCounts?.[i] ?? 0, remainingKgs?.[i] ?? 0, crateWeight);
+  }
+  return total;
 }
 
 export function extractStoragePathFromUrl(
@@ -203,6 +220,13 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     entry.brixReadings.length > 0
       ? entry.brixReadings.map((b) => b.class)
       : createEmptyEntry().brixClasses;
+  // Align the stored crate arrays; default to the standard class count when this
+  // is a weight-mode/empty entry so the crate layout still has rows if switched.
+  const crate = normalizeCratePair(
+    entry.crateCounts,
+    entry.remainingKgs,
+    DEFAULT_CRATE_CLASS_COUNT,
+  );
   return {
     marketable: entry.classA,
     waste: entry.waste,
@@ -210,12 +234,8 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     classC: entry.classC,
     rowX: entry.rowX,
     rowY: entry.rowY,
-    crateCountA: entry.crateCountA ?? 0,
-    crateCountB: entry.crateCountB ?? 0,
-    crateCountC: entry.crateCountC ?? 0,
-    remainingKgA: entry.remainingKgA ?? 0,
-    remainingKgB: entry.remainingKgB ?? 0,
-    remainingKgC: entry.remainingKgC ?? 0,
+    crateCounts: crate.crateCounts,
+    remainingKgs: crate.remainingKgs,
     brixReadings: readings,
     brixClasses: classes,
     showBrix: entry.brixReadings.some((b) => b.value > 0),

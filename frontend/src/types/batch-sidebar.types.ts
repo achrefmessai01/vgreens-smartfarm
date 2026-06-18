@@ -11,14 +11,11 @@ export interface HarvestEntryData {
   classC: number;
   rowX: number;
   rowY: number;
-  // Crate-mode inputs (ignored in weight mode): per-quality crate counts and a
-  // remaining-kg tail. kg/total are derived from the batch crateWeight.
-  crateCountA: number;
-  crateCountB: number;
-  crateCountC: number;
-  remainingKgA: number;
-  remainingKgB: number;
-  remainingKgC: number;
+  // Crate-mode inputs (ignored in weight mode): positional per-quality arrays
+  // (index 0=A, 1=B, 2=C) of crate counts and remaining-kg tails. kg/total are
+  // derived from the batch crateWeight. Always length 3 in form state.
+  crateCounts: number[];
+  remainingKgs: number[];
   brixReadings: number[];
   // Quality grade per Brix reading, index-aligned with brixReadings.
   brixClasses: HarvestQualityClass[];
@@ -37,12 +34,8 @@ export function entryHasData(entry: HarvestEntryData): boolean {
     entry.classC > 0 ||
     entry.rowX > 0 ||
     entry.rowY > 0 ||
-    entry.crateCountA > 0 ||
-    entry.crateCountB > 0 ||
-    entry.crateCountC > 0 ||
-    entry.remainingKgA > 0 ||
-    entry.remainingKgB > 0 ||
-    entry.remainingKgC > 0 ||
+    entry.crateCounts.some((v) => v > 0) ||
+    entry.remainingKgs.some((v) => v > 0) ||
     entry.fruitCount > 0 ||
     entry.brixReadings.some((v) => v > 0)
   );
@@ -56,12 +49,8 @@ export function createEmptyEntry(): HarvestEntryData {
     classC: 0,
     rowX: 0,
     rowY: 0,
-    crateCountA: 0,
-    crateCountB: 0,
-    crateCountC: 0,
-    remainingKgA: 0,
-    remainingKgB: 0,
-    remainingKgC: 0,
+    crateCounts: [0, 0, 0],
+    remainingKgs: [0, 0, 0],
     brixReadings: [0],
     brixClasses: [HarvestQualityClass.A],
     showBrix: false,
@@ -139,31 +128,28 @@ export interface YieldDataFieldProps {
   isLoading?: boolean;
 }
 
-// Crate-mode yield inputs: per-quality crate counts + remainders and the shared
-// waste field. crateWeight (kg per crate) drives the derived per-class kg and
-// the entry total. Presentational — the parent owns state.
+// How a crate-mode change is addressed: a per-quality array cell (by class
+// index), the shared scalar waste field, or adding/removing a whole quality
+// class (classes are dynamic and unbounded).
+export type CrateChange =
+  | { kind: 'crateCount'; index: number; value: number }
+  | { kind: 'remainingKg'; index: number; value: number }
+  | { kind: 'waste'; value: number }
+  | { kind: 'addClass' }
+  | { kind: 'removeClass'; index: number };
+
+// Crate-mode yield inputs: positional per-quality arrays (index 0=A,1=B,2=C) of
+// crate counts + remainders, plus the shared waste field. crateWeight (kg per
+// crate) drives the derived per-class kg and the entry total. Presentational —
+// the parent owns state.
 export interface CrateYieldFieldProps {
-  crateCountA: number;
-  crateCountB: number;
-  crateCountC: number;
-  remainingKgA: number;
-  remainingKgB: number;
-  remainingKgC: number;
+  crateCounts: number[];
+  remainingKgs: number[];
   waste: number;
   // Per-batch crate weight (kg). Null/0 means it hasn't been set; the field
   // still renders but derived kg show as 0.
   crateWeight: number | null;
-  onCrateChange?: (
-    field:
-      | 'crateCountA'
-      | 'crateCountB'
-      | 'crateCountC'
-      | 'remainingKgA'
-      | 'remainingKgB'
-      | 'remainingKgC'
-      | 'waste',
-    value: number,
-  ) => void;
+  onCrateChange?: (change: CrateChange) => void;
   isLoading?: boolean;
 }
 
@@ -184,9 +170,9 @@ export interface BrixMeasurementsFieldProps {
 
 export interface FruitWeightFieldProps {
   fruitCount: number;
-  marketable: number;
-  classB: number;
-  classC: number;
+  // Total sellable yield (kg) the average fruit weight is derived from. The
+  // parent computes it per mode (weight: A+B+C; crate: sum of all classes).
+  sellableWeight: number;
   showFruitWeight: boolean;
   onShowFruitWeightChange: (show: boolean) => void;
   onFruitCountChange?: (value: number) => void;

@@ -208,8 +208,8 @@ export function BatchSidebar({
                     onYieldChange={(field, value) =>
                       handleYieldChange(index, field, value)
                     }
-                    onCrateChange={(field, value) =>
-                      handleCrateChange(index, field, value)
+                    onCrateChange={(change) =>
+                      handleCrateChange(index, change)
                     }
                     onBrixChange={(readingIndex, value) =>
                       handleBrixChange(index, readingIndex, value)

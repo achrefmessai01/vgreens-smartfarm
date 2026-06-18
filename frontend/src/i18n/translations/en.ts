@@ -593,6 +593,9 @@ export const en = {
       enterCrateCount: 'Crates',
       cratesUnit: 'crates',
       totalCrates: 'Total crates',
+      qualityClassLabel: 'Quality {class}',
+      addQualityClass: 'Add quality class',
+      removeQualityClass: 'Remove class',
       remainingKg: 'Remaining (kg)',
       remainingKgExceedsCrate:
         'At/above one full crate ({weight} kg) — count another crate?',

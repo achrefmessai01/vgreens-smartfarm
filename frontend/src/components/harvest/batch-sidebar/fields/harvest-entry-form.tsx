@@ -3,8 +3,11 @@
 import * as React from 'react';
 import { InputMode } from '@/generated/graphql';
 import type { HarvestQualityClass } from '@/generated/graphql';
-import type { HarvestEntryData } from '@/types/batch-sidebar.types';
-import { crateClassKg } from '@/lib/harvest-utils';
+import type {
+  CrateChange,
+  HarvestEntryData,
+} from '@/types/batch-sidebar.types';
+import { crateEntryTotalKg } from '@/lib/harvest-utils';
 import { YieldDataField } from './batch-sidebar-yield-field';
 import { CrateYieldField } from './batch-sidebar-crate-field';
 import { BrixMeasurementsField } from './batch-sidebar-brix-field';
@@ -25,17 +28,7 @@ export interface HarvestEntryFormProps {
     field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
     value: number,
   ) => void;
-  onCrateChange: (
-    field:
-      | 'crateCountA'
-      | 'crateCountB'
-      | 'crateCountC'
-      | 'remainingKgA'
-      | 'remainingKgB'
-      | 'remainingKgC'
-      | 'waste',
-    value: number,
-  ) => void;
+  onCrateChange: (change: CrateChange) => void;
   onBrixChange: (readingIndex: number, value: number) => void;
   onBrixClassChange: (readingIndex: number, value: HarvestQualityClass) => void;
   onAddBrixReading: () => void;
@@ -71,29 +64,18 @@ export function HarvestEntryForm({
   const idPrefix = `entry-${index}-`;
   const isCrate = inputMode === InputMode.Crate;
 
-  // The sellable per-class kg the Fruit-weight section averages over. In crate
-  // mode these are derived from the crate inputs; in weight mode they're the
-  // entered class kg.
-  const classAKg = isCrate
-    ? crateClassKg(entry.crateCountA, entry.remainingKgA, crateWeight)
-    : entry.marketable;
-  const classBKg = isCrate
-    ? crateClassKg(entry.crateCountB, entry.remainingKgB, crateWeight)
-    : entry.classB;
-  const classCKg = isCrate
-    ? crateClassKg(entry.crateCountC, entry.remainingKgC, crateWeight)
-    : entry.classC;
+  // Total sellable yield the Fruit-weight section averages over. Crate mode sums
+  // every quality class (dynamic count); weight mode sums A + B + C.
+  const sellableWeight = isCrate
+    ? crateEntryTotalKg(entry.crateCounts, entry.remainingKgs, crateWeight)
+    : entry.marketable + entry.classB + entry.classC;
 
   return (
     <div className="space-y-4">
       {isCrate ? (
         <CrateYieldField
-          crateCountA={entry.crateCountA}
-          crateCountB={entry.crateCountB}
-          crateCountC={entry.crateCountC}
-          remainingKgA={entry.remainingKgA}
-          remainingKgB={entry.remainingKgB}
-          remainingKgC={entry.remainingKgC}
+          crateCounts={entry.crateCounts}
+          remainingKgs={entry.remainingKgs}
           waste={entry.waste}
           crateWeight={crateWeight}
           onCrateChange={onCrateChange}
@@ -130,9 +112,7 @@ export function HarvestEntryForm({
       <div className="border-t pt-4">
         <FruitWeightField
           fruitCount={entry.fruitCount}
-          marketable={classAKg}
-          classB={classBKg}
-          classC={classCKg}
+          sellableWeight={sellableWeight}
           showFruitWeight={entry.showFruitWeight}
           onShowFruitWeightChange={onSetShowFruitWeight}
           onFruitCountChange={onFruitCountChange}

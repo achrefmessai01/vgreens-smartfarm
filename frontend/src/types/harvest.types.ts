@@ -45,14 +45,11 @@ export interface HarvestEntryLike {
   classB: number;
   classC: number;
   waste: number;
-  // Crate mode only (null in weight mode): per-quality crate counts + a
-  // remaining-kg tail. kg/total are derived from the batch crateWeight.
-  crateCountA?: number | null;
-  crateCountB?: number | null;
-  crateCountC?: number | null;
-  remainingKgA?: number | null;
-  remainingKgB?: number | null;
-  remainingKgC?: number | null;
+  // Crate mode only (null in weight mode): positional per-quality arrays
+  // (index 0=A, 1=B, 2=C) of crate counts and remaining-kg tails. kg/total are
+  // derived from the batch crateWeight.
+  crateCounts?: number[] | null;
+  remainingKgs?: number[] | null;
   fruitCount: number;
   totalFruitWeight: number;
   avgFruitWeight: number;
@@ -68,9 +65,8 @@ export interface HarvestTotalsLike {
   waste: number;
   fruitCount: number;
   totalFruitWeight: number;
-  crateCountA?: number | null;
-  crateCountB?: number | null;
-  crateCountC?: number | null;
+  // Per-quality crate-count sums, indexed 0=A,1=B,2=C; null off crate mode.
+  crateCounts?: number[] | null;
   avgFruitWeight?: number | null;
   avgBrix?: number | null;
   yieldPerPlant?: number | null;

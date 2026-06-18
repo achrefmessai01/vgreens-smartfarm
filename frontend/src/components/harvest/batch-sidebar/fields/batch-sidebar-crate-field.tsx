@@ -1,32 +1,20 @@
 'use client';
 
 import * as React from 'react';
+import { Plus, X } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import type { CrateYieldFieldProps } from '@/types/batch-sidebar.types';
 import {
+  classLetter,
   crateClassKg,
   crateEntryTotalKg,
 } from '@/lib/harvest-utils';
 
-// One quality row: a crate-count input + a remainder input, with the derived
-// per-class kg shown alongside.
-interface ClassRow {
-  cls: 'A' | 'B' | 'C';
-  label: string;
-  countField: 'crateCountA' | 'crateCountB' | 'crateCountC';
-  remainderField: 'remainingKgA' | 'remainingKgB' | 'remainingKgC';
-  count: number;
-  remainder: number;
-}
-
 export function CrateYieldField({
-  crateCountA,
-  crateCountB,
-  crateCountC,
-  remainingKgA,
-  remainingKgB,
-  remainingKgC,
+  crateCounts,
+  remainingKgs,
   waste,
   crateWeight,
   onCrateChange,
@@ -36,33 +24,6 @@ export function CrateYieldField({
   const h = t.pages.harvest;
 
   const weight = crateWeight ?? 0;
-
-  const rows: ReadonlyArray<ClassRow> = [
-    {
-      cls: 'A',
-      label: h?.qualityA ?? 'Quality A',
-      countField: 'crateCountA',
-      remainderField: 'remainingKgA',
-      count: crateCountA,
-      remainder: remainingKgA,
-    },
-    {
-      cls: 'B',
-      label: h?.qualityB ?? 'Quality B',
-      countField: 'crateCountB',
-      remainderField: 'remainingKgB',
-      count: crateCountB,
-      remainder: remainingKgB,
-    },
-    {
-      cls: 'C',
-      label: h?.qualityC ?? 'Quality C',
-      countField: 'crateCountC',
-      remainderField: 'remainingKgC',
-      count: crateCountC,
-      remainder: remainingKgC,
-    },
-  ];
 
   if (isLoading) {
     return (
@@ -75,17 +36,15 @@ export function CrateYieldField({
     );
   }
 
-  const total = crateEntryTotalKg(
-    { crateCountA, crateCountB, crateCountC, remainingKgA, remainingKgB, remainingKgC },
-    crateWeight,
-  );
-
+  const total = crateEntryTotalKg(crateCounts, remainingKgs, crateWeight);
   const crateUnit = h?.cratesUnit ?? 'crates';
   const remainingKgLabel = h?.remainingKg ?? 'Remaining (kg)';
+  const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
   const remainderWarning = (
     h?.remainingKgExceedsCrate ??
     'At/above one full crate ({weight} kg) — count another crate?'
   ).replace('{weight}', String(weight));
+  const canRemove = crateCounts.length > 1;
 
   return (
     <div className="space-y-4">
@@ -102,16 +61,33 @@ export function CrateYieldField({
       </div>
 
       <div className="space-y-3">
-        {rows.map((row) => {
-          const kg = crateClassKg(row.count, row.remainder, crateWeight);
-          const overRemainder = weight > 0 && row.remainder >= weight;
+        {crateCounts.map((count, i) => {
+          const remainder = remainingKgs[i] ?? 0;
+          const kg = crateClassKg(count, remainder, crateWeight);
+          const overRemainder = weight > 0 && remainder >= weight;
           return (
-            <div key={row.cls} className="space-y-2 text-left">
+            <div key={i} className="space-y-2 text-left">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-muted-foreground text-sm">{row.label}</p>
-                <span className="text-sm font-medium text-teal-600">
-                  {kg.toFixed(1)} kg
-                </span>
+                <p className="text-muted-foreground text-sm">
+                  {classLabelTpl.replace('{class}', classLetter(i))}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-teal-600">
+                    {kg.toFixed(1)} kg
+                  </span>
+                  {canRemove && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onCrateChange?.({ kind: 'removeClass', index: i })
+                      }
+                      aria-label={h?.removeQualityClass ?? 'Remove class'}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative">
@@ -119,12 +95,16 @@ export function CrateYieldField({
                     type="number"
                     min="0"
                     step="1"
-                    value={row.count === 0 ? '' : row.count.toString()}
+                    value={count === 0 ? '' : count.toString()}
                     onChange={(e) =>
-                      onCrateChange?.(
-                        row.countField,
-                        Math.max(0, Math.trunc(parseFloat(e.target.value) || 0)),
-                      )
+                      onCrateChange?.({
+                        kind: 'crateCount',
+                        index: i,
+                        value: Math.max(
+                          0,
+                          Math.trunc(parseFloat(e.target.value) || 0),
+                        ),
+                      })
                     }
                     className="h-10 pr-14 text-left text-base"
                     placeholder={h?.enterCrateCount ?? 'Crates'}
@@ -138,12 +118,13 @@ export function CrateYieldField({
                     type="number"
                     min="0"
                     step="0.1"
-                    value={row.remainder === 0 ? '' : row.remainder.toString()}
+                    value={remainder === 0 ? '' : remainder.toString()}
                     onChange={(e) =>
-                      onCrateChange?.(
-                        row.remainderField,
-                        Math.max(0, parseFloat(e.target.value) || 0),
-                      )
+                      onCrateChange?.({
+                        kind: 'remainingKg',
+                        index: i,
+                        value: Math.max(0, parseFloat(e.target.value) || 0),
+                      })
                     }
                     className="h-10 pr-10 text-left text-base"
                     placeholder={remainingKgLabel}
@@ -160,6 +141,17 @@ export function CrateYieldField({
           );
         })}
 
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onCrateChange?.({ kind: 'addClass' })}
+          className="w-full"
+        >
+          <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+          {h?.addQualityClass ?? 'Add quality class'}
+        </Button>
+
         <div className="space-y-2 text-left">
           <p className="text-muted-foreground text-sm">{h?.waste ?? 'Waste'}</p>
           <div className="relative">
@@ -169,7 +161,10 @@ export function CrateYieldField({
               step="0.1"
               value={waste === 0 ? '' : waste.toString()}
               onChange={(e) =>
-                onCrateChange?.('waste', Math.max(0, parseFloat(e.target.value) || 0))
+                onCrateChange?.({
+                  kind: 'waste',
+                  value: Math.max(0, parseFloat(e.target.value) || 0),
+                })
               }
               className="h-10 pr-10 text-left text-base"
               placeholder={h?.enterWasteAmount ?? 'Enter waste amount'}

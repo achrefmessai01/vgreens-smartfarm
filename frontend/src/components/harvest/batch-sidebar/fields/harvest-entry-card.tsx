@@ -5,7 +5,10 @@ import { ChevronDown } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { InputMode } from '@/generated/graphql';
 import type { HarvestQualityClass } from '@/generated/graphql';
-import type { HarvestEntryData } from '@/types/batch-sidebar.types';
+import type {
+  CrateChange,
+  HarvestEntryData,
+} from '@/types/batch-sidebar.types';
 import { crateEntryTotalKg } from '@/lib/harvest-utils';
 import { HarvestEntryForm } from './harvest-entry-form';
 
@@ -25,17 +28,7 @@ export interface HarvestEntryCardProps {
     field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
     value: number,
   ) => void;
-  onCrateChange: (
-    field:
-      | 'crateCountA'
-      | 'crateCountB'
-      | 'crateCountC'
-      | 'remainingKgA'
-      | 'remainingKgB'
-      | 'remainingKgC'
-      | 'waste',
-    value: number,
-  ) => void;
+  onCrateChange: (change: CrateChange) => void;
   onBrixChange: (readingIndex: number, value: number) => void;
   onBrixClassChange: (readingIndex: number, value: HarvestQualityClass) => void;
   onAddBrixReading: () => void;
@@ -73,7 +66,7 @@ export function HarvestEntryCard({
   // mode it's derived from the crate counts + the batch crate weight.
   const headlineValue =
     inputMode === InputMode.Crate
-      ? crateEntryTotalKg(entry, crateWeight)
+      ? crateEntryTotalKg(entry.crateCounts, entry.remainingKgs, crateWeight)
       : entry.marketable + entry.classB + entry.classC;
   const entryTitle = (h?.entryLabel ?? 'Entry {n}').replace(
     '{n}',

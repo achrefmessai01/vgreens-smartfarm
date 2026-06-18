@@ -42,12 +42,8 @@ const HARVEST_MUTATION_FIELDS = gql`
       classB
       classC
       waste
-      crateCountA
-      crateCountB
-      crateCountC
-      remainingKgA
-      remainingKgB
-      remainingKgC
+      crateCounts
+      remainingKgs
       fruitCount
       totalFruitWeight
       avgFruitWeight
@@ -64,9 +60,7 @@ const HARVEST_MUTATION_FIELDS = gql`
       waste
       fruitCount
       totalFruitWeight
-      crateCountA
-      crateCountB
-      crateCountC
+      crateCounts
       avgFruitWeight
       avgBrix
       yieldPerPlant

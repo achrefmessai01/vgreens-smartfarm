@@ -10,6 +10,7 @@ import {
 } from '@/generated/graphql';
 import type {
   BatchDetailsData,
+  CrateChange,
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
 import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
@@ -166,22 +167,41 @@ export function useBatchSidebar({
     [updateEntry],
   );
 
-  // Crate-mode field updates: the per-quality crate counts, remainders and the
-  // shared waste field.
+  // Crate-mode field updates: a per-quality array cell (crate count or
+  // remainder, by class index), the shared scalar waste field, or adding /
+  // removing a whole quality class (both arrays grow/shrink together; never
+  // below one class).
   const handleCrateChange = React.useCallback(
-    (
-      entryIndex: number,
-      field:
-        | 'crateCountA'
-        | 'crateCountB'
-        | 'crateCountC'
-        | 'remainingKgA'
-        | 'remainingKgB'
-        | 'remainingKgC'
-        | 'waste',
-      value: number,
-    ) => {
-      updateEntry(entryIndex, (entry) => ({ ...entry, [field]: value }));
+    (entryIndex: number, change: CrateChange) => {
+      updateEntry(entryIndex, (entry) => {
+        switch (change.kind) {
+          case 'waste':
+            return { ...entry, waste: change.value };
+          case 'addClass':
+            return {
+              ...entry,
+              crateCounts: [...entry.crateCounts, 0],
+              remainingKgs: [...entry.remainingKgs, 0],
+            };
+          case 'removeClass': {
+            if (entry.crateCounts.length <= 1) return entry;
+            return {
+              ...entry,
+              crateCounts: entry.crateCounts.filter((_, i) => i !== change.index),
+              remainingKgs: entry.remainingKgs.filter(
+                (_, i) => i !== change.index,
+              ),
+            };
+          }
+          default: {
+            const key =
+              change.kind === 'crateCount' ? 'crateCounts' : 'remainingKgs';
+            const next = [...entry[key]];
+            next[change.index] = change.value;
+            return { ...entry, [key]: next };
+          }
+        }
+      });
     },
     [updateEntry],
   );
@@ -258,12 +278,8 @@ export function useBatchSidebar({
           rowX: entry.rowX,
           rowY: entry.rowY,
           waste: entry.waste,
-          crateCountA: entry.crateCountA,
-          crateCountB: entry.crateCountB,
-          crateCountC: entry.crateCountC,
-          remainingKgA: entry.remainingKgA,
-          remainingKgB: entry.remainingKgB,
-          remainingKgC: entry.remainingKgC,
+          crateCounts: entry.crateCounts,
+          remainingKgs: entry.remainingKgs,
           fruitCount,
           brixReadings,
         };

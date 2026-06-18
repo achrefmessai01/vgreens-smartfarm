@@ -57,34 +57,20 @@ export class HarvestEntry {
   @Column({ type: 'double precision', default: 0 })
   waste: number;
 
-  // Crate mode only (null in weight mode). Per-quality crate counts and a
-  // remaining-kg tail. The per-class kg and the entry total are derived at read
-  // from the batch's current crateWeight — never snapshotted here — so editing
-  // crateWeight propagates. classA/B/C/totalFruitWeight/avgFruitWeight stay 0
-  // for crate-mode entries.
-  @Field(() => Int, { nullable: true })
-  @Column({ type: 'int', nullable: true })
-  crateCountA?: number | null;
+  // Crate mode only (null in weight mode). Positional per-quality arrays where
+  // the index maps to a class by position (0 = A, 1 = B, 2 = C, 3 = D, ...): crate
+  // counts and the remaining-kg tail. The class count is dynamic/unbounded — not
+  // tied to an enum. Native Postgres int[] / double precision[] columns. The
+  // per-class kg and entry total are derived at read from the batch's current
+  // crateWeight — never snapshotted — so editing crateWeight propagates.
+  // classA/B/C, totalFruitWeight and avgFruitWeight stay 0 for crate-mode entries.
+  @Field(() => [Int], { nullable: true })
+  @Column({ type: 'int', array: true, nullable: true })
+  crateCounts?: number[] | null;
 
-  @Field(() => Int, { nullable: true })
-  @Column({ type: 'int', nullable: true })
-  crateCountB?: number | null;
-
-  @Field(() => Int, { nullable: true })
-  @Column({ type: 'int', nullable: true })
-  crateCountC?: number | null;
-
-  @Field(() => Float, { nullable: true })
-  @Column({ type: 'double precision', nullable: true })
-  remainingKgA?: number | null;
-
-  @Field(() => Float, { nullable: true })
-  @Column({ type: 'double precision', nullable: true })
-  remainingKgB?: number | null;
-
-  @Field(() => Float, { nullable: true })
-  @Column({ type: 'double precision', nullable: true })
-  remainingKgC?: number | null;
+  @Field(() => [Float], { nullable: true })
+  @Column({ type: 'double precision', array: true, nullable: true })
+  remainingKgs?: number[] | null;
 
   @Field(() => Int)
   @Column({ type: 'int', default: 0 })
