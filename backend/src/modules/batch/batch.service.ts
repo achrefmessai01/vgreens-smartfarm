@@ -8,13 +8,15 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { BaseService } from '@common/services';
-import { OrderDirection } from '@common/enums';
 import { Crop } from '@modules/crop/entities/crop.entity';
 import { Variety } from '@modules/variety/entities/variety.entity';
 import { GreenhouseCrop } from '@modules/greenhouse-crop/entities/greenhouse-crop.entity';
 import { Batch } from './entities/batch.entity';
 import { CreateBatchInput } from './dto/create-batch.input';
 import { UpdateBatchInput } from './dto/update-batch.input';
+import { BatchFilterInput } from './dto/batch-filter.input';
+import { BatchSortInput } from './dto/batch-sort.input';
+import { buildBatchOrderBy } from './utils/batch-order.util';
 import { buildBatchNumber } from '@modules/harvest/utils/batch-number.util';
 
 @Injectable()
@@ -118,20 +120,61 @@ export class BatchService extends BaseService<Batch> {
     return { crop, variety };
   }
 
-  async findAllScoped(tenantId: string | undefined): Promise<Batch[]> {
+  // The row range is a contiguous block, so a defined start must not come after
+  // the end. Either bound may be null (legacy batches are backfilled by hand);
+  // the check only applies when both are present. @Min(0) on the DTO already
+  // rejects negatives, so this only guards the start <= end ordering.
+  private validateRowRange(
+    startRow: number | null | undefined,
+    endRow: number | null | undefined,
+  ): void {
+    if (startRow != null && endRow != null && startRow > endRow) {
+      throw new BadRequestException(
+        `startRow (${startRow}) must be less than or equal to endRow (${endRow})`,
+      );
+    }
+  }
+
+  async findAllScoped(
+    tenantId: string | undefined,
+    filter?: BatchFilterInput | null,
+    sort?: BatchSortInput | null,
+  ): Promise<Batch[]> {
     const qb = this.batchRepository
       .createQueryBuilder('batch')
       .leftJoinAndSelect('batch.tenant', 'tenant')
       .leftJoinAndSelect('batch.greenhouse', 'greenhouse')
       .leftJoinAndSelect('batch.crop', 'crop')
       .leftJoinAndSelect('batch.variety', 'variety')
-      .leftJoinAndSelect('batch.createdBy', 'createdBy')
-      .orderBy('batch.plantingDate', OrderDirection.DESC)
-      .addOrderBy('batch.createdAt', OrderDirection.DESC);
+      .leftJoinAndSelect('batch.createdBy', 'createdBy');
 
     if (tenantId !== undefined) {
       qb.andWhere('batch.tenantId = :tenantId', { tenantId });
     }
+
+    // Inclusive plantingDate range. plantingDate is a `date` column, so a
+    // `<= :to` comparison includes the whole `to` day.
+    if (filter?.plantingDateFrom) {
+      qb.andWhere('batch.plantingDate >= :plantingDateFrom', {
+        plantingDateFrom: filter.plantingDateFrom,
+      });
+    }
+    if (filter?.plantingDateTo) {
+      qb.andWhere('batch.plantingDate <= :plantingDateTo', {
+        plantingDateTo: filter.plantingDateTo,
+      });
+    }
+
+    // Apply the (validated) sort selection. The first clause becomes the
+    // primary ORDER BY; the rest are deterministic tiebreakers.
+    buildBatchOrderBy(sort).forEach((clause, index) => {
+      if (index === 0) {
+        qb.orderBy(clause.expression, clause.direction, clause.nulls);
+      } else {
+        qb.addOrderBy(clause.expression, clause.direction, clause.nulls);
+      }
+    });
+
     return qb.getMany();
   }
 
@@ -166,6 +209,7 @@ export class BatchService extends BaseService<Batch> {
       input.cropId,
       input.varietyId,
     );
+    this.validateRowRange(input.startRow, input.endRow);
 
     try {
       const numberOfRows = input.numberOfRows ?? 0;
@@ -198,9 +242,12 @@ export class BatchService extends BaseService<Batch> {
         rowLength,
         rowSpacing,
         plantsPerMeter: input.plantsPerMeter ?? 0,
+        startRow: input.startRow ?? null,
+        endRow: input.endRow ?? null,
         lostPlants: input.lostPlants ?? 0,
         cultivationArea: this.deriveCultivationArea({ ...input, rowSpacing }),
         totalPlants: this.deriveTotalPlants(input),
+        replicates: input.replicates ?? 1,
       });
 
       const saved = await this.batchRepository.save(batch);
@@ -268,6 +315,13 @@ export class BatchService extends BaseService<Batch> {
     if (input.cultivationArea !== undefined)
       batch.cultivationArea = input.cultivationArea;
     if (input.totalPlants !== undefined) batch.totalPlants = input.totalPlants;
+    if (input.replicates !== undefined) batch.replicates = input.replicates;
+
+    // Apply row-range changes, then validate the resulting (start, end) pair so
+    // a partial update can't leave start > end.
+    if (input.startRow !== undefined) batch.startRow = input.startRow;
+    if (input.endRow !== undefined) batch.endRow = input.endRow;
+    this.validateRowRange(batch.startRow, batch.endRow);
 
     await this.batchRepository.save(batch);
     return this.findOneById(id, tenantId);

@@ -81,9 +81,14 @@ export function useAdminUsersPage() {
       setIsLoading(true);
       try {
         if (editingUser) {
-          await updateUser({
+          const result = await updateUser({
             variables: { id: editingUser.id, input: formData },
           });
+          // The Apollo client returns GraphQL errors in `errors` instead of
+          // rejecting, so surface them explicitly (keeps the form open).
+          if (result.errors?.length) {
+            throw new Error(result.errors[0].message);
+          }
         } else {
           const result = await createUser({
             variables: {
@@ -97,6 +102,9 @@ export function useAdminUsersPage() {
               },
             },
           });
+          if (result.errors?.length) {
+            throw new Error(result.errors[0].message);
+          }
           if (result.data?.createUser?.status === UserStatus.Pending) {
             console.log('User created with pending invitation');
           }
@@ -106,6 +114,9 @@ export function useAdminUsersPage() {
         setEditingUser(null);
       } catch (error) {
         console.error('Error saving user:', error);
+        // Re-throw so the form can surface it (e.g. highlight the email field
+        // when the admin email-domain rule rejects the creation).
+        throw error;
       } finally {
         setIsLoading(false);
       }

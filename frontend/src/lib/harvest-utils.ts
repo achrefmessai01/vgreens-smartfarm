@@ -197,6 +197,30 @@ export function harvestToDisplayEntries(h: HarvestLike): HarvestEntryLike[] {
   return h.entries ?? [];
 }
 
+// A batch defines a usable row range only when both bounds are present and
+// positive. A null/0 bound means the range hasn't been backfilled yet, in which
+// case harvest row entry falls back to unconstrained behavior.
+export function hasRowRange(
+  start: number | null | undefined,
+  end: number | null | undefined,
+): boolean {
+  return start != null && end != null && start > 0 && end > 0;
+}
+
+// True when a row value falls outside the batch's defined range. Returns false
+// (no constraint) when the batch has no range, or when the row value is unset
+// (<= 0) — we never flag an empty input. Used to limit inputs and to warn,
+// without blocking, on legacy rows that predate the range (warn-but-allow).
+export function isRowOutsideBatchRange(
+  value: number,
+  start: number | null | undefined,
+  end: number | null | undefined,
+): boolean {
+  if (!hasRowRange(start, end)) return false;
+  if (value <= 0) return false;
+  return value < (start as number) || value > (end as number);
+}
+
 function daysSince(plantingDate: string): number {
   const planted = new Date(plantingDate);
   if (Number.isNaN(planted.getTime())) return 0;
@@ -227,12 +251,21 @@ function batchToDetails(
     rowLength: batch.rowLength,
     plantsPerMeter: batch.plantsPerMeter,
     rowSpacing: batch.rowSpacing,
+    startRow: batch.startRow ?? null,
+    endRow: batch.endRow ?? null,
     totalPlants: batch.totalPlants,
     lostPlants: batch.lostPlants,
+    replicates: replicateCount(batch),
     plantingDate: batch.plantingDate,
     entries,
     photos,
   };
+}
+
+// A batch's replicate count, clamped to at least 1 so the form always renders
+// at least one entry even for legacy/absent values.
+function replicateCount(batch: BatchLike): number {
+  return Math.max(1, batch.replicates ?? 1);
 }
 
 // Sidebar view-model for an existing harvest (its batch + its entries).
@@ -256,7 +289,10 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
 }
 
 // Sidebar view-model for a freshly created batch (no harvest yet): one blank
-// entry, no photos.
+// entry per configured replicate, no photos.
 export function batchToBatchDetails(batch: BatchLike): BatchDetailsData {
-  return batchToDetails(batch, [createEmptyEntry()], []);
+  const entries = Array.from({ length: replicateCount(batch) }, () =>
+    createEmptyEntry(),
+  );
+  return batchToDetails(batch, entries, []);
 }

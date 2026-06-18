@@ -10,8 +10,15 @@ export interface BatchFormData {
   rowLength: number;
   plantsPerMeter: number;
   rowSpacing: number;
+  // Start/end of the contiguous row block this batch occupies (inclusive). Both
+  // optional: 0 means "unset" and is sent as undefined so the column stays null
+  // (legacy batches are backfilled by hand). When both are set, start <= end.
+  startRow: number;
+  endRow: number;
   totalPlants: number;
   lostPlants: number;
+  // Replicate samples per harvest; at least 1.
+  replicates: number;
 }
 
 export interface BatchFormErrors {
@@ -23,6 +30,9 @@ export interface BatchFormErrors {
   numberOfRows?: string;
   rowLength?: string;
   plantsPerMeter?: string;
+  startRow?: string;
+  endRow?: string;
   totalPlants?: string;
   lostPlants?: string;
+  replicates?: string;
 }

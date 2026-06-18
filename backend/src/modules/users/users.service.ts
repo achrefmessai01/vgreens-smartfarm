@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -10,8 +11,11 @@ import { BaseService } from '@common/services';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClerkSyncService } from './clerk-sync.service';
 import { CreateUserInput, UpdateUserInput } from './dto';
+import { HarvestViewSettingsInput } from './dto/user-settings';
+import { mergeUserSettings } from './utils/user-settings.util';
 import { OrderDirection, UserRole } from '@common/enums';
 import { UserStatus } from '@common/enums/user-status.enum';
+import { getAdminEmailDomainError } from './utils/admin-email-domain';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -89,6 +93,18 @@ export class UsersService extends BaseService<User> {
         }
       }
 
+      // Admin roles require an email on an allowed domain (VSL-182).
+      // Checked before inviting so we never create a Clerk user for a
+      // request that will be rejected.
+      const domainError = getAdminEmailDomainError(
+        createUserInput.role,
+        createUserInput.email,
+        createUserInput.tenantId,
+      );
+      if (domainError) {
+        throw new BadRequestException(domainError);
+      }
+
       // If no clerkUserId provided, send invitation via Clerk
       let clerkUserId = createUserInput.clerkUserId;
       let invitationUrl: string | undefined;
@@ -146,8 +162,11 @@ export class UsersService extends BaseService<User> {
 
       return this.userRepository.save(user);
     } catch (error) {
-      // Re-throw known exceptions
-      if (error instanceof ForbiddenException) {
+      // Re-throw known exceptions (incl. the domain-rule validation error)
+      if (
+        error instanceof ForbiddenException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       // Log unexpected errors with full stack trace
@@ -254,6 +273,38 @@ export class UsersService extends BaseService<User> {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
     user.farmOverviewTimeRange = value;
+    return this.userRepository.save(user);
+  }
+
+  /**
+   * Persist the signed-in user's harvest-entry view preferences (sort +
+   * plantingDate range). Validates the structure, then MERGES `harvestView`
+   * into the existing userSettings blob so other settings keys survive
+   * (read-modify-write).
+   */
+  async updateHarvestViewSettings(
+    userId: string,
+    input: HarvestViewSettingsInput,
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    // Read-modify-write at the harvestView sub-key level too: only fields
+    // present in the input overwrite their counterpart, so a sort-only update
+    // doesn't wipe the collapsed-batch list (and vice versa).
+    const existing = user.userSettings?.harvestView ?? {};
+    user.userSettings = mergeUserSettings(user.userSettings, {
+      harvestView: {
+        sort: input.sort !== undefined ? input.sort : (existing.sort ?? null),
+        range:
+          input.range !== undefined ? input.range : (existing.range ?? null),
+        collapsedBatchIds:
+          input.collapsedBatchIds !== undefined
+            ? input.collapsedBatchIds
+            : (existing.collapsedBatchIds ?? null),
+      },
+    });
     return this.userRepository.save(user);
   }
 }

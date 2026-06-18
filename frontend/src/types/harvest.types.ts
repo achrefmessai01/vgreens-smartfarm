@@ -82,8 +82,16 @@ export interface BatchLike {
   rowLength: number;
   plantsPerMeter: number;
   rowSpacing: number;
+  // Inclusive row range the batch occupies. Optional/nullable: legacy batches
+  // are backfilled by hand, and a null range leaves harvest rows unconstrained.
+  startRow?: number | null;
+  endRow?: number | null;
   totalPlants: number;
   lostPlants: number;
+  // Number of replicate input sets the harvest form should render. Optional on
+  // the read model so older queries/fixtures without it still type-check; the
+  // form falls back to 1 when absent.
+  replicates?: number | null;
   greenhouse?: { id: string; name: string } | null;
 }
 

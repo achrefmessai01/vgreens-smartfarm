@@ -1,9 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronDown, Trash2 } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useI18n } from '@/i18n';
-import { Button } from '@/components/ui/button';
 import type { HarvestQualityClass } from '@/generated/graphql';
 import type { HarvestEntryData } from '@/types/batch-sidebar.types';
 import { YieldDataField } from './batch-sidebar-yield-field';
@@ -13,7 +12,10 @@ import { FruitWeightField } from './batch-sidebar-fruit-weight-field';
 export interface HarvestEntryCardProps {
   entry: HarvestEntryData;
   index: number;
-  canRemove: boolean;
+  // The parent batch's row range; forwarded to the yield field to limit and
+  // validate the per-entry row coordinates.
+  batchStartRow?: number | null;
+  batchEndRow?: number | null;
   defaultOpen?: boolean;
   onYieldChange: (
     field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
@@ -26,14 +28,14 @@ export interface HarvestEntryCardProps {
   onSetShowBrix: (show: boolean) => void;
   onFruitCountChange: (value: number) => void;
   onSetShowFruitWeight: (show: boolean) => void;
-  onRemove: () => void;
   isLoading?: boolean;
 }
 
 export function HarvestEntryCard({
   entry,
   index,
-  canRemove,
+  batchStartRow,
+  batchEndRow,
   defaultOpen = false,
   onYieldChange,
   onBrixChange,
@@ -43,7 +45,6 @@ export function HarvestEntryCard({
   onSetShowBrix,
   onFruitCountChange,
   onSetShowFruitWeight,
-  onRemove,
   isLoading = false,
 }: HarvestEntryCardProps) {
   const { t } = useI18n();
@@ -76,17 +77,6 @@ export function HarvestEntryCard({
             {headlineValue.toFixed(1)} kg
           </span>
         </button>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="h-9 w-9 shrink-0"
-          onClick={onRemove}
-          disabled={isLoading || !canRemove}
-          aria-label={h?.removeEntry ?? 'Remove entry'}
-        >
-          <Trash2 className="text-destructive h-4 w-4" />
-        </Button>
       </div>
 
       {open && (
@@ -98,6 +88,8 @@ export function HarvestEntryCard({
             classC={entry.classC}
             rowX={entry.rowX}
             rowY={entry.rowY}
+            batchStartRow={batchStartRow}
+            batchEndRow={batchEndRow}
             onYieldChange={onYieldChange}
             isLoading={isLoading}
           />

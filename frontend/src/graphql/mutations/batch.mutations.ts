@@ -14,6 +14,8 @@ const BATCH_MUTATION_FIELDS = gql`
     numberOfRows
     rowLength
     rowSpacing
+    startRow
+    endRow
     plantsPerMeter
     lostPlants
     cultivationArea

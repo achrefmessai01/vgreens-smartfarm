@@ -5,6 +5,7 @@ import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
+import { hasRowRange, isRowOutsideBatchRange } from '@/lib/harvest-utils';
 
 export function YieldDataField({
   marketable,
@@ -13,11 +14,24 @@ export function YieldDataField({
   classC,
   rowX,
   rowY,
+  batchStartRow,
+  batchEndRow,
   onYieldChange,
   isLoading = false,
 }: YieldDataFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  // When the batch defines a row range, limit the row inputs to it and flag
+  // (without blocking) any value outside it — e.g. legacy rows that predate the
+  // range. A null/unset range leaves the inputs unconstrained.
+  const rangeDefined = hasRowRange(batchStartRow, batchEndRow);
+  const rowMin = rangeDefined ? (batchStartRow ?? undefined) : 0;
+  const rowMax = rangeDefined ? (batchEndRow ?? undefined) : undefined;
+  const outOfRangeText = (
+    h?.rowOutsideBatchRange ?? 'Outside the batch row range ({start}–{end})'
+  )
+    .replace('{start}', String(batchStartRow))
+    .replace('{end}', String(batchEndRow));
   // Auto-reveal the row coordinates when the entry already carries values, so
   // existing coordinates stay visible when viewing/editing a harvest.
   const [showRowCoordinates, setShowRowCoordinates] = React.useState(
@@ -126,7 +140,8 @@ export function YieldDataField({
                 <div className="relative">
                   <Input
                     type="number"
-                    min="0"
+                    min={rowMin}
+                    max={rowMax}
                     step="0.1"
                     value={rowX === 0 ? '' : rowX.toString()}
                     onChange={(e) =>
@@ -142,6 +157,9 @@ export function YieldDataField({
                     {h?.rowsUnit ?? 'rows'}
                   </span>
                 </div>
+                {isRowOutsideBatchRange(rowX, batchStartRow, batchEndRow) && (
+                  <p className="text-xs text-amber-600">{outOfRangeText}</p>
+                )}
               </div>
               <div className="space-y-2 text-left">
                 <p className="text-muted-foreground text-sm">
@@ -150,7 +168,8 @@ export function YieldDataField({
                 <div className="relative">
                   <Input
                     type="number"
-                    min="0"
+                    min={rowMin}
+                    max={rowMax}
                     step="0.1"
                     value={rowY === 0 ? '' : rowY.toString()}
                     onChange={(e) =>
@@ -166,6 +185,9 @@ export function YieldDataField({
                     {h?.rowsUnit ?? 'rows'}
                   </span>
                 </div>
+                {isRowOutsideBatchRange(rowY, batchStartRow, batchEndRow) && (
+                  <p className="text-xs text-amber-600">{outOfRangeText}</p>
+                )}
               </div>
             </>
           )}

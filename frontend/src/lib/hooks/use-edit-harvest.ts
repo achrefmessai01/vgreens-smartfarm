@@ -1,11 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import {
-  useUpdateBatchMutation,
-  type BatchesQuery,
-} from '@/generated/graphql';
+import { useUpdateBatchMutation, type BatchesQuery } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
+import { validateRowRange } from '@/lib/hooks/use-create-batch-form';
 
 type BatchItem = BatchesQuery['batches'][number];
 
@@ -19,8 +17,11 @@ const EMPTY_FORM: BatchFormData = {
   rowLength: 0,
   plantsPerMeter: 0,
   rowSpacing: 0,
+  startRow: 0,
+  endRow: 0,
   totalPlants: 0,
   lostPlants: 0,
+  replicates: 1,
 };
 
 function computeRowSpacing(data: BatchFormData): number {
@@ -43,8 +44,12 @@ function batchToFormData(batch: BatchItem): BatchFormData {
     rowLength: batch.rowLength ?? 0,
     plantsPerMeter: batch.plantsPerMeter ?? 0,
     rowSpacing: batch.rowSpacing ?? 0,
+    // 0 stands in for an unset bound; a null/absent range stays unconstrained.
+    startRow: batch.startRow ?? 0,
+    endRow: batch.endRow ?? 0,
     totalPlants: batch.totalPlants ?? 0,
     lostPlants: batch.lostPlants ?? 0,
+    replicates: batch.replicates ?? 1,
   };
 }
 
@@ -62,6 +67,9 @@ function validateEditForm(data: BatchFormData): BatchFormErrors {
     errors.rowLength = 'Row length must be greater than 0';
   if (!data.plantsPerMeter || data.plantsPerMeter <= 0)
     errors.plantsPerMeter = 'Plants per meter must be greater than 0';
+  if (!data.replicates || data.replicates < 1)
+    errors.replicates = 'Replicates must be at least 1';
+  validateRowRange(data, errors);
   return errors;
 }
 
@@ -111,8 +119,11 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               rowLength: formData.rowLength,
               plantsPerMeter: formData.plantsPerMeter,
               rowSpacing,
+              startRow: formData.startRow || undefined,
+              endRow: formData.endRow || undefined,
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
+              replicates: formData.replicates,
               // name/batchNumber are re-derived from crop/variety by the backend.
             },
           },

@@ -99,6 +99,7 @@ export type Batch = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   deletedBy?: Maybe<User>;
   deletedById?: Maybe<Scalars['ID']['output']>;
+  endRow?: Maybe<Scalars['Float']['output']>;
   greenhouse?: Maybe<Greenhouse>;
   greenhouseId?: Maybe<Scalars['ID']['output']>;
   id: Scalars['ID']['output'];
@@ -107,8 +108,10 @@ export type Batch = {
   numberOfRows: Scalars['Float']['output'];
   plantingDate: Scalars['DateTime']['output'];
   plantsPerMeter: Scalars['Float']['output'];
+  replicates: Scalars['Int']['output'];
   rowLength: Scalars['Float']['output'];
   rowSpacing: Scalars['Float']['output'];
+  startRow?: Maybe<Scalars['Float']['output']>;
   status: BatchStatus;
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
@@ -116,6 +119,20 @@ export type Batch = {
   updatedAt: Scalars['DateTime']['output'];
   variety?: Maybe<Variety>;
   varietyId?: Maybe<Scalars['ID']['output']>;
+};
+
+export type BatchFilterInput = {
+  /** Batches planted on or after this date (inclusive, YYYY-MM-DD) */
+  plantingDateFrom?: InputMaybe<Scalars['String']['input']>;
+  /** Batches planted on or before this date (inclusive, YYYY-MM-DD) */
+  plantingDateTo?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type BatchSortInput = {
+  /** Sort direction (default DESC) */
+  direction?: InputMaybe<OrderDirection>;
+  /** Field to sort by (default PLANTING_DATE) */
+  field?: InputMaybe<HarvestSortField>;
 };
 
 /** Batch lifecycle status */
@@ -194,6 +211,7 @@ export type CreateAlertInput = {
 export type CreateBatchInput = {
   cropId: Scalars['ID']['input'];
   cultivationArea?: InputMaybe<Scalars['Float']['input']>;
+  endRow?: InputMaybe<Scalars['Float']['input']>;
   greenhouseId?: InputMaybe<Scalars['ID']['input']>;
   lostPlants?: Scalars['Int']['input'];
   /** Defaults to "crop - variety" if omitted */
@@ -202,8 +220,10 @@ export type CreateBatchInput = {
   /** Planting date (ISO date string) */
   plantingDate: Scalars['String']['input'];
   plantsPerMeter?: Scalars['Float']['input'];
+  replicates?: Scalars['Int']['input'];
   rowLength?: Scalars['Float']['input'];
   rowSpacing?: InputMaybe<Scalars['Float']['input']>;
+  startRow?: InputMaybe<Scalars['Float']['input']>;
   status?: InputMaybe<BatchStatus>;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
   totalPlants?: InputMaybe<Scalars['Int']['input']>;
@@ -589,6 +609,16 @@ export type HarvestDashboardMetrics = {
   yieldPerPlant?: Maybe<Scalars['Float']['output']>;
 };
 
+/** Relative plantingDate range presets for the harvest list */
+export enum HarvestDateRangePreset {
+  All = 'ALL',
+  LastMonth = 'LAST_MONTH',
+  ThisMonth = 'THIS_MONTH',
+  ThisWeek = 'THIS_WEEK',
+  ThisYear = 'THIS_YEAR',
+  Today = 'TODAY'
+}
+
 export type HarvestEntry = {
   __typename?: 'HarvestEntry';
   avgBrix: Scalars['Float']['output'];
@@ -647,6 +677,13 @@ export enum HarvestQualityClass {
   C = 'C'
 }
 
+/** Sortable fields for the batch-grouped harvest list */
+export enum HarvestSortField {
+  Crop = 'CROP',
+  Greenhouse = 'GREENHOUSE',
+  PlantingDate = 'PLANTING_DATE'
+}
+
 export type HarvestTotals = {
   __typename?: 'HarvestTotals';
   /** Unweighted MEAN of per-entry avgBrix. Null when there are no entries. */
@@ -669,6 +706,30 @@ export type HarvestTotals = {
   yieldPerMeter?: Maybe<Scalars['Float']['output']>;
   /** totalFruitWeight / batch.totalPlants. Null when totalPlants is 0/missing. */
   yieldPerPlant?: Maybe<Scalars['Float']['output']>;
+};
+
+export type HarvestViewSettings = {
+  __typename?: 'HarvestViewSettings';
+  collapsedBatchIds?: Maybe<Array<Scalars['String']['output']>>;
+  range?: Maybe<HarvestDateRangePreset>;
+  sort?: Maybe<HarvestViewSort>;
+};
+
+export type HarvestViewSettingsInput = {
+  collapsedBatchIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  range?: InputMaybe<HarvestDateRangePreset>;
+  sort?: InputMaybe<HarvestViewSortInput>;
+};
+
+export type HarvestViewSort = {
+  __typename?: 'HarvestViewSort';
+  direction: OrderDirection;
+  field: HarvestSortField;
+};
+
+export type HarvestViewSortInput = {
+  direction: OrderDirection;
+  field: HarvestSortField;
 };
 
 export type ImageFile = {
@@ -751,6 +812,7 @@ export type Mutation = {
   updateFeature: Feature;
   updateGreenhouse: Greenhouse;
   updateHarvest: Harvest;
+  updateMyHarvestViewSettings: User;
   updateTenant: Tenant;
   updateUser: User;
   /** Upload an image file directly via GraphQL and store it in Supabase Storage. */
@@ -975,6 +1037,11 @@ export type MutationUpdateHarvestArgs = {
 };
 
 
+export type MutationUpdateMyHarvestViewSettingsArgs = {
+  input: HarvestViewSettingsInput;
+};
+
+
 export type MutationUpdateTenantArgs = {
   id: Scalars['ID']['input'];
   input: UpdateTenantInput;
@@ -1091,6 +1158,12 @@ export type QueryAlertsArgs = {
 
 export type QueryBatchArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryBatchesArgs = {
+  filter?: InputMaybe<BatchFilterInput>;
+  sort?: InputMaybe<BatchSortInput>;
 };
 
 
@@ -1405,6 +1478,7 @@ export type UpdateAlertInput = {
 export type UpdateBatchInput = {
   cropId?: InputMaybe<Scalars['ID']['input']>;
   cultivationArea?: InputMaybe<Scalars['Float']['input']>;
+  endRow?: InputMaybe<Scalars['Float']['input']>;
   greenhouseId?: InputMaybe<Scalars['ID']['input']>;
   lostPlants?: InputMaybe<Scalars['Int']['input']>;
   /** Defaults to "crop - variety" if omitted */
@@ -1413,8 +1487,10 @@ export type UpdateBatchInput = {
   /** Planting date (ISO date string) */
   plantingDate?: InputMaybe<Scalars['String']['input']>;
   plantsPerMeter?: InputMaybe<Scalars['Float']['input']>;
+  replicates?: InputMaybe<Scalars['Int']['input']>;
   rowLength?: InputMaybe<Scalars['Float']['input']>;
   rowSpacing?: InputMaybe<Scalars['Float']['input']>;
+  startRow?: InputMaybe<Scalars['Float']['input']>;
   status?: InputMaybe<BatchStatus>;
   totalPlants?: InputMaybe<Scalars['Int']['input']>;
   varietyId?: InputMaybe<Scalars['ID']['input']>;
@@ -1517,6 +1593,7 @@ export type User = {
   tenant?: Maybe<Tenant>;
   tenantId?: Maybe<Scalars['ID']['output']>;
   updatedAt: Scalars['DateTime']['output'];
+  userSettings?: Maybe<UserSettings>;
 };
 
 /** User role types */
@@ -1525,6 +1602,11 @@ export enum UserRole {
   TenantUser = 'TENANT_USER',
   VgreensAdmin = 'VGREENS_ADMIN'
 }
+
+export type UserSettings = {
+  __typename?: 'UserSettings';
+  harvestView?: Maybe<HarvestViewSettings>;
+};
 
 /** User invitation and activation status */
 export enum UserStatus {
@@ -1618,14 +1700,14 @@ export type GetUnresolvedErrorReportsCountQueryVariables = Exact<{ [key: string]
 
 export type GetUnresolvedErrorReportsCountQuery = { __typename?: 'Query', unresolvedErrorReportsCount: number };
 
-export type BatchMutationFieldsFragment = { __typename?: 'Batch', id: string, tenantId: string, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null };
+export type BatchMutationFieldsFragment = { __typename?: 'Batch', id: string, tenantId: string, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null };
 
 export type CreateBatchMutationVariables = Exact<{
   input: CreateBatchInput;
 }>;
 
 
-export type CreateBatchMutation = { __typename?: 'Mutation', createBatch: { __typename?: 'Batch', id: string, tenantId: string, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null } };
+export type CreateBatchMutation = { __typename?: 'Mutation', createBatch: { __typename?: 'Batch', id: string, tenantId: string, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null } };
 
 export type UpdateBatchMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1633,7 +1715,7 @@ export type UpdateBatchMutationVariables = Exact<{
 }>;
 
 
-export type UpdateBatchMutation = { __typename?: 'Mutation', updateBatch: { __typename?: 'Batch', id: string, tenantId: string, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null } };
+export type UpdateBatchMutation = { __typename?: 'Mutation', updateBatch: { __typename?: 'Batch', id: string, tenantId: string, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null } };
 
 export type DeleteBatchMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1847,6 +1929,13 @@ export type SetMyFarmOverviewTimeRangeMutationVariables = Exact<{
 
 export type SetMyFarmOverviewTimeRangeMutation = { __typename?: 'Mutation', setMyFarmOverviewTimeRange: { __typename?: 'User', id: string, farmOverviewTimeRange?: string | null } };
 
+export type UpdateMyHarvestViewSettingsMutationVariables = Exact<{
+  input: HarvestViewSettingsInput;
+}>;
+
+
+export type UpdateMyHarvestViewSettingsMutation = { __typename?: 'Mutation', updateMyHarvestViewSettings: { __typename?: 'User', id: string, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } };
+
 export type GetRecentSystemErrorsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Float']['input']>;
   severity?: InputMaybe<ReportSeverity>;
@@ -1929,19 +2018,22 @@ export type DeleteAlertMutationVariables = Exact<{
 
 export type DeleteAlertMutation = { __typename?: 'Mutation', deleteAlert: boolean };
 
-export type BatchFieldsFragment = { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null };
+export type BatchFieldsFragment = { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null };
 
-export type BatchesQueryVariables = Exact<{ [key: string]: never; }>;
+export type BatchesQueryVariables = Exact<{
+  filter?: InputMaybe<BatchFilterInput>;
+  sort?: InputMaybe<BatchSortInput>;
+}>;
 
 
-export type BatchesQuery = { __typename?: 'Query', batches: Array<{ __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null }> };
+export type BatchesQuery = { __typename?: 'Query', batches: Array<{ __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null }> };
 
 export type BatchQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type BatchQuery = { __typename?: 'Query', batch?: { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null } | null };
+export type BatchQuery = { __typename?: 'Query', batch?: { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null } | null };
 
 export type HarvestBatchesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2098,21 +2190,21 @@ export type GetHarvestSummaryQueryVariables = Exact<{
 
 export type GetHarvestSummaryQuery = { __typename?: 'Query', harvests: Array<{ __typename?: 'Harvest', id: string, date: any, createdAt: any, batch?: { __typename?: 'Batch', id: string, name?: string | null, status: BatchStatus, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, totals: { __typename?: 'HarvestTotals', classA: number, classB: number, classC: number, waste: number, avgBrix?: number | null } }> };
 
-export type HarvestFieldsFragment = { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, photoUrls: Array<string>, createdAt: any, updatedAt: any, batch?: { __typename?: 'Batch', id: string, name?: string | null, cropId: string, varietyId?: string | null, status: BatchStatus, batchNumber?: string | null, greenhouseId?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, totalPlants: number, lostPlants: number, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: number, rowY: number, classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight: number, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerMeter?: number | null }, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null };
+export type HarvestFieldsFragment = { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, photoUrls: Array<string>, createdAt: any, updatedAt: any, batch?: { __typename?: 'Batch', id: string, name?: string | null, cropId: string, varietyId?: string | null, status: BatchStatus, batchNumber?: string | null, greenhouseId?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, totalPlants: number, lostPlants: number, replicates: number, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: number, rowY: number, classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight: number, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerMeter?: number | null }, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null };
 
 export type HarvestsQueryVariables = Exact<{
   filter?: InputMaybe<HarvestFilterInput>;
 }>;
 
 
-export type HarvestsQuery = { __typename?: 'Query', harvests: Array<{ __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, photoUrls: Array<string>, createdAt: any, updatedAt: any, batch?: { __typename?: 'Batch', id: string, name?: string | null, cropId: string, varietyId?: string | null, status: BatchStatus, batchNumber?: string | null, greenhouseId?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, totalPlants: number, lostPlants: number, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: number, rowY: number, classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight: number, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerMeter?: number | null }, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
+export type HarvestsQuery = { __typename?: 'Query', harvests: Array<{ __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, photoUrls: Array<string>, createdAt: any, updatedAt: any, batch?: { __typename?: 'Batch', id: string, name?: string | null, cropId: string, varietyId?: string | null, status: BatchStatus, batchNumber?: string | null, greenhouseId?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, totalPlants: number, lostPlants: number, replicates: number, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: number, rowY: number, classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight: number, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerMeter?: number | null }, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
 
 export type HarvestQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type HarvestQuery = { __typename?: 'Query', harvest?: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, photoUrls: Array<string>, createdAt: any, updatedAt: any, batch?: { __typename?: 'Batch', id: string, name?: string | null, cropId: string, varietyId?: string | null, status: BatchStatus, batchNumber?: string | null, greenhouseId?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, totalPlants: number, lostPlants: number, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: number, rowY: number, classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight: number, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerMeter?: number | null }, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
+export type HarvestQuery = { __typename?: 'Query', harvest?: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, photoUrls: Array<string>, createdAt: any, updatedAt: any, batch?: { __typename?: 'Batch', id: string, name?: string | null, cropId: string, varietyId?: string | null, status: BatchStatus, batchNumber?: string | null, greenhouseId?: string | null, plantingDate: any, cultivationArea: number, numberOfRows: number, rowLength: number, plantsPerMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, totalPlants: number, lostPlants: number, replicates: number, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: number, rowY: number, classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight: number, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classA: number, classB: number, classC: number, waste: number, fruitCount: number, totalFruitWeight: number, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerMeter?: number | null }, createdBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null } | null };
 
 export type HarvestsCsvExportQueryVariables = Exact<{
   filter?: InputMaybe<HarvestFilterInput>;
@@ -2217,7 +2309,7 @@ export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null }> | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2280,6 +2372,8 @@ export const BatchMutationFieldsFragmentDoc = gql`
   numberOfRows
   rowLength
   rowSpacing
+  startRow
+  endRow
   plantsPerMeter
   lostPlants
   cultivationArea
@@ -2385,10 +2479,13 @@ export const BatchFieldsFragmentDoc = gql`
   numberOfRows
   rowLength
   rowSpacing
+  startRow
+  endRow
   plantsPerMeter
   lostPlants
   cultivationArea
   totalPlants
+  replicates
   createdAt
   updatedAt
   greenhouse {
@@ -2451,8 +2548,11 @@ export const HarvestFieldsFragmentDoc = gql`
     rowLength
     plantsPerMeter
     rowSpacing
+    startRow
+    endRow
     totalPlants
     lostPlants
+    replicates
     greenhouse {
       id
       name
@@ -3875,6 +3975,49 @@ export function useSetMyFarmOverviewTimeRangeMutation(baseOptions?: Apollo.Mutat
 export type SetMyFarmOverviewTimeRangeMutationHookResult = ReturnType<typeof useSetMyFarmOverviewTimeRangeMutation>;
 export type SetMyFarmOverviewTimeRangeMutationResult = Apollo.MutationResult<SetMyFarmOverviewTimeRangeMutation>;
 export type SetMyFarmOverviewTimeRangeMutationOptions = Apollo.BaseMutationOptions<SetMyFarmOverviewTimeRangeMutation, SetMyFarmOverviewTimeRangeMutationVariables>;
+export const UpdateMyHarvestViewSettingsDocument = gql`
+    mutation UpdateMyHarvestViewSettings($input: HarvestViewSettingsInput!) {
+  updateMyHarvestViewSettings(input: $input) {
+    id
+    userSettings {
+      harvestView {
+        sort {
+          field
+          direction
+        }
+        range
+        collapsedBatchIds
+      }
+    }
+  }
+}
+    `;
+export type UpdateMyHarvestViewSettingsMutationFn = Apollo.MutationFunction<UpdateMyHarvestViewSettingsMutation, UpdateMyHarvestViewSettingsMutationVariables>;
+
+/**
+ * __useUpdateMyHarvestViewSettingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateMyHarvestViewSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateMyHarvestViewSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateMyHarvestViewSettingsMutation, { data, loading, error }] = useUpdateMyHarvestViewSettingsMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateMyHarvestViewSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateMyHarvestViewSettingsMutation, UpdateMyHarvestViewSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateMyHarvestViewSettingsMutation, UpdateMyHarvestViewSettingsMutationVariables>(UpdateMyHarvestViewSettingsDocument, options);
+      }
+export type UpdateMyHarvestViewSettingsMutationHookResult = ReturnType<typeof useUpdateMyHarvestViewSettingsMutation>;
+export type UpdateMyHarvestViewSettingsMutationResult = Apollo.MutationResult<UpdateMyHarvestViewSettingsMutation>;
+export type UpdateMyHarvestViewSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateMyHarvestViewSettingsMutation, UpdateMyHarvestViewSettingsMutationVariables>;
 export const GetRecentSystemErrorsDocument = gql`
     query GetRecentSystemErrors($limit: Float, $severity: ReportSeverity, $source: ErrorSource, $isResolved: Boolean) {
   getRecentSystemErrors(
@@ -4432,8 +4575,8 @@ export type DeleteAlertMutationHookResult = ReturnType<typeof useDeleteAlertMuta
 export type DeleteAlertMutationResult = Apollo.MutationResult<DeleteAlertMutation>;
 export type DeleteAlertMutationOptions = Apollo.BaseMutationOptions<DeleteAlertMutation, DeleteAlertMutationVariables>;
 export const BatchesDocument = gql`
-    query Batches {
-  batches {
+    query Batches($filter: BatchFilterInput, $sort: BatchSortInput) {
+  batches(filter: $filter, sort: $sort) {
     ...BatchFields
   }
 }
@@ -4451,6 +4594,8 @@ export const BatchesDocument = gql`
  * @example
  * const { data, loading, error } = useBatchesQuery({
  *   variables: {
+ *      filter: // value for 'filter'
+ *      sort: // value for 'sort'
  *   },
  * });
  */
@@ -6502,6 +6647,16 @@ export const MeDocument = gql`
     status
     preferredLanguage
     farmOverviewTimeRange
+    userSettings {
+      harvestView {
+        sort {
+          field
+          direction
+        }
+        range
+        collapsedBatchIds
+      }
+    }
     createdAt
     updatedAt
   }

@@ -20,8 +20,11 @@ const INITIAL_FORM_DATA: BatchFormData = {
   rowLength: 0,
   plantsPerMeter: 0,
   rowSpacing: 0,
+  startRow: 0,
+  endRow: 0,
   totalPlants: 0,
   lostPlants: 0,
+  replicates: 1,
 };
 
 function computeRowSpacing(data: BatchFormData): number {
@@ -45,7 +48,27 @@ function validateBatchForm(data: BatchFormData): BatchFormErrors {
     errors.rowLength = 'Row length must be greater than 0';
   if (!data.plantsPerMeter || data.plantsPerMeter <= 0)
     errors.plantsPerMeter = 'Plants per meter must be greater than 0';
+  if (!data.replicates || data.replicates < 1)
+    errors.replicates = 'Replicates must be at least 1';
+  validateRowRange(data, errors);
   return errors;
+}
+
+// The batch row range is optional (backfilled by hand), but if either bound is
+// entered the pair must be complete and ordered (start <= end), with positive
+// row numbers. Shared by the create and edit batch forms.
+export function validateRowRange(
+  data: BatchFormData,
+  errors: BatchFormErrors,
+): void {
+  const hasStart = data.startRow > 0;
+  const hasEnd = data.endRow > 0;
+  if (!hasStart && !hasEnd) return;
+  if (!hasStart) errors.startRow = 'Start row is required when end row is set';
+  if (!hasEnd) errors.endRow = 'End row is required when start row is set';
+  if (hasStart && hasEnd && data.startRow > data.endRow) {
+    errors.endRow = 'End row must be greater than or equal to start row';
+  }
 }
 
 interface UseCreateBatchFormOptions {
@@ -89,8 +112,11 @@ export function useCreateBatchForm({
               rowLength: formData.rowLength,
               plantsPerMeter: formData.plantsPerMeter,
               rowSpacing,
+              startRow: formData.startRow || undefined,
+              endRow: formData.endRow || undefined,
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
+              replicates: formData.replicates,
               status: BatchStatus.Active,
             },
           },

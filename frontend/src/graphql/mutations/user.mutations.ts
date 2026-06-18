@@ -60,3 +60,21 @@ export const SET_MY_FARM_OVERVIEW_TIME_RANGE_MUTATION = gql`
     }
   }
 `;
+
+export const UPDATE_MY_HARVEST_VIEW_SETTINGS_MUTATION = gql`
+  mutation UpdateMyHarvestViewSettings($input: HarvestViewSettingsInput!) {
+    updateMyHarvestViewSettings(input: $input) {
+      id
+      userSettings {
+        harvestView {
+          sort {
+            field
+            direction
+          }
+          range
+          collapsedBatchIds
+        }
+      }
+    }
+  }
+`;

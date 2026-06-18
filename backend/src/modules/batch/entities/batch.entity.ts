@@ -117,6 +117,19 @@ export class Batch {
   @Column({ type: 'double precision', default: 0 })
   rowSpacing: number;
 
+  // The contiguous block of physical rows this batch occupies, as start/end row
+  // numbers (inclusive). Nullable: existing batches are backfilled by hand and
+  // a batch without a defined range falls back to unconstrained harvest rows.
+  // Float to match the harvest entry rowX/rowY representation so batch bounds
+  // and per-harvest positions live in the same numeric domain.
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  startRow?: number | null;
+
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  endRow?: number | null;
+
   @Field(() => Float)
   @Column({ type: 'double precision', default: 0 })
   plantsPerMeter: number;
@@ -134,6 +147,13 @@ export class Batch {
   @Field(() => Int)
   @Column({ type: 'int', default: 0 })
   totalPlants: number;
+
+  // Number of replicate samples taken per harvest for this batch. Drives how
+  // many sets of inputs the harvest entry form renders. Defaults to 1 so
+  // legacy batches (and any batch without an explicit value) still render one.
+  @Field(() => Int)
+  @Column({ type: 'int', default: 1 })
+  replicates: number;
 
   @Field()
   @CreateDateColumn({ type: 'timestamptz' })

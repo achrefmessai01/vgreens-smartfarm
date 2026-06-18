@@ -15,10 +15,13 @@ const BATCH_FIELDS = gql`
     numberOfRows
     rowLength
     rowSpacing
+    startRow
+    endRow
     plantsPerMeter
     lostPlants
     cultivationArea
     totalPlants
+    replicates
     createdAt
     updatedAt
     greenhouse {
@@ -37,8 +40,8 @@ const BATCH_FIELDS = gql`
 `;
 
 export const BATCHES_QUERY = gql`
-  query Batches {
-    batches {
+  query Batches($filter: BatchFilterInput, $sort: BatchSortInput) {
+    batches(filter: $filter, sort: $sort) {
       ...BatchFields
     }
   }

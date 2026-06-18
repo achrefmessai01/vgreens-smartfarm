@@ -19,7 +19,7 @@ import {
   BatchHeaderField,
 } from './fields/batch-sidebar-basic-fields';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Plus, Sparkles } from 'lucide-react';
+import { CalendarDays, Sparkles } from 'lucide-react';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { entryHasData } from '@/types/batch-sidebar.types';
@@ -64,8 +64,6 @@ export function BatchSidebar({
     handleYieldChange,
     handleSetShowBrix,
     handleSetShowFruitWeight,
-    handleAddEntry,
-    handleRemoveEntry,
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,
@@ -108,6 +106,9 @@ export function BatchSidebar({
   );
 
   const busy = isLoading || isSaving;
+  // View mode renders the harvest read-only: the entry inputs are disabled via
+  // a <fieldset> wrapper and the save action is hidden.
+  const readOnly = mode === 'view';
 
   const buttonLabel = isSaving
     ? mode === 'edit'
@@ -115,6 +116,12 @@ export function BatchSidebar({
       : (h?.saving ?? 'Saving...')
     : mode === 'edit'
       ? (h?.update ?? 'Update')
+      : (h?.logHarvest ?? 'Log Harvest');
+
+  const badgeLabel = readOnly
+    ? (h?.viewDetails ?? 'View Details')
+    : mode === 'edit'
+      ? (h?.editHarvest ?? 'Edit Harvest')
       : (h?.logHarvest ?? 'Log Harvest');
 
   return (
@@ -127,18 +134,13 @@ export function BatchSidebar({
           <div className="mb-2 flex items-center gap-2">
             <Sparkles className="text-primary h-4 w-4" />
             <Badge variant="secondary" className="text-[10px] uppercase">
-              {mode === 'edit'
-                ? (h?.editHarvest ?? 'Edit Harvest')
-                : (h?.logHarvest ?? 'Log Harvest')}
+              {badgeLabel}
             </Badge>
           </div>
           <SheetTitle className="dark:text-card-foreground pr-8 text-left leading-tight break-words">
             {currentData?.greenhouse?.name
               ? (h?.batchDetailsFor ?? '{label} for {greenhouse}')
-                  .replace(
-                    '{label}',
-                    h?.batchDetails ?? 'Batch Details',
-                  )
+                  .replace('{label}', h?.batchDetails ?? 'Batch Details')
                   .replace('{greenhouse}', currentData.greenhouse.name)
               : (h?.batchDetails ?? 'Batch Details')}
           </SheetTitle>
@@ -162,7 +164,10 @@ export function BatchSidebar({
                 />
               </div>
 
-              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
+              <fieldset
+                disabled={readOnly}
+                className="min-h-0 min-w-0 flex-1 space-y-4 overflow-y-auto px-3 py-3 disabled:opacity-90 sm:px-5 sm:py-4"
+              >
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-medium">
                     {h?.todaysHarvest ?? 'Today Harvest'}
@@ -171,7 +176,7 @@ export function BatchSidebar({
                     type="button"
                     onClick={openDatePicker}
                     aria-label={h?.harvestDate ?? 'Harvest Date'}
-                    className="border-border/60 bg-muted/40 text-muted-foreground hover:bg-muted/70 focus-visible:ring-ring/40 focus-visible:ring-offset-background relative inline-flex h-7 w-fit cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none"
+                    className="border-border/60 bg-muted/40 text-muted-foreground hover:bg-muted/70 focus-visible:ring-ring/40 focus-visible:ring-offset-background relative inline-flex h-7 w-fit cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>{friendlyDate}</span>
@@ -194,7 +199,8 @@ export function BatchSidebar({
                     key={index}
                     entry={entry}
                     index={index}
-                    canRemove={currentData.entries.length > 1}
+                    batchStartRow={currentData.startRow}
+                    batchEndRow={currentData.endRow}
                     defaultOpen={index === 0 || entryHasData(entry)}
                     onYieldChange={(field, value) =>
                       handleYieldChange(index, field, value)
@@ -216,21 +222,9 @@ export function BatchSidebar({
                     onSetShowFruitWeight={(show) =>
                       handleSetShowFruitWeight(index, show)
                     }
-                    onRemove={() => handleRemoveEntry(index)}
                     isLoading={busy}
                   />
                 ))}
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAddEntry}
-                  disabled={busy}
-                  className="w-full"
-                >
-                  <Plus className="mr-1 h-4 w-4" />
-                  {h?.addEntry ?? 'Add entry'}
-                </Button>
 
                 <div className="bg-card rounded-xl border p-3 shadow-sm">
                   <PhotosField
@@ -241,7 +235,7 @@ export function BatchSidebar({
                   />
                 </div>
                 <div className="h-16" />
-              </div>
+              </fieldset>
             </>
           ) : (
             <div className="flex flex-1 items-center justify-center">
@@ -252,16 +246,18 @@ export function BatchSidebar({
           )}
         </div>
 
-        <SheetFooter className="bg-background/95 dark:border-primary-foreground/30 border-t px-4 py-4 backdrop-blur-sm sm:px-6">
-          <Button
-            onClick={handleSave}
-            disabled={busy || !canSave}
-            className="h-12 w-full text-base font-semibold shadow-sm sm:text-lg"
-            size="lg"
-          >
-            {buttonLabel}
-          </Button>
-        </SheetFooter>
+        {!readOnly && (
+          <SheetFooter className="bg-background/95 dark:border-primary-foreground/30 border-t px-4 py-4 backdrop-blur-sm sm:px-6">
+            <Button
+              onClick={handleSave}
+              disabled={busy || !canSave}
+              className="h-12 w-full text-base font-semibold shadow-sm sm:text-lg"
+              size="lg"
+            >
+              {buttonLabel}
+            </Button>
+          </SheetFooter>
+        )}
       </SheetContent>
     </Sheet>
   );
