@@ -35,6 +35,8 @@ const HARVEST_FIELDS = gql`
       rowLength
       plantsPerMeter
       rowSpacing
+      startRow
+      endRow
       totalPlants
       lostPlants
       replicates

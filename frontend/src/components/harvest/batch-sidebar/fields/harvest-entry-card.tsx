@@ -12,6 +12,10 @@ import { FruitWeightField } from './batch-sidebar-fruit-weight-field';
 export interface HarvestEntryCardProps {
   entry: HarvestEntryData;
   index: number;
+  // The parent batch's row range; forwarded to the yield field to limit and
+  // validate the per-entry row coordinates.
+  batchStartRow?: number | null;
+  batchEndRow?: number | null;
   defaultOpen?: boolean;
   onYieldChange: (
     field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
@@ -30,6 +34,8 @@ export interface HarvestEntryCardProps {
 export function HarvestEntryCard({
   entry,
   index,
+  batchStartRow,
+  batchEndRow,
   defaultOpen = false,
   onYieldChange,
   onBrixChange,
@@ -82,6 +88,8 @@ export function HarvestEntryCard({
             classC={entry.classC}
             rowX={entry.rowX}
             rowY={entry.rowY}
+            batchStartRow={batchStartRow}
+            batchEndRow={batchEndRow}
             onYieldChange={onYieldChange}
             isLoading={isLoading}
           />

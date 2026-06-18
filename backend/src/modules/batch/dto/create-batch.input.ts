@@ -74,6 +74,21 @@ export class CreateBatchInput {
   @Min(0)
   rowSpacing?: number;
 
+  // Start/end row of the contiguous block this batch occupies (inclusive).
+  // Both optional (backfilled by hand for legacy batches); when both are given
+  // the service enforces startRow <= endRow. Positive row numbers only.
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  startRow?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  endRow?: number;
+
   @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
   @IsNumber()

@@ -251,6 +251,83 @@ export function PlantsPerMeterField({
   );
 }
 
+// Optional row-range bounds (start/end) that define which contiguous block of
+// physical rows the batch occupies. Float to match the per-harvest rowX/rowY
+// representation; 0 means "unset" so a batch without a range stays unconstrained.
+export function StartRowField({
+  formData,
+  setFormData,
+  errors,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="startRow" className="text-sm font-medium">
+        {h?.startRow ?? 'Start Row'}
+      </Label>
+      <Input
+        id="startRow"
+        type="number"
+        min="0"
+        step="1"
+        placeholder={h?.enterStartRow ?? 'First row of the batch'}
+        value={formData.startRow || ''}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            startRow: parsePositiveNumber(e.target.value),
+          }))
+        }
+        disabled={disabled}
+        className={`h-10 ${errors.startRow ? 'border-destructive' : ''}`}
+      />
+      {errors.startRow && (
+        <p className="text-destructive text-sm">{errors.startRow}</p>
+      )}
+    </div>
+  );
+}
+
+export function EndRowField({
+  formData,
+  setFormData,
+  errors,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="endRow" className="text-sm font-medium">
+        {h?.endRow ?? 'End Row'}
+      </Label>
+      <Input
+        id="endRow"
+        type="number"
+        min="0"
+        step="1"
+        placeholder={h?.enterEndRow ?? 'Last row of the batch'}
+        value={formData.endRow || ''}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            endRow: parsePositiveNumber(e.target.value),
+          }))
+        }
+        disabled={disabled}
+        className={`h-10 ${errors.endRow ? 'border-destructive' : ''}`}
+      />
+      {errors.endRow && (
+        <p className="text-destructive text-sm">{errors.endRow}</p>
+      )}
+    </div>
+  );
+}
+
 export function TotalPlantsField({
   formData,
   setFormData,

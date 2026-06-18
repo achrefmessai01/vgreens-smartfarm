@@ -66,6 +66,10 @@ export interface BatchDetailsData {
   rowLength: number;
   plantsPerMeter: number;
   rowSpacing: number;
+  // Inclusive row range the batch occupies. null when not yet backfilled, in
+  // which case harvest row inputs stay unconstrained (fallback behavior).
+  startRow: number | null;
+  endRow: number | null;
   totalPlants: number;
   lostPlants: number;
   // Replicate samples configured on the batch; drives how many entry cards a
@@ -99,6 +103,10 @@ export interface YieldDataFieldProps {
   classC: number;
   rowX: number;
   rowY: number;
+  // The batch's row range (inclusive). null bounds leave the row inputs
+  // unconstrained; when set, inputs are limited and out-of-range values warn.
+  batchStartRow?: number | null;
+  batchEndRow?: number | null;
   onYieldChange?: (
     field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
     value: number,

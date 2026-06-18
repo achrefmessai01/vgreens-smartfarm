@@ -34,6 +34,8 @@ export function createBatchDetailsFromForm(
     rowLength: formData.rowLength,
     plantsPerMeter: formData.plantsPerMeter,
     rowSpacing: formData.rowSpacing,
+    startRow: formData.startRow || null,
+    endRow: formData.endRow || null,
     totalPlants: formData.totalPlants,
     lostPlants: formData.lostPlants,
     replicates,

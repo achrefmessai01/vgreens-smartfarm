@@ -140,10 +140,7 @@ export function BatchSidebar({
           <SheetTitle className="dark:text-card-foreground pr-8 text-left leading-tight break-words">
             {currentData?.greenhouse?.name
               ? (h?.batchDetailsFor ?? '{label} for {greenhouse}')
-                  .replace(
-                    '{label}',
-                    h?.batchDetails ?? 'Batch Details',
-                  )
+                  .replace('{label}', h?.batchDetails ?? 'Batch Details')
                   .replace('{greenhouse}', currentData.greenhouse.name)
               : (h?.batchDetails ?? 'Batch Details')}
           </SheetTitle>
@@ -202,6 +199,8 @@ export function BatchSidebar({
                     key={index}
                     entry={entry}
                     index={index}
+                    batchStartRow={currentData.startRow}
+                    batchEndRow={currentData.endRow}
                     defaultOpen={index === 0 || entryHasData(entry)}
                     onYieldChange={(field, value) =>
                       handleYieldChange(index, field, value)
