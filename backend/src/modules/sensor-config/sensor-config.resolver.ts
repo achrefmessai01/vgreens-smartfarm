@@ -73,7 +73,7 @@ export class SensorConfigResolver {
   }
 
   @Query(() => [DeviceStatus], { name: 'deviceStatuses' })
-  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
   async deviceStatuses(
     @CurrentUser() currentUser: User,
     @Args('input', { nullable: true }) input?: DeviceStatusInput,

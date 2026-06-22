@@ -2,6 +2,10 @@
 
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n/context';
+import {
+  SENSOR_OVERVIEW_PARAMETER,
+  type ViewMode,
+} from '@/lib/farm-overview-constants';
 import type {
   FarmLayoutConfig,
   GreenhouseDimensions,
@@ -19,11 +23,15 @@ export interface FarmOverviewCardProps {
   parameterOptions: { label: string; value: string }[];
   effectiveParameter: ParameterType;
   onParameterChange: (value: ParameterType) => void;
-  viewMode: 'heatmap' | 'discrete' | 'graph';
-  onViewModeChange: (value: 'heatmap' | 'discrete' | 'graph') => void;
+  viewMode: ViewMode;
+  onViewModeChange: (value: ViewMode) => void;
   viewHeatmapLabel: string;
   viewDiscreteLabel: string;
   viewGraphLabel: string;
+  /** Whether the "Overview" parameter tab (all-sensors map) is enabled. */
+  overviewEnabled: boolean;
+  /** Disabled sensor `_field` set ("Enable Sensors" dropdown). */
+  disabledSensorFields: Set<string>;
   bays: Bay[];
   greenhouseLabel: string;
   /** Optional tenant override forwarded to the embedded PAR graph.
@@ -60,6 +68,8 @@ export function FarmOverviewCard({
   viewHeatmapLabel,
   viewDiscreteLabel,
   viewGraphLabel,
+  overviewEnabled,
+  disabledSensorFields,
   bays,
   greenhouseLabel,
   parGraphTenantId,
@@ -85,8 +95,22 @@ export function FarmOverviewCard({
   entranceLabel = entranceLabel ?? t.pages.farmOverview.entranceLabel;
 
   const showEmpty = false;
+  const isOverview = effectiveParameter === SENSOR_OVERVIEW_PARAMETER;
   const showGraphOption =
     effectiveParameter === 'par' || effectiveParameter === 'par_estimated';
+
+  // Surface the all-sensors map as the first (leftmost) parameter tab, gated by
+  // the "Enable Sensors" dropdown. The Overview map has no heatmap/discrete/graph
+  // sub-mode.
+  const parameterTabOptions = overviewEnabled
+    ? [
+        {
+          label: t.pages.farmOverview.overview,
+          value: SENSOR_OVERVIEW_PARAMETER,
+        },
+        ...parameterOptions,
+      ]
+    : parameterOptions;
 
   return (
     <Card className="flex h-full min-h-0 flex-col gap-0 overflow-hidden rounded-none py-0 dark:shadow-lg">
@@ -96,7 +120,7 @@ export function FarmOverviewCard({
             <ParameterSelector
               value={effectiveParameter}
               onValueChange={onParameterChange}
-              options={parameterOptions}
+              options={parameterTabOptions}
             />
           </div>
           {greenhouseDimensions && viewMode !== 'graph' && (
@@ -106,18 +130,20 @@ export function FarmOverviewCard({
               <span>{greenhouseDimensions.yDimension}m</span>
             </div>
           )}
-          <div className="w-full min-w-0 sm:w-auto sm:flex-none">
-            <ViewModeSelector
-              value={viewMode}
-              onValueChange={onViewModeChange}
-              heatmapLabel={viewHeatmapLabel}
-              discreteLabel={viewDiscreteLabel}
-              graphLabel={viewGraphLabel}
-              showGraphOption={showGraphOption}
-            />
-          </div>
+          {!isOverview && (
+            <div className="w-full min-w-0 sm:w-auto sm:flex-none">
+              <ViewModeSelector
+                value={viewMode}
+                onValueChange={onViewModeChange}
+                heatmapLabel={viewHeatmapLabel}
+                discreteLabel={viewDiscreteLabel}
+                graphLabel={viewGraphLabel}
+                showGraphOption={showGraphOption}
+              />
+            </div>
+          )}
         </div>
-        {!showEmpty && viewMode !== 'graph' && (
+        {!showEmpty && viewMode !== 'graph' && !isOverview && (
           <ParameterColorLegendBar parameter={effectiveParameter} />
         )}
       </div>
@@ -135,6 +161,7 @@ export function FarmOverviewCard({
                 bays={bays}
                 viewMode={viewMode}
                 parameter={effectiveParameter}
+                disabledSensorFields={disabledSensorFields}
                 greenhouseLabel={greenhouseLabel}
                 parGraphTenantId={parGraphTenantId}
                 parGraphGreenhouseName={parGraphGreenhouseName}

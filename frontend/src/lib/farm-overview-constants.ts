@@ -12,6 +12,20 @@ export const GREENHOUSE_LABEL_KEYS = [
   'greenHouse2',
 ] as const;
 
+/**
+ * Pseudo-parameter for the Sensor Overview map. Selected like any other
+ * parameter tab (temperature, co2, …) but renders the all-sensors map instead
+ * of a single-parameter view.
+ */
+export const SENSOR_OVERVIEW_PARAMETER = 'overview';
+
+/**
+ * Sentinel `_field` persisted in `Tenant.disabledSensorFields` when the Sensor
+ * Overview tab is toggled OFF in the "Enable Sensors" dropdown. Not a real
+ * measurement — see the backend allow-list in `sensor-fields.constants.ts`.
+ */
+export const SENSOR_OVERVIEW_FIELD = 'sensor_overview';
+
 /** Parameter values allowed in URL; invalid values fall back to temperature. */
 export const VALID_PARAMETERS: ParameterType[] = [
   'temperature',
@@ -24,6 +38,7 @@ export const VALID_PARAMETERS: ParameterType[] = [
   'vpd',
   'par',
   'par_estimated',
+  SENSOR_OVERVIEW_PARAMETER,
 ];
 
 /** View mode values for heatmap / discrete / graph. */

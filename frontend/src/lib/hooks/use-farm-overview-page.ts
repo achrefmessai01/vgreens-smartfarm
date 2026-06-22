@@ -30,6 +30,9 @@ import {
   PARAM_GREENHOUSE,
   PARAM_PARAMETER,
   PARAM_VIEW_MODE,
+  SENSOR_OVERVIEW_FIELD,
+  SENSOR_OVERVIEW_PARAMETER,
+  type ViewMode,
 } from '@/lib/farm-overview-constants';
 import {
   parseGreenhouseTab,
@@ -241,6 +244,10 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     [tenantDisabledSensorFields],
   );
 
+  // The Sensor Overview map tab is shown unless toggled off in the "Enable
+  // Sensors" dropdown (persisted via the sentinel field in disabledSensorFields).
+  const overviewEnabled = !disabledSensorFieldsSet.has(SENSOR_OVERVIEW_FIELD);
+
   const [setDisabledSensorFieldsMutation] =
     useSetTenantDisabledSensorFieldsMutation();
   const [savingSensorFields, setSavingSensorFields] = React.useState(false);
@@ -408,9 +415,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     null,
   );
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<
-    'heatmap' | 'discrete' | 'graph'
-  >(modeFromUrl);
+  const [viewMode, setViewMode] = React.useState<ViewMode>(modeFromUrl);
   const [activeGreenhouseTab, setActiveGreenhouseTab] =
     React.useState(tabFromUrl);
 
@@ -501,12 +506,19 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     });
   }, [bucketFields, t, disabledSensorFieldsSet]);
 
+  // `overview` is a pseudo-parameter (the all-sensors map), not a bucket field,
+  // so it is exempt from the bucket-field checks below.
+  const isOverviewParameter = selectedParameter === SENSOR_OVERVIEW_PARAMETER;
+
   const effectiveParameter =
-    selectedParameter && bucketFields.includes(selectedParameter)
-      ? selectedParameter
-      : (bucketFields[0] ?? 'temperature');
+    isOverviewParameter && overviewEnabled
+      ? SENSOR_OVERVIEW_PARAMETER
+      : selectedParameter && bucketFields.includes(selectedParameter)
+        ? selectedParameter
+        : (bucketFields[0] ?? 'temperature');
 
   React.useEffect(() => {
+    if (selectedParameter === SENSOR_OVERVIEW_PARAMETER) return;
     if (bucketFields.length > 0 && !bucketFields.includes(selectedParameter)) {
       setSelectedParameter(bucketFields[0]);
     }
@@ -515,18 +527,22 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   // Ensure selectedParameter is one of the visible options for the current tab
   React.useEffect(() => {
     const visibleKeys = new Set(parameterOptions.map((o) => o.value));
+    if (overviewEnabled) visibleKeys.add(SENSOR_OVERVIEW_PARAMETER);
     if (!visibleKeys.has(selectedParameter)) {
       const fallback =
         (parameterOptions[0]?.value as ParameterType) ?? 'temperature';
       setSelectedParameter(fallback);
     }
-  }, [parameterOptions, selectedParameter]);
+  }, [parameterOptions, selectedParameter, overviewEnabled]);
 
   React.useEffect(() => {
     if (selectedSlotId) setHistoryDrawerOpen(true);
   }, [selectedSlotId]);
 
   React.useEffect(() => {
+    // The Sensor Overview map has no heatmap/discrete/graph sub-mode, so leave
+    // the view mode untouched while it's selected.
+    if (effectiveParameter === SENSOR_OVERVIEW_PARAMETER) return;
     const isParParameter =
       effectiveParameter === 'par' || effectiveParameter === 'par_estimated';
     if (isParParameter) {
@@ -637,6 +653,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       (isVGreensAdmin && !!selectedTenantId && tenantBucketLoading),
     greenhouseOptions,
     parameterOptions,
+    overviewEnabled,
     effectiveParameter,
     setSelectedParameter,
     activeGreenhouseTab,

@@ -318,6 +318,7 @@ export const de = {
       showAllSensors: 'Alle anzeigen',
       hideAllSensors: 'Alle ausblenden',
       sensorsVisible: 'sichtbar',
+      enableSensorOverview: 'Sensorübersichtskarte',
       subtitle: 'Echtzeit-Einblicke in Ihre Betriebsabläufe',
       batches: 'Chargen',
       onTime: 'Pünktlich',
@@ -388,6 +389,7 @@ export const de = {
       viewDiscrete: 'Diskret',
       viewHeatmap: 'Wärmekarte',
       viewGraph: 'Grafik',
+      overview: 'Übersicht',
       invalidDropTitle: 'Ablage außerhalb der Karte',
       invalidDropDescription:
         'Platzieren Sie den Sensor innerhalb des Gewächshaus-Layouts.',
