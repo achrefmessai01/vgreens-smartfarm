@@ -1,0 +1,4 @@
+influxdb-client>=1.40,<2
+pandas>=2.0
+matplotlib>=3.7
+python-dotenv>=1.0
