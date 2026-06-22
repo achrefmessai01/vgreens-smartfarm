@@ -55,7 +55,6 @@ const HARVEST_FIELDS = gql`
       waste
       crateCounts
       remainingKgs
-      fruitCount
       totalFruitWeight
       avgFruitWeight
       sampleWeight

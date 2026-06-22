@@ -144,24 +144,12 @@ export function HarvestDetails({
                 entryTotal > 0 ? (entry.waste / entryTotal) * 100 : 0;
               const totalCrates = counts.reduce((s, c) => s + (c ?? 0), 0);
               // Average fruit weight (g/fruit) comes from the weighed sample.
-              // Legacy entries (no sample) fall back to the old derivation: the
-              // entry's sellable kg → grams divided by the stored total count.
-              const sampleAvg =
+              const displayAvgFruitWeight =
                 entry.sampleWeight != null &&
                 entry.sampleWeight > 0 &&
                 entry.sampleFruitCount != null &&
                 entry.sampleFruitCount > 0
                   ? entry.sampleWeight / entry.sampleFruitCount
-                  : null;
-              const displayAvgFruitWeight =
-                sampleAvg ??
-                (entry.fruitCount > 0
-                  ? (sellable * 1000) / entry.fruitCount
-                  : null);
-              // Total fruit count is derived from yield ÷ average, not counted.
-              const displayFruitCount =
-                displayAvgFruitWeight != null && displayAvgFruitWeight > 0
-                  ? Math.round((sellable * 1000) / displayAvgFruitWeight)
                   : null;
               const hasFruitWeight = displayAvgFruitWeight != null;
               return (
@@ -289,16 +277,6 @@ export function HarvestDetails({
                               </span>
                             </div>
                           )}
-                        {displayFruitCount != null && (
-                          <div className="flex items-center justify-between py-2">
-                            <span className="text-muted-foreground font-medium">
-                              {h?.fruitCount ?? 'Fruit count'}:
-                            </span>
-                            <span className="text-foreground text-lg font-bold">
-                              ≈ {displayFruitCount}
-                            </span>
-                          </div>
-                        )}
                         <div className="flex items-center justify-between py-2">
                           <span className="text-muted-foreground font-medium">
                             {h?.totalWeight ?? 'Total weight'}:

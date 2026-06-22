@@ -50,13 +50,11 @@ export interface HarvestEntryLike {
   // derived from the batch crateWeight.
   crateCounts?: number[] | null;
   remainingKgs?: number[] | null;
-  // Legacy count-everything fields (0 on new sample-based entries; retained so
-  // historical rows still render).
-  fruitCount: number;
+  // Derived per-entry figures (stored 0 server-side, computed on read).
   totalFruitWeight: number;
   avgFruitWeight: number;
   // Sample-based fruit weight: sample mass in grams + fruits in the sample.
-  // Null when no sample was taken (or on legacy rows).
+  // Null when no sample was taken for the entry.
   sampleWeight?: number | null;
   sampleFruitCount?: number | null;
   avgBrix: number;

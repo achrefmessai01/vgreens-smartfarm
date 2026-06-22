@@ -66,18 +66,9 @@ export class HarvestEntry {
   @Column({ type: 'double precision', array: true, nullable: true })
   remainingKgs?: number[] | null;
 
-  // LEGACY: pre-sampling entries stored the entry's TOTAL fruit count here and
-  // derived avgFruitWeight from it. New entries are sample-based (sampleWeight +
-  // sampleFruitCount below) and leave this 0; it is kept only so historical rows
-  // still read correctly via the service's fallback. The harvest summary now
-  // derives the total fruit count from yield ÷ avgFruitWeight, never from this.
-  @Field(() => Int)
-  @Column({ type: 'int', default: 0 })
-  fruitCount: number;
-
-  // LEGACY/derived: both stay 0 in storage and are computed at read by the
-  // service (totalFruitWeight from the sellable kg; avgFruitWeight in GRAMS per
-  // fruit from the sample, see sampleWeight/sampleFruitCount).
+  // DERIVED: both stay 0 in storage and are computed at read by the service
+  // (totalFruitWeight from the sellable kg; avgFruitWeight in GRAMS per fruit
+  // from the sample, see sampleWeight/sampleFruitCount).
   @Field(() => Float)
   @Column({ type: 'double precision', default: 0 })
   totalFruitWeight: number;

@@ -42,7 +42,6 @@ const HARVEST_MUTATION_FIELDS = gql`
       waste
       crateCounts
       remainingKgs
-      fruitCount
       totalFruitWeight
       avgFruitWeight
       sampleWeight

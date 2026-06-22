@@ -32,7 +32,7 @@ export class HarvestTotals {
 
   @Field(() => Int, {
     description:
-      'Derived total fruit count: SUM over entries of (entry sellable g ÷ avgFruitWeight). Inferred from yield + sampled average, not counted.',
+      'Total fruits SAMPLED: SUM of entries.sampleFruitCount. The number of fruits weighed across the samples, NOT an estimate of total fruits harvested.',
   })
   fruitCount: number;
 
