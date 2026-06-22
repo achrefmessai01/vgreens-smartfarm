@@ -153,9 +153,7 @@ export function NumberOfRowsField({
       <DecimalInput
         id="numberOfRows"
         value={formData.numberOfRows}
-        onChange={(v) =>
-          setFormData((prev) => ({ ...prev, numberOfRows: v }))
-        }
+        onChange={(v) => setFormData((prev) => ({ ...prev, numberOfRows: v }))}
         disabled={disabled}
         className={`h-10 ${errors.numberOfRows ? 'border-destructive' : ''}`}
       />
@@ -457,7 +455,9 @@ export function InputModeField({
             key={mode}
             type="button"
             disabled={disabled || lockMode}
-            onClick={() => setFormData((prev) => ({ ...prev, inputMode: mode }))}
+            onClick={() =>
+              setFormData((prev) => ({ ...prev, inputMode: mode }))
+            }
             className={`h-10 rounded-md border px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
               formData.inputMode === mode
                 ? 'border-primary bg-primary/10 text-primary'

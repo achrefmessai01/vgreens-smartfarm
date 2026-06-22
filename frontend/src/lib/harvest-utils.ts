@@ -127,7 +127,11 @@ export function crateEntryTotalKg(
   const len = Math.max(crateCounts?.length ?? 0, remainingKgs?.length ?? 0);
   let total = 0;
   for (let i = 0; i < len; i++) {
-    total += crateClassKg(crateCounts?.[i] ?? 0, remainingKgs?.[i] ?? 0, crateWeight);
+    total += crateClassKg(
+      crateCounts?.[i] ?? 0,
+      remainingKgs?.[i] ?? 0,
+      crateWeight,
+    );
   }
   return total;
 }

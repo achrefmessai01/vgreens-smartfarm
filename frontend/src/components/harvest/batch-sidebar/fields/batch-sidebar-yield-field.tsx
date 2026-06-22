@@ -53,7 +53,9 @@ export function YieldDataField({
         <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm select-none">
           <Checkbox
             checked={showRowCoordinates}
-            onCheckedChange={(checked) => setShowRowCoordinates(checked === true)}
+            onCheckedChange={(checked) =>
+              setShowRowCoordinates(checked === true)
+            }
           />
           <span>{h?.showRowCoordinates ?? 'Show row coordinates'}</span>
         </label>
@@ -122,7 +124,9 @@ export function YieldDataField({
         {showRowCoordinates && (
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 text-left">
-              <p className="text-muted-foreground text-sm">{h?.rowX ?? 'Row X'}</p>
+              <p className="text-muted-foreground text-sm">
+                {h?.rowX ?? 'Row X'}
+              </p>
               <div className="relative">
                 <DecimalInput
                   value={rowX}
@@ -139,7 +143,9 @@ export function YieldDataField({
               )}
             </div>
             <div className="space-y-2 text-left">
-              <p className="text-muted-foreground text-sm">{h?.rowY ?? 'Row Y'}</p>
+              <p className="text-muted-foreground text-sm">
+                {h?.rowY ?? 'Row Y'}
+              </p>
               <div className="relative">
                 <DecimalInput
                   value={rowY}

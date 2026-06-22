@@ -35,7 +35,10 @@ import {
 export class HarvestsResolver {
   constructor(private readonly harvestsService: HarvestsService) {}
 
-  private resolveTenantId(currentUser: User, requireForNonAdmin = true): string | undefined {
+  private resolveTenantId(
+    currentUser: User,
+    requireForNonAdmin = true,
+  ): string | undefined {
     if (currentUser.role === UserRole.VGREENS_ADMIN) return undefined;
     if (requireForNonAdmin && !currentUser.tenantId) {
       throw new Error('Tenant ID is required');

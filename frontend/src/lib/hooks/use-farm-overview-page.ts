@@ -100,7 +100,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   // graph so admins viewing another tenant fetch its mapping. `undefined`
   // for tenant users lets the backend resolve from their auth context.
   const tenantIdOverride = isVGreensAdmin
-    ? (selectedTenantId || null)
+    ? selectedTenantId || null
     : undefined;
 
   // Explicit tenantId for all config queries.
@@ -279,8 +279,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       } catch (err) {
         toast({
           title: t.positionSaveFailedTitle,
-          description:
-            err instanceof Error ? err.message : String(err),
+          description: err instanceof Error ? err.message : String(err),
           variant: 'destructive',
         });
       } finally {

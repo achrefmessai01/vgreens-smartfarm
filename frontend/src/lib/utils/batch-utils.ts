@@ -40,7 +40,8 @@ export function createBatchDetailsFromForm(
     lostPlants: formData.lostPlants,
     replicates,
     inputMode: formData.inputMode,
-    crateWeight: formData.inputMode === InputMode.Crate ? formData.crateWeight : null,
+    crateWeight:
+      formData.inputMode === InputMode.Crate ? formData.crateWeight : null,
     plantingDate: formData.plantingDate,
     entries: Array.from({ length: replicates }, () => createEmptyEntry()),
     photos: [],

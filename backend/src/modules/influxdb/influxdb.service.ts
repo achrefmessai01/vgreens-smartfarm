@@ -844,8 +844,7 @@ from(bucket: "${escape(bucketName)}")
   ): Promise<Record<string, unknown>[]> {
     if (!this.client || !this.queryApi) return [];
 
-    const escape = (v: string) =>
-      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     const isIso = (s: string) =>
       s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s);
     const rangeStart = isIso(range.start)
@@ -903,8 +902,7 @@ from(bucket: "${escape(bucketName)}")
   ): Promise<{ lux03?: number; lux08?: number }> {
     if (!this.client || !this.queryApi) return {};
 
-    const escape = (v: string) =>
-      v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     const useAbsolute =
       typeof options.start === 'string' &&
       typeof options.stop === 'string' &&

@@ -122,7 +122,8 @@ export function FruitWeightTrendChart(props: FruitWeightTrendChartProps) {
                 fontSize={12}
                 domain={['auto', 'auto']}
                 label={{
-                  value: t.pages.harvest?.fruitWeightValue ?? 'Fruit Weight (kg)',
+                  value:
+                    t.pages.harvest?.fruitWeightValue ?? 'Fruit Weight (kg)',
                   angle: -90,
                   position: 'insideLeft',
                 }}

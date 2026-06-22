@@ -83,10 +83,12 @@ export function HarvestBatchGroup({
     'text-purple-600',
   ];
   const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
-  const classLabel = (i: number) => classLabelTpl.replace('{class}', classLetter(i));
+  const classLabel = (i: number) =>
+    classLabelTpl.replace('{class}', classLetter(i));
   const classColor = (i: number) => classColors[i % classColors.length];
   const classIdxs = agg.classKgs.map((_, i) => i);
-  const classKgAt = (kgs: number[] | null | undefined, i: number) => kgs?.[i] ?? 0;
+  const classKgAt = (kgs: number[] | null | undefined, i: number) =>
+    kgs?.[i] ?? 0;
 
   return (
     <Accordion

@@ -62,7 +62,10 @@ export function HarvestDetails({
     'text-purple-600',
   ];
   // "12 × 8 kg + 3.5 kg" caption for a crate-mode class; omitted when empty.
-  const crateBreakdownText = (count: number, remainder: number): string | null => {
+  const crateBreakdownText = (
+    count: number,
+    remainder: number,
+  ): string | null => {
     if (!isCrate) return null;
     const parts: string[] = [];
     if (count > 0) parts.push(`${count} × ${crateWeight ?? 0} kg`);
@@ -255,7 +258,8 @@ export function HarvestDetails({
                     </div>
                     {entry.fruitCount === 0 && displayTotalFruitWeight === 0 ? (
                       <p className="text-muted-foreground text-sm">
-                        {h?.noFruitWeightRecorded ?? 'No fruit weight recorded.'}
+                        {h?.noFruitWeightRecorded ??
+                          'No fruit weight recorded.'}
                       </p>
                     ) : (
                       <div className="space-y-4">

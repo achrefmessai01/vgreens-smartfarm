@@ -67,7 +67,7 @@ export function CameraLivestreamUnavailable({
         <div className="border-primary/30 dark:border-primary/50 pointer-events-none absolute top-5 left-5 h-8 w-8 rounded-tl-md border-t-2 border-l-2" />
         <div className="border-primary/30 dark:border-primary/50 pointer-events-none absolute top-5 right-5 h-8 w-8 rounded-tr-md border-t-2 border-r-2" />
         <div className="border-primary/30 dark:border-primary/50 pointer-events-none absolute bottom-5 left-5 h-8 w-8 rounded-bl-md border-b-2 border-l-2" />
-        <div className="border-primary/30 dark:border-primary/50 pointer-events-none absolute right-5 bottom-5 h-8 w-8 rounded-br-md border-b-2 border-r-2" />
+        <div className="border-primary/30 dark:border-primary/50 pointer-events-none absolute right-5 bottom-5 h-8 w-8 rounded-br-md border-r-2 border-b-2" />
 
         <CardContent className="relative px-6 py-14 text-center sm:px-12">
           {/* Camera icon with pulsing rings */}

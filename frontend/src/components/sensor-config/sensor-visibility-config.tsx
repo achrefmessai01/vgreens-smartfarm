@@ -19,7 +19,9 @@ interface SensorVisibilityConfigProps {
  * the dropdown directly, sourcing disabled fields from the active tenant via
  * `useFarmOverviewPage`.
  */
-export function SensorVisibilityConfig({ tenantId }: SensorVisibilityConfigProps) {
+export function SensorVisibilityConfig({
+  tenantId,
+}: SensorVisibilityConfigProps) {
   const { t } = useI18n();
   const { toast } = useToast();
 
@@ -72,7 +74,13 @@ export function SensorVisibilityConfig({ tenantId }: SensorVisibilityConfigProps
         setSaving(false);
       }
     },
-    [data?.tenant?.disabledSensorFields, setDisabledMutation, t, tenantId, toast],
+    [
+      data?.tenant?.disabledSensorFields,
+      setDisabledMutation,
+      t,
+      tenantId,
+      toast,
+    ],
   );
 
   return (

@@ -49,9 +49,7 @@ export default function Home() {
   if (hasUnresolvedMeError) {
     return (
       <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-        <h1 className="text-xl font-semibold">
-          {t.errors.sessionLoad.title}
-        </h1>
+        <h1 className="text-xl font-semibold">{t.errors.sessionLoad.title}</h1>
         <p className="text-muted-foreground max-w-md text-sm">
           {t.errors.sessionLoad.description}
         </p>

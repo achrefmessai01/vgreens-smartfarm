@@ -88,7 +88,7 @@ export function SensorVisibilityDropdown({
           size="sm"
           className={cn(
             'group relative h-9 gap-2 overflow-hidden rounded-full border px-1 pr-1 pl-3 shadow-sm backdrop-blur-sm transition-all duration-200',
-            'hover:shadow-md hover:-translate-y-px',
+            'hover:-translate-y-px hover:shadow-md',
             'data-[state=open]:shadow-md data-[state=open]:ring-2 data-[state=open]:ring-emerald-400/30',
             someDisabled
               ? 'border-amber-500/50 bg-gradient-to-r from-amber-500/[0.06] via-amber-500/[0.03] to-transparent hover:border-amber-500/70'
@@ -140,7 +140,7 @@ export function SensorVisibilityDropdown({
       <DropdownMenuContent align="end" className="w-64 p-1.5">
         <DropdownMenuLabel className="flex items-center justify-between px-2 pt-1 pb-1.5 text-xs font-semibold tracking-wide uppercase">
           <span>{triggerLabel}</span>
-          <span className="text-muted-foreground text-[10px] tabular-nums normal-case">
+          <span className="text-muted-foreground text-[10px] normal-case tabular-nums">
             {totalCount - hiddenCount} / {totalCount} {visibleSuffixLabel}
           </span>
         </DropdownMenuLabel>

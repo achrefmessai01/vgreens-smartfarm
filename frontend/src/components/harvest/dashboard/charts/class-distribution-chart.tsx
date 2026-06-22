@@ -63,16 +63,28 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
   const isMulti = 'series' in props && props.series !== undefined;
   const wasteName = h?.waste ?? 'Waste';
   const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
-  const classLabel = (i: number) => classLabelTpl.replace('{class}', classLetter(i));
+  const classLabel = (i: number) =>
+    classLabelTpl.replace('{class}', classLetter(i));
 
   const rows = isMulti
-    ? props.series.map((s) => ({ label: s.batchName, classes: s.classes, waste: s.waste }))
-    : props.data.map((d) => ({ label: d.date, classes: d.classes, waste: d.waste }));
+    ? props.series.map((s) => ({
+        label: s.batchName,
+        classes: s.classes,
+        waste: s.waste,
+      }))
+    : props.data.map((d) => ({
+        label: d.date,
+        classes: d.classes,
+        waste: d.waste,
+      }));
   // Flatten the per-class arrays into discrete keys (class0, class1, ...) recharts
   // can stack, padding to the widest row.
   const maxClasses = Math.max(0, ...rows.map((r) => r.classes.length));
   const chartData = rows.map((r) => {
-    const point: Record<string, number | string> = { label: r.label, waste: r.waste };
+    const point: Record<string, number | string> = {
+      label: r.label,
+      waste: r.waste,
+    };
     for (let i = 0; i < maxClasses; i++) point[`class${i}`] = r.classes[i] ?? 0;
     return point;
   });

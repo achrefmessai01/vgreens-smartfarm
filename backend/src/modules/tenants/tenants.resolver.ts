@@ -28,7 +28,10 @@ export class TenantsResolver {
   // Greenhouses are now first-class rows. Expose them on the tenant (preserving
   // the existing API shape) by reading the dedicated greenhouses table — the
   // single source of truth.
-  @ResolveField(() => [TenantGreenhouse], { name: 'greenhouses', nullable: true })
+  @ResolveField(() => [TenantGreenhouse], {
+    name: 'greenhouses',
+    nullable: true,
+  })
   async greenhouses(@Parent() tenant: Tenant): Promise<TenantGreenhouse[]> {
     const rows = await this.greenhouseService.findAllScoped(tenant.id);
     return rows.map((g) => ({

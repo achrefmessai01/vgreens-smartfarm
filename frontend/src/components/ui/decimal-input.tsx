@@ -36,8 +36,10 @@ function formatValue(value: number): string {
   return value === 0 ? '' : String(value);
 }
 
-export interface DecimalInputProps
-  extends Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange' | 'type'> {
+export interface DecimalInputProps extends Omit<
+  React.ComponentProps<typeof Input>,
+  'value' | 'onChange' | 'type'
+> {
   value: number;
   onChange: (value: number) => void;
   // Max digits allowed after the separator (default 3).

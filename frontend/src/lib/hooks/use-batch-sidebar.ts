@@ -180,7 +180,7 @@ export function useBatchSidebar({
             };
           case 'removeClass': {
             if (entry.classKgs.length <= 1) return entry;
-            const drop = <T,>(arr: T[]) =>
+            const drop = <T>(arr: T[]) =>
               arr.filter((_, i) => i !== change.index);
             return {
               ...entry,
