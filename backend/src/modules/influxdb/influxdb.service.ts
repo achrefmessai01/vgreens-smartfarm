@@ -5,6 +5,9 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import {
+  DeviceActivityPoint,
+  DeviceFieldValue,
+  DeviceStatus,
   FieldMeanMetric,
   ParDliBandPoint,
   ParDliPoint,
@@ -909,7 +912,7 @@ from(bucket: "${escape(bucketName)}")
       !Number.isNaN(new Date(options.start).getTime()) &&
       !Number.isNaN(new Date(options.stop).getTime());
     const rangeClause = useAbsolute
-      ? `|> range(start: time(v: "${escape(options.start!)}"), stop: time(v: "${escape(options.stop!)}"))`
+      ? `|> range(start: time(v: "${escape(options.start)}"), stop: time(v: "${escape(options.stop)}"))`
       : `|> range(start: -${options.windowMinutes}m)`;
 
     const greenhouseClause =
@@ -1085,6 +1088,311 @@ schema.tagValues(bucket: "${escaped}", tag: "${tag}")`;
   /** Returns all unique greenhouse tag values stored in the given bucket. */
   async getUniqueGreenhouses(bucketName: string): Promise<string[]> {
     return this.getUniqueTagValues(bucketName, 'greenhouse');
+  }
+
+  /**
+   * Builds a Flux `range(...)` clause. `start` may be a relative duration
+   * (e.g. `-7d`) or an absolute ISO timestamp; `stop` is an optional absolute
+   * ISO timestamp. ISO values are wrapped in `time(v: ...)`.
+   */
+  private buildRangeClause(start: string, stop?: string): string {
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const isIso = (s: string) => s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s);
+    const startExpr = isIso(start)
+      ? `time(v: "${escape(start)}")`
+      : escape(start);
+    const stopExpr =
+      stop && isIso(stop) ? `, stop: time(v: "${escape(stop)}")` : '';
+    return `range(start: ${startExpr}${stopExpr})`;
+  }
+
+  /** Runs a Flux query and collects every row as a plain object. */
+  private async runQueryRows(flux: string): Promise<Record<string, unknown>[]> {
+    if (!this.client || !this.queryApi) {
+      throw new Error('InfluxDB client is not initialized');
+    }
+    const rows: Record<string, unknown>[] = [];
+    const queryApi = this.queryApi;
+    await new Promise<void>((resolve, reject) => {
+      queryApi.queryRows(flux, {
+        next: (row, tableMeta) => {
+          rows.push(tableMeta.toObject(row) as Record<string, unknown>);
+        },
+        error: reject,
+        complete: resolve,
+      });
+    });
+    return rows;
+  }
+
+  /**
+   * Per-device liveness/inventory for the device-status dashboard. This is the
+   * in-app port of `backend/scripts/message_inventory.py`: it classifies each
+   * device as working / stale / heartbeat-only and reports when it was last
+   * alive (last uplink, from the server-side `system` monitor) vs. when it last
+   * sent real sensor data (any non-`system` measurement).
+   *
+   * Only devices that appear in the bucket within the window are returned;
+   * `never-seen` devices (configured but silent) are added by the resolver from
+   * `SensorConfig`.
+   *
+   * The `stale` cutoff is per device class: edge devices (`vgreens-XX-XX`, push
+   * ~3x/day) get `edgeStaleHours`; everything else (Air_/Soil_ sensors, ~5 min)
+   * gets the much shorter `regularStaleMinutes`.
+   */
+  async getDeviceStatusInventory(
+    bucketName: string,
+    options: {
+      start: string;
+      stop?: string;
+      regularStaleMinutes?: number;
+      edgeStaleHours?: number;
+      now?: Date;
+    },
+  ): Promise<DeviceStatus[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.error('InfluxDB client is not initialized');
+      throw new Error('InfluxDB client is not initialized');
+    }
+
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const bucket = escape(bucketName);
+    const rangeClause = this.buildRangeClause(options.start, options.stop);
+    const regularStaleMinutes = options.regularStaleMinutes ?? 30;
+    const edgeStaleHours = options.edgeStaleHours ?? 26;
+    const nowMs = (options.now ?? new Date()).getTime();
+
+    // Q1: last timestamp per (device, measurement) — message types + last-seen.
+    const q1 = `from(bucket: "${bucket}")
+  |> ${rangeClause}
+  |> group(columns: ["device", "_measurement"])
+  |> last()
+  |> keep(columns: ["device", "_measurement", "_time"])`;
+
+    // Q2: latest connectivity state per device (uplink age + online flag).
+    const q2 = `from(bucket: "${bucket}")
+  |> ${rangeClause}
+  |> filter(fn: (r) => r["_measurement"] == "system" and (r["_field"] == "last_uplink_age_min" or r["_field"] == "online"))
+  |> group(columns: ["device", "_field"])
+  |> last()
+  |> keep(columns: ["device", "_field", "_time", "_value"])`;
+
+    // Q3: real (non-system) point count per device.
+    const q3 = `from(bucket: "${bucket}")
+  |> ${rangeClause}
+  |> filter(fn: (r) => r["_measurement"] != "system")
+  |> group(columns: ["device"])
+  |> count(column: "_value")
+  |> keep(columns: ["device", "_value"])`;
+
+    // Q4: server-side `system` monitor point count per device.
+    const q4 = `from(bucket: "${bucket}")
+  |> ${rangeClause}
+  |> filter(fn: (r) => r["_measurement"] == "system")
+  |> group(columns: ["device"])
+  |> count(column: "_value")
+  |> keep(columns: ["device", "_value"])`;
+
+    // Q5: latest value of each real (non-system) field per device.
+    const q5 = `from(bucket: "${bucket}")
+  |> ${rangeClause}
+  |> filter(fn: (r) => r["_measurement"] != "system")
+  |> group(columns: ["device", "_field"])
+  |> last()
+  |> keep(columns: ["device", "_field", "_value", "_time"])`;
+
+    const [perMeas, sysRows, realCounts, hbCounts, lastValueRows] =
+      await Promise.all([
+        this.runQueryRows(q1),
+        this.runQueryRows(q2),
+        this.runQueryRows(q3),
+        this.runQueryRows(q4),
+        this.runQueryRows(q5),
+      ]);
+
+    const toTime = (v: unknown): Date | undefined => {
+      if (v instanceof Date) return v;
+      if (typeof v === 'string' && v) {
+        const d = new Date(v);
+        return Number.isNaN(d.getTime()) ? undefined : d;
+      }
+      return undefined;
+    };
+    const shortMeas = (m: string) => m.replace(/^vgreens_/, '');
+
+    // Aggregate Q1 by device → measurements + last real-data timestamp.
+    const measByDevice = new Map<
+      string,
+      { measurements: Set<string>; lastReal?: Date }
+    >();
+    for (const row of perMeas) {
+      const device = typeof row.device === 'string' ? row.device : '';
+      const measurement =
+        typeof row._measurement === 'string' ? row._measurement : '';
+      if (!device || !measurement) continue;
+      let entry = measByDevice.get(device);
+      if (!entry) {
+        entry = { measurements: new Set() };
+        measByDevice.set(device, entry);
+      }
+      entry.measurements.add(measurement);
+      if (measurement !== 'system') {
+        const t = toTime(row._time);
+        if (t && (!entry.lastReal || t > entry.lastReal)) entry.lastReal = t;
+      }
+    }
+
+    // Q2 → per-device { lastAlive, online }.
+    const sysByDevice = new Map<
+      string,
+      { lastAlive?: Date; online?: boolean }
+    >();
+    for (const row of sysRows) {
+      const device = typeof row.device === 'string' ? row.device : '';
+      const field = typeof row._field === 'string' ? row._field : '';
+      if (!device) continue;
+      let entry = sysByDevice.get(device);
+      if (!entry) {
+        entry = {};
+        sysByDevice.set(device, entry);
+      }
+      if (field === 'last_uplink_age_min') {
+        const t = toTime(row._time);
+        const ageMin = Number(row._value);
+        if (t && Number.isFinite(ageMin)) {
+          entry.lastAlive = new Date(t.getTime() - ageMin * 60_000);
+        }
+      } else if (field === 'online') {
+        const v = row._value;
+        entry.online = v === true || Number(v) === 1;
+      }
+    }
+
+    const countByDevice = (rows: Record<string, unknown>[]) => {
+      const m = new Map<string, number>();
+      for (const row of rows) {
+        const device = typeof row.device === 'string' ? row.device : '';
+        if (!device) continue;
+        m.set(device, (m.get(device) ?? 0) + (Number(row._value) || 0));
+      }
+      return m;
+    };
+    const realByDevice = countByDevice(realCounts);
+    const hbByDevice = countByDevice(hbCounts);
+
+    // Q5 → per-device latest value per field (sorted by field name).
+    const valuesByDevice = new Map<string, DeviceFieldValue[]>();
+    for (const row of lastValueRows) {
+      const device = typeof row.device === 'string' ? row.device : '';
+      const field = typeof row._field === 'string' ? row._field : '';
+      const value = Number(row._value);
+      const time = toTime(row._time);
+      if (!device || !field || !time || !Number.isFinite(value)) continue;
+      const list = valuesByDevice.get(device) ?? [];
+      list.push({ field, value, time });
+      valuesByDevice.set(device, list);
+    }
+    for (const list of valuesByDevice.values()) {
+      list.sort((a, b) => a.field.localeCompare(b.field));
+    }
+
+    const devices = new Set<string>([
+      ...measByDevice.keys(),
+      ...sysByDevice.keys(),
+      ...realByDevice.keys(),
+      ...hbByDevice.keys(),
+    ]);
+
+    const result: DeviceStatus[] = [];
+    for (const device of devices) {
+      const meas = measByDevice.get(device);
+      const measurements = meas ? [...meas.measurements].sort() : [];
+      const realMeasurements = measurements.filter((m) => m !== 'system');
+      const realDataPoints = realByDevice.get(device) ?? 0;
+      const lastRealData = meas?.lastReal;
+      const sys = sysByDevice.get(device);
+      const deviceClass = device.startsWith('vgreens-') ? 'edge' : 'regular';
+
+      const staleAfterMs =
+        deviceClass === 'edge'
+          ? edgeStaleHours * 3_600_000
+          : regularStaleMinutes * 60_000;
+
+      let state: string;
+      if (measurements.length === 0) {
+        state = 'never-seen';
+      } else if (realDataPoints === 0) {
+        state = 'heartbeat-only';
+      } else if (
+        !lastRealData ||
+        nowMs - lastRealData.getTime() > staleAfterMs
+      ) {
+        state = 'stale';
+      } else {
+        state = 'working';
+      }
+
+      result.push({
+        device,
+        state,
+        deviceClass,
+        messageTypes: measurements.map(shortMeas),
+        realMessageTypes: realMeasurements.map(shortMeas),
+        online: sys?.online,
+        lastAlive: sys?.lastAlive,
+        lastRealData,
+        realDataPoints,
+        heartbeatDataPoints: hbByDevice.get(device) ?? 0,
+        lastValues: valuesByDevice.get(device) ?? [],
+      });
+    }
+
+    result.sort((a, b) => a.device.localeCompare(b.device));
+    this.logger.debug(
+      `getDeviceStatusInventory("${bucketName}", start=${options.start}): ${result.length} devices`,
+    );
+    return result;
+  }
+
+  /**
+   * Bucketed count of real (non-`system`) data points over the window, for the
+   * data-points-over-time chart. `windowEvery` is a Flux duration (e.g. `1h`).
+   */
+  async getDeviceActivitySeries(
+    bucketName: string,
+    options: { start: string; stop?: string; windowEvery: string },
+  ): Promise<DeviceActivityPoint[]> {
+    if (!this.client || !this.queryApi) {
+      this.logger.error('InfluxDB client is not initialized');
+      throw new Error('InfluxDB client is not initialized');
+    }
+
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const rangeClause = this.buildRangeClause(options.start, options.stop);
+    // `windowEvery` is internal (never user input) but escape defensively.
+    const flux = `from(bucket: "${escape(bucketName)}")
+  |> ${rangeClause}
+  |> filter(fn: (r) => r["_measurement"] != "system")
+  |> group()
+  |> aggregateWindow(every: ${escape(options.windowEvery)}, fn: count, column: "_value", createEmpty: true)
+  |> keep(columns: ["_time", "_value"])`;
+
+    const rows = await this.runQueryRows(flux);
+    const points: DeviceActivityPoint[] = [];
+    for (const row of rows) {
+      const time =
+        row._time instanceof Date
+          ? row._time
+          : new Date(String((row as { _time?: string })._time ?? ''));
+      if (Number.isNaN(time.getTime())) continue;
+      const count = Number(row._value);
+      points.push({ time, count: Number.isFinite(count) ? count : 0 });
+    }
+    points.sort((a, b) => a.time.getTime() - b.time.getTime());
+    this.logger.debug(
+      `getDeviceActivitySeries("${bucketName}", every=${options.windowEvery}): ${points.length} points`,
+    );
+    return points;
   }
 
   /**
