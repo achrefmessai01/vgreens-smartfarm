@@ -22,6 +22,8 @@ const BATCH_FIELDS = gql`
     cultivationArea
     totalPlants
     replicates
+    inputMode
+    crateWeight
     createdAt
     updatedAt
     greenhouse {

@@ -28,9 +28,7 @@ export const GET_HARVEST_DASHBOARD = gql`
       }
       classDistribution {
         date
-        marketable
-        classB
-        classC
+        classes
         waste
       }
       brixTrend {
@@ -43,9 +41,7 @@ export const GET_HARVEST_DASHBOARD = gql`
       }
       cumulativeYield {
         date
-        cumulativeClassA
-        cumulativeClassB
-        cumulativeClassC
+        cumulativeSellable
         cumulativeWaste
       }
     }
@@ -99,9 +95,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       }
       classDistribution {
         date
-        marketable
-        classB
-        classC
+        classes
         waste
       }
       brixTrend {
@@ -114,9 +108,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       }
       cumulativeYield {
         date
-        cumulativeClassA
-        cumulativeClassB
-        cumulativeClassC
+        cumulativeSellable
         cumulativeWaste
       }
     }

@@ -42,19 +42,7 @@ export function DashboardChartsGrid({
     },
     {
       id: DASHBOARD_CHART_IDS.cumulativeYield,
-      node: (
-        <CumulativeYieldChart
-          data={
-            (data.cumulativeYield as Array<{
-              date: string;
-              cumulativeClassA: number;
-              cumulativeClassB: number;
-              cumulativeClassC: number;
-              cumulativeWaste: number;
-            }>) ?? []
-          }
-        />
-      ),
+      node: <CumulativeYieldChart data={data.cumulativeYield ?? []} />,
     },
   ];
 

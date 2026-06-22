@@ -2,9 +2,10 @@
 
 import * as React from 'react';
 import { Input } from '@/components/ui/input';
+import { DecimalInput } from '@/components/ui/decimal-input';
 import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n';
-import { useVarietiesQuery } from '@/generated/graphql';
+import { InputMode, useVarietiesQuery } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 interface FormFieldProps {
@@ -117,18 +118,12 @@ export function CultivationAreaField({
         {h?.cultivationArea ?? 'Cultivation Area (m²)'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Input
+      <DecimalInput
         id="cultivationArea"
-        type="number"
-        min="0"
-        step="0.1"
         placeholder={h?.enterArea ?? 'Enter area in square meters'}
-        value={formData.cultivationArea || ''}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            cultivationArea: parsePositiveNumber(e.target.value),
-          }))
+        value={formData.cultivationArea}
+        onChange={(v) =>
+          setFormData((prev) => ({ ...prev, cultivationArea: v }))
         }
         disabled={disabled}
         className={`h-10 ${errors.cultivationArea ? 'border-destructive' : ''}`}
@@ -155,18 +150,10 @@ export function NumberOfRowsField({
         {h?.numberOfRows ?? 'Number of Rows'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Input
+      <DecimalInput
         id="numberOfRows"
-        type="number"
-        min="0"
-        step="0.1"
-        value={formData.numberOfRows || ''}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            numberOfRows: parsePositiveNumber(e.target.value),
-          }))
-        }
+        value={formData.numberOfRows}
+        onChange={(v) => setFormData((prev) => ({ ...prev, numberOfRows: v }))}
         disabled={disabled}
         className={`h-10 ${errors.numberOfRows ? 'border-destructive' : ''}`}
       />
@@ -192,18 +179,10 @@ export function RowLengthField({
         {h?.rowLength ?? 'Row Length (m)'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Input
+      <DecimalInput
         id="rowLength"
-        type="number"
-        min="0"
-        step="0.1"
-        value={formData.rowLength || ''}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            rowLength: parsePositiveNumber(e.target.value),
-          }))
-        }
+        value={formData.rowLength}
+        onChange={(v) => setFormData((prev) => ({ ...prev, rowLength: v }))}
         disabled={disabled}
         className={`h-10 ${errors.rowLength ? 'border-destructive' : ''}`}
       />
@@ -229,17 +208,11 @@ export function PlantsPerMeterField({
         {h?.plantsPerMeter ?? 'Plants per Meter'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Input
+      <DecimalInput
         id="plantsPerMeter"
-        type="number"
-        min="0"
-        step="0.1"
-        value={formData.plantsPerMeter || ''}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            plantsPerMeter: parsePositiveNumber(e.target.value),
-          }))
+        value={formData.plantsPerMeter}
+        onChange={(v) =>
+          setFormData((prev) => ({ ...prev, plantsPerMeter: v }))
         }
         disabled={disabled}
         className={`h-10 ${errors.plantsPerMeter ? 'border-destructive' : ''}`}
@@ -445,6 +418,77 @@ export function ReplicatesField({
       />
       {errors.replicates && (
         <p className="text-destructive text-sm">{errors.replicates}</p>
+      )}
+    </div>
+  );
+}
+
+// Yield input mode toggle (weight vs crate), fixed at batch creation. In crate
+// mode it reveals the per-batch crate-weight input; harvests for this batch then
+// open in crate layout and derive kg from this weight.
+export function InputModeField({
+  formData,
+  setFormData,
+  errors,
+  disabled = false,
+  // inputMode is fixed at creation: when editing an existing batch the toggle is
+  // locked, but crateWeight remains editable.
+  lockMode = false,
+}: FormFieldProps & { lockMode?: boolean }) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+  const isCrate = formData.inputMode === InputMode.Crate;
+
+  const modes: ReadonlyArray<{ mode: InputMode; label: string }> = [
+    { mode: InputMode.Weight, label: h?.weightMode ?? 'Weight (kg)' },
+    { mode: InputMode.Crate, label: h?.crateMode ?? 'Crates' },
+  ];
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-sm font-medium">
+        {h?.inputMode ?? 'Yield input mode'}
+      </Label>
+      <div className="grid grid-cols-2 gap-2">
+        {modes.map(({ mode, label }) => (
+          <button
+            key={mode}
+            type="button"
+            disabled={disabled || lockMode}
+            onClick={() =>
+              setFormData((prev) => ({ ...prev, inputMode: mode }))
+            }
+            className={`h-10 rounded-md border px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              formData.inputMode === mode
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-input bg-background text-muted-foreground hover:bg-muted/50'
+            }`}
+            aria-pressed={formData.inputMode === mode}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {isCrate && (
+        <div className="space-y-2 pt-2">
+          <Label htmlFor="crateWeight" className="text-sm font-medium">
+            {h?.crateWeight ?? 'Crate Weight (kg)'}{' '}
+            <span className="text-destructive">*</span>
+          </Label>
+          <DecimalInput
+            id="crateWeight"
+            placeholder={h?.enterCrateWeight ?? 'Weight of one full crate'}
+            value={formData.crateWeight}
+            onChange={(v) =>
+              setFormData((prev) => ({ ...prev, crateWeight: v }))
+            }
+            disabled={disabled}
+            className={`h-10 ${errors.crateWeight ? 'border-destructive' : ''}`}
+          />
+          {errors.crateWeight && (
+            <p className="text-destructive text-sm">{errors.crateWeight}</p>
+          )}
+        </div>
       )}
     </div>
   );

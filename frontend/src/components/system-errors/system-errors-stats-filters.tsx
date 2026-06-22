@@ -206,9 +206,7 @@ export function SystemErrorsFilters({
           }
         >
           <SelectTrigger className="h-9 w-full">
-            <SelectValue
-              placeholder={t.pages.admin.systemErrors.allStatuses}
-            />
+            <SelectValue placeholder={t.pages.admin.systemErrors.allStatuses} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">

@@ -39,12 +39,7 @@ interface BatchLoaderProps {
   onLoaded: (state: LoadedBatch) => void;
 }
 
-function BatchDataLoader({
-  batch,
-  color,
-  period,
-  onLoaded,
-}: BatchLoaderProps) {
+function BatchDataLoader({ batch, color, period, onLoaded }: BatchLoaderProps) {
   const { data, loading } = useHarvestDashboard({
     dateFilter: period,
     batchId: batch.id,
@@ -133,7 +128,9 @@ export function HarvestDashboardCompare({
     const classBTotal = data?.classBTotal ?? 0;
     const classCTotal = data?.classCTotal ?? 0;
     // "marketable" is the Quality A bar only; B and C stack on top of it, so
-    // back them out of the sellable total to avoid double-counting.
+    // back them out of the sellable total to avoid double-counting. The compare
+    // view summarizes batches by the first three classes (A/B/C) — the per-class
+    // array the chart expects, index 0=A, 1=B, 2=C.
     const marketable = Math.max(
       totalYield - wasteTotal - classBTotal - classCTotal,
       0,
@@ -142,9 +139,7 @@ export function HarvestDashboardCompare({
       batchId: batch.id,
       batchName: batch.name,
       color,
-      marketable,
-      classB: classBTotal,
-      classC: classCTotal,
+      classes: [marketable, classBTotal, classCTotal],
       waste: wasteTotal,
     };
   });
@@ -163,7 +158,7 @@ export function HarvestDashboardCompare({
               prev[state.batch.id].loading === state.loading &&
               prev[state.batch.id].data === state.data
                 ? prev
-                : { ...prev, [state.batch.id]: state }
+                : { ...prev, [state.batch.id]: state },
             )
           }
         />
@@ -231,7 +226,7 @@ export function HarvestDashboardCompare({
                     {h?.averageFruitWeight ?? 'Avg Fruit Weight'}
                   </p>
                   <p className="text-sm font-semibold">
-                    {isLoading ? '–' : `${averageFruitWeight.toFixed(3)} kg`}
+                    {isLoading ? '–' : `${averageFruitWeight.toFixed(1)} g`}
                   </p>
                 </div>
                 <div>

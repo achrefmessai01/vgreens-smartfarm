@@ -74,9 +74,12 @@ export function useLocaleFormatters() {
       const rtf = new Intl.RelativeTimeFormat(tag, { numeric: 'auto' });
       const absSec = Math.abs(diffSeconds);
       if (absSec < 60) return rtf.format(diffSeconds, 'second');
-      if (absSec < 3600) return rtf.format(Math.round(diffSeconds / 60), 'minute');
-      if (absSec < 86400) return rtf.format(Math.round(diffSeconds / 3600), 'hour');
-      if (absSec < 2_592_000) return rtf.format(Math.round(diffSeconds / 86400), 'day');
+      if (absSec < 3600)
+        return rtf.format(Math.round(diffSeconds / 60), 'minute');
+      if (absSec < 86400)
+        return rtf.format(Math.round(diffSeconds / 3600), 'hour');
+      if (absSec < 2_592_000)
+        return rtf.format(Math.round(diffSeconds / 86400), 'day');
       if (absSec < 31_536_000)
         return rtf.format(Math.round(diffSeconds / 2_592_000), 'month');
       return rtf.format(Math.round(diffSeconds / 31_536_000), 'year');

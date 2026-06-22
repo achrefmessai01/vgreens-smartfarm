@@ -25,7 +25,7 @@ import {
   FruitWeightTrendData,
   CumulativeYieldData,
 } from './dto/dashboard-metrics.dto';
-import { OrderDirection } from '@common/enums';
+import { OrderDirection, InputMode } from '@common/enums';
 import { Batch } from '@modules/batch/entities/batch.entity';
 import { BatchService } from '@modules/batch/batch.service';
 
@@ -78,38 +78,130 @@ export class HarvestsService {
     return this.roundTo(this.mean(brixReadings.map((b) => b.value)), 1);
   }
 
+  // Quality-class label from a 0-based array index: 0 -> A, 1 -> B, 2 -> C, ...
+  // The classes are positional and unbounded; the letter is derived, never taken
+  // from a fixed enum.
+  private classLetter(index: number): string {
+    return String.fromCharCode(65 + index);
+  }
+
+  // Non-blocking sanity check for crate-mode input: a per-class remainder at or
+  // above a full crate weight means another crate should probably have been
+  // counted. Logged, never rejected.
+  private warnCrateRemainder(input: HarvestEntryInput, batch: Batch): void {
+    if (batch.inputMode !== InputMode.CRATE) return;
+    const crateWeight = batch.crateWeight ?? 0;
+    if (crateWeight <= 0) return;
+    (input.remainingKgs ?? []).forEach((remainder, i) => {
+      if ((remainder ?? 0) >= crateWeight) {
+        this.logger.warn(
+          `Crate entry remainingKg[${this.classLetter(i)}]=${remainder} >= crateWeight=${crateWeight} (batch ${batch.id}); that is another full crate.`,
+        );
+      }
+    });
+  }
+
   // Build a persistable entry from input, filling the two derived per-entry
   // fields (avgFruitWeight, avgBrix) — the service is the source of truth for
   // these, never the client.
-  private buildEntry(input: HarvestEntryInput): DeepPartial<HarvestEntry> {
+  //
+  // Both modes store per-quality arrays now: weight mode the kg directly
+  // (classKgs), crate mode the counts + remainders (kg derived at read from the
+  // batch's current crateWeight, so a crateWeight edit propagates). The derived
+  // fields (totalFruitWeight, avgFruitWeight) are always computed at read via the
+  // helpers below and left 0 in storage.
+  private buildEntry(
+    input: HarvestEntryInput,
+    batch: Batch,
+  ): DeepPartial<HarvestEntry> {
     const brixReadings: BrixReading[] = (input.brixReadings ?? []).map((b) => ({
       class: b.class,
       value: b.value,
     }));
-    const fruitCount = input.fruitCount ?? 0;
-    const totalFruitWeight = input.totalFruitWeight ?? 0;
-    return {
+
+    const common = {
       rowX: input.rowX ?? 0,
       rowY: input.rowY ?? 0,
-      classA: input.classA ?? 0,
-      classB: input.classB ?? 0,
-      classC: input.classC ?? 0,
       waste: input.waste ?? 0,
-      fruitCount,
-      totalFruitWeight,
-      avgFruitWeight:
-        fruitCount > 0 ? this.roundTo(totalFruitWeight / fruitCount, 3) : 0,
+      // Derived at read (avgFruitWeight from the sample below); stored 0.
+      totalFruitWeight: 0,
+      avgFruitWeight: 0,
+      // Sample-based fruit weight: the sample's mass (g) and its fruit count.
+      sampleWeight: input.sampleWeight ?? null,
+      sampleFruitCount: input.sampleFruitCount ?? null,
       brixReadings,
       avgBrix: this.entryAvgBrix(brixReadings),
     };
+
+    if (batch.inputMode === InputMode.CRATE) {
+      return {
+        ...common,
+        crateCounts: input.crateCounts ?? [],
+        remainingKgs: input.remainingKgs ?? [],
+      };
+    }
+    return { ...common, classKgs: input.classKgs ?? [] };
+  }
+
+  // Number of quality classes an entry carries (per-entry, dynamic).
+  private entryClassCount(
+    e: HarvestEntry,
+    batch: Batch | null | undefined,
+  ): number {
+    return batch?.inputMode === InputMode.CRATE
+      ? (e.crateCounts?.length ?? 0)
+      : (e.classKgs?.length ?? 0);
+  }
+
+  // Effective sellable kg for one quality class by 0-based index. Crate mode
+  // derives it from the batch's current crateWeight (count × crateWeight +
+  // remainder); weight mode reads the stored class kg. Single source of truth —
+  // every total flows through here.
+  private entryClassKg(
+    e: HarvestEntry,
+    batch: Batch | null | undefined,
+    index: number,
+  ): number {
+    if (batch?.inputMode === InputMode.CRATE) {
+      const count = e.crateCounts?.[index] ?? 0;
+      const remainder = e.remainingKgs?.[index] ?? 0;
+      return count * (batch.crateWeight ?? 0) + remainder;
+    }
+    return e.classKgs?.[index] ?? 0;
+  }
+
+  // Effective total sellable weight for an entry: the sum across ALL quality
+  // classes present (dynamic, unbounded), in either mode.
+  private entryTotalWeight(
+    e: HarvestEntry,
+    batch: Batch | null | undefined,
+  ): number {
+    const n = this.entryClassCount(e, batch);
+    let total = 0;
+    for (let i = 0; i < n; i++) total += this.entryClassKg(e, batch, i);
+    return total;
+  }
+
+  // Average fruit weight in GRAMS per fruit, from the weighed sample
+  // (sampleWeight g / sampleFruitCount). Returns null when the sample is missing
+  // or incomplete, so such an entry is excluded from the mean rather than
+  // dragging it toward 0.
+  private entryAvgFruitWeight(e: HarvestEntry): number | null {
+    const sampleCount = e.sampleFruitCount ?? 0;
+    if (e.sampleWeight != null && e.sampleWeight > 0 && sampleCount > 0) {
+      return this.roundTo(e.sampleWeight / sampleCount, 3);
+    }
+    return null;
   }
 
   // Derive a harvest's totals from its entries (+ parent batch for the yields).
   // This is exactly what the omitted DB view would have produced.
   //
-  // NOTE: avgFruitWeight and avgBrix are the UNWEIGHTED mean of the per-entry
-  // averages — deliberately NOT SUM(totalFruitWeight)/SUM(fruitCount). If a
-  // weighted mean is wanted later, change it here.
+  // NOTE: avgFruitWeight (now GRAMS per fruit) and avgBrix are the UNWEIGHTED
+  // mean of the per-entry averages, skipping entries with no value. fruitCount is
+  // the SUM of the per-entry sampleFruitCount — i.e. the total number of fruits
+  // SAMPLED, not an estimate of the total fruits harvested. If a weighted mean is
+  // wanted later, change it here.
   computeTotals(
     entries: HarvestEntry[] | undefined,
     batch?: Batch | null,
@@ -118,17 +210,55 @@ export class HarvestsService {
     const sum = (pick: (e: HarvestEntry) => number): number =>
       list.reduce((s, e) => s + (pick(e) || 0), 0);
 
-    const classA = this.roundTo(sum((e) => e.classA), 3);
-    const classB = this.roundTo(sum((e) => e.classB), 3);
-    const classC = this.roundTo(sum((e) => e.classC), 3);
-    const waste = this.roundTo(sum((e) => e.waste), 3);
-    const fruitCount = sum((e) => e.fruitCount);
-    const totalFruitWeight = this.roundTo(sum((e) => e.totalFruitWeight), 3);
+    // Per-class sellable kg, summed across entries through the effective-weight
+    // helper (so crate-mode entries reflect the batch's current crateWeight). The
+    // array is as wide as the widest entry — class count is per-entry and dynamic.
+    const classN = Math.max(
+      0,
+      ...list.map((e) => this.entryClassCount(e, batch)),
+    );
+    const classKgs = Array.from({ length: classN }, (_, i) =>
+      this.roundTo(
+        sum((e) => this.entryClassKg(e, batch, i)),
+        3,
+      ),
+    );
+    // Convenience scalars for the first three classes (CSV / summary / compare).
+    const classA = classKgs[0] ?? 0;
+    const classB = classKgs[1] ?? 0;
+    const classC = classKgs[2] ?? 0;
+    const waste = this.roundTo(
+      sum((e) => e.waste),
+      3,
+    );
+    // Total fruits SAMPLED across the entries (sum of each sample's fruit count),
+    // not an estimate of the total fruits harvested.
+    const fruitCount = sum((e) => e.sampleFruitCount ?? 0);
+    const totalFruitWeight = this.roundTo(
+      sum((e) => this.entryTotalWeight(e, batch)),
+      3,
+    );
+
+    // Crate-count rollups are meaningful only for crate-mode batches. Dynamic
+    // length: as wide as the widest entry's crateCounts (index 0=A, 1=B, ...).
+    const isCrate = batch?.inputMode === InputMode.CRATE;
+    const crateClassN = isCrate
+      ? Math.max(0, ...list.map((e) => e.crateCounts?.length ?? 0))
+      : 0;
+    const crateCounts = isCrate
+      ? Array.from({ length: crateClassN }, (_, i) =>
+          sum((e) => e.crateCounts?.[i] ?? 0),
+        )
+      : null;
 
     const hasEntries = list.length > 0;
-    const avgFruitWeight = hasEntries
-      ? this.roundTo(this.mean(list.map((e) => e.avgFruitWeight || 0)), 3)
-      : null;
+    // Unweighted mean of the per-entry g/fruit averages, ignoring entries that
+    // have no computable average (incomplete sample / no legacy count).
+    const avgValues = list
+      .map((e) => this.entryAvgFruitWeight(e))
+      .filter((v): v is number => v != null);
+    const avgFruitWeight =
+      avgValues.length > 0 ? this.roundTo(this.mean(avgValues), 3) : null;
     const avgBrix = hasEntries
       ? this.roundTo(this.mean(list.map((e) => e.avgBrix || 0)), 1)
       : null;
@@ -142,12 +272,14 @@ export class HarvestsService {
       rowLength > 0 ? this.roundTo(totalFruitWeight / rowLength, 3) : null;
 
     return {
+      classKgs,
       classA,
       classB,
       classC,
       waste,
       fruitCount,
       totalFruitWeight,
+      crateCounts,
       avgFruitWeight,
       avgBrix,
       yieldPerPlant,
@@ -180,7 +312,9 @@ export class HarvestsService {
           });
         }
         if (filter.batchId) {
-          qb.andWhere('harvest.batchId = :batchId', { batchId: filter.batchId });
+          qb.andWhere('harvest.batchId = :batchId', {
+            batchId: filter.batchId,
+          });
         }
         if (filter.greenhouseId) {
           qb.andWhere('batch.greenhouseId = :greenhouseId', {
@@ -198,7 +332,9 @@ export class HarvestsService {
           );
         }
         if (filter.dateFrom) {
-          qb.andWhere('harvest.date >= :dateFrom', { dateFrom: filter.dateFrom });
+          qb.andWhere('harvest.date >= :dateFrom', {
+            dateFrom: filter.dateFrom,
+          });
         }
         if (filter.dateTo) {
           qb.andWhere('harvest.date <= :dateTo', { dateTo: filter.dateTo });
@@ -252,8 +388,13 @@ export class HarvestsService {
     createdById: string,
   ): Promise<Harvest> {
     try {
-      // Validates the batch exists and belongs to the tenant.
-      await this.batchService.findOneById(input.batchId, tenantId);
+      // Validates the batch exists and belongs to the tenant; also gives us the
+      // mode + crateWeight needed to build crate-mode entries.
+      const batch = await this.batchService.findOneById(
+        input.batchId,
+        tenantId,
+      );
+      (input.entries ?? []).forEach((e) => this.warnCrateRemainder(e, batch));
 
       const harvest = this.harvestRepository.create({
         tenantId,
@@ -261,7 +402,7 @@ export class HarvestsService {
         createdById,
         date: new Date(input.date),
         photoUrls: input.photoUrls ?? [],
-        entries: (input.entries ?? []).map((e) => this.buildEntry(e)),
+        entries: (input.entries ?? []).map((e) => this.buildEntry(e, batch)),
       });
 
       const saved = await this.harvestRepository.save(harvest);
@@ -284,8 +425,11 @@ export class HarvestsService {
     try {
       const harvest = await this.findOneById(id, tenantId);
 
+      // Resolve the batch we'll build entries against: the new one if the
+      // harvest is being reassigned, otherwise the already-loaded parent.
+      let batch = harvest.batch ?? null;
       if (input.batchId !== undefined) {
-        await this.batchService.findOneById(input.batchId, tenantId);
+        batch = await this.batchService.findOneById(input.batchId, tenantId);
         harvest.batchId = input.batchId;
       }
       if (input.date !== undefined) harvest.date = new Date(input.date);
@@ -297,8 +441,21 @@ export class HarvestsService {
       if (input.entries !== undefined) {
         await this.entryRepository.delete({ harvestId: id });
         if (input.entries.length > 0) {
+          if (!batch) {
+            batch = await this.batchService.findOneById(
+              harvest.batchId,
+              tenantId,
+            );
+          }
+          const resolvedBatch = batch;
+          input.entries.forEach((e) =>
+            this.warnCrateRemainder(e, resolvedBatch),
+          );
           const entries = input.entries.map((e) =>
-            this.entryRepository.create({ ...this.buildEntry(e), harvestId: id }),
+            this.entryRepository.create({
+              ...this.buildEntry(e, resolvedBatch),
+              harvestId: id,
+            }),
           );
           await this.entryRepository.save(entries);
         }
@@ -315,7 +472,11 @@ export class HarvestsService {
     }
   }
 
-  async deleteHarvest(id: string, deletedById: string, tenantId?: string): Promise<void> {
+  async deleteHarvest(
+    id: string,
+    deletedById: string,
+    tenantId?: string,
+  ): Promise<void> {
     try {
       const harvest = await this.findOneById(id, tenantId);
       harvest.deletedById = deletedById;
@@ -341,11 +502,16 @@ export class HarvestsService {
 
     const weightByBatch = new Map<string, number>();
     for (const h of harvests) {
+      // entryTotalWeight reads crate-mode entries off the batch's crateWeight;
+      // findAllFiltered already joins h.batch.
       const weight = (h.entries ?? []).reduce(
-        (s, e) => s + (e.totalFruitWeight || 0),
+        (s, e) => s + this.entryTotalWeight(e, h.batch),
         0,
       );
-      weightByBatch.set(h.batchId, (weightByBatch.get(h.batchId) ?? 0) + weight);
+      weightByBatch.set(
+        h.batchId,
+        (weightByBatch.get(h.batchId) ?? 0) + weight,
+      );
     }
 
     return batches.map((b) => {
@@ -384,7 +550,9 @@ export class HarvestsService {
           });
         }
         if (filter.batchId) {
-          qb.andWhere('harvest.batchId = :batchId', { batchId: filter.batchId });
+          qb.andWhere('harvest.batchId = :batchId', {
+            batchId: filter.batchId,
+          });
         }
         if (filter.greenhouseId) {
           qb.andWhere('batch.greenhouseId = :greenhouseId', {
@@ -402,10 +570,14 @@ export class HarvestsService {
           });
         }
         if (filter.batch) {
-          qb.andWhere('batch.name ILIKE :batch', { batch: `%${filter.batch}%` });
+          qb.andWhere('batch.name ILIKE :batch', {
+            batch: `%${filter.batch}%`,
+          });
         }
         if (filter.dateFrom) {
-          qb.andWhere('harvest.date >= :dateFrom', { dateFrom: filter.dateFrom });
+          qb.andWhere('harvest.date >= :dateFrom', {
+            dateFrom: filter.dateFrom,
+          });
         }
         if (filter.dateTo) {
           qb.andWhere('harvest.date <= :dateTo', { dateTo: filter.dateTo });
@@ -490,7 +662,9 @@ export class HarvestsService {
       const yieldPerPlant =
         sumPlants > 0 ? this.roundTo(sumWeightPlants / sumPlants, 3) : null;
       const yieldPerMeter =
-        sumRowLength > 0 ? this.roundTo(sumWeightMeters / sumRowLength, 3) : null;
+        sumRowLength > 0
+          ? this.roundTo(sumWeightMeters / sumRowLength, 3)
+          : null;
 
       // daysActive: earliest batch planting -> latest harvest date.
       const plantingTimes = items
@@ -499,7 +673,9 @@ export class HarvestsService {
         .map((d) => new Date(d).getTime());
       const harvestTimes = items.map((i) => new Date(i.harvest.date).getTime());
       const earliestPlanting =
-        plantingTimes.length > 0 ? Math.min(...plantingTimes) : Math.min(...harvestTimes);
+        plantingTimes.length > 0
+          ? Math.min(...plantingTimes)
+          : Math.min(...harvestTimes);
       const latestHarvest = Math.max(...harvestTimes);
       const daysActive = Math.max(
         0,
@@ -507,7 +683,8 @@ export class HarvestsService {
       );
 
       const criticalAlerts = items.filter(({ totals }) => {
-        const picked = totals.classA + totals.classB + totals.classC + totals.waste;
+        const picked =
+          totals.classA + totals.classB + totals.classC + totals.waste;
         const lowBrix = totals.avgBrix !== null && totals.avgBrix < 6.0;
         const highWaste = picked > 0 && totals.waste / picked > 0.15;
         return lowBrix || highWaste;
@@ -541,7 +718,9 @@ export class HarvestsService {
         `getDashboardMetrics failed: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
       );
-      throw new InternalServerErrorException('Failed to fetch dashboard metrics');
+      throw new InternalServerErrorException(
+        'Failed to fetch dashboard metrics',
+      );
     }
   }
 
@@ -575,7 +754,9 @@ export class HarvestsService {
     return new Date(date).toISOString().split('T')[0];
   }
 
-  private generateYieldOverTime(items: HarvestWithTotals[]): YieldOverTimeData[] {
+  private generateYieldOverTime(
+    items: HarvestWithTotals[],
+  ): YieldOverTimeData[] {
     const daily = new Map<string, number>();
     for (const { harvest, totals } of items) {
       const key = this.dateKey(harvest.date);
@@ -607,29 +788,34 @@ export class HarvestsService {
       }));
   }
 
+  // Per-day per-class kg, with a dynamic number of classes (index 0=A, 1=B, ...).
+  // `classes` is padded to the widest day so every datum has the same length for
+  // the stacked chart.
   private generateClassDistribution(
     items: HarvestWithTotals[],
   ): ClassDistributionData[] {
-    const daily = new Map<
-      string,
-      { classA: number; classB: number; classC: number; waste: number }
-    >();
+    const daily = new Map<string, { classes: number[]; waste: number }>();
     for (const { harvest, totals } of items) {
       const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? { classA: 0, classB: 0, classC: 0, waste: 0 };
-      cur.classA += totals.classA;
-      cur.classB += totals.classB;
-      cur.classC += totals.classC;
+      const cur = daily.get(key) ?? { classes: [], waste: 0 };
+      const kgs = totals.classKgs ?? [];
+      for (let i = 0; i < kgs.length; i++) {
+        cur.classes[i] = (cur.classes[i] ?? 0) + (kgs[i] ?? 0);
+      }
       cur.waste += totals.waste;
       daily.set(key, cur);
     }
+    const maxLen = Math.max(
+      0,
+      ...[...daily.values()].map((d) => d.classes.length),
+    );
     return [...daily.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, d]) => ({
         date,
-        marketable: this.roundTo(d.classA, 1),
-        classB: this.roundTo(d.classB, 1),
-        classC: this.roundTo(d.classC, 1),
+        classes: Array.from({ length: maxLen }, (_, i) =>
+          this.roundTo(d.classes[i] ?? 0, 1),
+        ),
         waste: this.roundTo(d.waste, 1),
       }));
   }
@@ -665,41 +851,36 @@ export class HarvestsService {
     }
     return [...daily.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, d]) => ({ date, weight: this.roundTo(d.total / d.count, 3) }));
+      .map(([date, d]) => ({
+        date,
+        weight: this.roundTo(d.total / d.count, 3),
+      }));
   }
 
+  // Cumulative sellable (all classes summed) and waste over time. The chart
+  // plots the sellable line, so per-class detail isn't needed here — and summing
+  // all classes keeps it correct for any class count.
   private generateCumulativeYield(
     items: HarvestWithTotals[],
   ): CumulativeYieldData[] {
-    const daily = new Map<
-      string,
-      { classA: number; classB: number; classC: number; waste: number }
-    >();
+    const daily = new Map<string, { sellable: number; waste: number }>();
     for (const { harvest, totals } of items) {
       const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? { classA: 0, classB: 0, classC: 0, waste: 0 };
-      cur.classA += totals.classA;
-      cur.classB += totals.classB;
-      cur.classC += totals.classC;
+      const cur = daily.get(key) ?? { sellable: 0, waste: 0 };
+      cur.sellable += totals.totalFruitWeight;
       cur.waste += totals.waste;
       daily.set(key, cur);
     }
-    let a = 0;
-    let b = 0;
-    let c = 0;
+    let sellable = 0;
     let w = 0;
     return [...daily.entries()]
       .sort(([x], [y]) => x.localeCompare(y))
       .map(([date, d]) => {
-        a += d.classA;
-        b += d.classB;
-        c += d.classC;
+        sellable += d.sellable;
         w += d.waste;
         return {
           date,
-          cumulativeClassA: this.roundTo(a, 1),
-          cumulativeClassB: this.roundTo(b, 1),
-          cumulativeClassC: this.roundTo(c, 1),
+          cumulativeSellable: this.roundTo(sellable, 1),
           cumulativeWaste: this.roundTo(w, 1),
         };
       });

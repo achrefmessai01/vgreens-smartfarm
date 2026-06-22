@@ -64,7 +64,9 @@ export function DeviceHealthCard({
         </div>
         {weather && (
           <div className="mt-6 border-t pt-4">
-            <h4 className="text-muted-foreground text-sm">{t.common.weather}</h4>
+            <h4 className="text-muted-foreground text-sm">
+              {t.common.weather}
+            </h4>
             <div className="mt-2 flex items-center gap-3">
               {weather.icon && <div className="text-3xl">{weather.icon}</div>}
               <div>

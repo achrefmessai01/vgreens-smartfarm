@@ -31,23 +31,14 @@ export class HarvestEntryInput {
   @Min(0)
   rowY?: number;
 
-  @Field(() => Float, { defaultValue: 0 })
+  // Weight mode: positional per-quality sellable kg (index 0=A, 1=B, ...).
+  // Dynamic length, not capped. Omitted in crate mode.
+  @Field(() => [Float], { nullable: true })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classA?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classB?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  classC?: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Min(0, { each: true })
+  classKgs?: number[];
 
   @Field(() => Float, { defaultValue: 0 })
   @IsOptional()
@@ -55,17 +46,42 @@ export class HarvestEntryInput {
   @Min(0)
   waste?: number;
 
-  @Field(() => Int, { defaultValue: 0 })
+  // Crate mode only: positional per-quality arrays of crate counts and
+  // remaining-kg tails. Index maps to a quality class by position (0=A, 1=B,
+  // 2=C, 3=D, ...) — count is dynamic, not capped. Omitted in weight mode. The
+  // service derives kg/total from the batch crateWeight; totalFruitWeight is not
+  // accepted for crate entries.
+  @Field(() => [Int], { nullable: true })
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  fruitCount?: number;
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(0, { each: true })
+  crateCounts?: number[];
 
-  @Field(() => Float, { defaultValue: 0 })
+  @Field(() => [Float], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Min(0, { each: true })
+  remainingKgs?: number[];
+
+  // Sample-based fruit weight. The user weighs a small counted sample rather
+  // than every fruit: sampleWeight is the sample's mass in GRAMS, sampleFruitCount
+  // the number of fruits in it. The service derives avgFruitWeight (g/fruit) from
+  // these. Both optional — omitted when no sample was taken for this entry.
+  // (fruitCount/totalFruitWeight are no longer accepted; they were the old
+  // count-everything method and are derived/legacy now.)
+  @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(0)
-  totalFruitWeight?: number;
+  sampleWeight?: number | null;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  sampleFruitCount?: number | null;
 
   @Field(() => [BrixReading], { nullable: true })
   @IsOptional()

@@ -15,6 +15,7 @@ import {
   Building2,
   ClipboardList,
   Clock,
+  Cpu,
   Flag,
   Menu,
   Settings,
@@ -176,6 +177,14 @@ export function Sidebar({
       href: '/tenant/history',
       icon: Clock,
       featureKey: 'data_analytics',
+    },
+    {
+      label: t.navigation.deviceStatus,
+      href: '/tenant/devices',
+      icon: Cpu,
+      featureKey: 'device_status',
+      // Device fleet health is an admin concern, not for plain tenant users.
+      allowedRoles: [UserRole.VgreensAdmin, UserRole.TenantAdmin],
     },
   ];
 

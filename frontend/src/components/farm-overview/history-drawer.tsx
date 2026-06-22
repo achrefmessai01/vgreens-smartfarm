@@ -116,7 +116,6 @@ export function HistoryDrawer({
         stop: startStop.stop ?? undefined,
         limit: 2000,
         field: parameter,
-        greenhouse: slotFilters?.greenhouse ?? undefined,
         device: slotFilters?.device ?? undefined,
         level:
           slotFilters?.level && slotFilters.level.toLowerCase() !== 'unknown'
@@ -161,14 +160,17 @@ export function HistoryDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[70svh] sm:h-[60vh]">
+      <SheetContent
+        side="bottom"
+        className="flex h-[70svh] flex-col sm:h-[60vh]"
+      >
         <SheetHeader>
           <SheetTitle>
             {historyLabel} - {parameterLabel}
           </SheetTitle>
           <SheetDescription>{slotId}</SheetDescription>
         </SheetHeader>
-        <div className="space-y-4 overflow-x-hidden px-4 pb-4 sm:px-5">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden px-4 pb-4 sm:px-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <label className="text-sm font-medium">{timeRangeLabel}:</label>
             <div className="w-full sm:w-auto">
@@ -187,7 +189,7 @@ export function HistoryDrawer({
               />
             </div>
           </div>
-          <div className="h-[280px] sm:h-[400px]">
+          <div className="min-h-[200px] flex-1">
             {historyLoading ? (
               <HistoryChartSkeleton className="h-full w-full" />
             ) : historyData.length === 0 ? (
@@ -206,8 +208,18 @@ export function HistoryDrawer({
                         day: 'numeric',
                       })
                     }
+                    height={28}
+                    tickMargin={8}
+                    minTickGap={24}
+                    interval="preserveStartEnd"
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    stroke="#94a3b8"
                   />
-                  <YAxis />
+                  <YAxis
+                    width={44}
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    stroke="#94a3b8"
+                  />
                   <Tooltip
                     labelFormatter={(value) => formatDateTime(new Date(value))}
                   />
@@ -226,22 +238,30 @@ export function HistoryDrawer({
                       };
                       index?: number;
                     }) => {
+                      // Recharts renders one dot per point, so each returned
+                      // node needs a stable, unique `key`.
+                      const dotKey = `dot-${props.index ?? props.payload?.index ?? 'x'}`;
                       if (!props.cx || !props.cy || !props.payload) {
-                        return <g />;
+                        return <g key={dotKey} />;
                       }
                       const pointIndex =
                         props.payload.index ?? props.index ?? -1;
-                      if (pointIndex === -1) return <g />;
+                      if (pointIndex === -1) return <g key={dotKey} />;
                       const isSelected = selectedPointIndex === pointIndex;
                       return (
                         <circle
+                          key={dotKey}
                           cx={props.cx}
                           cy={props.cy}
-                          r={isSelected ? 6 : 4}
-                          fill="#016F7C"
-                          stroke="white"
-                          strokeWidth={isSelected ? 3 : 1.5}
-                          className="cursor-pointer transition-all hover:scale-110"
+                          // Default dots are transparent (but still clickable —
+                          // `transparent` is hit-tested, `none` would not be) so
+                          // the line itself reads clearly. Only the selected
+                          // point gets a visible marker.
+                          r={isSelected ? 6 : 7}
+                          fill={isSelected ? '#016F7C' : 'transparent'}
+                          stroke={isSelected ? 'white' : 'transparent'}
+                          strokeWidth={isSelected ? 3 : 0}
+                          className="cursor-pointer transition-all"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedPointIndex(
@@ -251,12 +271,17 @@ export function HistoryDrawer({
                           style={{
                             filter: isSelected
                               ? 'drop-shadow(0 2px 6px rgba(0,0,0,0.25))'
-                              : 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))',
+                              : 'none',
                           }}
                         />
                       );
                     }}
-                    activeDot={false}
+                    activeDot={{
+                      r: 4,
+                      fill: '#016F7C',
+                      stroke: 'white',
+                      strokeWidth: 1.5,
+                    }}
                   />
                 </LineChart>
               </ResponsiveContainer>

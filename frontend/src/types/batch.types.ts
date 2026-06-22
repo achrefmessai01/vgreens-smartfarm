@@ -1,3 +1,5 @@
+import type { InputMode } from '@/generated/graphql';
+
 export interface BatchFormData {
   // Cascading selection: greenhouse -> crop (required) -> variety (optional).
   // sourceGreenhouse / cropId / varietyId hold the selected entity ids.
@@ -19,6 +21,10 @@ export interface BatchFormData {
   lostPlants: number;
   // Replicate samples per harvest; at least 1.
   replicates: number;
+  // Yield input mode, fixed at creation. Crate mode requires a positive
+  // crateWeight (kg per crate); in weight mode crateWeight is ignored.
+  inputMode: InputMode;
+  crateWeight: number;
 }
 
 export interface BatchFormErrors {
@@ -35,4 +41,5 @@ export interface BatchFormErrors {
   totalPlants?: string;
   lostPlants?: string;
   replicates?: string;
+  crateWeight?: string;
 }

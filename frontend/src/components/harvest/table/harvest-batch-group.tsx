@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import {
+  classLetter,
   formatHarvestDate,
   getGreenhouseLabel,
   harvestsLoggedLabel,
@@ -61,9 +62,6 @@ export function HarvestBatchGroup({
 }: HarvestBatchGroupProps) {
   const { t, locale } = useI18n();
   const h = t.pages.harvest;
-  const qualityALabel = h?.qualityA ?? 'Quality A';
-  const qualityBLabel = h?.qualityB ?? 'Quality B';
-  const qualityCLabel = h?.qualityC ?? 'Quality C';
   const wasteLabel = h?.waste ?? 'Waste';
   const { isMobile } = useResponsiveBreakpoint('lg');
   const visibleEntries = group.entries;
@@ -73,6 +71,24 @@ export function HarvestBatchGroup({
     () => aggregateBatchTotals(visibleEntries, batch),
     [visibleEntries, batch],
   );
+
+  // Quality classes are dynamic and per-entry; the group renders one column per
+  // class up to the widest entry (= the aggregate's length). Per-harvest rows
+  // pad to the same width so columns align.
+  const classColors = [
+    'text-green-600',
+    'text-teal-600',
+    'text-amber-600',
+    'text-blue-600',
+    'text-purple-600',
+  ];
+  const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
+  const classLabel = (i: number) =>
+    classLabelTpl.replace('{class}', classLetter(i));
+  const classColor = (i: number) => classColors[i % classColors.length];
+  const classIdxs = agg.classKgs.map((_, i) => i);
+  const classKgAt = (kgs: number[] | null | undefined, i: number) =>
+    kgs?.[i] ?? 0;
 
   return (
     <Accordion
@@ -175,9 +191,9 @@ export function HarvestBatchGroup({
                 <TableHeader>
                   <TableRow>
                     <TableHead>{totalLabel}</TableHead>
-                    <TableHead>{qualityALabel}</TableHead>
-                    <TableHead>{qualityBLabel}</TableHead>
-                    <TableHead>{qualityCLabel}</TableHead>
+                    {classIdxs.map((i) => (
+                      <TableHead key={i}>{classLabel(i)}</TableHead>
+                    ))}
                     <TableHead>{wasteLabel}</TableHead>
                     <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
                     <TableHead>
@@ -195,21 +211,17 @@ export function HarvestBatchGroup({
                       {visibleEntries.length}{' '}
                       {harvestsLoggedLabel(visibleEntries.length, h, locale)}
                     </TableCell>
-                    <TableCell className="text-green-600">
-                      {agg.classA}
-                    </TableCell>
-                    <TableCell className="text-teal-600">
-                      {agg.classB}
-                    </TableCell>
-                    <TableCell className="text-amber-600">
-                      {agg.classC}
-                    </TableCell>
+                    {classIdxs.map((i) => (
+                      <TableCell key={i} className={classColor(i)}>
+                        {classKgAt(agg.classKgs, i)}
+                      </TableCell>
+                    ))}
                     <TableCell className="text-red-500">{agg.waste}</TableCell>
                     <TableCell>{agg.avgBrix ?? 0}&deg;Bx</TableCell>
                     <TableCell>
                       {agg.avgFruitWeight == null
                         ? '—'
-                        : `${agg.avgFruitWeight.toFixed(3)} kg`}
+                        : `${agg.avgFruitWeight.toFixed(1)} g`}
                     </TableCell>
                     <TableCell>
                       {agg.yieldPerPlant == null
@@ -250,30 +262,18 @@ export function HarvestBatchGroup({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2.5 px-0.5 pt-1 text-sm">
-                    <div className="bg-muted/40 rounded-lg p-2.5">
-                      <span className="text-muted-foreground block text-[11px]">
-                        {qualityALabel}
-                      </span>
-                      <span className="text-base font-semibold text-green-600">
-                        {agg.classA}
-                      </span>
-                    </div>
-                    <div className="bg-muted/40 rounded-lg p-2.5">
-                      <span className="text-muted-foreground block text-[11px]">
-                        {qualityBLabel}
-                      </span>
-                      <span className="text-base font-semibold text-teal-600">
-                        {agg.classB}
-                      </span>
-                    </div>
-                    <div className="bg-muted/40 rounded-lg p-2.5">
-                      <span className="text-muted-foreground block text-[11px]">
-                        {qualityCLabel}
-                      </span>
-                      <span className="text-base font-semibold text-amber-600">
-                        {agg.classC}
-                      </span>
-                    </div>
+                    {classIdxs.map((i) => (
+                      <div key={i} className="bg-muted/40 rounded-lg p-2.5">
+                        <span className="text-muted-foreground block text-[11px]">
+                          {classLabel(i)}
+                        </span>
+                        <span
+                          className={`text-base font-semibold ${classColor(i)}`}
+                        >
+                          {classKgAt(agg.classKgs, i)}
+                        </span>
+                      </div>
+                    ))}
                     <div className="bg-muted/40 rounded-lg p-2.5">
                       <span className="text-muted-foreground block text-[11px]">
                         {wasteLabel}
@@ -301,9 +301,9 @@ export function HarvestBatchGroup({
                   <TableHeader>
                     <TableRow>
                       <TableHead>{h?.date ?? 'Date'}</TableHead>
-                      <TableHead>{qualityALabel}</TableHead>
-                      <TableHead>{qualityBLabel}</TableHead>
-                      <TableHead>{qualityCLabel}</TableHead>
+                      {classIdxs.map((i) => (
+                        <TableHead key={i}>{classLabel(i)}</TableHead>
+                      ))}
                       <TableHead>{wasteLabel}</TableHead>
                       <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
                       <TableHead>
@@ -332,15 +332,11 @@ export function HarvestBatchGroup({
                       return (
                         <TableRow key={entry.id}>
                           <TableCell>{formatHarvestDate(entry.date)}</TableCell>
-                          <TableCell className="text-green-600">
-                            {totals.classA}
-                          </TableCell>
-                          <TableCell className="text-teal-600">
-                            {totals.classB}
-                          </TableCell>
-                          <TableCell className="text-amber-600">
-                            {totals.classC}
-                          </TableCell>
+                          {classIdxs.map((i) => (
+                            <TableCell key={i} className={classColor(i)}>
+                              {classKgAt(totals.classKgs, i)}
+                            </TableCell>
+                          ))}
                           <TableCell className="text-red-500">
                             {totals.waste}
                           </TableCell>
@@ -348,7 +344,7 @@ export function HarvestBatchGroup({
                           <TableCell>
                             {rowAvgFruitWeight == null
                               ? '—'
-                              : `${rowAvgFruitWeight.toFixed(3)} kg`}
+                              : `${rowAvgFruitWeight.toFixed(1)} g`}
                           </TableCell>
                           <TableCell>
                             {rowYieldPerPlant == null
@@ -430,30 +426,18 @@ export function HarvestBatchGroup({
                       </div>
 
                       <div className="grid grid-cols-2 gap-2.5 px-0.5 pt-1 text-sm">
-                        <div className="bg-muted/40 rounded-lg p-2.5">
-                          <span className="text-muted-foreground block text-[11px]">
-                            {qualityALabel}
-                          </span>
-                          <span className="text-base font-semibold text-green-600">
-                            {entry.totals.classA}
-                          </span>
-                        </div>
-                        <div className="bg-muted/40 rounded-lg p-2.5">
-                          <span className="text-muted-foreground block text-[11px]">
-                            {qualityBLabel}
-                          </span>
-                          <span className="text-base font-semibold text-teal-600">
-                            {entry.totals.classB}
-                          </span>
-                        </div>
-                        <div className="bg-muted/40 rounded-lg p-2.5">
-                          <span className="text-muted-foreground block text-[11px]">
-                            {qualityCLabel}
-                          </span>
-                          <span className="text-base font-semibold text-amber-600">
-                            {entry.totals.classC}
-                          </span>
-                        </div>
+                        {classIdxs.map((i) => (
+                          <div key={i} className="bg-muted/40 rounded-lg p-2.5">
+                            <span className="text-muted-foreground block text-[11px]">
+                              {classLabel(i)}
+                            </span>
+                            <span
+                              className={`text-base font-semibold ${classColor(i)}`}
+                            >
+                              {classKgAt(entry.totals.classKgs, i)}
+                            </span>
+                          </div>
+                        ))}
                         <div className="bg-muted/40 rounded-lg p-2.5">
                           <span className="text-muted-foreground block text-[11px]">
                             {wasteLabel}

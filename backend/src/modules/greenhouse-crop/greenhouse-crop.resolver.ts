@@ -12,9 +12,7 @@ import { GreenhouseCropService } from './greenhouse-crop.service';
 @UseInterceptors(UserInterceptor, TenantInterceptor)
 @Resolver(() => GreenhouseCrop)
 export class GreenhouseCropResolver {
-  constructor(
-    private readonly greenhouseCropService: GreenhouseCropService,
-  ) {}
+  constructor(private readonly greenhouseCropService: GreenhouseCropService) {}
 
   // Admins act across tenants (tenantId undefined); tenant admins are scoped to
   // their own tenant — same pattern as the greenhouse/batch resolvers.

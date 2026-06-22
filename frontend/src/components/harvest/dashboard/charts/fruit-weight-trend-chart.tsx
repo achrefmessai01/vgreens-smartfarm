@@ -47,7 +47,7 @@ const FruitWeightTooltip = ({ active, payload, label }: ChartTooltipProps) => {
           className="text-sm"
           style={{ color: entry.color ?? '#f59e0b' }}
         >
-          {`${entry.name ?? 'Fruit Weight'}: ${entry.value} kg`}
+          {`${entry.name ?? 'Fruit Weight'}: ${entry.value} g`}
         </p>
       ))}
     </ChartTooltipContainer>
@@ -122,7 +122,8 @@ export function FruitWeightTrendChart(props: FruitWeightTrendChartProps) {
                 fontSize={12}
                 domain={['auto', 'auto']}
                 label={{
-                  value: t.pages.harvest?.fruitWeightValue ?? 'Fruit Weight (kg)',
+                  value:
+                    t.pages.harvest?.fruitWeightValue ?? 'Fruit Weight (g)',
                   angle: -90,
                   position: 'insideLeft',
                 }}

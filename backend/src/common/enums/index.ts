@@ -4,6 +4,7 @@ export * from './alert-status.enum';
 export * from './alert-severity.enum';
 export * from './harvest-status.enum';
 export * from './batch-status.enum';
+export * from './input-mode.enum';
 export * from './door-position.enum';
 export * from './harvest-quality-class.enum';
 export * from './order-direction.enum';

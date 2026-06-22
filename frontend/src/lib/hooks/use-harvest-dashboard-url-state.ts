@@ -49,8 +49,7 @@ export function useHarvestDashboardUrlState(): HarvestDashboardUrlState {
     [compareParam],
   );
 
-  const batchId =
-    compareBatchIds.length === 1 ? compareBatchIds[0] : undefined;
+  const batchId = compareBatchIds.length === 1 ? compareBatchIds[0] : undefined;
   const compareMode = compareBatchIds.length >= 2;
 
   const writeParams = useCallback(

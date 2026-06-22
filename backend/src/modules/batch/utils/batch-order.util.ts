@@ -61,7 +61,10 @@ export function buildBatchOrderBy(sort?: BatchSortInput | null): OrderClause[] {
     });
   }
 
-  clauses.push({ expression: 'batch.createdAt', direction: OrderDirection.DESC });
+  clauses.push({
+    expression: 'batch.createdAt',
+    direction: OrderDirection.DESC,
+  });
   clauses.push({ expression: 'batch.id', direction: OrderDirection.ASC });
 
   return clauses;

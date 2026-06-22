@@ -8,7 +8,12 @@ import { ParGraphResolver } from './par-graph.resolver';
 import { ParGraphService } from './par-graph.service';
 
 @Module({
-  imports: [TenantsModule, SensorConfigModule, InfluxDBModule, GreenhouseModule],
+  imports: [
+    TenantsModule,
+    SensorConfigModule,
+    InfluxDBModule,
+    GreenhouseModule,
+  ],
   providers: [
     ParGraphResolver,
     ParGraphService,

@@ -138,7 +138,9 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="companyName">{tenantsT.companyName}</FieldLabel>
+            <FieldLabel htmlFor="companyName">
+              {tenantsT.companyName}
+            </FieldLabel>
             <FieldContent>
               <Input
                 id="companyName"

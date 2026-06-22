@@ -58,9 +58,7 @@ export function GreenhouseField({
           errors.sourceGreenhouse ? 'border-destructive' : ''
         }`}
       >
-        <option value="">
-          {h?.enterGreenhouse ?? 'Select greenhouse...'}
-        </option>
+        <option value="">{h?.enterGreenhouse ?? 'Select greenhouse...'}</option>
         {greenhouses.map((g) => (
           <option key={g.id} value={g.id}>
             {g.name}

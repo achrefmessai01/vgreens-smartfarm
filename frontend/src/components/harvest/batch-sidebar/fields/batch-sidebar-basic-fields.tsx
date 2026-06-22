@@ -8,14 +8,12 @@ import type {
   BatchStatsFieldProps,
 } from '@/types/batch-sidebar.types';
 
-const STATUS_VARIANT: Record<
-  BatchStatus,
-  'default' | 'secondary' | 'outline'
-> = {
-  [BatchStatus.Active]: 'default',
-  [BatchStatus.Completed]: 'secondary',
-  [BatchStatus.Archived]: 'outline',
-};
+const STATUS_VARIANT: Record<BatchStatus, 'default' | 'secondary' | 'outline'> =
+  {
+    [BatchStatus.Active]: 'default',
+    [BatchStatus.Completed]: 'secondary',
+    [BatchStatus.Archived]: 'outline',
+  };
 
 const STATUS_COLOR: Record<BatchStatus, string> = {
   [BatchStatus.Active]: 'bg-green-500 hover:bg-green-600',
