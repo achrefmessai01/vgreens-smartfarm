@@ -33,11 +33,7 @@ export function DeviceRefreshControl({
   const r = t.pages.deviceStatus.refresh;
 
   const intervalLabel = (ms: number) =>
-    ms === 0
-      ? r.off
-      : ms < 60_000
-        ? `${ms / 1000}s`
-        : `${ms / 60_000}m`;
+    ms === 0 ? r.off : ms < 60_000 ? `${ms / 1000}s` : `${ms / 60_000}m`;
 
   return (
     <div className="flex items-end gap-2">
@@ -61,7 +57,7 @@ export function DeviceRefreshControl({
         onValueChange={(v) => onIntervalChange(Number(v))}
       >
         <SelectTrigger
-          className="h-9 w-28 bg-card/60 backdrop-blur-sm"
+          className="bg-card/60 h-9 w-28 backdrop-blur-sm"
           aria-label={r.auto}
         >
           <SelectValue />

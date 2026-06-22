@@ -61,7 +61,10 @@ export function DeviceDetailsDialog({
       let rel: string;
       if (diffMin < 1) rel = ds.relative.justNow;
       else if (diffMin < 60)
-        rel = ds.relative.minutesAgo.replace('{n}', String(Math.round(diffMin)));
+        rel = ds.relative.minutesAgo.replace(
+          '{n}',
+          String(Math.round(diffMin)),
+        );
       else if (diffMin < 2880)
         rel = ds.relative.hoursAgo.replace(
           '{n}',
@@ -87,11 +90,17 @@ export function DeviceDetailsDialog({
         : ds.details.offline;
 
   const rows: { label: string; value: React.ReactNode }[] = [
-    { label: tbl.columns.class, value: device.deviceClass === 'edge' ? tbl.classEdge : tbl.classRegular },
+    {
+      label: tbl.columns.class,
+      value: device.deviceClass === 'edge' ? tbl.classEdge : tbl.classRegular,
+    },
     { label: ds.details.connectivity, value: connectivity },
     { label: tbl.columns.lastAlive, value: formatFull(device.lastAlive) },
     { label: tbl.columns.lastRealData, value: formatFull(device.lastRealData) },
-    { label: tbl.columns.realPoints, value: device.realDataPoints.toLocaleString() },
+    {
+      label: tbl.columns.realPoints,
+      value: device.realDataPoints.toLocaleString(),
+    },
     {
       label: tbl.columns.heartbeatPoints,
       value: device.heartbeatDataPoints.toLocaleString(),
@@ -122,7 +131,10 @@ export function DeviceDetailsDialog({
             <span className="truncate">{device.device}</span>
             <Badge
               variant="outline"
-              className={cn('ml-1 font-medium', STATE_BADGE_CLASS[device.state])}
+              className={cn(
+                'ml-1 font-medium',
+                STATE_BADGE_CLASS[device.state],
+              )}
             >
               {stateLabel(device.state)}
             </Badge>
@@ -147,7 +159,9 @@ export function DeviceDetailsDialog({
             {ds.details.latestValues}
           </p>
           {device.lastValues.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{ds.details.noValues}</p>
+            <p className="text-muted-foreground text-sm">
+              {ds.details.noValues}
+            </p>
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {device.lastValues.map((v) => (

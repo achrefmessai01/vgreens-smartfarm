@@ -1097,7 +1097,8 @@ schema.tagValues(bucket: "${escaped}", tag: "${tag}")`;
    */
   private buildRangeClause(start: string, stop?: string): string {
     const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    const isIso = (s: string) => s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s);
+    const isIso = (s: string) =>
+      s.includes('T') || /^\d{4}-\d{2}-\d{2}/.test(s);
     const startExpr = isIso(start)
       ? `time(v: "${escape(start)}")`
       : escape(start);

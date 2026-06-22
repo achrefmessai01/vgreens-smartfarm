@@ -30,7 +30,8 @@ export interface HarvestEntryCardProps {
   onAddBrixReading: () => void;
   onRemoveBrixReading: (readingIndex: number) => void;
   onSetShowBrix: (show: boolean) => void;
-  onFruitCountChange: (value: number) => void;
+  onSampleWeightChange: (value: number) => void;
+  onSampleFruitCountChange: (value: number) => void;
   onSetShowFruitWeight: (show: boolean) => void;
   isLoading?: boolean;
 }
@@ -49,7 +50,8 @@ export function HarvestEntryCard({
   onAddBrixReading,
   onRemoveBrixReading,
   onSetShowBrix,
-  onFruitCountChange,
+  onSampleWeightChange,
+  onSampleFruitCountChange,
   onSetShowFruitWeight,
   isLoading = false,
 }: HarvestEntryCardProps) {
@@ -103,7 +105,8 @@ export function HarvestEntryCard({
             onAddBrixReading={onAddBrixReading}
             onRemoveBrixReading={onRemoveBrixReading}
             onSetShowBrix={onSetShowBrix}
-            onFruitCountChange={onFruitCountChange}
+            onSampleWeightChange={onSampleWeightChange}
+            onSampleFruitCountChange={onSampleFruitCountChange}
             onSetShowFruitWeight={onSetShowFruitWeight}
             isLoading={isLoading}
           />

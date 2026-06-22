@@ -65,17 +65,23 @@ export class HarvestEntryInput {
   @Min(0, { each: true })
   remainingKgs?: number[];
 
-  @Field(() => Int, { defaultValue: 0 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  fruitCount?: number;
-
-  @Field(() => Float, { defaultValue: 0 })
+  // Sample-based fruit weight. The user weighs a small counted sample rather
+  // than every fruit: sampleWeight is the sample's mass in GRAMS, sampleFruitCount
+  // the number of fruits in it. The service derives avgFruitWeight (g/fruit) from
+  // these. Both optional — omitted when no sample was taken for this entry.
+  // (fruitCount/totalFruitWeight are no longer accepted; they were the old
+  // count-everything method and are derived/legacy now.)
+  @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(0)
-  totalFruitWeight?: number;
+  sampleWeight?: number | null;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  sampleFruitCount?: number | null;
 
   @Field(() => [BrixReading], { nullable: true })
   @IsOptional()

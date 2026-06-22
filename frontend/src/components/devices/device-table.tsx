@@ -83,7 +83,10 @@ export function DeviceTable({ devices, isLoading }: DeviceTableProps) {
       const diffMin = Math.max(0, (Date.now() - ms) / 60_000);
       if (diffMin < 1) return ds.relative.justNow;
       if (diffMin < 60)
-        return ds.relative.minutesAgo.replace('{n}', String(Math.round(diffMin)));
+        return ds.relative.minutesAgo.replace(
+          '{n}',
+          String(Math.round(diffMin)),
+        );
       const diffH = diffMin / 60;
       if (diffH < 48)
         return ds.relative.hoursAgo.replace('{n}', String(Math.round(diffH)));
@@ -174,7 +177,11 @@ export function DeviceTable({ devices, isLoading }: DeviceTableProps) {
 
   const sortHeader = (sortField: SortKey, label: string): React.ReactNode => {
     const active = sortKey === sortField;
-    const Icon = !active ? ArrowUpDown : sortDir === 'asc' ? ArrowUp : ArrowDown;
+    const Icon = !active
+      ? ArrowUpDown
+      : sortDir === 'asc'
+        ? ArrowUp
+        : ArrowDown;
     return (
       <button
         type="button"
@@ -254,7 +261,9 @@ export function DeviceTable({ devices, isLoading }: DeviceTableProps) {
           </span>
           <span>{tbl.columns.messageTypes}</span>
           <span className="text-foreground truncate">
-            {d.realMessageTypes.length ? d.realMessageTypes.join(', ') : tbl.none}
+            {d.realMessageTypes.length
+              ? d.realMessageTypes.join(', ')
+              : tbl.none}
           </span>
           <span>{tbl.columns.lastRealData}</span>
           <span className="text-foreground">

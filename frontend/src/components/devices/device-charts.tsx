@@ -1,14 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Bar,
-  BarChart,
-  Cell,
-  LabelList,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Bar, BarChart, Cell, LabelList, XAxis, YAxis } from 'recharts';
 import { BarChart3, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, type ChartConfig } from '@/components/ui/chart';
@@ -18,7 +11,9 @@ import { hoursSince } from '@/lib/hooks/use-device-dashboard';
 import { STATE_COLORS } from './device-status-constants';
 
 const MAX_BARS = 12;
-const chartConfig = { value: { label: '', color: 'var(--primary)' } } satisfies ChartConfig;
+const chartConfig = {
+  value: { label: '', color: 'var(--primary)' },
+} satisfies ChartConfig;
 
 interface DeviceChartsProps {
   devices: DeviceStatus[];

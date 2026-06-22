@@ -30,10 +30,13 @@ export class HarvestTotals {
   @Field(() => Float, { description: 'SUM of entries.waste' })
   waste: number;
 
-  @Field(() => Int, { description: 'SUM of entries.fruitCount' })
+  @Field(() => Int, {
+    description:
+      'Total fruits SAMPLED: SUM of entries.sampleFruitCount. The number of fruits weighed across the samples, NOT an estimate of total fruits harvested.',
+  })
   fruitCount: number;
 
-  @Field(() => Float, { description: 'SUM of entries.totalFruitWeight' })
+  @Field(() => Float, { description: 'SUM of entry sellable kg' })
   totalFruitWeight: number;
 
   @Field(() => [Int], {
@@ -46,7 +49,7 @@ export class HarvestTotals {
   @Field(() => Float, {
     nullable: true,
     description:
-      'Unweighted MEAN of per-entry avgFruitWeight. Null when there are no entries.',
+      'Unweighted MEAN of per-entry avgFruitWeight (GRAMS per fruit). Null when no entry has a computable average.',
   })
   avgFruitWeight: number | null;
 

@@ -66,18 +66,29 @@ export class HarvestEntry {
   @Column({ type: 'double precision', array: true, nullable: true })
   remainingKgs?: number[] | null;
 
-  @Field(() => Int)
-  @Column({ type: 'int', default: 0 })
-  fruitCount: number;
-
+  // DERIVED: both stay 0 in storage and are computed at read by the service
+  // (totalFruitWeight from the sellable kg; avgFruitWeight in GRAMS per fruit
+  // from the sample, see sampleWeight/sampleFruitCount).
   @Field(() => Float)
   @Column({ type: 'double precision', default: 0 })
   totalFruitWeight: number;
 
-  // Derived on write: totalFruitWeight / fruitCount (0 when fruitCount is 0).
   @Field(() => Float)
   @Column({ type: 'double precision', default: 0 })
   avgFruitWeight: number;
+
+  // Sample-based fruit weight (the current method). Instead of counting every
+  // fruit, the user weighs a small counted sample: sampleWeight is that sample's
+  // mass in GRAMS, sampleFruitCount the number of fruits in it. avgFruitWeight
+  // (g/fruit) = sampleWeight / sampleFruitCount. Both nullable — absent on legacy
+  // rows and on entries where no sample was taken.
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  sampleWeight?: number | null;
+
+  @Field(() => Int, { nullable: true })
+  @Column({ type: 'int', nullable: true })
+  sampleFruitCount?: number | null;
 
   // [{ "class": "A", "value": 5 }, ...]
   @Field(() => [BrixReading])

@@ -221,7 +221,7 @@ export function HarvestBatchGroup({
                     <TableCell>
                       {agg.avgFruitWeight == null
                         ? '—'
-                        : `${agg.avgFruitWeight.toFixed(3)} kg`}
+                        : `${agg.avgFruitWeight.toFixed(1)} g`}
                     </TableCell>
                     <TableCell>
                       {agg.yieldPerPlant == null
@@ -344,7 +344,7 @@ export function HarvestBatchGroup({
                           <TableCell>
                             {rowAvgFruitWeight == null
                               ? '—'
-                              : `${rowAvgFruitWeight.toFixed(3)} kg`}
+                              : `${rowAvgFruitWeight.toFixed(1)} g`}
                           </TableCell>
                           <TableCell>
                             {rowYieldPerPlant == null

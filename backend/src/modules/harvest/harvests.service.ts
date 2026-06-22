@@ -123,9 +123,12 @@ export class HarvestsService {
       rowX: input.rowX ?? 0,
       rowY: input.rowY ?? 0,
       waste: input.waste ?? 0,
-      fruitCount: input.fruitCount ?? 0,
+      // Derived at read (avgFruitWeight from the sample below); stored 0.
       totalFruitWeight: 0,
       avgFruitWeight: 0,
+      // Sample-based fruit weight: the sample's mass (g) and its fruit count.
+      sampleWeight: input.sampleWeight ?? null,
+      sampleFruitCount: input.sampleFruitCount ?? null,
       brixReadings,
       avgBrix: this.entryAvgBrix(brixReadings),
     };
@@ -179,24 +182,26 @@ export class HarvestsService {
     return total;
   }
 
-  // Effective average fruit weight, derived from the effective total so it also
-  // tracks a crateWeight edit in crate mode.
-  private entryAvgFruitWeight(
-    e: HarvestEntry,
-    batch: Batch | null | undefined,
-  ): number {
-    const count = e.fruitCount ?? 0;
-    return count > 0
-      ? this.roundTo(this.entryTotalWeight(e, batch) / count, 3)
-      : 0;
+  // Average fruit weight in GRAMS per fruit, from the weighed sample
+  // (sampleWeight g / sampleFruitCount). Returns null when the sample is missing
+  // or incomplete, so such an entry is excluded from the mean rather than
+  // dragging it toward 0.
+  private entryAvgFruitWeight(e: HarvestEntry): number | null {
+    const sampleCount = e.sampleFruitCount ?? 0;
+    if (e.sampleWeight != null && e.sampleWeight > 0 && sampleCount > 0) {
+      return this.roundTo(e.sampleWeight / sampleCount, 3);
+    }
+    return null;
   }
 
   // Derive a harvest's totals from its entries (+ parent batch for the yields).
   // This is exactly what the omitted DB view would have produced.
   //
-  // NOTE: avgFruitWeight and avgBrix are the UNWEIGHTED mean of the per-entry
-  // averages — deliberately NOT SUM(totalFruitWeight)/SUM(fruitCount). If a
-  // weighted mean is wanted later, change it here.
+  // NOTE: avgFruitWeight (now GRAMS per fruit) and avgBrix are the UNWEIGHTED
+  // mean of the per-entry averages, skipping entries with no value. fruitCount is
+  // the SUM of the per-entry sampleFruitCount — i.e. the total number of fruits
+  // SAMPLED, not an estimate of the total fruits harvested. If a weighted mean is
+  // wanted later, change it here.
   computeTotals(
     entries: HarvestEntry[] | undefined,
     batch?: Batch | null,
@@ -226,7 +231,9 @@ export class HarvestsService {
       sum((e) => e.waste),
       3,
     );
-    const fruitCount = sum((e) => e.fruitCount);
+    // Total fruits SAMPLED across the entries (sum of each sample's fruit count),
+    // not an estimate of the total fruits harvested.
+    const fruitCount = sum((e) => e.sampleFruitCount ?? 0);
     const totalFruitWeight = this.roundTo(
       sum((e) => this.entryTotalWeight(e, batch)),
       3,
@@ -245,12 +252,13 @@ export class HarvestsService {
       : null;
 
     const hasEntries = list.length > 0;
-    const avgFruitWeight = hasEntries
-      ? this.roundTo(
-          this.mean(list.map((e) => this.entryAvgFruitWeight(e, batch))),
-          3,
-        )
-      : null;
+    // Unweighted mean of the per-entry g/fruit averages, ignoring entries that
+    // have no computable average (incomplete sample / no legacy count).
+    const avgValues = list
+      .map((e) => this.entryAvgFruitWeight(e))
+      .filter((v): v is number => v != null);
+    const avgFruitWeight =
+      avgValues.length > 0 ? this.roundTo(this.mean(avgValues), 3) : null;
     const avgBrix = hasEntries
       ? this.roundTo(this.mean(list.map((e) => e.avgBrix || 0)), 1)
       : null;

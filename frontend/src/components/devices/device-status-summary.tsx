@@ -21,7 +21,8 @@ import { deviceGroup } from '@/lib/hooks/use-device-dashboard';
 import { STATE_COLORS, STATE_ORDER } from './device-status-constants';
 
 /** Shared glass-panel styling for the dashboard cards. */
-const GLASS = 'border-border/40 bg-card/50 shadow-lg shadow-black/5 backdrop-blur-md';
+const GLASS =
+  'border-border/40 bg-card/50 shadow-lg shadow-black/5 backdrop-blur-md';
 
 interface DeviceStatusSummaryProps {
   devices: DeviceStatus[];
@@ -64,7 +65,8 @@ const compactFmt = new Intl.NumberFormat(undefined, {
 
 function StatBox({ label, value, dotColor, icon }: StatBoxProps) {
   // Keep small numbers exact; compact only once they would overflow the box.
-  const display = value >= 100_000 ? compactFmt.format(value) : value.toLocaleString();
+  const display =
+    value >= 100_000 ? compactFmt.format(value) : value.toLocaleString();
   return (
     <Card
       className={cn(
