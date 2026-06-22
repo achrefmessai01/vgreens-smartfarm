@@ -100,6 +100,25 @@ export function getSensorTypeFromDeviceId(deviceId: string): SensorMapType {
   return 'air';
 }
 
+/**
+ * Whether a device id matches a known sensor family prefix (Air / Soil / Lux).
+ * Uncategorized devices — edge gateways like `vgreens-XX-XX` or `knaup-XX` —
+ * return `false`. (`getSensorTypeFromDeviceId` defaults unknowns to `air`, so it
+ * can't be used to tell them apart.)
+ */
+export function isKnownSensorDevice(deviceId: string): boolean {
+  const normalized = getMapDeviceId(deviceId);
+  // Prefix match (no trailing `_`) so variants like `AirC`, `SoilB` etc. are
+  // still recognized as sensors rather than falling through to "edge device".
+  return (
+    /^Lux/i.test(normalized) ||
+    /^Light/i.test(deviceId) ||
+    /^Soil/i.test(normalized) ||
+    /^Air/i.test(normalized) ||
+    /^A_\d+/i.test(deviceId)
+  );
+}
+
 /** Slot with computed canvas position. */
 export interface SlotWithPosition {
   slot: PlantSlot;

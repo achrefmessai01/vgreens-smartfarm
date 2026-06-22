@@ -322,6 +322,7 @@ export const ro = {
       showAllSensors: 'Arată toate',
       hideAllSensors: 'Ascunde toate',
       sensorsVisible: 'vizibili',
+      enableSensorOverview: 'Hartă senzori',
       subtitle: 'Informații în timp real despre operațiunile fermei tale',
       batches: 'Loturi',
       onTime: 'La timp',
@@ -392,6 +393,7 @@ export const ro = {
       viewDiscrete: 'Discret',
       viewHeatmap: 'Hartă termică',
       viewGraph: 'Grafic',
+      overview: 'Prezentare generală',
       invalidDropTitle: 'Plasare în afara hărții',
       invalidDropDescription:
         'Plasează senzorul în interiorul layoutului serei.',

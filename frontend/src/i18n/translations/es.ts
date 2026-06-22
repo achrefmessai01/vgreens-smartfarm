@@ -310,6 +310,7 @@ export const es = {
       showAllSensors: 'Mostrar todos',
       hideAllSensors: 'Ocultar todos',
       sensorsVisible: 'visibles',
+      enableSensorOverview: 'Mapa de sensores',
       subtitle:
         'Información en tiempo real sobre el funcionamiento de tu granja',
       batches: 'Lotes',
@@ -381,6 +382,7 @@ export const es = {
       viewDiscrete: 'Discreto',
       viewHeatmap: 'Mapa de calor',
       viewGraph: 'Gráfico',
+      overview: 'Resumen',
       invalidDropTitle: 'Soltar fuera del mapa',
       invalidDropDescription:
         'Coloca el sensor dentro del diseño del invernadero.',

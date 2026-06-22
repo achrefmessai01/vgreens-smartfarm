@@ -324,6 +324,7 @@ export const el = {
       showAllSensors: 'Εμφάνιση όλων',
       hideAllSensors: 'Απόκρυψη όλων',
       sensorsVisible: 'ορατά',
+      enableSensorOverview: 'Χάρτης αισθητήρων',
       subtitle:
         'Πληροφορίες σε πραγματικό χρόνο για τις δραστηριότητες της φάρμας σας',
       batches: 'Παρτίδες',
@@ -395,6 +396,7 @@ export const el = {
       viewDiscrete: 'Διακριτό',
       viewHeatmap: 'Θερμικός χάρτης',
       viewGraph: 'Γράφημα',
+      overview: 'Επισκόπηση',
       invalidDropTitle: 'Απόρριψη εκτός χάρτη',
       invalidDropDescription:
         'Τοποθετήστε τον αισθητήρα μέσα στη διάταξη του θερμοκηπίου.',

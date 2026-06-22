@@ -18,6 +18,7 @@ export { FarmDataDisplay } from './farm-view-container';
 export { ViewModeSelector } from './view-mode-selector';
 export { ViewSingleBay } from './views/view-single-bay';
 export { ViewSensorMap } from './views/view-sensor-map';
+export { ViewAllSensorsMap } from './views/view-all-sensors-map';
 export { FarmOverviewCard } from './farm-overview-card';
 export { ParameterSelector } from './parameter-selector';
 export { GreenhouseSelector } from './greenhouse-selector';
