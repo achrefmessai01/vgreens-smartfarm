@@ -8,11 +8,12 @@ import { TablePagination } from '@/components/ui/table-pagination';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { TableToolbar } from '@/components/ui/table-toolbar';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
+import { cn } from '@/lib/utils';
 import * as React from 'react';
 
 export interface Column<T> {
   key: string;
-  header: string;
+  header: React.ReactNode;
   accessor?: (item: T) => React.ReactNode;
   className?: string;
   headerClassName?: string;
@@ -74,6 +75,8 @@ export interface DataTableProps<T> {
   isLoading?: boolean;
   responsiveBreakpoint?: 'md' | 'lg' | 'xl' | '2xl';
   responsiveMode?: 'viewport' | 'container';
+  /** Extra classes for the outer Card (e.g. a glass effect). */
+  cardClassName?: string;
 }
 
 export function DataTable<T extends { id: string | number }>({
@@ -98,6 +101,7 @@ export function DataTable<T extends { id: string | number }>({
   isLoading = false,
   responsiveBreakpoint = 'md',
   responsiveMode = 'viewport',
+  cardClassName,
 }: DataTableProps<T>) {
   const [internalSearch, setInternalSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -241,11 +245,12 @@ export function DataTable<T extends { id: string | number }>({
       )}
 
       <Card
-        className={
+        className={cn(
           showCardView
             ? 'border-border/60 flex flex-col rounded-xl border shadow-sm' // Mobile: grow naturally
-            : 'border-border/60 flex min-h-0 flex-1 flex-col rounded-xl border shadow-sm' // Desktop: constrained height
-        }
+            : 'border-border/60 flex min-h-0 flex-1 flex-col rounded-xl border shadow-sm', // Desktop: constrained height
+          cardClassName,
+        )}
       >
         <CardContent className="flex min-h-0 flex-1 flex-col p-0">
           {isLoading ? (

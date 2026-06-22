@@ -58,10 +58,10 @@ export function AppLayout({ children, user, onLogout }: AppLayoutProps) {
           onToggleCollapse={setIsSidebarCollapsed}
         />
         <div
-          className={`flex flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}
+          className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}
         >
           <Navbar user={navbarUser} onSettingsClick={handleSettingsClick} />
-          <main className="bg-background flex-1 overflow-y-auto p-4 lg:p-6">
+          <main className="bg-background min-w-0 flex-1 overflow-y-auto p-4 lg:p-6">
             {children}
           </main>
         </div>

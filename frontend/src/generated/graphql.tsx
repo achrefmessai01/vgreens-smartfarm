@@ -363,6 +363,55 @@ export type DeleteImageInput = {
   path: Scalars['String']['input'];
 };
 
+export type DeviceActivityPoint = {
+  __typename?: 'DeviceActivityPoint';
+  count: Scalars['Int']['output'];
+  time: Scalars['DateTime']['output'];
+};
+
+export type DeviceFieldValue = {
+  __typename?: 'DeviceFieldValue';
+  field: Scalars['String']['output'];
+  time: Scalars['DateTime']['output'];
+  value: Scalars['Float']['output'];
+};
+
+export type DeviceStatus = {
+  __typename?: 'DeviceStatus';
+  city?: Maybe<Scalars['String']['output']>;
+  device: Scalars['String']['output'];
+  deviceClass: Scalars['String']['output'];
+  greenhouse?: Maybe<Scalars['String']['output']>;
+  heartbeatDataPoints: Scalars['Int']['output'];
+  hiddenInFarmOverview?: Maybe<Scalars['Boolean']['output']>;
+  lastAlive?: Maybe<Scalars['DateTime']['output']>;
+  lastRealData?: Maybe<Scalars['DateTime']['output']>;
+  lastValues: Array<DeviceFieldValue>;
+  messageTypes: Array<Scalars['String']['output']>;
+  online?: Maybe<Scalars['Boolean']['output']>;
+  realDataPoints: Scalars['Int']['output'];
+  realMessageTypes: Array<Scalars['String']['output']>;
+  state: Scalars['String']['output'];
+  xPosition?: Maybe<Scalars['Float']['output']>;
+  yPosition?: Maybe<Scalars['Float']['output']>;
+};
+
+export type DeviceStatusInput = {
+  range?: DeviceStatusRange;
+  start?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['String']['input']>;
+  tenantId?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Relative look-back window for device status queries */
+export enum DeviceStatusRange {
+  OneDay = 'ONE_DAY',
+  OneMonth = 'ONE_MONTH',
+  OneYear = 'ONE_YEAR',
+  SevenDays = 'SEVEN_DAYS',
+  SixMonths = 'SIX_MONTHS'
+}
+
 /** Door position types */
 export enum DoorPosition {
   BottomCenter = 'BOTTOM_CENTER',
@@ -1117,6 +1166,8 @@ export type Query = {
   cameraLivestreamFeeds: Array<CameraLivestreamFeed>;
   cameraLivestreamStreamUrl: CameraLivestreamStream;
   crops: Array<Crop>;
+  deviceActivitySeries: Array<DeviceActivityPoint>;
+  deviceStatuses: Array<DeviceStatus>;
   errorReport?: Maybe<ErrorReport>;
   errorReports: Array<ErrorReport>;
   farmConfig?: Maybe<TenantFarmConfig>;
@@ -1186,6 +1237,16 @@ export type QueryCameraLivestreamStreamUrlArgs = {
 
 export type QueryCropsArgs = {
   greenhouseId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryDeviceActivitySeriesArgs = {
+  input?: InputMaybe<DeviceStatusInput>;
+};
+
+
+export type QueryDeviceStatusesArgs = {
+  input?: InputMaybe<DeviceStatusInput>;
 };
 
 
@@ -2079,6 +2140,20 @@ export type VarietiesQueryVariables = Exact<{
 
 
 export type VarietiesQuery = { __typename?: 'Query', varieties: Array<{ __typename?: 'Variety', id: string, name: string }> };
+
+export type DeviceStatusesQueryVariables = Exact<{
+  input?: InputMaybe<DeviceStatusInput>;
+}>;
+
+
+export type DeviceStatusesQuery = { __typename?: 'Query', deviceStatuses: Array<{ __typename?: 'DeviceStatus', device: string, state: string, deviceClass: string, messageTypes: Array<string>, realMessageTypes: Array<string>, online?: boolean | null, lastAlive?: any | null, lastRealData?: any | null, realDataPoints: number, heartbeatDataPoints: number, greenhouse?: string | null, xPosition?: number | null, yPosition?: number | null, city?: string | null, hiddenInFarmOverview?: boolean | null, lastValues: Array<{ __typename?: 'DeviceFieldValue', field: string, value: number, time: any }> }> };
+
+export type DeviceActivitySeriesQueryVariables = Exact<{
+  input?: InputMaybe<DeviceStatusInput>;
+}>;
+
+
+export type DeviceActivitySeriesQuery = { __typename?: 'Query', deviceActivitySeries: Array<{ __typename?: 'DeviceActivityPoint', time: any, count: number }> };
 
 export type FarmConfigQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -4920,6 +4995,112 @@ export type VarietiesQueryHookResult = ReturnType<typeof useVarietiesQuery>;
 export type VarietiesLazyQueryHookResult = ReturnType<typeof useVarietiesLazyQuery>;
 export type VarietiesSuspenseQueryHookResult = ReturnType<typeof useVarietiesSuspenseQuery>;
 export type VarietiesQueryResult = Apollo.QueryResult<VarietiesQuery, VarietiesQueryVariables>;
+export const DeviceStatusesDocument = gql`
+    query DeviceStatuses($input: DeviceStatusInput) {
+  deviceStatuses(input: $input) {
+    device
+    state
+    deviceClass
+    messageTypes
+    realMessageTypes
+    online
+    lastAlive
+    lastRealData
+    realDataPoints
+    heartbeatDataPoints
+    lastValues {
+      field
+      value
+      time
+    }
+    greenhouse
+    xPosition
+    yPosition
+    city
+    hiddenInFarmOverview
+  }
+}
+    `;
+
+/**
+ * __useDeviceStatusesQuery__
+ *
+ * To run a query within a React component, call `useDeviceStatusesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeviceStatusesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeviceStatusesQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeviceStatusesQuery(baseOptions?: Apollo.QueryHookOptions<DeviceStatusesQuery, DeviceStatusesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeviceStatusesQuery, DeviceStatusesQueryVariables>(DeviceStatusesDocument, options);
+      }
+export function useDeviceStatusesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeviceStatusesQuery, DeviceStatusesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeviceStatusesQuery, DeviceStatusesQueryVariables>(DeviceStatusesDocument, options);
+        }
+// @ts-ignore
+export function useDeviceStatusesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeviceStatusesQuery, DeviceStatusesQueryVariables>): Apollo.UseSuspenseQueryResult<DeviceStatusesQuery, DeviceStatusesQueryVariables>;
+export function useDeviceStatusesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DeviceStatusesQuery, DeviceStatusesQueryVariables>): Apollo.UseSuspenseQueryResult<DeviceStatusesQuery | undefined, DeviceStatusesQueryVariables>;
+export function useDeviceStatusesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DeviceStatusesQuery, DeviceStatusesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeviceStatusesQuery, DeviceStatusesQueryVariables>(DeviceStatusesDocument, options);
+        }
+export type DeviceStatusesQueryHookResult = ReturnType<typeof useDeviceStatusesQuery>;
+export type DeviceStatusesLazyQueryHookResult = ReturnType<typeof useDeviceStatusesLazyQuery>;
+export type DeviceStatusesSuspenseQueryHookResult = ReturnType<typeof useDeviceStatusesSuspenseQuery>;
+export type DeviceStatusesQueryResult = Apollo.QueryResult<DeviceStatusesQuery, DeviceStatusesQueryVariables>;
+export const DeviceActivitySeriesDocument = gql`
+    query DeviceActivitySeries($input: DeviceStatusInput) {
+  deviceActivitySeries(input: $input) {
+    time
+    count
+  }
+}
+    `;
+
+/**
+ * __useDeviceActivitySeriesQuery__
+ *
+ * To run a query within a React component, call `useDeviceActivitySeriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeviceActivitySeriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeviceActivitySeriesQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeviceActivitySeriesQuery(baseOptions?: Apollo.QueryHookOptions<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>(DeviceActivitySeriesDocument, options);
+      }
+export function useDeviceActivitySeriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>(DeviceActivitySeriesDocument, options);
+        }
+// @ts-ignore
+export function useDeviceActivitySeriesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>): Apollo.UseSuspenseQueryResult<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>;
+export function useDeviceActivitySeriesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>): Apollo.UseSuspenseQueryResult<DeviceActivitySeriesQuery | undefined, DeviceActivitySeriesQueryVariables>;
+export function useDeviceActivitySeriesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>(DeviceActivitySeriesDocument, options);
+        }
+export type DeviceActivitySeriesQueryHookResult = ReturnType<typeof useDeviceActivitySeriesQuery>;
+export type DeviceActivitySeriesLazyQueryHookResult = ReturnType<typeof useDeviceActivitySeriesLazyQuery>;
+export type DeviceActivitySeriesSuspenseQueryHookResult = ReturnType<typeof useDeviceActivitySeriesSuspenseQuery>;
+export type DeviceActivitySeriesQueryResult = Apollo.QueryResult<DeviceActivitySeriesQuery, DeviceActivitySeriesQueryVariables>;
 export const FarmConfigDocument = gql`
     query FarmConfig($tenantId: ID) {
   farmConfig(tenantId: $tenantId) {
