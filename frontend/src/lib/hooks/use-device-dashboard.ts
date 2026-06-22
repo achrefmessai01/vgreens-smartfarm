@@ -88,7 +88,9 @@ export function useDeviceDashboard(): DeviceDashboardData {
   const [range, setRangeState] = React.useState<DeviceStatusRange>(
     DeviceStatusRange.SevenDays,
   );
-  const [customRange, setCustomRange] = React.useState<CustomRange | null>(null);
+  const [customRange, setCustomRange] = React.useState<CustomRange | null>(
+    null,
+  );
   const [selectedTenantId, setSelectedTenantId] = React.useState('');
 
   // Selecting a preset clears any custom range and vice-versa.
@@ -100,8 +102,7 @@ export function useDeviceDashboard(): DeviceDashboardData {
   // Only vGreens admins need the tenant list (to scope the InfluxDB bucket).
   const { data: tenantsData } = useTenantsQuery({ skip: !isVGreensAdmin });
   const tenants = React.useMemo(
-    () =>
-      (tenantsData?.tenants ?? []).map((t) => ({ id: t.id, name: t.name })),
+    () => (tenantsData?.tenants ?? []).map((t) => ({ id: t.id, name: t.name })),
     [tenantsData],
   );
 
@@ -246,7 +247,10 @@ export function useDeviceDashboard(): DeviceDashboardData {
 }
 
 /** Hours since a timestamp, or null when never seen. */
-export function hoursSince(iso?: string | null, now = Date.now()): number | null {
+export function hoursSince(
+  iso?: string | null,
+  now = Date.now(),
+): number | null {
   if (!iso) return null;
   const t = new Date(iso).getTime();
   if (Number.isNaN(t)) return null;

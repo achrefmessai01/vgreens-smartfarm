@@ -78,10 +78,15 @@ export function DeviceTimeFilter({
   };
 
   const validation = React.useMemo(() => {
-    if (!fromInput || !toInput) return { ok: false, error: null as string | null };
+    if (!fromInput || !toInput)
+      return { ok: false, error: null as string | null };
     const from = new Date(fromInput);
     const to = new Date(toInput);
-    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from >= to) {
+    if (
+      Number.isNaN(from.getTime()) ||
+      Number.isNaN(to.getTime()) ||
+      from >= to
+    ) {
       return { ok: false, error: ds.customRange.invalid, from, to };
     }
     return { ok: true, error: null as string | null, from, to };
@@ -153,12 +158,16 @@ export function DeviceTimeFilter({
                 <Clock
                   className={cn(
                     'h-3.5 w-3.5',
-                    active ? 'text-[#016f7c] dark:text-teal-300' : 'text-muted-foreground',
+                    active
+                      ? 'text-[#016f7c] dark:text-teal-300'
+                      : 'text-muted-foreground',
                   )}
                 />
                 <span>{presetLabel[preset]}</span>
               </span>
-              {active && <Check className="h-4 w-4 text-[#016f7c] dark:text-teal-300" />}
+              {active && (
+                <Check className="h-4 w-4 text-[#016f7c] dark:text-teal-300" />
+              )}
             </DropdownMenuItem>
           );
         })}
@@ -169,7 +178,10 @@ export function DeviceTimeFilter({
           <CalendarRange className="h-3.5 w-3.5" />
           {ds.customRange.title}
         </DropdownMenuLabel>
-        <div className="space-y-2 px-2 pb-1" onKeyDown={(e) => e.stopPropagation()}>
+        <div
+          className="space-y-2 px-2 pb-1"
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           <label className="block space-y-1">
             <span className="text-muted-foreground block text-xs">
               {ds.customRange.from}

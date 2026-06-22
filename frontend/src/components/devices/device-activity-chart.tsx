@@ -85,7 +85,11 @@ export function DeviceActivityChart({ data }: DeviceActivityChartProps) {
               <ChartTooltip
                 cursor={false}
                 content={
-                  <ChartTooltipContent labelFormatter={(_, p) => formatTick(String(p?.[0]?.payload?.time ?? ''))} />
+                  <ChartTooltipContent
+                    labelFormatter={(_, p) =>
+                      formatTick(String(p?.[0]?.payload?.time ?? ''))
+                    }
+                  />
                 }
               />
               <Area
