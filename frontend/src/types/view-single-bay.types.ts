@@ -1,5 +1,8 @@
 import type { HeatmapPoint } from '@/lib/heatmap-utils';
-import type { GreenhouseDimensions } from '@/lib/sensor-map-positions';
+import type {
+  GreenhouseDimensions,
+  SensorMapType,
+} from '@/lib/sensor-map-positions';
 import type { Bay, ParameterType, PlantSlot } from '@/types/farm.types';
 
 export interface ViewSingleBayProps {
@@ -31,4 +34,28 @@ export interface FullMapDataResult {
   globalMin: number;
   globalMax: number;
   hasAnyData: boolean;
+}
+
+/** One enabled measurement shown on an all-sensors map marker. */
+export interface SensorMeasurement {
+  field: string;
+  value: number;
+  unit: string;
+  label: string;
+}
+
+/**
+ * A positioned sensor on the all-sensors map. Unlike `SensorWithPosition` it
+ * carries every enabled measurement (not a single parameter), and is kept even
+ * when it has no readings so the marker still renders with a placeholder.
+ */
+export interface AllSensorMarker {
+  slot: PlantSlot;
+  slotId: string;
+  deviceId: string;
+  /** Sensor family (air / soil / lux / par) — drives the marker icon & color. */
+  type: SensorMapType;
+  leftPercent: number;
+  topPercent: number;
+  measurements: SensorMeasurement[];
 }

@@ -2,8 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-
-type ViewMode = 'heatmap' | 'discrete' | 'graph';
+import type { ViewMode } from '@/lib/farm-overview-constants';
 
 interface ViewModeSelectorProps {
   value: ViewMode;

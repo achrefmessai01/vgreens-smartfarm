@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,7 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { formatFieldToLabel } from '@/lib/farm-data';
-import { SENSOR_TYPE_TOGGLES } from '@/lib/farm-overview-constants';
+import {
+  SENSOR_OVERVIEW_FIELD,
+  SENSOR_TYPE_TOGGLES,
+} from '@/lib/farm-overview-constants';
 import { getParameterIcon } from '@/lib/parameter-status';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +34,8 @@ export interface SensorVisibilityDropdownProps {
   showAllLabel?: string;
   hideAllLabel?: string;
   visibleSuffixLabel?: string;
+  /** Label for the Sensor Overview map toggle (parameter tab on/off). */
+  overviewLabel?: string;
 }
 
 /**
@@ -61,8 +66,10 @@ export function SensorVisibilityDropdown({
   showAllLabel = 'Show all',
   hideAllLabel = 'Hide all',
   visibleSuffixLabel = 'visible',
+  overviewLabel = 'Sensor overview map',
 }: SensorVisibilityDropdownProps) {
   const [open, setOpen] = React.useState(false);
+  const overviewEnabled = !disabledFields.has(SENSOR_OVERVIEW_FIELD);
 
   const hiddenCount = SENSOR_TYPE_TOGGLES.filter((group) =>
     group.fields.every((f) => disabledFields.has(f)),
@@ -144,6 +151,32 @@ export function SensorVisibilityDropdown({
             {totalCount - hiddenCount} / {totalCount} {visibleSuffixLabel}
           </span>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuCheckboxItem
+          checked={overviewEnabled}
+          onSelect={(e) => e.preventDefault()}
+          onCheckedChange={(checked) => {
+            void onToggle([SENSOR_OVERVIEW_FIELD], checked === true);
+          }}
+          className="rounded-md py-2"
+        >
+          <span className="flex items-center gap-2">
+            <Map
+              className={cn(
+                'h-3.5 w-3.5 transition-colors',
+                overviewEnabled ? 'text-emerald-400' : 'text-muted-foreground',
+              )}
+            />
+            <span
+              className={cn(
+                'text-sm font-medium',
+                !overviewEnabled && 'line-through decoration-[1.5px]',
+              )}
+            >
+              {overviewLabel}
+            </span>
+          </span>
+        </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
         {SENSOR_TYPE_TOGGLES.length === 0 ? (
           <div className="text-muted-foreground px-2 py-1.5 text-xs">
