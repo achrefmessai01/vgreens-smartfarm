@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Input } from '@/components/ui/input';
+import { DecimalInput } from '@/components/ui/decimal-input';
 import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n';
 import { InputMode, useVarietiesQuery } from '@/generated/graphql';
@@ -117,18 +118,12 @@ export function CultivationAreaField({
         {h?.cultivationArea ?? 'Cultivation Area (m²)'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Input
+      <DecimalInput
         id="cultivationArea"
-        type="number"
-        min="0"
-        step="0.1"
         placeholder={h?.enterArea ?? 'Enter area in square meters'}
-        value={formData.cultivationArea || ''}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            cultivationArea: parsePositiveNumber(e.target.value),
-          }))
+        value={formData.cultivationArea}
+        onChange={(v) =>
+          setFormData((prev) => ({ ...prev, cultivationArea: v }))
         }
         disabled={disabled}
         className={`h-10 ${errors.cultivationArea ? 'border-destructive' : ''}`}
@@ -155,17 +150,11 @@ export function NumberOfRowsField({
         {h?.numberOfRows ?? 'Number of Rows'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Input
+      <DecimalInput
         id="numberOfRows"
-        type="number"
-        min="0"
-        step="0.1"
-        value={formData.numberOfRows || ''}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            numberOfRows: parsePositiveNumber(e.target.value),
-          }))
+        value={formData.numberOfRows}
+        onChange={(v) =>
+          setFormData((prev) => ({ ...prev, numberOfRows: v }))
         }
         disabled={disabled}
         className={`h-10 ${errors.numberOfRows ? 'border-destructive' : ''}`}
@@ -192,18 +181,10 @@ export function RowLengthField({
         {h?.rowLength ?? 'Row Length (m)'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Input
+      <DecimalInput
         id="rowLength"
-        type="number"
-        min="0"
-        step="0.1"
-        value={formData.rowLength || ''}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            rowLength: parsePositiveNumber(e.target.value),
-          }))
-        }
+        value={formData.rowLength}
+        onChange={(v) => setFormData((prev) => ({ ...prev, rowLength: v }))}
         disabled={disabled}
         className={`h-10 ${errors.rowLength ? 'border-destructive' : ''}`}
       />
@@ -229,17 +210,11 @@ export function PlantsPerMeterField({
         {h?.plantsPerMeter ?? 'Plants per Meter'}{' '}
         <span className="text-destructive">*</span>
       </Label>
-      <Input
+      <DecimalInput
         id="plantsPerMeter"
-        type="number"
-        min="0"
-        step="0.1"
-        value={formData.plantsPerMeter || ''}
-        onChange={(e) =>
-          setFormData((prev) => ({
-            ...prev,
-            plantsPerMeter: parsePositiveNumber(e.target.value),
-          }))
+        value={formData.plantsPerMeter}
+        onChange={(v) =>
+          setFormData((prev) => ({ ...prev, plantsPerMeter: v }))
         }
         disabled={disabled}
         className={`h-10 ${errors.plantsPerMeter ? 'border-destructive' : ''}`}
@@ -500,18 +475,12 @@ export function InputModeField({
             {h?.crateWeight ?? 'Crate Weight (kg)'}{' '}
             <span className="text-destructive">*</span>
           </Label>
-          <Input
+          <DecimalInput
             id="crateWeight"
-            type="number"
-            min="0"
-            step="0.1"
             placeholder={h?.enterCrateWeight ?? 'Weight of one full crate'}
-            value={formData.crateWeight || ''}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                crateWeight: parsePositiveNumber(e.target.value),
-              }))
+            value={formData.crateWeight}
+            onChange={(v) =>
+              setFormData((prev) => ({ ...prev, crateWeight: v }))
             }
             disabled={disabled}
             className={`h-10 ${errors.crateWeight ? 'border-destructive' : ''}`}

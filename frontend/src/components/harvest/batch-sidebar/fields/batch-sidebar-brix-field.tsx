@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useI18n } from '@/i18n';
-import { Input } from '@/components/ui/input';
+import { DecimalInput } from '@/components/ui/decimal-input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -100,22 +100,13 @@ export function BrixMeasurementsField({
                 <FieldContent>
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1">
-                      <Input
+                      <DecimalInput
                         id={`${idPrefix}brix-${index + 1}`}
                         ref={(el) => {
                           inputRefs.current[index] = el;
                         }}
-                        type="number"
-                        min="0"
-                        max="30"
-                        step="0.1"
-                        value={value === 0 ? '' : value.toString()}
-                        onChange={(e) =>
-                          onReadingChange?.(
-                            index,
-                            parseFloat(e.target.value) || 0,
-                          )
-                        }
+                        value={value}
+                        onChange={(v) => onReadingChange?.(index, v)}
                         onKeyDown={(e) => handleKeyDown(e, index)}
                         placeholder={`${h?.enterBrixValue ?? 'Enter Brix value'} ${index + 1}`}
                         disabled={isLoading}
