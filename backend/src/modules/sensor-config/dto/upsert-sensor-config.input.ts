@@ -1,10 +1,11 @@
-import { Field, Float, InputType } from '@nestjs/graphql';
+import { Field, Float, ID, InputType } from '@nestjs/graphql';
 import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Min,
 } from 'class-validator';
 
@@ -27,10 +28,10 @@ export class UpsertSensorConfigInput {
   @Min(0)
   yPosition?: number;
 
-  @Field({ nullable: true })
-  @IsString()
+  @Field(() => ID, { nullable: true })
+  @IsUUID()
   @IsOptional()
-  greenhouse?: string;
+  greenhouseId?: string;
 
   @Field({ nullable: true })
   @IsString()

@@ -93,7 +93,11 @@ export function getAllHarvests(): HarvestRecord[] {
 
 export function addNewHarvest(batchData: BatchFormData): HarvestRecord {
   const newId = (allHarvestData.length + 1).toString();
-  const batchName = `${batchData.species} - ${batchData.variety}`;
+  // crop/variety are FK ids on the form now; the human-readable name is built
+  // server-side, so this mock helper just joins the ids.
+  const batchName = [batchData.cropId, batchData.varietyId]
+    .filter(Boolean)
+    .join(' - ');
 
   // Generate realistic harvest data based on batch
   const classA = Math.round((8 + Math.random() * 8) * 10) / 10; // 8-16 kg
@@ -148,9 +152,11 @@ export function addCompletedBatchToHistory(
       year: 'numeric',
     }),
     batch: batchName,
-    classA: batchData.entries.reduce((sum, e) => sum + e.marketable, 0),
-    classB: batchData.entries.reduce((sum, e) => sum + e.classB, 0),
-    classC: batchData.entries.reduce((sum, e) => sum + e.classC, 0),
+    // HarvestRecord keeps the legacy first-three-class scalars; sum the dynamic
+    // per-class arrays at indices 0/1/2 (A/B/C).
+    classA: batchData.entries.reduce((sum, e) => sum + (e.classKgs[0] ?? 0), 0),
+    classB: batchData.entries.reduce((sum, e) => sum + (e.classKgs[1] ?? 0), 0),
+    classC: batchData.entries.reduce((sum, e) => sum + (e.classKgs[2] ?? 0), 0),
     waste: batchData.entries.reduce((sum, e) => sum + e.waste, 0),
     avgBrix,
     photos: batchData.photos.length,

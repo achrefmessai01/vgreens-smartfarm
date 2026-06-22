@@ -1,4 +1,4 @@
-import { HarvestStatus } from '@/generated/graphql';
+import { BatchStatus, InputMode } from '@/generated/graphql';
 import type { BatchFormData } from '@/types/batch.types';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { createEmptyEntry } from '@/types/batch-sidebar.types';
@@ -14,14 +14,16 @@ export function createBatchDetailsFromForm(
   const today = new Date();
   const timeDiff = today.getTime() - plantingDate.getTime();
   const daysAfterPlanting = Math.floor(timeDiff / (1000 * 3600 * 24));
+  const replicates = Math.max(1, formData.replicates ?? 1);
 
   return {
     id: `batch-${Date.now()}`,
-    name: `${formData.species.charAt(0).toUpperCase() + formData.species.slice(1)} - ${formData.variety}`,
-    species:
-      formData.species.charAt(0).toUpperCase() + formData.species.slice(1),
-    variety: formData.variety,
-    status: HarvestStatus.Draft,
+    // crop/variety are now FK ids on the form; their display names come from the
+    // server after creation, so this optimistic view-model leaves them blank.
+    name: '',
+    species: '',
+    variety: '',
+    status: BatchStatus.Active,
     greenhouse: {
       id: formData.sourceGreenhouse,
       name: getGreenhouseName(formData.sourceGreenhouse),
@@ -32,10 +34,16 @@ export function createBatchDetailsFromForm(
     rowLength: formData.rowLength,
     plantsPerMeter: formData.plantsPerMeter,
     rowSpacing: formData.rowSpacing,
+    startRow: formData.startRow || null,
+    endRow: formData.endRow || null,
     totalPlants: formData.totalPlants,
     lostPlants: formData.lostPlants,
+    replicates,
+    inputMode: formData.inputMode,
+    crateWeight:
+      formData.inputMode === InputMode.Crate ? formData.crateWeight : null,
     plantingDate: formData.plantingDate,
-    entries: [createEmptyEntry()],
+    entries: Array.from({ length: replicates }, () => createEmptyEntry()),
     photos: [],
   };
 }

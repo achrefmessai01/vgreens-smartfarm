@@ -59,6 +59,7 @@ export default function FarmOverviewPage() {
                 showAllLabel={t.pages.farmOverview.showAllSensors}
                 hideAllLabel={t.pages.farmOverview.hideAllSensors}
                 visibleSuffixLabel={t.pages.farmOverview.sensorsVisible}
+                overviewLabel={t.pages.farmOverview.enableSensorOverview}
               />
             )}
             {state.isVGreensAdmin && (
@@ -103,6 +104,8 @@ export default function FarmOverviewPage() {
               viewHeatmapLabel={state.labels.viewHeatmap}
               viewDiscreteLabel={state.labels.viewDiscrete}
               viewGraphLabel={state.labels.viewGraph}
+              overviewEnabled={state.overviewEnabled}
+              disabledSensorFields={state.disabledSensorFields}
               bays={state.bays}
               greenhouseLabel={state.greenhouseLabel}
               parGraphTenantId={state.tenantIdOverride}
@@ -131,6 +134,7 @@ export default function FarmOverviewPage() {
             onOpenChange={state.setHistoryDrawerOpen}
             parameter={state.effectiveParameter}
             slotId={state.selectedSlotId}
+            greenhouse={state.selectedSlotGreenhouse}
             parameterLabel={state.getParameterLabel(state.effectiveParameter)}
             timeRangeLabel={t.pages.farmOverview.timeRange}
             oneDayLabel={t.pages.farmOverview.oneDay}

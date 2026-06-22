@@ -16,11 +16,7 @@ export interface TrendsCardProps {
   className?: string;
 }
 
-export function TrendsCard({
-  title,
-  trends,
-  className,
-}: TrendsCardProps) {
+export function TrendsCard({ title, trends, className }: TrendsCardProps) {
   const { t } = useI18n();
   title = title ?? t.pages.tenant.dashboard.trendsTitle;
   return (

@@ -1,11 +1,13 @@
-import { HarvestStatus, HarvestQualityClass } from '@/generated/graphql';
+import { BatchStatus, InputMode } from '@/generated/graphql';
 import type { Locale } from '@/i18n/config';
 import type { Translations } from '@/i18n/translations';
 import type {
   BatchDetailsData,
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
+import { createEmptyEntry } from '@/types/batch-sidebar.types';
 import type {
+  BatchLike,
   HarvestEntryLike,
   HarvestLike,
   HarvestSummary,
@@ -62,17 +64,76 @@ export function computeAvgBrix(readings: number[]): number {
 }
 
 /**
- * Average weight of a single fruit (kg) = total weight / fruit count.
- * Returns 0 when the count is missing so an incomplete entry contributes
- * nothing to the metric. Rounded to 3 decimals to preserve gram-level detail.
+ * Average weight of a single fruit in GRAMS, from a weighed sample:
+ * sampleWeight (g) / sampleFruitCount. Returns 0 when the sample is incomplete
+ * so it contributes nothing to the metric. Rounded to 3 decimals.
  */
 export function computeAvgFruitWeight(
-  fruitCount: number,
-  totalFruitWeight: number,
+  sampleFruitCount: number,
+  sampleWeight: number,
 ): number {
-  if (fruitCount <= 0 || totalFruitWeight <= 0) return 0;
+  if (sampleFruitCount <= 0 || sampleWeight <= 0) return 0;
 
-  return Math.round((totalFruitWeight / fruitCount) * 1000) / 1000;
+  return Math.round((sampleWeight / sampleFruitCount) * 1000) / 1000;
+}
+
+// Quality-class label letter from a 0-based array index: 0 -> A, 1 -> B, ... The
+// classes are positional and unbounded; the letter is derived, not from an enum.
+// Mirrors the backend classLetter.
+export function classLetter(index: number): string {
+  return String.fromCharCode(65 + index);
+}
+
+// Align the three per-class form arrays (weight kg, crate counts, remainders) to
+// one common length (zero-filled), at least 1, so a single class index is valid
+// across all of them regardless of which mode the entry was saved in.
+export function normalizeEntryClasses(
+  classKgs: number[] | null | undefined,
+  counts: number[] | null | undefined,
+  rems: number[] | null | undefined,
+): { classKgs: number[]; crateCounts: number[]; remainingKgs: number[] } {
+  const len = Math.max(
+    1,
+    classKgs?.length ?? 0,
+    counts?.length ?? 0,
+    rems?.length ?? 0,
+  );
+  return {
+    classKgs: Array.from({ length: len }, (_, i) => classKgs?.[i] ?? 0),
+    crateCounts: Array.from({ length: len }, (_, i) => counts?.[i] ?? 0),
+    remainingKgs: Array.from({ length: len }, (_, i) => rems?.[i] ?? 0),
+  };
+}
+
+// Derived sellable kg for one quality class in crate mode:
+// crateCount × crateWeight + remainder. crateWeight is read live (never
+// snapshotted), so editing it shifts every crate-mode entry's kg.
+export function crateClassKg(
+  count: number,
+  remainder: number,
+  crateWeight: number | null | undefined,
+): number {
+  return (count || 0) * (crateWeight ?? 0) + (remainder || 0);
+}
+
+// Total sellable kg for a crate-mode entry: the sum of the derived per-class kg
+// across all classes present (dynamic count). Waste is tracked separately and
+// never part of this total.
+export function crateEntryTotalKg(
+  crateCounts: number[] | null | undefined,
+  remainingKgs: number[] | null | undefined,
+  crateWeight: number | null | undefined,
+): number {
+  const len = Math.max(crateCounts?.length ?? 0, remainingKgs?.length ?? 0);
+  let total = 0;
+  for (let i = 0; i < len; i++) {
+    total += crateClassKg(
+      crateCounts?.[i] ?? 0,
+      remainingKgs?.[i] ?? 0,
+      crateWeight,
+    );
+  }
+  return total;
 }
 
 export function extractStoragePathFromUrl(
@@ -108,6 +169,8 @@ export function formatHarvestDate(dateStr: string): string {
   });
 }
 
+// Aggregate a set of harvests into the summary card figures, reading the
+// service-computed `totals` and the parent batch name.
 export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
   if (harvests.length === 0) {
     return {
@@ -121,15 +184,22 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
     };
   }
 
-  const totalClassA = harvests.reduce((s, h) => s + h.classA, 0);
-  const totalClassB = harvests.reduce((s, h) => s + h.classB, 0);
-  const totalClassC = harvests.reduce((s, h) => s + (h.classC ?? 0), 0);
-  const totalWaste = harvests.reduce((s, h) => s + h.waste, 0);
-  const avgBrix = harvests.reduce((s, h) => s + h.avgBrix, 0) / harvests.length;
+  const totalClassA = harvests.reduce((s, h) => s + h.totals.classA, 0);
+  const totalClassB = harvests.reduce((s, h) => s + h.totals.classB, 0);
+  const totalClassC = harvests.reduce((s, h) => s + h.totals.classC, 0);
+  const totalWaste = harvests.reduce((s, h) => s + h.totals.waste, 0);
+  const brixValues = harvests
+    .map((h) => h.totals.avgBrix)
+    .filter((v): v is number => v != null && v > 0);
+  const avgBrix =
+    brixValues.length > 0
+      ? brixValues.reduce((s, v) => s + v, 0) / brixValues.length
+      : 0;
 
   const counts: Record<string, number> = {};
   for (const h of harvests) {
-    counts[h.batch] = (counts[h.batch] ?? 0) + 1;
+    const name = h.batch?.name ?? '-';
+    counts[name] = (counts[name] ?? 0) + 1;
   }
   const variety =
     Object.entries(counts).sort(([, a], [, b]) => b - a)[0]?.[0] ?? '-';
@@ -145,108 +215,154 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
   };
 }
 
-// Map one stored sub-entry to the editable form shape, expanding the brix and
-// fruit-weight sections when they carry data.
+// Map one stored entry to the editable form shape. The normalized
+// {class,value} brix objects are split back into the form's index-aligned
+// readings / classes arrays.
 function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
-  const brixReadings =
-    entry.brixReadings.length > 0 ? [...entry.brixReadings] : [0];
-  // One grade per reading, index-aligned; default any missing grade to A.
-  const brixClasses = brixReadings.map(
-    (_, i) => entry.brixClasses?.[i] ?? HarvestQualityClass.A,
+  const readings =
+    entry.brixReadings.length > 0
+      ? entry.brixReadings.map((b) => b.value)
+      : [0];
+  const classes =
+    entry.brixReadings.length > 0
+      ? entry.brixReadings.map((b) => b.class)
+      : createEmptyEntry().brixClasses;
+  // Align the three per-class arrays to one length (>=1) so the form's class
+  // rows are consistent whichever mode the entry was saved in.
+  const cls = normalizeEntryClasses(
+    entry.classKgs,
+    entry.crateCounts,
+    entry.remainingKgs,
   );
   return {
-    marketable: entry.classA,
+    classKgs: cls.classKgs,
+    crateCounts: cls.crateCounts,
+    remainingKgs: cls.remainingKgs,
     waste: entry.waste,
-    classB: entry.classB,
-    classC: entry.classC ?? 0,
     rowX: entry.rowX,
     rowY: entry.rowY,
-    brixReadings,
-    brixClasses,
-    showBrix: entry.brixReadings.some((v) => v > 0),
-    fruitCount: entry.fruitCount,
-    showFruitWeight: entry.fruitCount > 0,
+    brixReadings: readings,
+    brixClasses: classes,
+    showBrix: entry.brixReadings.some((b) => b.value > 0),
+    sampleWeight: entry.sampleWeight ?? 0,
+    sampleFruitCount: entry.sampleFruitCount ?? 0,
+    showFruitWeight:
+      (entry.sampleWeight ?? 0) > 0 || (entry.sampleFruitCount ?? 0) > 0,
   };
 }
 
-// Build the editable entries list for a harvest. Uses the stored `entries`
-// breakdown when present; otherwise synthesizes a single entry from the flat
-// top-level fields so harvests logged before sub-entries existed still edit
-// cleanly.
+// Editable entries for a harvest. A harvest with no entries yet starts with one
+// blank entry so the sidebar always has a card to fill in.
 export function harvestToEntries(h: HarvestLike): HarvestEntryData[] {
   if (h.entries && h.entries.length > 0) {
     return h.entries.map(entryLikeToEntryData);
   }
-  return [
-    entryLikeToEntryData({
-      classA: h.classA,
-      classB: h.classB,
-      classC: h.classC ?? 0,
-      waste: h.waste,
-      rowX: h.rowX,
-      rowY: h.rowY,
-      avgBrix: h.avgBrix,
-      brixReadings: h.brixReadings,
-      brixClasses: h.brixClasses,
-      fruitCount: h.fruitCount,
-      totalFruitWeight: h.totalFruitWeight,
-      avgFruitWeight: h.avgFruitWeight,
-    }),
-  ];
+  return [createEmptyEntry()];
 }
 
-// Per-entry breakdown for the read-only detail view. Uses the stored entries
-// when present; otherwise synthesizes a single entry from the flat top-level
-// fields so legacy harvests still render one card.
+// Per-entry breakdown for the read-only detail view.
 export function harvestToDisplayEntries(h: HarvestLike): HarvestEntryLike[] {
-  if (h.entries && h.entries.length > 0) {
-    return h.entries;
-  }
-  return [
-    {
-      classA: h.classA,
-      classB: h.classB,
-      classC: h.classC ?? 0,
-      waste: h.waste,
-      rowX: h.rowX,
-      rowY: h.rowY,
-      avgBrix: h.avgBrix,
-      brixReadings: h.brixReadings,
-      brixClasses: h.brixClasses,
-      fruitCount: h.fruitCount,
-      totalFruitWeight: h.totalFruitWeight,
-      avgFruitWeight: h.avgFruitWeight,
-    },
-  ];
+  return h.entries ?? [];
 }
 
-export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
-  const plantingDate = new Date(h.plantingDate);
-  const days = Math.max(
-    0,
-    Math.floor((Date.now() - plantingDate.getTime()) / 86_400_000),
-  );
+// A batch defines a usable row range only when both bounds are present and
+// positive. A null/0 bound means the range hasn't been backfilled yet, in which
+// case harvest row entry falls back to unconstrained behavior.
+export function hasRowRange(
+  start: number | null | undefined,
+  end: number | null | undefined,
+): boolean {
+  return start != null && end != null && start > 0 && end > 0;
+}
 
+// True when a row value falls outside the batch's defined range. Returns false
+// (no constraint) when the batch has no range, or when the row value is unset
+// (<= 0) — we never flag an empty input. Used to limit inputs and to warn,
+// without blocking, on legacy rows that predate the range (warn-but-allow).
+export function isRowOutsideBatchRange(
+  value: number,
+  start: number | null | undefined,
+  end: number | null | undefined,
+): boolean {
+  if (!hasRowRange(start, end)) return false;
+  if (value <= 0) return false;
+  return value < (start as number) || value > (end as number);
+}
+
+function daysSince(plantingDate: string): number {
+  const planted = new Date(plantingDate);
+  if (Number.isNaN(planted.getTime())) return 0;
+  return Math.max(0, Math.floor((Date.now() - planted.getTime()) / 86_400_000));
+}
+
+// Build the sidebar's batch-details view-model from a batch's planting fields.
+function batchToDetails(
+  batch: BatchLike,
+  entries: HarvestEntryData[],
+  photos: string[],
+): BatchDetailsData {
   return {
-    id: h.id,
-    name: h.batch,
-    species: h.species,
-    variety: h.variety,
-    status: h.status ?? HarvestStatus.Draft,
+    id: batch.id,
+    name:
+      batch.name ??
+      [batch.crop?.name, batch.variety?.name].filter(Boolean).join(' - '),
+    species: batch.crop?.name ?? '',
+    variety: batch.variety?.name ?? '',
+    status: batch.status ?? BatchStatus.Active,
     greenhouse: {
-      id: h.greenhouse ?? '',
-      name: getGreenhouseLabel(h.greenhouse),
+      id: batch.greenhouseId ?? batch.greenhouse?.id ?? '',
+      name: batch.greenhouse?.name ?? '-',
     },
-    daysAfterPlanting: days,
-    area: h.cultivationArea,
-    numberOfRows: h.numberOfRows,
-    rowLength: h.rowLength,
-    plantsPerMeter: h.plantsPerMeter,
-    rowSpacing: h.rowSpacing,
-    totalPlants: h.totalPlants,
-    lostPlants: h.lostPlants,
-    plantingDate: h.plantingDate,
-    entries: harvestToEntries(h),
-    photos: h.photoUrls ?? [],
+    daysAfterPlanting: daysSince(batch.plantingDate),
+    area: batch.cultivationArea,
+    numberOfRows: batch.numberOfRows,
+    rowLength: batch.rowLength,
+    plantsPerMeter: batch.plantsPerMeter,
+    rowSpacing: batch.rowSpacing,
+    startRow: batch.startRow ?? null,
+    endRow: batch.endRow ?? null,
+    totalPlants: batch.totalPlants,
+    lostPlants: batch.lostPlants,
+    replicates: replicateCount(batch),
+    inputMode: batch.inputMode ?? InputMode.Weight,
+    crateWeight: batch.crateWeight ?? null,
+    plantingDate: batch.plantingDate,
+    entries,
+    photos,
   };
+}
+
+// A batch's replicate count, clamped to at least 1 so the form always renders
+// at least one entry even for legacy/absent values.
+function replicateCount(batch: BatchLike): number {
+  return Math.max(1, batch.replicates ?? 1);
+}
+
+// Sidebar view-model for an existing harvest (its batch + its entries).
+export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
+  const batch: BatchLike =
+    h.batch ??
+    ({
+      id: h.batchId,
+      name: '',
+      status: BatchStatus.Active,
+      plantingDate: h.date,
+      cultivationArea: 0,
+      numberOfRows: 0,
+      rowLength: 0,
+      plantsPerMeter: 0,
+      rowSpacing: 0,
+      totalPlants: 0,
+      lostPlants: 0,
+    } as BatchLike);
+  return batchToDetails(batch, harvestToEntries(h), h.photoUrls ?? []);
+}
+
+// Sidebar view-model for a freshly created batch (no harvest yet): one blank
+// entry per configured replicate, no photos.
+export function batchToBatchDetails(batch: BatchLike): BatchDetailsData {
+  const entries = Array.from({ length: replicateCount(batch) }, () =>
+    createEmptyEntry(),
+  );
+  return batchToDetails(batch, entries, []);
 }

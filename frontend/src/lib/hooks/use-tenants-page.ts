@@ -79,17 +79,10 @@ export function useTenantsPage() {
 
   const handleSubmit = React.useCallback(
     async (formData: TenantFormData) => {
-      const { bayCount, chambersCount, greenhouses, ...rest } = formData;
-      const tenantInput = {
-        ...rest,
-        greenhouses: greenhouses.map((g) => ({
-          name: g.name,
-          doorPosition: g.doorPosition ?? null,
-          xDimension: g.xDimension ?? 0,
-          yDimension: g.yDimension ?? 0,
-          bayCount: g.bayCount ?? null,
-        })),
-      };
+      // Greenhouses are managed separately via the greenhouses table; bayCount /
+      // chambersCount feed the farm-config upsert below, not the tenant input.
+      const { bayCount, chambersCount, ...rest } = formData;
+      const tenantInput = { ...rest };
       setIsLoading(true);
       try {
         let savedTenantId: string;

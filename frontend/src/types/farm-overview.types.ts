@@ -12,6 +12,7 @@ export interface FarmOverviewTranslations {
   viewHeatmap: string;
   viewDiscrete: string;
   viewGraph: string;
+  overview: string;
   emptyForNow?: string;
   noSensor: string;
   noData: string;

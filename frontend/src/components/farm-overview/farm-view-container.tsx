@@ -1,3 +1,7 @@
+import {
+  SENSOR_OVERVIEW_PARAMETER,
+  type ViewMode,
+} from '@/lib/farm-overview-constants';
 import type {
   FarmLayoutConfig,
   GreenhouseDimensions,
@@ -6,13 +10,16 @@ import type { Bay, ParameterType } from '@/types/farm.types';
 import type { SensorPositionCommit } from '@/types/sensor-map';
 import { EmptyState } from './empty-state';
 import { ParGraphSection } from './par-graph-section';
+import { ViewAllSensorsMap } from './views/view-all-sensors-map';
 import { ViewSensorMap } from './views/view-sensor-map';
 import { ViewSingleBay } from './views/view-single-bay';
 
 interface FarmDataDisplayProps {
   bays: Bay[];
-  viewMode: 'heatmap' | 'discrete' | 'graph';
+  viewMode: ViewMode;
   parameter: ParameterType;
+  /** Disabled sensor `_field` set ("Enable Sensors" dropdown) — all-sensors map. */
+  disabledSensorFields: Set<string>;
   greenhouseLabel: string;
   /** Optional tenant override forwarded to the embedded PAR graph in
    *  `graph` view. Required for vGreens admins viewing another tenant. */
@@ -41,6 +48,7 @@ export function FarmDataDisplay({
   bays,
   viewMode,
   parameter,
+  disabledSensorFields,
   greenhouseLabel,
   parGraphTenantId,
   parGraphGreenhouseName,
@@ -64,6 +72,18 @@ export function FarmDataDisplay({
   }
 
   const dims = viewMode !== 'graph' ? greenhouseDimensions : null;
+  // Horizontal layout renders the greenhouse rotated 90°, so the on-screen
+  // axes swap: the length (y) runs left→right and the width (x) runs top→bottom.
+  const horizontalAxisDim = dims
+    ? dims.isHorizontal
+      ? dims.yDimension
+      : dims.xDimension
+    : null;
+  const verticalAxisDim = dims
+    ? dims.isHorizontal
+      ? dims.xDimension
+      : dims.yDimension
+    : null;
 
   return (
     <div
@@ -73,7 +93,32 @@ export function FarmDataDisplay({
           : 'flex h-full min-h-0 w-full min-w-0 flex-col overflow-x-clip p-0.5 sm:p-2'
       }
     >
-      {viewMode === 'graph' ? (
+      {parameter === SENSOR_OVERVIEW_PARAMETER ? (
+        <div className="relative min-h-0 flex-1">
+          <ViewAllSensorsMap
+            key={bays[0].id}
+            bay={bays[0]}
+            tenantId={parGraphTenantId}
+            disabledSensorFields={disabledSensorFields}
+            selectedSlotId={selectedSlotId}
+            onSelectSlot={onSelectSlot}
+            className="h-full w-full"
+            onSensorPositionCommit={onSensorPositionCommit}
+            savingDeviceId={savingDeviceId}
+            positionErrorDeviceId={positionErrorDeviceId}
+            invalidDropTitle={invalidDropTitle}
+            invalidDropDescription={invalidDropDescription}
+            readOnly={readOnly}
+            greenhouseDimensions={dims}
+          />
+          {dims && (
+            <div className="pointer-events-none absolute right-8 bottom-6 left-5 flex items-center justify-between text-[10px] text-white/50 tabular-nums sm:right-12 sm:bottom-12 sm:left-10 sm:text-xs">
+              <span>← {horizontalAxisDim} m →</span>
+              <span>↕ {verticalAxisDim} m</span>
+            </div>
+          )}
+        </div>
+      ) : viewMode === 'graph' ? (
         <ParGraphSection
           bay={bays[0] ?? null}
           greenhouseLabel={greenhouseLabel}
@@ -103,8 +148,8 @@ export function FarmDataDisplay({
           />
           {dims && (
             <div className="pointer-events-none absolute right-8 bottom-6 left-5 flex items-center justify-between text-[10px] text-white/50 tabular-nums sm:right-12 sm:bottom-12 sm:left-10 sm:text-xs">
-              <span>← {dims.xDimension} m →</span>
-              <span>↕ {dims.yDimension} m</span>
+              <span>← {horizontalAxisDim} m →</span>
+              <span>↕ {verticalAxisDim} m</span>
             </div>
           )}
         </div>
@@ -123,8 +168,8 @@ export function FarmDataDisplay({
           />
           {dims && (
             <div className="pointer-events-none absolute right-8 bottom-6 left-5 flex items-center justify-between text-[10px] text-white/50 tabular-nums sm:right-12 sm:bottom-12 sm:left-10 sm:text-xs">
-              <span>← {dims.xDimension} m →</span>
-              <span>↕ {dims.yDimension} m</span>
+              <span>← {horizontalAxisDim} m →</span>
+              <span>↕ {verticalAxisDim} m</span>
             </div>
           )}
         </div>

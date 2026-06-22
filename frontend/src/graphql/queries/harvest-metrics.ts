@@ -40,9 +40,7 @@ export const GET_CLASS_DISTRIBUTION = gql`
     harvestDashboard(filter: $filter) {
       classDistribution {
         date
-        marketable
-        classB
-        classC
+        classes
         waste
       }
     }
@@ -79,9 +77,7 @@ export const GET_CUMULATIVE_YIELD = gql`
     harvestDashboard(filter: $filter) {
       cumulativeYield {
         date
-        cumulativeClassA
-        cumulativeClassB
-        cumulativeClassC
+        cumulativeSellable
         cumulativeWaste
       }
     }
@@ -94,17 +90,31 @@ export const GET_HARVEST_SUMMARY = gql`
     harvests(filter: $filter) {
       id
       date
-      classA
-      classB
-      classC
-      waste
-      avgBrix
-      species
-      variety
-      batch
-      greenhouse
-      status
       createdAt
+      batch {
+        id
+        name
+        crop {
+          id
+          name
+        }
+        variety {
+          id
+          name
+        }
+        status
+        greenhouse {
+          id
+          name
+        }
+      }
+      totals {
+        classA
+        classB
+        classC
+        waste
+        avgBrix
+      }
     }
   }
 `;

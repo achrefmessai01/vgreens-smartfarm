@@ -1,29 +1,28 @@
 'use client';
 
 import {
-  HarvestStatus,
   HarvestQualityClass,
   HarvestsDocument,
+  InputMode,
   useCreateHarvestMutation,
   useDeleteHarvestImageMutation,
   useUpdateHarvestMutation,
 } from '@/generated/graphql';
 import type {
   BatchDetailsData,
+  EntryChange,
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
-import { createEmptyEntry } from '@/types/batch-sidebar.types';
 import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
-import {
-  computeAvgBrix,
-  computeAvgFruitWeight,
-  extractStoragePathFromUrl,
-} from '@/lib/harvest-utils';
+import { extractStoragePathFromUrl } from '@/lib/harvest-utils';
 import * as React from 'react';
 
-export type SidebarMode = 'create' | 'edit';
+export type SidebarMode = 'create' | 'edit' | 'view';
 
 interface UseBatchSidebarOptions {
+  // Batch the harvest belongs to (used when creating a new harvest event).
+  batchId: string | null;
+  // Existing harvest being edited (edit mode only).
   harvestId: string | null;
   batchData: BatchDetailsData | null;
   mode?: SidebarMode;
@@ -43,6 +42,7 @@ function toIsoDateInput(value: string | null | undefined): string {
 }
 
 export function useBatchSidebar({
+  batchId,
   harvestId,
   batchData,
   mode = 'create',
@@ -56,13 +56,19 @@ export function useBatchSidebar({
   const [createHarvest, { loading: createLoading }] =
     useCreateHarvestMutation();
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
-  const { uploadPhotos, uploading } = useHarvestPhotosUpload(harvestId);
+  // Photos are stored under the harvest folder when editing, otherwise under
+  // the batch folder while a new harvest is being composed.
+  const { uploadPhotos, uploading } = useHarvestPhotosUpload(
+    harvestId ?? batchId,
+  );
   const [deleteHarvestImage] = useDeleteHarvestImageMutation();
 
   React.useEffect(() => {
     setLocalData(batchData);
+    // Both edit and view operate on an existing harvest, so they show its
+    // stored date; only a fresh create defaults to today.
     setHarvestDate(
-      mode === 'edit' ? toIsoDateInput(initialDate) : todayIsoDate(),
+      mode === 'create' ? todayIsoDate() : toIsoDateInput(initialDate),
     );
   }, [batchData, mode, initialDate]);
 
@@ -143,20 +149,69 @@ export function useBatchSidebar({
     [updateEntry],
   );
 
-  const handleFruitCountChange = React.useCallback(
+  const handleSampleWeightChange = React.useCallback(
     (entryIndex: number, value: number) => {
-      updateEntry(entryIndex, (entry) => ({ ...entry, fruitCount: value }));
+      updateEntry(entryIndex, (entry) => ({ ...entry, sampleWeight: value }));
     },
     [updateEntry],
   );
 
-  const handleYieldChange = React.useCallback(
-    (
-      entryIndex: number,
-      field: 'marketable' | 'waste' | 'classB' | 'classC' | 'rowX' | 'rowY',
-      value: number,
-    ) => {
-      updateEntry(entryIndex, (entry) => ({ ...entry, [field]: value }));
+  const handleSampleFruitCountChange = React.useCallback(
+    (entryIndex: number, value: number) => {
+      updateEntry(entryIndex, (entry) => ({
+        ...entry,
+        sampleFruitCount: value,
+      }));
+    },
+    [updateEntry],
+  );
+
+  // Unified entry-field updates for both modes: per-class cells (weight kg, crate
+  // count, remainder) addressed by class index; shared scalars (waste, row
+  // coords); and add/remove of a whole quality class. add/remove grow/shrink all
+  // three per-class arrays together (never below one class) so the mode-specific
+  // arrays stay aligned and a class index is always valid.
+  const handleEntryChange = React.useCallback(
+    (entryIndex: number, change: EntryChange) => {
+      updateEntry(entryIndex, (entry) => {
+        switch (change.kind) {
+          case 'waste':
+            return { ...entry, waste: change.value };
+          case 'rowX':
+            return { ...entry, rowX: change.value };
+          case 'rowY':
+            return { ...entry, rowY: change.value };
+          case 'addClass':
+            return {
+              ...entry,
+              classKgs: [...entry.classKgs, 0],
+              crateCounts: [...entry.crateCounts, 0],
+              remainingKgs: [...entry.remainingKgs, 0],
+            };
+          case 'removeClass': {
+            if (entry.classKgs.length <= 1) return entry;
+            const drop = <T>(arr: T[]) =>
+              arr.filter((_, i) => i !== change.index);
+            return {
+              ...entry,
+              classKgs: drop(entry.classKgs),
+              crateCounts: drop(entry.crateCounts),
+              remainingKgs: drop(entry.remainingKgs),
+            };
+          }
+          default: {
+            const key =
+              change.kind === 'classKg'
+                ? 'classKgs'
+                : change.kind === 'crateCount'
+                  ? 'crateCounts'
+                  : 'remainingKgs';
+            const next = [...entry[key]];
+            next[change.index] = change.value;
+            return { ...entry, [key]: next };
+          }
+        }
+      });
     },
     [updateEntry],
   );
@@ -174,24 +229,6 @@ export function useBatchSidebar({
     },
     [updateEntry],
   );
-
-  const handleAddEntry = React.useCallback(() => {
-    setLocalData((prev) =>
-      prev ? { ...prev, entries: [...prev.entries, createEmptyEntry()] } : prev,
-    );
-  }, []);
-
-  const handleRemoveEntry = React.useCallback((entryIndex: number) => {
-    setLocalData((prev) => {
-      if (!prev) return prev;
-      // At least one entry must always remain.
-      if (prev.entries.length <= 1) return prev;
-      return {
-        ...prev,
-        entries: prev.entries.filter((_, i) => i !== entryIndex),
-      };
-    });
-  }, []);
 
   const handlePhotoUpload = React.useCallback(
     async (files: File[]) => {
@@ -228,37 +265,54 @@ export function useBatchSidebar({
   );
 
   const handleSave = React.useCallback(async () => {
-    if (!harvestId || !currentData) return;
-    // Map each sub-entry to the GraphQL input shape. Brix readings and fruit
-    // count only count when their section is expanded; total fruit weight is
-    // the entry's sellable yield (Class A + Class B + Class C). The backend
-    // re-derives the top-level aggregates from these entries.
+    if (!currentData) return;
+
+    // Map each sub-entry to the GraphQL input shape. Brix readings and the fruit
+    // weight sample only count when their section is expanded. In weight mode the
+    // entry carries its class kg directly; in crate mode it carries per-quality
+    // crate counts + remainders and the backend derives the kg/total from the
+    // batch crateWeight. The backend derives per-entry avgBrix / avgFruitWeight
+    // (from the sample) and all totals.
+    const isCrate = currentData.inputMode === InputMode.Crate;
     const entries = currentData.entries.map((entry) => {
-      const brixReadings = entry.showBrix ? entry.brixReadings : [];
-      // Keep grades index-aligned with the readings actually sent.
-      const brixClasses = entry.showBrix ? entry.brixClasses : [];
-      const fruitCount = entry.showFruitWeight ? entry.fruitCount : 0;
-      const totalFruitWeight = entry.showFruitWeight
-        ? (entry.marketable || 0) + (entry.classB || 0) + (entry.classC || 0)
-        : 0;
+      const brixReadings = entry.showBrix
+        ? entry.brixReadings.map((value, i) => ({
+            class: entry.brixClasses[i] ?? HarvestQualityClass.A,
+            value,
+          }))
+        : [];
+      // Sample weight is captured in grams; avgFruitWeight is derived backend-side.
+      const sampleWeight = entry.showFruitWeight ? entry.sampleWeight : null;
+      const sampleFruitCount = entry.showFruitWeight
+        ? entry.sampleFruitCount
+        : null;
+
+      if (isCrate) {
+        return {
+          rowX: entry.rowX,
+          rowY: entry.rowY,
+          waste: entry.waste,
+          crateCounts: entry.crateCounts,
+          remainingKgs: entry.remainingKgs,
+          sampleWeight,
+          sampleFruitCount,
+          brixReadings,
+        };
+      }
+
       return {
-        classA: entry.marketable,
-        classB: entry.classB,
-        classC: entry.classC,
-        waste: entry.waste,
         rowX: entry.rowX,
         rowY: entry.rowY,
-        avgBrix: computeAvgBrix(brixReadings),
+        classKgs: entry.classKgs,
+        waste: entry.waste,
+        sampleWeight,
+        sampleFruitCount,
         brixReadings,
-        brixClasses,
-        fruitCount,
-        totalFruitWeight,
-        avgFruitWeight: computeAvgFruitWeight(fruitCount, totalFruitWeight),
       };
     });
-    // Re-fetch the harvest list after every save so the entry tab updates
-    // immediately. awaitRefetchQueries makes the mutation promise resolve only
-    // after the refetch lands, so onCompleted fires against fresh data.
+
+    // Re-fetch the harvest list after every save so the table updates
+    // immediately.
     const refetchOptions = {
       refetchQueries: [{ query: HarvestsDocument }],
       awaitRefetchQueries: true,
@@ -266,42 +320,27 @@ export function useBatchSidebar({
     const isoDate = new Date(harvestDate).toISOString();
     try {
       if (mode === 'create') {
+        if (!batchId) return;
         await createHarvest({
           variables: {
             input: {
-              parentBatchId: harvestId,
-              species: currentData.species,
-              variety: currentData.variety,
-              batch: currentData.name,
-              greenhouse:
-                currentData.greenhouse.id || currentData.greenhouse.name,
-              plantingDate: currentData.plantingDate,
-              cultivationArea: currentData.area,
-              numberOfRows: currentData.numberOfRows,
-              rowLength: currentData.rowLength,
-              plantsPerMeter: currentData.plantsPerMeter,
-              rowSpacing: currentData.rowSpacing,
-              totalPlants: currentData.totalPlants,
-              lostPlants: currentData.lostPlants,
-              entries,
-              photos: currentData.photos.length,
-              photoUrls: currentData.photos,
+              batchId,
               date: isoDate,
-              status: HarvestStatus.Completed,
+              photoUrls: currentData.photos,
+              entries,
             },
           },
           ...refetchOptions,
         });
       } else {
+        if (!harvestId) return;
         await updateHarvest({
           variables: {
             id: harvestId,
             input: {
-              entries,
-              photos: currentData.photos.length,
-              photoUrls: currentData.photos,
               date: isoDate,
-              status: currentData.status,
+              photoUrls: currentData.photos,
+              entries,
             },
           },
           ...refetchOptions,
@@ -312,6 +351,7 @@ export function useBatchSidebar({
       console.error('Failed to save harvest:', err);
     }
   }, [
+    batchId,
     harvestId,
     currentData,
     mode,
@@ -321,22 +361,24 @@ export function useBatchSidebar({
     onCompleted,
   ]);
 
+  const canSave = mode === 'create' ? Boolean(batchId) : Boolean(harvestId);
+
   return {
     currentData,
     loading: loading || createLoading || uploading,
     mode,
+    canSave,
     harvestDate,
     setHarvestDate,
     handleBrixChange,
     handleBrixClassChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
-    handleFruitCountChange,
-    handleYieldChange,
+    handleSampleWeightChange,
+    handleSampleFruitCountChange,
+    handleEntryChange,
     handleSetShowBrix,
     handleSetShowFruitWeight,
-    handleAddEntry,
-    handleRemoveEntry,
     handlePhotoUpload,
     handleRemovePhoto,
     handleSave,

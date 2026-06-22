@@ -23,14 +23,11 @@ export class ClassDistributionData {
   @Field()
   date: string;
 
-  @Field(() => Float)
-  marketable: number;
-
-  @Field(() => Float)
-  classB: number;
-
-  @Field(() => Float)
-  classC: number;
+  @Field(() => [Float], {
+    description:
+      'Per-quality kg for this day, positional and dynamic (index 0=A, 1=B, ...), padded to the widest day.',
+  })
+  classes: number[];
 
   @Field(() => Float)
   waste: number;
@@ -59,14 +56,10 @@ export class CumulativeYieldData {
   @Field()
   date: string;
 
-  @Field(() => Float)
-  cumulativeClassA: number;
-
-  @Field(() => Float)
-  cumulativeClassB: number;
-
-  @Field(() => Float)
-  cumulativeClassC: number;
+  @Field(() => Float, {
+    description: 'Cumulative sellable kg (all quality classes summed) to date.',
+  })
+  cumulativeSellable: number;
 
   @Field(() => Float)
   cumulativeWaste: number;

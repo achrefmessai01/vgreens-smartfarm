@@ -8,11 +8,13 @@ import {
   SheetContent,
 } from '@/components/ui/sheet';
 import {
+  classLetter,
+  crateClassKg,
   formatHarvestDate,
   getGreenhouseLabel,
   harvestToDisplayEntries,
 } from '@/lib/harvest-utils';
-import type { HarvestsQuery } from '@/generated/graphql';
+import { InputMode, type HarvestsQuery } from '@/generated/graphql';
 
 type HarvestItem = HarvestsQuery['harvests'][number];
 
@@ -32,20 +34,44 @@ export function HarvestDetails({
 
   if (!harvest) return null;
 
-  // Total yield = every picked grade plus waste (Quality A + B + C + Waste).
-  const totalYield =
-    harvest.classA +
-    harvest.classB +
-    (harvest.classC ?? 0) +
-    harvest.waste;
-  const qualityALabel = h?.qualityA ?? 'Quality A';
-  const qualityBLabel = h?.qualityB ?? 'Quality B';
-  const qualityCLabel = h?.qualityC ?? 'Quality C';
+  const totals = harvest.totals;
+  const greenhouseName = harvest.batch?.greenhouse?.name ?? null;
+  const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
   const wasteLabel = h?.waste ?? 'Waste';
   const ratioLabel = h?.wasteRatio ?? 'Waste Ratio';
   // Per sub-entry breakdown; legacy harvests synthesize a single entry.
   const entries = harvestToDisplayEntries(harvest);
   const showEntryLabels = entries.length > 1;
+  // In crate mode the stored classA/B/C are 0; per-class kg are derived from the
+  // crate counts + the batch crate weight at display time, across a dynamic
+  // number of classes.
+  const isCrate = harvest.batch?.inputMode === InputMode.Crate;
+  const crateWeight = harvest.batch?.crateWeight ?? null;
+  const cratesLabel = h?.cratesUnit ?? 'crates';
+  // Total yield = sellable + waste. Crate mode sums all classes via the
+  // service-computed totalFruitWeight; weight mode uses the A/B/C scalars.
+  const totalYield = isCrate
+    ? totals.totalFruitWeight + totals.waste
+    : totals.classA + totals.classB + totals.classC + totals.waste;
+  // A muted color cycle for the per-class value labels.
+  const classColors = [
+    'text-green-600',
+    'text-teal-600',
+    'text-amber-600',
+    'text-blue-600',
+    'text-purple-600',
+  ];
+  // "12 × 8 kg + 3.5 kg" caption for a crate-mode class; omitted when empty.
+  const crateBreakdownText = (
+    count: number,
+    remainder: number,
+  ): string | null => {
+    if (!isCrate) return null;
+    const parts: string[] = [];
+    if (count > 0) parts.push(`${count} × ${crateWeight ?? 0} kg`);
+    if (remainder > 0) parts.push(`${remainder} kg`);
+    return parts.length > 0 ? parts.join(' + ') : null;
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -53,7 +79,7 @@ export function HarvestDetails({
         <SheetHeader className="from-background to-muted/20 border-b bg-gradient-to-r px-6 pt-6 pb-4">
           <SheetTitle className="text-xl font-bold">
             {h?.harvestDetails ?? 'Harvest Details'} -{' '}
-            {getGreenhouseLabel(harvest.greenhouse)}
+            {getGreenhouseLabel(greenhouseName)}
           </SheetTitle>
         </SheetHeader>
 
@@ -68,17 +94,20 @@ export function HarvestDetails({
                   label={h?.date ?? 'Date'}
                   value={formatHarvestDate(harvest.date)}
                 />
-                <DetailRow label={h?.batch ?? 'Batch'} value={harvest.batch} />
-                {harvest.batchNumber && (
+                <DetailRow
+                  label={h?.batch ?? 'Batch'}
+                  value={harvest.batch?.name ?? '-'}
+                />
+                {harvest.batch?.batchNumber && (
                   <DetailRow
                     label={h?.batchNumber ?? 'Batch Number'}
-                    value={harvest.batchNumber}
+                    value={harvest.batch.batchNumber}
                     valueClassName="font-mono"
                   />
                 )}
                 <DetailRow
                   label={h?.greenhouse ?? 'Greenhouse'}
-                  value={getGreenhouseLabel(harvest.greenhouse)}
+                  value={getGreenhouseLabel(greenhouseName)}
                   valueClassName="text-blue-600"
                 />
                 <div className="flex items-center justify-between py-2">
@@ -93,11 +122,36 @@ export function HarvestDetails({
             </div>
 
             {entries.map((entry, entryIndex) => {
-              const entryClassC = entry.classC ?? 0;
-              const entryTotal =
-                entry.classA + entry.classB + entryClassC + entry.waste;
+              const counts = entry.crateCounts ?? [];
+              const rems = entry.remainingKgs ?? [];
+              // Per-class rows, dynamic in both modes. Crate mode: kg derived
+              // from count × crateWeight + remainder, with a breakdown caption.
+              // Weight mode: the stored per-class kg.
+              const classRows = isCrate
+                ? counts.map((count, i) => ({
+                    label: classLabelTpl.replace('{class}', classLetter(i)),
+                    kg: crateClassKg(count, rems[i] ?? 0, crateWeight),
+                    breakdown: crateBreakdownText(count, rems[i] ?? 0),
+                  }))
+                : (entry.classKgs ?? []).map((kg, i) => ({
+                    label: classLabelTpl.replace('{class}', classLetter(i)),
+                    kg,
+                    breakdown: null,
+                  }));
+              const sellable = classRows.reduce((s, r) => s + r.kg, 0);
+              const entryTotal = sellable + entry.waste;
               const entryRatio =
                 entryTotal > 0 ? (entry.waste / entryTotal) * 100 : 0;
+              const totalCrates = counts.reduce((s, c) => s + (c ?? 0), 0);
+              // Average fruit weight (g/fruit) comes from the weighed sample.
+              const displayAvgFruitWeight =
+                entry.sampleWeight != null &&
+                entry.sampleWeight > 0 &&
+                entry.sampleFruitCount != null &&
+                entry.sampleFruitCount > 0
+                  ? entry.sampleWeight / entry.sampleFruitCount
+                  : null;
+              const hasFruitWeight = displayAvgFruitWeight != null;
               return (
                 <div
                   key={entryIndex}
@@ -117,30 +171,25 @@ export function HarvestDetails({
                       {h?.harvestBreakdown ?? 'Harvest Breakdown'}
                     </h4>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between py-3">
-                        <span className="text-muted-foreground font-medium">
-                          {qualityALabel}:
-                        </span>
-                        <span className="text-xl font-bold text-green-600">
-                          {entry.classA} kg
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between py-3">
-                        <span className="text-muted-foreground font-medium">
-                          {qualityBLabel}:
-                        </span>
-                        <span className="text-xl font-bold text-teal-600">
-                          {entry.classB} kg
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between py-3">
-                        <span className="text-muted-foreground font-medium">
-                          {qualityCLabel}:
-                        </span>
-                        <span className="text-xl font-bold text-amber-600">
-                          {entryClassC} kg
-                        </span>
-                      </div>
+                      {classRows.map((row, i) => (
+                        <QualityRow
+                          key={i}
+                          label={row.label}
+                          kg={row.kg}
+                          breakdown={row.breakdown}
+                          valueClassName={classColors[i % classColors.length]}
+                        />
+                      ))}
+                      {isCrate && (
+                        <div className="flex items-center justify-between py-3">
+                          <span className="text-muted-foreground font-medium">
+                            {h?.totalCrates ?? 'Total crates'}:
+                          </span>
+                          <span className="text-foreground text-lg font-bold">
+                            {totalCrates} {cratesLabel}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between py-3">
                         <span className="text-muted-foreground font-medium">
                           {wasteLabel}:
@@ -178,15 +227,14 @@ export function HarvestDetails({
                       </p>
                     ) : (
                       <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-                        {entry.brixReadings.map((value, index) => (
+                        {entry.brixReadings.map((reading, index) => (
                           <div key={index} className="text-center">
                             <div className="text-muted-foreground mb-2 text-xs font-medium">
-                              #{index + 1} &middot;{' '}
-                              {entry.brixClasses?.[index] ?? 'A'}
+                              #{index + 1} &middot; {reading.class}
                             </div>
                             <div className="bg-muted rounded-lg border p-4">
                               <span className="text-foreground text-lg font-bold">
-                                {value.toFixed(1)}
+                                {reading.value.toFixed(1)}
                               </span>
                             </div>
                           </div>
@@ -203,30 +251,38 @@ export function HarvestDetails({
                       <span className="text-muted-foreground text-sm">
                         {h?.averageFruitWeight ?? 'Average Fruit Weight'}:{' '}
                         <span className="text-lg font-medium text-orange-500">
-                          {entry.avgFruitWeight.toFixed(3)} kg
+                          {hasFruitWeight
+                            ? `${displayAvgFruitWeight.toFixed(1)} g`
+                            : '—'}
                         </span>
                       </span>
                     </div>
-                    {entry.fruitCount === 0 && entry.totalFruitWeight === 0 ? (
+                    {!hasFruitWeight ? (
                       <p className="text-muted-foreground text-sm">
-                        {h?.noFruitWeightRecorded ?? 'No fruit weight recorded.'}
+                        {h?.noFruitWeightRecorded ??
+                          'No fruit weight recorded.'}
                       </p>
                     ) : (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between py-2">
-                          <span className="text-muted-foreground font-medium">
-                            {h?.fruitCount ?? 'Fruit count'}:
-                          </span>
-                          <span className="text-foreground text-lg font-bold">
-                            {entry.fruitCount}
-                          </span>
-                        </div>
+                        {entry.sampleFruitCount != null &&
+                          entry.sampleWeight != null && (
+                            <div className="flex items-center justify-between py-2">
+                              <span className="text-muted-foreground font-medium">
+                                {h?.fruitWeightSample ?? 'Fruit weight sample'}:
+                              </span>
+                              <span className="text-foreground text-lg font-bold">
+                                {entry.sampleWeight.toFixed(1)} g /{' '}
+                                {entry.sampleFruitCount}{' '}
+                                {h?.sampleFruitCountUnit ?? 'fruits'}
+                              </span>
+                            </div>
+                          )}
                         <div className="flex items-center justify-between py-2">
                           <span className="text-muted-foreground font-medium">
                             {h?.totalWeight ?? 'Total weight'}:
                           </span>
                           <span className="text-foreground text-lg font-bold">
-                            {entry.totalFruitWeight.toFixed(2)} kg
+                            {sellable.toFixed(2)} kg
                           </span>
                         </div>
                       </div>
@@ -239,6 +295,36 @@ export function HarvestDetails({
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+// One quality line in the per-entry breakdown. `breakdown` is the crate-mode
+// "12 × 8 kg + 3.5 kg" caption (null in weight mode).
+function QualityRow({
+  label,
+  kg,
+  breakdown,
+  valueClassName,
+}: {
+  label: string;
+  kg: number;
+  breakdown: string | null;
+  valueClassName: string;
+}) {
+  return (
+    <div className="py-3">
+      <div className="flex items-center justify-between">
+        <span className="text-muted-foreground font-medium">{label}:</span>
+        <span className={`text-xl font-bold ${valueClassName}`}>
+          {kg.toFixed(1)} kg
+        </span>
+      </div>
+      {breakdown && (
+        <p className="text-muted-foreground mt-1 text-right text-xs">
+          {breakdown}
+        </p>
+      )}
+    </div>
   );
 }
 

@@ -1,127 +1,109 @@
 import { gql } from '@apollo/client';
 
-export const HARVESTS_QUERY = gql`
-  query Harvests($filter: HarvestFilterInput) {
-    harvests(filter: $filter) {
+// Shared selection for a harvest event in the normalized model: the slim
+// harvest row + its parent batch (planting data), its entries (per-position
+// measurements) and the service-computed totals.
+const HARVEST_FIELDS = gql`
+  fragment HarvestFields on Harvest {
+    id
+    tenantId
+    createdById
+    batchId
+    date
+    photoUrls
+    createdAt
+    updatedAt
+    batch {
       id
-      tenantId
-      createdById
-      species
-      variety
-      batch
+      name
+      cropId
+      varietyId
+      crop {
+        id
+        name
+      }
+      variety {
+        id
+        name
+      }
+      status
       batchNumber
-      parentBatchId
-      greenhouse
+      greenhouseId
       plantingDate
       cultivationArea
       numberOfRows
       rowLength
       plantsPerMeter
       rowSpacing
+      startRow
+      endRow
       totalPlants
       lostPlants
-      status
-      date
+      replicates
+      inputMode
+      crateWeight
+      greenhouse {
+        id
+        name
+      }
+    }
+    entries {
+      id
+      rowX
+      rowY
+      classKgs
+      waste
+      crateCounts
+      remainingKgs
+      totalFruitWeight
+      avgFruitWeight
+      sampleWeight
+      sampleFruitCount
+      avgBrix
+      brixReadings {
+        class
+        value
+      }
+    }
+    totals {
+      classKgs
       classA
       classB
       classC
       waste
-      avgBrix
-      rowX
-      rowY
-      brixReadings
-      brixClasses
       fruitCount
       totalFruitWeight
+      crateCounts
       avgFruitWeight
-      photos
-      photoUrls
-      entries {
-        classA
-        classB
-        classC
-        waste
-        rowX
-        rowY
-        avgBrix
-        brixReadings
-        brixClasses
-        fruitCount
-        totalFruitWeight
-        avgFruitWeight
-      }
-      createdAt
-      updatedAt
-      createdBy {
-        id
-        firstName
-        lastName
-        email
-      }
+      avgBrix
+      yieldPerPlant
+      yieldPerMeter
+    }
+    createdBy {
+      id
+      firstName
+      lastName
+      email
     }
   }
+`;
+
+export const HARVESTS_QUERY = gql`
+  query Harvests($filter: HarvestFilterInput) {
+    harvests(filter: $filter) {
+      ...HarvestFields
+    }
+  }
+  ${HARVEST_FIELDS}
 `;
 
 export const HARVEST_QUERY = gql`
   query Harvest($id: ID!) {
     harvest(id: $id) {
-      id
-      tenantId
-      createdById
-      species
-      variety
-      batch
-      batchNumber
-      parentBatchId
-      greenhouse
-      plantingDate
-      cultivationArea
-      numberOfRows
-      rowLength
-      plantsPerMeter
-      rowSpacing
-      totalPlants
-      lostPlants
-      status
-      date
-      classA
-      classB
-      classC
-      waste
-      avgBrix
-      rowX
-      rowY
-      brixReadings
-      brixClasses
-      fruitCount
-      totalFruitWeight
-      avgFruitWeight
-      photos
-      photoUrls
-      entries {
-        classA
-        classB
-        classC
-        waste
-        rowX
-        rowY
-        avgBrix
-        brixReadings
-        brixClasses
-        fruitCount
-        totalFruitWeight
-        avgFruitWeight
-      }
-      createdAt
-      updatedAt
-      createdBy {
-        id
-        firstName
-        lastName
-        email
-      }
+      ...HarvestFields
     }
   }
+  ${HARVEST_FIELDS}
 `;
 
 export const HARVESTS_CSV_EXPORT_QUERY = gql`
@@ -130,20 +112,24 @@ export const HARVESTS_CSV_EXPORT_QUERY = gql`
   }
 `;
 
+// Lightweight selection for counting / quick metrics over the harvest list.
 export const HARVESTS_COUNT_QUERY = gql`
   query HarvestsCount($filter: HarvestFilterInput) {
     harvests(filter: $filter) {
       id
-      parentBatchId
-      status
-      classA
-      classB
-      classC
-      waste
-      avgBrix
-      rowX
-      rowY
-      photos
+      batchId
+      date
+      batch {
+        id
+        status
+      }
+      totals {
+        classA
+        classB
+        classC
+        waste
+        avgBrix
+      }
     }
   }
 `;

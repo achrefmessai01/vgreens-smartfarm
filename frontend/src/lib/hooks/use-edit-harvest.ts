@@ -2,12 +2,33 @@
 
 import * as React from 'react';
 import {
-  useUpdateHarvestMutation,
-  type HarvestsQuery,
+  InputMode,
+  useUpdateBatchMutation,
+  type BatchesQuery,
 } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
+import { validateRowRange } from '@/lib/hooks/use-create-batch-form';
 
-type HarvestItem = HarvestsQuery['harvests'][number];
+type BatchItem = BatchesQuery['batches'][number];
+
+const EMPTY_FORM: BatchFormData = {
+  sourceGreenhouse: '',
+  cropId: '',
+  varietyId: '',
+  plantingDate: '',
+  cultivationArea: 0,
+  numberOfRows: 0,
+  rowLength: 0,
+  plantsPerMeter: 0,
+  rowSpacing: 0,
+  startRow: 0,
+  endRow: 0,
+  totalPlants: 0,
+  lostPlants: 0,
+  replicates: 1,
+  inputMode: InputMode.Weight,
+  crateWeight: 0,
+};
 
 function computeRowSpacing(data: BatchFormData): number {
   const denominator = data.numberOfRows * data.rowLength;
@@ -15,39 +36,53 @@ function computeRowSpacing(data: BatchFormData): number {
   return Number((data.cultivationArea / denominator).toFixed(4));
 }
 
-function harvestToFormData(harvest: HarvestItem): BatchFormData {
+// Pull the editable planting fields off a batch.
+function batchToFormData(batch: BatchItem): BatchFormData {
   return {
-    species: harvest.species,
-    variety: harvest.variety,
-    plantingDate: harvest.plantingDate
-      ? new Date(harvest.plantingDate).toISOString().split('T')[0]
+    sourceGreenhouse: batch.greenhouseId ?? '',
+    cropId: batch.cropId ?? '',
+    varietyId: batch.varietyId ?? '',
+    plantingDate: batch.plantingDate
+      ? new Date(batch.plantingDate).toISOString().split('T')[0]
       : '',
-    cultivationArea: harvest.cultivationArea,
-    sourceGreenhouse: harvest.greenhouse ?? '',
-    numberOfRows: harvest.numberOfRows,
-    rowLength: harvest.rowLength,
-    plantsPerMeter: harvest.plantsPerMeter,
-    rowSpacing: harvest.rowSpacing,
-    totalPlants: harvest.totalPlants,
-    lostPlants: harvest.lostPlants,
+    cultivationArea: batch.cultivationArea ?? 0,
+    numberOfRows: batch.numberOfRows ?? 0,
+    rowLength: batch.rowLength ?? 0,
+    plantsPerMeter: batch.plantsPerMeter ?? 0,
+    rowSpacing: batch.rowSpacing ?? 0,
+    // 0 stands in for an unset bound; a null/absent range stays unconstrained.
+    startRow: batch.startRow ?? 0,
+    endRow: batch.endRow ?? 0,
+    totalPlants: batch.totalPlants ?? 0,
+    lostPlants: batch.lostPlants ?? 0,
+    replicates: batch.replicates ?? 1,
+    inputMode: batch.inputMode ?? InputMode.Weight,
+    crateWeight: batch.crateWeight ?? 0,
   };
 }
 
 function validateEditForm(data: BatchFormData): BatchFormErrors {
   const errors: BatchFormErrors = {};
-  if (!data.species) errors.species = 'Species is required';
-  if (!data.variety) errors.variety = 'Variety is required';
+  if (!data.sourceGreenhouse.trim())
+    errors.sourceGreenhouse = 'Greenhouse is required';
+  if (!data.cropId) errors.cropId = 'Crop is required';
   if (!data.plantingDate) errors.plantingDate = 'Planting date is required';
   if (!data.cultivationArea || data.cultivationArea <= 0)
     errors.cultivationArea = 'Valid cultivation area is required';
-  if (!data.sourceGreenhouse.trim())
-    errors.sourceGreenhouse = 'Greenhouse is required';
   if (!data.numberOfRows || data.numberOfRows <= 0)
     errors.numberOfRows = 'Number of rows must be greater than 0';
   if (!data.rowLength || data.rowLength <= 0)
     errors.rowLength = 'Row length must be greater than 0';
   if (!data.plantsPerMeter || data.plantsPerMeter <= 0)
     errors.plantsPerMeter = 'Plants per meter must be greater than 0';
+  if (!data.replicates || data.replicates < 1)
+    errors.replicates = 'Replicates must be at least 1';
+  if (
+    data.inputMode === InputMode.Crate &&
+    (!data.crateWeight || data.crateWeight <= 0)
+  )
+    errors.crateWeight = 'Crate weight must be greater than 0';
+  validateRowRange(data, errors);
   return errors;
 }
 
@@ -55,45 +90,23 @@ interface UseEditHarvestOptions {
   onSuccess?: () => void;
 }
 
+// Despite the name (kept for call-site stability) this edits the parent BATCH:
+// the planting-level data now lives on the batches table.
 export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
-  const [formData, setFormData] = React.useState<BatchFormData>({
-    species: '',
-    variety: '',
-    plantingDate: '',
-    cultivationArea: 0,
-    sourceGreenhouse: '',
-    numberOfRows: 0,
-    rowLength: 0,
-    plantsPerMeter: 0,
-    rowSpacing: 0,
-    totalPlants: 0,
-    lostPlants: 0,
-  });
+  const [formData, setFormData] = React.useState<BatchFormData>(EMPTY_FORM);
   const [errors, setErrors] = React.useState<BatchFormErrors>({});
-  const [harvestId, setHarvestId] = React.useState<string | null>(null);
-  const [updateHarvest, { loading }] = useUpdateHarvestMutation();
+  const [batchId, setBatchId] = React.useState<string | null>(null);
+  const [updateBatch, { loading }] = useUpdateBatchMutation();
 
-  const populate = React.useCallback((harvest: HarvestItem) => {
-    setHarvestId(harvest.id);
-    setFormData(harvestToFormData(harvest));
+  const populate = React.useCallback((batch: BatchItem) => {
+    setBatchId(batch.id);
+    setFormData(batchToFormData(batch));
     setErrors({});
   }, []);
 
   const reset = React.useCallback(() => {
-    setHarvestId(null);
-    setFormData({
-      species: '',
-      variety: '',
-      plantingDate: '',
-      cultivationArea: 0,
-      sourceGreenhouse: '',
-      numberOfRows: 0,
-      rowLength: 0,
-      plantsPerMeter: 0,
-      rowSpacing: 0,
-      totalPlants: 0,
-      lostPlants: 0,
-    });
+    setBatchId(null);
+    setFormData(EMPTY_FORM);
     setErrors({});
   }, []);
 
@@ -102,36 +115,46 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
       e.preventDefault();
       const validationErrors = validateEditForm(formData);
       setErrors(validationErrors);
-      if (Object.keys(validationErrors).length > 0 || !harvestId) return;
+      if (Object.keys(validationErrors).length > 0 || !batchId) return;
 
       try {
         const rowSpacing = computeRowSpacing(formData);
-        await updateHarvest({
+        await updateBatch({
           variables: {
-            id: harvestId,
+            id: batchId,
             input: {
-              species: formData.species,
-              variety: formData.variety,
+              cropId: formData.cropId,
+              varietyId: formData.varietyId || undefined,
               plantingDate: formData.plantingDate,
               cultivationArea: formData.cultivationArea,
-              greenhouse: formData.sourceGreenhouse.trim(),
+              greenhouseId: formData.sourceGreenhouse.trim() || undefined,
               numberOfRows: formData.numberOfRows,
               rowLength: formData.rowLength,
               plantsPerMeter: formData.plantsPerMeter,
               rowSpacing,
+              startRow: formData.startRow || undefined,
+              endRow: formData.endRow || undefined,
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
-              batch: `${formData.species} - ${formData.variety}`,
+              replicates: formData.replicates,
+              // inputMode is fixed at creation (the backend ignores it on
+              // update); crateWeight stays editable for crate batches and its
+              // change propagates to every crate-mode entry's derived yield.
+              crateWeight:
+                formData.inputMode === InputMode.Crate
+                  ? formData.crateWeight
+                  : undefined,
+              // name/batchNumber are re-derived from crop/variety by the backend.
             },
           },
         });
         reset();
         onSuccess?.();
       } catch (err) {
-        console.error('Failed to update harvest:', err);
+        console.error('Failed to update batch:', err);
       }
     },
-    [formData, harvestId, updateHarvest, reset, onSuccess],
+    [formData, batchId, updateBatch, reset, onSuccess],
   );
 
   return {

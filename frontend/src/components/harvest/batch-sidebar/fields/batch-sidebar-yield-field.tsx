@@ -1,175 +1,168 @@
 'use client';
 
 import * as React from 'react';
+import { Plus, X } from 'lucide-react';
 import { useI18n } from '@/i18n';
-import { Input } from '@/components/ui/input';
+import { DecimalInput } from '@/components/ui/decimal-input';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
+import { classLetter, isRowOutsideBatchRange } from '@/lib/harvest-utils';
 
 export function YieldDataField({
-  marketable,
+  classKgs,
   waste,
-  classB,
-  classC,
   rowX,
   rowY,
-  onYieldChange,
+  batchStartRow,
+  batchEndRow,
+  onChange,
   isLoading = false,
 }: YieldDataFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  // Auto-reveal the row coordinates when the entry already carries values, so
-  // existing coordinates stay visible when viewing/editing a harvest.
+  // When the batch defines a row range, flag (without blocking) any value
+  // outside it. A null/unset range leaves the inputs unconstrained.
+  const outOfRangeText = (
+    h?.rowOutsideBatchRange ?? 'Outside the batch row range ({start}–{end})'
+  )
+    .replace('{start}', String(batchStartRow))
+    .replace('{end}', String(batchEndRow));
   const [showRowCoordinates, setShowRowCoordinates] = React.useState(
     rowX > 0 || rowY > 0,
   );
-
-  // The four crop-grade inputs, rendered in order. Quality A maps to the
-  // `marketable` (classA) field; Quality D is the existing `waste` field.
-  const yieldFields: ReadonlyArray<{
-    field: 'marketable' | 'classB' | 'classC' | 'waste';
-    label: string;
-    placeholder: string;
-    value: number;
-  }> = [
-    {
-      field: 'marketable',
-      label: h?.qualityA ?? 'Quality A',
-      placeholder: h?.enterQualityAYield ?? 'Enter Quality A yield',
-      value: marketable,
-    },
-    {
-      field: 'classB',
-      label: h?.qualityB ?? 'Quality B',
-      placeholder: h?.enterQualityBYield ?? 'Enter Quality B yield',
-      value: classB,
-    },
-    {
-      field: 'classC',
-      label: h?.qualityC ?? 'Quality C',
-      placeholder: h?.enterQualityCYield ?? 'Enter Quality C yield',
-      value: classC,
-    },
-    {
-      field: 'waste',
-      label: h?.waste ?? 'Waste',
-      placeholder: h?.enterWasteAmount ?? 'Enter waste amount',
-      value: waste,
-    },
-  ];
+  const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
+  const canRemove = classKgs.length > 1;
 
   if (isLoading) {
     return (
       <div className="space-y-4">
         <div className="bg-muted h-5 animate-pulse rounded" />
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-muted h-10 animate-pulse rounded" />
-          <div className="bg-muted h-10 animate-pulse rounded" />
-          <div className="bg-muted h-10 animate-pulse rounded" />
-          <div className="bg-muted h-10 animate-pulse rounded" />
-          {showRowCoordinates && (
-            <>
-              <div className="bg-muted h-10 animate-pulse rounded" />
-              <div className="bg-muted h-10 animate-pulse rounded" />
-            </>
-          )}
-        </div>
+        <div className="bg-muted h-10 animate-pulse rounded" />
+        <div className="bg-muted h-10 animate-pulse rounded" />
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-muted-foreground text-sm font-medium">
+          {h?.yieldData ?? 'Yield Data'}
+        </p>
+        <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm select-none">
+          <Checkbox
+            checked={showRowCoordinates}
+            onCheckedChange={(checked) =>
+              setShowRowCoordinates(checked === true)
+            }
+          />
+          <span>{h?.showRowCoordinates ?? 'Show row coordinates'}</span>
+        </label>
+      </div>
+
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-muted-foreground text-sm font-medium">
-            {h?.yieldData ?? 'Yield Data'}
-          </p>
-          <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm select-none">
-            <Checkbox
-              checked={showRowCoordinates}
-              onCheckedChange={(checked) =>
-                setShowRowCoordinates(checked === true)
-              }
+        {classKgs.map((value, i) => (
+          <div key={i} className="space-y-2 text-left">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-muted-foreground text-sm">
+                {classLabelTpl.replace('{class}', classLetter(i))}
+              </p>
+              {canRemove && (
+                <button
+                  type="button"
+                  onClick={() => onChange?.({ kind: 'removeClass', index: i })}
+                  aria-label={h?.removeQualityClass ?? 'Remove class'}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </button>
+              )}
+            </div>
+            <div className="relative">
+              <DecimalInput
+                value={value}
+                onChange={(v) =>
+                  onChange?.({ kind: 'classKg', index: i, value: v })
+                }
+                className="h-10 pr-12 text-left text-base"
+                placeholder={h?.enterQualityAYield ?? 'Enter yield'}
+              />
+              <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
+                kg
+              </span>
+            </div>
+          </div>
+        ))}
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onChange?.({ kind: 'addClass' })}
+          className="w-full"
+        >
+          <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+          {h?.addQualityClass ?? 'Add quality class'}
+        </Button>
+
+        <div className="space-y-2 text-left">
+          <p className="text-muted-foreground text-sm">{h?.waste ?? 'Waste'}</p>
+          <div className="relative">
+            <DecimalInput
+              value={waste}
+              onChange={(v) => onChange?.({ kind: 'waste', value: v })}
+              className="h-10 pr-12 text-left text-base"
+              placeholder={h?.enterWasteAmount ?? 'Enter waste amount'}
             />
-            <span>{h?.showRowCoordinates ?? 'Show row coordinates'}</span>
-          </label>
+            <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
+              kg
+            </span>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          {yieldFields.map(({ field, label, placeholder, value }) => (
-            <div key={field} className="space-y-2 text-left">
-              <p className="text-muted-foreground text-sm">{label}</p>
+
+        {showRowCoordinates && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2 text-left">
+              <p className="text-muted-foreground text-sm">
+                {h?.rowX ?? 'Row X'}
+              </p>
               <div className="relative">
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={value === 0 ? '' : value.toString()}
-                  onChange={(e) =>
-                    onYieldChange?.(field, parseFloat(e.target.value) || 0)
-                  }
+                <DecimalInput
+                  value={rowX}
+                  onChange={(v) => onChange?.({ kind: 'rowX', value: v })}
                   className="h-10 pr-12 text-left text-base"
-                  placeholder={placeholder}
+                  placeholder={h?.enterRowX ?? 'Start row'}
                 />
-                <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
-                  kg
+                <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
+                  {h?.rowsUnit ?? 'rows'}
                 </span>
               </div>
+              {isRowOutsideBatchRange(rowX, batchStartRow, batchEndRow) && (
+                <p className="text-xs text-amber-600">{outOfRangeText}</p>
+              )}
             </div>
-          ))}
-          {showRowCoordinates && (
-            <>
-              <div className="space-y-2 text-left">
-                <p className="text-muted-foreground text-sm">
-                  {h?.rowX ?? 'Row X'}
-                </p>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={rowX === 0 ? '' : rowX.toString()}
-                    onChange={(e) =>
-                      onYieldChange?.(
-                        'rowX',
-                        Math.max(0, Number.parseFloat(e.target.value) || 0),
-                      )
-                    }
-                    className="h-10 pr-12 text-left text-base"
-                    placeholder={h?.enterRowX ?? 'Start row'}
-                  />
-                  <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
-                    {h?.rowsUnit ?? 'rows'}
-                  </span>
-                </div>
+            <div className="space-y-2 text-left">
+              <p className="text-muted-foreground text-sm">
+                {h?.rowY ?? 'Row Y'}
+              </p>
+              <div className="relative">
+                <DecimalInput
+                  value={rowY}
+                  onChange={(v) => onChange?.({ kind: 'rowY', value: v })}
+                  className="h-10 pr-12 text-left text-base"
+                  placeholder={h?.enterRowY ?? 'End row'}
+                />
+                <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
+                  {h?.rowsUnit ?? 'rows'}
+                </span>
               </div>
-              <div className="space-y-2 text-left">
-                <p className="text-muted-foreground text-sm">
-                  {h?.rowY ?? 'Row Y'}
-                </p>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={rowY === 0 ? '' : rowY.toString()}
-                    onChange={(e) =>
-                      onYieldChange?.(
-                        'rowY',
-                        Math.max(0, Number.parseFloat(e.target.value) || 0),
-                      )
-                    }
-                    className="h-10 pr-12 text-left text-base"
-                    placeholder={h?.enterRowY ?? 'End row'}
-                  />
-                  <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
-                    {h?.rowsUnit ?? 'rows'}
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+              {isRowOutsideBatchRange(rowY, batchStartRow, batchEndRow) && (
+                <p className="text-xs text-amber-600">{outOfRangeText}</p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

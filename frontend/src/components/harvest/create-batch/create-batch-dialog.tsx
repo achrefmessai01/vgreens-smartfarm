@@ -12,14 +12,14 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { useI18n } from '@/i18n';
-import type { CreateHarvestMutation } from '@/generated/graphql';
+import type { CreateBatchMutation } from '@/generated/graphql';
 import { CreateBatchFormFields } from './form/create-batch-form-fields';
 import { useCreateBatchForm } from '@/lib/hooks/use-create-batch-form';
 
 interface CreateBatchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated?: (harvest: CreateHarvestMutation['createHarvest']) => void;
+  onCreated?: (batch: CreateBatchMutation['createBatch']) => void;
 }
 
 export function CreateBatchDialog({

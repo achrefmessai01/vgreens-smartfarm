@@ -100,7 +100,8 @@ export function HarvestDashboard({
                 {(compareBatchIds.length === 1
                   ? (h?.comparing ?? 'Comparing {count} batch for {filter}')
                   : (h?.comparingPlural ??
-                    'Comparing {count} batches for {filter}'))
+                    'Comparing {count} batches for {filter}')
+                )
                   .replace('{count}', String(compareBatchIds.length))
                   .replace('{filter}', filterLabel)}
               </p>
@@ -117,7 +118,8 @@ export function HarvestDashboard({
     );
   }
 
-  if (loading && !data) return <HarvestDashboardSkeleton className={className} />;
+  if (loading && !data)
+    return <HarvestDashboardSkeleton className={className} />;
 
   if (error) {
     return (
@@ -167,7 +169,7 @@ export function HarvestDashboard({
               })()}
             </p>
             {isStaleBatchId && (
-              <p className="text-amber-600 mt-1 text-xs">
+              <p className="mt-1 text-xs text-amber-600">
                 {h?.selectedBatchNotFound ??
                   'Selected batch not found — showing all batches.'}
               </p>
@@ -188,7 +190,10 @@ export function HarvestDashboard({
             <Package className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
             <p className="text-muted-foreground text-sm sm:text-base">
               {selectedBatch
-                ? (h?.noHarvestsForBatch ?? 'No harvests for {name} in {filter}')
+                ? (
+                    h?.noHarvestsForBatch ??
+                    'No harvests for {name} in {filter}'
+                  )
                     .replace('{name}', selectedBatch.name)
                     .replace('{filter}', filterLabel)
                 : (h?.noHarvestsYet ?? 'No harvest data available')}

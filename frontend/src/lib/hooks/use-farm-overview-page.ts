@@ -10,6 +10,7 @@ import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
 import {
   useFarmConfigQuery,
   UserRole,
+  useGreenhousesQuery,
   useSensorConfigsQuery,
   useSetTenantDisabledSensorFieldsMutation,
   useTenantsQuery,
@@ -29,6 +30,9 @@ import {
   PARAM_GREENHOUSE,
   PARAM_PARAMETER,
   PARAM_VIEW_MODE,
+  SENSOR_OVERVIEW_FIELD,
+  SENSOR_OVERVIEW_PARAMETER,
+  type ViewMode,
 } from '@/lib/farm-overview-constants';
 import {
   parseGreenhouseTab,
@@ -99,7 +103,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   // graph so admins viewing another tenant fetch its mapping. `undefined`
   // for tenant users lets the backend resolve from their auth context.
   const tenantIdOverride = isVGreensAdmin
-    ? (selectedTenantId || null)
+    ? selectedTenantId || null
     : undefined;
 
   // Explicit tenantId for all config queries.
@@ -199,6 +203,19 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     fetchPolicy: 'cache-and-network',
   });
 
+  // Resolve a greenhouse name -> id so a position commit can persist the
+  // sensor's greenhouseId (the FK). Sourced from the greenhouses table.
+  const { data: greenhousesData } = useGreenhousesQuery({
+    variables: { tenantId: configQueryTenantId },
+    skip: !configQueryTenantId,
+    fetchPolicy: 'cache-and-network',
+  });
+  const greenhouseIdByName = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const g of greenhousesData?.greenhouses ?? []) map.set(g.name, g.id);
+    return map;
+  }, [greenhousesData?.greenhouses]);
+
   const tenantGreenhouses = React.useMemo(() => {
     if (isVGreensAdmin) {
       const tenant = tenants.find((tn) => tn.id === selectedTenantId);
@@ -226,6 +243,10 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     () => new Set(tenantDisabledSensorFields),
     [tenantDisabledSensorFields],
   );
+
+  // The Sensor Overview map tab is shown unless toggled off in the "Enable
+  // Sensors" dropdown (persisted via the sentinel field in disabledSensorFields).
+  const overviewEnabled = !disabledSensorFieldsSet.has(SENSOR_OVERVIEW_FIELD);
 
   const [setDisabledSensorFieldsMutation] =
     useSetTenantDisabledSensorFieldsMutation();
@@ -265,8 +286,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       } catch (err) {
         toast({
           title: t.positionSaveFailedTitle,
-          description:
-            err instanceof Error ? err.message : String(err),
+          description: err instanceof Error ? err.message : String(err),
           variant: 'destructive',
         });
       } finally {
@@ -336,12 +356,18 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         return next;
       });
 
+      const greenhouseId =
+        (greenhouse ? greenhouseIdByName.get(greenhouse) : undefined) ??
+        (persisted?.greenhouse
+          ? greenhouseIdByName.get(persisted.greenhouse)
+          : undefined);
+
       try {
         await upsertSensorConfig({
           variables: {
             input: {
               device: deviceId,
-              greenhouse: greenhouse || persisted?.greenhouse || undefined,
+              greenhouseId: greenhouseId || undefined,
               xPosition: nextX,
               yPosition: nextY,
             },
@@ -369,6 +395,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     [
       canEditSensorPositions,
       configQueryTenantId,
+      greenhouseIdByName,
       persistedSensorConfigMap,
       refetchSensorConfigs,
       t.positionSaveFailedDescription,
@@ -388,9 +415,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     null,
   );
   const [historyDrawerOpen, setHistoryDrawerOpen] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<
-    'heatmap' | 'discrete' | 'graph'
-  >(modeFromUrl);
+  const [viewMode, setViewMode] = React.useState<ViewMode>(modeFromUrl);
   const [activeGreenhouseTab, setActiveGreenhouseTab] =
     React.useState(tabFromUrl);
 
@@ -481,12 +506,19 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     });
   }, [bucketFields, t, disabledSensorFieldsSet]);
 
+  // `overview` is a pseudo-parameter (the all-sensors map), not a bucket field,
+  // so it is exempt from the bucket-field checks below.
+  const isOverviewParameter = selectedParameter === SENSOR_OVERVIEW_PARAMETER;
+
   const effectiveParameter =
-    selectedParameter && bucketFields.includes(selectedParameter)
-      ? selectedParameter
-      : (bucketFields[0] ?? 'temperature');
+    isOverviewParameter && overviewEnabled
+      ? SENSOR_OVERVIEW_PARAMETER
+      : selectedParameter && bucketFields.includes(selectedParameter)
+        ? selectedParameter
+        : (bucketFields[0] ?? 'temperature');
 
   React.useEffect(() => {
+    if (selectedParameter === SENSOR_OVERVIEW_PARAMETER) return;
     if (bucketFields.length > 0 && !bucketFields.includes(selectedParameter)) {
       setSelectedParameter(bucketFields[0]);
     }
@@ -495,18 +527,22 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   // Ensure selectedParameter is one of the visible options for the current tab
   React.useEffect(() => {
     const visibleKeys = new Set(parameterOptions.map((o) => o.value));
+    if (overviewEnabled) visibleKeys.add(SENSOR_OVERVIEW_PARAMETER);
     if (!visibleKeys.has(selectedParameter)) {
       const fallback =
         (parameterOptions[0]?.value as ParameterType) ?? 'temperature';
       setSelectedParameter(fallback);
     }
-  }, [parameterOptions, selectedParameter]);
+  }, [parameterOptions, selectedParameter, overviewEnabled]);
 
   React.useEffect(() => {
     if (selectedSlotId) setHistoryDrawerOpen(true);
   }, [selectedSlotId]);
 
   React.useEffect(() => {
+    // The Sensor Overview map has no heatmap/discrete/graph sub-mode, so leave
+    // the view mode untouched while it's selected.
+    if (effectiveParameter === SENSOR_OVERVIEW_PARAMETER) return;
     const isParParameter =
       effectiveParameter === 'par' || effectiveParameter === 'par_estimated';
     if (isParParameter) {
@@ -526,6 +562,27 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     const bay = bays[activeGreenhouseTab - 1]; // 1-indexed → 0-indexed
     return bay ? [bay] : [];
   }, [activeGreenhouseTab, bays]);
+
+  // Map each slot id to its REAL InfluxDB `greenhouse` tag (from slot meta),
+  // so the history drawer can scope its query to the exact series. The slot
+  // id's own greenhouse segment can be an assigned display name, so it must
+  // not be used as a tag filter (VSL-221).
+  const selectedSlotGreenhouse = React.useMemo<string | null>(() => {
+    if (!selectedSlotId) return null;
+    for (const bay of bays) {
+      for (const row of bay.rows) {
+        for (const col of row.columns) {
+          for (const slot of col.slots) {
+            if (slot.id === selectedSlotId) {
+              const gh = slot.meta?.influxGreenhouse;
+              return typeof gh === 'string' && gh ? gh : null;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }, [bays, selectedSlotId]);
 
   const ghLabels = [t.greenHouse1, t.greenHouse2];
 
@@ -596,6 +653,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       (isVGreensAdmin && !!selectedTenantId && tenantBucketLoading),
     greenhouseOptions,
     parameterOptions,
+    overviewEnabled,
     effectiveParameter,
     setSelectedParameter,
     activeGreenhouseTab,
@@ -605,6 +663,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     setViewMode,
     selectedSlotId,
     setSelectedSlotId,
+    selectedSlotGreenhouse,
     historyDrawerOpen,
     setHistoryDrawerOpen,
     bays: selectedBays,

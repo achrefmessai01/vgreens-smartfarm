@@ -4,15 +4,19 @@ import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 import * as React from 'react';
 import {
   GreenhouseField,
-  SpeciesField,
+  CropField,
 } from './create-batch-form-field-components';
 import {
   CultivationAreaField,
+  EndRowField,
+  InputModeField,
   LostPlantsField,
   NumberOfRowsField,
   PlantsPerMeterField,
   PlantingDateField,
+  ReplicatesField,
   RowLengthField,
+  StartRowField,
   TotalPlantsField,
   VarietyField,
 } from './create-batch-more-field-components';
@@ -22,6 +26,8 @@ interface CreateBatchFormFieldsProps {
   setFormData: React.Dispatch<React.SetStateAction<BatchFormData>>;
   errors: BatchFormErrors;
   disabled?: boolean;
+  // Lock the input-mode toggle (edit flow): mode is fixed at creation.
+  lockMode?: boolean;
 }
 
 export function CreateBatchFormFields({
@@ -29,6 +35,7 @@ export function CreateBatchFormFields({
   setFormData,
   errors,
   disabled = false,
+  lockMode = false,
 }: CreateBatchFormFieldsProps) {
   return (
     <div className="space-y-4">
@@ -38,7 +45,7 @@ export function CreateBatchFormFields({
         errors={errors}
         disabled={disabled}
       />
-      <SpeciesField
+      <CropField
         formData={formData}
         setFormData={setFormData}
         errors={errors}
@@ -74,6 +81,20 @@ export function CreateBatchFormFields({
         errors={errors}
         disabled={disabled}
       />
+      <div className="grid grid-cols-2 gap-4">
+        <StartRowField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+        <EndRowField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+      </div>
       <PlantsPerMeterField
         formData={formData}
         setFormData={setFormData}
@@ -91,6 +112,19 @@ export function CreateBatchFormFields({
         setFormData={setFormData}
         errors={errors}
         disabled={disabled}
+      />
+      <ReplicatesField
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+        disabled={disabled}
+      />
+      <InputModeField
+        formData={formData}
+        setFormData={setFormData}
+        errors={errors}
+        disabled={disabled}
+        lockMode={lockMode}
       />
     </div>
   );

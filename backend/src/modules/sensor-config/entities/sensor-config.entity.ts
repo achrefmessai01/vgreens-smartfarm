@@ -1,5 +1,6 @@
 import { BaseEntity } from '@common/entities';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
+import { Greenhouse } from '@modules/greenhouse/entities/greenhouse.entity';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import {
   Column,
@@ -39,9 +40,16 @@ export class SensorConfig extends BaseEntity {
   @Column({ type: 'float', default: 0, nullable: true })
   yPosition?: number;
 
-  @Field({ nullable: true })
-  @Column({ type: 'varchar', length: 128, nullable: true })
-  greenhouse?: string;
+  // References the dedicated greenhouses table (the single source of truth).
+  // The `greenhouse` GraphQL field (the name) is resolved from this relation in
+  // SensorConfigResolver, so existing name-based consumers keep working.
+  @Field(() => ID, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  greenhouseId?: string | null;
+
+  @ManyToOne(() => Greenhouse, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'greenhouseId' })
+  greenhouseRef?: Greenhouse | null;
 
   @Field({ nullable: true })
   @Column({ type: 'varchar', length: 128, nullable: true })

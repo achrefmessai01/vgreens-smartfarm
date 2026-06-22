@@ -6,11 +6,16 @@ import {
   IsEnum,
 } from 'class-validator';
 import { InputType, Field, ID } from '@nestjs/graphql';
-import { HarvestStatus } from '@/common/enums/harvest-status.enum';
+import { BatchStatus } from '@common/enums';
 
+// Harvest list filters. Planting/identity fields (search term, status,
+// greenhouse) now live on the parent batch and are filtered via a join.
 @InputType()
 export class HarvestFilterInput {
-  @Field({ nullable: true, description: 'Search in batch / species / variety' })
+  @Field({
+    nullable: true,
+    description: 'Search in batch name / species / variety',
+  })
   @IsOptional()
   @IsString()
   search?: string;
@@ -28,13 +33,13 @@ export class HarvestFilterInput {
   @IsDateString()
   dateTo?: string;
 
-  @Field(() => HarvestStatus, {
+  @Field(() => BatchStatus, {
     nullable: true,
-    description: 'Filter by status',
+    description: 'Filter by the parent batch status',
   })
   @IsOptional()
-  @IsEnum(HarvestStatus)
-  status?: HarvestStatus;
+  @IsEnum(BatchStatus)
+  status?: BatchStatus;
 
   @Field(() => ID, {
     nullable: true,
@@ -52,8 +57,13 @@ export class HarvestFilterInput {
   @IsUUID()
   createdById?: string;
 
-  @Field({ nullable: true, description: 'Filter by greenhouse' })
+  @Field(() => ID, { nullable: true, description: 'Filter by batch' })
   @IsOptional()
-  @IsString()
-  greenhouse?: string;
+  @IsUUID()
+  batchId?: string;
+
+  @Field(() => ID, { nullable: true, description: 'Filter by greenhouse' })
+  @IsOptional()
+  @IsUUID()
+  greenhouseId?: string;
 }

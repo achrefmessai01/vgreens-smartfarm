@@ -10,6 +10,8 @@ import {
   HarvestExportDialog,
   HarvestPageHeader,
   HarvestTable,
+  PeriodFilter,
+  SortControls,
 } from '@/components/harvest';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n';
@@ -37,8 +39,14 @@ export default function HarvestPage() {
 
   const {
     harvests,
+    batches,
     summary,
     loading,
+    view,
+    isFiltered,
+    handleSortChange,
+    handleRangeChange,
+    handleToggleCollapse,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,
@@ -49,6 +57,7 @@ export default function HarvestPage() {
     handleBatchCreated,
     handleSidebarCompleted,
     handleSidebarEdit,
+    handleSidebarView,
     handleLogEntry,
     handleBatchView,
     handleBatchEdit,
@@ -134,16 +143,33 @@ export default function HarvestPage() {
                 title={t.pages.harvest?.harvestEntryTitle || 'Harvest Entry'}
                 onCreateBatch={handleCreateBatch}
                 onExportClick={() => setExportDialogOpen(true)}
+                filters={
+                  <>
+                    <PeriodFilter
+                      value={view.range}
+                      onChange={handleRangeChange}
+                    />
+                    <SortControls
+                      value={view.sort}
+                      onChange={handleSortChange}
+                    />
+                  </>
+                }
               />
               <HarvestTable
+                batches={batches ?? []}
                 harvests={harvests ?? []}
                 onDelete={handleDeleteRequest}
                 onSidebarEdit={handleSidebarEdit}
+                onSidebarView={handleSidebarView}
                 onLogEntry={handleLogEntry}
                 onViewBatch={handleBatchView}
                 onEditBatch={handleBatchEdit}
                 onDeleteBatch={handleBatchDeleteRequest}
                 isLoading={loading}
+                isFiltered={isFiltered}
+                collapsedBatchIds={view.collapsedBatchIds}
+                onToggleCollapse={handleToggleCollapse}
               />
             </div>
           </TabsContent>
@@ -189,7 +215,8 @@ export default function HarvestPage() {
         <BatchSidebar
           open={batchSidebarOpen}
           onOpenChange={setBatchSidebarOpen}
-          harvestId={pendingBatch?.id ?? null}
+          batchId={pendingBatch?.batchId ?? null}
+          harvestId={pendingBatch?.harvestId ?? null}
           batchData={pendingBatch?.details ?? null}
           mode={sidebarMode}
           initialDate={pendingBatch?.initialDate ?? null}

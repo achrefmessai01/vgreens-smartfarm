@@ -23,7 +23,10 @@ export function CameraCard({
   const [imageFailed, setImageFailed] = React.useState(false);
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const canShowImage = camera.available && imageUrl && !imageFailed;
-  const isInteractive = Boolean(canShowImage && onClick);
+  // Clickable whenever a handler exists: the live stream may be available
+  // even when the preview image is not (and vice versa) — the player view
+  // handles its own unavailable state.
+  const isInteractive = Boolean(onClick) && !loading;
 
   React.useEffect(() => {
     setImageFailed(false);
@@ -51,7 +54,7 @@ export function CameraCard({
           : undefined
       }
     >
-      <div className="bg-muted dark:bg-black/40 relative flex aspect-video w-full items-center justify-center overflow-hidden">
+      <div className="bg-muted relative flex aspect-video w-full items-center justify-center overflow-hidden dark:bg-black/40">
         {loading ? (
           <div className="text-muted-foreground flex flex-col items-center gap-2 text-sm">
             <Loader2 className="h-8 w-8 animate-spin" />

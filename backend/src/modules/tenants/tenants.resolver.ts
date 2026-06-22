@@ -3,15 +3,46 @@ import { UserRole } from '@common/enums';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import { User } from '@modules/users/entities/user.entity';
 import { UseGuards } from '@nestjs/common';
-import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  ID,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { CreateTenantInput, UpdateTenantInput } from './dto';
-import { Tenant } from './entities/tenant.entity';
+import { Tenant, TenantGreenhouse } from './entities/tenant.entity';
 import { TenantsService } from './tenants.service';
+import { GreenhouseService } from '@modules/greenhouse/greenhouse.service';
 
 @Resolver(() => Tenant)
 @UseGuards(ClerkAuthGuard, RolesGuard)
 export class TenantsResolver {
-  constructor(private readonly tenantsService: TenantsService) {}
+  constructor(
+    private readonly tenantsService: TenantsService,
+    private readonly greenhouseService: GreenhouseService,
+  ) {}
+
+  // Greenhouses are now first-class rows. Expose them on the tenant (preserving
+  // the existing API shape) by reading the dedicated greenhouses table — the
+  // single source of truth.
+  @ResolveField(() => [TenantGreenhouse], {
+    name: 'greenhouses',
+    nullable: true,
+  })
+  async greenhouses(@Parent() tenant: Tenant): Promise<TenantGreenhouse[]> {
+    const rows = await this.greenhouseService.findAllScoped(tenant.id);
+    return rows.map((g) => ({
+      name: g.name,
+      doorPosition: g.doorPosition,
+      xDimension: g.xDimension ?? 0,
+      yDimension: g.yDimension ?? 0,
+      bayCount: g.bayCount,
+      isHorizontal: g.isHorizontal,
+    }));
+  }
 
   @Query(() => [Tenant])
   @Roles(UserRole.VGREENS_ADMIN)
@@ -37,8 +68,8 @@ export class TenantsResolver {
       currentUser.role === UserRole.VGREENS_ADMIN
         ? (tenantId ?? currentUser.tenantId)
         : currentUser.tenantId;
-    const tenant = await this.tenantsService.findOne(targetTenantId);
-    return tenant?.greenhouses.map((gh) => gh.name) ?? [];
+    const rows = await this.greenhouseService.findAllScoped(targetTenantId);
+    return rows.map((g) => g.name);
   }
 
   @Mutation(() => Tenant)

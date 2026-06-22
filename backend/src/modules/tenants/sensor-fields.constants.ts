@@ -13,6 +13,10 @@ export const ALLOWED_SENSOR_FIELDS = [
   'vpd',
   'par',
   'par_estimated',
+  // Not a real measurement: a sentinel persisted in `disabledSensorFields` so
+  // the "Enable Sensors" dropdown can toggle the farm-overview Sensor Overview
+  // map tab on/off per tenant (reuses the existing toggle persistence).
+  'sensor_overview',
 ] as const;
 
 export type AllowedSensorField = (typeof ALLOWED_SENSOR_FIELDS)[number];

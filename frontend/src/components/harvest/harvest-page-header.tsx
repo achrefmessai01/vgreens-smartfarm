@@ -12,6 +12,8 @@ interface HarvestPageHeaderProps {
   onCreateBatch?: () => void;
   onExportClick?: () => void;
   isLoading?: boolean;
+  /** Sort/filter controls rendered alongside the action buttons. */
+  filters?: React.ReactNode;
 }
 
 export function HarvestPageHeader({
@@ -20,17 +22,18 @@ export function HarvestPageHeader({
   onCreateBatch,
   onExportClick,
   isLoading = false,
+  filters,
 }: HarvestPageHeaderProps) {
   const { t, locale } = useI18n();
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight break-words sm:text-3xl">
+    <div className="bg-card rounded-xl border p-3 sm:p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl font-bold tracking-tight break-words sm:text-2xl lg:text-3xl">
             {title}
           </h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
+          <p className="text-muted-foreground mt-1 text-sm">
             {summary.totalHarvests}{' '}
             {harvestsLoggedLabel(
               summary.totalHarvests,
@@ -40,7 +43,8 @@ export function HarvestPageHeader({
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {filters}
           {onExportClick && (
             <Button
               onClick={onExportClick}

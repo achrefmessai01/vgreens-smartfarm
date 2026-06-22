@@ -25,8 +25,6 @@ import {
   useHarvestExport,
   type HarvestExportFilter,
 } from '@/lib/hooks/use-harvest-export';
-import { isAutoDraftPlaceholder } from '@/components/harvest/table/harvest-table-utils';
-import { HarvestStatus } from '@/generated/graphql';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import {
@@ -152,19 +150,7 @@ export function HarvestExportDialog({
     customFrom > customTo;
 
   const { data: countData, loading: countLoading } = useQuery<{
-    harvests: Array<{
-      id: string;
-      parentBatchId: string | null;
-      status: HarvestStatus;
-      classA: number;
-      classB: number;
-      classC: number;
-      waste: number;
-      avgBrix: number;
-      rowX: number;
-      rowY: number;
-      photos: number;
-    }>;
+    harvests: Array<{ id: string }>;
   }>(HARVESTS_COUNT_QUERY, {
     variables: {
       filter:
@@ -174,11 +160,7 @@ export function HarvestExportDialog({
     fetchPolicy: 'cache-and-network',
   });
 
-  // Empty draft placeholders are excluded from the export, so they must not be
-  // counted here either.
-  const count = countData?.harvests?.filter(
-    (entry) => !isAutoDraftPlaceholder(entry),
-  ).length;
+  const count = countData?.harvests?.length;
 
   const handleDownload = async () => {
     const ok = await exportCsv(computedRange, [...selectedColumns]);

@@ -12,7 +12,16 @@ import type { User } from '@/generated/graphql';
 interface UseUserManagementFormProps {
   initialData?: Partial<User>;
   hideTenantSelection?: boolean;
-  onSubmit: (data: UserFormData) => void;
+  onSubmit: (data: UserFormData) => void | Promise<void>;
+}
+
+/** Pull a readable message out of a failed create/update (Apollo error). */
+function getSubmitErrorMessage(error: unknown): string {
+  const e = error as {
+    graphQLErrors?: { message?: string }[];
+    message?: string;
+  };
+  return e?.graphQLErrors?.[0]?.message || e?.message || 'Failed to save user';
 }
 
 export function useUserManagementForm({
@@ -90,19 +99,26 @@ export function useUserManagementForm({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      const submitData: UserFormData = {
-        ...formData,
-        tenantId:
-          formData.role === UserRole.VgreensAdmin
+    if (!validateForm()) return;
+
+    const submitData: UserFormData = {
+      ...formData,
+      tenantId:
+        formData.role === UserRole.VgreensAdmin
+          ? undefined
+          : hideTenantSelection
             ? undefined
-            : hideTenantSelection
-              ? undefined
-              : formData.tenantId,
-      };
-      onSubmit(submitData);
+            : formData.tenantId,
+    };
+
+    try {
+      await onSubmit(submitData);
+    } catch (error) {
+      // A failed creation (e.g. the admin email-domain rule rejecting it) is
+      // shown on the email field — red border + the backend's message.
+      setErrors((prev) => ({ ...prev, email: getSubmitErrorMessage(error) }));
     }
   };
 

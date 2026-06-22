@@ -5,6 +5,8 @@ import { User } from '@modules/users/entities/user.entity';
 export const CAMERA_LIVESTREAM_FEATURE_KEY = 'camera_livestream';
 export const SNAPSHOT_FILENAME = 'latest.jpg';
 export const SIGNED_URL_TTL_SECONDS = 600;
+export const STREAM_TOKEN_TTL_SECONDS = 6 * 60 * 60;
+export const STREAM_PLAYLIST_FILENAME = 'index.m3u8';
 
 export interface CameraLivestreamCameraConfig {
   id: string;
@@ -14,6 +16,12 @@ export interface CameraLivestreamCameraConfig {
 
 export interface CameraLivestreamTenantConfig {
   folder: string;
+  /**
+   * Upstream HLS folder for live streams (relative to the stream proxy
+   * upstream base URL). When absent, real livestream is disabled for the
+   * tenant and only preview images are available.
+   */
+  streamFolder?: string;
   cameras: CameraLivestreamCameraConfig[];
 }
 
@@ -23,10 +31,15 @@ interface LocalTenantConfig extends CameraLivestreamTenantConfig {
 
 const FRUTANIA_CAMERA_IDS = ['Cam01_', 'Cam02_', 'Cam03_', 'Cam04_', 'Cam05_'];
 
+// Matched by the tenant's stable id — `name` and `companyName` can change, the
+// id cannot (per Ceng). This is the Frutania/Agrania tenant. Tenant ids differ
+// per database, so add each environment's id to this list when enabling the
+// feature there. Storage folders below stay 'frutania*' (unchanged by rename).
 const LOCAL_CAMERA_LIVESTREAM_TENANT_CONFIGS: LocalTenantConfig[] = [
   {
-    tenantIdentifiers: ['frutania'],
+    tenantIdentifiers: ['da6bd9d5-bce6-4b7f-bc81-6e2f2c9b99c2'],
     folder: 'frutania-livestream',
+    streamFolder: 'frutania',
     cameras: FRUTANIA_CAMERA_IDS.map((id) => ({
       id,
       name: formatCameraName(id),
@@ -69,6 +82,11 @@ export function parseCameraLivestreamConfig(
       ? config.folder.trim()
       : null;
 
+  const streamFolder =
+    typeof config.streamFolder === 'string' && config.streamFolder.trim()
+      ? config.streamFolder.trim().replace(/^\/+|\/+$/g, '')
+      : undefined;
+
   const cameras = Array.isArray(config.cameras)
     ? config.cameras
         .map((camera: unknown): CameraLivestreamCameraConfig | null => {
@@ -100,12 +118,13 @@ export function parseCameraLivestreamConfig(
         )
     : [];
 
-  if (!folder && cameras.every((camera) => !camera.path)) {
+  if (!folder && !streamFolder && cameras.every((camera) => !camera.path)) {
     return null;
   }
 
   return {
     folder: folder ?? '',
+    streamFolder,
     cameras,
   };
 }
@@ -129,6 +148,7 @@ export function getLocalCameraLivestreamConfig(
 
   return {
     folder: match.folder,
+    streamFolder: match.streamFolder,
     cameras: match.cameras,
   };
 }

@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { UserStatus } from '@/common/enums/user-status.enum';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
+import { UserSettings } from '../dto/user-settings';
 
 @ObjectType()
 @Entity('users')
@@ -75,6 +76,21 @@ export class User extends BaseEntity {
 
   @Column({ type: 'jsonb', nullable: true })
   metadata?: Record<string, any>;
+
+  /**
+   * Per-user, cross-device UI preferences (freeform jsonb). Currently holds the
+   * harvest-entry view's sort + plantingDate range under `harvestView`. Writes
+   * go through dedicated, structure-validating mutations that MERGE into the
+   * existing blob (see UsersService.updateHarvestViewSettings) rather than
+   * overwriting it, so future features can add sibling keys safely.
+   *
+   * Nullable / no default: a null blob means "use client defaults". Created
+   * automatically by TypeORM `synchronize` (no migration file in this repo);
+   * existing rows need no backfill.
+   */
+  @Field(() => UserSettings, { nullable: true })
+  @Column({ type: 'jsonb', nullable: true })
+  userSettings?: UserSettings | null;
 
   /**
    * BCP 47-style locale code the user picked in the language switcher

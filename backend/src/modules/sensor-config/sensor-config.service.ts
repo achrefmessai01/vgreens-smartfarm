@@ -16,6 +16,7 @@ export class SensorConfigService {
   async findAllByTenant(tenantId: string): Promise<SensorConfig[]> {
     return this.repo.find({
       where: { tenantId },
+      relations: ['greenhouseRef'],
       order: { device: 'ASC' },
     });
   }
@@ -24,7 +25,10 @@ export class SensorConfigService {
     tenantId: string,
     device: string,
   ): Promise<SensorConfig | null> {
-    return this.repo.findOne({ where: { tenantId, device } });
+    return this.repo.findOne({
+      where: { tenantId, device },
+      relations: ['greenhouseRef'],
+    });
   }
 
   async upsert(
@@ -39,12 +43,16 @@ export class SensorConfigService {
       Object.assign(existing, {
         xPosition: input.xPosition ?? existing.xPosition,
         yPosition: input.yPosition ?? existing.yPosition,
-        greenhouse: input.greenhouse ?? existing.greenhouse,
+        greenhouseId: input.greenhouseId ?? existing.greenhouseId,
         city: input.city ?? existing.city,
         hiddenInFarmOverview:
           input.hiddenInFarmOverview ?? existing.hiddenInFarmOverview ?? false,
       });
-      return this.repo.save(existing);
+      await this.repo.save(existing);
+      return this.findOneByDevice(
+        tenantId,
+        input.device,
+      ) as Promise<SensorConfig>;
     }
 
     const config = this.repo.create({
@@ -54,7 +62,11 @@ export class SensorConfigService {
       yPosition: input.yPosition ?? null,
       hiddenInFarmOverview: input.hiddenInFarmOverview ?? false,
     });
-    return this.repo.save(config);
+    await this.repo.save(config);
+    return this.findOneByDevice(
+      tenantId,
+      input.device,
+    ) as Promise<SensorConfig>;
   }
 
   async delete(id: string, tenantId: string): Promise<boolean> {
