@@ -3,15 +3,11 @@
 import * as React from 'react';
 import { Plus, X } from 'lucide-react';
 import { useI18n } from '@/i18n';
-import { Input } from '@/components/ui/input';
+import { DecimalInput } from '@/components/ui/decimal-input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
-import {
-  classLetter,
-  hasRowRange,
-  isRowOutsideBatchRange,
-} from '@/lib/harvest-utils';
+import { classLetter, isRowOutsideBatchRange } from '@/lib/harvest-utils';
 
 export function YieldDataField({
   classKgs,
@@ -25,12 +21,8 @@ export function YieldDataField({
 }: YieldDataFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  // When the batch defines a row range, limit the row inputs to it and flag
-  // (without blocking) any value outside it. A null/unset range leaves the
-  // inputs unconstrained.
-  const rangeDefined = hasRowRange(batchStartRow, batchEndRow);
-  const rowMin = rangeDefined ? (batchStartRow ?? undefined) : 0;
-  const rowMax = rangeDefined ? (batchEndRow ?? undefined) : undefined;
+  // When the batch defines a row range, flag (without blocking) any value
+  // outside it. A null/unset range leaves the inputs unconstrained.
   const outOfRangeText = (
     h?.rowOutsideBatchRange ?? 'Outside the batch row range ({start}–{end})'
   )
@@ -86,17 +78,10 @@ export function YieldDataField({
               )}
             </div>
             <div className="relative">
-              <Input
-                type="number"
-                min="0"
-                step="0.1"
-                value={value === 0 ? '' : value.toString()}
-                onChange={(e) =>
-                  onChange?.({
-                    kind: 'classKg',
-                    index: i,
-                    value: Math.max(0, parseFloat(e.target.value) || 0),
-                  })
+              <DecimalInput
+                value={value}
+                onChange={(v) =>
+                  onChange?.({ kind: 'classKg', index: i, value: v })
                 }
                 className="h-10 pr-12 text-left text-base"
                 placeholder={h?.enterQualityAYield ?? 'Enter yield'}
@@ -122,17 +107,9 @@ export function YieldDataField({
         <div className="space-y-2 text-left">
           <p className="text-muted-foreground text-sm">{h?.waste ?? 'Waste'}</p>
           <div className="relative">
-            <Input
-              type="number"
-              min="0"
-              step="0.1"
-              value={waste === 0 ? '' : waste.toString()}
-              onChange={(e) =>
-                onChange?.({
-                  kind: 'waste',
-                  value: Math.max(0, parseFloat(e.target.value) || 0),
-                })
-              }
+            <DecimalInput
+              value={waste}
+              onChange={(v) => onChange?.({ kind: 'waste', value: v })}
               className="h-10 pr-12 text-left text-base"
               placeholder={h?.enterWasteAmount ?? 'Enter waste amount'}
             />
@@ -147,18 +124,9 @@ export function YieldDataField({
             <div className="space-y-2 text-left">
               <p className="text-muted-foreground text-sm">{h?.rowX ?? 'Row X'}</p>
               <div className="relative">
-                <Input
-                  type="number"
-                  min={rowMin}
-                  max={rowMax}
-                  step="0.1"
-                  value={rowX === 0 ? '' : rowX.toString()}
-                  onChange={(e) =>
-                    onChange?.({
-                      kind: 'rowX',
-                      value: Math.max(0, Number.parseFloat(e.target.value) || 0),
-                    })
-                  }
+                <DecimalInput
+                  value={rowX}
+                  onChange={(v) => onChange?.({ kind: 'rowX', value: v })}
                   className="h-10 pr-12 text-left text-base"
                   placeholder={h?.enterRowX ?? 'Start row'}
                 />
@@ -173,18 +141,9 @@ export function YieldDataField({
             <div className="space-y-2 text-left">
               <p className="text-muted-foreground text-sm">{h?.rowY ?? 'Row Y'}</p>
               <div className="relative">
-                <Input
-                  type="number"
-                  min={rowMin}
-                  max={rowMax}
-                  step="0.1"
-                  value={rowY === 0 ? '' : rowY.toString()}
-                  onChange={(e) =>
-                    onChange?.({
-                      kind: 'rowY',
-                      value: Math.max(0, Number.parseFloat(e.target.value) || 0),
-                    })
-                  }
+                <DecimalInput
+                  value={rowY}
+                  onChange={(v) => onChange?.({ kind: 'rowY', value: v })}
                   className="h-10 pr-12 text-left text-base"
                   placeholder={h?.enterRowY ?? 'End row'}
                 />
