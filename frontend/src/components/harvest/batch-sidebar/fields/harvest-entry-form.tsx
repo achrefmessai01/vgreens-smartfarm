@@ -7,7 +7,6 @@ import type {
   EntryChange,
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
-import { crateEntryTotalKg } from '@/lib/harvest-utils';
 import { YieldDataField } from './batch-sidebar-yield-field';
 import { CrateYieldField } from './batch-sidebar-crate-field';
 import { BrixMeasurementsField } from './batch-sidebar-brix-field';
@@ -32,7 +31,8 @@ export interface HarvestEntryFormProps {
   onAddBrixReading: () => void;
   onRemoveBrixReading: (readingIndex: number) => void;
   onSetShowBrix: (show: boolean) => void;
-  onFruitCountChange: (value: number) => void;
+  onSampleWeightChange: (value: number) => void;
+  onSampleFruitCountChange: (value: number) => void;
   onSetShowFruitWeight: (show: boolean) => void;
   isLoading?: boolean;
 }
@@ -54,18 +54,13 @@ export function HarvestEntryForm({
   onAddBrixReading,
   onRemoveBrixReading,
   onSetShowBrix,
-  onFruitCountChange,
+  onSampleWeightChange,
+  onSampleFruitCountChange,
   onSetShowFruitWeight,
   isLoading = false,
 }: HarvestEntryFormProps) {
   const idPrefix = `entry-${index}-`;
   const isCrate = inputMode === InputMode.Crate;
-
-  // Total sellable yield the Fruit-weight section averages over. Both modes sum
-  // every quality class (dynamic count).
-  const sellableWeight = isCrate
-    ? crateEntryTotalKg(entry.crateCounts, entry.remainingKgs, crateWeight)
-    : entry.classKgs.reduce((s, v) => s + (v || 0), 0);
 
   return (
     <div className="space-y-4">
@@ -106,11 +101,12 @@ export function HarvestEntryForm({
       </div>
       <div className="border-t pt-4">
         <FruitWeightField
-          fruitCount={entry.fruitCount}
-          sellableWeight={sellableWeight}
+          sampleWeight={entry.sampleWeight}
+          sampleFruitCount={entry.sampleFruitCount}
           showFruitWeight={entry.showFruitWeight}
           onShowFruitWeightChange={onSetShowFruitWeight}
-          onFruitCountChange={onFruitCountChange}
+          onSampleWeightChange={onSampleWeightChange}
+          onSampleFruitCountChange={onSampleFruitCountChange}
           idPrefix={idPrefix}
           isLoading={isLoading}
         />

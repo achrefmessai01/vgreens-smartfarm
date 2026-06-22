@@ -58,6 +58,8 @@ const HARVEST_FIELDS = gql`
       fruitCount
       totalFruitWeight
       avgFruitWeight
+      sampleWeight
+      sampleFruitCount
       avgBrix
       brixReadings {
         class

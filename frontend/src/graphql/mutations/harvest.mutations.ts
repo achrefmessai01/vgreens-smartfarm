@@ -45,6 +45,8 @@ const HARVEST_MUTATION_FIELDS = gql`
       fruitCount
       totalFruitWeight
       avgFruitWeight
+      sampleWeight
+      sampleFruitCount
       avgBrix
       brixReadings {
         class

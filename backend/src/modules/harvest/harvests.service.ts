@@ -123,9 +123,14 @@ export class HarvestsService {
       rowX: input.rowX ?? 0,
       rowY: input.rowY ?? 0,
       waste: input.waste ?? 0,
-      fruitCount: input.fruitCount ?? 0,
+      // Legacy count-everything fields: never written for new (sample-based)
+      // entries. avgFruitWeight is derived at read from the sample below.
+      fruitCount: 0,
       totalFruitWeight: 0,
       avgFruitWeight: 0,
+      // Sample-based fruit weight: the sample's mass (g) and its fruit count.
+      sampleWeight: input.sampleWeight ?? null,
+      sampleFruitCount: input.sampleFruitCount ?? null,
       brixReadings,
       avgBrix: this.entryAvgBrix(brixReadings),
     };
@@ -179,24 +184,49 @@ export class HarvestsService {
     return total;
   }
 
-  // Effective average fruit weight, derived from the effective total so it also
-  // tracks a crateWeight edit in crate mode.
+  // Average fruit weight in GRAMS per fruit. Preferred source is the weighed
+  // sample (sampleWeight g / sampleFruitCount). Legacy entries (pre-sampling)
+  // carry no sample but a total fruitCount, so they fall back to the old
+  // derivation — the entry's sellable kg converted to grams, divided by that
+  // total count (also tracks a crateWeight edit in crate mode). Returns null
+  // when neither is computable, so an incomplete entry is excluded from the mean
+  // rather than dragging it toward 0.
   private entryAvgFruitWeight(
     e: HarvestEntry,
     batch: Batch | null | undefined,
-  ): number {
+  ): number | null {
+    const sampleCount = e.sampleFruitCount ?? 0;
+    if (e.sampleWeight != null && e.sampleWeight > 0 && sampleCount > 0) {
+      return this.roundTo(e.sampleWeight / sampleCount, 3);
+    }
     const count = e.fruitCount ?? 0;
     return count > 0
-      ? this.roundTo(this.entryTotalWeight(e, batch) / count, 3)
-      : 0;
+      ? this.roundTo((this.entryTotalWeight(e, batch) * 1000) / count, 3)
+      : null;
+  }
+
+  // Derived TOTAL fruit count for an entry: the entry's sellable kg (→ grams)
+  // divided by the average fruit weight (g). Replaces counting every fruit — the
+  // count is inferred from yield and the sampled average. 0 when the average is
+  // unavailable (no sample and no legacy count).
+  private entryFruitCount(
+    e: HarvestEntry,
+    batch: Batch | null | undefined,
+  ): number {
+    const avg = this.entryAvgFruitWeight(e, batch);
+    if (avg == null || avg <= 0) return 0;
+    return Math.round((this.entryTotalWeight(e, batch) * 1000) / avg);
   }
 
   // Derive a harvest's totals from its entries (+ parent batch for the yields).
   // This is exactly what the omitted DB view would have produced.
   //
-  // NOTE: avgFruitWeight and avgBrix are the UNWEIGHTED mean of the per-entry
-  // averages — deliberately NOT SUM(totalFruitWeight)/SUM(fruitCount). If a
-  // weighted mean is wanted later, change it here.
+  // NOTE: avgFruitWeight (now GRAMS per fruit) and avgBrix are the UNWEIGHTED
+  // mean of the per-entry averages, skipping entries with no value. fruitCount is
+  // no longer summed from a stored per-entry count (counting every fruit is the
+  // thing we removed) — it is the SUM of each entry's DERIVED total count
+  // (sellable g ÷ avgFruitWeight). If a weighted mean is wanted later, change it
+  // here.
   computeTotals(
     entries: HarvestEntry[] | undefined,
     batch?: Batch | null,
@@ -226,7 +256,7 @@ export class HarvestsService {
       sum((e) => e.waste),
       3,
     );
-    const fruitCount = sum((e) => e.fruitCount);
+    const fruitCount = sum((e) => this.entryFruitCount(e, batch));
     const totalFruitWeight = this.roundTo(
       sum((e) => this.entryTotalWeight(e, batch)),
       3,
@@ -245,12 +275,13 @@ export class HarvestsService {
       : null;
 
     const hasEntries = list.length > 0;
-    const avgFruitWeight = hasEntries
-      ? this.roundTo(
-          this.mean(list.map((e) => this.entryAvgFruitWeight(e, batch))),
-          3,
-        )
-      : null;
+    // Unweighted mean of the per-entry g/fruit averages, ignoring entries that
+    // have no computable average (incomplete sample / no legacy count).
+    const avgValues = list
+      .map((e) => this.entryAvgFruitWeight(e, batch))
+      .filter((v): v is number => v != null);
+    const avgFruitWeight =
+      avgValues.length > 0 ? this.roundTo(this.mean(avgValues), 3) : null;
     const avgBrix = hasEntries
       ? this.roundTo(this.mean(list.map((e) => e.avgBrix || 0)), 1)
       : null;

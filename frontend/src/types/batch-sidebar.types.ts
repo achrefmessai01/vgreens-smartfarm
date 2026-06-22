@@ -19,7 +19,10 @@ export interface HarvestEntryData {
   // Quality grade per Brix reading, index-aligned with brixReadings.
   brixClasses: HarvestQualityClass[];
   showBrix: boolean;
-  fruitCount: number;
+  // Sample-based fruit weight: the weighed sample's mass in grams and the number
+  // of fruits in that sample. avgFruitWeight (g/fruit) is derived from the two.
+  sampleWeight: number;
+  sampleFruitCount: number;
   showFruitWeight: boolean;
 }
 
@@ -46,7 +49,8 @@ export function entryHasData(entry: HarvestEntryData): boolean {
     entry.rowY > 0 ||
     entry.crateCounts.some((v) => v > 0) ||
     entry.remainingKgs.some((v) => v > 0) ||
-    entry.fruitCount > 0 ||
+    entry.sampleWeight > 0 ||
+    entry.sampleFruitCount > 0 ||
     entry.brixReadings.some((v) => v > 0)
   );
 }
@@ -63,7 +67,8 @@ export function createEmptyEntry(): HarvestEntryData {
     brixReadings: [0],
     brixClasses: [HarvestQualityClass.A],
     showBrix: false,
-    fruitCount: 0,
+    sampleWeight: 0,
+    sampleFruitCount: 0,
     showFruitWeight: false,
   };
 }
@@ -166,13 +171,14 @@ export interface BrixMeasurementsFieldProps {
 }
 
 export interface FruitWeightFieldProps {
-  fruitCount: number;
-  // Total sellable yield (kg) the average fruit weight is derived from. The
-  // parent computes it per mode (weight: A+B+C; crate: sum of all classes).
-  sellableWeight: number;
+  // The weighed sample: its mass in grams and the count of fruits in it.
+  // avgFruitWeight (g/fruit) = sampleWeight / sampleFruitCount.
+  sampleWeight: number;
+  sampleFruitCount: number;
   showFruitWeight: boolean;
   onShowFruitWeightChange: (show: boolean) => void;
-  onFruitCountChange?: (value: number) => void;
+  onSampleWeightChange?: (value: number) => void;
+  onSampleFruitCountChange?: (value: number) => void;
   // Namespaces input element ids so repeated entries don't collide.
   idPrefix?: string;
   isLoading?: boolean;

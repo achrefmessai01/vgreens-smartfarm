@@ -56,7 +56,8 @@ export function BatchSidebar({
     handleBrixClassChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
-    handleFruitCountChange,
+    handleSampleWeightChange,
+    handleSampleFruitCountChange,
     handleEntryChange,
     handleSetShowBrix,
     handleSetShowFruitWeight,
@@ -199,8 +200,11 @@ export function BatchSidebar({
                       handleRemoveBrixReading(index, readingIndex)
                     }
                     onSetShowBrix={(show) => handleSetShowBrix(index, show)}
-                    onFruitCountChange={(value) =>
-                      handleFruitCountChange(index, value)
+                    onSampleWeightChange={(value) =>
+                      handleSampleWeightChange(index, value)
+                    }
+                    onSampleFruitCountChange={(value) =>
+                      handleSampleFruitCountChange(index, value)
                     }
                     onSetShowFruitWeight={(show) =>
                       handleSetShowFruitWeight(index, show)

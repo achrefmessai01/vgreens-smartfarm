@@ -143,16 +143,27 @@ export function HarvestDetails({
               const entryRatio =
                 entryTotal > 0 ? (entry.waste / entryTotal) * 100 : 0;
               const totalCrates = counts.reduce((s, c) => s + (c ?? 0), 0);
-              // Fruit-weight figures are stored only in weight mode; in crate
-              // mode they're derived from the sellable total.
-              const displayTotalFruitWeight = isCrate
-                ? sellable
-                : entry.totalFruitWeight;
-              const displayAvgFruitWeight = isCrate
-                ? entry.fruitCount > 0
-                  ? displayTotalFruitWeight / entry.fruitCount
-                  : 0
-                : entry.avgFruitWeight;
+              // Average fruit weight (g/fruit) comes from the weighed sample.
+              // Legacy entries (no sample) fall back to the old derivation: the
+              // entry's sellable kg → grams divided by the stored total count.
+              const sampleAvg =
+                entry.sampleWeight != null &&
+                entry.sampleWeight > 0 &&
+                entry.sampleFruitCount != null &&
+                entry.sampleFruitCount > 0
+                  ? entry.sampleWeight / entry.sampleFruitCount
+                  : null;
+              const displayAvgFruitWeight =
+                sampleAvg ??
+                (entry.fruitCount > 0
+                  ? (sellable * 1000) / entry.fruitCount
+                  : null);
+              // Total fruit count is derived from yield ÷ average, not counted.
+              const displayFruitCount =
+                displayAvgFruitWeight != null && displayAvgFruitWeight > 0
+                  ? Math.round((sellable * 1000) / displayAvgFruitWeight)
+                  : null;
+              const hasFruitWeight = displayAvgFruitWeight != null;
               return (
                 <div
                   key={entryIndex}
@@ -252,31 +263,48 @@ export function HarvestDetails({
                       <span className="text-muted-foreground text-sm">
                         {h?.averageFruitWeight ?? 'Average Fruit Weight'}:{' '}
                         <span className="text-lg font-medium text-orange-500">
-                          {displayAvgFruitWeight.toFixed(3)} kg
+                          {hasFruitWeight
+                            ? `${displayAvgFruitWeight.toFixed(1)} g`
+                            : '—'}
                         </span>
                       </span>
                     </div>
-                    {entry.fruitCount === 0 && displayTotalFruitWeight === 0 ? (
+                    {!hasFruitWeight ? (
                       <p className="text-muted-foreground text-sm">
                         {h?.noFruitWeightRecorded ??
                           'No fruit weight recorded.'}
                       </p>
                     ) : (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between py-2">
-                          <span className="text-muted-foreground font-medium">
-                            {h?.fruitCount ?? 'Fruit count'}:
-                          </span>
-                          <span className="text-foreground text-lg font-bold">
-                            {entry.fruitCount}
-                          </span>
-                        </div>
+                        {entry.sampleFruitCount != null &&
+                          entry.sampleWeight != null && (
+                            <div className="flex items-center justify-between py-2">
+                              <span className="text-muted-foreground font-medium">
+                                {h?.fruitWeightSample ?? 'Fruit weight sample'}:
+                              </span>
+                              <span className="text-foreground text-lg font-bold">
+                                {entry.sampleWeight.toFixed(1)} g /{' '}
+                                {entry.sampleFruitCount}{' '}
+                                {h?.sampleFruitCountUnit ?? 'fruits'}
+                              </span>
+                            </div>
+                          )}
+                        {displayFruitCount != null && (
+                          <div className="flex items-center justify-between py-2">
+                            <span className="text-muted-foreground font-medium">
+                              {h?.fruitCount ?? 'Fruit count'}:
+                            </span>
+                            <span className="text-foreground text-lg font-bold">
+                              ≈ {displayFruitCount}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex items-center justify-between py-2">
                           <span className="text-muted-foreground font-medium">
                             {h?.totalWeight ?? 'Total weight'}:
                           </span>
                           <span className="text-foreground text-lg font-bold">
-                            {displayTotalFruitWeight.toFixed(2)} kg
+                            {sellable.toFixed(2)} kg
                           </span>
                         </div>
                       </div>
