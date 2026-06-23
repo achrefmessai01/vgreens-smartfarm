@@ -3,19 +3,40 @@
 import * as React from 'react';
 import {
   AlertStatus,
-  type AlertsQuery,
   type User,
   UserRole,
-  useAlertsQuery,
   useTenantFeaturesQuery,
 } from '@/generated/graphql';
+import { useSubscription } from '@apollo/client/react';
+import { ALERT_CREATED_SUBSCRIPTION } from '@/graphql/subscriptions/alert.subscriptions';
 import { useToast } from '@/components/ui/toast-provider';
 import { useI18n } from '@/i18n';
 
-const ALERT_POLL_INTERVAL_MS = 30000;
 const MAX_TRACKED_ALERTS = 200;
 
-type ToastableAlert = AlertsQuery['alerts'][number];
+/** Shape of the alert pushed by the `alertCreated` subscription. */
+type ToastableAlert = {
+  id: string;
+  tenantId?: string | null;
+  sensorName: string;
+  value?: string | null;
+  status: AlertStatus;
+  severity?: string | null;
+  description?: string | null;
+  timestamp?: string | null;
+  field?: string | null;
+  measurement?: string | null;
+  device?: string | null;
+  greenhouse?: string | null;
+  city?: string | null;
+  column?: string | null;
+  row?: string | null;
+  profile?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
+};
+
+type AlertCreatedData = { alertCreated: ToastableAlert };
 
 function formatFieldLabel(field?: string | null) {
   if (!field) {
@@ -26,10 +47,6 @@ function formatFieldLabel(field?: string | null) {
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/[_-]+/g, ' ')
     .replace(/\b\w/g, (character) => character.toUpperCase());
-}
-
-function getAlertTimestamp(alert: ToastableAlert) {
-  return alert.timestamp ?? alert.createdAt;
 }
 
 function formatAlertDescription(alert: ToastableAlert, fallback: string) {
@@ -47,7 +64,6 @@ export function useAlertToastListener(user?: User): void {
   const { t } = useI18n();
   const { toast } = useToast();
   const seenAlertIdsRef = React.useRef<Set<string>>(new Set());
-  const hasInitializedRef = React.useRef(false);
 
   const tenantId = user?.tenantId;
   const role = user?.role as UserRole | undefined;
@@ -77,48 +93,25 @@ export function useAlertToastListener(user?: User): void {
   const canWatchAlerts =
     isTenantScopedUser && !tenantFeaturesLoading && alertsFeatureEnabled;
 
-  const { data } = useAlertsQuery({
-    variables: {
-      filter: {
-        status: AlertStatus.Open,
-      },
-    },
-    skip: !canWatchAlerts,
-    pollInterval: ALERT_POLL_INTERVAL_MS,
-    fetchPolicy: 'network-only',
-    notifyOnNetworkStatusChange: false,
-  });
-
+  // Reset the de-dup set when the tenant or gating changes (e.g. tenant
+  // switch / feature toggled).
   React.useEffect(() => {
     seenAlertIdsRef.current.clear();
-    hasInitializedRef.current = false;
   }, [tenantId, canWatchAlerts]);
 
-  React.useEffect(() => {
-    if (!canWatchAlerts || !data?.alerts) {
-      return;
-    }
+  // VSL-97: receive new alerts in real time via a GraphQL subscription instead
+  // of 30s polling. The subscription only delivers alerts created AFTER we
+  // subscribe, so existing open alerts never produce a toast on page load.
+  // `seenAlertIdsRef` still guards against duplicate toasts if the socket
+  // reconnects and an alert is redelivered.
+  useSubscription<AlertCreatedData>(ALERT_CREATED_SUBSCRIPTION, {
+    skip: !canWatchAlerts,
+    onData: ({ data }) => {
+      const alert = data.data?.alertCreated;
+      if (!alert) return;
+      if (alert.status !== AlertStatus.Open) return;
+      if (seenAlertIdsRef.current.has(alert.id)) return;
 
-    const openAlerts = data.alerts.filter(
-      (alert) => alert.status === AlertStatus.Open,
-    );
-
-    if (!hasInitializedRef.current) {
-      seenAlertIdsRef.current = new Set(openAlerts.map((alert) => alert.id));
-      hasInitializedRef.current = true;
-      return;
-    }
-
-    const unseenAlerts = openAlerts
-      .filter((alert) => !seenAlertIdsRef.current.has(alert.id))
-      .sort((left, right) => {
-        const leftTimestamp = new Date(getAlertTimestamp(left)).getTime();
-        const rightTimestamp = new Date(getAlertTimestamp(right)).getTime();
-
-        return leftTimestamp - rightTimestamp;
-      });
-
-    unseenAlerts.forEach((alert) => {
       seenAlertIdsRef.current.add(alert.id);
 
       // Notification-only toast: shorter duration and no action button so it
@@ -135,12 +128,12 @@ export function useAlertToastListener(user?: User): void {
         variant: 'destructive',
         duration: 5000,
       });
-    });
 
-    if (seenAlertIdsRef.current.size > MAX_TRACKED_ALERTS) {
-      seenAlertIdsRef.current = new Set(
-        Array.from(seenAlertIdsRef.current).slice(-MAX_TRACKED_ALERTS),
-      );
-    }
-  }, [canWatchAlerts, data, t.pages.alerts, toast]);
+      if (seenAlertIdsRef.current.size > MAX_TRACKED_ALERTS) {
+        seenAlertIdsRef.current = new Set(
+          Array.from(seenAlertIdsRef.current).slice(-MAX_TRACKED_ALERTS),
+        );
+      }
+    },
+  });
 }

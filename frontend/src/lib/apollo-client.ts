@@ -3,8 +3,12 @@ import {
   ApolloLink,
   InMemoryCache,
   Observable,
+  split,
   type FetchResult,
 } from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import {
   apolloErrorLink,
@@ -60,13 +64,55 @@ export const createApolloClient = (
     });
   });
 
+  // HTTP chain for queries/mutations (unchanged behaviour).
+  const httpChain = ApolloLink.from([
+    apolloErrorLink, // Enhanced error logging system
+    apolloRequestLoggingLink, // Request performance tracking
+    authLink,
+    httpLink,
+  ]);
+
+  // VSL-97: WebSocket link for GraphQL subscriptions (e.g. alertCreated).
+  // Created client-side only (no `window` during SSR). The Clerk token is
+  // passed in `connectionParams` so the backend can authenticate the socket
+  // the same way it authenticates HTTP requests. Queries/mutations are NOT
+  // affected — only subscription operations are routed here via `split`.
+  const wsEndpoint =
+    process.env.NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT ??
+    graphqlEndpoint.replace(/^http/, 'ws');
+
+  const wsLink =
+    typeof window !== 'undefined'
+      ? new GraphQLWsLink(
+          createClient({
+            url: wsEndpoint,
+            // graphql-ws is lazy by default: the socket only opens when there
+            // is an active subscription, so gated-off users never connect.
+            connectionParams: async () => {
+              const token = await getToken();
+              return token ? { authorization: `Bearer ${token}` } : {};
+            },
+          }),
+        )
+      : null;
+
+  // Route subscriptions to the WS link, everything else to the HTTP chain.
+  const link = wsLink
+    ? split(
+        ({ query }) => {
+          const definition = getMainDefinition(query);
+          return (
+            definition.kind === 'OperationDefinition' &&
+            definition.operation === 'subscription'
+          );
+        },
+        wsLink,
+        httpChain,
+      )
+    : httpChain;
+
   return new ApolloClient({
-    link: ApolloLink.from([
-      apolloErrorLink, // Enhanced error logging system
-      apolloRequestLoggingLink, // Request performance tracking
-      authLink,
-      httpLink,
-    ]),
+    link,
     cache: new InMemoryCache(),
     defaultOptions: {
       watchQuery: {

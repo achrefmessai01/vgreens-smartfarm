@@ -1,5 +1,6 @@
 import {
   Logger,
+  Inject,
   Injectable,
   NotFoundException,
   InternalServerErrorException,
@@ -12,6 +13,8 @@ import { CreateAlertInput, UpdateAlertInput, AlertsFilterInput } from './dto';
 import { AlertStatus } from '@/common/enums/alert-status.enum';
 import { AlertSeverity } from '@/common/enums/alert-severity.enum';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
+import { PubSub } from 'graphql-subscriptions';
+import { PUB_SUB, ALERT_CREATED_EVENT } from './pubsub';
 
 @Injectable()
 export class AlertsService extends BaseService<Alert> {
@@ -20,6 +23,7 @@ export class AlertsService extends BaseService<Alert> {
   constructor(
     @InjectRepository(Alert)
     private readonly alertRepository: Repository<Alert>,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {
     super(alertRepository);
   }
@@ -195,6 +199,12 @@ export class AlertsService extends BaseService<Alert> {
           `Failed to reload alert with ID ${saved.id}`,
         );
       }
+
+      // VSL-97: push the newly-created alert to subscribers (toast
+      // notifications). Published only AFTER the alert is persisted and
+      // reloaded with relations. Tenant scoping is enforced by the
+      // subscription filter, not here.
+      await this.pubSub.publish(ALERT_CREATED_EVENT, { alertCreated: result });
 
       return result;
     } catch (error) {
