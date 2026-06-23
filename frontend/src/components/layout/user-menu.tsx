@@ -172,17 +172,14 @@ export function UserMenu({ className }: UserMenuProps) {
                   key={loc}
                   onClick={() => setLocale(loc)}
                   className={cn(
-                    'flex cursor-pointer items-center gap-2.5 py-2 pl-2 pr-2',
+                    'flex cursor-pointer items-center gap-2.5 py-2 pr-2 pl-2',
                     isActive && 'bg-accent/60',
                   )}
                   dir={loc === 'ar' ? 'rtl' : 'ltr'}
                 >
                   <FlagIcon locale={loc} className="h-4 w-4 shrink-0" />
                   <span
-                    className={cn(
-                      'flex-1 text-sm',
-                      isActive && 'font-medium',
-                    )}
+                    className={cn('flex-1 text-sm', isActive && 'font-medium')}
                   >
                     {localeNativeNames[loc]}
                   </span>

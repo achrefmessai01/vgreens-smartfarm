@@ -49,7 +49,10 @@ export class SensorConfigService {
           input.hiddenInFarmOverview ?? existing.hiddenInFarmOverview ?? false,
       });
       await this.repo.save(existing);
-      return this.findOneByDevice(tenantId, input.device) as Promise<SensorConfig>;
+      return this.findOneByDevice(
+        tenantId,
+        input.device,
+      ) as Promise<SensorConfig>;
     }
 
     const config = this.repo.create({
@@ -60,7 +63,10 @@ export class SensorConfigService {
       hiddenInFarmOverview: input.hiddenInFarmOverview ?? false,
     });
     await this.repo.save(config);
-    return this.findOneByDevice(tenantId, input.device) as Promise<SensorConfig>;
+    return this.findOneByDevice(
+      tenantId,
+      input.device,
+    ) as Promise<SensorConfig>;
   }
 
   async delete(id: string, tenantId: string): Promise<boolean> {

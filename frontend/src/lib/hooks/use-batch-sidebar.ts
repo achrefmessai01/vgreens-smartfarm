@@ -149,9 +149,19 @@ export function useBatchSidebar({
     [updateEntry],
   );
 
-  const handleFruitCountChange = React.useCallback(
+  const handleSampleWeightChange = React.useCallback(
     (entryIndex: number, value: number) => {
-      updateEntry(entryIndex, (entry) => ({ ...entry, fruitCount: value }));
+      updateEntry(entryIndex, (entry) => ({ ...entry, sampleWeight: value }));
+    },
+    [updateEntry],
+  );
+
+  const handleSampleFruitCountChange = React.useCallback(
+    (entryIndex: number, value: number) => {
+      updateEntry(entryIndex, (entry) => ({
+        ...entry,
+        sampleFruitCount: value,
+      }));
     },
     [updateEntry],
   );
@@ -180,7 +190,7 @@ export function useBatchSidebar({
             };
           case 'removeClass': {
             if (entry.classKgs.length <= 1) return entry;
-            const drop = <T,>(arr: T[]) =>
+            const drop = <T>(arr: T[]) =>
               arr.filter((_, i) => i !== change.index);
             return {
               ...entry,
@@ -257,12 +267,12 @@ export function useBatchSidebar({
   const handleSave = React.useCallback(async () => {
     if (!currentData) return;
 
-    // Map each sub-entry to the GraphQL input shape. Brix readings and fruit
-    // count only count when their section is expanded. In weight mode the entry
-    // carries its class kg directly; in crate mode it carries per-quality crate
-    // counts + remainders and the backend derives the kg/total from the batch
-    // crateWeight. The backend derives per-entry avgBrix / avgFruitWeight and
-    // all totals.
+    // Map each sub-entry to the GraphQL input shape. Brix readings and the fruit
+    // weight sample only count when their section is expanded. In weight mode the
+    // entry carries its class kg directly; in crate mode it carries per-quality
+    // crate counts + remainders and the backend derives the kg/total from the
+    // batch crateWeight. The backend derives per-entry avgBrix / avgFruitWeight
+    // (from the sample) and all totals.
     const isCrate = currentData.inputMode === InputMode.Crate;
     const entries = currentData.entries.map((entry) => {
       const brixReadings = entry.showBrix
@@ -271,7 +281,11 @@ export function useBatchSidebar({
             value,
           }))
         : [];
-      const fruitCount = entry.showFruitWeight ? entry.fruitCount : 0;
+      // Sample weight is captured in grams; avgFruitWeight is derived backend-side.
+      const sampleWeight = entry.showFruitWeight ? entry.sampleWeight : null;
+      const sampleFruitCount = entry.showFruitWeight
+        ? entry.sampleFruitCount
+        : null;
 
       if (isCrate) {
         return {
@@ -280,7 +294,8 @@ export function useBatchSidebar({
           waste: entry.waste,
           crateCounts: entry.crateCounts,
           remainingKgs: entry.remainingKgs,
-          fruitCount,
+          sampleWeight,
+          sampleFruitCount,
           brixReadings,
         };
       }
@@ -290,7 +305,8 @@ export function useBatchSidebar({
         rowY: entry.rowY,
         classKgs: entry.classKgs,
         waste: entry.waste,
-        fruitCount,
+        sampleWeight,
+        sampleFruitCount,
         brixReadings,
       };
     });
@@ -358,7 +374,8 @@ export function useBatchSidebar({
     handleBrixClassChange,
     handleAddBrixReading,
     handleRemoveBrixReading,
-    handleFruitCountChange,
+    handleSampleWeightChange,
+    handleSampleFruitCountChange,
     handleEntryChange,
     handleSetShowBrix,
     handleSetShowFruitWeight,

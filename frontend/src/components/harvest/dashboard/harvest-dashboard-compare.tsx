@@ -39,12 +39,7 @@ interface BatchLoaderProps {
   onLoaded: (state: LoadedBatch) => void;
 }
 
-function BatchDataLoader({
-  batch,
-  color,
-  period,
-  onLoaded,
-}: BatchLoaderProps) {
+function BatchDataLoader({ batch, color, period, onLoaded }: BatchLoaderProps) {
   const { data, loading } = useHarvestDashboard({
     dateFilter: period,
     batchId: batch.id,
@@ -163,7 +158,7 @@ export function HarvestDashboardCompare({
               prev[state.batch.id].loading === state.loading &&
               prev[state.batch.id].data === state.data
                 ? prev
-                : { ...prev, [state.batch.id]: state }
+                : { ...prev, [state.batch.id]: state },
             )
           }
         />
@@ -231,7 +226,7 @@ export function HarvestDashboardCompare({
                     {h?.averageFruitWeight ?? 'Avg Fruit Weight'}
                   </p>
                   <p className="text-sm font-semibold">
-                    {isLoading ? '–' : `${averageFruitWeight.toFixed(3)} kg`}
+                    {isLoading ? '–' : `${averageFruitWeight.toFixed(1)} g`}
                   </p>
                 </div>
                 <div>

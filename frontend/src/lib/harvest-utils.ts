@@ -64,17 +64,17 @@ export function computeAvgBrix(readings: number[]): number {
 }
 
 /**
- * Average weight of a single fruit (kg) = total weight / fruit count.
- * Returns 0 when the count is missing so an incomplete entry contributes
- * nothing to the metric. Rounded to 3 decimals to preserve gram-level detail.
+ * Average weight of a single fruit in GRAMS, from a weighed sample:
+ * sampleWeight (g) / sampleFruitCount. Returns 0 when the sample is incomplete
+ * so it contributes nothing to the metric. Rounded to 3 decimals.
  */
 export function computeAvgFruitWeight(
-  fruitCount: number,
-  totalFruitWeight: number,
+  sampleFruitCount: number,
+  sampleWeight: number,
 ): number {
-  if (fruitCount <= 0 || totalFruitWeight <= 0) return 0;
+  if (sampleFruitCount <= 0 || sampleWeight <= 0) return 0;
 
-  return Math.round((totalFruitWeight / fruitCount) * 1000) / 1000;
+  return Math.round((sampleWeight / sampleFruitCount) * 1000) / 1000;
 }
 
 // Quality-class label letter from a 0-based array index: 0 -> A, 1 -> B, ... The
@@ -127,7 +127,11 @@ export function crateEntryTotalKg(
   const len = Math.max(crateCounts?.length ?? 0, remainingKgs?.length ?? 0);
   let total = 0;
   for (let i = 0; i < len; i++) {
-    total += crateClassKg(crateCounts?.[i] ?? 0, remainingKgs?.[i] ?? 0, crateWeight);
+    total += crateClassKg(
+      crateCounts?.[i] ?? 0,
+      remainingKgs?.[i] ?? 0,
+      crateWeight,
+    );
   }
   return total;
 }
@@ -240,8 +244,10 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     brixReadings: readings,
     brixClasses: classes,
     showBrix: entry.brixReadings.some((b) => b.value > 0),
-    fruitCount: entry.fruitCount,
-    showFruitWeight: entry.fruitCount > 0,
+    sampleWeight: entry.sampleWeight ?? 0,
+    sampleFruitCount: entry.sampleFruitCount ?? 0,
+    showFruitWeight:
+      (entry.sampleWeight ?? 0) > 0 || (entry.sampleFruitCount ?? 0) > 0,
   };
 }
 

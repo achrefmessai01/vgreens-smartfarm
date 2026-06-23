@@ -45,7 +45,10 @@ export class GreenhouseResolver {
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
   ): Promise<Greenhouse | null> {
-    return this.greenhouseService.findOne(id, this.resolveTenantId(currentUser));
+    return this.greenhouseService.findOne(
+      id,
+      this.resolveTenantId(currentUser),
+    );
   }
 
   @Mutation(() => Greenhouse)

@@ -12,7 +12,10 @@ import { BatchStatus } from '@common/enums';
 // greenhouse) now live on the parent batch and are filtered via a join.
 @InputType()
 export class HarvestFilterInput {
-  @Field({ nullable: true, description: 'Search in batch name / species / variety' })
+  @Field({
+    nullable: true,
+    description: 'Search in batch name / species / variety',
+  })
   @IsOptional()
   @IsString()
   search?: string;
@@ -22,7 +25,10 @@ export class HarvestFilterInput {
   @IsDateString()
   dateFrom?: string;
 
-  @Field({ nullable: true, description: 'Harvests until this date (inclusive)' })
+  @Field({
+    nullable: true,
+    description: 'Harvests until this date (inclusive)',
+  })
   @IsOptional()
   @IsDateString()
   dateTo?: string;
@@ -43,7 +49,10 @@ export class HarvestFilterInput {
   @IsUUID()
   tenantId?: string;
 
-  @Field(() => ID, { nullable: true, description: 'Filter by user who created' })
+  @Field(() => ID, {
+    nullable: true,
+    description: 'Filter by user who created',
+  })
   @IsOptional()
   @IsUUID()
   createdById?: string;

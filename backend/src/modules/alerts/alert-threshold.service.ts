@@ -384,7 +384,11 @@ export class AlertThresholdService {
       if (!triggered) continue;
 
       // Check guard condition if defined (e.g. VPD > 2.3 for vwc_rapid_drydown)
-      if (rule.guardField && rule.guardOp !== undefined && rule.guardValue !== undefined) {
+      if (
+        rule.guardField &&
+        rule.guardOp !== undefined &&
+        rule.guardValue !== undefined
+      ) {
         const guardPoints = byDeviceGuard.get(device) ?? [];
         const guardInWindow = guardPoints.filter((p) => p.time >= cutoff);
         const guardPasses =

@@ -85,11 +85,12 @@ export function DashboardFilters({
     }
     if (compareBatchIds.length === 1) {
       const selected = batches.find((b) => b.id === compareBatchIds[0]);
-      return selected?.name ?? (h?.allBatches ?? 'All batches');
+      return selected?.name ?? h?.allBatches ?? 'All batches';
     }
-    return (
-      h?.batchesSelectedPlural ?? '{count} batches selected'
-    ).replace('{count}', String(compareBatchIds.length));
+    return (h?.batchesSelectedPlural ?? '{count} batches selected').replace(
+      '{count}',
+      String(compareBatchIds.length),
+    );
   })();
 
   return (
@@ -165,9 +166,7 @@ export function DashboardFilters({
                   />
                   <span className="truncate">
                     {b.name}{' '}
-                    <span className="text-muted-foreground">
-                      ({b.species})
-                    </span>
+                    <span className="text-muted-foreground">({b.species})</span>
                   </span>
                 </label>
               );

@@ -60,7 +60,9 @@ const COLUMN_DEFS: ColumnDef[] = [
     key: 'brixReadings',
     value: (h) =>
       (h.entries ?? [])
-        .flatMap((e) => (e.brixReadings ?? []).map((b) => `${b.class}:${b.value}`))
+        .flatMap((e) =>
+          (e.brixReadings ?? []).map((b) => `${b.class}:${b.value}`),
+        )
         .join('|'),
   },
   { key: 'fruitCount', value: (h) => num(h.totals?.fruitCount) },

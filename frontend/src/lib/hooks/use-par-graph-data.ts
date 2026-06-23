@@ -52,8 +52,7 @@ export function useParGraphData(
   // `me.tenant.id`; vGreens admins viewing another tenant pass an explicit
   // override. Without either the backend would 400 with "Tenant context
   // is required" — better to wait for auth to resolve.
-  const hasTenantContext =
-    !!tenantIdOverride || !!meData?.me?.tenant?.id;
+  const hasTenantContext = !!tenantIdOverride || !!meData?.me?.tenant?.id;
 
   const { data } = useGetParDliForTenantQuery({
     variables: { tenantId: tenantIdOverride ?? null, timezone },
@@ -134,10 +133,7 @@ export function useParGraphData(
 
   const yMax = React.useMemo(() => {
     const maxToday = curveData.reduce((acc, d) => Math.max(acc, d.today), 0);
-    const maxUpper = upperEdge.reduce(
-      (acc, d) => Math.max(acc, d.dli ?? 0),
-      0,
-    );
+    const maxUpper = upperEdge.reduce((acc, d) => Math.max(acc, d.dli ?? 0), 0);
     const maxSeries = Math.max(maxToday, maxUpper);
     if (maxSeries === 0) return 5;
     return Math.ceil((maxSeries + 1) / 5) * 5;

@@ -8,7 +8,8 @@ import { InputType, Field } from '@nestjs/graphql';
 export class BatchFilterInput {
   @Field({
     nullable: true,
-    description: 'Batches planted on or after this date (inclusive, YYYY-MM-DD)',
+    description:
+      'Batches planted on or after this date (inclusive, YYYY-MM-DD)',
   })
   @IsOptional()
   @IsDateString()
@@ -16,7 +17,8 @@ export class BatchFilterInput {
 
   @Field({
     nullable: true,
-    description: 'Batches planted on or before this date (inclusive, YYYY-MM-DD)',
+    description:
+      'Batches planted on or before this date (inclusive, YYYY-MM-DD)',
   })
   @IsOptional()
   @IsDateString()

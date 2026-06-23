@@ -58,6 +58,11 @@ const baseFeatureRouteConfigs: FeatureRouteConfig[] = [
     path: '/tenant/history',
     name: 'History',
   },
+  {
+    featureKey: 'device_status',
+    path: '/tenant/devices',
+    name: 'Device Status',
+  },
 ];
 
 /**

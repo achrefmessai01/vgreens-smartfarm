@@ -18,7 +18,10 @@ import { User } from '@modules/users/entities/user.entity';
 @ObjectType()
 @Entity('crops')
 // Name is unique only among live (non-soft-deleted) rows.
-@Index('crops_name_uq', ['name'], { unique: true, where: '"deletedAt" IS NULL' })
+@Index('crops_name_uq', ['name'], {
+  unique: true,
+  where: '"deletedAt" IS NULL',
+})
 export class Crop {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')

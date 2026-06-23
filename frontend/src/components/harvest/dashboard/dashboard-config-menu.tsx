@@ -71,7 +71,8 @@ export function DashboardConfigMenu({
         });
       } catch (err) {
         toast({
-          title: h?.configSaveFailed ?? 'Failed to save dashboard configuration',
+          title:
+            h?.configSaveFailed ?? 'Failed to save dashboard configuration',
           description: err instanceof Error ? err.message : String(err),
           variant: 'destructive',
         });
@@ -97,7 +98,9 @@ export function DashboardConfigMenu({
 
   const handleToggleAll = React.useCallback(
     (visible: boolean) => {
-      void persist(visible ? new Set<string>() : new Set(ALL_DASHBOARD_ITEM_IDS));
+      void persist(
+        visible ? new Set<string>() : new Set(ALL_DASHBOARD_ITEM_IDS),
+      );
     },
     [persist],
   );
@@ -133,7 +136,7 @@ export function DashboardConfigMenu({
         <DropdownMenuLabel className="flex items-center gap-2 px-2 pt-1 pb-1.5 text-xs font-semibold tracking-wide uppercase">
           <LayoutDashboard className="h-3.5 w-3.5" />
           <span>{triggerLabel}</span>
-          <span className="text-muted-foreground ml-auto text-[10px] tabular-nums normal-case">
+          <span className="text-muted-foreground ml-auto text-[10px] normal-case tabular-nums">
             {visibleCount} / {totalCount} {h?.configVisibleSuffix ?? 'visible'}
           </span>
         </DropdownMenuLabel>

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Plus, X } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { Input } from '@/components/ui/input';
+import { DecimalInput } from '@/components/ui/decimal-input';
 import { Button } from '@/components/ui/button';
 import type { CrateYieldFieldProps } from '@/types/batch-sidebar.types';
 import {
@@ -114,17 +115,10 @@ export function CrateYieldField({
                   </span>
                 </div>
                 <div className="relative">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={remainder === 0 ? '' : remainder.toString()}
-                    onChange={(e) =>
-                      onChange?.({
-                        kind: 'remainingKg',
-                        index: i,
-                        value: Math.max(0, parseFloat(e.target.value) || 0),
-                      })
+                  <DecimalInput
+                    value={remainder}
+                    onChange={(v) =>
+                      onChange?.({ kind: 'remainingKg', index: i, value: v })
                     }
                     className="h-10 pr-10 text-left text-base"
                     placeholder={remainingKgLabel}
@@ -155,17 +149,9 @@ export function CrateYieldField({
         <div className="space-y-2 text-left">
           <p className="text-muted-foreground text-sm">{h?.waste ?? 'Waste'}</p>
           <div className="relative">
-            <Input
-              type="number"
-              min="0"
-              step="0.1"
-              value={waste === 0 ? '' : waste.toString()}
-              onChange={(e) =>
-                onChange?.({
-                  kind: 'waste',
-                  value: Math.max(0, parseFloat(e.target.value) || 0),
-                })
-              }
+            <DecimalInput
+              value={waste}
+              onChange={(v) => onChange?.({ kind: 'waste', value: v })}
               className="h-10 pr-10 text-left text-base"
               placeholder={h?.enterWasteAmount ?? 'Enter waste amount'}
             />

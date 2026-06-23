@@ -77,7 +77,10 @@ function validateEditForm(data: BatchFormData): BatchFormErrors {
     errors.plantsPerMeter = 'Plants per meter must be greater than 0';
   if (!data.replicates || data.replicates < 1)
     errors.replicates = 'Replicates must be at least 1';
-  if (data.inputMode === InputMode.Crate && (!data.crateWeight || data.crateWeight <= 0))
+  if (
+    data.inputMode === InputMode.Crate &&
+    (!data.crateWeight || data.crateWeight <= 0)
+  )
     errors.crateWeight = 'Crate weight must be greater than 0';
   validateRowRange(data, errors);
   return errors;

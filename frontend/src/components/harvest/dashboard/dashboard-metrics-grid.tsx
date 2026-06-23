@@ -71,7 +71,7 @@ export function DashboardMetricsGrid({
       node: (
         <MetricCard
           title={h?.averageFruitWeight ?? 'Average Fruit Weight'}
-          value={`${data.averageFruitWeight?.toFixed(3) ?? 0} kg`}
+          value={`${data.averageFruitWeight?.toFixed(1) ?? 0} g`}
           subtitle={h?.avgWeightPerFruit ?? 'Average weight per fruit'}
           icon={<Scale className="h-4 w-4" />}
           color="info"

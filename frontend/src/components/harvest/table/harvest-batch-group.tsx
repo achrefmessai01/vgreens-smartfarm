@@ -83,10 +83,12 @@ export function HarvestBatchGroup({
     'text-purple-600',
   ];
   const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
-  const classLabel = (i: number) => classLabelTpl.replace('{class}', classLetter(i));
+  const classLabel = (i: number) =>
+    classLabelTpl.replace('{class}', classLetter(i));
   const classColor = (i: number) => classColors[i % classColors.length];
   const classIdxs = agg.classKgs.map((_, i) => i);
-  const classKgAt = (kgs: number[] | null | undefined, i: number) => kgs?.[i] ?? 0;
+  const classKgAt = (kgs: number[] | null | undefined, i: number) =>
+    kgs?.[i] ?? 0;
 
   return (
     <Accordion
@@ -219,7 +221,7 @@ export function HarvestBatchGroup({
                     <TableCell>
                       {agg.avgFruitWeight == null
                         ? '—'
-                        : `${agg.avgFruitWeight.toFixed(3)} kg`}
+                        : `${agg.avgFruitWeight.toFixed(1)} g`}
                     </TableCell>
                     <TableCell>
                       {agg.yieldPerPlant == null
@@ -342,7 +344,7 @@ export function HarvestBatchGroup({
                           <TableCell>
                             {rowAvgFruitWeight == null
                               ? '—'
-                              : `${rowAvgFruitWeight.toFixed(3)} kg`}
+                              : `${rowAvgFruitWeight.toFixed(1)} g`}
                           </TableCell>
                           <TableCell>
                             {rowYieldPerPlant == null

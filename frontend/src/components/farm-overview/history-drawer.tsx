@@ -64,6 +64,12 @@ interface HistoryDrawerProps {
   onOpenChange: (open: boolean) => void;
   parameter: ParameterType;
   slotId: string | null;
+  /**
+   * Real InfluxDB `greenhouse` tag for the selected slot. Used to scope the
+   * history query to the exact series — the slot id's greenhouse segment can be
+   * an assigned display name, so it must not be used as a tag filter (VSL-221).
+   */
+  greenhouse?: string | null;
   parameterLabel: string;
   timeRangeLabel: string;
   oneDayLabel: string;
@@ -78,6 +84,7 @@ export function HistoryDrawer({
   onOpenChange,
   parameter,
   slotId,
+  greenhouse,
   parameterLabel,
   timeRangeLabel,
   oneDayLabel,
@@ -116,6 +123,7 @@ export function HistoryDrawer({
         stop: startStop.stop ?? undefined,
         limit: 2000,
         field: parameter,
+        greenhouse: greenhouse ?? undefined,
         device: slotFilters?.device ?? undefined,
         level:
           slotFilters?.level && slotFilters.level.toLowerCase() !== 'unknown'

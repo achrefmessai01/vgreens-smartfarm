@@ -14,11 +14,7 @@ import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import type { UserFormData } from '@/components/users';
 
 export function useTenantUsersPage() {
-  const {
-    user: currentUser,
-    isVGreensAdmin,
-    isTenantAdmin,
-  } = useCurrentUser();
+  const { user: currentUser, isVGreensAdmin, isTenantAdmin } = useCurrentUser();
   const tenantId = currentUser?.tenantId;
 
   // The `users` query is restricted to admins; skip it for tenant users to

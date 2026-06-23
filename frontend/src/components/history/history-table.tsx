@@ -159,10 +159,12 @@ export function HistoryTable({
                   </>
                 )}
                 <TableCell>
-                  {formatCurrency(row.expectedProductionCost, 'EUR')}{t.pages.history.perKg}
+                  {formatCurrency(row.expectedProductionCost, 'EUR')}
+                  {t.pages.history.perKg}
                 </TableCell>
                 <TableCell>
-                  {formatCurrency(row.actualProductionCost, 'EUR')}{t.pages.history.perKg}
+                  {formatCurrency(row.actualProductionCost, 'EUR')}
+                  {t.pages.history.perKg}
                 </TableCell>
               </TableRow>
             ))}

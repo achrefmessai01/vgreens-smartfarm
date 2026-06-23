@@ -54,7 +54,7 @@ export function CameraCard({
           : undefined
       }
     >
-      <div className="bg-muted dark:bg-black/40 relative flex aspect-video w-full items-center justify-center overflow-hidden">
+      <div className="bg-muted relative flex aspect-video w-full items-center justify-center overflow-hidden dark:bg-black/40">
         {loading ? (
           <div className="text-muted-foreground flex flex-col items-center gap-2 text-sm">
             <Loader2 className="h-8 w-8 animate-spin" />

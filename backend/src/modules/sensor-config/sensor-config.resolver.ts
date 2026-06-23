@@ -16,6 +16,15 @@ import { SensorConfigService } from './sensor-config.service';
 import { SensorConfig } from './entities/sensor-config.entity';
 import { UpsertSensorConfigInput } from './dto';
 import { InfluxDBService } from '@modules/influxdb/influxdb.service';
+import {
+  DeviceActivityPoint,
+  DeviceStatus,
+  DeviceStatusInput,
+  DeviceStatusRange,
+  DEVICE_STATUS_RANGE_FLUX,
+  DEVICE_STATUS_RANGE_WINDOW,
+  windowForDurationMs,
+} from '@modules/influxdb/dto';
 import { TenantsService } from '@modules/tenants/tenants.service';
 import { GreenhouseService } from '@modules/greenhouse/greenhouse.service';
 
@@ -61,6 +70,110 @@ export class SensorConfigResolver {
     const tenant = await this.tenantsService.findOne(targetTenantId);
     if (!tenant?.influxBucketName) return [];
     return this.influxDBService.getUniqueGreenhouses(tenant.influxBucketName);
+  }
+
+  @Query(() => [DeviceStatus], { name: 'deviceStatuses' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  async deviceStatuses(
+    @CurrentUser() currentUser: User,
+    @Args('input', { nullable: true }) input?: DeviceStatusInput,
+  ): Promise<DeviceStatus[]> {
+    const targetTenantId = this.resolveTargetTenantId(
+      currentUser,
+      input?.tenantId,
+    );
+    const tenant = await this.tenantsService.findOne(targetTenantId);
+    if (!tenant?.influxBucketName) return [];
+
+    const { start, stop } = this.resolveDeviceRange(input);
+    const statuses = await this.influxDBService.getDeviceStatusInventory(
+      tenant.influxBucketName,
+      { start, stop },
+    );
+
+    // Merge in per-device settings, and surface configured-but-silent devices
+    // as `never-seen` rows so the dashboard lists the full fleet.
+    const configs =
+      await this.sensorConfigService.findAllByTenant(targetTenantId);
+    const byDevice = new Map(statuses.map((s) => [s.device, s]));
+    for (const cfg of configs) {
+      const settings = {
+        greenhouse: cfg.greenhouseRef?.name ?? undefined,
+        xPosition: cfg.xPosition ?? undefined,
+        yPosition: cfg.yPosition ?? undefined,
+        city: cfg.city ?? undefined,
+        hiddenInFarmOverview: cfg.hiddenInFarmOverview ?? undefined,
+      };
+      const existing = byDevice.get(cfg.device);
+      if (existing) {
+        Object.assign(existing, settings);
+      } else {
+        const status: DeviceStatus = {
+          device: cfg.device,
+          state: 'never-seen',
+          deviceClass: cfg.device.startsWith('vgreens-') ? 'edge' : 'regular',
+          messageTypes: [],
+          realMessageTypes: [],
+          realDataPoints: 0,
+          heartbeatDataPoints: 0,
+          lastValues: [],
+          ...settings,
+        };
+        byDevice.set(cfg.device, status);
+      }
+    }
+
+    return [...byDevice.values()].sort((a, b) =>
+      a.device.localeCompare(b.device),
+    );
+  }
+
+  @Query(() => [DeviceActivityPoint], { name: 'deviceActivitySeries' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  async deviceActivitySeries(
+    @CurrentUser() currentUser: User,
+    @Args('input', { nullable: true }) input?: DeviceStatusInput,
+  ): Promise<DeviceActivityPoint[]> {
+    const targetTenantId = this.resolveTargetTenantId(
+      currentUser,
+      input?.tenantId,
+    );
+    const tenant = await this.tenantsService.findOne(targetTenantId);
+    if (!tenant?.influxBucketName) return [];
+
+    const { start, stop, windowEvery } = this.resolveDeviceRange(input);
+    return this.influxDBService.getDeviceActivitySeries(
+      tenant.influxBucketName,
+      { start, stop, windowEvery },
+    );
+  }
+
+  /**
+   * Resolves a device-status range request to Flux inputs. A valid custom
+   * `start`/`stop` pair (ISO, stop after start) wins; otherwise the relative
+   * `range` preset is used.
+   */
+  private resolveDeviceRange(input?: DeviceStatusInput): {
+    start: string;
+    stop?: string;
+    windowEvery: string;
+  } {
+    if (input?.start && input?.stop) {
+      const s = new Date(input.start).getTime();
+      const e = new Date(input.stop).getTime();
+      if (!Number.isNaN(s) && !Number.isNaN(e) && e > s) {
+        return {
+          start: input.start,
+          stop: input.stop,
+          windowEvery: windowForDurationMs(e - s),
+        };
+      }
+    }
+    const range = input?.range ?? DeviceStatusRange.SEVEN_DAYS;
+    return {
+      start: DEVICE_STATUS_RANGE_FLUX[range],
+      windowEvery: DEVICE_STATUS_RANGE_WINDOW[range],
+    };
   }
 
   @Mutation(() => SensorConfig)
