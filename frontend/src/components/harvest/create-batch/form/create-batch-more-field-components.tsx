@@ -6,6 +6,11 @@ import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n';
 import { InputMode, useVarietiesQuery } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
+import { AddVarietyDialog } from './add-variety-dialog';
+
+// Sentinel value used by VarietyField's dropdown to open the "add variety"
+// dialog instead of selecting an actual variety id.
+const ADD_VARIETY_SENTINEL = '__add_variety__';
 
 interface FormFieldProps {
   formData: BatchFormData;
@@ -20,7 +25,9 @@ function parsePositiveNumber(value: string): number {
 }
 
 // Variety selector. Optional, and scoped to the varieties of the chosen crop,
-// so the field is disabled until a crop is picked.
+// so the field is disabled until a crop is picked. The dropdown ends with a
+// "+ Add new variety..." sentinel option that opens AddVarietyDialog so users
+// can add a missing variety inline (admin-gated on the backend).
 export function VarietyField({
   formData,
   setFormData,
@@ -28,13 +35,15 @@ export function VarietyField({
   disabled = false,
 }: FormFieldProps) {
   const { t } = useI18n();
-  const h = t.pages.harvest;
+  const h = t.pages.harvest as Record<string, string | undefined> &
+    typeof t.pages.harvest;
   const cropId = formData.cropId;
-  const { data, loading } = useVarietiesQuery({
+  const { data, loading, refetch } = useVarietiesQuery({
     variables: { cropId },
     skip: !cropId,
   });
   const varieties = data?.varieties ?? [];
+  const [addOpen, setAddOpen] = React.useState(false);
 
   return (
     <div className="space-y-2">
@@ -44,9 +53,15 @@ export function VarietyField({
       <select
         id="varietyId"
         value={formData.varietyId}
-        onChange={(e) =>
-          setFormData((prev) => ({ ...prev, varietyId: e.target.value }))
-        }
+        onChange={(e) => {
+          const value = e.target.value;
+          if (value === ADD_VARIETY_SENTINEL) {
+            // Don't write the sentinel to form state; open the dialog instead.
+            setAddOpen(true);
+            return;
+          }
+          setFormData((prev) => ({ ...prev, varietyId: value }));
+        }}
         disabled={disabled || !cropId || loading}
         className={`border-input bg-background ring-offset-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
           errors.varietyId ? 'border-destructive' : ''
@@ -62,9 +77,27 @@ export function VarietyField({
             {v.name}
           </option>
         ))}
+        {cropId && (
+          <option value={ADD_VARIETY_SENTINEL}>
+            {h?.addVarietyOption ?? '+ Add new variety...'}
+          </option>
+        )}
       </select>
       {errors.varietyId && (
         <p className="text-destructive text-sm">{errors.varietyId}</p>
+      )}
+      {cropId && (
+        <AddVarietyDialog
+          open={addOpen}
+          cropId={cropId}
+          onOpenChange={setAddOpen}
+          onCreated={async (variety) => {
+            // Make the new variety visible in the dropdown, then auto-select it
+            // so the user can immediately continue with the form.
+            await refetch();
+            setFormData((prev) => ({ ...prev, varietyId: variety.id }));
+          }}
+        />
       )}
     </div>
   );

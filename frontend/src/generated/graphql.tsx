@@ -255,6 +255,7 @@ export type CreateFeatureInput = {
 export type CreateGreenhouseInput = {
   bayCount?: InputMaybe<Scalars['Int']['input']>;
   doorPosition?: InputMaybe<DoorPosition>;
+  hiddenInFarmOverview?: InputMaybe<Scalars['Boolean']['input']>;
   isHorizontal?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -318,6 +319,12 @@ export type CreateUserInput = {
   lastName?: InputMaybe<Scalars['String']['input']>;
   role?: InputMaybe<UserRole>;
   tenantId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CreateVarietyInput = {
+  cropId: Scalars['ID']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
 };
 
 export type Crop = {
@@ -524,6 +531,7 @@ export type Greenhouse = {
   deletedBy?: Maybe<User>;
   deletedById?: Maybe<Scalars['ID']['output']>;
   doorPosition?: Maybe<DoorPosition>;
+  hiddenInFarmOverview?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   isHorizontal?: Maybe<Scalars['Boolean']['output']>;
   name: Scalars['String']['output'];
@@ -794,6 +802,7 @@ export type Mutation = {
   createImageUploadUrl: SignedUrl;
   createTenant: Tenant;
   createUser: User;
+  createVariety: Variety;
   deleteAlert: Scalars['Boolean']['output'];
   deleteBatch: Scalars['Boolean']['output'];
   deleteErrorReport: Scalars['Boolean']['output'];
@@ -887,6 +896,11 @@ export type MutationCreateTenantArgs = {
 
 export type MutationCreateUserArgs = {
   input: CreateUserInput;
+};
+
+
+export type MutationCreateVarietyArgs = {
+  input: CreateVarietyInput;
 };
 
 
@@ -1454,6 +1468,7 @@ export type TenantGreenhouse = {
   __typename?: 'TenantGreenhouse';
   bayCount?: Maybe<Scalars['Int']['output']>;
   doorPosition?: Maybe<DoorPosition>;
+  hiddenInFarmOverview?: Maybe<Scalars['Boolean']['output']>;
   isHorizontal?: Maybe<Scalars['Boolean']['output']>;
   name: Scalars['String']['output'];
   xDimension: Scalars['Float']['output'];
@@ -1534,6 +1549,7 @@ export type UpdateFeatureInput = {
 export type UpdateGreenhouseInput = {
   bayCount?: InputMaybe<Scalars['Int']['input']>;
   doorPosition?: InputMaybe<DoorPosition>;
+  hiddenInFarmOverview?: InputMaybe<Scalars['Boolean']['input']>;
   isHorizontal?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   xDimension?: InputMaybe<Scalars['Float']['input']>;
@@ -1874,7 +1890,7 @@ export type CreateTenantMutationVariables = Exact<{
 }>;
 
 
-export type CreateTenantMutation = { __typename?: 'Mutation', createTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null }> | null } };
+export type CreateTenantMutation = { __typename?: 'Mutation', createTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null } };
 
 export type UpdateTenantMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -1882,7 +1898,7 @@ export type UpdateTenantMutationVariables = Exact<{
 }>;
 
 
-export type UpdateTenantMutation = { __typename?: 'Mutation', updateTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null }> | null } };
+export type UpdateTenantMutation = { __typename?: 'Mutation', updateTenant: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null } };
 
 export type DeleteTenantMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2080,6 +2096,13 @@ export type VarietiesQueryVariables = Exact<{
 
 export type VarietiesQuery = { __typename?: 'Query', varieties: Array<{ __typename?: 'Variety', id: string, name: string }> };
 
+export type CreateVarietyMutationVariables = Exact<{
+  input: CreateVarietyInput;
+}>;
+
+
+export type CreateVarietyMutation = { __typename?: 'Mutation', createVariety: { __typename?: 'Variety', id: string, name: string, cropId: string } };
+
 export type FarmConfigQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
@@ -2113,21 +2136,21 @@ export type TenantFeaturesQueryVariables = Exact<{
 
 export type TenantFeaturesQuery = { __typename?: 'Query', tenantFeatures: Array<{ __typename?: 'TenantFeature', id: string, tenantId: string, featureId: string, enabled: boolean, createdAt: any, updatedAt: any, feature?: { __typename?: 'Feature', id: string, key: string, name: string, description?: string | null, category?: string | null, isActive: boolean } | null }> };
 
-export type GreenhouseFieldsFragment = { __typename?: 'Greenhouse', id: string, tenantId: string, name: string, doorPosition?: DoorPosition | null, xDimension?: number | null, yDimension?: number | null, bayCount?: number | null, isHorizontal?: boolean | null, createdAt: any, updatedAt: any };
+export type GreenhouseFieldsFragment = { __typename?: 'Greenhouse', id: string, tenantId: string, name: string, doorPosition?: DoorPosition | null, xDimension?: number | null, yDimension?: number | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any };
 
 export type GreenhousesQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type GreenhousesQuery = { __typename?: 'Query', greenhouses: Array<{ __typename?: 'Greenhouse', id: string, tenantId: string, name: string, doorPosition?: DoorPosition | null, xDimension?: number | null, yDimension?: number | null, bayCount?: number | null, isHorizontal?: boolean | null, createdAt: any, updatedAt: any }> };
+export type GreenhousesQuery = { __typename?: 'Query', greenhouses: Array<{ __typename?: 'Greenhouse', id: string, tenantId: string, name: string, doorPosition?: DoorPosition | null, xDimension?: number | null, yDimension?: number | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any }> };
 
 export type GreenhouseQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GreenhouseQuery = { __typename?: 'Query', greenhouse?: { __typename?: 'Greenhouse', id: string, tenantId: string, name: string, doorPosition?: DoorPosition | null, xDimension?: number | null, yDimension?: number | null, bayCount?: number | null, isHorizontal?: boolean | null, createdAt: any, updatedAt: any } | null };
+export type GreenhouseQuery = { __typename?: 'Query', greenhouse?: { __typename?: 'Greenhouse', id: string, tenantId: string, name: string, doorPosition?: DoorPosition | null, xDimension?: number | null, yDimension?: number | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any } | null };
 
 export type GetHarvestBatchesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2297,14 +2320,14 @@ export type GreenhouseOptionsQuery = { __typename?: 'Query', greenhouseOptions: 
 export type TenantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null }> | null }> };
+export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null }> };
 
 export type TenantQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
+export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
 
 export type GetTenantBucketQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2323,7 +2346,7 @@ export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2534,6 +2557,7 @@ export const GreenhouseFieldsFragmentDoc = gql`
   yDimension
   bayCount
   isHorizontal
+  hiddenInFarmOverview
   createdAt
   updatedAt
 }
@@ -3632,6 +3656,7 @@ export const CreateTenantDocument = gql`
       yDimension
       bayCount
       isHorizontal
+      hiddenInFarmOverview
     }
     createdAt
     updatedAt
@@ -3680,6 +3705,7 @@ export const UpdateTenantDocument = gql`
       yDimension
       bayCount
       isHorizontal
+      hiddenInFarmOverview
     }
     createdAt
     updatedAt
@@ -4920,6 +4946,41 @@ export type VarietiesQueryHookResult = ReturnType<typeof useVarietiesQuery>;
 export type VarietiesLazyQueryHookResult = ReturnType<typeof useVarietiesLazyQuery>;
 export type VarietiesSuspenseQueryHookResult = ReturnType<typeof useVarietiesSuspenseQuery>;
 export type VarietiesQueryResult = Apollo.QueryResult<VarietiesQuery, VarietiesQueryVariables>;
+export const CreateVarietyDocument = gql`
+    mutation CreateVariety($input: CreateVarietyInput!) {
+  createVariety(input: $input) {
+    id
+    name
+    cropId
+  }
+}
+    `;
+export type CreateVarietyMutationFn = Apollo.MutationFunction<CreateVarietyMutation, CreateVarietyMutationVariables>;
+
+/**
+ * __useCreateVarietyMutation__
+ *
+ * To run a mutation, you first call `useCreateVarietyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateVarietyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createVarietyMutation, { data, loading, error }] = useCreateVarietyMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateVarietyMutation(baseOptions?: Apollo.MutationHookOptions<CreateVarietyMutation, CreateVarietyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateVarietyMutation, CreateVarietyMutationVariables>(CreateVarietyDocument, options);
+      }
+export type CreateVarietyMutationHookResult = ReturnType<typeof useCreateVarietyMutation>;
+export type CreateVarietyMutationResult = Apollo.MutationResult<CreateVarietyMutation>;
+export type CreateVarietyMutationOptions = Apollo.BaseMutationOptions<CreateVarietyMutation, CreateVarietyMutationVariables>;
 export const FarmConfigDocument = gql`
     query FarmConfig($tenantId: ID) {
   farmConfig(tenantId: $tenantId) {
@@ -6434,6 +6495,7 @@ export const TenantsDocument = gql`
       yDimension
       bayCount
       isHorizontal
+      hiddenInFarmOverview
     }
     createdAt
     updatedAt
@@ -6493,6 +6555,7 @@ export const TenantDocument = gql`
       yDimension
       bayCount
       isHorizontal
+      hiddenInFarmOverview
     }
     createdAt
     updatedAt
@@ -6655,6 +6718,7 @@ export const MeDocument = gql`
         doorPosition
         bayCount
         isHorizontal
+        hiddenInFarmOverview
       }
     }
     isActive

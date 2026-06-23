@@ -32,6 +32,7 @@ import {
   PARAM_VIEW_MODE,
 } from '@/lib/farm-overview-constants';
 import {
+  findBayForGreenhouse,
   parseGreenhouseTab,
   parseParameter,
   parseViewMode,
@@ -214,13 +215,13 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   }, [greenhousesData?.greenhouses]);
 
   const tenantGreenhouses = React.useMemo(() => {
-    if (isVGreensAdmin) {
-      const tenant = tenants.find((tn) => tn.id === selectedTenantId);
-      return tenant?.greenhouses ?? [];
-    }
-    // For tenant users, greenhouses come from the `me` query (tenant relation).
-    // The `tenant(id)` resolver is admin-only, so we use the already-loaded user.tenant.
-    return user?.tenant?.greenhouses ?? [];
+    // Source of truth: admin → selected tenant; tenant user → own tenant from `me`.
+    const all = isVGreensAdmin
+      ? (tenants.find((tn) => tn.id === selectedTenantId)?.greenhouses ?? [])
+      : (user?.tenant?.greenhouses ?? []);
+    // Hide greenhouses the operator has toggled off in Farm Layout config —
+    // they remain configured but disappear from the overview tabs and grid.
+    return all.filter((g) => g.hiddenInFarmOverview !== true);
   }, [isVGreensAdmin, tenants, selectedTenantId, user?.tenant?.greenhouses]);
 
   const tenantDisabledSensorFields = React.useMemo<string[]>(() => {
@@ -542,11 +543,30 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     setHistoryDrawerOpen(false);
   }, [activeGreenhouseTab]);
 
+  // If the visible-greenhouse list shrinks (e.g. operator just hid this one),
+  // fall back to the Combined tab so we never point at a missing greenhouse.
+  React.useEffect(() => {
+    if (
+      activeGreenhouseTab > 0 &&
+      activeGreenhouseTab > tenantGreenhouses.length
+    ) {
+      setActiveGreenhouseTab(0);
+    }
+  }, [activeGreenhouseTab, tenantGreenhouses.length]);
+
+  // Bays returned by influxRowsToBays are sorted alphabetically by chamber
+  // name and only include greenhouses that currently emit sensor data — so
+  // the array indices do NOT align with `tenantGreenhouses` indices. Match
+  // by name (with fallbacks to handle bays still keyed on the raw InfluxDB
+  // tag like "greenhouse_03"); see findBayForGreenhouse.
   const selectedBays = React.useMemo(() => {
     if (activeGreenhouseTab === 0) return bays; // combined
-    const bay = bays[activeGreenhouseTab - 1]; // 1-indexed → 0-indexed
+    const idx = activeGreenhouseTab - 1;
+    const gh = tenantGreenhouses[idx];
+    if (!gh) return [];
+    const bay = findBayForGreenhouse(bays, gh.name, idx);
     return bay ? [bay] : [];
-  }, [activeGreenhouseTab, bays]);
+  }, [activeGreenhouseTab, bays, tenantGreenhouses]);
 
   // Map each slot id to its REAL InfluxDB `greenhouse` tag (from slot meta),
   // so the history drawer can scope its query to the exact series. The slot
@@ -582,15 +602,23 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   }, [activeGreenhouseTab, tenantGreenhouses, t.greenHouse1, t.greenHouse2]);
 
   const combinedGreenhouses = React.useMemo(() => {
-    const count =
-      tenantGreenhouses.length > 0
-        ? tenantGreenhouses.length
-        : farmLayout.chambersCount;
-    return Array.from({ length: count }, (_, i) => ({
-      key: bays[i]?.id ?? `greenhouse_${i + 1}`,
-      label: tenantGreenhouses[i]?.name || ghLabels[i] || `Greenhouse ${i + 1}`,
-      bay: bays[i] ?? null,
-    }));
+    if (tenantGreenhouses.length === 0) {
+      // Fallback: no tenant greenhouses configured — synthesize from layout.
+      return Array.from({ length: farmLayout.chambersCount }, (_, i) => ({
+        key: bays[i]?.id ?? `greenhouse_${i + 1}`,
+        label: ghLabels[i] || `Greenhouse ${i + 1}`,
+        bay: bays[i] ?? null,
+      }));
+    }
+    // Match each greenhouse to its bay (see selectedBays note + helper).
+    return tenantGreenhouses.map((gh, i) => {
+      const bay = findBayForGreenhouse(bays, gh.name, i);
+      return {
+        key: bay?.id ?? `greenhouse_${i + 1}`,
+        label: gh.name || ghLabels[i] || `Greenhouse ${i + 1}`,
+        bay,
+      };
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     bays,

@@ -27,6 +27,7 @@ export const ME_QUERY = gql`
           doorPosition
           bayCount
           isHorizontal
+          hiddenInFarmOverview
         }
       }
       isActive

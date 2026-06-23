@@ -50,4 +50,10 @@ export class CreateGreenhouseInput {
   @IsOptional()
   @IsBoolean()
   isHorizontal?: boolean;
+
+  // Mirrors the entity flag; consumed by Farm Overview to hide tabs.
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  hiddenInFarmOverview?: boolean;
 }

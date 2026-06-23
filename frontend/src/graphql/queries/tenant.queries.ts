@@ -18,6 +18,7 @@ export const TENANTS_QUERY = gql`
         yDimension
         bayCount
         isHorizontal
+        hiddenInFarmOverview
       }
       createdAt
       updatedAt
@@ -43,6 +44,7 @@ export const TENANT_QUERY = gql`
         yDimension
         bayCount
         isHorizontal
+        hiddenInFarmOverview
       }
       createdAt
       updatedAt

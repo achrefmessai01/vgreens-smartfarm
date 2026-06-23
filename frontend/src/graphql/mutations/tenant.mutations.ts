@@ -16,6 +16,7 @@ export const CREATE_TENANT_MUTATION = gql`
         yDimension
         bayCount
         isHorizontal
+        hiddenInFarmOverview
       }
       createdAt
       updatedAt
@@ -39,6 +40,7 @@ export const UPDATE_TENANT_MUTATION = gql`
         yDimension
         bayCount
         isHorizontal
+        hiddenInFarmOverview
       }
       createdAt
       updatedAt

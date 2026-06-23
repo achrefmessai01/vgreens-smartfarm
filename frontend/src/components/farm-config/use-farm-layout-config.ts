@@ -3,6 +3,8 @@
 import * as React from 'react';
 import {
   type DoorPosition,
+  MeDocument,
+  TenantsDocument,
   useGreenhousesQuery,
   useCreateGreenhouseMutation,
   useUpdateGreenhouseMutation,
@@ -19,6 +21,7 @@ export interface GreenhouseRowData {
   doorPosition?: DoorPosition | null;
   bayCount?: number | null;
   isHorizontal?: boolean | null;
+  hiddenInFarmOverview?: boolean | null;
 }
 
 export function useFarmLayoutConfig(tenantId: string) {
@@ -27,9 +30,17 @@ export function useFarmLayoutConfig(tenantId: string) {
     skip: !tenantId,
     fetchPolicy: 'cache-and-network',
   });
-  const [createGreenhouse] = useCreateGreenhouseMutation();
-  const [updateGreenhouse] = useUpdateGreenhouseMutation();
-  const [deleteGreenhouse] = useDeleteGreenhouseMutation();
+  // Farm Overview reads `user.tenant.greenhouses` from the Me query (and
+  // admins read from Tenants) — refetch those alongside this hook's own
+  // Greenhouses query so layout edits (including the Visible toggle) are
+  // immediately reflected on Farm Overview without a page reload.
+  const refetchQueries = React.useMemo(
+    () => [{ query: MeDocument }, { query: TenantsDocument }],
+    [],
+  );
+  const [createGreenhouse] = useCreateGreenhouseMutation({ refetchQueries });
+  const [updateGreenhouse] = useUpdateGreenhouseMutation({ refetchQueries });
+  const [deleteGreenhouse] = useDeleteGreenhouseMutation({ refetchQueries });
   const [saving, setSaving] = React.useState(false);
   const [rows, setRows] = React.useState<GreenhouseRowData[]>([]);
   // Ids of existing rows the user removed; deleted from the table on save.
@@ -46,6 +57,7 @@ export function useFarmLayoutConfig(tenantId: string) {
         doorPosition: g.doorPosition ?? null,
         bayCount: g.bayCount ?? null,
         isHorizontal: g.isHorizontal ?? false,
+        hiddenInFarmOverview: g.hiddenInFarmOverview ?? false,
       })),
     );
     setRemovedIds([]);
@@ -86,6 +98,7 @@ export function useFarmLayoutConfig(tenantId: string) {
         doorPosition: r.doorPosition ?? null,
         bayCount: r.bayCount ?? null,
         isHorizontal: r.isHorizontal ?? false,
+        hiddenInFarmOverview: r.hiddenInFarmOverview ?? false,
       }))
       .filter((r) => r.name.length > 0);
     if (cleaned.some((r) => r.xDimension <= 0 || r.yDimension <= 0)) return;
@@ -105,6 +118,7 @@ export function useFarmLayoutConfig(tenantId: string) {
             doorPosition: r.doorPosition,
             bayCount: r.bayCount,
             isHorizontal: r.isHorizontal,
+            hiddenInFarmOverview: r.hiddenInFarmOverview,
           };
           if (r.id) {
             return updateGreenhouse({ variables: { id: r.id, input } });

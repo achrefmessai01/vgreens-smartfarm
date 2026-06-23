@@ -21,3 +21,15 @@ export const VARIETIES_QUERY = gql`
     }
   }
 `;
+
+// Adds a new variety to the global catalog under the form's selected crop.
+// Admin-only on the backend; opened from the Batch Form's Variety dropdown.
+export const CREATE_VARIETY_MUTATION = gql`
+  mutation CreateVariety($input: CreateVarietyInput!) {
+    createVariety(input: $input) {
+      id
+      name
+      cropId
+    }
+  }
+`;

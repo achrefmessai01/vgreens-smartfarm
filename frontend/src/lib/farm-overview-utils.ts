@@ -1,4 +1,4 @@
-import type { ParameterType } from '@/types/farm.types';
+import type { Bay, ParameterType } from '@/types/farm.types';
 import {
   PARAM_GREENHOUSE,
   PARAM_PARAMETER,
@@ -7,6 +7,50 @@ import {
   VALID_VIEW_MODES,
   type ViewMode,
 } from '@/lib/farm-overview-constants';
+
+/** Trailing-number normaliser ("greenhouse_03" → 3, "Haus 3" → 3). */
+function trailingNumber(s: string | null | undefined): number | null {
+  if (!s) return null;
+  const m = /(\d+)\s*$/.exec(s);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+/**
+ * Find the bay backing a given tenant greenhouse, falling back through several
+ * heuristics. Bays are constructed by `influxRowsToBays` keyed on
+ * `SensorConfig.greenhouse ?? influxGreenhouseTag` — so a bay's `name` may be
+ * the operator-assigned display name (e.g. "Haus 3"), the raw InfluxDB tag
+ * (e.g. "greenhouse_03"), or — if mixed — both. Matching strictly by `===`
+ * misses raw-tag bays that should belong to a display-named greenhouse.
+ *
+ * Order:
+ *   1. Exact name match
+ *   2. Case/whitespace-insensitive name match
+ *   3. Trailing-number match (e.g. "Haus 3" ↔ "greenhouse_03" ↔ "chamber_3")
+ */
+export function findBayForGreenhouse(
+  bays: Bay[],
+  greenhouseName: string,
+  greenhouseIndex: number,
+): Bay | null {
+  if (!greenhouseName) return null;
+
+  const exact = bays.find((b) => b.name === greenhouseName);
+  if (exact) return exact;
+
+  const target = greenhouseName.toLowerCase().trim();
+  const ci = bays.find((b) => b.name?.toLowerCase().trim() === target);
+  if (ci) return ci;
+
+  const wantNum =
+    trailingNumber(greenhouseName) ?? (greenhouseIndex >= 0 ? greenhouseIndex + 1 : null);
+  if (wantNum != null) {
+    const byNumber = bays.find((b) => trailingNumber(b.name) === wantNum);
+    if (byNumber) return byNumber;
+  }
+
+  return null;
+}
 
 /** Parse greenhouse URL value to tab index (0 = combined, 1 = GH1, 2 = GH2). */
 export function parseGreenhouseTab(value: string | null): number {

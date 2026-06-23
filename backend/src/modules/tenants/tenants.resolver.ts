@@ -38,6 +38,7 @@ export class TenantsResolver {
       yDimension: g.yDimension ?? 0,
       bayCount: g.bayCount,
       isHorizontal: g.isHorizontal,
+      hiddenInFarmOverview: g.hiddenInFarmOverview ?? false,
     }));
   }
 

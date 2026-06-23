@@ -24,6 +24,11 @@ export class TenantGreenhouse {
 
   @Field(() => Boolean, { nullable: true })
   isHorizontal?: boolean;
+
+  // Surfaces the underlying Greenhouse flag through the Tenant.greenhouses
+  // resolve field so Farm Overview can hide tabs without an extra query.
+  @Field(() => Boolean, { nullable: true })
+  hiddenInFarmOverview?: boolean;
 }
 
 @ObjectType()
