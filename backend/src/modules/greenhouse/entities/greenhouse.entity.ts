@@ -60,6 +60,12 @@ export class Greenhouse {
   @Column({ type: 'boolean', nullable: true })
   isHorizontal?: boolean;
 
+  // Mirrors SensorConfig.hiddenInFarmOverview — when true, this greenhouse is
+  // hidden from the Farm Overview tabs (still configurable elsewhere).
+  @Field({ nullable: true })
+  @Column({ type: 'boolean', default: false, nullable: true })
+  hiddenInFarmOverview?: boolean;
+
   @Field()
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

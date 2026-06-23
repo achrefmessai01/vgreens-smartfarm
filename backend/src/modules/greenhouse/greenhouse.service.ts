@@ -69,7 +69,21 @@ export class GreenhouseService extends BaseService<Greenhouse> {
     tenantId?: string,
   ): Promise<Greenhouse> {
     const greenhouse = await this.findOneById(id, tenantId);
-    Object.assign(greenhouse, input);
+    // Explicit assignment (rather than Object.assign) so newly-added columns
+    // are always picked up even if a stale build is cached and so that
+    // false/null values are intentionally persisted instead of being skipped.
+    if (input.name !== undefined) greenhouse.name = input.name;
+    if (input.doorPosition !== undefined)
+      greenhouse.doorPosition = input.doorPosition;
+    if (input.xDimension !== undefined)
+      greenhouse.xDimension = input.xDimension;
+    if (input.yDimension !== undefined)
+      greenhouse.yDimension = input.yDimension;
+    if (input.bayCount !== undefined) greenhouse.bayCount = input.bayCount;
+    if (input.isHorizontal !== undefined)
+      greenhouse.isHorizontal = input.isHorizontal;
+    if (input.hiddenInFarmOverview !== undefined)
+      greenhouse.hiddenInFarmOverview = input.hiddenInFarmOverview;
     return this.greenhouseRepository.save(greenhouse);
   }
 

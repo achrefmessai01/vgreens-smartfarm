@@ -10,6 +10,7 @@ const GREENHOUSE_FIELDS = gql`
     yDimension
     bayCount
     isHorizontal
+    hiddenInFarmOverview
     createdAt
     updatedAt
   }

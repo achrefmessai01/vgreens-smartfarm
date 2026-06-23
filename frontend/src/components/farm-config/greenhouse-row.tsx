@@ -3,23 +3,9 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { DoorPosition as DoorPositionEnum } from '@/generated/graphql';
+import { Switch } from '@/components/ui/switch';
+import { GreenhouseRowFields } from './greenhouse-row-fields';
 import type { GreenhouseRowData } from './use-farm-layout-config';
-
-const DOOR_POSITION_OPTIONS = Object.entries(DoorPositionEnum).map(
-  ([key, value]) => ({
-    value,
-    label: key.replace(/([A-Z])/g, ' $1').trim(),
-  }),
-);
 
 interface GreenhouseRowProps {
   row: GreenhouseRowData;
@@ -32,6 +18,8 @@ interface GreenhouseRowProps {
   doorLabel: string;
   bayCountLabel: string;
   orientationLabel: string;
+  visibilityLabel: string;
+  visibilityHint: string;
   namePlaceholder: string;
   xPlaceholder: string;
   yPlaceholder: string;
@@ -52,6 +40,8 @@ export function GreenhouseRow({
   doorLabel,
   bayCountLabel,
   orientationLabel,
+  visibilityLabel,
+  visibilityHint,
   namePlaceholder,
   xPlaceholder,
   yPlaceholder,
@@ -78,113 +68,63 @@ export function GreenhouseRow({
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-5">
-        <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-          <label className="text-muted-foreground text-xs font-medium">
-            {nameLabel}
-          </label>
-          <Input
-            placeholder={namePlaceholder}
-            value={row.name}
-            disabled={disabled}
-            onChange={(e) => onChange(index, { name: e.target.value })}
-          />
-        </div>
+      <GreenhouseRowFields
+        row={row}
+        index={index}
+        disabled={disabled}
+        nameLabel={nameLabel}
+        xLabel={xLabel}
+        yLabel={yLabel}
+        doorLabel={doorLabel}
+        bayCountLabel={bayCountLabel}
+        namePlaceholder={namePlaceholder}
+        xPlaceholder={xPlaceholder}
+        yPlaceholder={yPlaceholder}
+        doorPositionPlaceholder={doorPositionPlaceholder}
+        bayCountPlaceholder={bayCountPlaceholder}
+        onChange={onChange}
+      />
 
-        <div className="flex flex-col gap-1">
-          <label className="text-muted-foreground text-xs font-medium">
-            {xLabel}
-          </label>
-          <Input
-            type="number"
-            min={0}
-            step="0.1"
-            placeholder={xPlaceholder}
-            value={row.xDimension}
+      <div className="border-border/40 flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id={`gh-horizontal-${index}`}
+            checked={row.isHorizontal ?? false}
             disabled={disabled}
-            onChange={(e) =>
-              onChange(index, { xDimension: Number(e.target.value) })
+            onCheckedChange={(checked) =>
+              onChange(index, { isHorizontal: checked === true })
             }
           />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-muted-foreground text-xs font-medium">
-            {yLabel}
-          </label>
-          <Input
-            type="number"
-            min={0}
-            step="0.1"
-            placeholder={yPlaceholder}
-            value={row.yDimension}
-            disabled={disabled}
-            onChange={(e) =>
-              onChange(index, { yDimension: Number(e.target.value) })
-            }
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-muted-foreground text-xs font-medium">
-            {bayCountLabel}
-          </label>
-          <Input
-            type="number"
-            min={1}
-            step="1"
-            placeholder={bayCountPlaceholder}
-            value={row.bayCount ?? ''}
-            disabled={disabled}
-            onChange={(e) =>
-              onChange(index, {
-                bayCount:
-                  e.target.value === '' ? undefined : Number(e.target.value),
-              })
-            }
-          />
-        </div>
-
-        <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-          <label className="text-muted-foreground text-xs font-medium">
-            {doorLabel}
-          </label>
-          <Select
-            value={row.doorPosition ?? ''}
-            onValueChange={(value) =>
-              onChange(index, { doorPosition: value as DoorPositionEnum })
-            }
-            disabled={disabled}
+          <label
+            htmlFor={`gh-horizontal-${index}`}
+            className="text-muted-foreground cursor-pointer text-xs font-medium select-none"
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={doorPositionPlaceholder} />
-            </SelectTrigger>
-            <SelectContent>
-              {DOOR_POSITION_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {orientationLabel}
+          </label>
         </div>
-      </div>
 
-      <div className="border-border/40 flex items-center gap-2 border-t px-4 py-3">
-        <Checkbox
-          id={`gh-horizontal-${index}`}
-          checked={row.isHorizontal ?? false}
-          disabled={disabled}
-          onCheckedChange={(checked) =>
-            onChange(index, { isHorizontal: checked === true })
-          }
-        />
-        <label
-          htmlFor={`gh-horizontal-${index}`}
-          className="text-muted-foreground cursor-pointer text-xs font-medium select-none"
-        >
-          {orientationLabel}
-        </label>
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col">
+            <label
+              htmlFor={`gh-visible-${index}`}
+              className="cursor-pointer text-xs font-medium select-none"
+            >
+              {visibilityLabel}
+            </label>
+            <span className="text-muted-foreground text-[11px]">
+              {visibilityHint}
+            </span>
+          </div>
+          <Switch
+            id={`gh-visible-${index}`}
+            checked={row.hiddenInFarmOverview !== true}
+            disabled={disabled}
+            aria-label={visibilityLabel}
+            onCheckedChange={(checked) =>
+              onChange(index, { hiddenInFarmOverview: !checked })
+            }
+          />
+        </div>
       </div>
     </div>
   );
