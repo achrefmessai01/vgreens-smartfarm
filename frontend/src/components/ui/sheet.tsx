@@ -49,6 +49,7 @@ function SheetContent({
   className,
   children,
   side = 'right',
+  onInteractOutside,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: 'top' | 'right' | 'bottom' | 'left';
@@ -72,6 +73,19 @@ function SheetContent({
           className,
         )}
         {...props}
+        onInteractOutside={(event) => {
+          // VSL-219: toasts/alerts render outside the sheet (at the app root),
+          // so dismissing/clicking one registers as an "outside" interaction
+          // and would otherwise close the sheet. Ignore interactions that
+          // originate from the toast viewport; defer to any caller-provided
+          // handler for everything else.
+          const target = event.detail.originalEvent.target as Element | null;
+          if (target?.closest('[data-toast-viewport]')) {
+            event.preventDefault();
+            return;
+          }
+          onInteractOutside?.(event);
+        }}
       >
         {children}
         <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-6 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
