@@ -10,6 +10,9 @@ const HARVEST_FIELDS = gql`
     createdById
     batchId
     date
+    startTime
+    stopTime
+    harvesterHeadCount
     photoUrls
     createdAt
     updatedAt

@@ -10,7 +10,7 @@ import {
   PrimaryGeneratedColumn,
   type ValueTransformer,
 } from 'typeorm';
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { User } from '@modules/users/entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { Batch } from '@modules/batch/entities/batch.entity';
@@ -65,6 +65,23 @@ export class Harvest {
   @Field()
   @Column({ type: 'date', transformer: dateTransformer })
   date: Date;
+
+  // Session timing + labor for the whole harvest, shared by all entries. Times
+  // are wall-clock time-of-day (local zone), stored as Postgres `time` and read
+  // back as 'HH:mm:ss' strings. All nullable: existing harvests have no values
+  // and are not backfilled. The service enforces stopTime > startTime and the
+  // both-or-neither rule; headcount is a positive integer.
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'time', nullable: true })
+  startTime?: string | null;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'time', nullable: true })
+  stopTime?: string | null;
+
+  @Field(() => Int, { nullable: true })
+  @Column({ type: 'int', nullable: true })
+  harvesterHeadCount?: number | null;
 
   @Field(() => [String])
   @Column({ type: 'jsonb', default: () => "'[]'" })

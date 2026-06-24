@@ -11,6 +11,8 @@ import {
   classLetter,
   crateClassKg,
   formatHarvestDate,
+  formatSessionDuration,
+  formatTimeOfDay,
   getGreenhouseLabel,
   harvestToDisplayEntries,
 } from '@/lib/harvest-utils';
@@ -36,6 +38,19 @@ export function HarvestDetails({
 
   const totals = harvest.totals;
   const greenhouseName = harvest.batch?.greenhouse?.name ?? null;
+  // Harvest-level session timing + labor. Legacy harvests have these unset, so
+  // render '—' rather than 0/epoch. Duration is derived (stop − start), shown
+  // only when both times are present and ordered.
+  const startTimeLabel = formatTimeOfDay(harvest.startTime) || '—';
+  const stopTimeLabel = formatTimeOfDay(harvest.stopTime) || '—';
+  const headCountLabel =
+    harvest.harvesterHeadCount != null
+      ? String(harvest.harvesterHeadCount)
+      : '—';
+  const sessionDuration = formatSessionDuration(
+    harvest.startTime,
+    harvest.stopTime,
+  );
   const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
   const wasteLabel = h?.waste ?? 'Waste';
   const ratioLabel = h?.wasteRatio ?? 'Waste Ratio';
@@ -109,6 +124,24 @@ export function HarvestDetails({
                   label={h?.greenhouse ?? 'Greenhouse'}
                   value={getGreenhouseLabel(greenhouseName)}
                   valueClassName="text-blue-600"
+                />
+                <DetailRow
+                  label={h?.startTime ?? 'Start Time'}
+                  value={startTimeLabel}
+                />
+                <DetailRow
+                  label={h?.stopTime ?? 'Stop Time'}
+                  value={stopTimeLabel}
+                />
+                {sessionDuration && (
+                  <DetailRow
+                    label={h?.sessionDuration ?? 'Duration'}
+                    value={sessionDuration}
+                  />
+                )}
+                <DetailRow
+                  label={h?.harvesterHeadCount ?? 'Harvesters'}
+                  value={headCountLabel}
                 />
                 <div className="flex items-center justify-between py-2">
                   <span className="text-muted-foreground font-medium">

@@ -57,30 +57,37 @@ export function CreateBatchFormFields({
         errors={errors}
         disabled={disabled}
       />
-      <PlantingDateField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-      />
-      <CultivationAreaField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-      />
-      <NumberOfRowsField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-      />
-      <RowLengthField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-      />
+      {/* Mostly-numeric fields are paired two-per-row (like Start/End Row) to
+          cut the form's vertical footprint. Selects and the mode toggle stay
+          full width. */}
+      <div className="grid grid-cols-2 gap-4">
+        <PlantingDateField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+        <CultivationAreaField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <NumberOfRowsField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+        <RowLengthField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <StartRowField
           formData={formData}
@@ -95,30 +102,34 @@ export function CreateBatchFormFields({
           disabled={disabled}
         />
       </div>
-      <PlantsPerMeterField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-      />
-      <TotalPlantsField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-      />
-      <LostPlantsField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-      />
-      <ReplicatesField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-      />
+      <div className="grid grid-cols-2 gap-4">
+        <PlantsPerMeterField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+        <TotalPlantsField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <LostPlantsField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+        <ReplicatesField
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          disabled={disabled}
+        />
+      </div>
       <InputModeField
         formData={formData}
         setFormData={setFormData}

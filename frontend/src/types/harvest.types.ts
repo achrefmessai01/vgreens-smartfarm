@@ -124,6 +124,12 @@ export interface HarvestLike {
   id: string;
   batchId: string;
   date: string;
+  // Session timing + labor, shared by all entries. Wall-clock HH:mm (or the
+  // 'HH:mm:ss' the backend returns); null on harvests logged before the fields
+  // existed.
+  startTime?: string | null;
+  stopTime?: string | null;
+  harvesterHeadCount?: number | null;
   photoUrls?: string[] | null;
   batch?: BatchLike | null;
   entries: HarvestEntryLike[];

@@ -30,7 +30,9 @@ import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import {
   availableExportColumns,
   DEFAULT_COLUMN_LABELS,
+  EXPORT_COLUMN_GROUPS,
 } from '@/lib/harvest-export-columns';
+import { Search } from 'lucide-react';
 
 type Preset =
   | 'allTime'
@@ -117,12 +119,14 @@ export function HarvestExportDialog({
   const [selectedColumns, setSelectedColumns] = React.useState<Set<string>>(
     () => new Set(available),
   );
+  const [columnQuery, setColumnQuery] = React.useState('');
 
   React.useEffect(() => {
     if (open) {
       setPreset('allTime');
       setCustomFrom('');
       setCustomTo('');
+      setColumnQuery('');
       // Default: all columns available to this role are checked.
       setSelectedColumns(new Set(available));
     }
@@ -184,6 +188,31 @@ export function HarvestExportDialog({
     (h?.exportColumnLabels as Record<string, string> | undefined)?.[key] ??
     DEFAULT_COLUMN_LABELS[key as keyof typeof DEFAULT_COLUMN_LABELS] ??
     key;
+
+  const groupLabel = (id: string, fallback: string): string =>
+    (h?.exportColumnGroups as Record<string, string> | undefined)?.[id] ??
+    fallback;
+
+  const setGroupColumns = (keys: readonly string[], checked: boolean) =>
+    setSelectedColumns((prev) => {
+      const next = new Set(prev);
+      keys.forEach((k) => (checked ? next.add(k) : next.delete(k)));
+      return next;
+    });
+
+  // Columns grouped for display, narrowed to this role's available set and the
+  // live search. Empty groups (all filtered out) are dropped.
+  const availableSet = React.useMemo(() => new Set(available), [available]);
+  const normalizedQuery = columnQuery.trim().toLowerCase();
+  const visibleGroups = EXPORT_COLUMN_GROUPS.map((group) => ({
+    group,
+    keys: group.keys.filter(
+      (key) =>
+        availableSet.has(key) &&
+        (normalizedQuery === '' ||
+          columnLabel(key).toLowerCase().includes(normalizedQuery)),
+    ),
+  })).filter((g) => g.keys.length > 0);
 
   const presets: { id: Preset; label: string }[] = [
     { id: 'allTime', label: h?.presetAllTime || 'All time' },
@@ -317,19 +346,59 @@ export function HarvestExportDialog({
                 </button>
               </div>
             </div>
-            <div className="bg-muted/20 grid grid-cols-2 gap-x-3 gap-y-2 rounded-lg border p-3 sm:grid-cols-3">
-              {available.map((key) => (
-                <label
-                  key={key}
-                  className="flex cursor-pointer items-center gap-2 text-xs"
-                >
-                  <Checkbox
-                    checked={selectedColumns.has(key)}
-                    onCheckedChange={() => toggleColumn(key)}
-                  />
-                  <span className="truncate">{columnLabel(key)}</span>
-                </label>
-              ))}
+            {/* Live filter — quickly narrow ~30 columns by label. */}
+            <div className="relative">
+              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+              <input
+                type="text"
+                value={columnQuery}
+                onChange={(e) => setColumnQuery(e.target.value)}
+                placeholder={h?.exportSearchPlaceholder || 'Filter columns…'}
+                className="border-input bg-background flex h-8 w-full min-w-0 rounded-md border pr-3 pl-8 text-xs transition-colors focus:border-[#016f7c] focus:ring-2 focus:ring-[#016f7c]/20 focus:outline-none"
+              />
+            </div>
+            <div className="bg-muted/20 space-y-3 rounded-lg border p-3">
+              {visibleGroups.length === 0 ? (
+                <p className="text-muted-foreground py-2 text-center text-xs">
+                  {h?.exportNoColumnsMatch || 'No columns match your search.'}
+                </p>
+              ) : (
+                visibleGroups.map(({ group, keys }) => {
+                  const allChecked = keys.every((k) => selectedColumns.has(k));
+                  return (
+                    <div key={group.id} className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-muted-foreground/90 text-[10px] font-semibold tracking-wider uppercase">
+                          {groupLabel(group.id, group.defaultLabel)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setGroupColumns(keys, !allChecked)}
+                          className="text-[10px] font-medium text-[#016f7c] hover:underline"
+                        >
+                          {allChecked
+                            ? h?.exportClearAll || 'Clear all'
+                            : h?.exportSelectAll || 'Select all'}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3">
+                        {keys.map((key) => (
+                          <label
+                            key={key}
+                            className="flex cursor-pointer items-center gap-2 text-xs"
+                          >
+                            <Checkbox
+                              checked={selectedColumns.has(key)}
+                              onCheckedChange={() => toggleColumn(key)}
+                            />
+                            <span className="truncate">{columnLabel(key)}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 

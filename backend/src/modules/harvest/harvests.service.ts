@@ -2,6 +2,7 @@ import {
   Logger,
   Injectable,
   NotFoundException,
+  BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -60,6 +61,38 @@ export class HarvestsService {
       .leftJoinAndSelect(`${alias}.entries`, 'entries')
       .leftJoinAndSelect(`${alias}.tenant`, 'tenant')
       .leftJoinAndSelect(`${alias}.createdBy`, 'createdBy');
+  }
+
+  // Minutes since midnight from a wall-clock time string ('HH:mm' or the
+  // 'HH:mm:ss' Postgres returns). Seconds are ignored — inputs are HH:mm.
+  private timeToMinutes(value: string): number {
+    const [h, m] = value.split(':');
+    return Number(h) * 60 + Number(m);
+  }
+
+  // Harvest-level timing rules, enforced server-side against the FINAL state
+  // (so an update that sets only one side is validated against what is stored):
+  //  - both startTime and stopTime present, or both absent (no half sessions);
+  //  - stopTime strictly after startTime (a harvest takes nonzero time).
+  // Times are same-day wall-clock — a session never crosses midnight.
+  private validateTiming(
+    startTime: string | null | undefined,
+    stopTime: string | null | undefined,
+  ): void {
+    const start = startTime == null || startTime === '' ? null : startTime;
+    const stop = stopTime == null || stopTime === '' ? null : stopTime;
+    if ((start === null) !== (stop === null)) {
+      throw new BadRequestException(
+        'startTime and stopTime must both be set or both be empty',
+      );
+    }
+    if (
+      start !== null &&
+      stop !== null &&
+      this.timeToMinutes(stop) <= this.timeToMinutes(start)
+    ) {
+      throw new BadRequestException('stopTime must be after startTime');
+    }
   }
 
   private roundTo(value: number, decimals: number): number {
@@ -396,11 +429,16 @@ export class HarvestsService {
       );
       (input.entries ?? []).forEach((e) => this.warnCrateRemainder(e, batch));
 
+      this.validateTiming(input.startTime, input.stopTime);
+
       const harvest = this.harvestRepository.create({
         tenantId,
         batchId: input.batchId,
         createdById,
         date: new Date(input.date),
+        startTime: input.startTime ?? null,
+        stopTime: input.stopTime ?? null,
+        harvesterHeadCount: input.harvesterHeadCount ?? null,
         photoUrls: input.photoUrls ?? [],
         entries: (input.entries ?? []).map((e) => this.buildEntry(e, batch)),
       });
@@ -408,7 +446,12 @@ export class HarvestsService {
       const saved = await this.harvestRepository.save(harvest);
       return this.findOneById(saved.id, tenantId);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
       this.logger.error(
         `createHarvest failed: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
@@ -434,6 +477,19 @@ export class HarvestsService {
       }
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.photoUrls !== undefined) harvest.photoUrls = input.photoUrls;
+
+      // Validate timing against the merged (final) state: a field left out of
+      // the input keeps its stored value; an explicit null clears it.
+      const nextStartTime =
+        input.startTime !== undefined ? input.startTime : harvest.startTime;
+      const nextStopTime =
+        input.stopTime !== undefined ? input.stopTime : harvest.stopTime;
+      this.validateTiming(nextStartTime, nextStopTime);
+      if (input.startTime !== undefined) harvest.startTime = input.startTime;
+      if (input.stopTime !== undefined) harvest.stopTime = input.stopTime;
+      if (input.harvesterHeadCount !== undefined) {
+        harvest.harvesterHeadCount = input.harvesterHeadCount;
+      }
 
       await this.harvestRepository.save(harvest);
 
@@ -463,7 +519,12 @@ export class HarvestsService {
 
       return this.findOneById(id, tenantId);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
       this.logger.error(
         `updateHarvest failed: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
@@ -632,6 +693,7 @@ export class HarvestsService {
       const fruitWeightByBatch = new Map<string, number>();
       const plantsByBatch = new Map<string, number>();
       const rowLengthByBatch = new Map<string, number>();
+      const cultivationAreaByBatch = new Map<string, number>();
       for (const { harvest, totals } of items) {
         const batchId = harvest.batchId;
         fruitWeightByBatch.set(
@@ -641,6 +703,10 @@ export class HarvestsService {
         if (harvest.batch) {
           plantsByBatch.set(batchId, harvest.batch.totalPlants ?? 0);
           rowLengthByBatch.set(batchId, harvest.batch.rowLength ?? 0);
+          cultivationAreaByBatch.set(
+            batchId,
+            harvest.batch.cultivationArea ?? 0,
+          );
         }
       }
       let sumWeightPlants = 0;
@@ -664,6 +730,17 @@ export class HarvestsService {
       const yieldPerMeter =
         sumRowLength > 0
           ? this.roundTo(sumWeightMeters / sumRowLength, 3)
+          : null;
+
+      // Yield per m²: existing totalYield ÷ Σ cultivationArea (distinct batches,
+      // so a batch with multiple harvests is counted once). Null-safe denominator.
+      let sumCultivationArea = 0;
+      for (const area of cultivationAreaByBatch.values()) {
+        if (area > 0) sumCultivationArea += area;
+      }
+      const yieldPerSquareMeter =
+        sumCultivationArea > 0
+          ? this.roundTo(totalYield / sumCultivationArea, 3)
           : null;
 
       // daysActive: earliest batch planting -> latest harvest date.
@@ -699,6 +776,7 @@ export class HarvestsService {
         averageFruitWeight: this.roundTo(averageFruitWeight, 3),
         yieldPerPlant,
         yieldPerMeter,
+        yieldPerSquareMeter,
         marketablePercent: this.roundTo(marketablePercent, 1),
         wastePercent: this.roundTo(wastePercent, 1),
         wasteTotal: this.roundTo(totalWaste, 1),
@@ -734,6 +812,7 @@ export class HarvestsService {
       averageFruitWeight: 0,
       yieldPerPlant: null,
       yieldPerMeter: null,
+      yieldPerSquareMeter: null,
       marketablePercent: 0,
       wastePercent: 0,
       wasteTotal: 0,

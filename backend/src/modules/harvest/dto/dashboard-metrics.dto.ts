@@ -99,6 +99,13 @@ export class HarvestDashboardMetrics {
   })
   yieldPerMeter: number | null;
 
+  @Field(() => Float, {
+    nullable: true,
+    description:
+      'Total yield per m² across selected batches: totalYield / Σ cultivationArea. Null when no batch in scope has cultivationArea > 0.',
+  })
+  yieldPerSquareMeter: number | null;
+
   @Field(() => Float)
   marketablePercent: number;
 
