@@ -5,6 +5,13 @@ primary_region = "fra"
 [build]
   dockerfile = "docker/Dockerfile"
 
+# Run pending TypeORM migrations in a one-off machine BEFORE swapping in the
+# new app version. Fly aborts the deploy if this exits non-zero, so a broken
+# migration never lands. Secrets (DATABASE_*) come from the app's secret
+# store — no duplication into GitLab CI variables.
+[deploy]
+  release_command = "node ./node_modules/typeorm/cli.js -d dist/config/data-source.js migration:run"
+
 [[services]]
   internal_port = 8080
   protocol = "tcp"
