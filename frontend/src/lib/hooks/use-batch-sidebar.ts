@@ -14,10 +14,20 @@ import type {
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
 import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
-import { extractStoragePathFromUrl } from '@/lib/harvest-utils';
+import {
+  extractStoragePathFromUrl,
+  formatTimeOfDay,
+} from '@/lib/harvest-utils';
 import * as React from 'react';
 
 export type SidebarMode = 'create' | 'edit' | 'view';
+
+// Inline validation messages for the harvest-level timing/labor fields.
+export interface HarvestTimingErrors {
+  startTime?: string;
+  stopTime?: string;
+  harvesterHeadCount?: string;
+}
 
 interface UseBatchSidebarOptions {
   // Batch the harvest belongs to (used when creating a new harvest event).
@@ -27,7 +37,16 @@ interface UseBatchSidebarOptions {
   batchData: BatchDetailsData | null;
   mode?: SidebarMode;
   initialDate?: string | null;
+  // Harvest-level session timing + labor of the harvest being edited/viewed.
+  initialStartTime?: string | null;
+  initialStopTime?: string | null;
+  initialHeadCount?: number | null;
   onCompleted?: () => void;
+}
+
+function timeToMinutes(value: string): number {
+  const [h, m] = value.split(':').map(Number);
+  return h * 60 + m;
 }
 
 function todayIsoDate(): string {
@@ -47,12 +66,21 @@ export function useBatchSidebar({
   batchData,
   mode = 'create',
   initialDate,
+  initialStartTime,
+  initialStopTime,
+  initialHeadCount,
   onCompleted,
 }: UseBatchSidebarOptions) {
   const [localData, setLocalData] = React.useState<BatchDetailsData | null>(
     null,
   );
   const [harvestDate, setHarvestDate] = React.useState<string>(todayIsoDate);
+  // Harvest-level timing + labor. Kept as form strings ('' = unset); the time
+  // inputs yield HH:mm and head count is a free-typed integer.
+  const [startTime, setStartTime] = React.useState<string>('');
+  const [stopTime, setStopTime] = React.useState<string>('');
+  const [harvesterHeadCount, setHarvesterHeadCount] =
+    React.useState<string>('');
   const [createHarvest, { loading: createLoading }] =
     useCreateHarvestMutation();
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
@@ -70,7 +98,53 @@ export function useBatchSidebar({
     setHarvestDate(
       mode === 'create' ? todayIsoDate() : toIsoDateInput(initialDate),
     );
-  }, [batchData, mode, initialDate]);
+    // A fresh create starts blank; edit/view seed from the stored harvest.
+    setStartTime(mode === 'create' ? '' : formatTimeOfDay(initialStartTime));
+    setStopTime(mode === 'create' ? '' : formatTimeOfDay(initialStopTime));
+    setHarvesterHeadCount(
+      mode === 'create' || initialHeadCount == null
+        ? ''
+        : String(initialHeadCount),
+    );
+  }, [
+    batchData,
+    mode,
+    initialDate,
+    initialStartTime,
+    initialStopTime,
+    initialHeadCount,
+  ]);
+
+  // Mirror the server-side rules so errors surface inline before a save:
+  // both-or-neither time, stop after start, positive-integer head count.
+  const timingErrors = React.useMemo<HarvestTimingErrors>(() => {
+    const errors: HarvestTimingErrors = {};
+    const hasStart = startTime.trim() !== '';
+    const hasStop = stopTime.trim() !== '';
+    if (hasStart && !hasStop) {
+      errors.stopTime = 'Stop time is required when start time is set';
+    }
+    if (!hasStart && hasStop) {
+      errors.startTime = 'Start time is required when stop time is set';
+    }
+    if (
+      hasStart &&
+      hasStop &&
+      timeToMinutes(stopTime) <= timeToMinutes(startTime)
+    ) {
+      errors.stopTime = 'Stop time must be after start time';
+    }
+    const head = harvesterHeadCount.trim();
+    if (head !== '') {
+      const n = Number(head);
+      if (!Number.isInteger(n) || n <= 0) {
+        errors.harvesterHeadCount = 'Must be a positive whole number';
+      }
+    }
+    return errors;
+  }, [startTime, stopTime, harvesterHeadCount]);
+
+  const hasTimingErrors = Object.keys(timingErrors).length > 0;
 
   // Update one entry in place via an updater function.
   const updateEntry = React.useCallback(
@@ -266,6 +340,8 @@ export function useBatchSidebar({
 
   const handleSave = React.useCallback(async () => {
     if (!currentData) return;
+    // Don't submit while the harvest-level timing/labor fields are invalid.
+    if (hasTimingErrors) return;
 
     // Map each sub-entry to the GraphQL input shape. Brix readings and the fruit
     // weight sample only count when their section is expanded. In weight mode the
@@ -318,6 +394,16 @@ export function useBatchSidebar({
       awaitRefetchQueries: true,
     };
     const isoDate = new Date(harvestDate).toISOString();
+    // Harvest-level timing/labor: '' -> null (clears / leaves unset). Times are
+    // sent as wall-clock HH:mm; the backend stores them in the local zone.
+    const trimmedStart = startTime.trim();
+    const trimmedStop = stopTime.trim();
+    const trimmedHead = harvesterHeadCount.trim();
+    const timingInput = {
+      startTime: trimmedStart === '' ? null : trimmedStart,
+      stopTime: trimmedStop === '' ? null : trimmedStop,
+      harvesterHeadCount: trimmedHead === '' ? null : Number(trimmedHead),
+    };
     try {
       if (mode === 'create') {
         if (!batchId) return;
@@ -326,6 +412,7 @@ export function useBatchSidebar({
             input: {
               batchId,
               date: isoDate,
+              ...timingInput,
               photoUrls: currentData.photos,
               entries,
             },
@@ -339,6 +426,7 @@ export function useBatchSidebar({
             id: harvestId,
             input: {
               date: isoDate,
+              ...timingInput,
               photoUrls: currentData.photos,
               entries,
             },
@@ -356,12 +444,18 @@ export function useBatchSidebar({
     currentData,
     mode,
     harvestDate,
+    startTime,
+    stopTime,
+    harvesterHeadCount,
+    hasTimingErrors,
     updateHarvest,
     createHarvest,
     onCompleted,
   ]);
 
-  const canSave = mode === 'create' ? Boolean(batchId) : Boolean(harvestId);
+  const canSave =
+    (mode === 'create' ? Boolean(batchId) : Boolean(harvestId)) &&
+    !hasTimingErrors;
 
   return {
     currentData,
@@ -370,6 +464,13 @@ export function useBatchSidebar({
     canSave,
     harvestDate,
     setHarvestDate,
+    startTime,
+    setStartTime,
+    stopTime,
+    setStopTime,
+    harvesterHeadCount,
+    setHarvesterHeadCount,
+    timingErrors,
     handleBrixChange,
     handleBrixClassChange,
     handleAddBrixReading,

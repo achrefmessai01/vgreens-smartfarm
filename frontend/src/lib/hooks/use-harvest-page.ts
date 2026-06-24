@@ -43,6 +43,10 @@ interface PendingBatch {
   harvestId: string | null;
   details: BatchDetailsData;
   initialDate?: string | null;
+  // Harvest-level session timing + labor of the harvest being edited/viewed.
+  initialStartTime?: string | null;
+  initialStopTime?: string | null;
+  initialHeadCount?: number | null;
 }
 
 export function useHarvestPage() {
@@ -241,6 +245,9 @@ export function useHarvestPage() {
       harvestId: harvest.id,
       details: harvestToBatchDetails(harvest),
       initialDate: harvest.date,
+      initialStartTime: harvest.startTime,
+      initialStopTime: harvest.stopTime,
+      initialHeadCount: harvest.harvesterHeadCount,
     });
     setSidebarMode('edit');
     setBatchSidebarOpen(true);
@@ -253,6 +260,9 @@ export function useHarvestPage() {
       harvestId: harvest.id,
       details: harvestToBatchDetails(harvest),
       initialDate: harvest.date,
+      initialStartTime: harvest.startTime,
+      initialStopTime: harvest.stopTime,
+      initialHeadCount: harvest.harvesterHeadCount,
     });
     setSidebarMode('view');
     setBatchSidebarOpen(true);

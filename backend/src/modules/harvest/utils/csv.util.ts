@@ -22,6 +22,13 @@ function num(value: number | null | undefined): string {
   return value == null ? '' : String(value);
 }
 
+// Wall-clock time as HH:mm. Postgres `time` columns read back as 'HH:mm:ss';
+// trim to HH:mm. Empty cell for null so legacy harvests export blank, not 0.
+function toTimeOfDay(value: string | null | undefined): string {
+  if (value == null || value === '') return '';
+  return String(value).slice(0, 5);
+}
+
 function escapeCell(value: string): string {
   if (/[",\r\n]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`;
@@ -44,6 +51,9 @@ const COLUMN_DEFS: ColumnDef[] = [
   { key: 'greenhouse', value: (h) => h.batch?.greenhouse?.name ?? '' },
   { key: 'plantingDate', value: (h) => toDateOnly(h.batch?.plantingDate) },
   { key: 'harvestDate', value: (h) => toDateOnly(h.date) },
+  { key: 'startTime', value: (h) => toTimeOfDay(h.startTime) },
+  { key: 'stopTime', value: (h) => toTimeOfDay(h.stopTime) },
+  { key: 'harvesterHeadCount', value: (h) => num(h.harvesterHeadCount) },
   { key: 'cultivationArea', value: (h) => num(h.batch?.cultivationArea) },
   { key: 'numberOfRows', value: (h) => num(h.batch?.numberOfRows) },
   { key: 'rowLength', value: (h) => num(h.batch?.rowLength) },
