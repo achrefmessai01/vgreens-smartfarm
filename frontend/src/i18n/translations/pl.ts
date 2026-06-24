@@ -581,6 +581,16 @@ export const pl = {
       exportColumnsTitle: 'Kolumny',
       exportSelectAll: 'Zaznacz wszystko',
       exportClearAll: 'Wyczyść wszystko',
+      exportSearchPlaceholder: 'Filtruj kolumny…',
+      exportNoColumnsMatch: 'Żadna kolumna nie pasuje do wyszukiwania.',
+      exportColumnGroups: {
+        session: 'Sesja',
+        cropBatch: 'Uprawa i partia',
+        yieldQuality: 'Plon i jakość',
+        plot: 'Pole i nasadzenie',
+        media: 'Multimedia',
+        meta: 'Identyfikatory i metadane',
+      },
       exportColumnLabels: {
         id: 'ID',
         parentBatchId: 'ID partii nadrzędnej',

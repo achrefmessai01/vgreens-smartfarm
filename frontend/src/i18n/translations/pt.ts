@@ -583,6 +583,16 @@ export const pt = {
       exportColumnsTitle: 'Colunas',
       exportSelectAll: 'Selecionar tudo',
       exportClearAll: 'Limpar tudo',
+      exportSearchPlaceholder: 'Filtrar colunas…',
+      exportNoColumnsMatch: 'Nenhuma coluna corresponde à sua pesquisa.',
+      exportColumnGroups: {
+        session: 'Sessão',
+        cropBatch: 'Cultura e lote',
+        yieldQuality: 'Produção e qualidade',
+        plot: 'Parcela e plantação',
+        media: 'Multimédia',
+        meta: 'Identificadores e metadados',
+      },
       exportColumnLabels: {
         id: 'ID',
         parentBatchId: 'ID do lote principal',

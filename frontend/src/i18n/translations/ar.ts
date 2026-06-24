@@ -572,6 +572,16 @@ export const ar = {
       exportColumnsTitle: 'الأعمدة',
       exportSelectAll: 'تحديد الكل',
       exportClearAll: 'مسح الكل',
+      exportSearchPlaceholder: 'تصفية الأعمدة…',
+      exportNoColumnsMatch: 'لا توجد أعمدة تطابق بحثك.',
+      exportColumnGroups: {
+        session: 'الجلسة',
+        cropBatch: 'المحصول والدفعة',
+        yieldQuality: 'الإنتاج والجودة',
+        plot: 'القطعة والزراعة',
+        media: 'الوسائط',
+        meta: 'المعرفات والبيانات الوصفية',
+      },
       exportColumnLabels: {
         id: 'المعرّف',
         parentBatchId: 'معرّف الدفعة الأصلية',

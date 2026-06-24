@@ -41,6 +41,102 @@ export const EXPORT_COLUMN_KEYS = [
 
 export type ExportColumnKey = (typeof EXPORT_COLUMN_KEYS)[number];
 
+// Logical groupings for the export dialog's column picker, in display order.
+// Every EXPORT_COLUMN_KEYS entry belongs to exactly one group (see the
+// exhaustiveness check below). `labelKey` resolves against i18n
+// exportColumnGroups[labelKey], falling back to defaultLabel.
+export interface ExportColumnGroup {
+  id: string;
+  defaultLabel: string;
+  keys: ExportColumnKey[];
+}
+
+export const EXPORT_COLUMN_GROUPS: readonly ExportColumnGroup[] = [
+  {
+    id: 'session',
+    defaultLabel: 'Session',
+    keys: ['harvestDate', 'startTime', 'stopTime', 'harvesterHeadCount'],
+  },
+  {
+    id: 'cropBatch',
+    defaultLabel: 'Crop & Batch',
+    keys: [
+      'batch',
+      'batchNumber',
+      'species',
+      'variety',
+      'status',
+      'greenhouse',
+      'plantingDate',
+    ],
+  },
+  {
+    id: 'yieldQuality',
+    defaultLabel: 'Yield & Quality',
+    keys: [
+      'classA',
+      'classB',
+      'classC',
+      'waste',
+      'avgBrix',
+      'brixReadings',
+      'fruitCount',
+      'totalFruitWeight',
+      'avgFruitWeight',
+      'yieldPerPlant',
+      'yieldPerMeter',
+    ],
+  },
+  {
+    id: 'plot',
+    defaultLabel: 'Plot & Planting',
+    keys: [
+      'cultivationArea',
+      'numberOfRows',
+      'rowLength',
+      'rowSpacing',
+      'plantsPerMeter',
+      'totalPlants',
+      'lostPlants',
+    ],
+  },
+  {
+    id: 'media',
+    defaultLabel: 'Media',
+    keys: ['photoUrls'],
+  },
+  {
+    id: 'meta',
+    defaultLabel: 'Identifiers & Metadata',
+    keys: [
+      'id',
+      'batchId',
+      'tenantId',
+      'createdById',
+      'createdAt',
+      'updatedAt',
+    ],
+  },
+] as const;
+
+// Dev-time guard: the groups must cover every export column exactly once, so a
+// newly added column can never silently vanish from the picker.
+if (process.env.NODE_ENV !== 'production') {
+  const grouped = EXPORT_COLUMN_GROUPS.flatMap((g) => g.keys);
+  const missing = EXPORT_COLUMN_KEYS.filter((k) => !grouped.includes(k));
+  const extra = grouped.filter((k) => !EXPORT_COLUMN_KEYS.includes(k));
+  if (
+    missing.length ||
+    extra.length ||
+    grouped.length !== new Set(grouped).size
+  ) {
+    console.error('EXPORT_COLUMN_GROUPS out of sync with EXPORT_COLUMN_KEYS', {
+      missing,
+      extra,
+    });
+  }
+}
+
 const ID_COLUMN_EXCEPTIONS = new Set<string>();
 
 // Mirrors the backend isIdColumn: a column is an ID-type field when named 'id'
