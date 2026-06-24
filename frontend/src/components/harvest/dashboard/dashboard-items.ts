@@ -28,6 +28,7 @@ export const DASHBOARD_METRIC_IDS = {
   averageFruitWeight: 'averageFruitWeight',
   yieldPerPlant: 'yieldPerPlant',
   yieldPerMeter: 'yieldPerMeter',
+  yieldPerSquareMeter: 'yieldPerSquareMeter',
   qualityPrimary: 'qualityPrimary',
   qualitySecondary: 'qualitySecondary',
   criticalAlerts: 'criticalAlerts',
@@ -74,6 +75,12 @@ export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
     id: DASHBOARD_METRIC_IDS.yieldPerMeter,
     labelKey: 'yieldPerMeter',
     fallback: 'Yield per Meter',
+    category: 'metrics',
+  },
+  {
+    id: DASHBOARD_METRIC_IDS.yieldPerSquareMeter,
+    labelKey: 'yieldPerSquareMeter',
+    fallback: 'Yield per m²',
     category: 'metrics',
   },
   {

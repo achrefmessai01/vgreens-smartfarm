@@ -12,6 +12,7 @@ export const GET_HARVEST_DASHBOARD = gql`
       yieldPerPlant
       yieldPerMeter
       yieldPerRunningMeter
+      yieldPerSquareMeter
       marketablePercent
       wastePercent
       wasteTotal
@@ -83,6 +84,7 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       yieldPerPlant
       yieldPerMeter
       yieldPerRunningMeter
+      yieldPerSquareMeter
       marketablePercent
       wastePercent
       wasteTotal

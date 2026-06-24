@@ -27,8 +27,6 @@
     "@clerk/clerk-sdk-node": "^5.1.6",
     "@influxdata/influxdb-client": "^1.35.0",
     "@influxdata/influxdb-client-apis": "^1.35.0",
-    "@supabase/supabase-js": "^2.49.3",
-    "graphql-upload-ts": "^2.0.3",
     "@nestjs/apollo": "^13.2.3",
     "@nestjs/common": "^11.1.10",
     "@nestjs/config": "^4.0.2",
@@ -37,17 +35,22 @@
     "@nestjs/platform-express": "^11.1.10",
     "@nestjs/schedule": "^6.1.1",
     "@nestjs/typeorm": "^11.0.0",
+    "@supabase/supabase-js": "^2.49.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "dotenv": "^17.2.3",
     "graphql": "^16.12.0",
+    "graphql-subscriptions": "^3.0.0",
     "graphql-type-json": "^0.3.2",
+    "graphql-upload-ts": "^2.0.3",
+    "graphql-ws": "^6.0.8",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "svix": "^1.82.0",
     "typeorm": "^0.3.28",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "ws": "^8.21.0"
   },
   "jest": {
     "moduleFileExtensions": [

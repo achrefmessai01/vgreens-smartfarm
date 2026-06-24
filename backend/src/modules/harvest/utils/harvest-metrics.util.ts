@@ -266,6 +266,7 @@ export function buildDashboardMetrics(
     yieldPerPlant: ratioByBatch(items, (b) => b.livingPlants),
     yieldPerMeter: ratioByBatch(items, (b) => b.rowLength ?? 0),
     yieldPerRunningMeter: ratioByBatch(items, (b) => b.runningMeter ?? 0),
+    yieldPerSquareMeter: ratioByBatch(items, (b) => b.cultivationArea ?? 0),
     marketablePercent: roundTo(
       totalYield > 0 ? (totalSellable / totalYield) * 100 : 0,
       1,
@@ -302,6 +303,7 @@ export function emptyDashboardMetrics(): HarvestDashboardMetrics {
     yieldPerPlant: null,
     yieldPerMeter: null,
     yieldPerRunningMeter: null,
+    yieldPerSquareMeter: null,
     marketablePercent: 0,
     wastePercent: 0,
     wasteTotal: 0,

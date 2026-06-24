@@ -3,6 +3,7 @@ import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
 import {
   Activity,
   AlertTriangle,
+  Grid2x2,
   Package,
   Ruler,
   Scale,
@@ -114,6 +115,27 @@ export function DashboardMetricsGrid({
               : (h?.yieldPerMeterSubtitle ?? 'Sellable kg per row metre')
           }
           icon={<Ruler className="h-4 w-4" />}
+          color="default"
+        />
+      ),
+    },
+    {
+      id: DASHBOARD_METRIC_IDS.yieldPerSquareMeter,
+      node: (
+        <MetricCard
+          title={h?.yieldPerSquareMeter ?? 'Yield per m²'}
+          value={
+            data.yieldPerSquareMeter == null
+              ? '—'
+              : `${data.yieldPerSquareMeter.toFixed(2)} kg/m²`
+          }
+          subtitle={
+            data.yieldPerSquareMeter == null
+              ? (h?.yieldPerSquareMeterNoData ??
+                'Set cultivation area on the batch')
+              : (h?.yieldPerSquareMeterSubtitle ?? 'Total kg per m²')
+          }
+          icon={<Grid2x2 className="h-4 w-4" />}
           color="default"
         />
       ),
