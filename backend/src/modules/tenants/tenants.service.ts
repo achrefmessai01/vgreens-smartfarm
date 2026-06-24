@@ -10,6 +10,7 @@ import {
 import { InfluxDBService } from '@modules/influxdb/influxdb.service';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
 import { isAllowedSensorField } from './sensor-fields.constants';
+import { DEFAULT_HIDDEN_HARVEST_DASHBOARD_ITEMS } from './dashboard-defaults.constants';
 
 const DEFAULT_BUCKET_RETENTION_SECONDS = 60 * 60 * 24 * 30;
 
@@ -39,6 +40,8 @@ export class TenantsService {
     const tenant = this.tenantRepository.create({
       ...createTenantInput,
       isActive: createTenantInput.isActive ?? true,
+      // Seed metrics that ship "off by default" into the hidden set.
+      hiddenHarvestDashboardItems: [...DEFAULT_HIDDEN_HARVEST_DASHBOARD_ITEMS],
     });
 
     const savedTenant = await this.tenantRepository.save(tenant);

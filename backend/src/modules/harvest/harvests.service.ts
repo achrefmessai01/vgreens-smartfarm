@@ -693,6 +693,7 @@ export class HarvestsService {
       const fruitWeightByBatch = new Map<string, number>();
       const plantsByBatch = new Map<string, number>();
       const rowLengthByBatch = new Map<string, number>();
+      const cultivationAreaByBatch = new Map<string, number>();
       for (const { harvest, totals } of items) {
         const batchId = harvest.batchId;
         fruitWeightByBatch.set(
@@ -702,6 +703,10 @@ export class HarvestsService {
         if (harvest.batch) {
           plantsByBatch.set(batchId, harvest.batch.totalPlants ?? 0);
           rowLengthByBatch.set(batchId, harvest.batch.rowLength ?? 0);
+          cultivationAreaByBatch.set(
+            batchId,
+            harvest.batch.cultivationArea ?? 0,
+          );
         }
       }
       let sumWeightPlants = 0;
@@ -725,6 +730,17 @@ export class HarvestsService {
       const yieldPerMeter =
         sumRowLength > 0
           ? this.roundTo(sumWeightMeters / sumRowLength, 3)
+          : null;
+
+      // Yield per m²: existing totalYield ÷ Σ cultivationArea (distinct batches,
+      // so a batch with multiple harvests is counted once). Null-safe denominator.
+      let sumCultivationArea = 0;
+      for (const area of cultivationAreaByBatch.values()) {
+        if (area > 0) sumCultivationArea += area;
+      }
+      const yieldPerSquareMeter =
+        sumCultivationArea > 0
+          ? this.roundTo(totalYield / sumCultivationArea, 3)
           : null;
 
       // daysActive: earliest batch planting -> latest harvest date.
@@ -760,6 +776,7 @@ export class HarvestsService {
         averageFruitWeight: this.roundTo(averageFruitWeight, 3),
         yieldPerPlant,
         yieldPerMeter,
+        yieldPerSquareMeter,
         marketablePercent: this.roundTo(marketablePercent, 1),
         wastePercent: this.roundTo(wastePercent, 1),
         wasteTotal: this.roundTo(totalWaste, 1),
@@ -795,6 +812,7 @@ export class HarvestsService {
       averageFruitWeight: 0,
       yieldPerPlant: null,
       yieldPerMeter: null,
+      yieldPerSquareMeter: null,
       marketablePercent: 0,
       wastePercent: 0,
       wasteTotal: 0,
