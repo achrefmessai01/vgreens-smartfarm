@@ -15,6 +15,8 @@ import {
   type SidebarMode,
 } from '@/lib/hooks/use-batch-sidebar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { CalendarDays, Sparkles } from 'lucide-react';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
@@ -29,6 +31,9 @@ export interface BatchSidebarProps {
   batchData: BatchDetailsData | null;
   mode?: SidebarMode;
   initialDate?: string | null;
+  initialStartTime?: string | null;
+  initialStopTime?: string | null;
+  initialHeadCount?: number | null;
   onCompleted?: () => void;
   isLoading?: boolean;
 }
@@ -41,6 +46,9 @@ export function BatchSidebar({
   batchData,
   mode = 'create',
   initialDate,
+  initialStartTime,
+  initialStopTime,
+  initialHeadCount,
   onCompleted,
   isLoading = false,
 }: BatchSidebarProps) {
@@ -52,6 +60,13 @@ export function BatchSidebar({
     canSave,
     harvestDate,
     setHarvestDate,
+    startTime,
+    setStartTime,
+    stopTime,
+    setStopTime,
+    harvesterHeadCount,
+    setHarvesterHeadCount,
+    timingErrors,
     handleBrixChange,
     handleBrixClassChange,
     handleAddBrixReading,
@@ -70,6 +85,9 @@ export function BatchSidebar({
     batchData,
     mode,
     initialDate,
+    initialStartTime,
+    initialStopTime,
+    initialHeadCount,
     onCompleted,
   });
   const todayIso = React.useMemo(
@@ -176,6 +194,75 @@ export function BatchSidebar({
                       className="pointer-events-none absolute h-0 w-0 opacity-0"
                     />
                   </button>
+                </div>
+
+                {/* Harvest-level session timing + labor: shared by every entry
+                    in this harvest. Validation errors surface inline. */}
+                <div className="bg-card grid grid-cols-1 gap-3 rounded-xl border p-3 shadow-sm sm:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="harvestStartTime"
+                      className="text-sm font-medium"
+                    >
+                      {h?.startTime ?? 'Start Time'}
+                    </Label>
+                    <Input
+                      id="harvestStartTime"
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      aria-invalid={Boolean(timingErrors.startTime)}
+                    />
+                    {timingErrors.startTime && (
+                      <p className="text-destructive text-xs">
+                        {timingErrors.startTime}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="harvestStopTime"
+                      className="text-sm font-medium"
+                    >
+                      {h?.stopTime ?? 'Stop Time'}
+                    </Label>
+                    <Input
+                      id="harvestStopTime"
+                      type="time"
+                      value={stopTime}
+                      onChange={(e) => setStopTime(e.target.value)}
+                      aria-invalid={Boolean(timingErrors.stopTime)}
+                    />
+                    {timingErrors.stopTime && (
+                      <p className="text-destructive text-xs">
+                        {timingErrors.stopTime}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="harvesterHeadCount"
+                      className="text-sm font-medium"
+                    >
+                      {h?.harvesterHeadCount ?? 'Harvesters'}
+                    </Label>
+                    <Input
+                      id="harvesterHeadCount"
+                      type="number"
+                      min={1}
+                      step={1}
+                      inputMode="numeric"
+                      placeholder={h?.harvesterHeadCountPlaceholder ?? 'e.g. 4'}
+                      value={harvesterHeadCount}
+                      onChange={(e) => setHarvesterHeadCount(e.target.value)}
+                      aria-invalid={Boolean(timingErrors.harvesterHeadCount)}
+                    />
+                    {timingErrors.harvesterHeadCount && (
+                      <p className="text-destructive text-xs">
+                        {timingErrors.harvesterHeadCount}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {currentData.entries.map((entry, index) => (

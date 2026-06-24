@@ -220,6 +220,9 @@ export default function HarvestPage() {
           batchData={pendingBatch?.details ?? null}
           mode={sidebarMode}
           initialDate={pendingBatch?.initialDate ?? null}
+          initialStartTime={pendingBatch?.initialStartTime ?? null}
+          initialStopTime={pendingBatch?.initialStopTime ?? null}
+          initialHeadCount={pendingBatch?.initialHeadCount ?? null}
           onCompleted={handleSidebarCompleted}
         />
 
