@@ -27,6 +27,10 @@ export const GET_HARVEST_DASHBOARD = gql`
         date
         yieldPerMeter
       }
+      yieldPerRunningMeterTrend {
+        date
+        yieldPerRunningMeter
+      }
       classDistribution {
         date
         classes
@@ -94,6 +98,10 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       yieldPerMeterTrend {
         date
         yieldPerMeter
+      }
+      yieldPerRunningMeterTrend {
+        date
+        yieldPerRunningMeter
       }
       classDistribution {
         date

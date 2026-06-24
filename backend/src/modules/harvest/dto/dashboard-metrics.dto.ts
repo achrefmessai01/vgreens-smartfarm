@@ -19,6 +19,15 @@ export class YieldPerMeterData {
 }
 
 @ObjectType()
+export class YieldPerRunningMeterData {
+  @Field()
+  date: string;
+
+  @Field(() => Float)
+  yieldPerRunningMeter: number;
+}
+
+@ObjectType()
 export class ClassDistributionData {
   @Field()
   date: string;
@@ -132,6 +141,9 @@ export class HarvestDashboardMetrics {
 
   @Field(() => [YieldPerMeterData])
   yieldPerMeterTrend: YieldPerMeterData[];
+
+  @Field(() => [YieldPerRunningMeterData])
+  yieldPerRunningMeterTrend: YieldPerRunningMeterData[];
 
   @Field(() => [ClassDistributionData])
   classDistribution: ClassDistributionData[];

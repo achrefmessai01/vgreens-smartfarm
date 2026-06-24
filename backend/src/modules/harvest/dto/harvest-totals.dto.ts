@@ -36,7 +36,10 @@ export class HarvestTotals {
   })
   fruitCount: number;
 
-  @Field(() => Float, { description: 'SUM of entry sellable kg' })
+  @Field(() => Float, {
+    description:
+      'Total harvested weight (kg): SUM over entries of (sellable kg across all classes + waste). Waste is INCLUDED here and also reported separately as `waste`.',
+  })
   totalFruitWeight: number;
 
   @Field(() => [Int], {
@@ -63,7 +66,7 @@ export class HarvestTotals {
   @Field(() => Float, {
     nullable: true,
     description:
-      'totalFruitWeight / batch.totalPlants. Null when totalPlants is 0/missing.',
+      'totalFruitWeight / living plants, where living plants = batch.totalPlants − batch.lostPlants. Null when living plants is 0/negative/missing.',
   })
   yieldPerPlant: number | null;
 
