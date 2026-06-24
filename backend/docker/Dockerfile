@@ -38,11 +38,16 @@ RUN addgroup -g 1001 -S nodejs && \
 # Copy package files
 COPY package*.json ./
 
-# Install only production dependencies
+# Install only production dependencies. We keep typeorm + pg + reflect-metadata
+# in `dependencies` (not devDependencies) so the Fly `release_command` can
+# invoke the typeorm CLI against the compiled data-source.
 RUN npm ci --only=production && \
   npm cache clean --force
 
-# Copy built application from builder stage
+# Copy built application from builder stage. This includes:
+#   - dist/main.js                (app entrypoint)
+#   - dist/config/data-source.js  (used by release_command for migrations)
+#   - dist/migrations/*.js        (the migrations themselves)
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 
 # Ensure dist directory is writable for GraphQL schema generation

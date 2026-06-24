@@ -1,11 +1,15 @@
 image: alpine:latest
 
 stages:
-  - deploy
+  - migrate_check    # Show pending migrations against the target DB
+  - migrate_apply    # Apply them (manual on production)
+  - deploy           # Roll out the new code
+  - migrate_rollback # Manual emergency-revert lever
 
 variables:
   GIT_STRATEGY: fetch
   FLY_VERSION: '0.3.55'
+  NODE_VERSION: '20'
 
 .flyctl_setup: &flyctl_setup
   - apk add --no-cache curl
@@ -16,6 +20,143 @@ variables:
   - flyctl auth whoami || echo "Auth failed"
 
 # ──────────────────────────────────────
+# Migration jobs
+# ──────────────────────────────────────
+#
+# Strategy:
+#   1. `migrate_show_*`  — auto, prints the list of pending migrations. Pure
+#       visibility, never fails the pipeline.
+#   2. `migrate_run_*`   — applies migrations from the CI container against the
+#       target DB. Staging is automatic; production is `when: manual` so a
+#       human has to click "play" after reading the show output.
+#   3. `deploy_*`        — needs the run job, so the deploy can't start until
+#       migrations are applied.
+#   4. `migrate_revert_*` — manual emergency rollback, runs against the live
+#       Fly machine.
+#
+# Defense-in-depth: `release_command` in fly.{production,staging}.toml ALSO
+# runs `migration:run` during deploy. If somehow a migration leaks through
+# without the CI job applying it, Fly catches it. `migration:run` is
+# idempotent — already-applied migrations are skipped.
+#
+# REQUIRED CI/CD VARIABLES (Settings → CI/CD → Variables):
+#   For environment scope `staging/backend`:
+#     DATABASE_HOST, DATABASE_PORT, DATABASE_NAME, DATABASE_USER,
+#     DATABASE_PASSWORD, DATABASE_SSL  (set to "true" for Supabase)
+#   For environment scope `production/backend`:
+#     Same five vars + DATABASE_SSL=true
+#   Mark all as Protected (only protected branches) and Masked
+#   (DATABASE_PASSWORD especially — keeps it out of logs).
+
+.node_image: &node_image
+  image: node:20-alpine
+
+.migrate_install: &migrate_install
+  - cd backend
+  - apk add --no-cache git
+  - npm ci --no-audit --no-fund
+  - npm run build
+
+migrate_show_staging:
+  <<: *node_image
+  stage: migrate_check
+  only:
+    - staging
+  before_script:
+    - *migrate_install
+  script:
+    - echo "=== Pending migrations on STAGING DB ==="
+    - npm run migration:show:prod
+  environment:
+    name: staging/backend
+    action: prepare
+  allow_failure: false
+
+migrate_show_production:
+  <<: *node_image
+  stage: migrate_check
+  only:
+    - master
+  before_script:
+    - *migrate_install
+  script:
+    - echo "=== Pending migrations on PRODUCTION DB ==="
+    - npm run migration:show:prod
+  environment:
+    name: production/backend
+    action: prepare
+  allow_failure: false
+
+migrate_run_staging:
+  <<: *node_image
+  stage: migrate_apply
+  only:
+    - staging
+  needs:
+    - migrate_show_staging
+  before_script:
+    - *migrate_install
+  script:
+    - echo "=== Applying migrations on STAGING DB ==="
+    - npm run migration:run:prod
+    - echo "=== Post-apply state ==="
+    - npm run migration:show:prod
+  environment:
+    name: staging/backend
+    action: prepare
+
+migrate_run_production:
+  <<: *node_image
+  stage: migrate_apply
+  when: manual            # Production requires explicit human click.
+  only:
+    - master
+  needs:
+    - migrate_show_production
+  before_script:
+    - *migrate_install
+  script:
+    - echo "=== Applying migrations on PRODUCTION DB ==="
+    - npm run migration:run:prod
+    - echo "=== Post-apply state ==="
+    - npm run migration:show:prod
+  environment:
+    name: production/backend
+    action: prepare
+
+migrate_revert_staging:
+  <<: *node_image
+  stage: migrate_rollback
+  when: manual
+  only:
+    - staging
+  before_script:
+    - *migrate_install
+  script:
+    - echo "=== Reverting last migration on STAGING DB ==="
+    - npm run migration:revert:prod
+    - npm run migration:show:prod
+  environment:
+    name: staging/backend
+    action: prepare
+
+migrate_revert_production:
+  <<: *node_image
+  stage: migrate_rollback
+  when: manual
+  only:
+    - master
+  before_script:
+    - *migrate_install
+  script:
+    - echo "=== Reverting last migration on PRODUCTION DB ==="
+    - npm run migration:revert:prod
+    - npm run migration:show:prod
+  environment:
+    name: production/backend
+    action: prepare
+
+# ──────────────────────────────────────
 # Production — triggered on master
 # ──────────────────────────────────────
 
@@ -23,11 +164,15 @@ deploy_backend:
   stage: deploy
   only:
     - master
+  needs:
+    - migrate_run_production
   before_script:
     - *flyctl_setup
   script:
     - cd backend
     - echo "=== Starting Production Backend Deployment ==="
+    # Migrations already applied by migrate_run_production. Fly's
+    # release_command will re-run `migration:run` as a no-op safety net.
     - |
       MAX_RETRIES=3
       RETRY_COUNT=0
@@ -122,7 +267,8 @@ deploy_status:
     name: production/status
     url: https://vgreens-status.fly.dev
 
-# Manual production deployment
+# Manual production deployment (no migration gating — assumes caller has
+# already applied migrations via migrate_run_production).
 deploy_manual:
   stage: deploy
   when: manual
@@ -149,11 +295,15 @@ deploy_backend_staging:
   stage: deploy
   only:
     - staging
+  needs:
+    - migrate_run_staging
   before_script:
     - *flyctl_setup
   script:
     - cd backend
     - echo "=== Starting Staging Backend Deployment ==="
+    # Migrations already applied by migrate_run_staging. Fly's
+    # release_command will re-run `migration:run` as a no-op safety net.
     - |
       MAX_RETRIES=3
       RETRY_COUNT=0
