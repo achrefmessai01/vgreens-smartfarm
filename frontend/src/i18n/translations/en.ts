@@ -570,6 +570,16 @@ export const en = {
       exportColumnsTitle: 'Columns',
       exportSelectAll: 'Select all',
       exportClearAll: 'Clear all',
+      exportSearchPlaceholder: 'Filter columns…',
+      exportNoColumnsMatch: 'No columns match your search.',
+      exportColumnGroups: {
+        session: 'Session',
+        cropBatch: 'Crop & Batch',
+        yieldQuality: 'Yield & Quality',
+        plot: 'Plot & Planting',
+        media: 'Media',
+        meta: 'Identifiers & Metadata',
+      },
       exportColumnLabels: {
         id: 'ID',
         parentBatchId: 'Parent Batch ID',

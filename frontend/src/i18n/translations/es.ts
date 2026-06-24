@@ -573,6 +573,16 @@ export const es = {
       exportColumnsTitle: 'Columnas',
       exportSelectAll: 'Seleccionar todo',
       exportClearAll: 'Borrar todo',
+      exportSearchPlaceholder: 'Filtrar columnas…',
+      exportNoColumnsMatch: 'Ninguna columna coincide con tu búsqueda.',
+      exportColumnGroups: {
+        session: 'Sesión',
+        cropBatch: 'Cultivo y lote',
+        yieldQuality: 'Rendimiento y calidad',
+        plot: 'Parcela y plantación',
+        media: 'Multimedia',
+        meta: 'Identificadores y metadatos',
+      },
       exportColumnLabels: {
         id: 'ID',
         parentBatchId: 'ID del lote principal',

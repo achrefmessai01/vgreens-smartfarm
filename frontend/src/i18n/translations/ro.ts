@@ -585,6 +585,16 @@ export const ro = {
       exportColumnsTitle: 'Coloane',
       exportSelectAll: 'Selectează tot',
       exportClearAll: 'Șterge tot',
+      exportSearchPlaceholder: 'Filtrează coloanele…',
+      exportNoColumnsMatch: 'Nicio coloană nu corespunde căutării.',
+      exportColumnGroups: {
+        session: 'Sesiune',
+        cropBatch: 'Cultură și lot',
+        yieldQuality: 'Producție și calitate',
+        plot: 'Parcelă și plantare',
+        media: 'Media',
+        meta: 'Identificatori și metadate',
+      },
       exportColumnLabels: {
         id: 'ID',
         parentBatchId: 'ID lot părinte',

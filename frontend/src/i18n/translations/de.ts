@@ -581,6 +581,16 @@ export const de = {
       exportColumnsTitle: 'Spalten',
       exportSelectAll: 'Alle auswählen',
       exportClearAll: 'Auswahl aufheben',
+      exportSearchPlaceholder: 'Spalten filtern…',
+      exportNoColumnsMatch: 'Keine Spalten entsprechen Ihrer Suche.',
+      exportColumnGroups: {
+        session: 'Erntesitzung',
+        cropBatch: 'Kultur & Charge',
+        yieldQuality: 'Ertrag & Qualität',
+        plot: 'Fläche & Pflanzung',
+        media: 'Medien',
+        meta: 'Kennungen & Metadaten',
+      },
       exportColumnLabels: {
         id: 'ID',
         parentBatchId: 'Übergeordnete Charge-ID',

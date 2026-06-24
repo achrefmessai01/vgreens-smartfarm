@@ -577,6 +577,16 @@ export const tr = {
       exportColumnsTitle: 'Sütunlar',
       exportSelectAll: 'Tümünü seç',
       exportClearAll: 'Tümünü temizle',
+      exportSearchPlaceholder: 'Sütunları filtrele…',
+      exportNoColumnsMatch: 'Aramanızla eşleşen sütun yok.',
+      exportColumnGroups: {
+        session: 'Hasat oturumu',
+        cropBatch: 'Ürün ve parti',
+        yieldQuality: 'Verim ve kalite',
+        plot: 'Parsel ve dikim',
+        media: 'Medya',
+        meta: 'Tanımlayıcılar ve meta veriler',
+      },
       exportColumnLabels: {
         id: 'ID',
         parentBatchId: 'Üst Parti ID',

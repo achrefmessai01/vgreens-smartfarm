@@ -588,6 +588,16 @@ export const el = {
       exportColumnsTitle: 'Στήλες',
       exportSelectAll: 'Επιλογή όλων',
       exportClearAll: 'Καθαρισμός όλων',
+      exportSearchPlaceholder: 'Φιλτράρισμα στηλών…',
+      exportNoColumnsMatch: 'Καμία στήλη δεν ταιριάζει με την αναζήτησή σας.',
+      exportColumnGroups: {
+        session: 'Συνεδρία',
+        cropBatch: 'Καλλιέργεια & παρτίδα',
+        yieldQuality: 'Απόδοση & ποιότητα',
+        plot: 'Αγροτεμάχιο & φύτευση',
+        media: 'Πολυμέσα',
+        meta: 'Αναγνωριστικά & μεταδεδομένα',
+      },
       exportColumnLabels: {
         id: 'ID',
         parentBatchId: 'ID γονικής παρτίδας',
