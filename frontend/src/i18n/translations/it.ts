@@ -523,6 +523,8 @@ export const it = {
       yieldOverTime: 'Resa nel tempo',
       yieldPerMeterOverTime: 'Resa per metro nel tempo',
       yieldPerMeterUnit: 'Resa (kg/m)',
+      yieldPerRunningMeterOverTime: 'Resa per metro lineare nel tempo',
+      yieldPerRunningMeterUnit: 'Resa (kg/m lineare)',
       yieldPerMeterShort: 'Resa/m',
       yieldPerMeter: 'Resa per metro',
       yieldPerMeterSubtitle: 'kg vendibili per metro di fila',

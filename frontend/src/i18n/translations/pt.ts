@@ -521,6 +521,8 @@ export const pt = {
       yieldOverTime: 'Produção ao longo do tempo',
       yieldPerMeterOverTime: 'Produção por metro ao longo do tempo',
       yieldPerMeterUnit: 'Produção (kg/m)',
+      yieldPerRunningMeterOverTime: 'Produção por metro linear ao longo do tempo',
+      yieldPerRunningMeterUnit: 'Produção (kg/m linear)',
       yieldPerMeterShort: 'Produção/m',
       yieldPerMeter: 'Produção por metro',
       yieldPerMeterSubtitle: 'kg vendáveis por metro de linha',

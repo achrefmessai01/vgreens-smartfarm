@@ -511,6 +511,9 @@ export const es = {
       yieldOverTime: 'Rendimiento a lo largo del tiempo',
       yieldPerMeterOverTime: 'Rendimiento por metro a lo largo del tiempo',
       yieldPerMeterUnit: 'Rendimiento (kg/m)',
+      yieldPerRunningMeterOverTime:
+        'Rendimiento por metro lineal a lo largo del tiempo',
+      yieldPerRunningMeterUnit: 'Rendimiento (kg/m lineal)',
       yieldPerMeterShort: 'Rendimiento/m',
       yieldPerMeter: 'Rendimiento por metro',
       yieldPerMeterSubtitle: 'kg vendibles por metro de hilera',

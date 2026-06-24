@@ -525,6 +525,8 @@ export const el = {
       yieldOverTime: 'Απόδοση στον χρόνο',
       yieldPerMeterOverTime: 'Απόδοση ανά μέτρο στον χρόνο',
       yieldPerMeterUnit: 'Απόδοση (kg/m)',
+      yieldPerRunningMeterOverTime: 'Απόδοση ανά τρέχον μέτρο στον χρόνο',
+      yieldPerRunningMeterUnit: 'Απόδοση (kg/τρέχον m)',
       yieldPerMeterShort: 'Απόδοση/m',
       yieldPerMeter: 'Απόδοση ανά μέτρο',
       yieldPerMeterSubtitle: 'Εμπορεύσιμα kg ανά μέτρο σειράς',
