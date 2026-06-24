@@ -169,6 +169,39 @@ export function formatHarvestDate(dateStr: string): string {
   });
 }
 
+// Wall-clock time-of-day as HH:mm. The backend returns Postgres `time` as
+// 'HH:mm:ss'; trim to HH:mm. Empty input -> '' so callers can fall back to '—'.
+export function formatTimeOfDay(value: string | null | undefined): string {
+  if (!value) return '';
+  return value.slice(0, 5);
+}
+
+// Minutes since midnight from an 'HH:mm' / 'HH:mm:ss' string, or null if unset.
+function timeOfDayToMinutes(value: string | null | undefined): number | null {
+  const trimmed = formatTimeOfDay(value);
+  if (!trimmed) return null;
+  const [h, m] = trimmed.split(':');
+  const minutes = Number(h) * 60 + Number(m);
+  return Number.isFinite(minutes) ? minutes : null;
+}
+
+// Human "Xh Ym" duration between start and stop (same-day). Null unless both
+// are present and stop is after start.
+export function formatSessionDuration(
+  startTime: string | null | undefined,
+  stopTime: string | null | undefined,
+): string | null {
+  const start = timeOfDayToMinutes(startTime);
+  const stop = timeOfDayToMinutes(stopTime);
+  if (start == null || stop == null || stop <= start) return null;
+  const total = stop - start;
+  const hours = Math.floor(total / 60);
+  const mins = total % 60;
+  if (hours === 0) return `${mins}m`;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h ${mins}m`;
+}
+
 // Aggregate a set of harvests into the summary card figures, reading the
 // service-computed `totals` and the parent batch name.
 export function computeSummary(harvests: HarvestLike[]): HarvestSummary {

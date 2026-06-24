@@ -640,6 +640,11 @@ export const de = {
         'Möchten Sie diese Charge und alle zugehörigen Ernteeinträge wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
       completeBatch: 'Batch abschließen',
       harvestDate: 'Erntedatum',
+      startTime: 'Startzeit',
+      stopTime: 'Endzeit',
+      sessionDuration: 'Dauer',
+      harvesterHeadCount: 'Erntehelfer',
+      harvesterHeadCountPlaceholder: 'z. B. 4',
       logHarvest: 'Ernte protokollieren',
       logEntry: 'Eintrag protokollieren',
       logFirstEntryHint:
