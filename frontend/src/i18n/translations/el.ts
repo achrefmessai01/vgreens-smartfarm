@@ -647,6 +647,11 @@ export const el = {
         'Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την παρτίδα και όλες τις συνδεδεμένες καταχωρίσεις συγκομιδής; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.',
       completeBatch: 'Ολοκλήρωση παρτίδας',
       harvestDate: 'Ημερομηνία συγκομιδής',
+      startTime: 'Ώρα έναρξης',
+      stopTime: 'Ώρα λήξης',
+      sessionDuration: 'Διάρκεια',
+      harvesterHeadCount: 'Συλλέκτες',
+      harvesterHeadCountPlaceholder: 'π.χ. 4',
       logHarvest: 'Καταχώριση συγκομιδής',
       logEntry: 'Καταχώριση εγγραφής',
       logFirstEntryHint:
