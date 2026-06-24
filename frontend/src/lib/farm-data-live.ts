@@ -81,6 +81,13 @@ function buildSlotsFromRows(
      * series. Undefined for tenants that don't use the `greenhouse` tag.
      */
     influxGreenhouse?: string;
+    /**
+     * Original (un-normalised) device id from InfluxDB. Slot ids strip
+     * whitespace, so parsing the device out of the id is lossy — keep the raw
+     * value here so cross-references to SensorConfig (which stores the
+     * unmodified device name) stay reliable.
+     */
+    device?: string;
   };
 
   const bySlot = new Map<SlotKey, FieldValues>();
@@ -133,6 +140,7 @@ function buildSlotsFromRows(
       // Real `greenhouse` tag only (not `chamber`) — used to scope history
       // queries. Left undefined when the tenant doesn't tag with `greenhouse`.
       influxGreenhouse: (row.greenhouse as string) || undefined,
+      device: device || undefined,
       ...(Number.isFinite(xPos) && xPos != null && { xPosition: xPos }),
       ...(Number.isFinite(yPos) && yPos != null && { yPosition: yPos }),
       ...(config?.hiddenInFarmOverview === true && {

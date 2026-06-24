@@ -579,9 +579,12 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     const idx = activeGreenhouseTab - 1;
     const gh = tenantGreenhouses[idx];
     if (!gh) return [];
-    const bay = findBayForGreenhouse(bays, gh.name, idx);
+    const bay = findBayForGreenhouse(bays, gh.name, idx, {
+      totalGreenhouses: tenantGreenhouses.length,
+      sensorConfigMap,
+    });
     return bay ? [bay] : [];
-  }, [activeGreenhouseTab, bays, tenantGreenhouses]);
+  }, [activeGreenhouseTab, bays, tenantGreenhouses, sensorConfigMap]);
 
   // Map each slot id to its REAL InfluxDB `greenhouse` tag (from slot meta),
   // so the history drawer can scope its query to the exact series. The slot
@@ -627,7 +630,10 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     }
     // Match each greenhouse to its bay (see selectedBays note + helper).
     return tenantGreenhouses.map((gh, i) => {
-      const bay = findBayForGreenhouse(bays, gh.name, i);
+      const bay = findBayForGreenhouse(bays, gh.name, i, {
+        totalGreenhouses: tenantGreenhouses.length,
+        sensorConfigMap,
+      });
       return {
         key: bay?.id ?? `greenhouse_${i + 1}`,
         label: gh.name || ghLabels[i] || `Greenhouse ${i + 1}`,
@@ -639,6 +645,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     bays,
     farmLayout.chambersCount,
     tenantGreenhouses,
+    sensorConfigMap,
     t.greenHouse1,
     t.greenHouse2,
   ]);
