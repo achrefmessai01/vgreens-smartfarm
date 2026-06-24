@@ -136,6 +136,18 @@ export class Batch {
   @Column({ type: 'double precision', default: 0 })
   rowSpacing: number;
 
+  // Running meters: the batch's total cultivated row length in metres, i.e.
+  // numberOfRows × rowLength. Derived from the two stored fields (not a column)
+  // so it can never drift out of sync when either changes; 0 when either factor
+  // is 0/missing. Distinct from rowLength, which is the length of a single row.
+  @Field(() => Float, {
+    description:
+      'Running meters: numberOfRows × rowLength (m). Total cultivated row length across all rows of the batch. 0 when either factor is 0.',
+  })
+  get runningMeter(): number {
+    return (this.numberOfRows ?? 0) * (this.rowLength ?? 0);
+  }
+
   // The contiguous block of physical rows this batch occupies, as start/end row
   // numbers (inclusive). Nullable: existing batches are backfilled by hand and
   // a batch without a defined range falls back to unconstrained harvest rows.

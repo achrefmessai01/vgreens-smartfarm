@@ -13,6 +13,7 @@ const BATCH_MUTATION_FIELDS = gql`
     plantingDate
     numberOfRows
     rowLength
+    runningMeter
     rowSpacing
     startRow
     endRow

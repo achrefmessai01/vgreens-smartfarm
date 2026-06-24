@@ -99,6 +99,13 @@ export class HarvestDashboardMetrics {
   })
   yieldPerMeter: number | null;
 
+  @Field(() => Float, {
+    nullable: true,
+    description:
+      'Weighted kg per running metre across selected batches: Σ totalFruitWeight / Σ runningMeter (numberOfRows × rowLength). Null when no batch in scope has runningMeter > 0.',
+  })
+  yieldPerRunningMeter: number | null;
+
   @Field(() => Float)
   marketablePercent: number;
 

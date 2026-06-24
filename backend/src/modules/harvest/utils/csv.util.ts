@@ -57,6 +57,7 @@ const COLUMN_DEFS: ColumnDef[] = [
   { key: 'cultivationArea', value: (h) => num(h.batch?.cultivationArea) },
   { key: 'numberOfRows', value: (h) => num(h.batch?.numberOfRows) },
   { key: 'rowLength', value: (h) => num(h.batch?.rowLength) },
+  { key: 'runningMeter', value: (h) => num(h.batch?.runningMeter) },
   { key: 'rowSpacing', value: (h) => num(h.batch?.rowSpacing) },
   { key: 'plantsPerMeter', value: (h) => num(h.batch?.plantsPerMeter) },
   { key: 'totalPlants', value: (h) => num(h.batch?.totalPlants) },
@@ -80,6 +81,10 @@ const COLUMN_DEFS: ColumnDef[] = [
   { key: 'avgFruitWeight', value: (h) => num(h.totals?.avgFruitWeight) },
   { key: 'yieldPerPlant', value: (h) => num(h.totals?.yieldPerPlant) },
   { key: 'yieldPerMeter', value: (h) => num(h.totals?.yieldPerMeter) },
+  {
+    key: 'yieldPerRunningMeter',
+    value: (h) => num(h.totals?.yieldPerRunningMeter),
+  },
   {
     key: 'photoUrls',
     value: (h) => (Array.isArray(h.photoUrls) ? h.photoUrls.join('|') : ''),

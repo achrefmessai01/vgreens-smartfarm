@@ -14,6 +14,7 @@ const BATCH_FIELDS = gql`
     plantingDate
     numberOfRows
     rowLength
+    runningMeter
     rowSpacing
     startRow
     endRow

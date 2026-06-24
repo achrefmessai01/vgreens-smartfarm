@@ -30,6 +30,7 @@ const HARVEST_MUTATION_FIELDS = gql`
       status
       totalPlants
       rowLength
+      runningMeter
       inputMode
       crateWeight
       greenhouse {
@@ -68,6 +69,7 @@ const HARVEST_MUTATION_FIELDS = gql`
       avgBrix
       yieldPerPlant
       yieldPerMeter
+      yieldPerRunningMeter
     }
   }
 `;

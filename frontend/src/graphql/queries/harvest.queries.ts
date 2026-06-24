@@ -36,6 +36,7 @@ const HARVEST_FIELDS = gql`
       cultivationArea
       numberOfRows
       rowLength
+      runningMeter
       plantsPerMeter
       rowSpacing
       startRow
@@ -81,6 +82,7 @@ const HARVEST_FIELDS = gql`
       avgBrix
       yieldPerPlant
       yieldPerMeter
+      yieldPerRunningMeter
     }
     createdBy {
       id

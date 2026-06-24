@@ -298,11 +298,16 @@ export class HarvestsService {
 
     const totalPlants = batch?.totalPlants ?? 0;
     const rowLength = batch?.rowLength ?? 0;
+    const runningMeter = batch?.runningMeter ?? 0;
     // Null-safe: never divide by a zero/missing denominator.
     const yieldPerPlant =
       totalPlants > 0 ? this.roundTo(totalFruitWeight / totalPlants, 3) : null;
     const yieldPerMeter =
       rowLength > 0 ? this.roundTo(totalFruitWeight / rowLength, 3) : null;
+    const yieldPerRunningMeter =
+      runningMeter > 0
+        ? this.roundTo(totalFruitWeight / runningMeter, 3)
+        : null;
 
     return {
       classKgs,
@@ -317,6 +322,7 @@ export class HarvestsService {
       avgBrix,
       yieldPerPlant,
       yieldPerMeter,
+      yieldPerRunningMeter,
     };
   }
 
@@ -693,6 +699,7 @@ export class HarvestsService {
       const fruitWeightByBatch = new Map<string, number>();
       const plantsByBatch = new Map<string, number>();
       const rowLengthByBatch = new Map<string, number>();
+      const runningMeterByBatch = new Map<string, number>();
       for (const { harvest, totals } of items) {
         const batchId = harvest.batchId;
         fruitWeightByBatch.set(
@@ -702,12 +709,15 @@ export class HarvestsService {
         if (harvest.batch) {
           plantsByBatch.set(batchId, harvest.batch.totalPlants ?? 0);
           rowLengthByBatch.set(batchId, harvest.batch.rowLength ?? 0);
+          runningMeterByBatch.set(batchId, harvest.batch.runningMeter ?? 0);
         }
       }
       let sumWeightPlants = 0;
       let sumPlants = 0;
       let sumWeightMeters = 0;
       let sumRowLength = 0;
+      let sumWeightRunningMeters = 0;
+      let sumRunningMeter = 0;
       for (const [batchId, weight] of fruitWeightByBatch) {
         const plants = plantsByBatch.get(batchId) ?? 0;
         if (plants > 0) {
@@ -719,12 +729,21 @@ export class HarvestsService {
           sumWeightMeters += weight;
           sumRowLength += rowLength;
         }
+        const runningMeter = runningMeterByBatch.get(batchId) ?? 0;
+        if (runningMeter > 0) {
+          sumWeightRunningMeters += weight;
+          sumRunningMeter += runningMeter;
+        }
       }
       const yieldPerPlant =
         sumPlants > 0 ? this.roundTo(sumWeightPlants / sumPlants, 3) : null;
       const yieldPerMeter =
         sumRowLength > 0
           ? this.roundTo(sumWeightMeters / sumRowLength, 3)
+          : null;
+      const yieldPerRunningMeter =
+        sumRunningMeter > 0
+          ? this.roundTo(sumWeightRunningMeters / sumRunningMeter, 3)
           : null;
 
       // daysActive: earliest batch planting -> latest harvest date.
@@ -760,6 +779,7 @@ export class HarvestsService {
         averageFruitWeight: this.roundTo(averageFruitWeight, 3),
         yieldPerPlant,
         yieldPerMeter,
+        yieldPerRunningMeter,
         marketablePercent: this.roundTo(marketablePercent, 1),
         wastePercent: this.roundTo(wastePercent, 1),
         wasteTotal: this.roundTo(totalWaste, 1),
@@ -795,6 +815,7 @@ export class HarvestsService {
       averageFruitWeight: 0,
       yieldPerPlant: null,
       yieldPerMeter: null,
+      yieldPerRunningMeter: null,
       marketablePercent: 0,
       wastePercent: 0,
       wasteTotal: 0,
