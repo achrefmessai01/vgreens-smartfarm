@@ -4,11 +4,20 @@ import { AlertsService } from './alerts.service';
 import { Roles, CurrentUser } from '@common/decorators';
 import { CreateAlertInput, UpdateAlertInput, AlertsFilterInput } from './dto';
 import { User } from '@modules/users/entities/user.entity';
-import { UseGuards, UseInterceptors } from '@nestjs/common';
+import { Inject, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import { AlertThresholdService } from './alert-threshold.service';
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Subscription,
+  Args,
+  ID,
+} from '@nestjs/graphql';
 import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
+import { PubSub } from 'graphql-subscriptions';
+import { PUB_SUB, ALERT_CREATED_EVENT } from './pubsub';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @UseInterceptors(UserInterceptor, TenantInterceptor)
@@ -17,7 +26,40 @@ export class AlertsResolver {
   constructor(
     private readonly alertsService: AlertsService,
     private readonly alertThresholdService: AlertThresholdService,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
+
+  // VSL-97: real-time push of newly-created alerts (drives toast
+  // notifications). Tenant isolation is enforced by `filter`: tenant-scoped
+  // users only receive alerts for their own tenant; VGREENS_ADMIN receives
+  // all. Role restrictions mirror the `alerts` query. The authenticated user
+  // is attached to `context.req.user` by the (reused) ClerkAuthGuard.
+  @Subscription(() => Alert, {
+    name: 'alertCreated',
+    // Extract the alert from the published payload (`{ alertCreated: <alert> }`).
+    // Null-safe so a stray/undefined event can never crash the resolver.
+    resolve: (payload: { alertCreated?: Alert } | undefined) =>
+      payload?.alertCreated,
+    // Tenant isolation. Null-safe: events without an alert are skipped (so an
+    // undefined payload is filtered out instead of reaching resolve).
+    filter: (
+      payload: { alertCreated?: Alert } | undefined,
+      _variables: unknown,
+      context: { req?: { user?: User } },
+    ) => {
+      const user = context?.req?.user;
+      const alert = payload?.alertCreated;
+      if (!user || !alert) return false;
+      if (user.role === UserRole.VGREENS_ADMIN) return true;
+      return alert.tenantId === user.tenantId;
+    },
+  })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  alertCreated() {
+    return this.pubSub.asyncIterableIterator<{ alertCreated: Alert }>(
+      ALERT_CREATED_EVENT,
+    );
+  }
 
   @Query(() => [Alert], { name: 'alerts' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
