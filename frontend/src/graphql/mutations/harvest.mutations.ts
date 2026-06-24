@@ -58,9 +58,6 @@ const HARVEST_MUTATION_FIELDS = gql`
     }
     totals {
       classKgs
-      classA
-      classB
-      classC
       waste
       fruitCount
       totalFruitWeight

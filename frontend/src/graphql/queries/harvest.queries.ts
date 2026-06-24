@@ -71,9 +71,6 @@ const HARVEST_FIELDS = gql`
     }
     totals {
       classKgs
-      classA
-      classB
-      classC
       waste
       fruitCount
       totalFruitWeight
@@ -129,9 +126,7 @@ export const HARVESTS_COUNT_QUERY = gql`
         status
       }
       totals {
-        classA
-        classB
-        classC
+        classKgs
         waste
         avgBrix
       }

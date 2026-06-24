@@ -17,6 +17,19 @@ export function mean(values: number[]): number {
   return values.length === 0 ? 0 : sum(values) / values.length;
 }
 
+// Element-wise sum of a list of numeric arrays into one array, as long as the
+// longest input (shorter arrays count as 0 past their end). The primitive for
+// rolling up positional, dynamic-length per-class arrays (index 0=A, 1=B, ...).
+// sumByIndex([[1,2],[10,0,5]]) -> [11, 2, 5].
+export function sumByIndex(arrays: number[][]): number[] {
+  const width = Math.max(0, ...arrays.map((a) => a.length));
+  const result = new Array<number>(width).fill(0);
+  for (const a of arrays) {
+    for (let i = 0; i < a.length; i++) result[i] += a[i] ?? 0;
+  }
+  return result;
+}
+
 // Weighted mean: Σ(value × weight) / Σ(weight). Falls back to the unweighted
 // mean when every weight is 0/absent, so a metric never collapses to 0 just
 // because no weights were supplied. `values` and `weights` are paired by index.

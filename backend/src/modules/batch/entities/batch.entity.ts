@@ -148,6 +148,18 @@ export class Batch {
     return (this.numberOfRows ?? 0) * (this.rowLength ?? 0);
   }
 
+  // Living plant count: totalPlants minus the plants recorded as lost, floored at
+  // 0. Derived (not a column) so it tracks both fields. This is the denominator
+  // for yield-per-plant — yield should reflect surviving plants, not the gross
+  // planting.
+  @Field(() => Int, {
+    description:
+      'Living plants: totalPlants − lostPlants, floored at 0. The denominator used for yield-per-plant.',
+  })
+  get livingPlants(): number {
+    return Math.max(0, (this.totalPlants ?? 0) - (this.lostPlants ?? 0));
+  }
+
   // The contiguous block of physical rows this batch occupies, as start/end row
   // numbers (inclusive). Nullable: existing batches are backfilled by hand and
   // a batch without a defined range falls back to unconstrained harvest rows.

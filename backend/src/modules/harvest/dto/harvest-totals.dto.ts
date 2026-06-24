@@ -7,25 +7,9 @@ import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
 export class HarvestTotals {
   @Field(() => [Float], {
     description:
-      'Per-quality sellable kg sums, positional and dynamic (index 0=A, 1=B, ...). As wide as the widest entry. The authoritative per-class breakdown.',
+      'The authoritative per-quality sellable kg breakdown, positional and dynamic (index 0=A, 1=B, 2=C, ...). As wide as the widest entry; sum it for total sellable.',
   })
   classKgs: number[];
-
-  @Field(() => Float, {
-    description:
-      'classKgs[0] (Quality A). Convenience scalar for the first class.',
-  })
-  classA: number;
-
-  @Field(() => Float, {
-    description: 'classKgs[1] (Quality B), 0 if absent. Convenience scalar.',
-  })
-  classB: number;
-
-  @Field(() => Float, {
-    description: 'classKgs[2] (Quality C), 0 if absent. Convenience scalar.',
-  })
-  classC: number;
 
   @Field(() => Float, { description: 'SUM of entries.waste' })
   waste: number;

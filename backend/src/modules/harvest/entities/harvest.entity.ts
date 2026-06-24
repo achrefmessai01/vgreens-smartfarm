@@ -25,7 +25,7 @@ const dateTransformer: ValueTransformer = {
 };
 
 // The harvest event only. All measurements live in harvest_entries; all totals
-// (classA, yields, etc.) are derived by HarvestService and exposed via the
+// (classKgs, yields, etc.) are derived by HarvestService and exposed via the
 // resolved `totals` field — they are never stored on this row. Planting data
 // lives on the parent batch.
 @ObjectType()

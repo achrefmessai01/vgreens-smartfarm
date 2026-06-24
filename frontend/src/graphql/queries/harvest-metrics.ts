@@ -14,8 +14,7 @@ export const GET_HARVEST_METRICS = gql`
       marketablePercent
       wastePercent
       wasteTotal
-      classBTotal
-      classCTotal
+      classTotals
       criticalAlerts
       daysActive
     }
@@ -109,9 +108,7 @@ export const GET_HARVEST_SUMMARY = gql`
         }
       }
       totals {
-        classA
-        classB
-        classC
+        classKgs
         waste
         avgBrix
       }

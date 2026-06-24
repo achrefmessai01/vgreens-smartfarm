@@ -17,32 +17,18 @@ import { HarvestFilterInput } from './dto/harvest-filter.input';
 import { DashboardFilterInput } from './dto/dashboard-filter.input';
 import { HarvestTotals } from './dto/harvest-totals.dto';
 import { HarvestBatchListItem } from './dto/harvest-batch-list-item.dto';
-import {
-  HarvestDashboardMetrics,
-  YieldOverTimeData,
-  YieldPerMeterData,
-  YieldPerRunningMeterData,
-  ClassDistributionData,
-  BrixTrendData,
-  FruitWeightTrendData,
-  CumulativeYieldData,
-} from './dto/dashboard-metrics.dto';
+import { HarvestDashboardMetrics } from './dto/dashboard-metrics.dto';
 import { OrderDirection, InputMode } from '@common/enums';
-import { roundTo, sum, mean, weightedMean } from '@common/utils';
+import { roundTo, mean } from '@common/utils';
 import { Batch } from '@modules/batch/entities/batch.entity';
 import { BatchService } from '@modules/batch/batch.service';
+import { entryTotalWeight } from './utils/harvest-weight.util';
+import { computeHarvestTotals } from './utils/harvest-totals.util';
 import {
-  entryClassWeights,
-  entryTotalWeight,
-  totalFruitWeight as sumTotalFruitWeight,
-} from './utils/harvest-weight.util';
-
-// A harvest paired with its derived totals — the unit dashboard aggregation
-// works over.
-interface HarvestWithTotals {
-  harvest: Harvest;
-  totals: HarvestTotals;
-}
+  buildDashboardMetrics,
+  emptyDashboardMetrics,
+  type HarvestWithTotals,
+} from './utils/harvest-metrics.util';
 
 @Injectable()
 export class HarvestsService {
@@ -174,108 +160,13 @@ export class HarvestsService {
   }
 
   // Derive a harvest's totals from its entries (+ parent batch for the yields).
-  // All weight derivation flows through the harvest-weight util, so both input
-  // modes and any number of quality classes are handled in one place.
-  //
-  // avgFruitWeight and avgBrix are SAMPLE-WEIGHTED means (by sampleFruitCount),
-  // so a larger sample counts proportionally more. fruitCount is the SUM of the
-  // per-entry sampleFruitCount — fruits SAMPLED, not an estimate of fruits
-  // harvested. totalFruitWeight INCLUDES waste.
+  // The computation is a pure function (harvest-totals.util); this thin method is
+  // the seam the resolver and the read paths call.
   computeTotals(
     entries: HarvestEntry[] | undefined,
     batch?: Batch | null,
   ): HarvestTotals {
-    const list = entries ?? [];
-
-    // Per-class sellable kg (waste excluded), summed element-wise across entries.
-    // As wide as the widest entry — class count is per-entry, dynamic, unbounded.
-    const classWeightsByEntry = list.map((e) => entryClassWeights(e, batch));
-    const classN = Math.max(0, ...classWeightsByEntry.map((a) => a.length));
-    const classKgs = Array.from({ length: classN }, (_, i) =>
-      roundTo(sum(classWeightsByEntry.map((a) => a[i] ?? 0)), 3),
-    );
-    // Convenience scalars for the first three classes (CSV / summary / compare).
-    const classA = classKgs[0] ?? 0;
-    const classB = classKgs[1] ?? 0;
-    const classC = classKgs[2] ?? 0;
-
-    const waste = roundTo(sum(list.map((e) => e.waste ?? 0)), 3);
-    // Total harvested weight = sellable across all classes + waste. Waste counts
-    // toward the weight and is still reported separately above.
-    const totalFruitWeight = roundTo(sumTotalFruitWeight(list, batch), 3);
-
-    // Total fruits SAMPLED across the entries — not an estimate of fruits
-    // harvested.
-    const fruitCount = sum(list.map((e) => e.sampleFruitCount ?? 0));
-
-    // Crate-count rollups are meaningful only for crate-mode batches. Dynamic
-    // length: as wide as the widest entry's crateCounts (index 0=A, 1=B, ...).
-    const isCrate = batch?.inputMode === InputMode.CRATE;
-    const crateClassN = isCrate
-      ? Math.max(0, ...list.map((e) => e.crateCounts?.length ?? 0))
-      : 0;
-    const crateCounts = isCrate
-      ? Array.from({ length: crateClassN }, (_, i) =>
-          sum(list.map((e) => e.crateCounts?.[i] ?? 0)),
-        )
-      : null;
-
-    // Sample-weighted g/fruit: pooled sample mass / pooled sample fruit count
-    // (= per-entry g/fruit weighted by each entry's fruit count). Only entries
-    // with a complete sample contribute. Null when none do.
-    const sampled = list.filter(
-      (e) => (e.sampleWeight ?? 0) > 0 && (e.sampleFruitCount ?? 0) > 0,
-    );
-    const sampledFruit = sum(sampled.map((e) => e.sampleFruitCount ?? 0));
-    const avgFruitWeight =
-      sampledFruit > 0
-        ? roundTo(
-            sum(sampled.map((e) => e.sampleWeight ?? 0)) / sampledFruit,
-            3,
-          )
-        : null;
-
-    // Sample-weighted mean brix across entries that carry a reading (avgBrix > 0),
-    // weighted by sampleFruitCount. Null when none do.
-    const brixEntries = list.filter((e) => (e.avgBrix ?? 0) > 0);
-    const avgBrix =
-      brixEntries.length > 0
-        ? roundTo(
-            weightedMean(
-              brixEntries.map((e) => e.avgBrix),
-              brixEntries.map((e) => e.sampleFruitCount ?? 0),
-            ),
-            1,
-          )
-        : null;
-
-    // Yields divide by the LIVING plant count (planted − lost) and the row
-    // lengths. Null-safe: never divide by a zero/missing denominator.
-    const livingPlants = (batch?.totalPlants ?? 0) - (batch?.lostPlants ?? 0);
-    const rowLength = batch?.rowLength ?? 0;
-    const runningMeter = batch?.runningMeter ?? 0;
-    const yieldPerPlant =
-      livingPlants > 0 ? roundTo(totalFruitWeight / livingPlants, 3) : null;
-    const yieldPerMeter =
-      rowLength > 0 ? roundTo(totalFruitWeight / rowLength, 3) : null;
-    const yieldPerRunningMeter =
-      runningMeter > 0 ? roundTo(totalFruitWeight / runningMeter, 3) : null;
-
-    return {
-      classKgs,
-      classA,
-      classB,
-      classC,
-      waste,
-      fruitCount,
-      totalFruitWeight,
-      crateCounts,
-      avgFruitWeight,
-      avgBrix,
-      yieldPerPlant,
-      yieldPerMeter,
-      yieldPerRunningMeter,
-    };
+    return computeHarvestTotals(entries, batch);
   }
 
   async findAllFiltered(
@@ -535,7 +426,6 @@ export class HarvestsService {
 
     return batches.map((b) => {
       const weight = weightByBatch.get(b.id) ?? 0;
-      const livingPlants = (b.totalPlants ?? 0) - (b.lostPlants ?? 0);
       return {
         id: b.id,
         name: b.name ?? '',
@@ -545,7 +435,7 @@ export class HarvestsService {
         plantingDate: b.plantingDate,
         status: b.status,
         yieldPerPlant:
-          livingPlants > 0 ? roundTo(weight / livingPlants, 3) : null,
+          b.livingPlants > 0 ? roundTo(weight / b.livingPlants, 3) : null,
       };
     });
   }
@@ -610,161 +500,9 @@ export class HarvestsService {
         totals: this.computeTotals(harvest.entries, harvest.batch),
       }));
 
-      if (items.length === 0) {
-        return this.getEmptyDashboardMetrics();
-      }
-
-      // Primary species/variety (most common across the batches in scope).
-      const speciesMap = new Map<string, number>();
-      const varietyMap = new Map<string, number>();
-      for (const { harvest } of items) {
-        const species = harvest.batch?.crop?.name ?? 'N/A';
-        const variety = harvest.batch?.variety?.name ?? 'N/A';
-        speciesMap.set(species, (speciesMap.get(species) ?? 0) + 1);
-        varietyMap.set(variety, (varietyMap.get(variety) ?? 0) + 1);
-      }
-      const topKey = (m: Map<string, number>): string =>
-        [...m.entries()].sort((a, b) => b[1] - a[1])[0][0];
-
-      const totalClassB = items.reduce((s, i) => s + i.totals.classB, 0);
-      const totalClassC = items.reduce((s, i) => s + i.totals.classC, 0);
-      const totalWaste = items.reduce((s, i) => s + i.totals.waste, 0);
-      // totalFruitWeight already includes waste, so it IS the total yield.
-      // Sellable is the remainder once waste is removed — and counts ALL quality
-      // classes, not just A/B/C.
-      const totalYield = items.reduce(
-        (s, i) => s + i.totals.totalFruitWeight,
-        0,
-      );
-      const totalSellable = totalYield - totalWaste;
-
-      const marketablePercent =
-        totalYield > 0 ? (totalSellable / totalYield) * 100 : 0;
-      const wastePercent = totalYield > 0 ? (totalWaste / totalYield) * 100 : 0;
-
-      // Sample-weighted means: each harvest's average counts in proportion to how
-      // many fruits it sampled (fruitCount), so a 2-fruit sample no longer sways
-      // the metric as much as a 200-fruit one. Entries with no reading excluded.
-      const brixItems = items.filter(
-        (i) => i.totals.avgBrix !== null && i.totals.avgBrix > 0,
-      );
-      const averageBrix = weightedMean(
-        brixItems.map((i) => i.totals.avgBrix ?? 0),
-        brixItems.map((i) => i.totals.fruitCount),
-      );
-
-      const fwItems = items.filter(
-        (i) => i.totals.avgFruitWeight !== null && i.totals.avgFruitWeight > 0,
-      );
-      const averageFruitWeight = weightedMean(
-        fwItems.map((i) => i.totals.avgFruitWeight ?? 0),
-        fwItems.map((i) => i.totals.fruitCount),
-      );
-
-      // Weighted yields: Σ totalFruitWeight / Σ (batch denominator), grouped by
-      // batch so each batch's plant count / row length is counted once. Plants
-      // are LIVING plants (planted − lost).
-      const fruitWeightByBatch = new Map<string, number>();
-      const plantsByBatch = new Map<string, number>();
-      const rowLengthByBatch = new Map<string, number>();
-      const runningMeterByBatch = new Map<string, number>();
-      for (const { harvest, totals } of items) {
-        const batchId = harvest.batchId;
-        fruitWeightByBatch.set(
-          batchId,
-          (fruitWeightByBatch.get(batchId) ?? 0) + totals.totalFruitWeight,
-        );
-        if (harvest.batch) {
-          plantsByBatch.set(
-            batchId,
-            (harvest.batch.totalPlants ?? 0) - (harvest.batch.lostPlants ?? 0),
-          );
-          rowLengthByBatch.set(batchId, harvest.batch.rowLength ?? 0);
-          runningMeterByBatch.set(batchId, harvest.batch.runningMeter ?? 0);
-        }
-      }
-      let sumWeightPlants = 0;
-      let sumPlants = 0;
-      let sumWeightMeters = 0;
-      let sumRowLength = 0;
-      let sumWeightRunningMeters = 0;
-      let sumRunningMeter = 0;
-      for (const [batchId, weight] of fruitWeightByBatch) {
-        const plants = plantsByBatch.get(batchId) ?? 0;
-        if (plants > 0) {
-          sumWeightPlants += weight;
-          sumPlants += plants;
-        }
-        const rowLength = rowLengthByBatch.get(batchId) ?? 0;
-        if (rowLength > 0) {
-          sumWeightMeters += weight;
-          sumRowLength += rowLength;
-        }
-        const runningMeter = runningMeterByBatch.get(batchId) ?? 0;
-        if (runningMeter > 0) {
-          sumWeightRunningMeters += weight;
-          sumRunningMeter += runningMeter;
-        }
-      }
-      const yieldPerPlant =
-        sumPlants > 0 ? roundTo(sumWeightPlants / sumPlants, 3) : null;
-      const yieldPerMeter =
-        sumRowLength > 0 ? roundTo(sumWeightMeters / sumRowLength, 3) : null;
-      const yieldPerRunningMeter =
-        sumRunningMeter > 0
-          ? roundTo(sumWeightRunningMeters / sumRunningMeter, 3)
-          : null;
-
-      // daysActive: earliest batch planting -> latest harvest date.
-      const plantingTimes = items
-        .map((i) => i.harvest.batch?.plantingDate)
-        .filter((d): d is Date => d != null)
-        .map((d) => new Date(d).getTime());
-      const harvestTimes = items.map((i) => new Date(i.harvest.date).getTime());
-      const earliestPlanting =
-        plantingTimes.length > 0
-          ? Math.min(...plantingTimes)
-          : Math.min(...harvestTimes);
-      const latestHarvest = Math.max(...harvestTimes);
-      const daysActive = Math.max(
-        0,
-        Math.ceil((latestHarvest - earliestPlanting) / (1000 * 60 * 60 * 24)),
-      );
-
-      const criticalAlerts = items.filter(({ totals }) => {
-        // totalFruitWeight is the full picked weight (all classes + waste).
-        const picked = totals.totalFruitWeight;
-        const lowBrix = totals.avgBrix !== null && totals.avgBrix < 6.0;
-        const highWaste = picked > 0 && totals.waste / picked > 0.15;
-        return lowBrix || highWaste;
-      }).length;
-
-      return {
-        species: topKey(speciesMap),
-        variety: topKey(varietyMap),
-        harvestCount: items.length,
-        totalYield: roundTo(totalYield, 1),
-        averageBrix: roundTo(averageBrix, 1),
-        averageFruitWeight: roundTo(averageFruitWeight, 3),
-        yieldPerPlant,
-        yieldPerMeter,
-        yieldPerRunningMeter,
-        marketablePercent: roundTo(marketablePercent, 1),
-        wastePercent: roundTo(wastePercent, 1),
-        wasteTotal: roundTo(totalWaste, 1),
-        classBTotal: roundTo(totalClassB, 1),
-        classCTotal: roundTo(totalClassC, 1),
-        criticalAlerts,
-        daysActive,
-        yieldOverTime: this.generateYieldOverTime(items),
-        yieldPerMeterTrend: this.generateYieldPerMeterTrend(items),
-        yieldPerRunningMeterTrend:
-          this.generateYieldPerRunningMeterTrend(items),
-        classDistribution: this.generateClassDistribution(items),
-        brixTrend: this.generateBrixTrend(items),
-        fruitWeightTrend: this.generateFruitWeightTrend(items),
-        cumulativeYield: this.generateCumulativeYield(items),
-      };
+      return items.length > 0
+        ? buildDashboardMetrics(items)
+        : emptyDashboardMetrics();
     } catch (error) {
       this.logger.error(
         `getDashboardMetrics failed: ${error instanceof Error ? error.message : String(error)}`,
@@ -774,216 +512,5 @@ export class HarvestsService {
         'Failed to fetch dashboard metrics',
       );
     }
-  }
-
-  private getEmptyDashboardMetrics(): HarvestDashboardMetrics {
-    return {
-      species: 'N/A',
-      variety: 'N/A',
-      harvestCount: 0,
-      totalYield: 0,
-      averageBrix: 0,
-      averageFruitWeight: 0,
-      yieldPerPlant: null,
-      yieldPerMeter: null,
-      yieldPerRunningMeter: null,
-      marketablePercent: 0,
-      wastePercent: 0,
-      wasteTotal: 0,
-      classBTotal: 0,
-      classCTotal: 0,
-      criticalAlerts: 0,
-      daysActive: 0,
-      yieldOverTime: [],
-      yieldPerMeterTrend: [],
-      yieldPerRunningMeterTrend: [],
-      classDistribution: [],
-      brixTrend: [],
-      fruitWeightTrend: [],
-      cumulativeYield: [],
-    };
-  }
-
-  private dateKey(date: Date): string {
-    return new Date(date).toISOString().split('T')[0];
-  }
-
-  private generateYieldOverTime(
-    items: HarvestWithTotals[],
-  ): YieldOverTimeData[] {
-    const daily = new Map<string, number>();
-    for (const { harvest, totals } of items) {
-      const key = this.dateKey(harvest.date);
-      // Sellable across ALL classes (totalFruitWeight includes waste, so remove
-      // it) — not just the first three (A/B/C).
-      const sellable = totals.totalFruitWeight - totals.waste;
-      daily.set(key, (daily.get(key) ?? 0) + sellable);
-    }
-    return [...daily.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, value]) => ({ date, yield: roundTo(value, 1) }));
-  }
-
-  // Per-day weighted yield over a per-batch length denominator (row length or
-  // running meters). The denominator is counted ONCE per batch per day — a batch
-  // harvested twice in a day must not double its length — mirroring how the
-  // dashboard scalar aggregate dedups per batch. Days with no positive length
-  // are dropped. Returns [{ date, ratio }]; callers map ratio to the right field.
-  private generateYieldPerLengthTrend(
-    items: HarvestWithTotals[],
-    lengthOf: (batch: Batch) => number,
-  ): { date: string; ratio: number }[] {
-    const daily = new Map<
-      string,
-      { weight: Map<string, number>; length: Map<string, number> }
-    >();
-    for (const { harvest, totals } of items) {
-      const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? { weight: new Map(), length: new Map() };
-      const batchId = harvest.batchId;
-      cur.weight.set(
-        batchId,
-        (cur.weight.get(batchId) ?? 0) + totals.totalFruitWeight,
-      );
-      // Length is a batch constant — set (not add) so repeat harvests of the
-      // same batch on a day count its length only once.
-      if (harvest.batch) cur.length.set(batchId, lengthOf(harvest.batch));
-      daily.set(key, cur);
-    }
-    return [...daily.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, v]) => {
-        let weight = 0;
-        let length = 0;
-        for (const [batchId, w] of v.weight) {
-          const l = v.length.get(batchId) ?? 0;
-          if (l > 0) {
-            weight += w;
-            length += l;
-          }
-        }
-        return { date, ratio: length > 0 ? roundTo(weight / length, 3) : null };
-      })
-      .filter((p): p is { date: string; ratio: number } => p.ratio !== null);
-  }
-
-  private generateYieldPerMeterTrend(
-    items: HarvestWithTotals[],
-  ): YieldPerMeterData[] {
-    return this.generateYieldPerLengthTrend(items, (b) => b.rowLength ?? 0).map(
-      ({ date, ratio }) => ({ date, yieldPerMeter: ratio }),
-    );
-  }
-
-  private generateYieldPerRunningMeterTrend(
-    items: HarvestWithTotals[],
-  ): YieldPerRunningMeterData[] {
-    return this.generateYieldPerLengthTrend(
-      items,
-      (b) => b.runningMeter ?? 0,
-    ).map(({ date, ratio }) => ({ date, yieldPerRunningMeter: ratio }));
-  }
-
-  // Per-day per-class kg, with a dynamic number of classes (index 0=A, 1=B, ...).
-  // `classes` is padded to the widest day so every datum has the same length for
-  // the stacked chart.
-  private generateClassDistribution(
-    items: HarvestWithTotals[],
-  ): ClassDistributionData[] {
-    const daily = new Map<string, { classes: number[]; waste: number }>();
-    for (const { harvest, totals } of items) {
-      const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? { classes: [], waste: 0 };
-      const kgs = totals.classKgs ?? [];
-      for (let i = 0; i < kgs.length; i++) {
-        cur.classes[i] = (cur.classes[i] ?? 0) + (kgs[i] ?? 0);
-      }
-      cur.waste += totals.waste;
-      daily.set(key, cur);
-    }
-    const maxLen = Math.max(
-      0,
-      ...[...daily.values()].map((d) => d.classes.length),
-    );
-    return [...daily.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, d]) => ({
-        date,
-        classes: Array.from({ length: maxLen }, (_, i) =>
-          roundTo(d.classes[i] ?? 0, 1),
-        ),
-        waste: roundTo(d.waste, 1),
-      }));
-  }
-
-  // Per-day SAMPLE-WEIGHTED mean of a per-harvest average (brix, fruit weight),
-  // weighted by each harvest's fruitCount. Harvests whose value is null/≤0 are
-  // skipped; when a day's weights are all 0, weightedMean falls back to the plain
-  // mean so a reading taken without a fruit count still counts.
-  private weightedDailyMean(
-    items: HarvestWithTotals[],
-    valueOf: (t: HarvestTotals) => number | null,
-    decimals: number,
-  ): { date: string; value: number }[] {
-    const daily = new Map<string, { values: number[]; weights: number[] }>();
-    for (const { harvest, totals } of items) {
-      const value = valueOf(totals);
-      if (value === null || value <= 0) continue;
-      const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? { values: [], weights: [] };
-      cur.values.push(value);
-      cur.weights.push(totals.fruitCount);
-      daily.set(key, cur);
-    }
-    return [...daily.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, d]) => ({
-        date,
-        value: roundTo(weightedMean(d.values, d.weights), decimals),
-      }));
-  }
-
-  private generateBrixTrend(items: HarvestWithTotals[]): BrixTrendData[] {
-    return this.weightedDailyMean(items, (t) => t.avgBrix, 1).map(
-      ({ date, value }) => ({ date, brix: value }),
-    );
-  }
-
-  private generateFruitWeightTrend(
-    items: HarvestWithTotals[],
-  ): FruitWeightTrendData[] {
-    return this.weightedDailyMean(items, (t) => t.avgFruitWeight, 3).map(
-      ({ date, value }) => ({ date, weight: value }),
-    );
-  }
-
-  // Cumulative sellable (all classes summed) and waste over time. The chart
-  // plots the sellable line, so per-class detail isn't needed here — and summing
-  // all classes keeps it correct for any class count.
-  private generateCumulativeYield(
-    items: HarvestWithTotals[],
-  ): CumulativeYieldData[] {
-    const daily = new Map<string, { sellable: number; waste: number }>();
-    for (const { harvest, totals } of items) {
-      const key = this.dateKey(harvest.date);
-      const cur = daily.get(key) ?? { sellable: 0, waste: 0 };
-      // totalFruitWeight includes waste; remove it for the sellable line.
-      cur.sellable += totals.totalFruitWeight - totals.waste;
-      cur.waste += totals.waste;
-      daily.set(key, cur);
-    }
-    let sellable = 0;
-    let w = 0;
-    return [...daily.entries()]
-      .sort(([x], [y]) => x.localeCompare(y))
-      .map(([date, d]) => {
-        sellable += d.sellable;
-        w += d.waste;
-        return {
-          date,
-          cumulativeSellable: roundTo(sellable, 1),
-          cumulativeWaste: roundTo(w, 1),
-        };
-      });
   }
 }

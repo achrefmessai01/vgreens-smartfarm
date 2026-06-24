@@ -62,9 +62,11 @@ const COLUMN_DEFS: ColumnDef[] = [
   { key: 'plantsPerMeter', value: (h) => num(h.batch?.plantsPerMeter) },
   { key: 'totalPlants', value: (h) => num(h.batch?.totalPlants) },
   { key: 'lostPlants', value: (h) => num(h.batch?.lostPlants) },
-  { key: 'classA', value: (h) => num(h.totals?.classA) },
-  { key: 'classB', value: (h) => num(h.totals?.classB) },
-  { key: 'classC', value: (h) => num(h.totals?.classC) },
+  // Flat export keeps fixed A/B/C columns (spreadsheet familiarity), read
+  // positionally off the dynamic classKgs array (index 0=A, 1=B, 2=C).
+  { key: 'classA', value: (h) => num(h.totals?.classKgs?.[0]) },
+  { key: 'classB', value: (h) => num(h.totals?.classKgs?.[1]) },
+  { key: 'classC', value: (h) => num(h.totals?.classKgs?.[2]) },
   { key: 'waste', value: (h) => num(h.totals?.waste) },
   { key: 'avgBrix', value: (h) => num(h.totals?.avgBrix) },
   {
