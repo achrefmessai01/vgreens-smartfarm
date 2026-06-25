@@ -66,7 +66,13 @@ function ToastViewport({
   }
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[100] flex items-start justify-end p-3 sm:p-6">
+    // `data-toast-viewport` marks this subtree so overlay components (Sheet /
+    // Dialog) can tell an "outside" interaction came from a toast and not close
+    // themselves when a toast is clicked/dismissed (VSL-219).
+    <div
+      data-toast-viewport
+      className="pointer-events-none fixed inset-0 z-[100] flex items-start justify-end p-3 sm:p-6"
+    >
       <div className="flex w-full max-w-[18.5rem] flex-col gap-2.5 sm:max-w-sm sm:gap-3">
         {toasts.map((toast) => {
           const Icon = toast.variant === 'destructive' ? AlertTriangle : Bell;
