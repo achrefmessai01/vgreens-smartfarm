@@ -523,6 +523,8 @@ export const ro = {
       yieldOverTime: 'Producție în timp',
       yieldPerMeterOverTime: 'Producție pe metru în timp',
       yieldPerMeterUnit: 'Producție (kg/m)',
+      yieldPerRunningMeterOverTime: 'Producție pe metru liniar în timp',
+      yieldPerRunningMeterUnit: 'Producție (kg/m liniar)',
       yieldPerMeterShort: 'Producție/m',
       yieldPerMeter: 'Producție pe metru',
       yieldPerMeterSubtitle: 'kg vandabile pe metru de rând',

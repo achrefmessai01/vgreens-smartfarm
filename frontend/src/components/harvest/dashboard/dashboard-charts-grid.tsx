@@ -6,6 +6,7 @@ import {
   FruitWeightTrendChart,
   YieldOverTimeChart,
   YieldPerMeterChart,
+  YieldPerRunningMeterChart,
 } from './charts';
 import { DASHBOARD_CHART_IDS } from './dashboard-items';
 
@@ -27,6 +28,14 @@ export function DashboardChartsGrid({
     {
       id: DASHBOARD_CHART_IDS.yieldPerMeterTrend,
       node: <YieldPerMeterChart data={data.yieldPerMeterTrend ?? []} />,
+    },
+    {
+      id: DASHBOARD_CHART_IDS.yieldPerRunningMeterTrend,
+      node: (
+        <YieldPerRunningMeterChart
+          data={data.yieldPerRunningMeterTrend ?? []}
+        />
+      ),
     },
     {
       id: DASHBOARD_CHART_IDS.classDistribution,

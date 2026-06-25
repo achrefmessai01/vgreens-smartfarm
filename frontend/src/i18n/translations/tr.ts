@@ -515,6 +515,8 @@ export const tr = {
       yieldOverTime: 'Zamana göre verim',
       yieldPerMeterOverTime: 'Zamana göre metre başına verim',
       yieldPerMeterUnit: 'Verim (kg/m)',
+      yieldPerRunningMeterOverTime: 'Zamana göre tul metre başına verim',
+      yieldPerRunningMeterUnit: 'Verim (kg/tul m)',
       yieldPerMeterShort: 'Verim/m',
       yieldPerMeter: 'Metre başına verim',
       yieldPerMeterSubtitle: 'Sıra metresi başına satılabilir kg',

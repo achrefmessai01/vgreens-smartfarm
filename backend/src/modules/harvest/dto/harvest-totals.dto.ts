@@ -7,25 +7,9 @@ import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
 export class HarvestTotals {
   @Field(() => [Float], {
     description:
-      'Per-quality sellable kg sums, positional and dynamic (index 0=A, 1=B, ...). As wide as the widest entry. The authoritative per-class breakdown.',
+      'The authoritative per-quality sellable kg breakdown, positional and dynamic (index 0=A, 1=B, 2=C, ...). As wide as the widest entry; sum it for total sellable.',
   })
   classKgs: number[];
-
-  @Field(() => Float, {
-    description:
-      'classKgs[0] (Quality A). Convenience scalar for the first class.',
-  })
-  classA: number;
-
-  @Field(() => Float, {
-    description: 'classKgs[1] (Quality B), 0 if absent. Convenience scalar.',
-  })
-  classB: number;
-
-  @Field(() => Float, {
-    description: 'classKgs[2] (Quality C), 0 if absent. Convenience scalar.',
-  })
-  classC: number;
 
   @Field(() => Float, { description: 'SUM of entries.waste' })
   waste: number;
@@ -36,7 +20,10 @@ export class HarvestTotals {
   })
   fruitCount: number;
 
-  @Field(() => Float, { description: 'SUM of entry sellable kg' })
+  @Field(() => Float, {
+    description:
+      'Total harvested weight (kg): SUM over entries of (sellable kg across all classes + waste). Waste is INCLUDED here and also reported separately as `waste`.',
+  })
   totalFruitWeight: number;
 
   @Field(() => [Int], {
@@ -63,14 +50,21 @@ export class HarvestTotals {
   @Field(() => Float, {
     nullable: true,
     description:
-      'totalFruitWeight / batch.totalPlants. Null when totalPlants is 0/missing.',
+      'totalFruitWeight / living plants, where living plants = batch.totalPlants − batch.lostPlants. Null when living plants is 0/negative/missing.',
   })
   yieldPerPlant: number | null;
 
   @Field(() => Float, {
     nullable: true,
     description:
-      'totalFruitWeight / batch.rowLength. Null when rowLength is 0/missing.',
+      'totalFruitWeight / batch.rowLength. Null when rowLength is 0/missing. Normalizes by a single row length, NOT the batch total — see yieldPerRunningMeter.',
   })
   yieldPerMeter: number | null;
+
+  @Field(() => Float, {
+    nullable: true,
+    description:
+      'totalFruitWeight / batch.runningMeter (numberOfRows × rowLength). kg per running metre across all rows of the batch. Null when runningMeter is 0/missing.',
+  })
+  yieldPerRunningMeter: number | null;
 }
