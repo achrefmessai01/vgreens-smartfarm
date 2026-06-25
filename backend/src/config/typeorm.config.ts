@@ -1,17 +1,26 @@
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { buildDataSourceOptions } from './data-source-options';
 
+/**
+ * NestJS TypeORM module options. Delegates to `buildDataSourceOptions` so the
+ * runtime connection and the TypeORM CLI (data-source.ts) cannot drift.
+ *
+ * Behaviour:
+ *   - `synchronize: false` — schema changes MUST go through a migration.
+ *   - `migrationsRun: false` — migrations are applied by the deploy pipeline
+ *     (Fly release_command + GitLab CI), not on app boot. Running on boot
+ *     would race across N instances and silently retry failed migrations.
+ *   - `autoLoadEntities: true` — picks up entities registered with
+ *     `TypeOrmModule.forFeature([...])`, in addition to the file glob.
+ *   - `retryAttempts` / `retryDelay` — survive cold-start ordering during
+ *     Fly deploys where the DB-side cert/pooler may briefly be unresolvable.
+ */
 export const typeOrmConfig = (
   configService: ConfigService,
 ): TypeOrmModuleOptions => ({
-  type: 'postgres',
-  host: configService.get<string>('DATABASE_HOST'),
-  port: configService.get<number>('DATABASE_PORT'),
-  database: configService.get<string>('DATABASE_NAME'),
-  username: configService.get<string>('DATABASE_USER'),
-  password: configService.get<string>('DATABASE_PASSWORD'),
-  entities: [__dirname + '/../**/*.entity.{js,ts}'],
-  synchronize: true,
-  // synchronize: configService.get<string>('NODE_ENV') === 'Development',
-  logging: configService.get<string>('NODE_ENV') === 'Development',
+  ...buildDataSourceOptions(configService),
+  autoLoadEntities: true,
+  retryAttempts: 5,
+  retryDelay: 3000,
 });
