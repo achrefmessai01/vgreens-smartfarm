@@ -19,6 +19,15 @@ export class YieldPerMeterData {
 }
 
 @ObjectType()
+export class YieldPerRunningMeterData {
+  @Field()
+  date: string;
+
+  @Field(() => Float)
+  yieldPerRunningMeter: number;
+}
+
+@ObjectType()
 export class ClassDistributionData {
   @Field()
   date: string;
@@ -88,21 +97,28 @@ export class HarvestDashboardMetrics {
   @Field(() => Float, {
     nullable: true,
     description:
-      'Weighted kg per plant across selected batches: Σ(classA+classB+classC) / Σ totalPlants. Null when no batch in scope has totalPlants > 0.',
+      'Weighted kg per living plant across selected batches: Σ totalFruitWeight / Σ livingPlants. Null when no batch in scope has livingPlants > 0.',
   })
   yieldPerPlant: number | null;
 
   @Field(() => Float, {
     nullable: true,
     description:
-      'Weighted kg per row metre across selected batches: Σ(classA+classB+classC) / Σ rowLength. Null when no batch in scope has rowLength > 0.',
+      'Weighted kg per row metre across selected batches: Σ totalFruitWeight / Σ rowLength. Null when no batch in scope has rowLength > 0.',
   })
   yieldPerMeter: number | null;
 
   @Field(() => Float, {
     nullable: true,
     description:
-      'Total yield per m² across selected batches: totalYield / Σ cultivationArea. Null when no batch in scope has cultivationArea > 0.',
+      'Weighted kg per running metre across selected batches: Σ totalFruitWeight / Σ runningMeter (numberOfRows × rowLength). Null when no batch in scope has runningMeter > 0.',
+  })
+  yieldPerRunningMeter: number | null;
+
+  @Field(() => Float, {
+    nullable: true,
+    description:
+      'Total yield per m² across selected batches: Σ totalFruitWeight / Σ cultivationArea (distinct batches). Null when no batch in scope has cultivationArea > 0.',
   })
   yieldPerSquareMeter: number | null;
 
@@ -115,11 +131,11 @@ export class HarvestDashboardMetrics {
   @Field(() => Float)
   wasteTotal: number;
 
-  @Field(() => Float)
-  classBTotal: number;
-
-  @Field(() => Float)
-  classCTotal: number;
+  @Field(() => [Float], {
+    description:
+      'Per-quality sellable kg totals across the selected harvests, positional and dynamic (index 0=A, 1=B, 2=C, ...). Element-wise sum of each harvest classKgs.',
+  })
+  classTotals: number[];
 
   @Field(() => Int)
   criticalAlerts: number;
@@ -132,6 +148,9 @@ export class HarvestDashboardMetrics {
 
   @Field(() => [YieldPerMeterData])
   yieldPerMeterTrend: YieldPerMeterData[];
+
+  @Field(() => [YieldPerRunningMeterData])
+  yieldPerRunningMeterTrend: YieldPerRunningMeterData[];
 
   @Field(() => [ClassDistributionData])
   classDistribution: ClassDistributionData[];

@@ -11,12 +11,12 @@ export const GET_HARVEST_DASHBOARD = gql`
       averageFruitWeight
       yieldPerPlant
       yieldPerMeter
+      yieldPerRunningMeter
       yieldPerSquareMeter
       marketablePercent
       wastePercent
       wasteTotal
-      classBTotal
-      classCTotal
+      classTotals
       criticalAlerts
       daysActive
       yieldOverTime {
@@ -26,6 +26,10 @@ export const GET_HARVEST_DASHBOARD = gql`
       yieldPerMeterTrend {
         date
         yieldPerMeter
+      }
+      yieldPerRunningMeterTrend {
+        date
+        yieldPerRunningMeter
       }
       classDistribution {
         date
@@ -79,12 +83,12 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       averageFruitWeight
       yieldPerPlant
       yieldPerMeter
+      yieldPerRunningMeter
       yieldPerSquareMeter
       marketablePercent
       wastePercent
       wasteTotal
-      classBTotal
-      classCTotal
+      classTotals
       criticalAlerts
       daysActive
       yieldOverTime {
@@ -94,6 +98,10 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       yieldPerMeterTrend {
         date
         yieldPerMeter
+      }
+      yieldPerRunningMeterTrend {
+        date
+        yieldPerRunningMeter
       }
       classDistribution {
         date

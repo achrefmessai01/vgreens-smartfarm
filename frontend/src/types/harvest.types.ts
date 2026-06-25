@@ -64,11 +64,8 @@ export interface HarvestEntryLike {
 // Service-computed totals for a harvest (the omitted-view replacement).
 export interface HarvestTotalsLike {
   // Per-quality sellable kg sums, positional and dynamic (index 0=A, 1=B, ...).
-  // The authoritative per-class breakdown; classA/B/C below are the first three.
+  // The authoritative per-class breakdown — no fixed A/B/C.
   classKgs: number[];
-  classA: number;
-  classB: number;
-  classC: number;
   waste: number;
   fruitCount: number;
   totalFruitWeight: number;
@@ -78,6 +75,7 @@ export interface HarvestTotalsLike {
   avgBrix?: number | null;
   yieldPerPlant?: number | null;
   yieldPerMeter?: number | null;
+  yieldPerRunningMeter?: number | null;
 }
 
 // Planting-level data, now its own table. Structural subset of the generated

@@ -510,6 +510,8 @@ export const ar = {
       yieldOverTime: 'الإنتاج عبر الزمن',
       yieldPerMeterOverTime: 'الإنتاج لكل متر عبر الزمن',
       yieldPerMeterUnit: 'الإنتاج (كجم/م)',
+      yieldPerRunningMeterOverTime: 'الإنتاج لكل متر طولي عبر الزمن',
+      yieldPerRunningMeterUnit: 'الإنتاج (كجم/م طولي)',
       yieldPerMeterShort: 'الإنتاج/م',
       yieldPerMeter: 'الإنتاج لكل متر',
       yieldPerMeterSubtitle: 'كجم قابلة للبيع لكل متر صف',

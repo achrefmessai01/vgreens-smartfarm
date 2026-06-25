@@ -217,9 +217,11 @@ export function computeSummary(harvests: HarvestLike[]): HarvestSummary {
     };
   }
 
-  const totalClassA = harvests.reduce((s, h) => s + h.totals.classA, 0);
-  const totalClassB = harvests.reduce((s, h) => s + h.totals.classB, 0);
-  const totalClassC = harvests.reduce((s, h) => s + h.totals.classC, 0);
+  // classKgs is positional and dynamic (index 0=A, 1=B, 2=C, ...); the summary
+  // cards still surface the first three classes.
+  const totalClassA = harvests.reduce((s, h) => s + (h.totals.classKgs[0] ?? 0), 0);
+  const totalClassB = harvests.reduce((s, h) => s + (h.totals.classKgs[1] ?? 0), 0);
+  const totalClassC = harvests.reduce((s, h) => s + (h.totals.classKgs[2] ?? 0), 0);
   const totalWaste = harvests.reduce((s, h) => s + h.totals.waste, 0);
   const brixValues = harvests
     .map((h) => h.totals.avgBrix)

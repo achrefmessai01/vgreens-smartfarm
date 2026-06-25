@@ -519,6 +519,8 @@ export const pl = {
       yieldOverTime: 'Plon w czasie',
       yieldPerMeterOverTime: 'Plon na metr w czasie',
       yieldPerMeterUnit: 'Plon (kg/m)',
+      yieldPerRunningMeterOverTime: 'Plon na metr bieżący w czasie',
+      yieldPerRunningMeterUnit: 'Plon (kg/mb)',
       yieldPerMeterShort: 'Plon/m',
       yieldPerMeter: 'Plon na metr',
       yieldPerMeterSubtitle: 'Sprzedażne kg na metr rzędu',

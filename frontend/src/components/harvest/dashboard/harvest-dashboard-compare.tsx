@@ -123,24 +123,14 @@ export function HarvestDashboardCompare({
 
   const classSeries = selected.map(({ batch, color }) => {
     const data = loaded[batch.id]?.data;
-    const totalYield = data?.totalYield ?? 0;
-    const wasteTotal = data?.wasteTotal ?? 0;
-    const classBTotal = data?.classBTotal ?? 0;
-    const classCTotal = data?.classCTotal ?? 0;
-    // "marketable" is the Quality A bar only; B and C stack on top of it, so
-    // back them out of the sellable total to avoid double-counting. The compare
-    // view summarizes batches by the first three classes (A/B/C) — the per-class
-    // array the chart expects, index 0=A, 1=B, 2=C.
-    const marketable = Math.max(
-      totalYield - wasteTotal - classBTotal - classCTotal,
-      0,
-    );
+    // classTotals is the per-quality sellable breakdown, positional and dynamic
+    // (index 0=A, 1=B, 2=C, ...) — exactly the per-class array the chart stacks.
     return {
       batchId: batch.id,
       batchName: batch.name,
       color,
-      classes: [marketable, classBTotal, classCTotal],
-      waste: wasteTotal,
+      classes: data?.classTotals ?? [],
+      waste: data?.wasteTotal ?? 0,
     };
   });
 

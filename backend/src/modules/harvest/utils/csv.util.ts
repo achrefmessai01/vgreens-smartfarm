@@ -57,13 +57,16 @@ const COLUMN_DEFS: ColumnDef[] = [
   { key: 'cultivationArea', value: (h) => num(h.batch?.cultivationArea) },
   { key: 'numberOfRows', value: (h) => num(h.batch?.numberOfRows) },
   { key: 'rowLength', value: (h) => num(h.batch?.rowLength) },
+  { key: 'runningMeter', value: (h) => num(h.batch?.runningMeter) },
   { key: 'rowSpacing', value: (h) => num(h.batch?.rowSpacing) },
   { key: 'plantsPerMeter', value: (h) => num(h.batch?.plantsPerMeter) },
   { key: 'totalPlants', value: (h) => num(h.batch?.totalPlants) },
   { key: 'lostPlants', value: (h) => num(h.batch?.lostPlants) },
-  { key: 'classA', value: (h) => num(h.totals?.classA) },
-  { key: 'classB', value: (h) => num(h.totals?.classB) },
-  { key: 'classC', value: (h) => num(h.totals?.classC) },
+  // Flat export keeps fixed A/B/C columns (spreadsheet familiarity), read
+  // positionally off the dynamic classKgs array (index 0=A, 1=B, 2=C).
+  { key: 'classA', value: (h) => num(h.totals?.classKgs?.[0]) },
+  { key: 'classB', value: (h) => num(h.totals?.classKgs?.[1]) },
+  { key: 'classC', value: (h) => num(h.totals?.classKgs?.[2]) },
   { key: 'waste', value: (h) => num(h.totals?.waste) },
   { key: 'avgBrix', value: (h) => num(h.totals?.avgBrix) },
   {
@@ -80,6 +83,10 @@ const COLUMN_DEFS: ColumnDef[] = [
   { key: 'avgFruitWeight', value: (h) => num(h.totals?.avgFruitWeight) },
   { key: 'yieldPerPlant', value: (h) => num(h.totals?.yieldPerPlant) },
   { key: 'yieldPerMeter', value: (h) => num(h.totals?.yieldPerMeter) },
+  {
+    key: 'yieldPerRunningMeter',
+    value: (h) => num(h.totals?.yieldPerRunningMeter),
+  },
   {
     key: 'photoUrls',
     value: (h) => (Array.isArray(h.photoUrls) ? h.photoUrls.join('|') : ''),
