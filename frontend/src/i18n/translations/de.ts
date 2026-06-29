@@ -735,7 +735,7 @@ export const de = {
       totalPlants: 'Gesamtpflanzen',
       lostPlants: 'Verlorene Pflanzen',
       replicates: 'Wiederholungen',
-      headsPerPlant: 'Köpfe pro Pflanze',
+      avgHeadsPerPlant: 'Köpfe pro Pflanze',
       rowX: 'Reihe X',
       rowY: 'Reihe Y',
       enterRowX: 'Startreihe',

@@ -736,7 +736,7 @@ export const pl = {
       totalPlants: 'Całkowita liczba roślin',
       lostPlants: 'Utracone rośliny',
       replicates: 'Powtórzenia',
-      headsPerPlant: 'Główki na roślinę',
+      avgHeadsPerPlant: 'Główki na roślinę',
       rowX: 'Rząd X',
       rowY: 'Rząd Y',
       enterRowX: 'Rząd początkowy',

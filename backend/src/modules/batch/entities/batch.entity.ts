@@ -203,7 +203,7 @@ export class Batch {
   // for tomato batches where the grower omits it).
   @Field(() => Float, { nullable: true })
   @Column({ type: 'double precision', nullable: true })
-  headsPerPlant?: number | null;
+  avgHeadsPerPlant?: number | null;
 
   @Field()
   @CreateDateColumn({ type: 'timestamptz' })
