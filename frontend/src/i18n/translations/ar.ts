@@ -671,6 +671,11 @@ export const ar = {
       qualityMetrics: 'مقاييس الجودة',
       enterMarketableYield: 'أدخل الإنتاج القابل للتسويق',
       enterWasteAmount: 'أدخل كمية الفاقد',
+      wasteExceedsQualityWarning:
+        'الفاقد ({waste} kg) أعلى من إجمالي الإنتاج عالي الجودة ({quality} kg). يرجى تأكيد أن هذا الإدخال مقصود قبل الحفظ.',
+      confirmWasteValue: 'نعم، الفاقد صحيح',
+      wasteConfirmedNote: 'تم تأكيد قيمة الفاقد.',
+      undoWasteConfirmation: 'تراجع',
       quality1: 'الجودة 1',
       quality2: 'الجودة 2',
       quality2Ratio: 'نسبة الجودة 2',

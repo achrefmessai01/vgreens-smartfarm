@@ -684,6 +684,11 @@ export const ro = {
       qualityMetrics: 'Indicatori de calitate',
       enterMarketableYield: 'Introdu producția comercializabilă',
       enterWasteAmount: 'Introdu cantitatea de deșeuri',
+      wasteExceedsQualityWarning:
+        'Deșeurile ({waste} kg) depășesc producția totală de calitate ({quality} kg). Confirmă că această înregistrare este intenționată înainte de salvare.',
+      confirmWasteValue: 'Da, cantitatea de deșeuri este corectă',
+      wasteConfirmedNote: 'Valoarea deșeurilor confirmată.',
+      undoWasteConfirmation: 'Anulează',
       quality1: 'Calitate 1',
       quality2: 'Calitate 2',
       quality2Ratio: 'Raport Calitate 2',

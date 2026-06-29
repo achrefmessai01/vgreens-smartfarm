@@ -688,6 +688,11 @@ export const el = {
       qualityMetrics: 'Δείκτες ποιότητας',
       enterMarketableYield: 'Εισαγάγετε την εμπορεύσιμη απόδοση',
       enterWasteAmount: 'Εισαγάγετε την ποσότητα αποβλήτων',
+      wasteExceedsQualityWarning:
+        'Τα απόβλητα ({waste} kg) είναι περισσότερα από τη συνολική ποιοτική απόδοση ({quality} kg). Επιβεβαιώστε ότι αυτή η καταχώριση είναι σκόπιμη πριν την αποθήκευση.',
+      confirmWasteValue: 'Ναι, τα απόβλητα είναι σωστά',
+      wasteConfirmedNote: 'Η τιμή αποβλήτων επιβεβαιώθηκε.',
+      undoWasteConfirmation: 'Αναίρεση',
       quality1: 'Ποιότητα 1',
       quality2: 'Ποιότητα 2',
       quality2Ratio: 'Λόγος Ποιότητας 2',

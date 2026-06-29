@@ -676,6 +676,11 @@ export const tr = {
       qualityMetrics: 'Kalite metrikleri',
       enterMarketableYield: 'Pazarlanabilir verimi girin',
       enterWasteAmount: 'Atık miktarını girin',
+      wasteExceedsQualityWarning:
+        'Atık ({waste} kg), toplam kalite veriminden ({quality} kg) daha yüksek. Lütfen kaydetmeden önce bu girişin bilinçli olduğunu onaylayın.',
+      confirmWasteValue: 'Evet, atık doğru',
+      wasteConfirmedNote: 'Atık değeri onaylandı.',
+      undoWasteConfirmation: 'Geri al',
       quality1: 'Kalite 1',
       quality2: 'Kalite 2',
       quality2Ratio: 'Kalite 2 Oranı',
