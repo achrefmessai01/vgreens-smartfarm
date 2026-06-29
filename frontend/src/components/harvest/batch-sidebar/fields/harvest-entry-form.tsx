@@ -20,6 +20,8 @@ export interface HarvestEntryFormProps {
   // kg are derived.
   inputMode: InputMode;
   crateWeight: number | null;
+  // When true the fruit-weight section uses the "Tross Weight" labels (tomato).
+  isTomato?: boolean;
   // Batch row range, forwarded to the weight-mode yield field.
   batchStartRow?: number | null;
   batchEndRow?: number | null;
@@ -50,6 +52,7 @@ export function HarvestEntryForm({
   index,
   inputMode,
   crateWeight,
+  isTomato,
   batchStartRow,
   batchEndRow,
   wasteConfirmed,
@@ -117,6 +120,7 @@ export function HarvestEntryForm({
           onShowFruitWeightChange={onSetShowFruitWeight}
           onSampleWeightChange={onSampleWeightChange}
           onSampleFruitCountChange={onSampleFruitCountChange}
+          isTomato={isTomato}
           idPrefix={idPrefix}
           isLoading={isLoading}
         />

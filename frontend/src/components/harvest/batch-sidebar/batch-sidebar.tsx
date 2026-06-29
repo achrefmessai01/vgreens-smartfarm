@@ -22,6 +22,7 @@ import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { entryHasData } from '@/types/batch-sidebar.types';
 import { FieldMessage } from '@/components/harvest/field-message';
+import { isTomatoSpecies } from '@/lib/harvest-utils';
 import { HarvestEntryCard } from './fields/harvest-entry-card';
 
 export interface BatchSidebarProps {
@@ -269,6 +270,7 @@ export function BatchSidebar({
                     index={index}
                     inputMode={currentData.inputMode}
                     crateWeight={currentData.crateWeight}
+                    isTomato={isTomatoSpecies(currentData.species)}
                     batchStartRow={currentData.startRow}
                     batchEndRow={currentData.endRow}
                     wasteConfirmed={confirmedWasteEntries.has(index)}

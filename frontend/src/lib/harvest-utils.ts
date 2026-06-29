@@ -15,6 +15,15 @@ import type {
 
 type HarvestTranslations = Translations['pages']['harvest'];
 
+// True when a batch's crop is a tomato. Matched case-insensitively against the
+// species name (which carries the catalog crop name, e.g. "Tomato" / "Tomate")
+// so harvest labels can switch from "Fruit Weight" to "Tross Weight".
+export function isTomatoSpecies(species: string | null | undefined): boolean {
+  if (!species) return false;
+  const s = species.toLowerCase();
+  return s.includes('tomato') || s.includes('tomate');
+}
+
 // Pick the right "harvest(s) logged" string for the count, using the locale's
 // CLDR plural rules. Falls back to the plural form when the singular key is
 // missing or PluralRules isn't available.

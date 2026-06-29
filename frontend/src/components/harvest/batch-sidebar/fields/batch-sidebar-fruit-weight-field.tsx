@@ -16,11 +16,30 @@ export function FruitWeightField({
   onShowFruitWeightChange,
   onSampleWeightChange,
   onSampleFruitCountChange,
+  isTomato = false,
   idPrefix = '',
   isLoading = false,
 }: FruitWeightFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+
+  // Tomatoes are weighed by truss ("Tross"), so swap the fruit-weight wording
+  // for the Tross variants. All other labels in this section are unchanged.
+  const measurementLabel = isTomato
+    ? (h?.trossWeightMeasurement ?? 'Tross Weight')
+    : (h?.fruitWeightMeasurement ?? 'Fruit Weight');
+  const addLabel = isTomato
+    ? (h?.addTrossWeight ?? 'Add tross weight measurement')
+    : (h?.addFruitWeight ?? 'Add fruit weight measurement');
+  const sampleLabel = isTomato
+    ? (h?.trossWeightSample ?? 'Tross weight sample')
+    : (h?.fruitWeightSample ?? 'Fruit weight sample');
+  const averageLabel = isTomato
+    ? (h?.averageTrossWeight ?? 'Average Tross Weight')
+    : (h?.averageFruitWeight ?? 'Average Fruit Weight');
+  const sampleCountLabel = isTomato
+    ? (h?.trossInSample ?? 'Tross in sample')
+    : (h?.sampleFruitCount ?? 'Fruits in sample');
 
   if (isLoading) {
     return (
@@ -39,7 +58,7 @@ export function FruitWeightField({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted-foreground text-sm font-medium">
-          {h?.fruitWeightMeasurement ?? 'Fruit Weight'}
+          {measurementLabel}
         </p>
         <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm select-none">
           <Checkbox
@@ -48,17 +67,15 @@ export function FruitWeightField({
               onShowFruitWeightChange(checked === true)
             }
           />
-          <span>{h?.addFruitWeight ?? 'Add fruit weight measurement'}</span>
+          <span>{addLabel}</span>
         </label>
       </div>
       {showFruitWeight && (
         <div className="space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm font-medium">
-              {h?.fruitWeightSample ?? 'Fruit weight sample'}
-            </p>
+            <p className="text-sm font-medium">{sampleLabel}</p>
             <span className="text-muted-foreground text-sm">
-              {h?.averageFruitWeight ?? 'Average Fruit Weight'}:{' '}
+              {averageLabel}:{' '}
               <span className="text-lg font-medium text-orange-500">
                 {avgFruitWeight > 0 ? avgFruitWeight.toFixed(1) : '0.0'} g
               </span>
@@ -81,7 +98,7 @@ export function FruitWeightField({
             </Field>
             <Field>
               <FieldLabel htmlFor={`${idPrefix}sample-fruit-count`}>
-                {h?.sampleFruitCount ?? 'Fruits in sample'}
+                {sampleCountLabel}
               </FieldLabel>
               <FieldContent>
                 <Input
