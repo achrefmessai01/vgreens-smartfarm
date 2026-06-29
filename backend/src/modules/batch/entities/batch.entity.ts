@@ -113,10 +113,17 @@ export class Batch {
   })
   inputMode: InputMode;
 
-  // Weight of one crate (kg) for crate-mode batches. Editable; the change
-  // intentionally propagates to every crate-mode entry's derived yield. Null
-  // for weight-mode batches. Never snapshotted onto entries.
-  @Field(() => Float, { nullable: true })
+  // DEPRECATED: superseded by the tenant-scoped `crates` table + a per-harvest
+  // `crateId`. Crate-mode harvests now derive kg from their selected crate's
+  // weight, not this column. Kept (still populated on batch create/update) so
+  // the crates migration stays fully reversible and nothing reading it breaks
+  // mid-rollout; drop it in a follow-up migration once no reader remains.
+  // Weight of one crate (kg) for crate-mode batches; null for weight-mode.
+  @Field(() => Float, {
+    nullable: true,
+    deprecationReason:
+      'Use the crates table + harvest.crateId; crate-mode kg derives from the selected crate.',
+  })
   @Column({ type: 'double precision', nullable: true })
   crateWeight?: number | null;
 

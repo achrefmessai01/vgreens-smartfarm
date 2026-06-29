@@ -38,20 +38,31 @@ export function sumCrateWeights(
   return total;
 }
 
+// The crate weight to derive crate-mode kg from. Prefers the explicitly resolved
+// value (the harvest's selected crate); falls back to the legacy batch.crateWeight
+// so callers that don't yet pass a crate weight behave exactly as before.
+function resolveCrateWeight(
+  batch?: Batch | null,
+  crateWeight?: number | null,
+): number {
+  return crateWeight ?? batch?.crateWeight ?? 0;
+}
+
 // One entry resolved to its per-class sellable kg array (waste excluded), in
 // either mode. The single source of the per-class breakdown; class totals are
-// built by summing these element-wise across entries.
+// built by summing these element-wise across entries. crateWeight overrides the
+// batch's legacy crateWeight (the harvest's selected crate drives derivation).
 export function entryClassWeights(
   e: HarvestEntry,
   batch?: Batch | null,
+  crateWeight?: number | null,
 ): number[] {
   if (isCrateMode(batch)) {
-    const crateWeight = batch?.crateWeight ?? 0;
+    const weight = resolveCrateWeight(batch, crateWeight);
     const n = entryClassCount(e, batch);
     return Array.from(
       { length: n },
-      (_, i) =>
-        (e.crateCounts?.[i] ?? 0) * crateWeight + (e.remainingKgs?.[i] ?? 0),
+      (_, i) => (e.crateCounts?.[i] ?? 0) * weight + (e.remainingKgs?.[i] ?? 0),
     );
   }
   return [...(e.classKgs ?? [])];
@@ -62,9 +73,14 @@ export function entryClassWeights(
 export function entrySellableWeight(
   e: HarvestEntry,
   batch?: Batch | null,
+  crateWeight?: number | null,
 ): number {
   return isCrateMode(batch)
-    ? sumCrateWeights(e.crateCounts, e.remainingKgs, batch?.crateWeight ?? 0)
+    ? sumCrateWeights(
+        e.crateCounts,
+        e.remainingKgs,
+        resolveCrateWeight(batch, crateWeight),
+      )
     : sum(e.classKgs ?? []);
 }
 
@@ -74,8 +90,9 @@ export function entrySellableWeight(
 export function entryTotalWeight(
   e: HarvestEntry,
   batch?: Batch | null,
+  crateWeight?: number | null,
 ): number {
-  return entrySellableWeight(e, batch) + (e.waste ?? 0);
+  return entrySellableWeight(e, batch, crateWeight) + (e.waste ?? 0);
 }
 
 // Harvest-level total fruit weight: Σ entry totals (sellable + waste), dynamic
@@ -84,6 +101,9 @@ export function entryTotalWeight(
 export function totalFruitWeight(
   entries: HarvestEntry[] | undefined,
   batch?: Batch | null,
+  crateWeight?: number | null,
 ): number {
-  return sum((entries ?? []).map((e) => entryTotalWeight(e, batch)));
+  return sum(
+    (entries ?? []).map((e) => entryTotalWeight(e, batch, crateWeight)),
+  );
 }

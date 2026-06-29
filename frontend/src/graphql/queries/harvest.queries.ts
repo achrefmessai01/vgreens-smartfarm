@@ -16,6 +16,11 @@ const HARVEST_FIELDS = gql`
     photoUrls
     createdAt
     updatedAt
+    crateId
+    crate {
+      id
+      weight
+    }
     batch {
       id
       name

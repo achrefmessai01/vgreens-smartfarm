@@ -22,6 +22,8 @@ import { OrderDirection, InputMode } from '@common/enums';
 import { roundTo, mean } from '@common/utils';
 import { Batch } from '@modules/batch/entities/batch.entity';
 import { BatchService } from '@modules/batch/batch.service';
+import { Crate } from '@modules/crate/entities/crate.entity';
+import { CrateService } from '@modules/crate/crate.service';
 import { entryTotalWeight } from './utils/harvest-weight.util';
 import { computeHarvestTotals } from './utils/harvest-totals.util';
 import {
@@ -40,6 +42,7 @@ export class HarvestsService {
     @InjectRepository(HarvestEntry)
     private readonly entryRepository: Repository<HarvestEntry>,
     private readonly batchService: BatchService,
+    private readonly crateService: CrateService,
   ) {}
 
   // tenant + batch + greenhouse + entries + creator: everything the totals,
@@ -51,9 +54,38 @@ export class HarvestsService {
       .leftJoinAndSelect('batch.greenhouse', 'greenhouse')
       .leftJoinAndSelect('batch.crop', 'crop')
       .leftJoinAndSelect('batch.variety', 'variety')
+      .leftJoinAndSelect(`${alias}.crate`, 'crate')
       .leftJoinAndSelect(`${alias}.entries`, 'entries')
       .leftJoinAndSelect(`${alias}.tenant`, 'tenant')
       .leftJoinAndSelect(`${alias}.createdBy`, 'createdBy');
+  }
+
+  // The crate weight to derive a harvest's crate-mode kg from: the harvest's
+  // selected crate, falling back to the legacy batch.crateWeight for any
+  // crate-mode harvest logged before crates existed and not yet repointed.
+  private harvestCrateWeight(harvest: Harvest): number | null {
+    return harvest.crate?.weight ?? harvest.batch?.crateWeight ?? null;
+  }
+
+  // Resolve + validate the crate for a harvest against its batch. Weight-mode
+  // batches never carry a crate (returns null). Crate-mode batches require one,
+  // and it must belong to the caller's tenant.
+  private async resolveCrate(
+    crateId: string | null | undefined,
+    batch: Batch,
+    tenantId: string | undefined,
+  ): Promise<Crate | null> {
+    if (batch.inputMode !== InputMode.CRATE) return null;
+    if (!crateId) {
+      throw new BadRequestException(
+        'A crate must be selected for crate-mode harvests',
+      );
+    }
+    const crate = await this.crateService.findOneScoped(crateId, tenantId);
+    if (!crate) {
+      throw new NotFoundException(`Crate with ID ${crateId} not found`);
+    }
+    return crate;
   }
 
   // Minutes since midnight from a wall-clock time string ('HH:mm' or the
@@ -104,14 +136,18 @@ export class HarvestsService {
   // Non-blocking sanity check for crate-mode input: a per-class remainder at or
   // above a full crate weight means another crate should probably have been
   // counted. Logged, never rejected.
-  private warnCrateRemainder(input: HarvestEntryInput, batch: Batch): void {
+  private warnCrateRemainder(
+    input: HarvestEntryInput,
+    batch: Batch,
+    crateWeight: number | null,
+  ): void {
     if (batch.inputMode !== InputMode.CRATE) return;
-    const crateWeight = batch.crateWeight ?? 0;
-    if (crateWeight <= 0) return;
+    const weight = crateWeight ?? 0;
+    if (weight <= 0) return;
     (input.remainingKgs ?? []).forEach((remainder, i) => {
-      if ((remainder ?? 0) >= crateWeight) {
+      if ((remainder ?? 0) >= weight) {
         this.logger.warn(
-          `Crate entry remainingKg[${this.classLetter(i)}]=${remainder} >= crateWeight=${crateWeight} (batch ${batch.id}); that is another full crate.`,
+          `Crate entry remainingKg[${this.classLetter(i)}]=${remainder} >= crateWeight=${weight} (batch ${batch.id}); that is another full crate.`,
         );
       }
     });
@@ -188,8 +224,9 @@ export class HarvestsService {
   computeTotals(
     entries: HarvestEntry[] | undefined,
     batch?: Batch | null,
+    crateWeight?: number | null,
   ): HarvestTotals {
-    return computeHarvestTotals(entries, batch);
+    return computeHarvestTotals(entries, batch, crateWeight);
   }
 
   async findAllFiltered(
@@ -263,7 +300,7 @@ export class HarvestsService {
     const harvests = await this.findAllFiltered(tenantId, filter);
     // Populate the resolved totals so the CSV serializer can read them.
     for (const h of harvests) {
-      h.totals = this.computeTotals(h.entries, h.batch);
+      h.totals = this.computeTotals(h.entries, h.batch, this.harvestCrateWeight(h));
     }
     return harvests;
   }
@@ -299,9 +336,12 @@ export class HarvestsService {
         input.batchId,
         tenantId,
       );
+      // Crate-mode harvests must reference a tenant-owned crate; weight-mode
+      // harvests carry none. Its weight drives the crate-mode kg derivation.
+      const crate = await this.resolveCrate(input.crateId, batch, tenantId);
       (input.entries ?? []).forEach((e) => {
         this.validateRowSegments(e);
-        this.warnCrateRemainder(e, batch);
+        this.warnCrateRemainder(e, batch, crate?.weight ?? null);
       });
 
       this.validateTiming(input.startTime, input.stopTime);
@@ -309,6 +349,7 @@ export class HarvestsService {
       const harvest = this.harvestRepository.create({
         tenantId,
         batchId: input.batchId,
+        crateId: crate?.id ?? null,
         createdById,
         date: new Date(input.date),
         startTime: input.startTime ?? null,
@@ -353,6 +394,18 @@ export class HarvestsService {
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.photoUrls !== undefined) harvest.photoUrls = input.photoUrls;
 
+      // Re-resolve the crate against the merged state: an explicit crateId
+      // reassigns it, otherwise the stored crate is kept. Validated against the
+      // (possibly reassigned) batch's mode; its weight feeds entry derivation.
+      let crateWeight: number | null = null;
+      if (batch) {
+        const nextCrateId =
+          input.crateId !== undefined ? input.crateId : harvest.crateId;
+        const crate = await this.resolveCrate(nextCrateId, batch, tenantId);
+        harvest.crateId = crate?.id ?? null;
+        crateWeight = crate?.weight ?? null;
+      }
+
       // Validate timing against the merged (final) state: a field left out of
       // the input keeps its stored value; an explicit null clears it.
       const nextStartTime =
@@ -381,7 +434,7 @@ export class HarvestsService {
           const resolvedBatch = batch;
           input.entries.forEach((e) => {
             this.validateRowSegments(e);
-            this.warnCrateRemainder(e, resolvedBatch);
+            this.warnCrateRemainder(e, resolvedBatch, crateWeight);
           });
           const entries = input.entries.map((e) =>
             this.entryRepository.create({
@@ -441,8 +494,9 @@ export class HarvestsService {
     for (const h of harvests) {
       // entryTotalWeight reads crate-mode entries off the batch's crateWeight;
       // findAllFiltered already joins h.batch.
+      const crateWeight = this.harvestCrateWeight(h);
       const weight = (h.entries ?? []).reduce(
-        (s, e) => s + entryTotalWeight(e, h.batch),
+        (s, e) => s + entryTotalWeight(e, h.batch, crateWeight),
         0,
       );
       weightByBatch.set(
@@ -524,7 +578,11 @@ export class HarvestsService {
       const harvests = await qb.getMany();
       const items: HarvestWithTotals[] = harvests.map((harvest) => ({
         harvest,
-        totals: this.computeTotals(harvest.entries, harvest.batch),
+        totals: this.computeTotals(
+          harvest.entries,
+          harvest.batch,
+          this.harvestCrateWeight(harvest),
+        ),
       }));
 
       return items.length > 0

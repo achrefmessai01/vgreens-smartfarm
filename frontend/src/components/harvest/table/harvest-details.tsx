@@ -58,10 +58,11 @@ export function HarvestDetails({
   const entries = harvestToDisplayEntries(harvest);
   const showEntryLabels = entries.length > 1;
   // In crate mode the stored classA/B/C are 0; per-class kg are derived from the
-  // crate counts + the batch crate weight at display time, across a dynamic
-  // number of classes.
+  // crate counts + the crate weight at display time, across a dynamic number of
+  // classes. The weight comes from the harvest's selected crate (falling back to
+  // the legacy batch.crateWeight for harvests not yet repointed).
   const isCrate = harvest.batch?.inputMode === InputMode.Crate;
-  const crateWeight = harvest.batch?.crateWeight ?? null;
+  const crateWeight = harvest.crate?.weight ?? harvest.batch?.crateWeight ?? null;
   const cratesLabel = h?.cratesUnit ?? 'crates';
   // Total yield = the service-computed totalFruitWeight, which already sums all
   // (dynamic) quality classes plus waste, in both input modes.

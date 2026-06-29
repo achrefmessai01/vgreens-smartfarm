@@ -413,10 +413,14 @@ function daysSince(plantingDate: string): number {
 }
 
 // Build the sidebar's batch-details view-model from a batch's planting fields.
+// The crate (crate-mode only) comes from the harvest, not the batch: crateId is
+// the selected crate and crateWeight mirrors its weight for kg derivation. A
+// fresh harvest passes none, so the user must pick a crate before saving.
 function batchToDetails(
   batch: BatchLike,
   entries: HarvestEntryData[],
   photos: string[],
+  crate?: { id: string; weight: number } | null,
 ): BatchDetailsData {
   return {
     id: batch.id,
@@ -442,7 +446,8 @@ function batchToDetails(
     lostPlants: batch.lostPlants,
     replicates: replicateCount(batch),
     inputMode: batch.inputMode ?? InputMode.Weight,
-    crateWeight: batch.crateWeight ?? null,
+    crateId: crate?.id ?? null,
+    crateWeight: crate?.weight ?? null,
     plantingDate: batch.plantingDate,
     entries,
     photos,
@@ -472,7 +477,12 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
       totalPlants: 0,
       lostPlants: 0,
     } as BatchLike);
-  return batchToDetails(batch, harvestToEntries(h), h.photoUrls ?? []);
+  return batchToDetails(
+    batch,
+    harvestToEntries(h),
+    h.photoUrls ?? [],
+    h.crate ?? null,
+  );
 }
 
 // Sidebar view-model for a freshly created batch (no harvest yet): one blank

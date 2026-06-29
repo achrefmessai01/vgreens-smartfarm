@@ -27,6 +27,14 @@ export class UpdateHarvestInput {
   @IsUUID()
   batchId?: string;
 
+  // Reassign the harvest's crate. Only provided fields change; when omitted the
+  // stored crate is kept. The service re-validates the crate-mode requirement
+  // against the resulting (merged) state.
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsUUID()
+  crateId?: string | null;
+
   @Field({ nullable: true })
   @IsOptional()
   @IsDateString()

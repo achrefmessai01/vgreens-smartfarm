@@ -132,6 +132,10 @@ export interface HarvestLike {
   harvesterHeadCount?: number | null;
   photoUrls?: string[] | null;
   batch?: BatchLike | null;
+  // The crate this harvest was logged with (crate-mode only). Its weight drives
+  // crate-mode kg derivation, superseding batch.crateWeight. Null in weight mode.
+  crateId?: string | null;
+  crate?: { id: string; weight: number } | null;
   entries: HarvestEntryLike[];
   totals: HarvestTotalsLike;
 }

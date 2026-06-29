@@ -14,6 +14,7 @@ import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { User } from '@modules/users/entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { Batch } from '@modules/batch/entities/batch.entity';
+import { Crate } from '@modules/crate/entities/crate.entity';
 import { HarvestEntry } from './harvest-entry.entity';
 import { HarvestTotals } from '../dto/harvest-totals.dto';
 
@@ -52,6 +53,20 @@ export class Harvest {
   @ManyToOne(() => Batch, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'batchId' })
   batch?: Batch;
+
+  // The crate this harvest was recorded with, for crate-mode batches. Supersedes
+  // the live read off batch.crateWeight: crate-mode weight derivation reads the
+  // crate's weight, so a harvest is pinned to the crate size it was logged with.
+  // Null for weight-mode harvests (and any legacy crate harvest not yet
+  // repointed). onDelete RESTRICT can't fire — crates are only ever soft-deleted.
+  @Field(() => ID, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  crateId?: string | null;
+
+  @Field(() => Crate, { nullable: true })
+  @ManyToOne(() => Crate, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'crateId' })
+  crate?: Crate | null;
 
   @Field(() => ID, { nullable: true })
   @Column({ type: 'uuid', nullable: true })

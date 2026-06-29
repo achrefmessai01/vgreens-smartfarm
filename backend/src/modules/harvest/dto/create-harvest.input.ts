@@ -31,6 +31,14 @@ export class CreateHarvestInput {
   @IsUUID()
   batchId: string;
 
+  // The selected crate (its weight drives crate-mode kg derivation). Required by
+  // the service for crate-mode batches; ignored for weight mode. Optional here so
+  // weight-mode harvests can omit it; the service enforces the crate-mode rule.
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsUUID()
+  crateId?: string | null;
+
   @Field({ description: 'Harvest date (ISO date string)' })
   @IsDateString()
   date: string;
