@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useI18n } from '@/i18n';
+import { FieldMessage } from '@/components/harvest/field-message';
 import { useCreateVarietyMutation, type CreateVarietyMutation } from '@/generated/graphql';
 
 interface AddVarietyDialogProps {
@@ -52,8 +53,9 @@ export function AddVarietyDialog({
       return;
     }
     setError(null);
+    const failedMessage = h?.varietyCreateFailed ?? 'Failed to add variety';
     try {
-      const { data } = await createVariety({
+      const { data, errors } = await createVariety({
         variables: {
           input: {
             cropId,
@@ -62,16 +64,24 @@ export function AddVarietyDialog({
           },
         },
       });
+      // The client runs mutations with errorPolicy 'all', so GraphQL errors
+      // (e.g. the backend's "variety already exists" conflict) resolve here on
+      // the result rather than rejecting — surface them inline instead of
+      // letting the duplicate fail silently.
+      if (errors && errors.length > 0) {
+        setError(errors[0]?.message || failedMessage);
+        return;
+      }
       if (data?.createVariety) {
         onCreated(data.createVariety);
         onOpenChange(false);
+        return;
       }
+      // No data and no errors is unexpected; fail soft rather than silently.
+      setError(failedMessage);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : (h?.varietyCreateFailed ?? 'Failed to add variety'),
-      );
+      // Network failures (or any policy that rejects) land here.
+      setError(err instanceof Error ? err.message : failedMessage);
     }
   };
 
@@ -118,7 +128,7 @@ export function AddVarietyDialog({
               disabled={loading}
             />
           </div>
-          {error && <p className="text-destructive text-sm">{error}</p>}
+          <FieldMessage variant="warning">{error}</FieldMessage>
           <DialogFooter className="gap-2 sm:gap-3">
             <Button
               type="button"

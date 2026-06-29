@@ -737,6 +737,11 @@ export const en = {
       remainingKg: 'Remaining (kg)',
       remainingKgExceedsCrate:
         'At/above one full crate ({weight} kg) — count another crate?',
+      wasteExceedsQualityWarning:
+        'Waste ({waste} kg) is higher than the total quality yield ({quality} kg). Please confirm this entry is intentional before saving.',
+      confirmWasteValue: 'Yes, waste is correct',
+      wasteConfirmedNote: 'Waste value confirmed.',
+      undoWasteConfirmation: 'Undo',
       rowX: 'Row X',
       rowY: 'Row Y',
       enterRowX: 'Start row',

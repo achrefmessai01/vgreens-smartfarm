@@ -23,6 +23,10 @@ export interface HarvestEntryFormProps {
   // Batch row range, forwarded to the weight-mode yield field.
   batchStartRow?: number | null;
   batchEndRow?: number | null;
+  // Soft waste-vs-quality check: whether the user has acknowledged a waste value
+  // exceeding the summed quality yield for this entry, and the setter to toggle it.
+  wasteConfirmed: boolean;
+  onConfirmWasteChange: (confirmed: boolean) => void;
   // Unified per-entry field change (per-class cells, waste, row coords,
   // add/remove class) for both modes.
   onChange: (change: EntryChange) => void;
@@ -48,6 +52,8 @@ export function HarvestEntryForm({
   crateWeight,
   batchStartRow,
   batchEndRow,
+  wasteConfirmed,
+  onConfirmWasteChange,
   onChange,
   onBrixChange,
   onBrixClassChange,
@@ -70,6 +76,8 @@ export function HarvestEntryForm({
           remainingKgs={entry.remainingKgs}
           waste={entry.waste}
           crateWeight={crateWeight}
+          wasteConfirmed={wasteConfirmed}
+          onConfirmWasteChange={onConfirmWasteChange}
           onChange={onChange}
           isLoading={isLoading}
         />
@@ -81,6 +89,8 @@ export function HarvestEntryForm({
           rowY={entry.rowY}
           batchStartRow={batchStartRow}
           batchEndRow={batchEndRow}
+          wasteConfirmed={wasteConfirmed}
+          onConfirmWasteChange={onConfirmWasteChange}
           onChange={onChange}
           isLoading={isLoading}
         />

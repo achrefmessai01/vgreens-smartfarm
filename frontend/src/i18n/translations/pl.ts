@@ -680,6 +680,11 @@ export const pl = {
       qualityMetrics: 'Wskaźniki jakości',
       enterMarketableYield: 'Wprowadź plon handlowy',
       enterWasteAmount: 'Wprowadź ilość odpadów',
+      wasteExceedsQualityWarning:
+        'Ilość odpadów ({waste} kg) jest większa niż całkowity plon jakościowy ({quality} kg). Potwierdź, że ten wpis jest zamierzony, zanim zapiszesz.',
+      confirmWasteValue: 'Tak, ilość odpadów jest poprawna',
+      wasteConfirmedNote: 'Wartość odpadów potwierdzona.',
+      undoWasteConfirmation: 'Cofnij',
       quality1: 'Jakość 1',
       quality2: 'Jakość 2',
       quality2Ratio: 'Wskaźnik Jakości 2',

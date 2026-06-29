@@ -684,6 +684,11 @@ export const it = {
       qualityMetrics: 'Metriche di qualità',
       enterMarketableYield: 'Inserisci la resa commerciabile',
       enterWasteAmount: 'Inserisci la quantità di scarto',
+      wasteExceedsQualityWarning:
+        'Lo scarto ({waste} kg) è superiore alla resa di qualità totale ({quality} kg). Conferma che questa voce è intenzionale prima di salvare.',
+      confirmWasteValue: 'Sì, lo scarto è corretto',
+      wasteConfirmedNote: 'Valore di scarto confermato.',
+      undoWasteConfirmation: 'Annulla',
       quality1: 'Qualità 1',
       quality2: 'Qualità 2',
       quality2Ratio: 'Rapporto Qualità 2',

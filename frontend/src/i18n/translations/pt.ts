@@ -682,6 +682,11 @@ export const pt = {
       qualityMetrics: 'Métricas de qualidade',
       enterMarketableYield: 'Introduza a produção comercializável',
       enterWasteAmount: 'Introduza a quantidade de desperdício',
+      wasteExceedsQualityWarning:
+        'O desperdício ({waste} kg) é superior à produção total de qualidade ({quality} kg). Confirme que este registo é intencional antes de guardar.',
+      confirmWasteValue: 'Sim, o desperdício está correto',
+      wasteConfirmedNote: 'Valor de desperdício confirmado.',
+      undoWasteConfirmation: 'Anular',
       quality1: 'Qualidade 1',
       quality2: 'Qualidade 2',
       quality2Ratio: 'Proporção de Qualidade 2',

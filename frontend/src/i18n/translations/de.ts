@@ -678,6 +678,11 @@ export const de = {
       qualityMetrics: 'Qualitätskennzahlen',
       enterMarketableYield: 'Vermarktbaren Ertrag eingeben',
       enterWasteAmount: 'Abfallmenge eingeben',
+      wasteExceedsQualityWarning:
+        'Der Abfall ({waste} kg) ist höher als der gesamte Qualitätsertrag ({quality} kg). Bitte bestätigen Sie, dass dieser Eintrag beabsichtigt ist, bevor Sie speichern.',
+      confirmWasteValue: 'Ja, der Abfall ist korrekt',
+      wasteConfirmedNote: 'Abfallwert bestätigt.',
+      undoWasteConfirmation: 'Rückgängig',
       quality1: 'Qualität 1',
       quality2: 'Qualität 2',
       quality2Ratio: 'Qualität 2 Verhältnis',

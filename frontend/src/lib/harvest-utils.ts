@@ -136,6 +136,40 @@ export function crateEntryTotalKg(
   return total;
 }
 
+// Summed sellable kg across all quality classes of one entry, in either mode.
+// Weight mode sums classKgs directly; crate mode derives kg from the crate
+// counts + remainders + the batch crate weight. Waste is never part of this sum.
+// Empty/non-numeric cells already arrive as 0 (the form's convention), so this
+// can't produce NaN.
+export function entryQualityTotalKg(
+  entry: Pick<HarvestEntryData, 'classKgs' | 'crateCounts' | 'remainingKgs'>,
+  inputMode: InputMode,
+  crateWeight: number | null | undefined,
+): number {
+  if (inputMode === InputMode.Crate) {
+    return crateEntryTotalKg(
+      entry.crateCounts,
+      entry.remainingKgs,
+      crateWeight,
+    );
+  }
+  return entry.classKgs.reduce(
+    (sum, v) => sum + (Number.isFinite(v) ? v : 0),
+    0,
+  );
+}
+
+// Soft safety check: is the entered waste higher than the summed quality-class
+// kg? A small epsilon keeps float noise (e.g. 0.1 + 0.2) from tripping the
+// warning. Non-finite waste is treated as 0 so the check never throws.
+export function wasteExceedsQualityTotal(
+  waste: number,
+  qualityTotalKg: number,
+): boolean {
+  const w = Number.isFinite(waste) ? waste : 0;
+  return w - qualityTotalKg > 1e-6;
+}
+
 export function extractStoragePathFromUrl(
   url: string | null | undefined,
 ): string | null {

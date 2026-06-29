@@ -670,6 +670,11 @@ export const fr = {
       qualityMetrics: 'Indicateurs de qualité',
       enterMarketableYield: 'Saisir le rendement commercialisable',
       enterWasteAmount: 'Saisir la quantité de déchets',
+      wasteExceedsQualityWarning:
+        'Les déchets ({waste} kg) sont supérieurs au rendement de qualité total ({quality} kg). Veuillez confirmer que cette saisie est intentionnelle avant d’enregistrer.',
+      confirmWasteValue: 'Oui, les déchets sont corrects',
+      wasteConfirmedNote: 'Valeur des déchets confirmée.',
+      undoWasteConfirmation: 'Annuler',
       quality1: 'Qualité 1',
       quality2: 'Qualité 2',
       quality2Ratio: 'Ratio Qualité 2',
