@@ -403,6 +403,11 @@ export class HarvestsService {
           input.crateId !== undefined ? input.crateId : harvest.crateId;
         const crate = await this.resolveCrate(nextCrateId, batch, tenantId);
         harvest.crateId = crate?.id ?? null;
+        // The harvest was loaded with its (old) `crate` relation; TypeORM uses a
+        // loaded relation object to compute the FK on save, which would override
+        // the scalar crateId above with the stale value. Keep the relation in
+        // sync so the reassignment actually persists.
+        harvest.crate = crate;
         crateWeight = crate?.weight ?? null;
       }
 
