@@ -48,6 +48,8 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
         code = 'NOT_FOUND';
       } else if (status === HttpStatus.BAD_REQUEST) {
         code = 'BAD_USER_INPUT';
+      } else if (status === HttpStatus.CONFLICT) {
+        code = 'CONFLICT';
       }
 
       const extensions: Record<string, unknown> = {
