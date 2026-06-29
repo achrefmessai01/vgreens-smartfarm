@@ -745,6 +745,7 @@ export const el = {
       totalPlants: 'Σύνολο φυτών',
       lostPlants: 'Χαμένα φυτά',
       replicates: 'Επαναλήψεις',
+      headsPerPlant: 'Κεφαλές ανά φυτό',
       rowX: 'Σειρά X',
       rowY: 'Σειρά Y',
       enterRowX: 'Σειρά αρχής',

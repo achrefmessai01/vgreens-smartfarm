@@ -727,6 +727,7 @@ export const ar = {
       totalPlants: 'إجمالي النباتات',
       lostPlants: 'النباتات المفقودة',
       replicates: 'التكرارات',
+      headsPerPlant: 'عدد الرؤوس لكل نبتة',
       rowX: 'الصف X',
       rowY: 'الصف Y',
       enterRowX: 'صف البداية',
