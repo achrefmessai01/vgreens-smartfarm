@@ -448,13 +448,13 @@ export function HeadsPerPlantField({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="headsPerPlant" className="text-sm font-medium">
-        {h?.headsPerPlant ?? 'Heads per plant'}
+      <Label htmlFor="avgHeadsPerPlant" className="text-sm font-medium">
+        {h?.avgHeadsPerPlant ?? 'Heads per plant'}
       </Label>
       <DecimalInput
-        id="headsPerPlant"
-        value={formData.headsPerPlant}
-        onChange={(v) => setFormData((prev) => ({ ...prev, headsPerPlant: v }))}
+        id="avgHeadsPerPlant"
+        value={formData.avgHeadsPerPlant}
+        onChange={(v) => setFormData((prev) => ({ ...prev, avgHeadsPerPlant: v }))}
         disabled={disabled}
         className="h-10"
       />

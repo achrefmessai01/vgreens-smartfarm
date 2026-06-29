@@ -146,5 +146,5 @@ export class CreateBatchInput {
   @IsOptional()
   @IsNumber()
   @Min(0)
-  headsPerPlant?: number;
+  avgHeadsPerPlant?: number;
 }

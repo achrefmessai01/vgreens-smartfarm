@@ -26,7 +26,7 @@ const INITIAL_FORM_DATA: BatchFormData = {
   totalPlants: 0,
   lostPlants: 0,
   replicates: 1,
-  headsPerPlant: 0,
+  avgHeadsPerPlant: 0,
   inputMode: InputMode.Weight,
   crateWeight: 0,
 };
@@ -127,7 +127,7 @@ export function useCreateBatchForm({
               lostPlants: formData.lostPlants,
               replicates: formData.replicates,
               // Tomato-only, never required: 0 means unset → store null.
-              headsPerPlant: formData.headsPerPlant || undefined,
+              avgHeadsPerPlant: formData.avgHeadsPerPlant || undefined,
               inputMode: formData.inputMode,
               crateWeight:
                 formData.inputMode === InputMode.Crate
