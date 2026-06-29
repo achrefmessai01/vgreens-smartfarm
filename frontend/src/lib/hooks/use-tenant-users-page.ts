@@ -36,7 +36,9 @@ export function useTenantUsersPage() {
 
   const users = React.useMemo(() => {
     if (!data?.users) return [];
-    return data.users.filter((u) => u.tenantId === tenantId) as User[];
+    return data.users.filter(
+      (u) => u.tenantId === tenantId && u.role !== UserRole.VgreensAdmin,
+    ) as User[];
   }, [data?.users, tenantId]);
 
   const handleCreate = React.useCallback(() => {
