@@ -165,8 +165,10 @@ export function DashboardFilters({
                     aria-label={b.name}
                   />
                   <span className="truncate">
-                    {b.name}{' '}
-                    <span className="text-muted-foreground">({b.species})</span>
+                    {b.greenhouse} - {b?.variety}{' '}
+                    <span className="text-muted-foreground">
+                      ({b?.species})
+                    </span>
                   </span>
                 </label>
               );

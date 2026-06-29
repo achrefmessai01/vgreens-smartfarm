@@ -48,9 +48,13 @@ export const DASHBOARD_CHART_IDS = {
 export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
   // Metrics
   {
+    // The id stays `totalYield` for backwards compatibility with persisted
+    // `Tenant.hiddenHarvestDashboardItems` — never rename it without a
+    // migration — but the displayed tile now shows the marketable kg total
+    // (total yield minus waste), not the gross total.
     id: DASHBOARD_METRIC_IDS.totalYield,
-    labelKey: 'totalYield',
-    fallback: 'Total Yield',
+    labelKey: 'totalMarketableYield',
+    fallback: 'Marketable Yield',
     category: 'metrics',
   },
   {
