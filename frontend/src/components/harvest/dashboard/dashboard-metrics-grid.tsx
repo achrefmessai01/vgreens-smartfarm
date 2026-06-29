@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   Grid2x2,
   Package,
-  Ruler,
   Scale,
   Sprout,
   Target,
@@ -82,26 +81,6 @@ export function DashboardMetricsGrid({
           value={`${secondaryPercent.toFixed(1)}%`}
           subtitle={`${secondaryTotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
           color="error"
-        />
-      ),
-    },
-    {
-      id: DASHBOARD_METRIC_IDS.yieldPerMeter,
-      node: (
-        <MetricCard
-          title={h?.yieldPerMeter ?? 'Yield per Meter'}
-          value={
-            data.yieldPerMeter == null
-              ? '—'
-              : `${data.yieldPerMeter.toFixed(2)} kg/m`
-          }
-          subtitle={
-            data.yieldPerMeter == null
-              ? (h?.yieldPerMeterNoData ?? 'Set Row Length on the batch')
-              : (h?.yieldPerMeterSubtitle ?? 'Sellable kg per row metre')
-          }
-          icon={<Ruler className="h-4 w-4" />}
-          color="default"
         />
       ),
     },

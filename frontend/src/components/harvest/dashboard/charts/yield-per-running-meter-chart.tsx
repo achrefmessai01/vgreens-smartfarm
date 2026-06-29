@@ -51,7 +51,11 @@ const YieldPerRunningMeterTooltip = ({
           className="text-sm"
           style={{ color: entry.color ?? '#6366f1' }}
         >
-          {`${entry.name ?? 'Yield/running m'}: ${entry.value} kg/m`}
+          {`${entry.name ?? 'Yield/running m'}: ${
+            typeof entry.value === 'number'
+              ? Number(entry.value.toFixed(3))
+              : entry.value
+          } kg/m`}
         </p>
       ))}
     </ChartTooltipContainer>

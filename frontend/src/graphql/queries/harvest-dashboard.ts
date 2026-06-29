@@ -10,7 +10,6 @@ export const GET_HARVEST_DASHBOARD = gql`
       averageBrix
       averageFruitWeight
       yieldPerPlant
-      yieldPerMeter
       yieldPerRunningMeter
       yieldPerSquareMeter
       marketablePercent
@@ -22,10 +21,6 @@ export const GET_HARVEST_DASHBOARD = gql`
       yieldOverTime {
         date
         yield
-      }
-      yieldPerMeterTrend {
-        date
-        yieldPerMeter
       }
       yieldPerRunningMeterTrend {
         date
@@ -82,7 +77,6 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       averageBrix
       averageFruitWeight
       yieldPerPlant
-      yieldPerMeter
       yieldPerRunningMeter
       yieldPerSquareMeter
       marketablePercent
@@ -94,10 +88,6 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       yieldOverTime {
         date
         yield
-      }
-      yieldPerMeterTrend {
-        date
-        yieldPerMeter
       }
       yieldPerRunningMeterTrend {
         date

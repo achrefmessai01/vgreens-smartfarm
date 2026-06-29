@@ -83,7 +83,6 @@ const HARVEST_FIELDS = gql`
       avgFruitWeight
       avgBrix
       yieldPerPlant
-      yieldPerMeter
       yieldPerRunningMeter
     }
     createdBy {

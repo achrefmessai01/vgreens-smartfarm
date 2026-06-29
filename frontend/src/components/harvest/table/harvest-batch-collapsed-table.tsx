@@ -54,7 +54,7 @@ export function HarvestBatchCollapsedTable({
           <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
           <TableHead>{h?.avgFruitWeight ?? 'Avg Fruit Weight'}</TableHead>
           <TableHead>{h?.yieldPerPlantShort ?? 'Yield/Plant'}</TableHead>
-          <TableHead>{h?.yieldPerMeterShort ?? 'Yield/m'}</TableHead>
+          <TableHead>{h?.yieldPerRunningMeterShort ?? 'Yield/m'}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -85,9 +85,9 @@ export function HarvestBatchCollapsedTable({
               : `${agg.yieldPerPlant.toFixed(2)} kg`}
           </TableCell>
           <TableCell>
-            {agg.yieldPerMeter == null
+            {agg.yieldPerRunningMeter == null
               ? '—'
-              : `${agg.yieldPerMeter.toFixed(2)} kg/m`}
+              : `${Number(agg.yieldPerRunningMeter.toFixed(3))} kg/m`}
           </TableCell>
         </TableRow>
       </TableBody>
