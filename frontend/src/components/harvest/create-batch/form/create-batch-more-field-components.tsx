@@ -462,21 +462,20 @@ export function HeadsPerPlantField({
   );
 }
 
-// Yield input mode toggle (weight vs crate), fixed at batch creation. In crate
-// mode it reveals the per-batch crate-weight input; harvests for this batch then
-// open in crate layout and derive kg from this weight.
+// Yield input mode toggle (weight vs crate), fixed at batch creation. It only
+// sets the mode (which drives the harvest layout: crate counts vs direct kg).
+// The crate WEIGHT is no longer a batch field — it's chosen per-harvest from the
+// tenant's crates when logging a crate-mode harvest.
 export function InputModeField({
   formData,
   setFormData,
-  errors,
   disabled = false,
   // inputMode is fixed at creation: when editing an existing batch the toggle is
-  // locked, but crateWeight remains editable.
+  // locked.
   lockMode = false,
 }: FormFieldProps & { lockMode?: boolean }) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const isCrate = formData.inputMode === InputMode.Crate;
 
   const modes: ReadonlyArray<{ mode: InputMode; label: string }> = [
     { mode: InputMode.Weight, label: h?.weightMode ?? 'Weight (kg)' },
@@ -508,25 +507,6 @@ export function InputModeField({
           </button>
         ))}
       </div>
-      {isCrate && (
-        <div className="space-y-2 pt-2">
-          <Label htmlFor="crateWeight" className="text-sm font-medium">
-            {h?.crateWeight ?? 'Crate Weight (kg)'}{' '}
-            <span className="text-destructive">*</span>
-          </Label>
-          <DecimalInput
-            id="crateWeight"
-            placeholder={h?.enterCrateWeight ?? 'Weight of one full crate'}
-            value={formData.crateWeight}
-            onChange={(v) =>
-              setFormData((prev) => ({ ...prev, crateWeight: v }))
-            }
-            disabled={disabled}
-            className={`h-10 ${errors.crateWeight ? 'border-destructive' : ''}`}
-          />
-          <FieldMessage>{errors.crateWeight}</FieldMessage>
-        </div>
-      )}
     </div>
   );
 }

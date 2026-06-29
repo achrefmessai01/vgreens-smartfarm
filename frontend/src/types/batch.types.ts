@@ -24,10 +24,10 @@ export interface BatchFormData {
   // Average number of heads per plant. Tomato-only, optional metadata; 0 means
   // "unset" (the form's empty convention) and is persisted as null.
   avgHeadsPerPlant: number;
-  // Yield input mode, fixed at creation. Crate mode requires a positive
-  // crateWeight (kg per crate); in weight mode crateWeight is ignored.
+  // Yield input mode, fixed at creation. Drives the harvest layout (crate counts
+  // vs direct kg). The crate WEIGHT is no longer a batch field — it's selected
+  // per-harvest from the tenant's crates when logging a crate-mode harvest.
   inputMode: InputMode;
-  crateWeight: number;
 }
 
 export interface BatchFormErrors {
@@ -44,5 +44,4 @@ export interface BatchFormErrors {
   totalPlants?: string;
   lostPlants?: string;
   replicates?: string;
-  crateWeight?: string;
 }
