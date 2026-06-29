@@ -19,6 +19,8 @@ export interface HarvestEntryCardProps {
   // renders and how crate-mode totals are derived.
   inputMode: InputMode;
   crateWeight: number | null;
+  // When true the fruit-weight section uses the "Tross Weight" labels (tomato).
+  isTomato?: boolean;
   // The parent batch's row range; forwarded to the yield field to limit and
   // validate the per-entry row coordinates.
   batchStartRow?: number | null;
@@ -45,6 +47,7 @@ export function HarvestEntryCard({
   index,
   inputMode,
   crateWeight,
+  isTomato,
   batchStartRow,
   batchEndRow,
   wasteConfirmed,
@@ -103,6 +106,7 @@ export function HarvestEntryCard({
             index={index}
             inputMode={inputMode}
             crateWeight={crateWeight}
+            isTomato={isTomato}
             batchStartRow={batchStartRow}
             batchEndRow={batchEndRow}
             wasteConfirmed={wasteConfirmed}

@@ -767,6 +767,13 @@ export const en = {
       removeReading: 'Remove reading',
       addBrixReading: 'Add Brix reading',
       fruitWeightMeasurement: 'Fruit Weight',
+      // Tross (truss) variants — shown in place of the fruit-weight labels when
+      // the harvested crop is a tomato. "Tross" is kept as a literal term.
+      trossWeightMeasurement: 'Tross Weight',
+      addTrossWeight: 'Add tross weight measurement',
+      trossWeightSample: 'Tross weight sample',
+      averageTrossWeight: 'Average Tross Weight',
+      trossInSample: 'Tross in sample',
       addFruitWeight: 'Add fruit weight measurement',
       fruitWeightSample: 'Fruit weight sample',
       sampleWeight: 'Sample weight (g)',

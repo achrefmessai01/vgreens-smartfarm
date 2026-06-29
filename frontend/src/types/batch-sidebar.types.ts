@@ -187,6 +187,9 @@ export interface FruitWeightFieldProps {
   onShowFruitWeightChange: (show: boolean) => void;
   onSampleWeightChange?: (value: number) => void;
   onSampleFruitCountChange?: (value: number) => void;
+  // When the harvested crop is a tomato, the labels read "Tross Weight" instead
+  // of "Fruit Weight" (the truss is weighed rather than individual fruit).
+  isTomato?: boolean;
   // Namespaces input element ids so repeated entries don't collide.
   idPrefix?: string;
   isLoading?: boolean;
