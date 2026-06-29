@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n';
 import { InputMode, useVarietiesQuery } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
+import { FieldMessage } from '@/components/harvest/field-message';
 import { AddVarietyDialog } from './add-variety-dialog';
 
 // Sentinel value used by VarietyField's dropdown to open the "add variety"
@@ -84,9 +85,7 @@ export function VarietyField({
           </option>
         )}
       </select>
-      {errors.varietyId && (
-        <p className="text-destructive text-sm">{errors.varietyId}</p>
-      )}
+      <FieldMessage>{errors.varietyId}</FieldMessage>
       {cropId && (
         <AddVarietyDialog
           open={addOpen}
@@ -129,9 +128,7 @@ export function PlantingDateField({
         disabled={disabled}
         className={`h-10 ${errors.plantingDate ? 'border-destructive' : ''}`}
       />
-      {errors.plantingDate && (
-        <p className="text-destructive text-sm">{errors.plantingDate}</p>
-      )}
+      <FieldMessage>{errors.plantingDate}</FieldMessage>
     </div>
   );
 }
@@ -161,9 +158,7 @@ export function CultivationAreaField({
         disabled={disabled}
         className={`h-10 ${errors.cultivationArea ? 'border-destructive' : ''}`}
       />
-      {errors.cultivationArea && (
-        <p className="text-destructive text-sm">{errors.cultivationArea}</p>
-      )}
+      <FieldMessage>{errors.cultivationArea}</FieldMessage>
     </div>
   );
 }
@@ -190,9 +185,7 @@ export function NumberOfRowsField({
         disabled={disabled}
         className={`h-10 ${errors.numberOfRows ? 'border-destructive' : ''}`}
       />
-      {errors.numberOfRows && (
-        <p className="text-destructive text-sm">{errors.numberOfRows}</p>
-      )}
+      <FieldMessage>{errors.numberOfRows}</FieldMessage>
     </div>
   );
 }
@@ -219,9 +212,7 @@ export function RowLengthField({
         disabled={disabled}
         className={`h-10 ${errors.rowLength ? 'border-destructive' : ''}`}
       />
-      {errors.rowLength && (
-        <p className="text-destructive text-sm">{errors.rowLength}</p>
-      )}
+      <FieldMessage>{errors.rowLength}</FieldMessage>
     </div>
   );
 }
@@ -250,9 +241,7 @@ export function PlantsPerMeterField({
         disabled={disabled}
         className={`h-10 ${errors.plantsPerMeter ? 'border-destructive' : ''}`}
       />
-      {errors.plantsPerMeter && (
-        <p className="text-destructive text-sm">{errors.plantsPerMeter}</p>
-      )}
+      <FieldMessage>{errors.plantsPerMeter}</FieldMessage>
     </div>
   );
 }
@@ -290,9 +279,7 @@ export function StartRowField({
         disabled={disabled}
         className={`h-10 ${errors.startRow ? 'border-destructive' : ''}`}
       />
-      {errors.startRow && (
-        <p className="text-destructive text-sm">{errors.startRow}</p>
-      )}
+      <FieldMessage>{errors.startRow}</FieldMessage>
     </div>
   );
 }
@@ -327,9 +314,7 @@ export function EndRowField({
         disabled={disabled}
         className={`h-10 ${errors.endRow ? 'border-destructive' : ''}`}
       />
-      {errors.endRow && (
-        <p className="text-destructive text-sm">{errors.endRow}</p>
-      )}
+      <FieldMessage>{errors.endRow}</FieldMessage>
     </div>
   );
 }
@@ -377,9 +362,7 @@ export function TotalPlantsField({
         disabled={disabled}
         className={`h-10 ${errors.totalPlants ? 'border-destructive' : ''}`}
       />
-      {errors.totalPlants && (
-        <p className="text-destructive text-sm">{errors.totalPlants}</p>
-      )}
+      <FieldMessage>{errors.totalPlants}</FieldMessage>
     </div>
   );
 }
@@ -413,9 +396,7 @@ export function LostPlantsField({
         disabled={disabled}
         className={`h-10 ${errors.lostPlants ? 'border-destructive' : ''}`}
       />
-      {errors.lostPlants && (
-        <p className="text-destructive text-sm">{errors.lostPlants}</p>
-      )}
+      <FieldMessage>{errors.lostPlants}</FieldMessage>
     </div>
   );
 }
@@ -449,9 +430,7 @@ export function ReplicatesField({
         disabled={disabled}
         className={`h-10 ${errors.replicates ? 'border-destructive' : ''}`}
       />
-      {errors.replicates && (
-        <p className="text-destructive text-sm">{errors.replicates}</p>
-      )}
+      <FieldMessage>{errors.replicates}</FieldMessage>
     </div>
   );
 }
@@ -518,9 +497,7 @@ export function InputModeField({
             disabled={disabled}
             className={`h-10 ${errors.crateWeight ? 'border-destructive' : ''}`}
           />
-          {errors.crateWeight && (
-            <p className="text-destructive text-sm">{errors.crateWeight}</p>
-          )}
+          <FieldMessage>{errors.crateWeight}</FieldMessage>
         </div>
       )}
     </div>

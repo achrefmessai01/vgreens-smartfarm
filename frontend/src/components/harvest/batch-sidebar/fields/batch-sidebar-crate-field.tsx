@@ -12,12 +12,16 @@ import {
   crateClassKg,
   crateEntryTotalKg,
 } from '@/lib/harvest-utils';
+import { FieldMessage } from '@/components/harvest/field-message';
+import { WasteWarning } from './batch-sidebar-waste-warning';
 
 export function CrateYieldField({
   crateCounts,
   remainingKgs,
   waste,
   crateWeight,
+  wasteConfirmed,
+  onConfirmWasteChange,
   onChange,
   isLoading = false,
 }: CrateYieldFieldProps) {
@@ -129,7 +133,9 @@ export function CrateYieldField({
                 </div>
               </div>
               {overRemainder && (
-                <p className="text-xs text-amber-600">{remainderWarning}</p>
+                <FieldMessage variant="warning" size="xs">
+                  {remainderWarning}
+                </FieldMessage>
               )}
             </div>
           );
@@ -159,6 +165,13 @@ export function CrateYieldField({
               kg
             </span>
           </div>
+          {/* total is the summed sellable kg across all quality classes. */}
+          <WasteWarning
+            waste={waste}
+            qualityTotalKg={total}
+            confirmed={wasteConfirmed}
+            onConfirmChange={onConfirmWasteChange}
+          />
         </div>
       </div>
 

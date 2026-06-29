@@ -738,6 +738,11 @@ export const en = {
       remainingKg: 'Remaining (kg)',
       remainingKgExceedsCrate:
         'At/above one full crate ({weight} kg) — count another crate?',
+      wasteExceedsQualityWarning:
+        'Waste ({waste} kg) is higher than the total quality yield ({quality} kg). Please confirm this entry is intentional before saving.',
+      confirmWasteValue: 'Yes, waste is correct',
+      wasteConfirmedNote: 'Waste value confirmed.',
+      undoWasteConfirmation: 'Undo',
       rowX: 'Row X',
       rowY: 'Row Y',
       enterRowX: 'Start row',
@@ -763,6 +768,13 @@ export const en = {
       removeReading: 'Remove reading',
       addBrixReading: 'Add Brix reading',
       fruitWeightMeasurement: 'Fruit Weight',
+      // Tross (truss) variants — shown in place of the fruit-weight labels when
+      // the harvested crop is a tomato. "Tross" is kept as a literal term.
+      trossWeightMeasurement: 'Tross Weight',
+      addTrossWeight: 'Add tross weight measurement',
+      trossWeightSample: 'Tross weight sample',
+      averageTrossWeight: 'Average Tross Weight',
+      trossInSample: 'Tross in sample',
       addFruitWeight: 'Add fruit weight measurement',
       fruitWeightSample: 'Fruit weight sample',
       sampleWeight: 'Sample weight (g)',

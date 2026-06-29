@@ -5,6 +5,29 @@ import type { ServerError } from '@apollo/client/link/utils';
 const EXPECTED_LIVESTREAM_UNAVAILABLE_MESSAGE =
   'Camera livestream is not available for this account';
 
+// GraphQL error codes for expected, client-recoverable problems (validation,
+// conflicts, auth, missing resources). The UI surfaces these inline, so logging
+// them as console errors is just noise — and in dev it also trips the Next.js
+// error overlay. Genuine server faults (INTERNAL_SERVER_ERROR) and network
+// errors still log loudly. Codes are set by the backend GraphQLExceptionFilter.
+const EXPECTED_CLIENT_ERROR_CODES = new Set([
+  'BAD_USER_INPUT',
+  'CONFLICT',
+  'NOT_FOUND',
+  'FORBIDDEN',
+  'UNAUTHENTICATED',
+]);
+
+// The backend flattens errors to `{ message, code }`, so the code is top-level;
+// fall back to the standard `extensions.code` in case that changes.
+function expectedClientErrorCode(error: {
+  code?: unknown;
+  extensions?: { code?: unknown } | null;
+}): boolean {
+  const code = error.code ?? error.extensions?.code;
+  return typeof code === 'string' && EXPECTED_CLIENT_ERROR_CODES.has(code);
+}
+
 function isExpectedLivestreamUnavailableError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
     return false;
@@ -35,8 +58,14 @@ function isExpectedLivestreamUnavailableError(error: unknown): boolean {
 export const apolloErrorLink = onError(
   ({ graphQLErrors, networkError, operation }) => {
     if (graphQLErrors) {
-      graphQLErrors.forEach(({ message, locations, path, extensions }) => {
+      graphQLErrors.forEach((graphQLError) => {
+        const { message, locations, path, extensions } = graphQLError;
         if (message === EXPECTED_LIVESTREAM_UNAVAILABLE_MESSAGE) {
+          return;
+        }
+        // Expected client errors are handled inline by the UI — don't log them
+        // as crashes (and don't trip the Next.js dev error overlay).
+        if (expectedClientErrorCode(graphQLError)) {
           return;
         }
 

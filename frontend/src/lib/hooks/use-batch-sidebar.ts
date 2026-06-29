@@ -15,8 +15,10 @@ import type {
 } from '@/types/batch-sidebar.types';
 import { useHarvestPhotosUpload } from '@/lib/hooks/use-harvest-photos-upload';
 import {
+  entryQualityTotalKg,
   extractStoragePathFromUrl,
   formatTimeOfDay,
+  wasteExceedsQualityTotal,
 } from '@/lib/harvest-utils';
 import * as React from 'react';
 
@@ -81,6 +83,12 @@ export function useBatchSidebar({
   const [stopTime, setStopTime] = React.useState<string>('');
   const [harvesterHeadCount, setHarvesterHeadCount] =
     React.useState<string>('');
+  // Entry indices whose waste-exceeds-quality warning the user has explicitly
+  // acknowledged. Any edit to an entry's waste/class inputs clears its
+  // confirmation (see handleEntryChange) so the soft check is re-evaluated.
+  const [confirmedWasteEntries, setConfirmedWasteEntries] = React.useState<
+    ReadonlySet<number>
+  >(() => new Set());
   const [createHarvest, { loading: createLoading }] =
     useCreateHarvestMutation();
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
@@ -106,6 +114,8 @@ export function useBatchSidebar({
         ? ''
         : String(initialHeadCount),
     );
+    // Fresh data: no waste warnings have been acknowledged yet.
+    setConfirmedWasteEntries(new Set());
   }, [
     batchData,
     mode,
@@ -173,6 +183,24 @@ export function useBatchSidebar({
   }, [localData?.photos]);
 
   const currentData = localData ?? batchData;
+
+  // Soft safety check, re-evaluated on every input change: flag any entry whose
+  // waste exceeds its summed quality yield. An entry only blocks the save while
+  // it's flagged AND not yet acknowledged; correcting the inputs clears the flag
+  // and confirming clears the block. Mirrors the timing-error gate below.
+  const hasUnconfirmedWasteWarning = React.useMemo(() => {
+    const entries = currentData?.entries;
+    if (!entries || !currentData) return false;
+    return entries.some((entry, index) => {
+      if (confirmedWasteEntries.has(index)) return false;
+      const qualityTotal = entryQualityTotalKg(
+        entry,
+        currentData.inputMode,
+        currentData.crateWeight,
+      );
+      return wasteExceedsQualityTotal(entry.waste, qualityTotal);
+    });
+  }, [currentData, confirmedWasteEntries]);
 
   const handleBrixChange = React.useCallback(
     (entryIndex: number, readingIndex: number, value: number) => {
@@ -245,8 +273,29 @@ export function useBatchSidebar({
   // coords); and add/remove of a whole quality class. add/remove grow/shrink all
   // three per-class arrays together (never below one class) so the mode-specific
   // arrays stay aligned and a class index is always valid.
+  // Toggle the user's acknowledgement of an entry's waste-exceeds-quality
+  // warning. Confirming lets the save proceed; un-confirming re-arms the gate.
+  const setWasteConfirmed = React.useCallback(
+    (entryIndex: number, confirmed: boolean) => {
+      setConfirmedWasteEntries((prev) => {
+        if (prev.has(entryIndex) === confirmed) return prev;
+        const next = new Set(prev);
+        if (confirmed) next.add(entryIndex);
+        else next.delete(entryIndex);
+        return next;
+      });
+    },
+    [],
+  );
+
   const handleEntryChange = React.useCallback(
     (entryIndex: number, change: EntryChange) => {
+      // Any change to the quantities feeding the waste/quality comparison
+      // invalidates a prior confirmation, so the warning is re-evaluated against
+      // the new values. Row coordinates don't affect the comparison.
+      if (change.kind !== 'rowX' && change.kind !== 'rowY') {
+        setWasteConfirmed(entryIndex, false);
+      }
       updateEntry(entryIndex, (entry) => {
         switch (change.kind) {
           case 'waste':
@@ -287,7 +336,7 @@ export function useBatchSidebar({
         }
       });
     },
-    [updateEntry],
+    [updateEntry, setWasteConfirmed],
   );
 
   const handleSetShowBrix = React.useCallback(
@@ -340,8 +389,9 @@ export function useBatchSidebar({
 
   const handleSave = React.useCallback(async () => {
     if (!currentData) return;
-    // Don't submit while the harvest-level timing/labor fields are invalid.
-    if (hasTimingErrors) return;
+    // Don't submit while the harvest-level timing/labor fields are invalid, or
+    // while an entry's waste exceeds its quality yield without acknowledgement.
+    if (hasTimingErrors || hasUnconfirmedWasteWarning) return;
 
     // Map each sub-entry to the GraphQL input shape. Brix readings and the fruit
     // weight sample only count when their section is expanded. In weight mode the
@@ -448,6 +498,7 @@ export function useBatchSidebar({
     stopTime,
     harvesterHeadCount,
     hasTimingErrors,
+    hasUnconfirmedWasteWarning,
     updateHarvest,
     createHarvest,
     onCompleted,
@@ -455,7 +506,8 @@ export function useBatchSidebar({
 
   const canSave =
     (mode === 'create' ? Boolean(batchId) : Boolean(harvestId)) &&
-    !hasTimingErrors;
+    !hasTimingErrors &&
+    !hasUnconfirmedWasteWarning;
 
   return {
     currentData,
@@ -471,6 +523,8 @@ export function useBatchSidebar({
     harvesterHeadCount,
     setHarvesterHeadCount,
     timingErrors,
+    confirmedWasteEntries,
+    setWasteConfirmed,
     handleBrixChange,
     handleBrixClassChange,
     handleAddBrixReading,
