@@ -39,8 +39,10 @@ export interface BrixReadingLike {
 // HarvestEntry; avgFruitWeight / avgBrix are derived by the backend.
 export interface HarvestEntryLike {
   id?: string;
-  rowX: number;
-  rowY: number;
+  // Parallel arrays of harvested row segments: rowX[i] pairs with rowY[i].
+  // Equal-length; empty when no rows were recorded.
+  rowX: number[];
+  rowY: number[];
   // Weight mode: positional per-quality sellable kg (index 0=A, 1=B, ...).
   // Null/empty in crate mode. Dynamic length.
   classKgs?: number[] | null;

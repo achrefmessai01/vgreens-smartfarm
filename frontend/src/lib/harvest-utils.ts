@@ -336,8 +336,8 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     crateCounts: cls.crateCounts,
     remainingKgs: cls.remainingKgs,
     waste: entry.waste,
-    rowX: entry.rowX,
-    rowY: entry.rowY,
+    rowX: entry.rowX ?? [],
+    rowY: entry.rowY ?? [],
     brixReadings: readings,
     brixClasses: classes,
     showBrix: entry.brixReadings.some((b) => b.value > 0),
@@ -384,6 +384,26 @@ export function isRowOutsideBatchRange(
   if (!hasRowRange(start, end)) return false;
   if (value <= 0) return false;
   return value < (start as number) || value > (end as number);
+}
+
+// Per-segment ordering check for a harvest's row segments. Flags segment i when
+// its start exceeds its end, or when it starts at/before the previous populated
+// segment's end — segments should be ordered and non-overlapping so the gaps
+// between them are meaningful. Soft (warn-but-allow): only populated values
+// (> 0) are considered, so empty cells never flag. Returns a flag per segment.
+export function rowSegmentOrderingFlags(
+  rowX: number[],
+  rowY: number[],
+): boolean[] {
+  let prevEnd = 0;
+  return rowX.map((start, i) => {
+    const end = rowY[i] ?? 0;
+    let flagged = false;
+    if (start > 0 && end > 0 && start > end) flagged = true;
+    if (start > 0 && prevEnd > 0 && start <= prevEnd) flagged = true;
+    if (end > 0) prevEnd = end;
+    return flagged;
+  });
 }
 
 function daysSince(plantingDate: string): number {
