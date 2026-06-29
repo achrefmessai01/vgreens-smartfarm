@@ -511,6 +511,7 @@ export const el = {
       yieldPredictionTrend: '+8,4 % έναντι του προηγούμενου μήνα',
       total: 'Σύνολο',
       totalYield: 'Συνολική απόδοση',
+      totalMarketableYield: 'Εμπορεύσιμη απόδοση',
       acrossHarvests: 'Σε {count} συγκομιδές',
       averageBrix: 'Μέσο Brix',
       qualityIndicator: 'Δείκτης ποιότητας',

@@ -496,6 +496,7 @@ export const ar = {
       yieldPredictionTrend: '+8.4 % مقارنةً بالشهر الماضي',
       total: 'الإجمالي',
       totalYield: 'إجمالي الإنتاج',
+      totalMarketableYield: 'الإنتاج القابل للتسويق',
       acrossHarvests: 'عبر {count} حصاد',
       averageBrix: 'متوسط Brix',
       qualityIndicator: 'مؤشر الجودة',

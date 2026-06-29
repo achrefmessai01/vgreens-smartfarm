@@ -32,7 +32,9 @@ export function DashboardMetricsGrid({
     `Across ${data.harvestCount} harvests`;
 
   // Total yield (= Quality A + B + C + waste) comes straight from the backend.
-  // Sellable (marketable) total is everything except waste.
+  // Sellable (marketable) total is everything except waste — that's what we
+  // surface as the headline tile now; the gross totalYield is no longer shown
+  // because it's misleading next to a "waste %" tile (it includes the waste).
   const totalYieldDisplay = data.totalYield ?? 0;
   const sellableTotal = totalYieldDisplay - (data.wasteTotal ?? 0);
   const primaryPercent = data.marketablePercent ?? 0;
@@ -42,60 +44,44 @@ export function DashboardMetricsGrid({
   const primaryTitle = h?.marketablePercent ?? 'Marketable %';
   const secondaryTitle = h?.wastePercent ?? 'Waste %';
 
+  // Tile order is product-driven: headline marketable kg first, then the two
+  // percentages that explain its composition, then the per-unit yields, then
+  // the rest. The `totalYield` id is kept (it's persisted in tenant configs)
+  // even though the tile now shows marketable kg — renaming the id would
+  // silently un-hide it for tenants who'd already hidden it.
   const cards: Array<{ id: string; node: React.ReactNode }> = [
     {
       id: DASHBOARD_METRIC_IDS.totalYield,
       node: (
         <MetricCard
-          title={h?.totalYield ?? 'Total Yield'}
-          value={`${totalYieldDisplay.toFixed(2)} kg`}
+          title={h?.totalMarketableYield ?? 'Marketable Yield'}
+          value={`${sellableTotal.toFixed(2)} kg`}
           subtitle={acrossHarvests}
           icon={<TrendingUp className="h-4 w-4" />}
-          color="default"
+          color="success"
         />
       ),
     },
     {
-      id: DASHBOARD_METRIC_IDS.averageBrix,
+      id: DASHBOARD_METRIC_IDS.qualityPrimary,
       node: (
         <MetricCard
-          title={h?.averageBrix ?? 'Average Brix'}
-          value={`${data.averageBrix?.toFixed(1) ?? 0}°Bx`}
-          subtitle={h?.qualityIndicator ?? 'Quality indicator'}
-          icon={<Target className="h-4 w-4" />}
-          color="info"
+          title={primaryTitle}
+          value={`${primaryPercent.toFixed(1)}%`}
+          subtitle={`${sellableTotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
+          icon={<Package className="h-4 w-4" />}
+          color="success"
         />
       ),
     },
     {
-      id: DASHBOARD_METRIC_IDS.averageFruitWeight,
+      id: DASHBOARD_METRIC_IDS.qualitySecondary,
       node: (
         <MetricCard
-          title={h?.averageFruitWeight ?? 'Average Fruit Weight'}
-          value={`${data.averageFruitWeight?.toFixed(1) ?? 0} g`}
-          subtitle={h?.avgWeightPerFruit ?? 'Average weight per fruit'}
-          icon={<Scale className="h-4 w-4" />}
-          color="info"
-        />
-      ),
-    },
-    {
-      id: DASHBOARD_METRIC_IDS.yieldPerPlant,
-      node: (
-        <MetricCard
-          title={h?.yieldPerPlant ?? 'Yield per Plant'}
-          value={
-            data.yieldPerPlant == null
-              ? '—'
-              : `${data.yieldPerPlant.toFixed(2)} kg`
-          }
-          subtitle={
-            data.yieldPerPlant == null
-              ? (h?.yieldPerPlantNoData ?? 'Set Total Plants on the batch')
-              : (h?.yieldPerPlantSubtitle ?? 'Sellable kg per plant')
-          }
-          icon={<Sprout className="h-4 w-4" />}
-          color="default"
+          title={secondaryTitle}
+          value={`${secondaryPercent.toFixed(1)}%`}
+          subtitle={`${secondaryTotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
+          color="error"
         />
       ),
     },
@@ -120,6 +106,50 @@ export function DashboardMetricsGrid({
       ),
     },
     {
+      id: DASHBOARD_METRIC_IDS.yieldPerPlant,
+      node: (
+        <MetricCard
+          title={h?.yieldPerPlant ?? 'Yield per Plant'}
+          value={
+            data.yieldPerPlant == null
+              ? '—'
+              : `${data.yieldPerPlant.toFixed(2)} kg`
+          }
+          subtitle={
+            data.yieldPerPlant == null
+              ? (h?.yieldPerPlantNoData ?? 'Set Total Plants on the batch')
+              : (h?.yieldPerPlantSubtitle ?? 'Sellable kg per plant')
+          }
+          icon={<Sprout className="h-4 w-4" />}
+          color="default"
+        />
+      ),
+    },
+    {
+      id: DASHBOARD_METRIC_IDS.averageFruitWeight,
+      node: (
+        <MetricCard
+          title={h?.averageFruitWeight ?? 'Average Fruit Weight'}
+          value={`${data.averageFruitWeight?.toFixed(1) ?? 0} g`}
+          subtitle={h?.avgWeightPerFruit ?? 'Average weight per fruit'}
+          icon={<Scale className="h-4 w-4" />}
+          color="info"
+        />
+      ),
+    },
+    {
+      id: DASHBOARD_METRIC_IDS.averageBrix,
+      node: (
+        <MetricCard
+          title={h?.averageBrix ?? 'Average Brix'}
+          value={`${data.averageBrix?.toFixed(1) ?? 0}°Bx`}
+          subtitle={h?.qualityIndicator ?? 'Quality indicator'}
+          icon={<Target className="h-4 w-4" />}
+          color="info"
+        />
+      ),
+    },
+    {
       id: DASHBOARD_METRIC_IDS.yieldPerSquareMeter,
       node: (
         <MetricCard
@@ -137,29 +167,6 @@ export function DashboardMetricsGrid({
           }
           icon={<Grid2x2 className="h-4 w-4" />}
           color="default"
-        />
-      ),
-    },
-    {
-      id: DASHBOARD_METRIC_IDS.qualityPrimary,
-      node: (
-        <MetricCard
-          title={primaryTitle}
-          value={`${primaryPercent.toFixed(1)}%`}
-          subtitle={`${sellableTotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
-          icon={<Package className="h-4 w-4" />}
-          color="success"
-        />
-      ),
-    },
-    {
-      id: DASHBOARD_METRIC_IDS.qualitySecondary,
-      node: (
-        <MetricCard
-          title={secondaryTitle}
-          value={`${secondaryPercent.toFixed(1)}%`}
-          subtitle={`${secondaryTotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
-          color="error"
         />
       ),
     },

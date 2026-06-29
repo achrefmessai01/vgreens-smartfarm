@@ -509,6 +509,7 @@ export const ro = {
       yieldPredictionTrend: '+8,4 % față de luna trecută',
       total: 'Total',
       totalYield: 'Producție totală',
+      totalMarketableYield: 'Producție comercializabilă',
       acrossHarvests: 'Pe {count} recolte',
       averageBrix: 'Brix mediu',
       qualityIndicator: 'Indicator de calitate',

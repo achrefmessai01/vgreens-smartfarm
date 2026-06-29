@@ -508,6 +508,7 @@ export const de = {
       yieldPredictionTrend: '+8,4% vs. letzter Monat',
       total: 'Gesamt',
       totalYield: 'Gesamtertrag',
+      totalMarketableYield: 'Vermarktbarer Ertrag',
       acrossHarvests: 'Über {count} Ernten',
       averageBrix: 'Durchschnittlicher Brix',
       qualityIndicator: 'Qualitätsindikator',

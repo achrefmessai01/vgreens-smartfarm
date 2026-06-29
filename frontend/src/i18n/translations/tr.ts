@@ -501,6 +501,7 @@ export const tr = {
       yieldPredictionTrend: 'Geçen aya göre +%8,4',
       total: 'Toplam',
       totalYield: 'Toplam verim',
+      totalMarketableYield: 'Pazarlanabilir verim',
       acrossHarvests: '{count} hasat genelinde',
       averageBrix: 'Ortalama Brix',
       qualityIndicator: 'Kalite göstergesi',

@@ -682,7 +682,7 @@ export type HarvestDashboardMetrics = {
   /** Weighted kg per running metre across selected batches: Σ totalFruitWeight / Σ runningMeter (numberOfRows × rowLength). Null when no batch in scope has runningMeter > 0. */
   yieldPerRunningMeter?: Maybe<Scalars['Float']['output']>;
   yieldPerRunningMeterTrend: Array<YieldPerRunningMeterData>;
-  /** Total yield per m² across selected batches: totalYield / Σ cultivationArea. Null when no batch in scope has cultivationArea > 0. */
+  /** Total yield per m² across selected batches: Σ totalFruitWeight / Σ cultivationArea (distinct batches). Null when no batch in scope has cultivationArea > 0. */
   yieldPerSquareMeter?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -1460,6 +1460,11 @@ export type SignedUrl = {
   path: Scalars['String']['output'];
   /** Time-limited URL that can be used to upload or download the image. */
   url: Scalars['String']['output'];
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  alertCreated: Alert;
 };
 
 export type SystemError = {
@@ -2458,6 +2463,11 @@ export type UserQueryVariables = Exact<{
 
 
 export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, createdAt: any, updatedAt: any } | null };
+
+export type AlertCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AlertCreatedSubscription = { __typename?: 'Subscription', alertCreated: { __typename?: 'Alert', id: string, tenantId: string, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, description?: string | null, timestamp?: any | null, field?: string | null, measurement?: string | null, device?: string | null, greenhouse?: string | null, city?: string | null, column?: string | null, row?: string | null, profile?: string | null, createdAt: any, updatedAt: any } };
 
 export const ErrorReportFragmentFragmentDoc = gql`
     fragment ErrorReportFragment on ErrorReport {
@@ -7106,3 +7116,49 @@ export type UserQueryHookResult = ReturnType<typeof useUserQuery>;
 export type UserLazyQueryHookResult = ReturnType<typeof useUserLazyQuery>;
 export type UserSuspenseQueryHookResult = ReturnType<typeof useUserSuspenseQuery>;
 export type UserQueryResult = Apollo.QueryResult<UserQuery, UserQueryVariables>;
+export const AlertCreatedDocument = gql`
+    subscription AlertCreated {
+  alertCreated {
+    id
+    tenantId
+    sensorName
+    value
+    status
+    severity
+    description
+    timestamp
+    field
+    measurement
+    device
+    greenhouse
+    city
+    column
+    row
+    profile
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useAlertCreatedSubscription__
+ *
+ * To run a query within a React component, call `useAlertCreatedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useAlertCreatedSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAlertCreatedSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAlertCreatedSubscription(baseOptions?: Apollo.SubscriptionHookOptions<AlertCreatedSubscription, AlertCreatedSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<AlertCreatedSubscription, AlertCreatedSubscriptionVariables>(AlertCreatedDocument, options);
+      }
+export type AlertCreatedSubscriptionHookResult = ReturnType<typeof useAlertCreatedSubscription>;
+export type AlertCreatedSubscriptionResult = Apollo.SubscriptionResult<AlertCreatedSubscription>;

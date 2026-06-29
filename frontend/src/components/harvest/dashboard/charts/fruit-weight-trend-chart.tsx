@@ -91,7 +91,7 @@ export function FruitWeightTrendChart(props: FruitWeightTrendChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 1, right: 30, left: 20, bottom: 1 }}
+              margin={{ top: 5, right: 20, left: 10, bottom: 40 }}
             >
               <defs>
                 <linearGradient
@@ -112,11 +112,13 @@ export function FruitWeightTrendChart(props: FruitWeightTrendChartProps) {
               />
               <XAxis
                 dataKey="date"
-                fontSize={12}
-                angle={0}
-                textAnchor="middle"
-                interval={isMulti ? 'preserveStartEnd' : 0}
-                minTickGap={isMulti ? 20 : undefined}
+                fontSize={11}
+                angle={-35}
+                textAnchor="end"
+                height={55}
+                interval="preserveStartEnd"
+                minTickGap={20}
+                tickMargin={8}
               />
               <YAxis
                 fontSize={12}

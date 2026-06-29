@@ -498,6 +498,7 @@ export const en = {
       yieldPredictionTrend: '+8.4% vs last month',
       total: 'Total',
       totalYield: 'Total Yield',
+      totalMarketableYield: 'Marketable Yield',
       acrossHarvests: 'Across {count} harvests',
       averageBrix: 'Average Brix',
       qualityIndicator: 'Quality indicator',

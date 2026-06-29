@@ -195,6 +195,25 @@ export function extractStoragePathFromUrl(
   }
 }
 
+/**
+ * Format waste as a percentage of the total batch yield (sellable classes + waste).
+ * Returns the percentage with one decimal place and a `%` suffix, e.g. "5.3%".
+ * When the total yield is zero (no harvests logged or all values empty), returns
+ * `—` so the cell doesn't read as "0.0%" — which would be misleading. The
+ * underlying kg figures are kept untouched; this is purely a display helper for
+ * the collapsed batch-summary row.
+ */
+export function formatWastePercent(
+  wasteKg: number,
+  classKgs: number[] | null | undefined,
+): string {
+  const sellable = (classKgs ?? []).reduce((sum, v) => sum + (v ?? 0), 0);
+  const total = sellable + (wasteKg ?? 0);
+  if (total <= 0) return '—';
+  const pct = ((wasteKg ?? 0) / total) * 100;
+  return `${pct.toFixed(1)}%`;
+}
+
 export function getGreenhouseLabel(greenhouse?: string | null): string {
   if (!greenhouse) return '-';
   if (greenhouse.includes('01') || greenhouse === 'gh1') return 'GH1';

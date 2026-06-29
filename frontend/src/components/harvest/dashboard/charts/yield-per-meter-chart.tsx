@@ -85,7 +85,7 @@ export function YieldPerMeterChart(props: YieldPerMeterChartProps) {
 
   return (
     <Card className={className}>
-      <div className="p-8">
+      <div className="p-4 sm:p-6">
         <h3 className="mb-4 text-lg font-semibold">
           {title ??
             t.pages.harvest?.yieldPerMeterOverTime ??
@@ -95,7 +95,7 @@ export function YieldPerMeterChart(props: YieldPerMeterChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 1, right: 30, left: 20, bottom: 1 }}
+              margin={{ top: 5, right: 20, left: 10, bottom: 40 }}
             >
               <defs>
                 <linearGradient
@@ -116,11 +116,13 @@ export function YieldPerMeterChart(props: YieldPerMeterChartProps) {
               />
               <XAxis
                 dataKey="date"
-                fontSize={12}
-                angle={0}
-                textAnchor="middle"
-                interval={isMulti ? 'preserveStartEnd' : 0}
-                minTickGap={isMulti ? 20 : undefined}
+                fontSize={11}
+                angle={-35}
+                textAnchor="end"
+                height={55}
+                interval="preserveStartEnd"
+                minTickGap={20}
+                tickMargin={8}
               />
               <YAxis
                 fontSize={12}
