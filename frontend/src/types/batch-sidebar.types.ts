@@ -136,6 +136,10 @@ export interface YieldDataFieldProps {
   // unconstrained; when set, inputs are limited and out-of-range values warn.
   batchStartRow?: number | null;
   batchEndRow?: number | null;
+  // Soft waste-vs-quality check: whether the user has acknowledged a waste value
+  // that exceeds the summed quality yield, and the setter to toggle it.
+  wasteConfirmed: boolean;
+  onConfirmWasteChange: (confirmed: boolean) => void;
   onChange?: (change: EntryChange) => void;
   isLoading?: boolean;
 }
@@ -151,6 +155,10 @@ export interface CrateYieldFieldProps {
   // Per-batch crate weight (kg). Null/0 means it hasn't been set; the field
   // still renders but derived kg show as 0.
   crateWeight: number | null;
+  // Soft waste-vs-quality check: whether the user has acknowledged a waste value
+  // that exceeds the summed quality yield, and the setter to toggle it.
+  wasteConfirmed: boolean;
+  onConfirmWasteChange: (confirmed: boolean) => void;
   onChange?: (change: EntryChange) => void;
   isLoading?: boolean;
 }

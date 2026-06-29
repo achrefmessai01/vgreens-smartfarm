@@ -12,12 +12,15 @@ import {
   crateClassKg,
   crateEntryTotalKg,
 } from '@/lib/harvest-utils';
+import { WasteWarning } from './batch-sidebar-waste-warning';
 
 export function CrateYieldField({
   crateCounts,
   remainingKgs,
   waste,
   crateWeight,
+  wasteConfirmed,
+  onConfirmWasteChange,
   onChange,
   isLoading = false,
 }: CrateYieldFieldProps) {
@@ -159,6 +162,13 @@ export function CrateYieldField({
               kg
             </span>
           </div>
+          {/* total is the summed sellable kg across all quality classes. */}
+          <WasteWarning
+            waste={waste}
+            qualityTotalKg={total}
+            confirmed={wasteConfirmed}
+            onConfirmChange={onConfirmWasteChange}
+          />
         </div>
       </div>
 

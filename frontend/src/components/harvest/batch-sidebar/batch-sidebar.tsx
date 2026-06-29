@@ -67,6 +67,8 @@ export function BatchSidebar({
     harvesterHeadCount,
     setHarvesterHeadCount,
     timingErrors,
+    confirmedWasteEntries,
+    setWasteConfirmed,
     handleBrixChange,
     handleBrixClassChange,
     handleAddBrixReading,
@@ -274,6 +276,10 @@ export function BatchSidebar({
                     crateWeight={currentData.crateWeight}
                     batchStartRow={currentData.startRow}
                     batchEndRow={currentData.endRow}
+                    wasteConfirmed={confirmedWasteEntries.has(index)}
+                    onConfirmWasteChange={(confirmed) =>
+                      setWasteConfirmed(index, confirmed)
+                    }
                     defaultOpen={index === 0 || entryHasData(entry)}
                     onChange={(change) => handleEntryChange(index, change)}
                     onBrixChange={(readingIndex, value) =>

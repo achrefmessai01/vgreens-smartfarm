@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
 import { classLetter, isRowOutsideBatchRange } from '@/lib/harvest-utils';
+import { WasteWarning } from './batch-sidebar-waste-warning';
 
 export function YieldDataField({
   classKgs,
@@ -16,11 +17,18 @@ export function YieldDataField({
   rowY,
   batchStartRow,
   batchEndRow,
+  wasteConfirmed,
+  onConfirmWasteChange,
   onChange,
   isLoading = false,
 }: YieldDataFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  // Summed quality yield (kg) across all classes — compared against waste below.
+  const qualityTotalKg = classKgs.reduce(
+    (sum, v) => sum + (Number.isFinite(v) ? v : 0),
+    0,
+  );
   // When the batch defines a row range, flag (without blocking) any value
   // outside it. A null/unset range leaves the inputs unconstrained.
   const outOfRangeText = (
@@ -119,6 +127,12 @@ export function YieldDataField({
               kg
             </span>
           </div>
+          <WasteWarning
+            waste={waste}
+            qualityTotalKg={qualityTotalKg}
+            confirmed={wasteConfirmed}
+            onConfirmChange={onConfirmWasteChange}
+          />
         </div>
 
         {showRowCoordinates && (
