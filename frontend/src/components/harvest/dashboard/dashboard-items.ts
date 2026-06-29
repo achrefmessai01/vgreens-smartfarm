@@ -27,6 +27,7 @@ export const DASHBOARD_METRIC_IDS = {
   averageBrix: 'averageBrix',
   averageFruitWeight: 'averageFruitWeight',
   yieldPerPlant: 'yieldPerPlant',
+  yieldPerRunningMeter: 'yieldPerRunningMeter',
   yieldPerSquareMeter: 'yieldPerSquareMeter',
   qualityPrimary: 'qualityPrimary',
   qualitySecondary: 'qualitySecondary',
@@ -71,6 +72,12 @@ export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
     id: DASHBOARD_METRIC_IDS.yieldPerPlant,
     labelKey: 'yieldPerPlant',
     fallback: 'Yield per Plant',
+    category: 'metrics',
+  },
+  {
+    id: DASHBOARD_METRIC_IDS.yieldPerRunningMeter,
+    labelKey: 'yieldPerRunningMeter',
+    fallback: 'Yield per Running Meter',
     category: 'metrics',
   },
   {
