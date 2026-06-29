@@ -740,6 +740,7 @@ export const ro = {
       totalPlants: 'Total plante',
       lostPlants: 'Plante pierdute',
       replicates: 'Repetiții',
+      avgHeadsPerPlant: 'Medie capete per plantă',
       rowX: 'Rândul X',
       rowY: 'Rândul Y',
       enterRowX: 'Rând de început',

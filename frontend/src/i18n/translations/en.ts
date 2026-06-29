@@ -722,6 +722,7 @@ export const en = {
       totalPlants: 'Total Plants',
       lostPlants: 'Lost Plants',
       replicates: 'Replicates',
+      avgHeadsPerPlant: 'Avg Heads per Plant',
       inputMode: 'Yield input mode',
       weightMode: 'Weight (kg)',
       crateMode: 'Crates',

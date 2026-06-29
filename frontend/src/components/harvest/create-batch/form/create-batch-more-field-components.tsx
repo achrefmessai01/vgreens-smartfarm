@@ -435,6 +435,33 @@ export function ReplicatesField({
   );
 }
 
+// Average number of heads per plant. Tomato-only metadata, never required: it's
+// rendered only when the selected crop is a tomato (gated by the parent) and an
+// empty value (0) is persisted as null. No required marker, no validation.
+export function HeadsPerPlantField({
+  formData,
+  setFormData,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="avgHeadsPerPlant" className="text-sm font-medium">
+        {h?.avgHeadsPerPlant ?? 'Avg Heads per Plant'}
+      </Label>
+      <DecimalInput
+        id="avgHeadsPerPlant"
+        value={formData.avgHeadsPerPlant}
+        onChange={(v) => setFormData((prev) => ({ ...prev, avgHeadsPerPlant: v }))}
+        disabled={disabled}
+        className="h-10"
+      />
+    </div>
+  );
+}
+
 // Yield input mode toggle (weight vs crate), fixed at batch creation. In crate
 // mode it reveals the per-batch crate-weight input; harvests for this batch then
 // open in crate layout and derive kg from this weight.

@@ -23,6 +23,7 @@ const BATCH_FIELDS = gql`
     cultivationArea
     totalPlants
     replicates
+    avgHeadsPerPlant
     inputMode
     crateWeight
     createdAt

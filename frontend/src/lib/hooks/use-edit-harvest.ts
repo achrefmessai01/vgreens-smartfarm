@@ -26,6 +26,7 @@ const EMPTY_FORM: BatchFormData = {
   totalPlants: 0,
   lostPlants: 0,
   replicates: 1,
+  avgHeadsPerPlant: 0,
   inputMode: InputMode.Weight,
   crateWeight: 0,
 };
@@ -56,6 +57,7 @@ function batchToFormData(batch: BatchItem): BatchFormData {
     totalPlants: batch.totalPlants ?? 0,
     lostPlants: batch.lostPlants ?? 0,
     replicates: batch.replicates ?? 1,
+    avgHeadsPerPlant: batch.avgHeadsPerPlant ?? 0,
     inputMode: batch.inputMode ?? InputMode.Weight,
     crateWeight: batch.crateWeight ?? 0,
   };
@@ -137,6 +139,9 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
               replicates: formData.replicates,
+              // Tomato-only, never required: 0 means unset → persist null (so
+              // clearing the field, or a non-tomato batch, stores null).
+              avgHeadsPerPlant: formData.avgHeadsPerPlant || null,
               // inputMode is fixed at creation (the backend ignores it on
               // update); crateWeight stays editable for crate batches and its
               // change propagates to every crate-mode entry's derived yield.
