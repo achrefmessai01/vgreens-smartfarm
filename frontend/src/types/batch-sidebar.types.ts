@@ -105,10 +105,13 @@ export interface BatchDetailsData {
   // Replicate samples configured on the batch; drives how many entry cards a
   // fresh harvest starts with. Always at least 1.
   replicates: number;
-  // Yield input mode (fixed at creation) and the per-batch crate weight (kg).
-  // crateWeight is null in weight mode. Drive which form layout renders and how
-  // crate-mode totals are derived.
+  // Yield input mode (fixed at creation). Drives which form layout renders.
   inputMode: InputMode;
+  // The crate selected for this harvest (crate mode only). crateId is the chosen
+  // crate's id (null until picked / in weight mode); crateWeight mirrors that
+  // crate's weight (kg) so the existing kg derivation reads it unchanged. In
+  // weight mode both are null. Selecting a crate sets both together.
+  crateId: string | null;
   crateWeight: number | null;
   plantingDate: string;
   // Repeatable sub-entries; always at least one. Photos and the harvest date

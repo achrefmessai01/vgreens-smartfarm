@@ -28,7 +28,6 @@ const INITIAL_FORM_DATA: BatchFormData = {
   replicates: 1,
   avgHeadsPerPlant: 0,
   inputMode: InputMode.Weight,
-  crateWeight: 0,
 };
 
 function computeRowSpacing(data: BatchFormData): number {
@@ -54,11 +53,6 @@ function validateBatchForm(data: BatchFormData): BatchFormErrors {
     errors.plantsPerMeter = 'Plants per meter must be greater than 0';
   if (!data.replicates || data.replicates < 1)
     errors.replicates = 'Replicates must be at least 1';
-  if (
-    data.inputMode === InputMode.Crate &&
-    (!data.crateWeight || data.crateWeight <= 0)
-  )
-    errors.crateWeight = 'Crate weight must be greater than 0';
   validateRowRange(data, errors);
   return errors;
 }
@@ -128,11 +122,9 @@ export function useCreateBatchForm({
               replicates: formData.replicates,
               // Tomato-only, never required: 0 means unset → store null.
               avgHeadsPerPlant: formData.avgHeadsPerPlant || undefined,
+              // crateWeight is no longer set on the batch — crate weight is
+              // chosen per-harvest from the tenant's crates.
               inputMode: formData.inputMode,
-              crateWeight:
-                formData.inputMode === InputMode.Crate
-                  ? formData.crateWeight
-                  : undefined,
               status: BatchStatus.Active,
             },
           },

@@ -52,20 +52,19 @@ export class BatchService extends BaseService<Batch> {
     return cultivationArea / denominator;
   }
 
-  // Resolve and validate a batch's crate config. Crate mode demands a positive
-  // crateWeight; weight mode never carries one. Throws a BadRequest the client
-  // can surface rather than a 500.
+  /**
+   * Resolve a batch's crate config. Crate weight now lives per-harvest on the
+   * selected crate, so crate-mode batches no longer require a `crateWeight` —
+   * only the input mode is fixed here. The deprecated column is still accepted
+   * for backward compatibility but defaults to null; weight mode never carries
+   * one.
+   */
   private resolveCrateConfig(
     inputMode: InputMode,
     crateWeight: number | null | undefined,
   ): { inputMode: InputMode; crateWeight: number | null } {
     if (inputMode === InputMode.CRATE) {
-      if (crateWeight == null || crateWeight <= 0) {
-        throw new BadRequestException(
-          'crateWeight must be greater than 0 for a crate-mode batch',
-        );
-      }
-      return { inputMode, crateWeight };
+      return { inputMode, crateWeight: crateWeight ?? null };
     }
     return { inputMode: InputMode.WEIGHT, crateWeight: null };
   }

@@ -24,6 +24,7 @@ import { entryHasData } from '@/types/batch-sidebar.types';
 import { FieldMessage } from '@/components/harvest/field-message';
 import { isTomatoSpecies } from '@/lib/harvest-utils';
 import { HarvestEntryCard } from './fields/harvest-entry-card';
+import { CrateSelectField } from './fields/crate-select-field';
 
 export interface BatchSidebarProps {
   open: boolean;
@@ -69,6 +70,9 @@ export function BatchSidebar({
     harvesterHeadCount,
     setHarvesterHeadCount,
     timingErrors,
+    isCrateMode,
+    crateError,
+    handleCrateSelect,
     confirmedWasteEntries,
     setWasteConfirmed,
     handleBrixChange,
@@ -262,6 +266,20 @@ export function BatchSidebar({
                     </FieldMessage>
                   </div>
                 </div>
+
+                {/* Crate selector: crate-mode only, between the harvesters
+                    fields above and the entries it drives below. Required —
+                    crate-mode kg derive from the chosen crate's weight. */}
+                {isCrateMode && (
+                  <div className="bg-card rounded-xl border p-3 shadow-sm">
+                    <CrateSelectField
+                      value={currentData.crateId}
+                      onSelect={handleCrateSelect}
+                      error={crateError}
+                      disabled={busy}
+                    />
+                  </div>
+                )}
 
                 {currentData.entries.map((entry, index) => (
                   <HarvestEntryCard

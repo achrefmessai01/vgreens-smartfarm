@@ -14,6 +14,7 @@ import { TenantsModule } from '../tenants/tenants.module';
 import { AuthGuard, ClerkAuthGuard } from '@common/guards';
 import { HarvestsModule } from '../harvest/harvests.module';
 import { BatchModule } from '../batch/batch.module';
+import { CrateModule } from '../crate/crate.module';
 import { CropModule } from '../crop/crop.module';
 import { VarietyModule } from '../variety/variety.module';
 import { GreenhouseModule } from '../greenhouse/greenhouse.module';
@@ -56,6 +57,7 @@ import {
     VarietyModule,
     GreenhouseCropModule,
     BatchModule,
+    CrateModule,
     HarvestsModule,
     InfluxDBModule,
     FilesModule,

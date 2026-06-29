@@ -16,6 +16,11 @@ const HARVEST_MUTATION_FIELDS = gql`
     photoUrls
     createdAt
     updatedAt
+    crateId
+    crate {
+      id
+      weight
+    }
     batch {
       id
       name

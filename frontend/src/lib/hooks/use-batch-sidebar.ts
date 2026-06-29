@@ -202,6 +202,23 @@ export function useBatchSidebar({
     });
   }, [currentData, confirmedWasteEntries]);
 
+  // Crate selection is shown and required only in crate mode; block the save
+  // until a crate is chosen since the kg derivation depends on it.
+  const isCrateMode = currentData?.inputMode === InputMode.Crate;
+  const crateMissing = Boolean(isCrateMode) && !currentData?.crateId;
+  const crateError = crateMissing ? 'Select a crate to continue' : undefined;
+
+  // Store the selected crate's id and mirror its weight onto crateWeight so the
+  // existing crate-mode kg derivation reads it unchanged.
+  const handleCrateSelect = React.useCallback(
+    (crateId: string, weight: number) => {
+      setLocalData((prev) =>
+        prev ? { ...prev, crateId, crateWeight: weight } : prev,
+      );
+    },
+    [],
+  );
+
   const handleBrixChange = React.useCallback(
     (entryIndex: number, readingIndex: number, value: number) => {
       updateEntry(entryIndex, (entry) => {
@@ -410,9 +427,10 @@ export function useBatchSidebar({
 
   const handleSave = React.useCallback(async () => {
     if (!currentData) return;
-    // Don't submit while the harvest-level timing/labor fields are invalid, or
-    // while an entry's waste exceeds its quality yield without acknowledgement.
-    if (hasTimingErrors || hasUnconfirmedWasteWarning) return;
+    // Don't submit while the harvest-level timing/labor fields are invalid,
+    // while an entry's waste exceeds its quality yield without acknowledgement,
+    // or while a crate-mode harvest has no crate selected.
+    if (hasTimingErrors || hasUnconfirmedWasteWarning || crateMissing) return;
 
     // Map each sub-entry to the GraphQL input shape. Brix readings and the fruit
     // weight sample only count when their section is expanded. In weight mode the
@@ -485,12 +503,16 @@ export function useBatchSidebar({
       harvesterHeadCount: trimmedHead === '' ? null : Number(trimmedHead),
     };
     try {
+      // Crate-mode harvests carry the selected crate; weight mode sends null so
+      // the backend leaves crateId unset (and ignores it for weight batches).
+      const crateId = isCrate ? currentData.crateId : null;
       if (mode === 'create') {
         if (!batchId) return;
         await createHarvest({
           variables: {
             input: {
               batchId,
+              crateId,
               date: isoDate,
               ...timingInput,
               photoUrls: currentData.photos,
@@ -505,6 +527,7 @@ export function useBatchSidebar({
           variables: {
             id: harvestId,
             input: {
+              crateId,
               date: isoDate,
               ...timingInput,
               photoUrls: currentData.photos,
@@ -529,6 +552,7 @@ export function useBatchSidebar({
     harvesterHeadCount,
     hasTimingErrors,
     hasUnconfirmedWasteWarning,
+    crateMissing,
     updateHarvest,
     createHarvest,
     onCompleted,
@@ -537,7 +561,8 @@ export function useBatchSidebar({
   const canSave =
     (mode === 'create' ? Boolean(batchId) : Boolean(harvestId)) &&
     !hasTimingErrors &&
-    !hasUnconfirmedWasteWarning;
+    !hasUnconfirmedWasteWarning &&
+    !crateMissing;
 
   return {
     currentData,
@@ -553,6 +578,9 @@ export function useBatchSidebar({
     harvesterHeadCount,
     setHarvesterHeadCount,
     timingErrors,
+    isCrateMode: Boolean(isCrateMode),
+    crateError,
+    handleCrateSelect,
     confirmedWasteEntries,
     setWasteConfirmed,
     handleBrixChange,
