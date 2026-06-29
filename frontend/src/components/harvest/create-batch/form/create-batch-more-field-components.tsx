@@ -462,10 +462,12 @@ export function HeadsPerPlantField({
   );
 }
 
-// Yield input mode toggle (weight vs crate), fixed at batch creation. It only
-// sets the mode (which drives the harvest layout: crate counts vs direct kg).
-// The crate WEIGHT is no longer a batch field — it's chosen per-harvest from the
-// tenant's crates when logging a crate-mode harvest.
+/**
+ * Yield input mode toggle (weight vs crate), fixed at batch creation. Sets only
+ * the mode, which drives the harvest layout (crate counts vs direct kg) — the
+ * crate WEIGHT is no longer a batch field; it's chosen per-harvest from the
+ * tenant's crates.
+ */
 export function InputModeField({
   formData,
   setFormData,

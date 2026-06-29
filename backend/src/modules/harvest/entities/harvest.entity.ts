@@ -54,11 +54,12 @@ export class Harvest {
   @JoinColumn({ name: 'batchId' })
   batch?: Batch;
 
-  // The crate this harvest was recorded with, for crate-mode batches. Supersedes
-  // the live read off batch.crateWeight: crate-mode weight derivation reads the
-  // crate's weight, so a harvest is pinned to the crate size it was logged with.
-  // Null for weight-mode harvests (and any legacy crate harvest not yet
-  // repointed). onDelete RESTRICT can't fire — crates are only ever soft-deleted.
+  /**
+   * The crate this harvest was logged with (crate-mode only). Its weight drives
+   * crate-mode kg derivation, superseding `batch.crateWeight`, so a harvest is
+   * pinned to the crate size it was recorded with. Null for weight-mode
+   * harvests. RESTRICT is safe — crates are only ever soft-deleted.
+   */
   @Field(() => ID, { nullable: true })
   @Column({ type: 'uuid', nullable: true })
   crateId?: string | null;

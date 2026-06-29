@@ -52,11 +52,13 @@ export class BatchService extends BaseService<Batch> {
     return cultivationArea / denominator;
   }
 
-  // Resolve a batch's crate config. Crate weight now lives per-harvest on the
-  // selected crate (see the crates table), NOT on the batch, so crate-mode
-  // batches no longer require or expect a crateWeight — only the input mode is
-  // fixed here. The deprecated column is still accepted for backward
-  // compatibility but defaults to null; weight mode never carries one.
+  /**
+   * Resolve a batch's crate config. Crate weight now lives per-harvest on the
+   * selected crate, so crate-mode batches no longer require a `crateWeight` —
+   * only the input mode is fixed here. The deprecated column is still accepted
+   * for backward compatibility but defaults to null; weight mode never carries
+   * one.
+   */
   private resolveCrateConfig(
     inputMode: InputMode,
     crateWeight: number | null | undefined,

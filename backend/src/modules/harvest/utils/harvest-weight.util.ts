@@ -38,9 +38,11 @@ export function sumCrateWeights(
   return total;
 }
 
-// The crate weight to derive crate-mode kg from. Prefers the explicitly resolved
-// value (the harvest's selected crate); falls back to the legacy batch.crateWeight
-// so callers that don't yet pass a crate weight behave exactly as before.
+/**
+ * Crate weight to derive crate-mode kg from. Prefers the explicitly passed value
+ * (the harvest's selected crate) and falls back to the legacy `batch.crateWeight`
+ * so callers that pass nothing behave as before.
+ */
 function resolveCrateWeight(
   batch?: Batch | null,
   crateWeight?: number | null,
@@ -50,8 +52,7 @@ function resolveCrateWeight(
 
 // One entry resolved to its per-class sellable kg array (waste excluded), in
 // either mode. The single source of the per-class breakdown; class totals are
-// built by summing these element-wise across entries. crateWeight overrides the
-// batch's legacy crateWeight (the harvest's selected crate drives derivation).
+// built by summing these element-wise across entries.
 export function entryClassWeights(
   e: HarvestEntry,
   batch?: Batch | null,

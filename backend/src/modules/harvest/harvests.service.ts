@@ -60,16 +60,20 @@ export class HarvestsService {
       .leftJoinAndSelect(`${alias}.createdBy`, 'createdBy');
   }
 
-  // The crate weight to derive a harvest's crate-mode kg from: the harvest's
-  // selected crate, falling back to the legacy batch.crateWeight for any
-  // crate-mode harvest logged before crates existed and not yet repointed.
+  /**
+   * Crate weight a harvest derives its crate-mode kg from: its selected crate,
+   * falling back to the legacy `batch.crateWeight` for crate-mode harvests not
+   * yet repointed.
+   */
   private harvestCrateWeight(harvest: Harvest): number | null {
     return harvest.crate?.weight ?? harvest.batch?.crateWeight ?? null;
   }
 
-  // Resolve + validate the crate for a harvest against its batch. Weight-mode
-  // batches never carry a crate (returns null). Crate-mode batches require one,
-  // and it must belong to the caller's tenant.
+  /**
+   * Resolve and validate a harvest's crate against its batch. Weight-mode
+   * batches carry none (returns null); crate-mode batches require a crate that
+   * belongs to the caller's tenant.
+   */
   private async resolveCrate(
     crateId: string | null | undefined,
     batch: Batch,
@@ -300,7 +304,11 @@ export class HarvestsService {
     const harvests = await this.findAllFiltered(tenantId, filter);
     // Populate the resolved totals so the CSV serializer can read them.
     for (const h of harvests) {
-      h.totals = this.computeTotals(h.entries, h.batch, this.harvestCrateWeight(h));
+      h.totals = this.computeTotals(
+        h.entries,
+        h.batch,
+        this.harvestCrateWeight(h),
+      );
     }
     return harvests;
   }
@@ -336,8 +344,6 @@ export class HarvestsService {
         input.batchId,
         tenantId,
       );
-      // Crate-mode harvests must reference a tenant-owned crate; weight-mode
-      // harvests carry none. Its weight drives the crate-mode kg derivation.
       const crate = await this.resolveCrate(input.crateId, batch, tenantId);
       (input.entries ?? []).forEach((e) => {
         this.validateRowSegments(e);
@@ -395,18 +401,16 @@ export class HarvestsService {
       if (input.photoUrls !== undefined) harvest.photoUrls = input.photoUrls;
 
       // Re-resolve the crate against the merged state: an explicit crateId
-      // reassigns it, otherwise the stored crate is kept. Validated against the
-      // (possibly reassigned) batch's mode; its weight feeds entry derivation.
+      // reassigns it, otherwise the stored crate is kept.
       let crateWeight: number | null = null;
       if (batch) {
         const nextCrateId =
           input.crateId !== undefined ? input.crateId : harvest.crateId;
         const crate = await this.resolveCrate(nextCrateId, batch, tenantId);
         harvest.crateId = crate?.id ?? null;
-        // The harvest was loaded with its (old) `crate` relation; TypeORM uses a
-        // loaded relation object to compute the FK on save, which would override
-        // the scalar crateId above with the stale value. Keep the relation in
-        // sync so the reassignment actually persists.
+        // Keep the loaded relation in sync: TypeORM derives the FK from the
+        // relation object on save, which would otherwise override crateId with
+        // the stale value and silently drop the reassignment.
         harvest.crate = crate;
         crateWeight = crate?.weight ?? null;
       }

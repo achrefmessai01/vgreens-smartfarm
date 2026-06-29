@@ -113,12 +113,15 @@ export class Batch {
   })
   inputMode: InputMode;
 
-  // DEPRECATED: superseded by the tenant-scoped `crates` table + a per-harvest
-  // `crateId`. Crate-mode harvests now derive kg from their selected crate's
-  // weight, not this column. Kept (still populated on batch create/update) so
-  // the crates migration stays fully reversible and nothing reading it breaks
-  // mid-rollout; drop it in a follow-up migration once no reader remains.
-  // Weight of one crate (kg) for crate-mode batches; null for weight-mode.
+  /**
+   * Weight of one crate (kg) for crate-mode batches; null for weight-mode.
+   *
+   * @deprecated Superseded by the tenant-scoped `crates` table + a per-harvest
+   * `crateId`. Crate-mode harvests now derive kg from their selected crate's
+   * weight, not this column. New batches no longer set it (it stays null); the
+   * column is kept so the crates migration is reversible and legacy values
+   * survive as a read fallback. Drop it once no reader remains.
+   */
   @Field(() => Float, {
     nullable: true,
     deprecationReason:

@@ -202,17 +202,14 @@ export function useBatchSidebar({
     });
   }, [currentData, confirmedWasteEntries]);
 
-  // The crate dropdown is shown and required only in crate mode (it's where a
-  // crate weight ever applied). Crate-mode harvest kg derivation depends on the
-  // selection, so block the save until a crate is chosen.
+  // Crate selection is shown and required only in crate mode; block the save
+  // until a crate is chosen since the kg derivation depends on it.
   const isCrateMode = currentData?.inputMode === InputMode.Crate;
   const crateMissing = Boolean(isCrateMode) && !currentData?.crateId;
-  const crateError = crateMissing
-    ? 'Select a crate to continue'
-    : undefined;
+  const crateError = crateMissing ? 'Select a crate to continue' : undefined;
 
-  // Pick a crate for the harvest: store its id and mirror its weight onto
-  // crateWeight so the existing crate-mode kg derivation reads it unchanged.
+  // Store the selected crate's id and mirror its weight onto crateWeight so the
+  // existing crate-mode kg derivation reads it unchanged.
   const handleCrateSelect = React.useCallback(
     (crateId: string, weight: number) => {
       setLocalData((prev) =>

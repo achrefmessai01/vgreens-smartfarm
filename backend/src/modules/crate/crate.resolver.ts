@@ -9,10 +9,12 @@ import { Crate } from './entities/crate.entity';
 import { CrateService } from './crate.service';
 import { CreateCrateInput } from './dto';
 
-// Crates are TENANT-SCOPED reference data: every query filters by the caller's
-// tenant so a tenant can never see another tenant's crates. Both read and
-// create are open to all authenticated roles because harvesters add a crate
-// inline from the dropdown while logging a harvest.
+/**
+ * Tenant-scoped crate API for the harvest sidebar's crate dropdown. Every query
+ * filters by the caller's tenant so a tenant can never see another's crates.
+ * Reads and create are open to all authenticated roles because harvesters add a
+ * crate inline while logging a harvest.
+ */
 @UseGuards(ClerkAuthGuard, RolesGuard)
 @UseInterceptors(UserInterceptor, TenantInterceptor)
 @Resolver(() => Crate)
@@ -33,8 +35,6 @@ export class CrateResolver {
     return this.crateService.findAllScoped(this.resolveTenantId(currentUser));
   }
 
-  // Adds a crate from the harvest sidebar's crate dropdown. tenantId/createdById
-  // come from the authenticated caller, never the client.
   @Mutation(() => Crate)
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
   async createCrate(

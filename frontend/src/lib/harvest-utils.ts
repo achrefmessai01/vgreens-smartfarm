@@ -412,10 +412,12 @@ function daysSince(plantingDate: string): number {
   return Math.max(0, Math.floor((Date.now() - planted.getTime()) / 86_400_000));
 }
 
-// Build the sidebar's batch-details view-model from a batch's planting fields.
-// The crate (crate-mode only) comes from the harvest, not the batch: crateId is
-// the selected crate and crateWeight mirrors its weight for kg derivation. A
-// fresh harvest passes none, so the user must pick a crate before saving.
+/**
+ * Build the sidebar's batch-details view-model from a batch's planting fields.
+ * The crate (crate-mode only) comes from the harvest, not the batch: `crateId`
+ * is the selected crate and `crateWeight` mirrors its weight for kg derivation.
+ * A fresh harvest passes none, so the user must pick a crate before saving.
+ */
 function batchToDetails(
   batch: BatchLike,
   entries: HarvestEntryData[],

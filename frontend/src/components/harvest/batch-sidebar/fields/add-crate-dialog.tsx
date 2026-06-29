@@ -26,11 +26,12 @@ interface AddCrateDialogProps {
   onCreated: (crate: CreateCrateMutation['createCrate']) => void;
 }
 
-// Minimal dialog for adding a new crate from the harvest sidebar's crate
-// dropdown. Crates are tenant-scoped; the backend stamps tenantId/createdById
-// from the caller and returns an existing same-weight crate idempotently. New
-// i18n keys use optional chaining + English fallbacks while translations roll
-// out across locales.
+/**
+ * Dialog for adding a crate inline from the harvest sidebar's crate dropdown.
+ * The backend stamps tenantId/createdById and returns an existing same-weight
+ * crate idempotently. New i18n keys use English fallbacks while translations
+ * roll out across locales.
+ */
 export function AddCrateDialog({
   open,
   onOpenChange,

@@ -1,9 +1,9 @@
 import { gql } from '@apollo/client';
 
-// Crates are tenant-scoped: the backend filters by the caller's tenant, so this
-// takes no arguments and only ever returns the current tenant's crates. Lightest
-// first (the backend orders by weight asc). Drives the harvest sidebar's crate
-// dropdown in crate mode.
+/**
+ * Current tenant's crates (the backend scopes by caller, lightest first), source
+ * for the harvest sidebar's crate dropdown. Takes no arguments.
+ */
 export const CRATES_QUERY = gql`
   query Crates {
     crates {

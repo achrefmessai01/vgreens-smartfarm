@@ -22,11 +22,12 @@ interface CrateSelectFieldProps {
   disabled?: boolean;
 }
 
-// Crate selector for crate-mode harvests. Lists the current tenant's crates
-// (the backend scopes the query by tenant) as "<weight> kg" options, and ends
-// with a "+ Add new crate..." sentinel that opens AddCrateDialog so users can
-// add a missing crate inline. Selection is required — the parent blocks save
-// until a crate is chosen.
+/**
+ * Crate selector for crate-mode harvests. Lists the current tenant's crates as
+ * "<weight> kg" options and ends with a "+ Add new crate..." sentinel that opens
+ * {@link AddCrateDialog}. Selection is required — the parent blocks save until a
+ * crate is chosen.
+ */
 export function CrateSelectField({
   value,
   onSelect,
