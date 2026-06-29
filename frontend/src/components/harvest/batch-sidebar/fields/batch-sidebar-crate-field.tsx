@@ -12,6 +12,7 @@ import {
   crateClassKg,
   crateEntryTotalKg,
 } from '@/lib/harvest-utils';
+import { FieldMessage } from '@/components/harvest/field-message';
 import { WasteWarning } from './batch-sidebar-waste-warning';
 
 export function CrateYieldField({
@@ -132,7 +133,9 @@ export function CrateYieldField({
                 </div>
               </div>
               {overRemainder && (
-                <p className="text-xs text-amber-600">{remainderWarning}</p>
+                <FieldMessage variant="warning" size="xs">
+                  {remainderWarning}
+                </FieldMessage>
               )}
             </div>
           );

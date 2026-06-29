@@ -5,6 +5,7 @@ import { useI18n } from '@/i18n';
 import { Label } from '@/components/ui/label';
 import { useGreenhousesQuery, useCropsQuery } from '@/generated/graphql';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { FieldMessage } from '@/components/harvest/field-message';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 interface FormFieldProps {
@@ -65,9 +66,7 @@ export function GreenhouseField({
           </option>
         ))}
       </select>
-      {errors.sourceGreenhouse && (
-        <p className="text-destructive text-sm">{errors.sourceGreenhouse}</p>
-      )}
+      <FieldMessage>{errors.sourceGreenhouse}</FieldMessage>
     </div>
   );
 }
@@ -121,9 +120,7 @@ export function CropField({
           </option>
         ))}
       </select>
-      {errors.cropId && (
-        <p className="text-destructive text-sm">{errors.cropId}</p>
-      )}
+      <FieldMessage>{errors.cropId}</FieldMessage>
     </div>
   );
 }
