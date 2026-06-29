@@ -8,6 +8,7 @@ import {
   JoinColumn,
   UpdateDateColumn,
   CreateDateColumn,
+  DeleteDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserStatus } from '@/common/enums/user-status.enum';
@@ -119,4 +120,7 @@ export class User extends BaseEntity {
   @Field(() => Date)
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt?: Date | null;
 }

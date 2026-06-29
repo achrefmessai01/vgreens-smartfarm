@@ -5,7 +5,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { BaseService } from '@common/services';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -245,9 +245,22 @@ export class UsersService extends BaseService<User> {
 
   async findAllByTenant(tenantId: string): Promise<User[]> {
     return this.userRepository.find({
-      where: { tenantId },
+      where: { tenantId, role: Not(UserRole.VGREENS_ADMIN) },
       relations: ['tenant'],
       order: { createdAt: OrderDirection.DESC },
+    });
+  }
+
+  async findOne(id: string, tenantId?: string): Promise<User | null> {
+    if (tenantId === undefined) {
+      return this.userRepository.findOne({
+        where: { id },
+        relations: ['tenant'],
+      });
+    }
+    return this.userRepository.findOne({
+      where: { id, tenantId, role: Not(UserRole.VGREENS_ADMIN) },
+      relations: ['tenant'],
     });
   }
 
@@ -255,6 +268,18 @@ export class UsersService extends BaseService<User> {
     return this.userRepository.find({
       where: { role: UserRole.VGREENS_ADMIN },
       relations: ['tenant'],
+    });
+  }
+
+  async delete(id: string, tenantId?: string): Promise<void> {
+    if (tenantId === undefined) {
+      await this.userRepository.softDelete(id);
+      return;
+    }
+    await this.userRepository.softDelete({
+      id,
+      tenantId,
+      role: Not(UserRole.VGREENS_ADMIN),
     });
   }
 
