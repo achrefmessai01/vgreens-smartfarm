@@ -2,6 +2,8 @@
 
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 import * as React from 'react';
+import { useCropsQuery } from '@/generated/graphql';
+import { isTomatoSpecies } from '@/lib/harvest-utils';
 import {
   GreenhouseField,
   CropField,
@@ -9,6 +11,7 @@ import {
 import {
   CultivationAreaField,
   EndRowField,
+  HeadsPerPlantField,
   InputModeField,
   LostPlantsField,
   NumberOfRowsField,
@@ -37,6 +40,16 @@ export function CreateBatchFormFields({
   disabled = false,
   lockMode = false,
 }: CreateBatchFormFieldsProps) {
+  // Resolve the selected crop's name (from the same greenhouse-scoped crop list
+  // the CropField uses) to decide whether to surface the tomato-only
+  // heads-per-plant field.
+  const { data: cropsData } = useCropsQuery({
+    variables: { greenhouseId: formData.sourceGreenhouse || undefined },
+    skip: !formData.sourceGreenhouse,
+  });
+  const selectedCrop = cropsData?.crops?.find((c) => c.id === formData.cropId);
+  const isTomato = isTomatoSpecies(selectedCrop?.name);
+
   return (
     <div className="space-y-4">
       <GreenhouseField
@@ -130,6 +143,18 @@ export function CreateBatchFormFields({
           disabled={disabled}
         />
       </div>
+      {/* Tomato-only metadata: average number of heads per plant. Hidden for
+          all other crops; optional even for tomatoes. */}
+      {isTomato && (
+        <div className="grid grid-cols-2 gap-4">
+          <HeadsPerPlantField
+            formData={formData}
+            setFormData={setFormData}
+            errors={errors}
+            disabled={disabled}
+          />
+        </div>
+      )}
       <InputModeField
         formData={formData}
         setFormData={setFormData}

@@ -732,6 +732,7 @@ export const tr = {
       totalPlants: 'Toplam Bitki',
       lostPlants: 'Kaybedilen Bitki',
       replicates: 'Tekrarlar',
+      headsPerPlant: 'Bitki başına baş sayısı',
       rowX: 'X sırası',
       rowY: 'Y sırası',
       enterRowX: 'Başlangıç sırası',

@@ -21,6 +21,9 @@ export interface BatchFormData {
   lostPlants: number;
   // Replicate samples per harvest; at least 1.
   replicates: number;
+  // Average number of heads per plant. Tomato-only, optional metadata; 0 means
+  // "unset" (the form's empty convention) and is persisted as null.
+  headsPerPlant: number;
   // Yield input mode, fixed at creation. Crate mode requires a positive
   // crateWeight (kg per crate); in weight mode crateWeight is ignored.
   inputMode: InputMode;
