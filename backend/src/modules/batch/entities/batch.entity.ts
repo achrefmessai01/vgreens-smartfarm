@@ -215,6 +215,20 @@ export class Batch {
   @Column({ type: 'double precision', nullable: true })
   avgHeadsPerPlant?: number | null;
 
+  // Length of a slab ("Matte"/slab), in cm. Tomato-only, user-entered metadata
+  // with no derivation. Nullable: never required (left null for non-tomato crops
+  // and for tomato batches where the grower omits it).
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  slabLength?: number | null;
+
+  // Number of heads grown on a single slab. Tomato-only, user-entered metadata
+  // with no derivation. Nullable: never required (left null for non-tomato crops
+  // and for tomato batches where the grower omits it).
+  @Field(() => Int, { nullable: true })
+  @Column({ type: 'integer', nullable: true })
+  headsPerSlab?: number | null;
+
   @Field()
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

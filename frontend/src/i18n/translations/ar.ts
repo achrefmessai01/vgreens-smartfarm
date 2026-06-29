@@ -753,6 +753,8 @@ export const ar = {
       lostPlants: 'النباتات المفقودة',
       replicates: 'التكرارات',
       avgHeadsPerPlant: 'متوسط عدد الرؤوس لكل نبتة',
+      slabLength: 'طول اللوح (سم)',
+      headsPerSlab: 'عدد الرؤوس لكل لوح',
       rowX: 'الصف X',
       rowY: 'الصف Y',
       enterRowX: 'صف البداية',

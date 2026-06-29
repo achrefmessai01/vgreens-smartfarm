@@ -767,6 +767,8 @@ export const it = {
       lostPlants: 'Piante perse',
       replicates: 'Repliche',
       avgHeadsPerPlant: 'Media teste per pianta',
+      slabLength: 'Lunghezza del pannello (cm)',
+      headsPerSlab: 'Teste per pannello',
       rowX: 'Fila X',
       rowY: 'Fila Y',
       enterRowX: 'Fila iniziale',

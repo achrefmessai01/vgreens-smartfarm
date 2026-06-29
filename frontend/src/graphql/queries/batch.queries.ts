@@ -24,6 +24,8 @@ const BATCH_FIELDS = gql`
     totalPlants
     replicates
     avgHeadsPerPlant
+    slabLength
+    headsPerSlab
     inputMode
     crateWeight
     createdAt

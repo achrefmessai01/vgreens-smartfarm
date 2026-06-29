@@ -22,6 +22,8 @@ const BATCH_MUTATION_FIELDS = gql`
     cultivationArea
     totalPlants
     avgHeadsPerPlant
+    slabLength
+    headsPerSlab
     inputMode
     crateWeight
     greenhouse {

@@ -762,6 +762,8 @@ export const pl = {
       lostPlants: 'Utracone rośliny',
       replicates: 'Powtórzenia',
       avgHeadsPerPlant: 'Śr. główek na roślinę',
+      slabLength: 'Długość maty (cm)',
+      headsPerSlab: 'Główki na matę',
       rowX: 'Rząd X',
       rowY: 'Rząd Y',
       enterRowX: 'Rząd początkowy',

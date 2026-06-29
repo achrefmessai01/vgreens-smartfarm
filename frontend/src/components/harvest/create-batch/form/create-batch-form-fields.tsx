@@ -12,6 +12,7 @@ import {
   CultivationAreaField,
   EndRowField,
   HeadsPerPlantField,
+  HeadsPerSlabField,
   InputModeField,
   LostPlantsField,
   NumberOfRowsField,
@@ -19,6 +20,7 @@ import {
   PlantingDateField,
   ReplicatesField,
   RowLengthField,
+  SlabLengthField,
   StartRowField,
   TotalPlantsField,
   VarietyField,
@@ -143,17 +145,34 @@ export function CreateBatchFormFields({
           disabled={disabled}
         />
       </div>
-      {/* Tomato-only metadata: average number of heads per plant. Hidden for
-          all other crops; optional even for tomatoes. */}
+      {/* Tomato-only metadata: average heads per plant, plus slab length and
+          heads per slab. Hidden for all other crops; optional even for
+          tomatoes. */}
       {isTomato && (
-        <div className="grid grid-cols-2 gap-4">
-          <HeadsPerPlantField
-            formData={formData}
-            setFormData={setFormData}
-            errors={errors}
-            disabled={disabled}
-          />
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <HeadsPerPlantField
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+              disabled={disabled}
+            />
+            <SlabLengthField
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+              disabled={disabled}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <HeadsPerSlabField
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+              disabled={disabled}
+            />
+          </div>
+        </>
       )}
       <InputModeField
         formData={formData}

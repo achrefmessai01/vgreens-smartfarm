@@ -753,6 +753,8 @@ export const fr = {
       lostPlants: 'Plantes perdues',
       replicates: 'Répétitions',
       avgHeadsPerPlant: 'Moyenne de têtes par plant',
+      slabLength: 'Longueur du pain (cm)',
+      headsPerSlab: 'Têtes par pain',
       rowX: 'Rang X',
       rowY: 'Rang Y',
       enterRowX: 'Rang de début',

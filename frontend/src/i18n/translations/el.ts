@@ -771,6 +771,8 @@ export const el = {
       lostPlants: 'Χαμένα φυτά',
       replicates: 'Επαναλήψεις',
       avgHeadsPerPlant: 'Μέσος όρος κεφαλών ανά φυτό',
+      slabLength: 'Μήκος πλάκας (cm)',
+      headsPerSlab: 'Κεφαλές ανά πλάκα',
       rowX: 'Σειρά X',
       rowY: 'Σειρά Y',
       enterRowX: 'Σειρά αρχής',
