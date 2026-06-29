@@ -57,13 +57,6 @@ export class HarvestTotals {
   @Field(() => Float, {
     nullable: true,
     description:
-      'totalFruitWeight / batch.rowLength. Null when rowLength is 0/missing. Normalizes by a single row length, NOT the batch total — see yieldPerRunningMeter.',
-  })
-  yieldPerMeter: number | null;
-
-  @Field(() => Float, {
-    nullable: true,
-    description:
       'totalFruitWeight / batch.runningMeter (numberOfRows × rowLength). kg per running metre across all rows of the batch. Null when runningMeter is 0/missing.',
   })
   yieldPerRunningMeter: number | null;

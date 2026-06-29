@@ -5,7 +5,6 @@ import type { HarvestTotals } from '../dto/harvest-totals.dto';
 import type {
   HarvestDashboardMetrics,
   YieldOverTimeData,
-  YieldPerMeterData,
   YieldPerRunningMeterData,
   ClassDistributionData,
   BrixTrendData,
@@ -107,13 +106,6 @@ function lengthTrend(
   return byDay(items)
     .map(([date, day]) => ({ date, ratio: ratioByBatch(day, lengthOf) }))
     .filter((p): p is { date: string; ratio: number } => p.ratio !== null);
-}
-
-function yieldPerMeterTrend(items: HarvestWithTotals[]): YieldPerMeterData[] {
-  return lengthTrend(items, (b) => b.rowLength ?? 0).map(({ date, ratio }) => ({
-    date,
-    yieldPerMeter: ratio,
-  }));
 }
 
 function yieldPerRunningMeterTrend(
@@ -264,7 +256,6 @@ export function buildDashboardMetrics(
       3,
     ),
     yieldPerPlant: ratioByBatch(items, (b) => b.livingPlants),
-    yieldPerMeter: ratioByBatch(items, (b) => b.rowLength ?? 0),
     yieldPerRunningMeter: ratioByBatch(items, (b) => b.runningMeter ?? 0),
     yieldPerSquareMeter: ratioByBatch(items, (b) => b.cultivationArea ?? 0),
     marketablePercent: roundTo(
@@ -282,7 +273,6 @@ export function buildDashboardMetrics(
     criticalAlerts: countCriticalAlerts(items),
     daysActive: daysActive(items),
     yieldOverTime: yieldOverTime(items),
-    yieldPerMeterTrend: yieldPerMeterTrend(items),
     yieldPerRunningMeterTrend: yieldPerRunningMeterTrend(items),
     classDistribution: classDistribution(items),
     brixTrend: brixTrend(items),
@@ -301,7 +291,6 @@ export function emptyDashboardMetrics(): HarvestDashboardMetrics {
     averageBrix: 0,
     averageFruitWeight: 0,
     yieldPerPlant: null,
-    yieldPerMeter: null,
     yieldPerRunningMeter: null,
     yieldPerSquareMeter: null,
     marketablePercent: 0,
@@ -311,7 +300,6 @@ export function emptyDashboardMetrics(): HarvestDashboardMetrics {
     criticalAlerts: 0,
     daysActive: 0,
     yieldOverTime: [],
-    yieldPerMeterTrend: [],
     yieldPerRunningMeterTrend: [],
     classDistribution: [],
     brixTrend: [],

@@ -70,7 +70,6 @@ const HARVEST_MUTATION_FIELDS = gql`
       avgFruitWeight
       avgBrix
       yieldPerPlant
-      yieldPerMeter
       yieldPerRunningMeter
     }
   }

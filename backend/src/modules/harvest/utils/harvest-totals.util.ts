@@ -69,15 +69,13 @@ export function computeHarvestTotals(
         )
       : null;
 
-  // Yields divide by living plants (planted − lost) and the row lengths.
-  // Null-safe: never divide by a zero/missing denominator.
+  // Yields divide by living plants (planted − lost) and the running metres
+  // (numberOfRows × rowLength). Null-safe: never divide by a zero/missing
+  // denominator.
   const livingPlants = batch?.livingPlants ?? 0;
-  const rowLength = batch?.rowLength ?? 0;
   const runningMeter = batch?.runningMeter ?? 0;
   const yieldPerPlant =
     livingPlants > 0 ? roundTo(totalWeight / livingPlants, 3) : null;
-  const yieldPerMeter =
-    rowLength > 0 ? roundTo(totalWeight / rowLength, 3) : null;
   const yieldPerRunningMeter =
     runningMeter > 0 ? roundTo(totalWeight / runningMeter, 3) : null;
 
@@ -90,7 +88,6 @@ export function computeHarvestTotals(
     avgFruitWeight,
     avgBrix,
     yieldPerPlant,
-    yieldPerMeter,
     yieldPerRunningMeter,
   };
 }

@@ -86,26 +86,6 @@ export function DashboardMetricsGrid({
       ),
     },
     {
-      id: DASHBOARD_METRIC_IDS.yieldPerMeter,
-      node: (
-        <MetricCard
-          title={h?.yieldPerMeter ?? 'Yield per Meter'}
-          value={
-            data.yieldPerMeter == null
-              ? '—'
-              : `${data.yieldPerMeter.toFixed(2)} kg/m`
-          }
-          subtitle={
-            data.yieldPerMeter == null
-              ? (h?.yieldPerMeterNoData ?? 'Set Row Length on the batch')
-              : (h?.yieldPerMeterSubtitle ?? 'Sellable kg per row metre')
-          }
-          icon={<Ruler className="h-4 w-4" />}
-          color="default"
-        />
-      ),
-    },
-    {
       id: DASHBOARD_METRIC_IDS.yieldPerPlant,
       node: (
         <MetricCard
@@ -121,6 +101,28 @@ export function DashboardMetricsGrid({
               : (h?.yieldPerPlantSubtitle ?? 'Sellable kg per plant')
           }
           icon={<Sprout className="h-4 w-4" />}
+          color="default"
+        />
+      ),
+    },
+    {
+      id: DASHBOARD_METRIC_IDS.yieldPerRunningMeter,
+      node: (
+        <MetricCard
+          title={h?.yieldPerRunningMeter ?? 'Yield per Running Meter'}
+          value={
+            data.yieldPerRunningMeter == null
+              ? '—'
+              : `${Number(data.yieldPerRunningMeter.toFixed(3))} kg/m`
+          }
+          subtitle={
+            data.yieldPerRunningMeter == null
+              ? (h?.yieldPerRunningMeterNoData ??
+                'Set Row Length and Number of Rows on the batch')
+              : (h?.yieldPerRunningMeterSubtitle ??
+                'Sellable kg per running metre')
+          }
+          icon={<Ruler className="h-4 w-4" />}
           color="default"
         />
       ),

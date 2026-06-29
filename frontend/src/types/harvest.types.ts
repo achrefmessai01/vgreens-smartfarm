@@ -76,7 +76,6 @@ export interface HarvestTotalsLike {
   avgFruitWeight?: number | null;
   avgBrix?: number | null;
   yieldPerPlant?: number | null;
-  yieldPerMeter?: number | null;
   yieldPerRunningMeter?: number | null;
 }
 

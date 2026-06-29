@@ -61,7 +61,7 @@ export function HarvestBatchEntriesTable({
           <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
           <TableHead>{h?.avgFruitWeight ?? 'Avg Fruit Weight'}</TableHead>
           <TableHead>{h?.yieldPerPlantShort ?? 'Yield/Plant'}</TableHead>
-          <TableHead>{h?.yieldPerMeterShort ?? 'Yield/m'}</TableHead>
+          <TableHead>{h?.yieldPerRunningMeterShort ?? 'Yield/m'}</TableHead>
           <TableHead>{h?.createdBy ?? 'Created By'}</TableHead>
           <TableHead className="text-right">
             {h?.actions ?? 'Actions'}
@@ -93,9 +93,9 @@ export function HarvestBatchEntriesTable({
                   : `${totals.yieldPerPlant.toFixed(2)} kg`}
               </TableCell>
               <TableCell>
-                {totals.yieldPerMeter == null
+                {totals.yieldPerRunningMeter == null
                   ? '—'
-                  : `${totals.yieldPerMeter.toFixed(2)} kg/m`}
+                  : `${Number(totals.yieldPerRunningMeter.toFixed(3))} kg/m`}
               </TableCell>
               <TableCell className="max-w-[220px] truncate">
                 {getCreatedByLabel(entry)}
