@@ -27,6 +27,8 @@ const EMPTY_FORM: BatchFormData = {
   lostPlants: 0,
   replicates: 1,
   avgHeadsPerPlant: 0,
+  slabLength: 0,
+  headsPerSlab: 0,
   inputMode: InputMode.Weight,
 };
 
@@ -57,6 +59,8 @@ function batchToFormData(batch: BatchItem): BatchFormData {
     lostPlants: batch.lostPlants ?? 0,
     replicates: batch.replicates ?? 1,
     avgHeadsPerPlant: batch.avgHeadsPerPlant ?? 0,
+    slabLength: batch.slabLength ?? 0,
+    headsPerSlab: batch.headsPerSlab ?? 0,
     inputMode: batch.inputMode ?? InputMode.Weight,
   };
 }
@@ -135,6 +139,8 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               // Tomato-only, never required: 0 means unset → persist null (so
               // clearing the field, or a non-tomato batch, stores null).
               avgHeadsPerPlant: formData.avgHeadsPerPlant || null,
+              slabLength: formData.slabLength || null,
+              headsPerSlab: formData.headsPerSlab || null,
               // inputMode is fixed at creation (the backend ignores it on
               // update). crateWeight is no longer a batch field — crate weight
               // is chosen per-harvest from the tenant's crates.

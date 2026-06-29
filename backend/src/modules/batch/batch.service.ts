@@ -274,6 +274,8 @@ export class BatchService extends BaseService<Batch> {
         totalPlants: this.deriveTotalPlants(input),
         replicates: input.replicates ?? 1,
         avgHeadsPerPlant: input.avgHeadsPerPlant ?? null,
+        slabLength: input.slabLength ?? null,
+        headsPerSlab: input.headsPerSlab ?? null,
         inputMode,
         crateWeight,
       });
@@ -346,6 +348,9 @@ export class BatchService extends BaseService<Batch> {
     if (input.replicates !== undefined) batch.replicates = input.replicates;
     if (input.avgHeadsPerPlant !== undefined)
       batch.avgHeadsPerPlant = input.avgHeadsPerPlant;
+    if (input.slabLength !== undefined) batch.slabLength = input.slabLength;
+    if (input.headsPerSlab !== undefined)
+      batch.headsPerSlab = input.headsPerSlab;
 
     // inputMode is fixed at creation, so it is intentionally not applied here.
     // crateWeight stays editable: a new value re-validates against the batch's

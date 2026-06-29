@@ -766,6 +766,8 @@ export const ro = {
       lostPlants: 'Plante pierdute',
       replicates: 'Repetiții',
       avgHeadsPerPlant: 'Medie capete per plantă',
+      slabLength: 'Lungimea saltelei (cm)',
+      headsPerSlab: 'Capete per saltea',
       rowX: 'Rândul X',
       rowY: 'Rândul Y',
       enterRowX: 'Rând de început',

@@ -27,6 +27,8 @@ const INITIAL_FORM_DATA: BatchFormData = {
   lostPlants: 0,
   replicates: 1,
   avgHeadsPerPlant: 0,
+  slabLength: 0,
+  headsPerSlab: 0,
   inputMode: InputMode.Weight,
 };
 
@@ -122,6 +124,8 @@ export function useCreateBatchForm({
               replicates: formData.replicates,
               // Tomato-only, never required: 0 means unset → store null.
               avgHeadsPerPlant: formData.avgHeadsPerPlant || undefined,
+              slabLength: formData.slabLength || undefined,
+              headsPerSlab: formData.headsPerSlab || undefined,
               // crateWeight is no longer set on the batch — crate weight is
               // chosen per-harvest from the tenant's crates.
               inputMode: formData.inputMode,

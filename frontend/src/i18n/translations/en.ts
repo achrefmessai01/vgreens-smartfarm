@@ -723,6 +723,8 @@ export const en = {
       lostPlants: 'Lost Plants',
       replicates: 'Replicates',
       avgHeadsPerPlant: 'Avg Heads per Plant',
+      slabLength: 'Slab Length (cm)',
+      headsPerSlab: 'Heads per Slab',
       inputMode: 'Yield input mode',
       weightMode: 'Weight (kg)',
       crateMode: 'Crates',

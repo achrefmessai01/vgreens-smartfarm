@@ -462,6 +462,68 @@ export function HeadsPerPlantField({
   );
 }
 
+// Length of a slab (cm). Tomato-only metadata, never required: it's rendered
+// only when the selected crop is a tomato (gated by the parent) and an empty
+// value (0) is persisted as null. No required marker, no validation.
+export function SlabLengthField({
+  formData,
+  setFormData,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="slabLength" className="text-sm font-medium">
+        {h?.slabLength ?? 'Slab Length (cm)'}
+      </Label>
+      <DecimalInput
+        id="slabLength"
+        value={formData.slabLength}
+        onChange={(v) => setFormData((prev) => ({ ...prev, slabLength: v }))}
+        disabled={disabled}
+        className="h-10"
+      />
+    </div>
+  );
+}
+
+// Number of heads per slab. Tomato-only metadata, never required: it's rendered
+// only when the selected crop is a tomato (gated by the parent) and an empty
+// value (0) is persisted as null. Whole-number input; no validation.
+export function HeadsPerSlabField({
+  formData,
+  setFormData,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="headsPerSlab" className="text-sm font-medium">
+        {h?.headsPerSlab ?? 'Heads per Slab'}
+      </Label>
+      <Input
+        id="headsPerSlab"
+        type="number"
+        min="0"
+        step="1"
+        value={formData.headsPerSlab || ''}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            headsPerSlab: Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+          }))
+        }
+        disabled={disabled}
+        className="h-10"
+      />
+    </div>
+  );
+}
+
 /**
  * Yield input mode toggle (weight vs crate), fixed at batch creation. Sets only
  * the mode, which drives the harvest layout (crate counts vs direct kg) — the

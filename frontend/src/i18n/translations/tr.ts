@@ -758,6 +758,8 @@ export const tr = {
       lostPlants: 'Kaybedilen Bitki',
       replicates: 'Tekrarlar',
       avgHeadsPerPlant: 'Bitki başına ort. baş sayısı',
+      slabLength: 'Tabaka uzunluğu (cm)',
+      headsPerSlab: 'Tabaka başına baş sayısı',
       rowX: 'X sırası',
       rowY: 'Y sırası',
       enterRowX: 'Başlangıç sırası',
