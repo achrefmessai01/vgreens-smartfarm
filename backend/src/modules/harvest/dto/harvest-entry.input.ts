@@ -19,17 +19,22 @@ export class HarvestEntryInput {
   @IsOptional()
   id?: string;
 
-  @Field(() => Float, { defaultValue: 0 })
+  // Parallel arrays of harvested row segments: rowX[i] pairs with rowY[i] to
+  // span segment i. Both optional (omitted -> []); the service enforces equal
+  // length and rowX[i] <= rowY[i]. Positive row numbers only.
+  @Field(() => [Float], { nullable: true })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  rowX?: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Min(0, { each: true })
+  rowX?: number[];
 
-  @Field(() => Float, { defaultValue: 0 })
+  @Field(() => [Float], { nullable: true })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  rowY?: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Min(0, { each: true })
+  rowY?: number[];
 
   // Weight mode: positional per-quality sellable kg (index 0=A, 1=B, ...).
   // Dynamic length, not capped. Omitted in crate mode.

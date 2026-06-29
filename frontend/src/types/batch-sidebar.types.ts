@@ -13,8 +13,11 @@ export interface HarvestEntryData {
   crateCounts: number[];
   remainingKgs: number[];
   waste: number;
-  rowX: number;
-  rowY: number;
+  // Parallel arrays of harvested row segments: rowX[i] pairs with rowY[i] to
+  // span segment i (start -> end); the space between consecutive segments is a
+  // gap. Kept equal-length. Empty means no rows recorded (optional section).
+  rowX: number[];
+  rowY: number[];
   brixReadings: number[];
   // Quality grade per Brix reading, index-aligned with brixReadings.
   brixClasses: HarvestQualityClass[];
@@ -34,8 +37,10 @@ export type EntryChange =
   | { kind: 'crateCount'; index: number; value: number }
   | { kind: 'remainingKg'; index: number; value: number }
   | { kind: 'waste'; value: number }
-  | { kind: 'rowX'; value: number }
-  | { kind: 'rowY'; value: number }
+  | { kind: 'rowX'; index: number; value: number }
+  | { kind: 'rowY'; index: number; value: number }
+  | { kind: 'addRowPair' }
+  | { kind: 'removeRowPair'; index: number }
   | { kind: 'addClass' }
   | { kind: 'removeClass'; index: number };
 
@@ -45,8 +50,8 @@ export function entryHasData(entry: HarvestEntryData): boolean {
   return (
     entry.classKgs.some((v) => v > 0) ||
     entry.waste > 0 ||
-    entry.rowX > 0 ||
-    entry.rowY > 0 ||
+    entry.rowX.some((v) => v > 0) ||
+    entry.rowY.some((v) => v > 0) ||
     entry.crateCounts.some((v) => v > 0) ||
     entry.remainingKgs.some((v) => v > 0) ||
     entry.sampleWeight > 0 ||
@@ -62,8 +67,10 @@ export function createEmptyEntry(): HarvestEntryData {
     crateCounts: [0],
     remainingKgs: [0],
     waste: 0,
-    rowX: 0,
-    rowY: 0,
+    // No row segments by default — the row-coordinates section is optional and
+    // seeds its first pair only when opened.
+    rowX: [],
+    rowY: [],
     brixReadings: [0],
     brixClasses: [HarvestQualityClass.A],
     showBrix: false,
@@ -130,8 +137,9 @@ export interface BatchStatsFieldProps {
 export interface YieldDataFieldProps {
   classKgs: number[];
   waste: number;
-  rowX: number;
-  rowY: number;
+  // Parallel arrays of (start, end) row segments, aligned by index.
+  rowX: number[];
+  rowY: number[];
   // The batch's row range (inclusive). null bounds leave the row inputs
   // unconstrained; when set, inputs are limited and out-of-range values warn.
   batchStartRow?: number | null;

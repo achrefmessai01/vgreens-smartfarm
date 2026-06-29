@@ -117,6 +117,29 @@ export class HarvestsService {
     });
   }
 
+  // Structural integrity check for an entry's row segments. rowX[i] pairs with
+  // rowY[i] to span segment i, so the two arrays MUST be equal length and each
+  // segment must run start -> end (rowX[i] <= rowY[i]). Mirrors the batch
+  // service's validateRowRange. Segment ordering / non-overlap across segments
+  // is intentionally NOT enforced here — that is a soft, warn-but-allow check on
+  // the client, consistent with how out-of-range row values are treated.
+  private validateRowSegments(input: HarvestEntryInput): void {
+    const rowX = input.rowX ?? [];
+    const rowY = input.rowY ?? [];
+    if (rowX.length !== rowY.length) {
+      throw new BadRequestException(
+        `rowX and rowY must have the same length (got ${rowX.length} and ${rowY.length})`,
+      );
+    }
+    for (let i = 0; i < rowX.length; i++) {
+      if (rowX[i] > rowY[i]) {
+        throw new BadRequestException(
+          `Row segment ${i + 1}: start (${rowX[i]}) must be less than or equal to end (${rowY[i]})`,
+        );
+      }
+    }
+  }
+
   // Build a persistable entry from input, filling the two derived per-entry
   // fields (avgFruitWeight, avgBrix) — the service is the source of truth for
   // these, never the client.
@@ -136,8 +159,8 @@ export class HarvestsService {
     }));
 
     const common = {
-      rowX: input.rowX ?? 0,
-      rowY: input.rowY ?? 0,
+      rowX: input.rowX ?? [],
+      rowY: input.rowY ?? [],
       waste: input.waste ?? 0,
       // Derived at read (avgFruitWeight from the sample below); stored 0.
       totalFruitWeight: 0,
@@ -276,7 +299,10 @@ export class HarvestsService {
         input.batchId,
         tenantId,
       );
-      (input.entries ?? []).forEach((e) => this.warnCrateRemainder(e, batch));
+      (input.entries ?? []).forEach((e) => {
+        this.validateRowSegments(e);
+        this.warnCrateRemainder(e, batch);
+      });
 
       this.validateTiming(input.startTime, input.stopTime);
 
@@ -353,9 +379,10 @@ export class HarvestsService {
             );
           }
           const resolvedBatch = batch;
-          input.entries.forEach((e) =>
-            this.warnCrateRemainder(e, resolvedBatch),
-          );
+          input.entries.forEach((e) => {
+            this.validateRowSegments(e);
+            this.warnCrateRemainder(e, resolvedBatch);
+          });
           const entries = input.entries.map((e) =>
             this.entryRepository.create({
               ...this.buildEntry(e, resolvedBatch),

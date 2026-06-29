@@ -293,17 +293,38 @@ export function useBatchSidebar({
       // Any change to the quantities feeding the waste/quality comparison
       // invalidates a prior confirmation, so the warning is re-evaluated against
       // the new values. Row coordinates don't affect the comparison.
-      if (change.kind !== 'rowX' && change.kind !== 'rowY') {
+      const rowKinds = ['rowX', 'rowY', 'addRowPair', 'removeRowPair'];
+      if (!rowKinds.includes(change.kind)) {
         setWasteConfirmed(entryIndex, false);
       }
       updateEntry(entryIndex, (entry) => {
         switch (change.kind) {
           case 'waste':
             return { ...entry, waste: change.value };
-          case 'rowX':
-            return { ...entry, rowX: change.value };
-          case 'rowY':
-            return { ...entry, rowY: change.value };
+          case 'rowX': {
+            const rowX = [...entry.rowX];
+            rowX[change.index] = change.value;
+            return { ...entry, rowX };
+          }
+          case 'rowY': {
+            const rowY = [...entry.rowY];
+            rowY[change.index] = change.value;
+            return { ...entry, rowY };
+          }
+          case 'addRowPair':
+            // Grow both arrays together so segment indices stay aligned.
+            return {
+              ...entry,
+              rowX: [...entry.rowX, 0],
+              rowY: [...entry.rowY, 0],
+            };
+          case 'removeRowPair': {
+            // Never drop the last pair (the section always shows >= 1 while open).
+            if (entry.rowX.length <= 1) return entry;
+            const drop = <T>(arr: T[]) =>
+              arr.filter((_, i) => i !== change.index);
+            return { ...entry, rowX: drop(entry.rowX), rowY: drop(entry.rowY) };
+          }
           case 'addClass':
             return {
               ...entry,
@@ -413,10 +434,19 @@ export function useBatchSidebar({
         ? entry.sampleFruitCount
         : null;
 
+      // Drop fully-empty (0,0) segments so opening the row section without
+      // entering anything still persists as []. The kept pairs stay aligned, so
+      // rowX/rowY remain equal-length for the backend's structural check.
+      const keptPairs = entry.rowX
+        .map((x, i) => ({ x, y: entry.rowY[i] ?? 0 }))
+        .filter((p) => p.x > 0 || p.y > 0);
+      const rowX = keptPairs.map((p) => p.x);
+      const rowY = keptPairs.map((p) => p.y);
+
       if (isCrate) {
         return {
-          rowX: entry.rowX,
-          rowY: entry.rowY,
+          rowX,
+          rowY,
           waste: entry.waste,
           crateCounts: entry.crateCounts,
           remainingKgs: entry.remainingKgs,
@@ -427,8 +457,8 @@ export function useBatchSidebar({
       }
 
       return {
-        rowX: entry.rowX,
-        rowY: entry.rowY,
+        rowX,
+        rowY,
         classKgs: entry.classKgs,
         waste: entry.waste,
         sampleWeight,
