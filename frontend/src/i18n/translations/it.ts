@@ -741,7 +741,7 @@ export const it = {
       totalPlants: 'Totale piante',
       lostPlants: 'Piante perse',
       replicates: 'Repliche',
-      avgHeadsPerPlant: 'Teste per pianta',
+      avgHeadsPerPlant: 'Media teste per pianta',
       rowX: 'Fila X',
       rowY: 'Fila Y',
       enterRowX: 'Fila iniziale',

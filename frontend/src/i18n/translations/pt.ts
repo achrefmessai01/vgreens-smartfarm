@@ -739,7 +739,7 @@ export const pt = {
       totalPlants: 'Total de plantas',
       lostPlants: 'Plantas perdidas',
       replicates: 'Réplicas',
-      avgHeadsPerPlant: 'Cabeças por planta',
+      avgHeadsPerPlant: 'Média de cabeças por planta',
       rowX: 'Fila X',
       rowY: 'Fila Y',
       enterRowX: 'Fila inicial',

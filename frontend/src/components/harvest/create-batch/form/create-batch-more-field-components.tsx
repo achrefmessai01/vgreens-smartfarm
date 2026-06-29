@@ -449,7 +449,7 @@ export function HeadsPerPlantField({
   return (
     <div className="space-y-2">
       <Label htmlFor="avgHeadsPerPlant" className="text-sm font-medium">
-        {h?.avgHeadsPerPlant ?? 'Heads per plant'}
+        {h?.avgHeadsPerPlant ?? 'Avg Heads per Plant'}
       </Label>
       <DecimalInput
         id="avgHeadsPerPlant"
