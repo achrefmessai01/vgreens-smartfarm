@@ -27,7 +27,7 @@ export const DASHBOARD_METRIC_IDS = {
   averageBrix: 'averageBrix',
   averageFruitWeight: 'averageFruitWeight',
   yieldPerPlant: 'yieldPerPlant',
-  yieldPerMeter: 'yieldPerMeter',
+  yieldPerRunningMeter: 'yieldPerRunningMeter',
   yieldPerSquareMeter: 'yieldPerSquareMeter',
   qualityPrimary: 'qualityPrimary',
   qualitySecondary: 'qualitySecondary',
@@ -37,7 +37,6 @@ export const DASHBOARD_METRIC_IDS = {
 
 export const DASHBOARD_CHART_IDS = {
   yieldOverTime: 'yieldOverTime',
-  yieldPerMeterTrend: 'yieldPerMeterTrend',
   yieldPerRunningMeterTrend: 'yieldPerRunningMeterTrend',
   classDistribution: 'classDistribution',
   brixTrend: 'brixTrend',
@@ -48,9 +47,13 @@ export const DASHBOARD_CHART_IDS = {
 export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
   // Metrics
   {
+    // The id stays `totalYield` for backwards compatibility with persisted
+    // `Tenant.hiddenHarvestDashboardItems` — never rename it without a
+    // migration — but the displayed tile now shows the marketable kg total
+    // (total yield minus waste), not the gross total.
     id: DASHBOARD_METRIC_IDS.totalYield,
-    labelKey: 'totalYield',
-    fallback: 'Total Yield',
+    labelKey: 'totalMarketableYield',
+    fallback: 'Marketable Yield',
     category: 'metrics',
   },
   {
@@ -72,9 +75,9 @@ export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
     category: 'metrics',
   },
   {
-    id: DASHBOARD_METRIC_IDS.yieldPerMeter,
-    labelKey: 'yieldPerMeter',
-    fallback: 'Yield per Meter',
+    id: DASHBOARD_METRIC_IDS.yieldPerRunningMeter,
+    labelKey: 'yieldPerRunningMeter',
+    fallback: 'Yield per Running Meter',
     category: 'metrics',
   },
   {
@@ -112,12 +115,6 @@ export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
     id: DASHBOARD_CHART_IDS.yieldOverTime,
     labelKey: 'yieldOverTime',
     fallback: 'Yield Over Time',
-    category: 'charts',
-  },
-  {
-    id: DASHBOARD_CHART_IDS.yieldPerMeterTrend,
-    labelKey: 'yieldPerMeterOverTime',
-    fallback: 'Yield per Meter Over Time',
     category: 'charts',
   },
   {

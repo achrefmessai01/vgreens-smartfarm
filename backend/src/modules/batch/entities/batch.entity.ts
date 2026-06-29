@@ -113,10 +113,20 @@ export class Batch {
   })
   inputMode: InputMode;
 
-  // Weight of one crate (kg) for crate-mode batches. Editable; the change
-  // intentionally propagates to every crate-mode entry's derived yield. Null
-  // for weight-mode batches. Never snapshotted onto entries.
-  @Field(() => Float, { nullable: true })
+  /**
+   * Weight of one crate (kg) for crate-mode batches; null for weight-mode.
+   *
+   * @deprecated Superseded by the tenant-scoped `crates` table + a per-harvest
+   * `crateId`. Crate-mode harvests now derive kg from their selected crate's
+   * weight, not this column. New batches no longer set it (it stays null); the
+   * column is kept so the crates migration is reversible and legacy values
+   * survive as a read fallback. Drop it once no reader remains.
+   */
+  @Field(() => Float, {
+    nullable: true,
+    deprecationReason:
+      'Use the crates table + harvest.crateId; crate-mode kg derives from the selected crate.',
+  })
   @Column({ type: 'double precision', nullable: true })
   crateWeight?: number | null;
 
@@ -197,6 +207,27 @@ export class Batch {
   @Field(() => Int)
   @Column({ type: 'int', default: 1 })
   replicates: number;
+
+  // Average number of heads per plant. Tomato-only, user-entered metadata with
+  // no derivation. Nullable: never required (left null for non-tomato crops and
+  // for tomato batches where the grower omits it).
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  avgHeadsPerPlant?: number | null;
+
+  // Length of a slab ("Matte"/slab), in cm. Tomato-only, user-entered metadata
+  // with no derivation. Nullable: never required (left null for non-tomato crops
+  // and for tomato batches where the grower omits it).
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  slabLength?: number | null;
+
+  // Number of heads grown on a single slab. Tomato-only, user-entered metadata
+  // with no derivation. Nullable: never required (left null for non-tomato crops
+  // and for tomato batches where the grower omits it).
+  @Field(() => Int, { nullable: true })
+  @Column({ type: 'integer', nullable: true })
+  headsPerSlab?: number | null;
 
   @Field()
   @CreateDateColumn({ type: 'timestamptz' })

@@ -15,7 +15,7 @@ import { ClassDistributionChart } from './charts/class-distribution-chart';
 import { CumulativeYieldChart } from './charts/cumulative-yield-chart';
 import { FruitWeightTrendChart } from './charts/fruit-weight-trend-chart';
 import { YieldOverTimeChart } from './charts/yield-over-time-chart';
-import { YieldPerMeterChart } from './charts/yield-per-meter-chart';
+import { YieldPerRunningMeterChart } from './charts/yield-per-running-meter-chart';
 
 const COMPARE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 
@@ -93,11 +93,11 @@ export function HarvestDashboardCompare({
     data: loaded[batch.id]?.data?.yieldOverTime ?? [],
   }));
 
-  const yieldPerMeterSeries = selected.map(({ batch, color }) => ({
+  const yieldPerRunningMeterSeries = selected.map(({ batch, color }) => ({
     batchId: batch.id,
     batchName: batch.name,
     color,
-    data: loaded[batch.id]?.data?.yieldPerMeterTrend ?? [],
+    data: loaded[batch.id]?.data?.yieldPerRunningMeterTrend ?? [],
   }));
 
   const brixSeries = selected.map(({ batch, color }) => ({
@@ -276,7 +276,7 @@ export function HarvestDashboardCompare({
 
       <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         <YieldOverTimeChart series={yieldSeries} />
-        <YieldPerMeterChart series={yieldPerMeterSeries} />
+        <YieldPerRunningMeterChart series={yieldPerRunningMeterSeries} />
         <ClassDistributionChart series={classSeries} />
         <BrixTrendChart series={brixSeries} />
         <FruitWeightTrendChart series={fruitWeightSeries} />

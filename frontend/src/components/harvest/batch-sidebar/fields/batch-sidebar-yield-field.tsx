@@ -7,7 +7,13 @@ import { DecimalInput } from '@/components/ui/decimal-input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { YieldDataFieldProps } from '@/types/batch-sidebar.types';
-import { classLetter, isRowOutsideBatchRange } from '@/lib/harvest-utils';
+import {
+  classLetter,
+  isRowOutsideBatchRange,
+  rowSegmentOrderingFlags,
+} from '@/lib/harvest-utils';
+import { FieldMessage } from '@/components/harvest/field-message';
+import { WasteWarning } from './batch-sidebar-waste-warning';
 
 export function YieldDataField({
   classKgs,
@@ -16,11 +22,18 @@ export function YieldDataField({
   rowY,
   batchStartRow,
   batchEndRow,
+  wasteConfirmed,
+  onConfirmWasteChange,
   onChange,
   isLoading = false,
 }: YieldDataFieldProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  // Summed quality yield (kg) across all classes — compared against waste below.
+  const qualityTotalKg = classKgs.reduce(
+    (sum, v) => sum + (Number.isFinite(v) ? v : 0),
+    0,
+  );
   // When the batch defines a row range, flag (without blocking) any value
   // outside it. A null/unset range leaves the inputs unconstrained.
   const outOfRangeText = (
@@ -29,10 +42,17 @@ export function YieldDataField({
     .replace('{start}', String(batchStartRow))
     .replace('{end}', String(batchEndRow));
   const [showRowCoordinates, setShowRowCoordinates] = React.useState(
-    rowX > 0 || rowY > 0,
+    rowX.length > 0 || rowY.length > 0,
   );
   const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
   const canRemove = classKgs.length > 1;
+  // Row segments: at least one pair is always shown while the section is open
+  // (seeded on toggle), and the last pair can't be removed.
+  const canRemovePair = rowX.length > 1;
+  const segmentLabelTpl = h?.rowSegmentLabel ?? 'Segment {n}';
+  const orderingFlags = rowSegmentOrderingFlags(rowX, rowY);
+  const segmentOrderText =
+    h?.rowSegmentsOverlap ?? 'Segments should be ordered and not overlap';
 
   if (isLoading) {
     return (
@@ -53,9 +73,15 @@ export function YieldDataField({
         <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm select-none">
           <Checkbox
             checked={showRowCoordinates}
-            onCheckedChange={(checked) =>
-              setShowRowCoordinates(checked === true)
-            }
+            onCheckedChange={(checked) => {
+              const next = checked === true;
+              setShowRowCoordinates(next);
+              // Opening the section with no segments yet seeds the first pair so
+              // there is always at least one to fill in.
+              if (next && rowX.length === 0) {
+                onChange?.({ kind: 'addRowPair' });
+              }
+            }}
           />
           <span>{h?.showRowCoordinates ?? 'Show row coordinates'}</span>
         </label>
@@ -119,48 +145,92 @@ export function YieldDataField({
               kg
             </span>
           </div>
+          <WasteWarning
+            waste={waste}
+            qualityTotalKg={qualityTotalKg}
+            confirmed={wasteConfirmed}
+            onConfirmChange={onConfirmWasteChange}
+          />
         </div>
 
         {showRowCoordinates && (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 text-left">
-              <p className="text-muted-foreground text-sm">
-                {h?.rowX ?? 'Row X'}
-              </p>
-              <div className="relative">
-                <DecimalInput
-                  value={rowX}
-                  onChange={(v) => onChange?.({ kind: 'rowX', value: v })}
-                  className="h-10 pr-12 text-left text-base"
-                  placeholder={h?.enterRowX ?? 'Start row'}
-                />
-                <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
-                  {h?.rowsUnit ?? 'rows'}
-                </span>
-              </div>
-              {isRowOutsideBatchRange(rowX, batchStartRow, batchEndRow) && (
-                <p className="text-xs text-amber-600">{outOfRangeText}</p>
-              )}
-            </div>
-            <div className="space-y-2 text-left">
-              <p className="text-muted-foreground text-sm">
-                {h?.rowY ?? 'Row Y'}
-              </p>
-              <div className="relative">
-                <DecimalInput
-                  value={rowY}
-                  onChange={(v) => onChange?.({ kind: 'rowY', value: v })}
-                  className="h-10 pr-12 text-left text-base"
-                  placeholder={h?.enterRowY ?? 'End row'}
-                />
-                <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
-                  {h?.rowsUnit ?? 'rows'}
-                </span>
-              </div>
-              {isRowOutsideBatchRange(rowY, batchStartRow, batchEndRow) && (
-                <p className="text-xs text-amber-600">{outOfRangeText}</p>
-              )}
-            </div>
+          <div className="space-y-3">
+            {rowX.map((start, i) => {
+              const end = rowY[i] ?? 0;
+              const outOfRange =
+                isRowOutsideBatchRange(start, batchStartRow, batchEndRow) ||
+                isRowOutsideBatchRange(end, batchStartRow, batchEndRow);
+              return (
+                <div key={i} className="space-y-2 text-left">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-muted-foreground text-sm">
+                      {segmentLabelTpl.replace('{n}', String(i + 1))}
+                    </p>
+                    {canRemovePair && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onChange?.({ kind: 'removeRowPair', index: i })
+                        }
+                        aria-label={h?.removeRowPair ?? 'Remove segment'}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <DecimalInput
+                        value={start}
+                        onChange={(v) =>
+                          onChange?.({ kind: 'rowX', index: i, value: v })
+                        }
+                        className="h-10 pr-12 text-left text-base"
+                        placeholder={h?.enterRowX ?? 'Start row'}
+                      />
+                      <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
+                        {h?.rowsUnit ?? 'rows'}
+                      </span>
+                    </div>
+                    <div className="relative">
+                      <DecimalInput
+                        value={end}
+                        onChange={(v) =>
+                          onChange?.({ kind: 'rowY', index: i, value: v })
+                        }
+                        className="h-10 pr-12 text-left text-base"
+                        placeholder={h?.enterRowY ?? 'End row'}
+                      />
+                      <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-xs">
+                        {h?.rowsUnit ?? 'rows'}
+                      </span>
+                    </div>
+                  </div>
+                  {outOfRange && (
+                    <FieldMessage variant="warning" size="xs">
+                      {outOfRangeText}
+                    </FieldMessage>
+                  )}
+                  {orderingFlags[i] && (
+                    <FieldMessage variant="warning" size="xs">
+                      {segmentOrderText}
+                    </FieldMessage>
+                  )}
+                </div>
+              );
+            })}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onChange?.({ kind: 'addRowPair' })}
+              className="w-full"
+            >
+              <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+              {h?.addRowPair ?? 'Add row segment'}
+            </Button>
           </div>
         )}
       </div>

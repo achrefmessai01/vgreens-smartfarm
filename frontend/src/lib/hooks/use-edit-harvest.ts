@@ -26,8 +26,10 @@ const EMPTY_FORM: BatchFormData = {
   totalPlants: 0,
   lostPlants: 0,
   replicates: 1,
+  avgHeadsPerPlant: 0,
+  slabLength: 0,
+  headsPerSlab: 0,
   inputMode: InputMode.Weight,
-  crateWeight: 0,
 };
 
 function computeRowSpacing(data: BatchFormData): number {
@@ -56,8 +58,10 @@ function batchToFormData(batch: BatchItem): BatchFormData {
     totalPlants: batch.totalPlants ?? 0,
     lostPlants: batch.lostPlants ?? 0,
     replicates: batch.replicates ?? 1,
+    avgHeadsPerPlant: batch.avgHeadsPerPlant ?? 0,
+    slabLength: batch.slabLength ?? 0,
+    headsPerSlab: batch.headsPerSlab ?? 0,
     inputMode: batch.inputMode ?? InputMode.Weight,
-    crateWeight: batch.crateWeight ?? 0,
   };
 }
 
@@ -77,11 +81,6 @@ function validateEditForm(data: BatchFormData): BatchFormErrors {
     errors.plantsPerMeter = 'Plants per meter must be greater than 0';
   if (!data.replicates || data.replicates < 1)
     errors.replicates = 'Replicates must be at least 1';
-  if (
-    data.inputMode === InputMode.Crate &&
-    (!data.crateWeight || data.crateWeight <= 0)
-  )
-    errors.crateWeight = 'Crate weight must be greater than 0';
   validateRowRange(data, errors);
   return errors;
 }
@@ -137,13 +136,14 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               totalPlants: formData.totalPlants,
               lostPlants: formData.lostPlants,
               replicates: formData.replicates,
+              // Tomato-only, never required: 0 means unset → persist null (so
+              // clearing the field, or a non-tomato batch, stores null).
+              avgHeadsPerPlant: formData.avgHeadsPerPlant || null,
+              slabLength: formData.slabLength || null,
+              headsPerSlab: formData.headsPerSlab || null,
               // inputMode is fixed at creation (the backend ignores it on
-              // update); crateWeight stays editable for crate batches and its
-              // change propagates to every crate-mode entry's derived yield.
-              crateWeight:
-                formData.inputMode === InputMode.Crate
-                  ? formData.crateWeight
-                  : undefined,
+              // update). crateWeight is no longer a batch field — crate weight
+              // is chosen per-harvest from the tenant's crates.
               // name/batchNumber are re-derived from crop/variety by the backend.
             },
           },

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n';
 import { InputMode, useVarietiesQuery } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
+import { FieldMessage } from '@/components/harvest/field-message';
 import { AddVarietyDialog } from './add-variety-dialog';
 
 // Sentinel value used by VarietyField's dropdown to open the "add variety"
@@ -84,9 +85,7 @@ export function VarietyField({
           </option>
         )}
       </select>
-      {errors.varietyId && (
-        <p className="text-destructive text-sm">{errors.varietyId}</p>
-      )}
+      <FieldMessage>{errors.varietyId}</FieldMessage>
       {cropId && (
         <AddVarietyDialog
           open={addOpen}
@@ -129,9 +128,7 @@ export function PlantingDateField({
         disabled={disabled}
         className={`h-10 ${errors.plantingDate ? 'border-destructive' : ''}`}
       />
-      {errors.plantingDate && (
-        <p className="text-destructive text-sm">{errors.plantingDate}</p>
-      )}
+      <FieldMessage>{errors.plantingDate}</FieldMessage>
     </div>
   );
 }
@@ -161,9 +158,7 @@ export function CultivationAreaField({
         disabled={disabled}
         className={`h-10 ${errors.cultivationArea ? 'border-destructive' : ''}`}
       />
-      {errors.cultivationArea && (
-        <p className="text-destructive text-sm">{errors.cultivationArea}</p>
-      )}
+      <FieldMessage>{errors.cultivationArea}</FieldMessage>
     </div>
   );
 }
@@ -190,9 +185,7 @@ export function NumberOfRowsField({
         disabled={disabled}
         className={`h-10 ${errors.numberOfRows ? 'border-destructive' : ''}`}
       />
-      {errors.numberOfRows && (
-        <p className="text-destructive text-sm">{errors.numberOfRows}</p>
-      )}
+      <FieldMessage>{errors.numberOfRows}</FieldMessage>
     </div>
   );
 }
@@ -219,9 +212,7 @@ export function RowLengthField({
         disabled={disabled}
         className={`h-10 ${errors.rowLength ? 'border-destructive' : ''}`}
       />
-      {errors.rowLength && (
-        <p className="text-destructive text-sm">{errors.rowLength}</p>
-      )}
+      <FieldMessage>{errors.rowLength}</FieldMessage>
     </div>
   );
 }
@@ -250,9 +241,7 @@ export function PlantsPerMeterField({
         disabled={disabled}
         className={`h-10 ${errors.plantsPerMeter ? 'border-destructive' : ''}`}
       />
-      {errors.plantsPerMeter && (
-        <p className="text-destructive text-sm">{errors.plantsPerMeter}</p>
-      )}
+      <FieldMessage>{errors.plantsPerMeter}</FieldMessage>
     </div>
   );
 }
@@ -290,9 +279,7 @@ export function StartRowField({
         disabled={disabled}
         className={`h-10 ${errors.startRow ? 'border-destructive' : ''}`}
       />
-      {errors.startRow && (
-        <p className="text-destructive text-sm">{errors.startRow}</p>
-      )}
+      <FieldMessage>{errors.startRow}</FieldMessage>
     </div>
   );
 }
@@ -327,9 +314,7 @@ export function EndRowField({
         disabled={disabled}
         className={`h-10 ${errors.endRow ? 'border-destructive' : ''}`}
       />
-      {errors.endRow && (
-        <p className="text-destructive text-sm">{errors.endRow}</p>
-      )}
+      <FieldMessage>{errors.endRow}</FieldMessage>
     </div>
   );
 }
@@ -377,9 +362,7 @@ export function TotalPlantsField({
         disabled={disabled}
         className={`h-10 ${errors.totalPlants ? 'border-destructive' : ''}`}
       />
-      {errors.totalPlants && (
-        <p className="text-destructive text-sm">{errors.totalPlants}</p>
-      )}
+      <FieldMessage>{errors.totalPlants}</FieldMessage>
     </div>
   );
 }
@@ -413,9 +396,7 @@ export function LostPlantsField({
         disabled={disabled}
         className={`h-10 ${errors.lostPlants ? 'border-destructive' : ''}`}
       />
-      {errors.lostPlants && (
-        <p className="text-destructive text-sm">{errors.lostPlants}</p>
-      )}
+      <FieldMessage>{errors.lostPlants}</FieldMessage>
     </div>
   );
 }
@@ -449,28 +430,116 @@ export function ReplicatesField({
         disabled={disabled}
         className={`h-10 ${errors.replicates ? 'border-destructive' : ''}`}
       />
-      {errors.replicates && (
-        <p className="text-destructive text-sm">{errors.replicates}</p>
-      )}
+      <FieldMessage>{errors.replicates}</FieldMessage>
     </div>
   );
 }
 
-// Yield input mode toggle (weight vs crate), fixed at batch creation. In crate
-// mode it reveals the per-batch crate-weight input; harvests for this batch then
-// open in crate layout and derive kg from this weight.
+// Average number of heads per plant. Tomato-only metadata, never required: it's
+// rendered only when the selected crop is a tomato (gated by the parent) and an
+// empty value (0) is persisted as null. No required marker, no validation.
+export function HeadsPerPlantField({
+  formData,
+  setFormData,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="avgHeadsPerPlant" className="text-sm font-medium">
+        {h?.avgHeadsPerPlant ?? 'Avg Heads per Plant'}
+      </Label>
+      <DecimalInput
+        id="avgHeadsPerPlant"
+        value={formData.avgHeadsPerPlant}
+        onChange={(v) => setFormData((prev) => ({ ...prev, avgHeadsPerPlant: v }))}
+        disabled={disabled}
+        className="h-10"
+      />
+    </div>
+  );
+}
+
+// Length of a slab (cm). Tomato-only metadata, never required: it's rendered
+// only when the selected crop is a tomato (gated by the parent) and an empty
+// value (0) is persisted as null. No required marker, no validation.
+export function SlabLengthField({
+  formData,
+  setFormData,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="slabLength" className="text-sm font-medium">
+        {h?.slabLength ?? 'Slab Length (cm)'}
+      </Label>
+      <DecimalInput
+        id="slabLength"
+        value={formData.slabLength}
+        onChange={(v) => setFormData((prev) => ({ ...prev, slabLength: v }))}
+        disabled={disabled}
+        className="h-10"
+      />
+    </div>
+  );
+}
+
+// Number of heads per slab. Tomato-only metadata, never required: it's rendered
+// only when the selected crop is a tomato (gated by the parent) and an empty
+// value (0) is persisted as null. Whole-number input; no validation.
+export function HeadsPerSlabField({
+  formData,
+  setFormData,
+  disabled = false,
+}: FormFieldProps) {
+  const { t } = useI18n();
+  const h = t.pages.harvest;
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="headsPerSlab" className="text-sm font-medium">
+        {h?.headsPerSlab ?? 'Heads per Slab'}
+      </Label>
+      <Input
+        id="headsPerSlab"
+        type="number"
+        min="0"
+        step="1"
+        value={formData.headsPerSlab || ''}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            headsPerSlab: Math.max(0, Number.parseInt(e.target.value, 10) || 0),
+          }))
+        }
+        disabled={disabled}
+        className="h-10"
+      />
+    </div>
+  );
+}
+
+/**
+ * Yield input mode toggle (weight vs crate), fixed at batch creation. Sets only
+ * the mode, which drives the harvest layout (crate counts vs direct kg) — the
+ * crate WEIGHT is no longer a batch field; it's chosen per-harvest from the
+ * tenant's crates.
+ */
 export function InputModeField({
   formData,
   setFormData,
-  errors,
   disabled = false,
   // inputMode is fixed at creation: when editing an existing batch the toggle is
-  // locked, but crateWeight remains editable.
+  // locked.
   lockMode = false,
 }: FormFieldProps & { lockMode?: boolean }) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const isCrate = formData.inputMode === InputMode.Crate;
 
   const modes: ReadonlyArray<{ mode: InputMode; label: string }> = [
     { mode: InputMode.Weight, label: h?.weightMode ?? 'Weight (kg)' },
@@ -502,27 +571,6 @@ export function InputModeField({
           </button>
         ))}
       </div>
-      {isCrate && (
-        <div className="space-y-2 pt-2">
-          <Label htmlFor="crateWeight" className="text-sm font-medium">
-            {h?.crateWeight ?? 'Crate Weight (kg)'}{' '}
-            <span className="text-destructive">*</span>
-          </Label>
-          <DecimalInput
-            id="crateWeight"
-            placeholder={h?.enterCrateWeight ?? 'Weight of one full crate'}
-            value={formData.crateWeight}
-            onChange={(v) =>
-              setFormData((prev) => ({ ...prev, crateWeight: v }))
-            }
-            disabled={disabled}
-            className={`h-10 ${errors.crateWeight ? 'border-destructive' : ''}`}
-          />
-          {errors.crateWeight && (
-            <p className="text-destructive text-sm">{errors.crateWeight}</p>
-          )}
-        </div>
-      )}
     </div>
   );
 }

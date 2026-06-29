@@ -39,8 +39,10 @@ export interface BrixReadingLike {
 // HarvestEntry; avgFruitWeight / avgBrix are derived by the backend.
 export interface HarvestEntryLike {
   id?: string;
-  rowX: number;
-  rowY: number;
+  // Parallel arrays of harvested row segments: rowX[i] pairs with rowY[i].
+  // Equal-length; empty when no rows were recorded.
+  rowX: number[];
+  rowY: number[];
   // Weight mode: positional per-quality sellable kg (index 0=A, 1=B, ...).
   // Null/empty in crate mode. Dynamic length.
   classKgs?: number[] | null;
@@ -74,7 +76,6 @@ export interface HarvestTotalsLike {
   avgFruitWeight?: number | null;
   avgBrix?: number | null;
   yieldPerPlant?: number | null;
-  yieldPerMeter?: number | null;
   yieldPerRunningMeter?: number | null;
 }
 
@@ -130,6 +131,10 @@ export interface HarvestLike {
   harvesterHeadCount?: number | null;
   photoUrls?: string[] | null;
   batch?: BatchLike | null;
+  // The crate this harvest was logged with (crate-mode only). Its weight drives
+  // crate-mode kg derivation, superseding batch.crateWeight. Null in weight mode.
+  crateId?: string | null;
+  crate?: { id: string; weight: number } | null;
   entries: HarvestEntryLike[];
   totals: HarvestTotalsLike;
 }

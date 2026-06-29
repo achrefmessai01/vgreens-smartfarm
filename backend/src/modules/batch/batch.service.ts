@@ -52,20 +52,19 @@ export class BatchService extends BaseService<Batch> {
     return cultivationArea / denominator;
   }
 
-  // Resolve and validate a batch's crate config. Crate mode demands a positive
-  // crateWeight; weight mode never carries one. Throws a BadRequest the client
-  // can surface rather than a 500.
+  /**
+   * Resolve a batch's crate config. Crate weight now lives per-harvest on the
+   * selected crate, so crate-mode batches no longer require a `crateWeight` —
+   * only the input mode is fixed here. The deprecated column is still accepted
+   * for backward compatibility but defaults to null; weight mode never carries
+   * one.
+   */
   private resolveCrateConfig(
     inputMode: InputMode,
     crateWeight: number | null | undefined,
   ): { inputMode: InputMode; crateWeight: number | null } {
     if (inputMode === InputMode.CRATE) {
-      if (crateWeight == null || crateWeight <= 0) {
-        throw new BadRequestException(
-          'crateWeight must be greater than 0 for a crate-mode batch',
-        );
-      }
-      return { inputMode, crateWeight };
+      return { inputMode, crateWeight: crateWeight ?? null };
     }
     return { inputMode: InputMode.WEIGHT, crateWeight: null };
   }
@@ -274,6 +273,9 @@ export class BatchService extends BaseService<Batch> {
         cultivationArea: this.deriveCultivationArea({ ...input, rowSpacing }),
         totalPlants: this.deriveTotalPlants(input),
         replicates: input.replicates ?? 1,
+        avgHeadsPerPlant: input.avgHeadsPerPlant ?? null,
+        slabLength: input.slabLength ?? null,
+        headsPerSlab: input.headsPerSlab ?? null,
         inputMode,
         crateWeight,
       });
@@ -344,6 +346,11 @@ export class BatchService extends BaseService<Batch> {
       batch.cultivationArea = input.cultivationArea;
     if (input.totalPlants !== undefined) batch.totalPlants = input.totalPlants;
     if (input.replicates !== undefined) batch.replicates = input.replicates;
+    if (input.avgHeadsPerPlant !== undefined)
+      batch.avgHeadsPerPlant = input.avgHeadsPerPlant;
+    if (input.slabLength !== undefined) batch.slabLength = input.slabLength;
+    if (input.headsPerSlab !== undefined)
+      batch.headsPerSlab = input.headsPerSlab;
 
     // inputMode is fixed at creation, so it is intentionally not applied here.
     // crateWeight stays editable: a new value re-validates against the batch's

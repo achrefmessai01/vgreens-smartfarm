@@ -16,20 +16,22 @@ import { entryClassWeights, totalFruitWeight } from './harvest-weight.util';
 export function computeHarvestTotals(
   entries: HarvestEntry[] | undefined,
   batch?: Batch | null,
+  crateWeight?: number | null,
 ): HarvestTotals {
   const list = entries ?? [];
 
   // Per-class sellable kg (waste excluded): the per-entry class arrays summed
   // element-wise into one positional array (index 0=A, 1=B, ...), as wide as the
-  // widest entry. Dynamic and unbounded — no fixed A/B/C.
-  const classKgs = sumByIndex(list.map((e) => entryClassWeights(e, batch))).map(
-    (kg) => roundTo(kg, 3),
-  );
+  // widest entry. Dynamic and unbounded — no fixed A/B/C. crateWeight (the
+  // harvest's selected crate) overrides the legacy batch.crateWeight.
+  const classKgs = sumByIndex(
+    list.map((e) => entryClassWeights(e, batch, crateWeight)),
+  ).map((kg) => roundTo(kg, 3));
 
   const waste = roundTo(sum(list.map((e) => e.waste ?? 0)), 3);
   // Total harvested weight = sellable across all classes + waste. Waste counts
   // toward the weight and is still reported separately above.
-  const totalWeight = roundTo(totalFruitWeight(list, batch), 3);
+  const totalWeight = roundTo(totalFruitWeight(list, batch, crateWeight), 3);
 
   // Total fruits SAMPLED across the entries — not an estimate of fruits harvested.
   const fruitCount = sum(list.map((e) => e.sampleFruitCount ?? 0));
@@ -67,15 +69,13 @@ export function computeHarvestTotals(
         )
       : null;
 
-  // Yields divide by living plants (planted − lost) and the row lengths.
-  // Null-safe: never divide by a zero/missing denominator.
+  // Yields divide by living plants (planted − lost) and the running metres
+  // (numberOfRows × rowLength). Null-safe: never divide by a zero/missing
+  // denominator.
   const livingPlants = batch?.livingPlants ?? 0;
-  const rowLength = batch?.rowLength ?? 0;
   const runningMeter = batch?.runningMeter ?? 0;
   const yieldPerPlant =
     livingPlants > 0 ? roundTo(totalWeight / livingPlants, 3) : null;
-  const yieldPerMeter =
-    rowLength > 0 ? roundTo(totalWeight / rowLength, 3) : null;
   const yieldPerRunningMeter =
     runningMeter > 0 ? roundTo(totalWeight / runningMeter, 3) : null;
 
@@ -88,7 +88,6 @@ export function computeHarvestTotals(
     avgFruitWeight,
     avgBrix,
     yieldPerPlant,
-    yieldPerMeter,
     yieldPerRunningMeter,
   };
 }

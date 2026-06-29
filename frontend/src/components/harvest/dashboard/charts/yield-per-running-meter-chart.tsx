@@ -51,7 +51,11 @@ const YieldPerRunningMeterTooltip = ({
           className="text-sm"
           style={{ color: entry.color ?? '#6366f1' }}
         >
-          {`${entry.name ?? 'Yield/running m'}: ${entry.value} kg/m`}
+          {`${entry.name ?? 'Yield/running m'}: ${
+            typeof entry.value === 'number'
+              ? Number(entry.value.toFixed(3))
+              : entry.value
+          } kg/m`}
         </p>
       ))}
     </ChartTooltipContainer>
@@ -87,7 +91,7 @@ export function YieldPerRunningMeterChart(
 
   return (
     <Card className={className}>
-      <div className="p-8">
+      <div className="p-4 sm:p-6">
         <h3 className="mb-4 text-lg font-semibold">
           {title ??
             t.pages.harvest?.yieldPerRunningMeterOverTime ??
@@ -97,7 +101,7 @@ export function YieldPerRunningMeterChart(
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 1, right: 30, left: 20, bottom: 1 }}
+              margin={{ top: 5, right: 20, left: 10, bottom: 40 }}
             >
               <defs>
                 <linearGradient
@@ -118,11 +122,13 @@ export function YieldPerRunningMeterChart(
               />
               <XAxis
                 dataKey="date"
-                fontSize={12}
-                angle={0}
-                textAnchor="middle"
-                interval={isMulti ? 'preserveStartEnd' : 0}
-                minTickGap={isMulti ? 20 : undefined}
+                fontSize={11}
+                angle={-35}
+                textAnchor="end"
+                height={55}
+                interval="preserveStartEnd"
+                minTickGap={20}
+                tickMargin={8}
               />
               <YAxis
                 fontSize={12}

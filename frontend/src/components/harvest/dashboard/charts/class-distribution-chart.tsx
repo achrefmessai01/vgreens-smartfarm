@@ -92,7 +92,7 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
 
   return (
     <Card className={className}>
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <h3 className="mb-4 text-lg font-semibold">
           {title ?? h?.classDistribution ?? 'Class Distribution'}
         </h3>
@@ -100,7 +100,7 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 20, right: 20, left: 10, bottom: 40 }}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -109,10 +109,13 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
               />
               <XAxis
                 dataKey="label"
-                fontSize={12}
-                angle={isMulti ? 0 : -45}
-                textAnchor={isMulti ? 'middle' : 'end'}
-                interval={0}
+                fontSize={11}
+                angle={-35}
+                textAnchor="end"
+                height={55}
+                interval={isMulti ? 'preserveStartEnd' : 0}
+                minTickGap={isMulti ? 20 : undefined}
+                tickMargin={8}
               />
               <YAxis
                 fontSize={12}

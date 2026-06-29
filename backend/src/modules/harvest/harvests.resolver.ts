@@ -49,7 +49,15 @@ export class HarvestsResolver {
   // Computed aggregate of the harvest's entries — replaces the omitted DB view.
   @ResolveField(() => HarvestTotals, { name: 'totals' })
   totals(@Parent() harvest: Harvest): HarvestTotals {
-    return this.harvestsService.computeTotals(harvest.entries, harvest.batch);
+    // Crate-mode kg derive from the harvest's selected crate (falling back to
+    // the legacy batch.crateWeight for harvests not yet repointed).
+    const crateWeight =
+      harvest.crate?.weight ?? harvest.batch?.crateWeight ?? null;
+    return this.harvestsService.computeTotals(
+      harvest.entries,
+      harvest.batch,
+      crateWeight,
+    );
   }
 
   @Query(() => [Harvest], { name: 'harvests' })

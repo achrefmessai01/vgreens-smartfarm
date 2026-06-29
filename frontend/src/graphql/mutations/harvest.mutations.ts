@@ -16,6 +16,11 @@ const HARVEST_MUTATION_FIELDS = gql`
     photoUrls
     createdAt
     updatedAt
+    crateId
+    crate {
+      id
+      weight
+    }
     batch {
       id
       name
@@ -65,7 +70,6 @@ const HARVEST_MUTATION_FIELDS = gql`
       avgFruitWeight
       avgBrix
       yieldPerPlant
-      yieldPerMeter
       yieldPerRunningMeter
     }
   }

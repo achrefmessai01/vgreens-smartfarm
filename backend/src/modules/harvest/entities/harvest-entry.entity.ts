@@ -33,13 +33,17 @@ export class HarvestEntry {
   @JoinColumn({ name: 'harvestId' })
   harvest?: Harvest;
 
-  @Field(() => Float)
-  @Column({ type: 'double precision', default: 0 })
-  rowX: number;
+  // Parallel arrays of harvested row segments: rowX[i] pairs with rowY[i] to
+  // span segment i (rowX[i] -> rowY[i]); the space between segment i's end and
+  // segment i+1's start is a gap. The two arrays are always kept equal-length.
+  // Empty ([]) means no rows were recorded (the old 0/0 "unspecified" case).
+  @Field(() => [Float])
+  @Column({ type: 'double precision', array: true, default: () => "'{}'" })
+  rowX: number[];
 
-  @Field(() => Float)
-  @Column({ type: 'double precision', default: 0 })
-  rowY: number;
+  @Field(() => [Float])
+  @Column({ type: 'double precision', array: true, default: () => "'{}'" })
+  rowY: number[];
 
   // Weight mode: per-quality sellable kg, positional and dynamic — index maps to
   // a class by position (0 = A, 1 = B, 2 = C, 3 = D, ...). Class count is

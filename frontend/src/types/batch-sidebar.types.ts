@@ -13,8 +13,11 @@ export interface HarvestEntryData {
   crateCounts: number[];
   remainingKgs: number[];
   waste: number;
-  rowX: number;
-  rowY: number;
+  // Parallel arrays of harvested row segments: rowX[i] pairs with rowY[i] to
+  // span segment i (start -> end); the space between consecutive segments is a
+  // gap. Kept equal-length. Empty means no rows recorded (optional section).
+  rowX: number[];
+  rowY: number[];
   brixReadings: number[];
   // Quality grade per Brix reading, index-aligned with brixReadings.
   brixClasses: HarvestQualityClass[];
@@ -34,8 +37,10 @@ export type EntryChange =
   | { kind: 'crateCount'; index: number; value: number }
   | { kind: 'remainingKg'; index: number; value: number }
   | { kind: 'waste'; value: number }
-  | { kind: 'rowX'; value: number }
-  | { kind: 'rowY'; value: number }
+  | { kind: 'rowX'; index: number; value: number }
+  | { kind: 'rowY'; index: number; value: number }
+  | { kind: 'addRowPair' }
+  | { kind: 'removeRowPair'; index: number }
   | { kind: 'addClass' }
   | { kind: 'removeClass'; index: number };
 
@@ -45,8 +50,8 @@ export function entryHasData(entry: HarvestEntryData): boolean {
   return (
     entry.classKgs.some((v) => v > 0) ||
     entry.waste > 0 ||
-    entry.rowX > 0 ||
-    entry.rowY > 0 ||
+    entry.rowX.some((v) => v > 0) ||
+    entry.rowY.some((v) => v > 0) ||
     entry.crateCounts.some((v) => v > 0) ||
     entry.remainingKgs.some((v) => v > 0) ||
     entry.sampleWeight > 0 ||
@@ -62,8 +67,10 @@ export function createEmptyEntry(): HarvestEntryData {
     crateCounts: [0],
     remainingKgs: [0],
     waste: 0,
-    rowX: 0,
-    rowY: 0,
+    // No row segments by default — the row-coordinates section is optional and
+    // seeds its first pair only when opened.
+    rowX: [],
+    rowY: [],
     brixReadings: [0],
     brixClasses: [HarvestQualityClass.A],
     showBrix: false,
@@ -98,10 +105,13 @@ export interface BatchDetailsData {
   // Replicate samples configured on the batch; drives how many entry cards a
   // fresh harvest starts with. Always at least 1.
   replicates: number;
-  // Yield input mode (fixed at creation) and the per-batch crate weight (kg).
-  // crateWeight is null in weight mode. Drive which form layout renders and how
-  // crate-mode totals are derived.
+  // Yield input mode (fixed at creation). Drives which form layout renders.
   inputMode: InputMode;
+  // The crate selected for this harvest (crate mode only). crateId is the chosen
+  // crate's id (null until picked / in weight mode); crateWeight mirrors that
+  // crate's weight (kg) so the existing kg derivation reads it unchanged. In
+  // weight mode both are null. Selecting a crate sets both together.
+  crateId: string | null;
   crateWeight: number | null;
   plantingDate: string;
   // Repeatable sub-entries; always at least one. Photos and the harvest date
@@ -130,12 +140,17 @@ export interface BatchStatsFieldProps {
 export interface YieldDataFieldProps {
   classKgs: number[];
   waste: number;
-  rowX: number;
-  rowY: number;
+  // Parallel arrays of (start, end) row segments, aligned by index.
+  rowX: number[];
+  rowY: number[];
   // The batch's row range (inclusive). null bounds leave the row inputs
   // unconstrained; when set, inputs are limited and out-of-range values warn.
   batchStartRow?: number | null;
   batchEndRow?: number | null;
+  // Soft waste-vs-quality check: whether the user has acknowledged a waste value
+  // that exceeds the summed quality yield, and the setter to toggle it.
+  wasteConfirmed: boolean;
+  onConfirmWasteChange: (confirmed: boolean) => void;
   onChange?: (change: EntryChange) => void;
   isLoading?: boolean;
 }
@@ -151,6 +166,10 @@ export interface CrateYieldFieldProps {
   // Per-batch crate weight (kg). Null/0 means it hasn't been set; the field
   // still renders but derived kg show as 0.
   crateWeight: number | null;
+  // Soft waste-vs-quality check: whether the user has acknowledged a waste value
+  // that exceeds the summed quality yield, and the setter to toggle it.
+  wasteConfirmed: boolean;
+  onConfirmWasteChange: (confirmed: boolean) => void;
   onChange?: (change: EntryChange) => void;
   isLoading?: boolean;
 }
@@ -179,6 +198,9 @@ export interface FruitWeightFieldProps {
   onShowFruitWeightChange: (show: boolean) => void;
   onSampleWeightChange?: (value: number) => void;
   onSampleFruitCountChange?: (value: number) => void;
+  // When the harvested crop is a tomato, the labels read "Tross Weight" instead
+  // of "Fruit Weight" (the truss is weighed rather than individual fruit).
+  isTomato?: boolean;
   // Namespaces input element ids so repeated entries don't collide.
   idPrefix?: string;
   isLoading?: boolean;

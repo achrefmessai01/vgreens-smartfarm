@@ -8,7 +8,6 @@ export { HarvestTotals } from './harvest-totals.dto';
 export {
   HarvestDashboardMetrics,
   YieldOverTimeData,
-  YieldPerMeterData,
   ClassDistributionData,
   BrixTrendData,
   FruitWeightTrendData,

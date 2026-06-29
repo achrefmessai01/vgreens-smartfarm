@@ -53,7 +53,7 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
 
   return (
     <Card className={props.className}>
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <h3 className="mb-4 text-lg font-semibold">{cardTitle}</h3>
         {isMulti ? (
           <MultiBatchView
@@ -143,14 +143,23 @@ function SingleBatchView({
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 10, right: 20, left: 10, bottom: 40 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="#94a3b8"
               strokeOpacity={0.4}
             />
-            <XAxis dataKey="date" fontSize={12} />
+            <XAxis
+              dataKey="date"
+              fontSize={11}
+              angle={-35}
+              textAnchor="end"
+              height={55}
+              interval="preserveStartEnd"
+              minTickGap={20}
+              tickMargin={8}
+            />
             <YAxis
               fontSize={12}
               label={{
@@ -250,14 +259,23 @@ function MultiBatchView({
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={chartData}
-          margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 10, right: 20, left: 10, bottom: 40 }}
         >
           <CartesianGrid
             strokeDasharray="3 3"
             stroke="#94a3b8"
             strokeOpacity={0.4}
           />
-          <XAxis dataKey="date" fontSize={12} minTickGap={20} />
+          <XAxis
+            dataKey="date"
+            fontSize={11}
+            angle={-35}
+            textAnchor="end"
+            height={55}
+            interval="preserveStartEnd"
+            minTickGap={20}
+            tickMargin={8}
+          />
           <YAxis
             fontSize={12}
             label={{

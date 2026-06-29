@@ -19,10 +19,16 @@ export interface HarvestEntryCardProps {
   // renders and how crate-mode totals are derived.
   inputMode: InputMode;
   crateWeight: number | null;
+  // When true the fruit-weight section uses the "Tross Weight" labels (tomato).
+  isTomato?: boolean;
   // The parent batch's row range; forwarded to the yield field to limit and
   // validate the per-entry row coordinates.
   batchStartRow?: number | null;
   batchEndRow?: number | null;
+  // Soft waste-vs-quality check: whether the user has acknowledged a waste value
+  // exceeding the summed quality yield for this entry, and the setter to toggle it.
+  wasteConfirmed: boolean;
+  onConfirmWasteChange: (confirmed: boolean) => void;
   defaultOpen?: boolean;
   onChange: (change: EntryChange) => void;
   onBrixChange: (readingIndex: number, value: number) => void;
@@ -41,8 +47,11 @@ export function HarvestEntryCard({
   index,
   inputMode,
   crateWeight,
+  isTomato,
   batchStartRow,
   batchEndRow,
+  wasteConfirmed,
+  onConfirmWasteChange,
   defaultOpen = false,
   onChange,
   onBrixChange,
@@ -97,8 +106,11 @@ export function HarvestEntryCard({
             index={index}
             inputMode={inputMode}
             crateWeight={crateWeight}
+            isTomato={isTomato}
             batchStartRow={batchStartRow}
             batchEndRow={batchEndRow}
+            wasteConfirmed={wasteConfirmed}
+            onConfirmWasteChange={onConfirmWasteChange}
             onChange={onChange}
             onBrixChange={onBrixChange}
             onBrixClassChange={onBrixClassChange}

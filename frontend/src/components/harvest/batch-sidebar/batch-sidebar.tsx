@@ -21,7 +21,10 @@ import { CalendarDays, Sparkles } from 'lucide-react';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { entryHasData } from '@/types/batch-sidebar.types';
+import { FieldMessage } from '@/components/harvest/field-message';
+import { isTomatoSpecies } from '@/lib/harvest-utils';
 import { HarvestEntryCard } from './fields/harvest-entry-card';
+import { CrateSelectField } from './fields/crate-select-field';
 
 export interface BatchSidebarProps {
   open: boolean;
@@ -67,6 +70,11 @@ export function BatchSidebar({
     harvesterHeadCount,
     setHarvesterHeadCount,
     timingErrors,
+    isCrateMode,
+    crateError,
+    handleCrateSelect,
+    confirmedWasteEntries,
+    setWasteConfirmed,
     handleBrixChange,
     handleBrixClassChange,
     handleAddBrixReading,
@@ -213,11 +221,9 @@ export function BatchSidebar({
                       onChange={(e) => setStartTime(e.target.value)}
                       aria-invalid={Boolean(timingErrors.startTime)}
                     />
-                    {timingErrors.startTime && (
-                      <p className="text-destructive text-xs">
-                        {timingErrors.startTime}
-                      </p>
-                    )}
+                    <FieldMessage size="xs">
+                      {timingErrors.startTime}
+                    </FieldMessage>
                   </div>
                   <div className="space-y-1.5">
                     <Label
@@ -233,11 +239,9 @@ export function BatchSidebar({
                       onChange={(e) => setStopTime(e.target.value)}
                       aria-invalid={Boolean(timingErrors.stopTime)}
                     />
-                    {timingErrors.stopTime && (
-                      <p className="text-destructive text-xs">
-                        {timingErrors.stopTime}
-                      </p>
-                    )}
+                    <FieldMessage size="xs">
+                      {timingErrors.stopTime}
+                    </FieldMessage>
                   </div>
                   <div className="space-y-1.5">
                     <Label
@@ -257,13 +261,25 @@ export function BatchSidebar({
                       onChange={(e) => setHarvesterHeadCount(e.target.value)}
                       aria-invalid={Boolean(timingErrors.harvesterHeadCount)}
                     />
-                    {timingErrors.harvesterHeadCount && (
-                      <p className="text-destructive text-xs">
-                        {timingErrors.harvesterHeadCount}
-                      </p>
-                    )}
+                    <FieldMessage size="xs">
+                      {timingErrors.harvesterHeadCount}
+                    </FieldMessage>
                   </div>
                 </div>
+
+                {/* Crate selector: crate-mode only, between the harvesters
+                    fields above and the entries it drives below. Required —
+                    crate-mode kg derive from the chosen crate's weight. */}
+                {isCrateMode && (
+                  <div className="bg-card rounded-xl border p-3 shadow-sm">
+                    <CrateSelectField
+                      value={currentData.crateId}
+                      onSelect={handleCrateSelect}
+                      error={crateError}
+                      disabled={busy}
+                    />
+                  </div>
+                )}
 
                 {currentData.entries.map((entry, index) => (
                   <HarvestEntryCard
@@ -272,8 +288,13 @@ export function BatchSidebar({
                     index={index}
                     inputMode={currentData.inputMode}
                     crateWeight={currentData.crateWeight}
+                    isTomato={isTomatoSpecies(currentData.species)}
                     batchStartRow={currentData.startRow}
                     batchEndRow={currentData.endRow}
+                    wasteConfirmed={confirmedWasteEntries.has(index)}
+                    onConfirmWasteChange={(confirmed) =>
+                      setWasteConfirmed(index, confirmed)
+                    }
                     defaultOpen={index === 0 || entryHasData(entry)}
                     onChange={(change) => handleEntryChange(index, change)}
                     onBrixChange={(readingIndex, value) =>

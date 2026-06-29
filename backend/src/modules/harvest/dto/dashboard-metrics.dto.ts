@@ -10,15 +10,6 @@ export class YieldOverTimeData {
 }
 
 @ObjectType()
-export class YieldPerMeterData {
-  @Field()
-  date: string;
-
-  @Field(() => Float)
-  yieldPerMeter: number;
-}
-
-@ObjectType()
 export class YieldPerRunningMeterData {
   @Field()
   date: string;
@@ -104,13 +95,6 @@ export class HarvestDashboardMetrics {
   @Field(() => Float, {
     nullable: true,
     description:
-      'Weighted kg per row metre across selected batches: Σ totalFruitWeight / Σ rowLength. Null when no batch in scope has rowLength > 0.',
-  })
-  yieldPerMeter: number | null;
-
-  @Field(() => Float, {
-    nullable: true,
-    description:
       'Weighted kg per running metre across selected batches: Σ totalFruitWeight / Σ runningMeter (numberOfRows × rowLength). Null when no batch in scope has runningMeter > 0.',
   })
   yieldPerRunningMeter: number | null;
@@ -145,9 +129,6 @@ export class HarvestDashboardMetrics {
 
   @Field(() => [YieldOverTimeData])
   yieldOverTime: YieldOverTimeData[];
-
-  @Field(() => [YieldPerMeterData])
-  yieldPerMeterTrend: YieldPerMeterData[];
 
   @Field(() => [YieldPerRunningMeterData])
   yieldPerRunningMeterTrend: YieldPerRunningMeterData[];

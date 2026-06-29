@@ -15,6 +15,15 @@ import type {
 
 type HarvestTranslations = Translations['pages']['harvest'];
 
+// True when a batch's crop is a tomato. Matched case-insensitively against the
+// species name (which carries the catalog crop name, e.g. "Tomato" / "Tomate")
+// so harvest labels can switch from "Fruit Weight" to "Tross Weight".
+export function isTomatoSpecies(species: string | null | undefined): boolean {
+  if (!species) return false;
+  const s = species.toLowerCase();
+  return s.includes('tomato') || s.includes('tomate');
+}
+
 // Pick the right "harvest(s) logged" string for the count, using the locale's
 // CLDR plural rules. Falls back to the plural form when the singular key is
 // missing or PluralRules isn't available.
@@ -136,6 +145,40 @@ export function crateEntryTotalKg(
   return total;
 }
 
+// Summed sellable kg across all quality classes of one entry, in either mode.
+// Weight mode sums classKgs directly; crate mode derives kg from the crate
+// counts + remainders + the batch crate weight. Waste is never part of this sum.
+// Empty/non-numeric cells already arrive as 0 (the form's convention), so this
+// can't produce NaN.
+export function entryQualityTotalKg(
+  entry: Pick<HarvestEntryData, 'classKgs' | 'crateCounts' | 'remainingKgs'>,
+  inputMode: InputMode,
+  crateWeight: number | null | undefined,
+): number {
+  if (inputMode === InputMode.Crate) {
+    return crateEntryTotalKg(
+      entry.crateCounts,
+      entry.remainingKgs,
+      crateWeight,
+    );
+  }
+  return entry.classKgs.reduce(
+    (sum, v) => sum + (Number.isFinite(v) ? v : 0),
+    0,
+  );
+}
+
+// Soft safety check: is the entered waste higher than the summed quality-class
+// kg? A small epsilon keeps float noise (e.g. 0.1 + 0.2) from tripping the
+// warning. Non-finite waste is treated as 0 so the check never throws.
+export function wasteExceedsQualityTotal(
+  waste: number,
+  qualityTotalKg: number,
+): boolean {
+  const w = Number.isFinite(waste) ? waste : 0;
+  return w - qualityTotalKg > 1e-6;
+}
+
 export function extractStoragePathFromUrl(
   url: string | null | undefined,
 ): string | null {
@@ -150,6 +193,25 @@ export function extractStoragePathFromUrl(
   } catch {
     return null;
   }
+}
+
+/**
+ * Format waste as a percentage of the total batch yield (sellable classes + waste).
+ * Returns the percentage with one decimal place and a `%` suffix, e.g. "5.3%".
+ * When the total yield is zero (no harvests logged or all values empty), returns
+ * `—` so the cell doesn't read as "0.0%" — which would be misleading. The
+ * underlying kg figures are kept untouched; this is purely a display helper for
+ * the collapsed batch-summary row.
+ */
+export function formatWastePercent(
+  wasteKg: number,
+  classKgs: number[] | null | undefined,
+): string {
+  const sellable = (classKgs ?? []).reduce((sum, v) => sum + (v ?? 0), 0);
+  const total = sellable + (wasteKg ?? 0);
+  if (total <= 0) return '—';
+  const pct = ((wasteKg ?? 0) / total) * 100;
+  return `${pct.toFixed(1)}%`;
 }
 
 export function getGreenhouseLabel(greenhouse?: string | null): string {
@@ -274,8 +336,8 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     crateCounts: cls.crateCounts,
     remainingKgs: cls.remainingKgs,
     waste: entry.waste,
-    rowX: entry.rowX,
-    rowY: entry.rowY,
+    rowX: entry.rowX ?? [],
+    rowY: entry.rowY ?? [],
     brixReadings: readings,
     brixClasses: classes,
     showBrix: entry.brixReadings.some((b) => b.value > 0),
@@ -324,17 +386,43 @@ export function isRowOutsideBatchRange(
   return value < (start as number) || value > (end as number);
 }
 
+// Per-segment ordering check for a harvest's row segments. Flags segment i when
+// its start exceeds its end, or when it starts at/before the previous populated
+// segment's end — segments should be ordered and non-overlapping so the gaps
+// between them are meaningful. Soft (warn-but-allow): only populated values
+// (> 0) are considered, so empty cells never flag. Returns a flag per segment.
+export function rowSegmentOrderingFlags(
+  rowX: number[],
+  rowY: number[],
+): boolean[] {
+  let prevEnd = 0;
+  return rowX.map((start, i) => {
+    const end = rowY[i] ?? 0;
+    let flagged = false;
+    if (start > 0 && end > 0 && start > end) flagged = true;
+    if (start > 0 && prevEnd > 0 && start <= prevEnd) flagged = true;
+    if (end > 0) prevEnd = end;
+    return flagged;
+  });
+}
+
 function daysSince(plantingDate: string): number {
   const planted = new Date(plantingDate);
   if (Number.isNaN(planted.getTime())) return 0;
   return Math.max(0, Math.floor((Date.now() - planted.getTime()) / 86_400_000));
 }
 
-// Build the sidebar's batch-details view-model from a batch's planting fields.
+/**
+ * Build the sidebar's batch-details view-model from a batch's planting fields.
+ * The crate (crate-mode only) comes from the harvest, not the batch: `crateId`
+ * is the selected crate and `crateWeight` mirrors its weight for kg derivation.
+ * A fresh harvest passes none, so the user must pick a crate before saving.
+ */
 function batchToDetails(
   batch: BatchLike,
   entries: HarvestEntryData[],
   photos: string[],
+  crate?: { id: string; weight: number } | null,
 ): BatchDetailsData {
   return {
     id: batch.id,
@@ -360,7 +448,8 @@ function batchToDetails(
     lostPlants: batch.lostPlants,
     replicates: replicateCount(batch),
     inputMode: batch.inputMode ?? InputMode.Weight,
-    crateWeight: batch.crateWeight ?? null,
+    crateId: crate?.id ?? null,
+    crateWeight: crate?.weight ?? null,
     plantingDate: batch.plantingDate,
     entries,
     photos,
@@ -390,7 +479,12 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
       totalPlants: 0,
       lostPlants: 0,
     } as BatchLike);
-  return batchToDetails(batch, harvestToEntries(h), h.photoUrls ?? []);
+  return batchToDetails(
+    batch,
+    harvestToEntries(h),
+    h.photoUrls ?? [],
+    h.crate ?? null,
+  );
 }
 
 // Sidebar view-model for a freshly created batch (no harvest yet): one blank

@@ -139,4 +139,28 @@ export class CreateBatchInput {
   @IsInt()
   @Min(1)
   replicates?: number;
+
+  // Average number of heads per plant. Tomato-only metadata; never required, so
+  // it stays nullable and carries no default.
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  avgHeadsPerPlant?: number;
+
+  // Length of a slab (cm). Tomato-only metadata; never required, so it stays
+  // nullable and carries no default.
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  slabLength?: number;
+
+  // Number of heads per slab. Tomato-only metadata; never required, so it stays
+  // nullable and carries no default.
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  headsPerSlab?: number;
 }
