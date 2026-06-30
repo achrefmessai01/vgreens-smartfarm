@@ -8,6 +8,7 @@ import {
 } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 import { validateRowRange } from '@/lib/hooks/use-create-batch-form';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 
 type BatchItem = BatchesQuery['batches'][number];
 
@@ -96,6 +97,7 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
   const [errors, setErrors] = React.useState<BatchFormErrors>({});
   const [batchId, setBatchId] = React.useState<string | null>(null);
   const [updateBatch, { loading }] = useUpdateBatchMutation();
+  const tenantId = useTenantIdVariable();
 
   const populate = React.useCallback((batch: BatchItem) => {
     setBatchId(batch.id);
@@ -146,6 +148,7 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
               // is chosen per-harvest from the tenant's crates.
               // name/batchNumber are re-derived from crop/variety by the backend.
             },
+            tenantId,
           },
         });
         reset();
@@ -154,7 +157,7 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
         console.error('Failed to update batch:', err);
       }
     },
-    [formData, batchId, updateBatch, reset, onSuccess],
+    [formData, batchId, updateBatch, reset, onSuccess, tenantId],
   );
 
   return {

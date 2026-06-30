@@ -53,7 +53,7 @@ export function TableToolbar({
     (hasMultipleFilters && filterChips.length > 0 && clearAllFilters);
 
   return (
-    <div className="px-1 py-4">
+    <div className="px-1 pb-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         {/* Search on its own row on mobile, inline on desktop */}
         {searchConfig && (

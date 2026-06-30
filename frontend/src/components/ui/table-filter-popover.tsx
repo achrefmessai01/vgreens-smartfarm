@@ -53,7 +53,7 @@ export function TableFilterPopover({
           variant="outline"
           size="sm"
           className={cn(
-            'border-border/60 bg-muted/30 hover:bg-muted/50 h-9 gap-1.5 rounded-full px-4',
+            'border-border/60 bg-muted/30 hover:bg-muted/50 h-9 gap-1.5 rounded-lg px-4',
             className,
           )}
         >

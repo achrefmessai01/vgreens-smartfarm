@@ -8,6 +8,10 @@ import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data';
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
 import {
+  useSelectedTenantId,
+  useSetSelectedTenantId,
+} from '@/lib/contexts/selected-tenant-context';
+import {
   useFarmConfigQuery,
   UserRole,
   useGreenhousesQuery,
@@ -68,32 +72,38 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     [tenantsData?.tenants],
   );
 
-  const [selectedTenantId, setSelectedTenantId] = React.useState<string>(
-    initialTenantIdFromUrl,
-  );
+  // Tenant selection is owned by the global SelectedTenantProvider (navbar
+  // dropdown + URL/localStorage persistence). This page reads it and falls
+  // back to the first tenant only when nothing is selected yet, to preserve
+  // the previous "always have a tenant in scope" UX for admins.
+  const globalSelectedTenantId = useSelectedTenantId();
+  const setGlobalSelectedTenantId = useSetSelectedTenantId();
+  const selectedTenantId =
+    globalSelectedTenantId ?? initialTenantIdFromUrl ?? '';
 
   React.useEffect(() => {
     if (!isVGreensAdmin || tenants.length === 0) return;
-    if (
-      initialTenantIdFromUrl &&
-      tenants.some((tn) => tn.id === initialTenantIdFromUrl)
-    ) {
-      setSelectedTenantId(initialTenantIdFromUrl);
-      return;
-    }
-    const valid =
+    // If the global selection is empty (cross-tenant view) or stale, default
+    // to the first tenant so the farm overview always has a concrete tenant
+    // to render — cross-tenant aggregation isn't meaningful for this view.
+    const isValid =
       selectedTenantId && tenants.some((tn) => tn.id === selectedTenantId);
-    if (!valid) setSelectedTenantId(tenants[0].id);
-  }, [isVGreensAdmin, tenants, selectedTenantId, initialTenantIdFromUrl]);
-
-  const handleTenantChange = React.useCallback((tenantId: string) => {
-    setSelectedTenantId(tenantId);
-    if (typeof window !== 'undefined' && tenantId) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('tenantId', tenantId);
-      window.history.replaceState({}, '', url.toString());
+    if (!isValid) {
+      setGlobalSelectedTenantId(tenants[0].id);
     }
-  }, []);
+  }, [
+    isVGreensAdmin,
+    tenants,
+    selectedTenantId,
+    setGlobalSelectedTenantId,
+  ]);
+
+  const handleTenantChange = React.useCallback(
+    (tenantId: string) => {
+      setGlobalSelectedTenantId(tenantId || null);
+    },
+    [setGlobalSelectedTenantId],
+  );
 
   const { bucketName: selectedTenantBucketName, loading: tenantBucketLoading } =
     useTenantBucketName(isVGreensAdmin ? selectedTenantId : undefined);

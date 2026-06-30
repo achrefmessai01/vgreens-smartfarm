@@ -7,6 +7,7 @@ import {
   useCreateBatchMutation,
   type CreateBatchMutation,
 } from '@/generated/graphql';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
 type CreatedBatch = CreateBatchMutation['createBatch'];
@@ -87,6 +88,7 @@ export function useCreateBatchForm({
     React.useState<BatchFormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = React.useState<BatchFormErrors>({});
   const [createBatch, { loading }] = useCreateBatchMutation();
+  const tenantId = useTenantIdVariable();
 
   const reset = React.useCallback(() => {
     setFormData({
@@ -130,6 +132,7 @@ export function useCreateBatchForm({
               // chosen per-harvest from the tenant's crates.
               inputMode: formData.inputMode,
               status: BatchStatus.Active,
+              tenantId,
             },
           },
         });
@@ -141,7 +144,7 @@ export function useCreateBatchForm({
         console.error('Failed to create batch:', err);
       }
     },
-    [formData, createBatch, reset, onSuccess],
+    [formData, createBatch, reset, onSuccess, tenantId],
   );
 
   return { formData, setFormData, errors, loading, reset, handleSubmit };

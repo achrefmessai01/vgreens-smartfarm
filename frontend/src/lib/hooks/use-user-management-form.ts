@@ -34,7 +34,6 @@ export function useUserManagementForm({
   const [formData, setFormData] = React.useState<UserFormData>(
     initialData
       ? {
-          clerkUserId: initialData.clerkUserId || '',
           email: initialData.email || '',
           firstName: initialData.firstName || '',
           lastName: initialData.lastName || '',
@@ -44,7 +43,6 @@ export function useUserManagementForm({
           isActive: initialData.isActive ?? true,
         }
       : {
-          clerkUserId: '',
           email: '',
           firstName: '',
           lastName: '',
@@ -59,7 +57,6 @@ export function useUserManagementForm({
   React.useEffect(() => {
     if (initialData) {
       setFormData({
-        clerkUserId: initialData.clerkUserId || '',
         email: initialData.email || '',
         firstName: initialData.firstName || '',
         lastName: initialData.lastName || '',

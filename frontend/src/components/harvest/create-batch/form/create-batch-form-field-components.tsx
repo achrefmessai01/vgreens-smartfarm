@@ -5,6 +5,7 @@ import { useI18n } from '@/i18n';
 import { Label } from '@/components/ui/label';
 import { useGreenhousesQuery, useCropsQuery } from '@/generated/graphql';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import { FieldMessage } from '@/components/harvest/field-message';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 
@@ -29,9 +30,11 @@ export function GreenhouseField({
   // For a VGREENS_ADMIN the greenhouses query is otherwise unscoped and would
   // return every tenant's greenhouses, so pass the tenantId explicitly.
   const { user } = useCurrentUser();
+  const selectedTenantId = useTenantIdVariable();
+  const tenantId = selectedTenantId ?? user?.tenantId ?? undefined;
   const { data, loading } = useGreenhousesQuery({
-    variables: { tenantId: user?.tenantId ?? undefined },
-    skip: !user?.tenantId,
+    variables: { tenantId },
+    skip: !tenantId,
   });
   const greenhouses = data?.greenhouses ?? [];
 

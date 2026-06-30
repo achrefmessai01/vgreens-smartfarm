@@ -5,7 +5,6 @@ import {
   EmailField,
   NameFields,
   ImageUrlField,
-  ClerkUserIdField,
   ActiveStatusField,
 } from './user-form-fields';
 import * as React from 'react';
@@ -70,13 +69,6 @@ export const UserManagementForm = React.forwardRef<
     return (
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
         <FieldGroup>
-          {initialData && (
-            <ClerkUserIdField
-              value={formData.clerkUserId || ''}
-              errors={errors}
-            />
-          )}
-
           <EmailField
             value={formData.email}
             onChange={handleChange('email')}

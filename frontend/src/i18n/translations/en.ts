@@ -101,6 +101,10 @@ export const en = {
     online: 'Online',
     degraded: 'Degraded',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'All tenants',
+      placeholder: 'Select tenant',
+    },
   },
   login: {
     title: 'Welcome back',

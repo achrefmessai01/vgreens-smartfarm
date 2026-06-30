@@ -5,6 +5,7 @@ import { useI18n } from '@/i18n';
 import * as React from 'react';
 import { Navbar } from './navbar';
 import { Sidebar } from './sidebar';
+import { TenantNavbar } from './tenant-navbar';
 
 interface AppMobileLayoutProps {
   children: React.ReactNode;
@@ -49,6 +50,7 @@ export function AppMobileLayout({
       {/* Main content area */}
       <div className="flex flex-1 flex-col">
         <Navbar user={navbarUser} onSettingsClick={handleSettingsClick} />
+        <TenantNavbar />
         <main className="bg-background flex-1 p-4">{children}</main>
       </div>
     </div>

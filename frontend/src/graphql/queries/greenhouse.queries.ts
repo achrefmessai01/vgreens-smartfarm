@@ -26,8 +26,8 @@ export const GREENHOUSES_QUERY = gql`
 `;
 
 export const GREENHOUSE_QUERY = gql`
-  query Greenhouse($id: ID!) {
-    greenhouse(id: $id) {
+  query Greenhouse($id: ID!, $tenantId: ID) {
+    greenhouse(id: $id, tenantId: $tenantId) {
       ...GreenhouseFields
     }
   }

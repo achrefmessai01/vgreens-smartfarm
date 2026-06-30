@@ -13,6 +13,7 @@ import {
 } from '@/generated/graphql';
 import type { AlertsFilterInput } from '@/lib/alerts-filter';
 import { toAlertsFilterVariables } from '@/lib/alerts-filter';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 
 interface AlertFormData {
   sensorName: string;
@@ -21,12 +22,16 @@ interface AlertFormData {
 }
 
 export function useAlertManagement(filter?: AlertsFilterInput | null) {
+  const tenantId = useTenantIdVariable();
   const variables = React.useMemo(
-    () => toAlertsFilterVariables(filter),
-    [filter],
+    () => ({ ...toAlertsFilterVariables(filter), tenantId }),
+    [filter, tenantId],
   );
   const { data, previousData, loading, refetch } = useAlertsQuery({
-    variables: variables as { filter?: AlertsFilterInput },
+    variables: variables as {
+      filter?: AlertsFilterInput;
+      tenantId?: string;
+    },
     notifyOnNetworkStatusChange: true,
   });
 
@@ -85,6 +90,7 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
             value: formData.value,
             description: formData.description,
           },
+          tenantId,
         },
       });
       refetch();
@@ -102,7 +108,7 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
   ): Promise<{ ok: true } | { ok: false; reason: string }> => {
     setIsLoading(true);
     try {
-      await softDeleteAlert({ variables: { id } });
+      await softDeleteAlert({ variables: { id, tenantId } });
       refetch();
       return { ok: true };
     } catch (error) {
@@ -119,7 +125,7 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
   const handleHardDelete = async (id: string) => {
     setIsLoading(true);
     try {
-      await deleteAlert({ variables: { id } });
+      await deleteAlert({ variables: { id, tenantId } });
       refetch();
       return true;
     } catch (error) {
@@ -133,7 +139,7 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
   const handleAcknowledge = async (id: string) => {
     setIsLoading(true);
     try {
-      await acknowledgeAlert({ variables: { id } });
+      await acknowledgeAlert({ variables: { id, tenantId } });
       await refetch();
       return true;
     } catch (error) {
@@ -147,7 +153,7 @@ export function useAlertManagement(filter?: AlertsFilterInput | null) {
   const handleResolve = async (id: string) => {
     setIsLoading(true);
     try {
-      await resolveAlert({ variables: { id } });
+      await resolveAlert({ variables: { id, tenantId } });
       await refetch();
       return true;
     } catch (error) {

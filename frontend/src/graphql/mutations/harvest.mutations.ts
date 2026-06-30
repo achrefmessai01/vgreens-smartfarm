@@ -85,8 +85,12 @@ export const CREATE_HARVEST_MUTATION = gql`
 `;
 
 export const UPDATE_HARVEST_MUTATION = gql`
-  mutation UpdateHarvest($id: ID!, $input: UpdateHarvestInput!) {
-    updateHarvest(id: $id, input: $input) {
+  mutation UpdateHarvest(
+    $id: ID!
+    $input: UpdateHarvestInput!
+    $tenantId: ID
+  ) {
+    updateHarvest(id: $id, input: $input, tenantId: $tenantId) {
       ...HarvestMutationFields
     }
   }
@@ -94,8 +98,8 @@ export const UPDATE_HARVEST_MUTATION = gql`
 `;
 
 export const DELETE_HARVEST_MUTATION = gql`
-  mutation DeleteHarvest($id: ID!) {
-    deleteHarvest(id: $id)
+  mutation DeleteHarvest($id: ID!, $tenantId: ID) {
+    deleteHarvest(id: $id, tenantId: $tenantId)
   }
 `;
 

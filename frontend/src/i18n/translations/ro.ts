@@ -106,6 +106,10 @@ export const ro = {
     online: 'Online',
     degraded: 'Degraded',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'Toți chiriașii',
+      placeholder: 'Selectează chiriaș',
+    },
   },
   login: {
     title: 'Bine ai revenit',

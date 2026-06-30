@@ -106,6 +106,10 @@ export const pt = {
     online: 'Online',
     degraded: 'Degraded',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'Todos os inquilinos',
+      placeholder: 'Selecionar inquilino',
+    },
   },
   login: {
     title: 'Bem-vindo de volta',

@@ -11,8 +11,8 @@ import { gql } from '@apollo/client';
  * toast listener uses Apollo's `useSubscription` with this document directly.
  */
 export const ALERT_CREATED_SUBSCRIPTION = gql`
-  subscription AlertCreated {
-    alertCreated {
+  subscription AlertCreated($tenantId: ID) {
+    alertCreated(tenantId: $tenantId) {
       id
       tenantId
       sensorName

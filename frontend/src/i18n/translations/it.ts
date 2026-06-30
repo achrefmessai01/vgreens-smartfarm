@@ -106,6 +106,10 @@ export const it = {
     online: 'Online',
     degraded: 'Degraded',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'Tutti i tenant',
+      placeholder: 'Seleziona tenant',
+    },
   },
   login: {
     title: 'Bentornato',

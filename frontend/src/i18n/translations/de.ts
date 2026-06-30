@@ -101,6 +101,10 @@ export const de = {
     online: 'Online',
     degraded: 'Eingeschränkt',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'Alle Mandanten',
+      placeholder: 'Mandant auswählen',
+    },
   },
   login: {
     title: 'Willkommen zurück',
