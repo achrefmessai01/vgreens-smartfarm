@@ -274,7 +274,7 @@ export function HarvestDashboardCompare({
         })}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-4 sm:gap-6 lg:grid-cols-2">
         <YieldOverTimeChart series={yieldSeries} />
         <YieldPerRunningMeterChart series={yieldPerRunningMeterSeries} />
         <ClassDistributionChart series={classSeries} />
