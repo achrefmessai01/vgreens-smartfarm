@@ -538,6 +538,7 @@ export const ro = {
       waste: 'Deșeuri',
       yieldKg: 'Producție (kg)',
       weightKg: 'Greutate (kg)',
+      percentage: 'Procentaj (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Producție totală (kg)',
       date: 'Data',

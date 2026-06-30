@@ -536,6 +536,7 @@ export const pt = {
       waste: 'Desperdício',
       yieldKg: 'Produção (kg)',
       weightKg: 'Peso (kg)',
+      percentage: 'Percentagem (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Produção total (kg)',
       date: 'Data',

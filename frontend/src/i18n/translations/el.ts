@@ -540,6 +540,7 @@ export const el = {
       waste: 'Απόβλητα',
       yieldKg: 'Απόδοση (kg)',
       weightKg: 'Βάρος (kg)',
+      percentage: 'Ποσοστό (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Συνολική απόδοση (kg)',
       date: 'Ημερομηνία',

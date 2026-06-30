@@ -530,6 +530,7 @@ export const tr = {
       waste: 'Atık',
       yieldKg: 'Verim (kg)',
       weightKg: 'Ağırlık (kg)',
+      percentage: 'Yüzde (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Toplam verim (kg)',
       date: 'Tarih',

@@ -534,6 +534,7 @@ export const pl = {
       waste: 'Odpady',
       yieldKg: 'Plon (kg)',
       weightKg: 'Waga (kg)',
+      percentage: 'Procent (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Plon całkowity (kg)',
       date: 'Data',

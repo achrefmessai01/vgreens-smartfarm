@@ -525,6 +525,7 @@ export const ar = {
       waste: 'الفاقد',
       yieldKg: 'الإنتاج (kg)',
       weightKg: 'الوزن (kg)',
+      percentage: 'النسبة المئوية (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'إجمالي الإنتاج (kg)',
       date: 'التاريخ',

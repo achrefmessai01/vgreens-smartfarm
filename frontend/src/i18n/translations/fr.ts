@@ -524,6 +524,7 @@ export const fr = {
       waste: 'Déchets',
       yieldKg: 'Rendement (kg)',
       weightKg: 'Poids (kg)',
+      percentage: 'Pourcentage (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Rendement total (kg)',
       date: 'Date',

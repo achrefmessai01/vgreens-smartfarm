@@ -520,6 +520,7 @@ export const en = {
       waste: 'Waste',
       yieldKg: 'Yield (kg)',
       weightKg: 'Weight (kg)',
+      percentage: 'Percentage (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Total Yield (kg)',
       date: 'Date',

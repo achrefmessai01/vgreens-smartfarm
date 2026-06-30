@@ -89,7 +89,7 @@ export function BrixTrendChart(props: BrixTrendChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 5, right: 20, left: 10, bottom: 40 }}
+              margin={{ top: 5, right: 20, left: 0, bottom: 40 }}
             >
               <defs>
                 <linearGradient id="brixGradient" x1="0" y1="0" x2="0" y2="1">
@@ -114,11 +114,13 @@ export function BrixTrendChart(props: BrixTrendChartProps) {
               />
               <YAxis
                 fontSize={12}
+                width={60}
                 domain={isMulti ? ['auto', 'auto'] : [6, 9]}
                 label={{
                   value: t.pages.harvest?.brixValue ?? 'Brix (°Bx)',
                   angle: -90,
                   position: 'insideLeft',
+                  style: { textAnchor: 'middle' },
                 }}
               />
               <Tooltip content={<BrixTooltip />} />

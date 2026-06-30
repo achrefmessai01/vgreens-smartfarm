@@ -143,7 +143,7 @@ function SingleBatchView({
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 10, right: 20, left: 10, bottom: 40 }}
+            margin={{ top: 10, right: 20, left: 0, bottom: 40 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -162,10 +162,12 @@ function SingleBatchView({
             />
             <YAxis
               fontSize={12}
+              width={60}
               label={{
                 value: yAxisLabel,
                 angle: -90,
                 position: 'insideLeft',
+                style: { textAnchor: 'middle' },
               }}
             />
             <Tooltip content={<TooltipContent />} />
@@ -259,7 +261,7 @@ function MultiBatchView({
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={chartData}
-          margin={{ top: 10, right: 20, left: 10, bottom: 40 }}
+          margin={{ top: 10, right: 20, left: 0, bottom: 40 }}
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -278,10 +280,12 @@ function MultiBatchView({
           />
           <YAxis
             fontSize={12}
+            width={60}
             label={{
               value: yAxisLabel,
               angle: -90,
               position: 'insideLeft',
+              style: { textAnchor: 'middle' },
             }}
           />
           <Tooltip content={<MultiTooltip />} />

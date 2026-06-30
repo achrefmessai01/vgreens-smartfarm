@@ -527,6 +527,7 @@ export const es = {
       waste: 'Desperdicio',
       yieldKg: 'Rendimiento (kg)',
       weightKg: 'Peso (kg)',
+      percentage: 'Porcentaje (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Rendimiento total (kg)',
       date: 'Fecha',

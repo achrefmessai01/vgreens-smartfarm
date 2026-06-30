@@ -538,6 +538,7 @@ export const it = {
       waste: 'Scarto',
       yieldKg: 'Resa (kg)',
       weightKg: 'Peso (kg)',
+      percentage: 'Percentuale (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Resa totale (kg)',
       date: 'Data',

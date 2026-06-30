@@ -101,7 +101,7 @@ export function YieldPerRunningMeterChart(
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 5, right: 20, left: 10, bottom: 40 }}
+              margin={{ top: 5, right: 20, left: 0, bottom: 40 }}
             >
               <defs>
                 <linearGradient
@@ -132,12 +132,14 @@ export function YieldPerRunningMeterChart(
               />
               <YAxis
                 fontSize={12}
+                width={60}
                 label={{
                   value:
                     t.pages.harvest?.yieldPerRunningMeterUnit ??
                     'Yield (kg/running m)',
                   angle: -90,
                   position: 'insideLeft',
+                  style: { textAnchor: 'middle' },
                 }}
               />
               <Tooltip content={<YieldPerRunningMeterTooltip />} />
