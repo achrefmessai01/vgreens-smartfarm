@@ -17,25 +17,27 @@ import { usePathname } from 'next/navigation';
  * actually navigate the app.
  *
  * Visibility:
- *  - Regular tenant users: always.
  *  - VGREENS_ADMIN: only when they've picked a tenant in the navbar selector
  *    (otherwise they're in admin mode and the sidebar shows admin links).
+ *  - Regular tenant users (TENANT_ADMIN / TENANT_USER): never. They already
+ *    have the sidebar pinned to their own tenant, so a duplicate header strip
+ *    would just be visual noise.
  */
 export function TenantNavbar() {
   const pathname = usePathname();
   const { role, loading } = useCurrentUser();
   const selectedTenantId = useSelectedTenantId();
   // Pass the selected tenant id so the items are filtered against THAT
-  // tenant's enabled features. For regular tenant users `selectedTenantId`
-  // is always null and the hook falls back to their own tenant.
+  // tenant's enabled features.
   const navItems = useTenantNavItems(selectedTenantId ?? undefined);
 
   if (loading) return null;
 
+  // VGREENS_ADMIN-only surface. Regular tenant users get the sidebar instead.
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
-  // Hide for admins who haven't picked a tenant — their sidebar is showing
-  // admin links and a tenant-pages strip would be misleading.
-  if (isVGreensAdmin && !selectedTenantId) return null;
+  if (!isVGreensAdmin) return null;
+  // Admin without a picked tenant is in admin mode — hide the tenant strip.
+  if (!selectedTenantId) return null;
   if (navItems.length === 0) return null;
 
   return (
