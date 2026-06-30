@@ -73,8 +73,14 @@ export function HarvestDashboard({
     batchId: isStaleBatchId ? undefined : batchId,
   });
 
-  const filterLabel =
+  // Force a plain `string` here. Without the coercion, TS infers the union of
+  // every literal in `t.common` (plus one nested object), which trips up
+  // `.replace(_, filterLabel)` overload resolution further down. `t.common`
+  // does include a nested key, so we guard against the object case explicitly.
+  const filterLabelRaw =
     t.common?.[FILTER_LABEL_KEYS[period] as keyof typeof t.common] ?? period;
+  const filterLabel: string =
+    typeof filterLabelRaw === 'string' ? filterLabelRaw : period;
 
   const filterBar = (
     <DashboardFilters
