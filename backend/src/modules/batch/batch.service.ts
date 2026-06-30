@@ -302,7 +302,10 @@ export class BatchService extends BaseService<Batch> {
       batch.greenhouseId = input.greenhouseId;
 
     // Re-validate the greenhouse -> crop -> variety chain whenever any link in
-    // it changes, against the resulting combination.
+    // it changes, against the resulting combination. When the chain changes we
+    // also stage a re-derived display name so the batch header / list / details
+    // reflect the new variety; explicit `input.name` below still wins.
+    let derivedName: string | null = null;
     if (
       input.greenhouseId !== undefined ||
       input.cropId !== undefined ||
@@ -311,12 +314,32 @@ export class BatchService extends BaseService<Batch> {
       const cropId = input.cropId ?? batch.cropId;
       const varietyId =
         input.varietyId !== undefined ? input.varietyId : batch.varietyId;
-      await this.validateCropSelection(batch.greenhouseId, cropId, varietyId);
+      const { crop, variety } = await this.validateCropSelection(
+        batch.greenhouseId,
+        cropId,
+        varietyId,
+      );
       batch.cropId = cropId;
       batch.varietyId = varietyId ?? null;
+      // Keep the eagerly-loaded relations in sync with the new FKs. Without
+      // this, TypeORM's save() can resolve the FK from the still-attached
+      // `variety` / `crop` relation objects loaded by findOneById and silently
+      // revert the column change — which is what was happening here: only the
+      // FK column was set, so the stale relation object won and the variety
+      // never actually updated in the DB.
+      batch.crop = crop;
+      batch.variety = variety;
+      derivedName =
+        [crop.name, variety?.name].filter(Boolean).join(' - ') || null;
     }
 
-    if (input.name !== undefined) batch.name = input.name;
+    if (input.name !== undefined) {
+      batch.name = input.name;
+    } else if (derivedName !== null) {
+      // No explicit name provided — keep the stored name in sync with the
+      // current crop/variety pair (mirrors createBatch's derivation).
+      batch.name = derivedName;
+    }
     if (input.status !== undefined) batch.status = input.status;
     if (input.plantingDate !== undefined)
       batch.plantingDate = new Date(input.plantingDate);
