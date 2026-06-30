@@ -530,6 +530,7 @@ export const de = {
       waste: 'Abfall',
       yieldKg: 'Ertrag (kg)',
       weightKg: 'Gewicht (kg)',
+      percentage: 'Prozentsatz (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Gesamtertrag (kg)',
       date: 'Datum',
@@ -871,6 +872,9 @@ export const de = {
       confirmDelete: 'Möchten Sie diesen Benutzer wirklich löschen?',
       confirmDeleteDescription:
         'Diese Aktion kann nicht rückgängig gemacht werden.',
+      confirmUpdate: 'Diesen Benutzer aktualisieren?',
+      confirmUpdateDescription:
+        'Überprüfen Sie Ihre Änderungen — nach der Bestätigung wird der Benutzer sofort aktualisiert.',
       userCreated: 'Benutzer erfolgreich erstellt',
       userUpdated: 'Benutzer erfolgreich aktualisiert',
       userDeleted: 'Benutzer erfolgreich gelöscht',
@@ -1138,6 +1142,16 @@ export const de = {
         inactive: 'Inaktiv',
         notAvailable: 'N/V',
         loading: 'Mandanten werden geladen...',
+        allowedDomains: 'Zugelassene E-Mail-Domains',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Leer lassen, um beliebige E-Mail-Domains zuzulassen. Enter oder Komma zum Hinzufügen drücken.',
+        allowedDomainsInvalid: 'Gültige Domain eingeben (z. B. example.com)',
+        allowedDomainsRemove: 'Domain entfernen',
+        domainNotAllowed:
+          'Diese E-Mail-Domain ist für den ausgewählten Mandanten nicht zugelassen.',
+        domainTransferWarning:
+          'Durch das Verschieben dieses Benutzers wird der Mandant geändert. Stellen Sie sicher, dass die neue E-Mail-Domain zugelassen ist.',
         tabs: {
           features: 'Funktionen',
           alertConfiguration: 'Alarmkonfiguration',

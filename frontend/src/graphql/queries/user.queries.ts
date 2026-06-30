@@ -20,6 +20,7 @@ export const ME_QUERY = gql`
         updatedAt
         disabledSensorFields
         hiddenHarvestDashboardItems
+        allowedDomains
         greenhouses {
           name
           xDimension
@@ -67,6 +68,7 @@ export const USERS_QUERY = gql`
         createdAt
         isActive
         updatedAt
+        allowedDomains
       }
       isActive
       status

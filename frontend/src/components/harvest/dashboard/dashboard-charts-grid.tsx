@@ -55,7 +55,7 @@ export function DashboardChartsGrid({
   if (visibleCharts.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
+    <div className="grid grid-cols-1 items-start gap-4 sm:gap-6 lg:grid-cols-2">
       {visibleCharts.map((chart) => (
         <div key={chart.id}>{chart.node}</div>
       ))}

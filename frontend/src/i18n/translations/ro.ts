@@ -538,6 +538,7 @@ export const ro = {
       waste: 'Deșeuri',
       yieldKg: 'Producție (kg)',
       weightKg: 'Greutate (kg)',
+      percentage: 'Procentaj (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Producție totală (kg)',
       date: 'Data',
@@ -858,6 +859,9 @@ export const ro = {
       searchPlaceholder: 'Caută utilizatori...',
       confirmDelete: 'Sigur dorești să ștergi acest utilizator?',
       confirmDeleteDescription: 'Acțiunea nu poate fi anulată.',
+      confirmUpdate: 'Actualizați acest utilizator?',
+      confirmUpdateDescription:
+        'Verificați modificările — după confirmare, utilizatorul va fi actualizat imediat.',
       userCreated: 'Utilizator creat cu succes',
       userUpdated: 'Utilizator actualizat cu succes',
       userDeleted: 'Utilizator șters cu succes',
@@ -1054,6 +1058,16 @@ export const ro = {
         inactive: 'Inactiv',
         notAvailable: 'N/A',
         loading: 'Se încarcă chiriașii...',
+        allowedDomains: 'Domenii de e-mail permise',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Lăsați gol pentru a permite orice domeniu de e-mail. Apăsați Enter sau virgulă pentru a adăuga.',
+        allowedDomainsInvalid: 'Introduceți un domeniu valid (de ex. example.com)',
+        allowedDomainsRemove: 'Eliminați domeniul',
+        domainNotAllowed:
+          'Acest domeniu de e-mail nu este permis pentru chiriașul selectat.',
+        domainTransferWarning:
+          'Mutarea acestui utilizator schimbă chiriașul. Asigurați-vă că noul domeniu de e-mail este permis.',
         tabs: {
           features: 'Funcționalități',
           alertConfiguration: 'Configurare alerte',

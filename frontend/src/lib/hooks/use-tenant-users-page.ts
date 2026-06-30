@@ -33,6 +33,14 @@ export function useTenantUsersPage() {
     user: User | null;
     isOpen: boolean;
   }>({ user: null, isOpen: false });
+  // Pending update payload buffered while the tenant admin confirms the
+  // change. Mirrors the admin page so the "are you sure?" gate behaves the
+  // same on both surfaces.
+  const [updateConfirmation, setUpdateConfirmation] = React.useState<{
+    user: User | null;
+    formData: UserFormData | null;
+    isOpen: boolean;
+  }>({ user: null, formData: null, isOpen: false });
 
   const users = React.useMemo(() => {
     if (!data?.users) return [];
@@ -74,30 +82,53 @@ export function useTenantUsersPage() {
     }
   }, [deleteConfirmation.user, deleteUser, refetch]);
 
-  const handleSubmit = React.useCallback(
-    async (formData: UserFormData) => {
+  const performUpdate = React.useCallback(
+    async (user: User, formData: UserFormData) => {
       setIsLoading(true);
       try {
-        if (editingUser) {
-          await updateUser({
-            variables: { id: editingUser.id, input: formData },
-          });
-        } else {
-          const result = await createUser({
-            variables: {
-              input: {
-                email: formData.email,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                imageUrl: formData.imageUrl,
-                role: formData.role,
-                tenantId,
-              },
+        await updateUser({
+          variables: { id: user.id, input: formData },
+        });
+        await refetch();
+        setIsSheetOpen(false);
+        setEditingUser(null);
+        setUpdateConfirmation({ user: null, formData: null, isOpen: false });
+      } catch (error) {
+        console.error('Error saving user:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [refetch, updateUser],
+  );
+
+  const handleSubmit = React.useCallback(
+    async (formData: UserFormData) => {
+      // Edits open the confirmation dialog first; creates go straight through.
+      if (editingUser) {
+        setUpdateConfirmation({
+          user: editingUser,
+          formData,
+          isOpen: true,
+        });
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const result = await createUser({
+          variables: {
+            input: {
+              email: formData.email,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              imageUrl: formData.imageUrl,
+              role: formData.role,
+              tenantId,
             },
-          });
-          if (result.data?.createUser?.status === UserStatus.Pending) {
-            console.log('User created with pending invitation');
-          }
+          },
+        });
+        if (result.data?.createUser?.status === UserStatus.Pending) {
+          console.log('User created with pending invitation');
         }
         await refetch();
         setIsSheetOpen(false);
@@ -108,8 +139,14 @@ export function useTenantUsersPage() {
         setIsLoading(false);
       }
     },
-    [editingUser, createUser, updateUser, refetch, tenantId],
+    [editingUser, createUser, refetch, tenantId],
   );
+
+  const confirmUpdate = React.useCallback(async () => {
+    const { user, formData } = updateConfirmation;
+    if (!user || !formData) return;
+    await performUpdate(user, formData);
+  }, [updateConfirmation, performUpdate]);
 
   return {
     users,
@@ -120,6 +157,8 @@ export function useTenantUsersPage() {
     setIsSheetOpen,
     deleteConfirmation,
     setDeleteConfirmation,
+    updateConfirmation,
+    setUpdateConfirmation,
     allowedRoles: [UserRole.TenantUser, UserRole.TenantAdmin] as UserRole[],
     handleCreate,
     handleEdit,
@@ -127,5 +166,6 @@ export function useTenantUsersPage() {
     handleCancel,
     handleSubmit,
     confirmDelete,
+    confirmUpdate,
   };
 }

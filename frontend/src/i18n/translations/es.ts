@@ -527,6 +527,7 @@ export const es = {
       waste: 'Desperdicio',
       yieldKg: 'Rendimiento (kg)',
       weightKg: 'Peso (kg)',
+      percentage: 'Porcentaje (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Rendimiento total (kg)',
       date: 'Fecha',
@@ -847,6 +848,9 @@ export const es = {
       searchPlaceholder: 'Buscar usuarios...',
       confirmDelete: '¿Seguro que deseas eliminar este usuario?',
       confirmDeleteDescription: 'Esta acción no se puede deshacer.',
+      confirmUpdate: '¿Actualizar este usuario?',
+      confirmUpdateDescription:
+        'Revise sus cambios: una vez confirmados, el usuario se actualizará de inmediato.',
       userCreated: 'Usuario creado correctamente',
       userUpdated: 'Usuario actualizado correctamente',
       userDeleted: 'Usuario eliminado correctamente',
@@ -1046,6 +1050,16 @@ export const es = {
         inactive: 'Inactivo',
         notAvailable: 'N/D',
         loading: 'Cargando inquilinos...',
+        allowedDomains: 'Dominios de correo permitidos',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Déjelo vacío para permitir cualquier dominio de correo. Pulse Intro o coma para añadir.',
+        allowedDomainsInvalid: 'Introduzca un dominio válido (p. ej., example.com)',
+        allowedDomainsRemove: 'Eliminar dominio',
+        domainNotAllowed:
+          'Este dominio de correo no está permitido para el inquilino seleccionado.',
+        domainTransferWarning:
+          'Mover este usuario cambia el inquilino. Asegúrese de que el nuevo dominio de correo esté permitido.',
         tabs: {
           features: 'Funciones',
           alertConfiguration: 'Configuración de alertas',

@@ -39,6 +39,14 @@ export function useAdminUsersPage() {
     user: User | null;
     isOpen: boolean;
   }>({ user: null, isOpen: false });
+  // Pending update payload buffered while the admin confirms the change. We
+  // hold the form data here instead of writing it back to `editingUser` so
+  // the sheet still shows the in-progress edits if they cancel out.
+  const [updateConfirmation, setUpdateConfirmation] = React.useState<{
+    user: User | null;
+    formData: UserFormData | null;
+    isOpen: boolean;
+  }>({ user: null, formData: null, isOpen: false });
 
   const users = (usersData?.users || []) as User[];
   const tenants = (tenantsData?.tenants || []) as Tenant[];
@@ -76,38 +84,64 @@ export function useAdminUsersPage() {
     }
   }, [deleteConfirmation.user, deleteUser, refetchUsers]);
 
-  const handleSubmit = React.useCallback(
-    async (formData: UserFormData) => {
+  const performUpdate = React.useCallback(
+    async (user: User, formData: UserFormData) => {
       setIsLoading(true);
       try {
-        if (editingUser) {
-          const result = await updateUser({
-            variables: { id: editingUser.id, input: formData },
-          });
-          // The Apollo client returns GraphQL errors in `errors` instead of
-          // rejecting, so surface them explicitly (keeps the form open).
-          if (result.errors?.length) {
-            throw new Error(result.errors[0].message);
-          }
-        } else {
-          const result = await createUser({
-            variables: {
-              input: {
-                email: formData.email,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                imageUrl: formData.imageUrl,
-                role: formData.role,
-                tenantId: formData.tenantId,
-              },
+        const result = await updateUser({
+          variables: { id: user.id, input: formData },
+        });
+        // The Apollo client returns GraphQL errors in `errors` instead of
+        // rejecting, so surface them explicitly (keeps the form open).
+        if (result.errors?.length) {
+          throw new Error(result.errors[0].message);
+        }
+        await refetchUsers();
+        setIsSheetOpen(false);
+        setEditingUser(null);
+        setUpdateConfirmation({ user: null, formData: null, isOpen: false });
+      } catch (error) {
+        console.error('Error saving user:', error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [refetchUsers, updateUser],
+  );
+
+  const handleSubmit = React.useCallback(
+    async (formData: UserFormData) => {
+      // Edits are gated behind a confirmation dialog so the admin sees a clear
+      // "are you sure?" before any user record is mutated. Creates skip the
+      // gate — there's nothing to overwrite yet.
+      if (editingUser) {
+        setUpdateConfirmation({
+          user: editingUser,
+          formData,
+          isOpen: true,
+        });
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const result = await createUser({
+          variables: {
+            input: {
+              email: formData.email,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              imageUrl: formData.imageUrl,
+              role: formData.role,
+              tenantId: formData.tenantId,
             },
-          });
-          if (result.errors?.length) {
-            throw new Error(result.errors[0].message);
-          }
-          if (result.data?.createUser?.status === UserStatus.Pending) {
-            console.log('User created with pending invitation');
-          }
+          },
+        });
+        if (result.errors?.length) {
+          throw new Error(result.errors[0].message);
+        }
+        if (result.data?.createUser?.status === UserStatus.Pending) {
+          console.log('User created with pending invitation');
         }
         await refetchUsers();
         setIsSheetOpen(false);
@@ -121,8 +155,14 @@ export function useAdminUsersPage() {
         setIsLoading(false);
       }
     },
-    [editingUser, createUser, updateUser, refetchUsers],
+    [editingUser, createUser, refetchUsers],
   );
+
+  const confirmUpdate = React.useCallback(async () => {
+    const { user, formData } = updateConfirmation;
+    if (!user || !formData) return;
+    await performUpdate(user, formData);
+  }, [updateConfirmation, performUpdate]);
 
   return {
     users,
@@ -135,11 +175,14 @@ export function useAdminUsersPage() {
     setIsSheetOpen,
     deleteConfirmation,
     setDeleteConfirmation,
+    updateConfirmation,
+    setUpdateConfirmation,
     handleCreate,
     handleEdit,
     handleDelete,
     handleCancel,
     handleSubmit,
     confirmDelete,
+    confirmUpdate,
   };
 }

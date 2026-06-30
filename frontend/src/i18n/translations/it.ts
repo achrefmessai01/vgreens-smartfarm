@@ -538,6 +538,7 @@ export const it = {
       waste: 'Scarto',
       yieldKg: 'Resa (kg)',
       weightKg: 'Peso (kg)',
+      percentage: 'Percentuale (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Resa totale (kg)',
       date: 'Data',
@@ -858,6 +859,9 @@ export const it = {
       searchPlaceholder: 'Cerca utenti...',
       confirmDelete: 'Sei sicuro di voler eliminare questo utente?',
       confirmDeleteDescription: 'L’azione non può essere annullata.',
+      confirmUpdate: 'Aggiornare questo utente?',
+      confirmUpdateDescription:
+        'Verifica le modifiche — dopo la conferma, l’utente verrà aggiornato immediatamente.',
       userCreated: 'Utente creato con successo',
       userUpdated: 'Utente aggiornato con successo',
       userDeleted: 'Utente eliminato con successo',
@@ -1055,6 +1059,16 @@ export const it = {
         inactive: 'Inattivo',
         notAvailable: 'N/D',
         loading: 'Caricamento tenant...',
+        allowedDomains: 'Domini email consentiti',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Lascia vuoto per consentire qualsiasi dominio email. Premi Invio o virgola per aggiungere.',
+        allowedDomainsInvalid: 'Inserisci un dominio valido (es. example.com)',
+        allowedDomainsRemove: 'Rimuovi dominio',
+        domainNotAllowed:
+          'Questo dominio email non è consentito per il tenant selezionato.',
+        domainTransferWarning:
+          'Lo spostamento di questo utente cambia il tenant. Assicurati che il nuovo dominio email sia consentito.',
         tabs: {
           features: 'Funzionalità',
           alertConfiguration: 'Configurazione allarmi',

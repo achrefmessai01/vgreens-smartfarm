@@ -1,4 +1,5 @@
 import { UserRole } from '@common/enums';
+import { emailMatchesDomains } from './email-domain';
 
 /**
  * Admin-role email-domain rule (VSL-182).
@@ -24,20 +25,6 @@ const TENANT_ADMIN_DOMAINS: Record<string, string[]> = {
   '254862df-36b9-4f63-b46a-e505a02c9476': ['gemuesering-boehmer.de'], // Stefan Brill (GMR Meinsdorf)
 };
 
-/** Lower-cased domain after the last '@', or null when missing/malformed. */
-function emailDomain(email?: string | null): string | null {
-  if (!email) return null;
-  const normalized = email.trim().toLowerCase();
-  const at = normalized.lastIndexOf('@');
-  if (at <= 0 || at === normalized.length - 1) return null;
-  return normalized.slice(at + 1);
-}
-
-function matches(email: string | null | undefined, domains: string[]): boolean {
-  const domain = emailDomain(email);
-  return !!domain && domains.some((d) => d.trim().toLowerCase() === domain);
-}
-
 /**
  * Returns an error message if the email is not allowed for the given admin
  * role, or `null` if it's allowed (or the role isn't an admin role / has no
@@ -49,7 +36,7 @@ export function getAdminEmailDomainError(
   tenantId: string | undefined | null,
 ): string | null {
   if (role === UserRole.VGREENS_ADMIN) {
-    return matches(email, VGREENS_ADMIN_DOMAINS)
+    return emailMatchesDomains(email, VGREENS_ADMIN_DOMAINS)
       ? null
       : `Only emails on ${VGREENS_ADMIN_DOMAINS.map((d) => `@${d}`).join(', ')} can be assigned the vGreens admin role.`;
   }
@@ -59,7 +46,7 @@ export function getAdminEmailDomainError(
     if (!domains || domains.length === 0) {
       return null; // no domain configured for this tenant → not restricted
     }
-    return matches(email, domains)
+    return emailMatchesDomains(email, domains)
       ? null
       : `Only emails on ${domains.map((d) => `@${d}`).join(', ')} can be assigned the tenant admin role for this tenant.`;
   }

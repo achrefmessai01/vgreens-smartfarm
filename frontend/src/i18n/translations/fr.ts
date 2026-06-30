@@ -524,6 +524,7 @@ export const fr = {
       waste: 'Déchets',
       yieldKg: 'Rendement (kg)',
       weightKg: 'Poids (kg)',
+      percentage: 'Pourcentage (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Rendement total (kg)',
       date: 'Date',
@@ -844,6 +845,9 @@ export const fr = {
       searchPlaceholder: 'Rechercher des utilisateurs…',
       confirmDelete: 'Voulez-vous vraiment supprimer cet utilisateur ?',
       confirmDeleteDescription: 'Action irréversible.',
+      confirmUpdate: 'Mettre à jour cet utilisateur ?',
+      confirmUpdateDescription:
+        'Vérifiez vos modifications — une fois confirmées, l’utilisateur sera mis à jour immédiatement.',
       userCreated: 'Utilisateur créé avec succès',
       userUpdated: 'Utilisateur mis à jour',
       userDeleted: 'Utilisateur supprimé',
@@ -1035,6 +1039,16 @@ export const fr = {
         inactive: 'Inactif',
         notAvailable: 'N/D',
         loading: 'Chargement…',
+        allowedDomains: 'Domaines e-mail autorisés',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Laissez vide pour autoriser n’importe quel domaine e-mail. Appuyez sur Entrée ou virgule pour ajouter.',
+        allowedDomainsInvalid: 'Saisissez un domaine valide (par ex. example.com)',
+        allowedDomainsRemove: 'Supprimer le domaine',
+        domainNotAllowed:
+          'Ce domaine e-mail n’est pas autorisé pour le locataire sélectionné.',
+        domainTransferWarning:
+          'Déplacer cet utilisateur change le locataire. Assurez-vous que le nouveau domaine e-mail est autorisé.',
         tabs: {
           features: 'Fonctionnalités',
           alertConfiguration: 'Configuration des alertes',
