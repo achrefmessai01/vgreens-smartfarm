@@ -935,12 +935,14 @@ export type Mutation = {
 
 export type MutationAcknowledgeAlertArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type MutationAssignCropToGreenhouseArgs = {
   cropId: Scalars['ID']['input'];
   greenhouseId: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1001,11 +1003,13 @@ export type MutationCreateVarietyArgs = {
 
 export type MutationDeleteAlertArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type MutationDeleteBatchArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1021,11 +1025,13 @@ export type MutationDeleteFeatureArgs = {
 
 export type MutationDeleteGreenhouseArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type MutationDeleteHarvestArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1047,6 +1053,7 @@ export type MutationDeleteTenantArgs = {
 
 export type MutationDeleteUserArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1057,6 +1064,7 @@ export type MutationLogSystemErrorArgs = {
 
 export type MutationResolveAlertArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1102,6 +1110,7 @@ export type MutationSetTenantHarvestDashboardItemsArgs = {
 
 export type MutationSoftDeleteAlertArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1113,18 +1122,21 @@ export type MutationToggleTenantFeatureArgs = {
 export type MutationUnassignCropFromGreenhouseArgs = {
   cropId: Scalars['ID']['input'];
   greenhouseId: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type MutationUpdateAlertArgs = {
   id: Scalars['ID']['input'];
   input: UpdateAlertInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type MutationUpdateBatchArgs = {
   id: Scalars['ID']['input'];
   input: UpdateBatchInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1149,12 +1161,14 @@ export type MutationUpdateFeatureArgs = {
 export type MutationUpdateGreenhouseArgs = {
   id: Scalars['ID']['input'];
   input: UpdateGreenhouseInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type MutationUpdateHarvestArgs = {
   id: Scalars['ID']['input'];
   input: UpdateHarvestInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1172,6 +1186,7 @@ export type MutationUpdateTenantArgs = {
 export type MutationUpdateUserArgs = {
   id: Scalars['ID']['input'];
   input: UpdateUserInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1272,22 +1287,26 @@ export type Query = {
 
 export type QueryAlertArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type QueryAlertsArgs = {
   filter?: InputMaybe<AlertsFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type QueryBatchArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type QueryBatchesArgs = {
   filter?: InputMaybe<BatchFilterInput>;
   sort?: InputMaybe<BatchSortInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1374,6 +1393,7 @@ export type QueryGetSystemErrorStatsArgs = {
 
 export type QueryGreenhouseArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1389,22 +1409,31 @@ export type QueryGreenhousesArgs = {
 
 export type QueryHarvestArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryHarvestBatchesArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type QueryHarvestDashboardArgs = {
   filter?: InputMaybe<DashboardFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type QueryHarvestsArgs = {
   filter?: InputMaybe<HarvestFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type QueryHarvestsCsvExportArgs = {
   columns?: InputMaybe<Array<Scalars['String']['input']>>;
   filter?: InputMaybe<HarvestFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1445,6 +1474,12 @@ export type QueryTenantGreenhousesArgs = {
 
 export type QueryUserArgs = {
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryUsersArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1497,6 +1532,11 @@ export type SignedUrl = {
 export type Subscription = {
   __typename?: 'Subscription';
   alertCreated: Alert;
+};
+
+
+export type SubscriptionAlertCreatedArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type SystemError = {
@@ -1864,6 +1904,7 @@ export type CreateBatchMutation = { __typename?: 'Mutation', createBatch: { __ty
 export type UpdateBatchMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateBatchInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -1871,6 +1912,7 @@ export type UpdateBatchMutation = { __typename?: 'Mutation', updateBatch: { __ty
 
 export type DeleteBatchMutationVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -1948,6 +1990,7 @@ export type CreateGreenhouseMutation = { __typename?: 'Mutation', createGreenhou
 export type UpdateGreenhouseMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateGreenhouseInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -1955,6 +1998,7 @@ export type UpdateGreenhouseMutation = { __typename?: 'Mutation', updateGreenhou
 
 export type DeleteGreenhouseMutationVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -1972,6 +2016,7 @@ export type CreateHarvestMutation = { __typename?: 'Mutation', createHarvest: { 
 export type UpdateHarvestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateHarvestInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -1979,6 +2024,7 @@ export type UpdateHarvestMutation = { __typename?: 'Mutation', updateHarvest: { 
 
 export type DeleteHarvestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2062,6 +2108,7 @@ export type CreateUserMutation = { __typename?: 'Mutation', createUser: { __type
 export type UpdateUserMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateUserInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2069,6 +2116,7 @@ export type UpdateUserMutation = { __typename?: 'Mutation', updateUser: { __type
 
 export type DeleteUserMutationVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2122,6 +2170,7 @@ export type ResolveSystemErrorMutation = { __typename?: 'Mutation', resolveSyste
 
 export type AlertsQueryVariables = Exact<{
   filter?: InputMaybe<AlertsFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2129,6 +2178,7 @@ export type AlertsQuery = { __typename?: 'Query', alerts: Array<{ __typename?: '
 
 export type AlertQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2144,6 +2194,7 @@ export type CreateAlertMutation = { __typename?: 'Mutation', createAlert: { __ty
 export type UpdateAlertMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateAlertInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2151,6 +2202,7 @@ export type UpdateAlertMutation = { __typename?: 'Mutation', updateAlert: { __ty
 
 export type AcknowledgeAlertMutationVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2158,6 +2210,7 @@ export type AcknowledgeAlertMutation = { __typename?: 'Mutation', acknowledgeAle
 
 export type ResolveAlertMutationVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2165,6 +2218,7 @@ export type ResolveAlertMutation = { __typename?: 'Mutation', resolveAlert: { __
 
 export type SoftDeleteAlertMutationVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2172,6 +2226,7 @@ export type SoftDeleteAlertMutation = { __typename?: 'Mutation', softDeleteAlert
 
 export type DeleteAlertMutationVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2182,6 +2237,7 @@ export type BatchFieldsFragment = { __typename?: 'Batch', id: string, tenantId: 
 export type BatchesQueryVariables = Exact<{
   filter?: InputMaybe<BatchFilterInput>;
   sort?: InputMaybe<BatchSortInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2189,12 +2245,15 @@ export type BatchesQuery = { __typename?: 'Query', batches: Array<{ __typename?:
 
 export type BatchQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
 export type BatchQuery = { __typename?: 'Query', batch?: { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, runningMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, avgHeadsPerPlant?: number | null, slabLength?: number | null, headsPerSlab?: number | null, inputMode: InputMode, crateWeight?: number | null, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null } | null };
 
-export type HarvestBatchesQueryVariables = Exact<{ [key: string]: never; }>;
+export type HarvestBatchesQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
 export type HarvestBatchesQuery = { __typename?: 'Query', harvestBatches: Array<{ __typename?: 'HarvestBatchListItem', id: string, name: string, species?: string | null, variety?: string | null, greenhouse?: string | null, plantingDate: any, status: BatchStatus, yieldPerPlant?: number | null }> };
@@ -2295,18 +2354,22 @@ export type GreenhousesQuery = { __typename?: 'Query', greenhouses: Array<{ __ty
 
 export type GreenhouseQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
 export type GreenhouseQuery = { __typename?: 'Query', greenhouse?: { __typename?: 'Greenhouse', id: string, tenantId: string, name: string, doorPosition?: DoorPosition | null, xDimension?: number | null, yDimension?: number | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any } | null };
 
-export type GetHarvestBatchesQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetHarvestBatchesQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
 export type GetHarvestBatchesQuery = { __typename?: 'Query', harvestBatches: Array<{ __typename?: 'HarvestBatchListItem', id: string, name: string, species?: string | null, variety?: string | null, greenhouse?: string | null, plantingDate: any, status: BatchStatus, yieldPerPlant?: number | null }> };
 
 export type GetHarvestDashboardQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2328,6 +2391,7 @@ export type GetHarvestDashboardWithVariablesQuery = { __typename?: 'Query', harv
 
 export type GetHarvestMetricsQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2335,6 +2399,7 @@ export type GetHarvestMetricsQuery = { __typename?: 'Query', harvestDashboard: {
 
 export type GetYieldOverTimeQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2342,6 +2407,7 @@ export type GetYieldOverTimeQuery = { __typename?: 'Query', harvestDashboard: { 
 
 export type GetClassDistributionQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2349,6 +2415,7 @@ export type GetClassDistributionQuery = { __typename?: 'Query', harvestDashboard
 
 export type GetBrixTrendQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2356,6 +2423,7 @@ export type GetBrixTrendQuery = { __typename?: 'Query', harvestDashboard: { __ty
 
 export type GetFruitWeightTrendQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2363,6 +2431,7 @@ export type GetFruitWeightTrendQuery = { __typename?: 'Query', harvestDashboard:
 
 export type GetCumulativeYieldQueryVariables = Exact<{
   filter?: InputMaybe<DashboardFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2370,6 +2439,7 @@ export type GetCumulativeYieldQuery = { __typename?: 'Query', harvestDashboard: 
 
 export type GetHarvestSummaryQueryVariables = Exact<{
   filter?: InputMaybe<HarvestFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2379,6 +2449,7 @@ export type HarvestFieldsFragment = { __typename?: 'Harvest', id: string, tenant
 
 export type HarvestsQueryVariables = Exact<{
   filter?: InputMaybe<HarvestFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2386,6 +2457,7 @@ export type HarvestsQuery = { __typename?: 'Query', harvests: Array<{ __typename
 
 export type HarvestQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2394,6 +2466,7 @@ export type HarvestQuery = { __typename?: 'Query', harvest?: { __typename?: 'Har
 export type HarvestsCsvExportQueryVariables = Exact<{
   filter?: InputMaybe<HarvestFilterInput>;
   columns?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2401,6 +2474,7 @@ export type HarvestsCsvExportQuery = { __typename?: 'Query', harvestsCsvExport: 
 
 export type HarvestsCountQueryVariables = Exact<{
   filter?: InputMaybe<HarvestFilterInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2496,19 +2570,24 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, allowedDomains: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } | null };
 
-export type UsersQueryVariables = Exact<{ [key: string]: never; }>;
+export type UsersQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
 export type UsersQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, createdAt: any, isActive: boolean, updatedAt: any, allowedDomains: Array<string> } | null }> };
 
 export type UserQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
 export type UserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, createdAt: any, updatedAt: any } | null };
 
-export type AlertCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type AlertCreatedSubscriptionVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
 export type AlertCreatedSubscription = { __typename?: 'Subscription', alertCreated: { __typename?: 'Alert', id: string, tenantId: string, sensorName: string, value: string, status: AlertStatus, severity: AlertSeverity, description?: string | null, timestamp?: any | null, field?: string | null, measurement?: string | null, device?: string | null, greenhouse?: string | null, city?: string | null, column?: string | null, row?: string | null, profile?: string | null, createdAt: any, updatedAt: any } };
@@ -3146,8 +3225,8 @@ export type CreateBatchMutationHookResult = ReturnType<typeof useCreateBatchMuta
 export type CreateBatchMutationResult = Apollo.MutationResult<CreateBatchMutation>;
 export type CreateBatchMutationOptions = Apollo.BaseMutationOptions<CreateBatchMutation, CreateBatchMutationVariables>;
 export const UpdateBatchDocument = gql`
-    mutation UpdateBatch($id: ID!, $input: UpdateBatchInput!) {
-  updateBatch(id: $id, input: $input) {
+    mutation UpdateBatch($id: ID!, $input: UpdateBatchInput!, $tenantId: ID) {
+  updateBatch(id: $id, input: $input, tenantId: $tenantId) {
     ...BatchMutationFields
   }
 }
@@ -3169,6 +3248,7 @@ export type UpdateBatchMutationFn = Apollo.MutationFunction<UpdateBatchMutation,
  *   variables: {
  *      id: // value for 'id'
  *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -3180,8 +3260,8 @@ export type UpdateBatchMutationHookResult = ReturnType<typeof useUpdateBatchMuta
 export type UpdateBatchMutationResult = Apollo.MutationResult<UpdateBatchMutation>;
 export type UpdateBatchMutationOptions = Apollo.BaseMutationOptions<UpdateBatchMutation, UpdateBatchMutationVariables>;
 export const DeleteBatchDocument = gql`
-    mutation DeleteBatch($id: ID!) {
-  deleteBatch(id: $id)
+    mutation DeleteBatch($id: ID!, $tenantId: ID) {
+  deleteBatch(id: $id, tenantId: $tenantId)
 }
     `;
 export type DeleteBatchMutationFn = Apollo.MutationFunction<DeleteBatchMutation, DeleteBatchMutationVariables>;
@@ -3200,6 +3280,7 @@ export type DeleteBatchMutationFn = Apollo.MutationFunction<DeleteBatchMutation,
  * const [deleteBatchMutation, { data, loading, error }] = useDeleteBatchMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -3543,8 +3624,8 @@ export type CreateGreenhouseMutationHookResult = ReturnType<typeof useCreateGree
 export type CreateGreenhouseMutationResult = Apollo.MutationResult<CreateGreenhouseMutation>;
 export type CreateGreenhouseMutationOptions = Apollo.BaseMutationOptions<CreateGreenhouseMutation, CreateGreenhouseMutationVariables>;
 export const UpdateGreenhouseDocument = gql`
-    mutation UpdateGreenhouse($id: ID!, $input: UpdateGreenhouseInput!) {
-  updateGreenhouse(id: $id, input: $input) {
+    mutation UpdateGreenhouse($id: ID!, $input: UpdateGreenhouseInput!, $tenantId: ID) {
+  updateGreenhouse(id: $id, input: $input, tenantId: $tenantId) {
     ...GreenhouseMutationFields
   }
 }
@@ -3566,6 +3647,7 @@ export type UpdateGreenhouseMutationFn = Apollo.MutationFunction<UpdateGreenhous
  *   variables: {
  *      id: // value for 'id'
  *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -3577,8 +3659,8 @@ export type UpdateGreenhouseMutationHookResult = ReturnType<typeof useUpdateGree
 export type UpdateGreenhouseMutationResult = Apollo.MutationResult<UpdateGreenhouseMutation>;
 export type UpdateGreenhouseMutationOptions = Apollo.BaseMutationOptions<UpdateGreenhouseMutation, UpdateGreenhouseMutationVariables>;
 export const DeleteGreenhouseDocument = gql`
-    mutation DeleteGreenhouse($id: ID!) {
-  deleteGreenhouse(id: $id)
+    mutation DeleteGreenhouse($id: ID!, $tenantId: ID) {
+  deleteGreenhouse(id: $id, tenantId: $tenantId)
 }
     `;
 export type DeleteGreenhouseMutationFn = Apollo.MutationFunction<DeleteGreenhouseMutation, DeleteGreenhouseMutationVariables>;
@@ -3597,6 +3679,7 @@ export type DeleteGreenhouseMutationFn = Apollo.MutationFunction<DeleteGreenhous
  * const [deleteGreenhouseMutation, { data, loading, error }] = useDeleteGreenhouseMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -3641,8 +3724,8 @@ export type CreateHarvestMutationHookResult = ReturnType<typeof useCreateHarvest
 export type CreateHarvestMutationResult = Apollo.MutationResult<CreateHarvestMutation>;
 export type CreateHarvestMutationOptions = Apollo.BaseMutationOptions<CreateHarvestMutation, CreateHarvestMutationVariables>;
 export const UpdateHarvestDocument = gql`
-    mutation UpdateHarvest($id: ID!, $input: UpdateHarvestInput!) {
-  updateHarvest(id: $id, input: $input) {
+    mutation UpdateHarvest($id: ID!, $input: UpdateHarvestInput!, $tenantId: ID) {
+  updateHarvest(id: $id, input: $input, tenantId: $tenantId) {
     ...HarvestMutationFields
   }
 }
@@ -3664,6 +3747,7 @@ export type UpdateHarvestMutationFn = Apollo.MutationFunction<UpdateHarvestMutat
  *   variables: {
  *      id: // value for 'id'
  *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -3675,8 +3759,8 @@ export type UpdateHarvestMutationHookResult = ReturnType<typeof useUpdateHarvest
 export type UpdateHarvestMutationResult = Apollo.MutationResult<UpdateHarvestMutation>;
 export type UpdateHarvestMutationOptions = Apollo.BaseMutationOptions<UpdateHarvestMutation, UpdateHarvestMutationVariables>;
 export const DeleteHarvestDocument = gql`
-    mutation DeleteHarvest($id: ID!) {
-  deleteHarvest(id: $id)
+    mutation DeleteHarvest($id: ID!, $tenantId: ID) {
+  deleteHarvest(id: $id, tenantId: $tenantId)
 }
     `;
 export type DeleteHarvestMutationFn = Apollo.MutationFunction<DeleteHarvestMutation, DeleteHarvestMutationVariables>;
@@ -3695,6 +3779,7 @@ export type DeleteHarvestMutationFn = Apollo.MutationFunction<DeleteHarvestMutat
  * const [deleteHarvestMutation, { data, loading, error }] = useDeleteHarvestMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4096,8 +4181,8 @@ export type CreateUserMutationHookResult = ReturnType<typeof useCreateUserMutati
 export type CreateUserMutationResult = Apollo.MutationResult<CreateUserMutation>;
 export type CreateUserMutationOptions = Apollo.BaseMutationOptions<CreateUserMutation, CreateUserMutationVariables>;
 export const UpdateUserDocument = gql`
-    mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
-  updateUser(id: $id, input: $input) {
+    mutation UpdateUser($id: ID!, $input: UpdateUserInput!, $tenantId: ID) {
+  updateUser(id: $id, input: $input, tenantId: $tenantId) {
     id
     clerkUserId
     email
@@ -4129,6 +4214,7 @@ export type UpdateUserMutationFn = Apollo.MutationFunction<UpdateUserMutation, U
  *   variables: {
  *      id: // value for 'id'
  *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4140,8 +4226,8 @@ export type UpdateUserMutationHookResult = ReturnType<typeof useUpdateUserMutati
 export type UpdateUserMutationResult = Apollo.MutationResult<UpdateUserMutation>;
 export type UpdateUserMutationOptions = Apollo.BaseMutationOptions<UpdateUserMutation, UpdateUserMutationVariables>;
 export const DeleteUserDocument = gql`
-    mutation DeleteUser($id: ID!) {
-  deleteUser(id: $id)
+    mutation DeleteUser($id: ID!, $tenantId: ID) {
+  deleteUser(id: $id, tenantId: $tenantId)
 }
     `;
 export type DeleteUserMutationFn = Apollo.MutationFunction<DeleteUserMutation, DeleteUserMutationVariables>;
@@ -4160,6 +4246,7 @@ export type DeleteUserMutationFn = Apollo.MutationFunction<DeleteUserMutation, D
  * const [deleteUserMutation, { data, loading, error }] = useDeleteUserMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4442,8 +4529,8 @@ export type ResolveSystemErrorMutationHookResult = ReturnType<typeof useResolveS
 export type ResolveSystemErrorMutationResult = Apollo.MutationResult<ResolveSystemErrorMutation>;
 export type ResolveSystemErrorMutationOptions = Apollo.BaseMutationOptions<ResolveSystemErrorMutation, ResolveSystemErrorMutationVariables>;
 export const AlertsDocument = gql`
-    query Alerts($filter: AlertsFilterInput) {
-  alerts(filter: $filter) {
+    query Alerts($filter: AlertsFilterInput, $tenantId: ID) {
+  alerts(filter: $filter, tenantId: $tenantId) {
     id
     tenantId
     tunnelId
@@ -4500,6 +4587,7 @@ export const AlertsDocument = gql`
  * const { data, loading, error } = useAlertsQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4523,8 +4611,8 @@ export type AlertsLazyQueryHookResult = ReturnType<typeof useAlertsLazyQuery>;
 export type AlertsSuspenseQueryHookResult = ReturnType<typeof useAlertsSuspenseQuery>;
 export type AlertsQueryResult = Apollo.QueryResult<AlertsQuery, AlertsQueryVariables>;
 export const AlertDocument = gql`
-    query Alert($id: ID!) {
-  alert(id: $id) {
+    query Alert($id: ID!, $tenantId: ID) {
+  alert(id: $id, tenantId: $tenantId) {
     id
     tenantId
     tunnelId
@@ -4581,6 +4669,7 @@ export const AlertDocument = gql`
  * const { data, loading, error } = useAlertQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4655,8 +4744,8 @@ export type CreateAlertMutationHookResult = ReturnType<typeof useCreateAlertMuta
 export type CreateAlertMutationResult = Apollo.MutationResult<CreateAlertMutation>;
 export type CreateAlertMutationOptions = Apollo.BaseMutationOptions<CreateAlertMutation, CreateAlertMutationVariables>;
 export const UpdateAlertDocument = gql`
-    mutation UpdateAlert($id: ID!, $input: UpdateAlertInput!) {
-  updateAlert(id: $id, input: $input) {
+    mutation UpdateAlert($id: ID!, $input: UpdateAlertInput!, $tenantId: ID) {
+  updateAlert(id: $id, input: $input, tenantId: $tenantId) {
     id
     tenantId
     tunnelId
@@ -4696,6 +4785,7 @@ export type UpdateAlertMutationFn = Apollo.MutationFunction<UpdateAlertMutation,
  *   variables: {
  *      id: // value for 'id'
  *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4707,8 +4797,8 @@ export type UpdateAlertMutationHookResult = ReturnType<typeof useUpdateAlertMuta
 export type UpdateAlertMutationResult = Apollo.MutationResult<UpdateAlertMutation>;
 export type UpdateAlertMutationOptions = Apollo.BaseMutationOptions<UpdateAlertMutation, UpdateAlertMutationVariables>;
 export const AcknowledgeAlertDocument = gql`
-    mutation AcknowledgeAlert($id: ID!) {
-  acknowledgeAlert(id: $id) {
+    mutation AcknowledgeAlert($id: ID!, $tenantId: ID) {
+  acknowledgeAlert(id: $id, tenantId: $tenantId) {
     id
     status
     updatedAt
@@ -4731,6 +4821,7 @@ export type AcknowledgeAlertMutationFn = Apollo.MutationFunction<AcknowledgeAler
  * const [acknowledgeAlertMutation, { data, loading, error }] = useAcknowledgeAlertMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4742,8 +4833,8 @@ export type AcknowledgeAlertMutationHookResult = ReturnType<typeof useAcknowledg
 export type AcknowledgeAlertMutationResult = Apollo.MutationResult<AcknowledgeAlertMutation>;
 export type AcknowledgeAlertMutationOptions = Apollo.BaseMutationOptions<AcknowledgeAlertMutation, AcknowledgeAlertMutationVariables>;
 export const ResolveAlertDocument = gql`
-    mutation ResolveAlert($id: ID!) {
-  resolveAlert(id: $id) {
+    mutation ResolveAlert($id: ID!, $tenantId: ID) {
+  resolveAlert(id: $id, tenantId: $tenantId) {
     id
     status
     updatedAt
@@ -4766,6 +4857,7 @@ export type ResolveAlertMutationFn = Apollo.MutationFunction<ResolveAlertMutatio
  * const [resolveAlertMutation, { data, loading, error }] = useResolveAlertMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4777,8 +4869,8 @@ export type ResolveAlertMutationHookResult = ReturnType<typeof useResolveAlertMu
 export type ResolveAlertMutationResult = Apollo.MutationResult<ResolveAlertMutation>;
 export type ResolveAlertMutationOptions = Apollo.BaseMutationOptions<ResolveAlertMutation, ResolveAlertMutationVariables>;
 export const SoftDeleteAlertDocument = gql`
-    mutation SoftDeleteAlert($id: ID!) {
-  softDeleteAlert(id: $id)
+    mutation SoftDeleteAlert($id: ID!, $tenantId: ID) {
+  softDeleteAlert(id: $id, tenantId: $tenantId)
 }
     `;
 export type SoftDeleteAlertMutationFn = Apollo.MutationFunction<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>;
@@ -4797,6 +4889,7 @@ export type SoftDeleteAlertMutationFn = Apollo.MutationFunction<SoftDeleteAlertM
  * const [softDeleteAlertMutation, { data, loading, error }] = useSoftDeleteAlertMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4808,8 +4901,8 @@ export type SoftDeleteAlertMutationHookResult = ReturnType<typeof useSoftDeleteA
 export type SoftDeleteAlertMutationResult = Apollo.MutationResult<SoftDeleteAlertMutation>;
 export type SoftDeleteAlertMutationOptions = Apollo.BaseMutationOptions<SoftDeleteAlertMutation, SoftDeleteAlertMutationVariables>;
 export const DeleteAlertDocument = gql`
-    mutation DeleteAlert($id: ID!) {
-  deleteAlert(id: $id)
+    mutation DeleteAlert($id: ID!, $tenantId: ID) {
+  deleteAlert(id: $id, tenantId: $tenantId)
 }
     `;
 export type DeleteAlertMutationFn = Apollo.MutationFunction<DeleteAlertMutation, DeleteAlertMutationVariables>;
@@ -4828,6 +4921,7 @@ export type DeleteAlertMutationFn = Apollo.MutationFunction<DeleteAlertMutation,
  * const [deleteAlertMutation, { data, loading, error }] = useDeleteAlertMutation({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4839,8 +4933,8 @@ export type DeleteAlertMutationHookResult = ReturnType<typeof useDeleteAlertMuta
 export type DeleteAlertMutationResult = Apollo.MutationResult<DeleteAlertMutation>;
 export type DeleteAlertMutationOptions = Apollo.BaseMutationOptions<DeleteAlertMutation, DeleteAlertMutationVariables>;
 export const BatchesDocument = gql`
-    query Batches($filter: BatchFilterInput, $sort: BatchSortInput) {
-  batches(filter: $filter, sort: $sort) {
+    query Batches($filter: BatchFilterInput, $sort: BatchSortInput, $tenantId: ID) {
+  batches(filter: $filter, sort: $sort, tenantId: $tenantId) {
     ...BatchFields
   }
 }
@@ -4860,6 +4954,7 @@ export const BatchesDocument = gql`
  *   variables: {
  *      filter: // value for 'filter'
  *      sort: // value for 'sort'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4883,8 +4978,8 @@ export type BatchesLazyQueryHookResult = ReturnType<typeof useBatchesLazyQuery>;
 export type BatchesSuspenseQueryHookResult = ReturnType<typeof useBatchesSuspenseQuery>;
 export type BatchesQueryResult = Apollo.QueryResult<BatchesQuery, BatchesQueryVariables>;
 export const BatchDocument = gql`
-    query Batch($id: ID!) {
-  batch(id: $id) {
+    query Batch($id: ID!, $tenantId: ID) {
+  batch(id: $id, tenantId: $tenantId) {
     ...BatchFields
   }
 }
@@ -4903,6 +4998,7 @@ export const BatchDocument = gql`
  * const { data, loading, error } = useBatchQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -4926,8 +5022,8 @@ export type BatchLazyQueryHookResult = ReturnType<typeof useBatchLazyQuery>;
 export type BatchSuspenseQueryHookResult = ReturnType<typeof useBatchSuspenseQuery>;
 export type BatchQueryResult = Apollo.QueryResult<BatchQuery, BatchQueryVariables>;
 export const HarvestBatchesDocument = gql`
-    query HarvestBatches {
-  harvestBatches {
+    query HarvestBatches($tenantId: ID) {
+  harvestBatches(tenantId: $tenantId) {
     id
     name
     species
@@ -4952,6 +5048,7 @@ export const HarvestBatchesDocument = gql`
  * @example
  * const { data, loading, error } = useHarvestBatchesQuery({
  *   variables: {
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -5640,8 +5737,8 @@ export type GreenhousesLazyQueryHookResult = ReturnType<typeof useGreenhousesLaz
 export type GreenhousesSuspenseQueryHookResult = ReturnType<typeof useGreenhousesSuspenseQuery>;
 export type GreenhousesQueryResult = Apollo.QueryResult<GreenhousesQuery, GreenhousesQueryVariables>;
 export const GreenhouseDocument = gql`
-    query Greenhouse($id: ID!) {
-  greenhouse(id: $id) {
+    query Greenhouse($id: ID!, $tenantId: ID) {
+  greenhouse(id: $id, tenantId: $tenantId) {
     ...GreenhouseFields
   }
 }
@@ -5660,6 +5757,7 @@ export const GreenhouseDocument = gql`
  * const { data, loading, error } = useGreenhouseQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -5683,8 +5781,8 @@ export type GreenhouseLazyQueryHookResult = ReturnType<typeof useGreenhouseLazyQ
 export type GreenhouseSuspenseQueryHookResult = ReturnType<typeof useGreenhouseSuspenseQuery>;
 export type GreenhouseQueryResult = Apollo.QueryResult<GreenhouseQuery, GreenhouseQueryVariables>;
 export const GetHarvestBatchesDocument = gql`
-    query GetHarvestBatches {
-  harvestBatches {
+    query GetHarvestBatches($tenantId: ID) {
+  harvestBatches(tenantId: $tenantId) {
     id
     name
     species
@@ -5709,6 +5807,7 @@ export const GetHarvestBatchesDocument = gql`
  * @example
  * const { data, loading, error } = useGetHarvestBatchesQuery({
  *   variables: {
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -5732,8 +5831,8 @@ export type GetHarvestBatchesLazyQueryHookResult = ReturnType<typeof useGetHarve
 export type GetHarvestBatchesSuspenseQueryHookResult = ReturnType<typeof useGetHarvestBatchesSuspenseQuery>;
 export type GetHarvestBatchesQueryResult = Apollo.QueryResult<GetHarvestBatchesQuery, GetHarvestBatchesQueryVariables>;
 export const GetHarvestDashboardDocument = gql`
-    query GetHarvestDashboard($filter: DashboardFilterInput) {
-  harvestDashboard(filter: $filter) {
+    query GetHarvestDashboard($filter: DashboardFilterInput, $tenantId: ID) {
+  harvestDashboard(filter: $filter, tenantId: $tenantId) {
     species
     variety
     harvestCount
@@ -5792,6 +5891,7 @@ export const GetHarvestDashboardDocument = gql`
  * const { data, loading, error } = useGetHarvestDashboardQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -5907,8 +6007,8 @@ export type GetHarvestDashboardWithVariablesLazyQueryHookResult = ReturnType<typ
 export type GetHarvestDashboardWithVariablesSuspenseQueryHookResult = ReturnType<typeof useGetHarvestDashboardWithVariablesSuspenseQuery>;
 export type GetHarvestDashboardWithVariablesQueryResult = Apollo.QueryResult<GetHarvestDashboardWithVariablesQuery, GetHarvestDashboardWithVariablesQueryVariables>;
 export const GetHarvestMetricsDocument = gql`
-    query GetHarvestMetrics($filter: DashboardFilterInput) {
-  harvestDashboard(filter: $filter) {
+    query GetHarvestMetrics($filter: DashboardFilterInput, $tenantId: ID) {
+  harvestDashboard(filter: $filter, tenantId: $tenantId) {
     species
     variety
     harvestCount
@@ -5939,6 +6039,7 @@ export const GetHarvestMetricsDocument = gql`
  * const { data, loading, error } = useGetHarvestMetricsQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -5962,8 +6063,8 @@ export type GetHarvestMetricsLazyQueryHookResult = ReturnType<typeof useGetHarve
 export type GetHarvestMetricsSuspenseQueryHookResult = ReturnType<typeof useGetHarvestMetricsSuspenseQuery>;
 export type GetHarvestMetricsQueryResult = Apollo.QueryResult<GetHarvestMetricsQuery, GetHarvestMetricsQueryVariables>;
 export const GetYieldOverTimeDocument = gql`
-    query GetYieldOverTime($filter: DashboardFilterInput) {
-  harvestDashboard(filter: $filter) {
+    query GetYieldOverTime($filter: DashboardFilterInput, $tenantId: ID) {
+  harvestDashboard(filter: $filter, tenantId: $tenantId) {
     yieldOverTime {
       date
       yield
@@ -5985,6 +6086,7 @@ export const GetYieldOverTimeDocument = gql`
  * const { data, loading, error } = useGetYieldOverTimeQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6008,8 +6110,8 @@ export type GetYieldOverTimeLazyQueryHookResult = ReturnType<typeof useGetYieldO
 export type GetYieldOverTimeSuspenseQueryHookResult = ReturnType<typeof useGetYieldOverTimeSuspenseQuery>;
 export type GetYieldOverTimeQueryResult = Apollo.QueryResult<GetYieldOverTimeQuery, GetYieldOverTimeQueryVariables>;
 export const GetClassDistributionDocument = gql`
-    query GetClassDistribution($filter: DashboardFilterInput) {
-  harvestDashboard(filter: $filter) {
+    query GetClassDistribution($filter: DashboardFilterInput, $tenantId: ID) {
+  harvestDashboard(filter: $filter, tenantId: $tenantId) {
     classDistribution {
       date
       classes
@@ -6032,6 +6134,7 @@ export const GetClassDistributionDocument = gql`
  * const { data, loading, error } = useGetClassDistributionQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6055,8 +6158,8 @@ export type GetClassDistributionLazyQueryHookResult = ReturnType<typeof useGetCl
 export type GetClassDistributionSuspenseQueryHookResult = ReturnType<typeof useGetClassDistributionSuspenseQuery>;
 export type GetClassDistributionQueryResult = Apollo.QueryResult<GetClassDistributionQuery, GetClassDistributionQueryVariables>;
 export const GetBrixTrendDocument = gql`
-    query GetBrixTrend($filter: DashboardFilterInput) {
-  harvestDashboard(filter: $filter) {
+    query GetBrixTrend($filter: DashboardFilterInput, $tenantId: ID) {
+  harvestDashboard(filter: $filter, tenantId: $tenantId) {
     brixTrend {
       date
       brix
@@ -6078,6 +6181,7 @@ export const GetBrixTrendDocument = gql`
  * const { data, loading, error } = useGetBrixTrendQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6101,8 +6205,8 @@ export type GetBrixTrendLazyQueryHookResult = ReturnType<typeof useGetBrixTrendL
 export type GetBrixTrendSuspenseQueryHookResult = ReturnType<typeof useGetBrixTrendSuspenseQuery>;
 export type GetBrixTrendQueryResult = Apollo.QueryResult<GetBrixTrendQuery, GetBrixTrendQueryVariables>;
 export const GetFruitWeightTrendDocument = gql`
-    query GetFruitWeightTrend($filter: DashboardFilterInput) {
-  harvestDashboard(filter: $filter) {
+    query GetFruitWeightTrend($filter: DashboardFilterInput, $tenantId: ID) {
+  harvestDashboard(filter: $filter, tenantId: $tenantId) {
     fruitWeightTrend {
       date
       weight
@@ -6124,6 +6228,7 @@ export const GetFruitWeightTrendDocument = gql`
  * const { data, loading, error } = useGetFruitWeightTrendQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6147,8 +6252,8 @@ export type GetFruitWeightTrendLazyQueryHookResult = ReturnType<typeof useGetFru
 export type GetFruitWeightTrendSuspenseQueryHookResult = ReturnType<typeof useGetFruitWeightTrendSuspenseQuery>;
 export type GetFruitWeightTrendQueryResult = Apollo.QueryResult<GetFruitWeightTrendQuery, GetFruitWeightTrendQueryVariables>;
 export const GetCumulativeYieldDocument = gql`
-    query GetCumulativeYield($filter: DashboardFilterInput) {
-  harvestDashboard(filter: $filter) {
+    query GetCumulativeYield($filter: DashboardFilterInput, $tenantId: ID) {
+  harvestDashboard(filter: $filter, tenantId: $tenantId) {
     cumulativeYield {
       date
       cumulativeSellable
@@ -6171,6 +6276,7 @@ export const GetCumulativeYieldDocument = gql`
  * const { data, loading, error } = useGetCumulativeYieldQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6194,8 +6300,8 @@ export type GetCumulativeYieldLazyQueryHookResult = ReturnType<typeof useGetCumu
 export type GetCumulativeYieldSuspenseQueryHookResult = ReturnType<typeof useGetCumulativeYieldSuspenseQuery>;
 export type GetCumulativeYieldQueryResult = Apollo.QueryResult<GetCumulativeYieldQuery, GetCumulativeYieldQueryVariables>;
 export const GetHarvestSummaryDocument = gql`
-    query GetHarvestSummary($filter: HarvestFilterInput) {
-  harvests(filter: $filter) {
+    query GetHarvestSummary($filter: HarvestFilterInput, $tenantId: ID) {
+  harvests(filter: $filter, tenantId: $tenantId) {
     id
     date
     createdAt
@@ -6238,6 +6344,7 @@ export const GetHarvestSummaryDocument = gql`
  * const { data, loading, error } = useGetHarvestSummaryQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6261,8 +6368,8 @@ export type GetHarvestSummaryLazyQueryHookResult = ReturnType<typeof useGetHarve
 export type GetHarvestSummarySuspenseQueryHookResult = ReturnType<typeof useGetHarvestSummarySuspenseQuery>;
 export type GetHarvestSummaryQueryResult = Apollo.QueryResult<GetHarvestSummaryQuery, GetHarvestSummaryQueryVariables>;
 export const HarvestsDocument = gql`
-    query Harvests($filter: HarvestFilterInput) {
-  harvests(filter: $filter) {
+    query Harvests($filter: HarvestFilterInput, $tenantId: ID) {
+  harvests(filter: $filter, tenantId: $tenantId) {
     ...HarvestFields
   }
 }
@@ -6281,6 +6388,7 @@ export const HarvestsDocument = gql`
  * const { data, loading, error } = useHarvestsQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6304,8 +6412,8 @@ export type HarvestsLazyQueryHookResult = ReturnType<typeof useHarvestsLazyQuery
 export type HarvestsSuspenseQueryHookResult = ReturnType<typeof useHarvestsSuspenseQuery>;
 export type HarvestsQueryResult = Apollo.QueryResult<HarvestsQuery, HarvestsQueryVariables>;
 export const HarvestDocument = gql`
-    query Harvest($id: ID!) {
-  harvest(id: $id) {
+    query Harvest($id: ID!, $tenantId: ID) {
+  harvest(id: $id, tenantId: $tenantId) {
     ...HarvestFields
   }
 }
@@ -6324,6 +6432,7 @@ export const HarvestDocument = gql`
  * const { data, loading, error } = useHarvestQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6347,8 +6456,8 @@ export type HarvestLazyQueryHookResult = ReturnType<typeof useHarvestLazyQuery>;
 export type HarvestSuspenseQueryHookResult = ReturnType<typeof useHarvestSuspenseQuery>;
 export type HarvestQueryResult = Apollo.QueryResult<HarvestQuery, HarvestQueryVariables>;
 export const HarvestsCsvExportDocument = gql`
-    query HarvestsCsvExport($filter: HarvestFilterInput, $columns: [String!]) {
-  harvestsCsvExport(filter: $filter, columns: $columns)
+    query HarvestsCsvExport($filter: HarvestFilterInput, $columns: [String!], $tenantId: ID) {
+  harvestsCsvExport(filter: $filter, columns: $columns, tenantId: $tenantId)
 }
     `;
 
@@ -6366,6 +6475,7 @@ export const HarvestsCsvExportDocument = gql`
  *   variables: {
  *      filter: // value for 'filter'
  *      columns: // value for 'columns'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6389,8 +6499,8 @@ export type HarvestsCsvExportLazyQueryHookResult = ReturnType<typeof useHarvests
 export type HarvestsCsvExportSuspenseQueryHookResult = ReturnType<typeof useHarvestsCsvExportSuspenseQuery>;
 export type HarvestsCsvExportQueryResult = Apollo.QueryResult<HarvestsCsvExportQuery, HarvestsCsvExportQueryVariables>;
 export const HarvestsCountDocument = gql`
-    query HarvestsCount($filter: HarvestFilterInput) {
-  harvests(filter: $filter) {
+    query HarvestsCount($filter: HarvestFilterInput, $tenantId: ID) {
+  harvests(filter: $filter, tenantId: $tenantId) {
     id
     batchId
     date
@@ -6420,6 +6530,7 @@ export const HarvestsCountDocument = gql`
  * const { data, loading, error } = useHarvestsCountQuery({
  *   variables: {
  *      filter: // value for 'filter'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -7135,8 +7246,8 @@ export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeSuspenseQueryHookResult = ReturnType<typeof useMeSuspenseQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const UsersDocument = gql`
-    query Users {
-  users {
+    query Users($tenantId: ID) {
+  users(tenantId: $tenantId) {
     id
     clerkUserId
     email
@@ -7173,6 +7284,7 @@ export const UsersDocument = gql`
  * @example
  * const { data, loading, error } = useUsersQuery({
  *   variables: {
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -7196,8 +7308,8 @@ export type UsersLazyQueryHookResult = ReturnType<typeof useUsersLazyQuery>;
 export type UsersSuspenseQueryHookResult = ReturnType<typeof useUsersSuspenseQuery>;
 export type UsersQueryResult = Apollo.QueryResult<UsersQuery, UsersQueryVariables>;
 export const UserDocument = gql`
-    query User($id: ID!) {
-  user(id: $id) {
+    query User($id: ID!, $tenantId: ID) {
+  user(id: $id, tenantId: $tenantId) {
     id
     clerkUserId
     email
@@ -7226,6 +7338,7 @@ export const UserDocument = gql`
  * const { data, loading, error } = useUserQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -7249,8 +7362,8 @@ export type UserLazyQueryHookResult = ReturnType<typeof useUserLazyQuery>;
 export type UserSuspenseQueryHookResult = ReturnType<typeof useUserSuspenseQuery>;
 export type UserQueryResult = Apollo.QueryResult<UserQuery, UserQueryVariables>;
 export const AlertCreatedDocument = gql`
-    subscription AlertCreated {
-  alertCreated {
+    subscription AlertCreated($tenantId: ID) {
+  alertCreated(tenantId: $tenantId) {
     id
     tenantId
     sensorName
@@ -7285,6 +7398,7 @@ export const AlertCreatedDocument = gql`
  * @example
  * const { data, loading, error } = useAlertCreatedSubscription({
  *   variables: {
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */

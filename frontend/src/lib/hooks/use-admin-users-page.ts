@@ -13,11 +13,17 @@ import {
   type Tenant,
 } from '@/generated/graphql';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { extractErrorMessage } from '@/lib/extract-error-message';
+import { useToast } from '@/components/ui/toast-provider';
+import { useI18n } from '@/i18n';
 import type { UserFormData } from '@/components/users/user-management-form';
 
 export function useAdminUsersPage() {
   const { role: currentUserRole } = useCurrentUser();
   const isVGreensAdmin = currentUserRole === UserRole.VgreensAdmin;
+  const { toast } = useToast();
+  const { t } = useI18n();
+  const errorTitle = t.errors.defaultTitle;
 
   const {
     data: usersData,
@@ -102,12 +108,21 @@ export function useAdminUsersPage() {
         setUpdateConfirmation({ user: null, formData: null, isOpen: false });
       } catch (error) {
         console.error('Error saving user:', error);
-        throw error;
+        // Surface the backend message as a toast — previously we re-threw which
+        // bubbled up as an unhandled rejection (Next.js dev overlay). Close the
+        // confirmation dialog so the admin can adjust the form and retry; the
+        // sheet itself stays open with their in-progress edits intact.
+        toast({
+          title: errorTitle,
+          description: extractErrorMessage(error),
+          variant: 'destructive',
+        });
+        setUpdateConfirmation({ user: null, formData: null, isOpen: false });
       } finally {
         setIsLoading(false);
       }
     },
-    [refetchUsers, updateUser],
+    [refetchUsers, updateUser, toast, errorTitle],
   );
 
   const handleSubmit = React.useCallback(
@@ -148,14 +163,20 @@ export function useAdminUsersPage() {
         setEditingUser(null);
       } catch (error) {
         console.error('Error saving user:', error);
-        // Re-throw so the form can surface it (e.g. highlight the email field
-        // when the admin email-domain rule rejects the creation).
+        // Toast the backend message AND re-throw so the form can also highlight
+        // the offending field (e.g. red border on email for the admin
+        // email-domain rule). The two surfaces are complementary, not duplicate.
+        toast({
+          title: errorTitle,
+          description: extractErrorMessage(error),
+          variant: 'destructive',
+        });
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [editingUser, createUser, refetchUsers],
+    [editingUser, createUser, refetchUsers, toast, errorTitle],
   );
 
   const confirmUpdate = React.useCallback(async () => {

@@ -8,6 +8,7 @@ import { CurrentUser } from '@common/decorators';
 import { CreateUserInput, UpdateUserInput } from './dto';
 import { HarvestViewSettingsInput } from './dto/user-settings';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { resolveTenantId } from '@common/utils';
 
 @Resolver(() => User)
 @UseGuards(RolesGuard)
@@ -115,15 +116,26 @@ export class UsersResolver {
 
   @Query(() => [User])
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
-  async users(@CurrentUser() currentUser: User): Promise<User[]> {
+  async users(
+    @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
+  ): Promise<User[]> {
+    // VGREENS_ADMIN: with a tenantId filter from the global selector we mirror
+    // tenant-admin view (`findAllByTenant`); without one we surface every user
+    // across tenants for cross-tenant administration.
     if (currentUser.role === UserRole.VGREENS_ADMIN) {
-      return this.usersService.findAllWithTenant();
-    } else {
-      if (!currentUser.tenantId) {
-        throw new Error('Tenant ID is required for tenant admins');
-      }
-      return this.usersService.findAllByTenant(currentUser.tenantId);
+      return tenantId
+        ? this.usersService.findAllByTenant(tenantId)
+        : this.usersService.findAllWithTenant();
     }
+    // Non-admins: helper enforces tenant pinning (and throws on cross-tenant
+    // override attempts).
+    const scopedTenantId = resolveTenantId(currentUser, tenantId);
+    if (!scopedTenantId) {
+      throw new Error('Tenant ID is required for tenant admins');
+    }
+    return this.usersService.findAllByTenant(scopedTenantId);
   }
 
   @Query(() => User, { nullable: true })
@@ -131,12 +143,13 @@ export class UsersResolver {
   async user(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<User | null> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId || undefined;
-    return this.usersService.findOne(id, tenantId);
+    return this.usersService.findOne(
+      id,
+      resolveTenantId(currentUser, tenantId, false),
+    );
   }
 
   @Mutation(() => User)
@@ -183,18 +196,17 @@ export class UsersResolver {
     @Args('id', { type: () => ID }) id: string,
     @Args('input') updateUserInput: UpdateUserInput,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<User> {
-    // VGREENS_ADMIN can update any user (tenantId = undefined)
-    // Tenant admins can only update users in their tenant
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId || undefined;
+    // VGREENS_ADMIN can update any user; tenant admins are pinned to their own
+    // tenant. The helper enforces this and rejects cross-tenant override
+    // attempts from tenant admins.
     return this.usersService.updateUser(
       id,
       updateUserInput,
       currentUser,
-      tenantId,
+      resolveTenantId(currentUser, tenantId, false),
     );
   }
 
@@ -203,14 +215,13 @@ export class UsersResolver {
   async deleteUser(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<boolean> {
-    // VGREENS_ADMIN can delete any user (tenantId = undefined)
-    // Tenant admins can only delete users in their tenant
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId || undefined;
-    await this.usersService.delete(id, tenantId);
+    await this.usersService.delete(
+      id,
+      resolveTenantId(currentUser, tenantId, false),
+    );
     return true;
   }
 }

@@ -23,8 +23,12 @@ export const CREATE_GREENHOUSE_MUTATION = gql`
 `;
 
 export const UPDATE_GREENHOUSE_MUTATION = gql`
-  mutation UpdateGreenhouse($id: ID!, $input: UpdateGreenhouseInput!) {
-    updateGreenhouse(id: $id, input: $input) {
+  mutation UpdateGreenhouse(
+    $id: ID!
+    $input: UpdateGreenhouseInput!
+    $tenantId: ID
+  ) {
+    updateGreenhouse(id: $id, input: $input, tenantId: $tenantId) {
       ...GreenhouseMutationFields
     }
   }
@@ -32,7 +36,7 @@ export const UPDATE_GREENHOUSE_MUTATION = gql`
 `;
 
 export const DELETE_GREENHOUSE_MUTATION = gql`
-  mutation DeleteGreenhouse($id: ID!) {
-    deleteGreenhouse(id: $id)
+  mutation DeleteGreenhouse($id: ID!, $tenantId: ID) {
+    deleteGreenhouse(id: $id, tenantId: $tenantId)
   }
 `;

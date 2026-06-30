@@ -46,8 +46,12 @@ const BATCH_FIELDS = gql`
 `;
 
 export const BATCHES_QUERY = gql`
-  query Batches($filter: BatchFilterInput, $sort: BatchSortInput) {
-    batches(filter: $filter, sort: $sort) {
+  query Batches(
+    $filter: BatchFilterInput
+    $sort: BatchSortInput
+    $tenantId: ID
+  ) {
+    batches(filter: $filter, sort: $sort, tenantId: $tenantId) {
       ...BatchFields
     }
   }
@@ -55,8 +59,8 @@ export const BATCHES_QUERY = gql`
 `;
 
 export const BATCH_QUERY = gql`
-  query Batch($id: ID!) {
-    batch(id: $id) {
+  query Batch($id: ID!, $tenantId: ID) {
+    batch(id: $id, tenantId: $tenantId) {
       ...BatchFields
     }
   }
@@ -66,8 +70,8 @@ export const BATCH_QUERY = gql`
 // Lightweight batch list used by the harvest batch selector, with derived
 // kg/plant.
 export const HARVEST_BATCHES_QUERY = gql`
-  query HarvestBatches {
-    harvestBatches {
+  query HarvestBatches($tenantId: ID) {
+    harvestBatches(tenantId: $tenantId) {
       id
       name
       species

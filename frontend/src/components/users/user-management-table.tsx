@@ -2,10 +2,11 @@
 
 import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
-import { User, UserRole } from '@/generated/graphql';
+import { User, UserRole, type Tenant } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
+import { useUserTableFilters } from '@/lib/hooks/use-user-table-filters';
 import { Plus } from 'lucide-react';
 import { useUserManagementRow } from './user-management-table-rows';
 
@@ -16,6 +17,11 @@ interface UserManagementTableProps {
   onCreate?: () => void;
   isLoading?: boolean;
   hideTenantColumn?: boolean; // Hide tenant column for tenant users
+  /**
+   * Optional tenants list. When provided alongside a visible tenant column,
+   * the toolbar exposes a Tenant filter dropdown (admin surface only).
+   */
+  tenants?: Tenant[];
 }
 
 export function UserManagementTable({
@@ -25,10 +31,13 @@ export function UserManagementTable({
   onCreate,
   isLoading = false,
   hideTenantColumn = false,
+  tenants,
 }: UserManagementTableProps) {
   const { t } = useI18n();
   const paginationConfig = usePaginationConfig();
   const { isMobile } = useResponsiveBreakpoint('lg');
+  const { filteredUsers, searchQuery, setSearchQuery, filterConfigs } =
+    useUserTableFilters({ users, tenants, hideTenantColumn });
 
   const roleLabels: Record<UserRole, string> = {
     VGREENS_ADMIN: t.pages.admin.users.roleVgreensAdmin,
@@ -77,26 +86,37 @@ export function UserManagementTable({
     },
   ];
 
+  // Render the Create button inside the table toolbar (right-aligned via
+  // `headerActions`) so it sits on the same row as the search + filter
+  // controls instead of consuming a separate row above the table.
+  const headerActions = onCreate ? (
+    <Button onClick={onCreate} disabled={isLoading}>
+      <Plus className="h-4 w-4" />
+      {t.pages.admin.users.createUser}
+    </Button>
+  ) : undefined;
+
   return (
     <div
       className={
         isMobile ? 'flex flex-col gap-4' : 'flex h-full min-h-0 flex-col gap-4'
       }
     >
-      {onCreate ? (
-        <div className="flex justify-end">
-          <Button onClick={onCreate} disabled={isLoading}>
-            <Plus className="h-4 w-4" />
-            {t.pages.admin.users.createUser}
-          </Button>
-        </div>
-      ) : null}
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <DataTable
-          data={users}
+          data={filteredUsers}
           columns={columns}
           renderRow={renderRow}
           renderCard={renderCard}
+          searchConfig={{ placeholder: t.pages.users.searchPlaceholder }}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterConfigs={filterConfigs}
+          headerActions={headerActions}
+          emptyState={{
+            title: t.pages.users.noUsers,
+            description: t.pages.users.noUsersDescription,
+          }}
           paginationVariant="compact"
           defaultPageSize={paginationConfig.defaultPageSize}
           pageSizeOptions={paginationConfig.pageSizeOptions}

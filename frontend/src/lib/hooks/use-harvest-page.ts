@@ -19,6 +19,7 @@ import {
   type BatchesQuery,
   type CreateBatchMutation,
 } from '@/generated/graphql';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import { useHarvestViewSettings } from '@/lib/hooks/use-harvest-view-settings';
 import {
   setSort,
@@ -103,11 +104,15 @@ export function useHarvestPage() {
     [persistView],
   );
 
+  // Active tenant scope (only meaningful for VGREENS_ADMIN; everyone else
+  // ignores the variable and the backend falls back to their own tenant).
+  const tenantId = useTenantIdVariable();
+
   // Server-side sort + filter: the batches query carries the order + range so
   // results stay correct regardless of how many batches exist.
   const batchesVariables = React.useMemo(
-    () => toBatchesVariables(view),
-    [view],
+    () => ({ ...toBatchesVariables(view), tenantId }),
+    [view, tenantId],
   );
   const isFiltered = Boolean(batchesVariables.filter);
 
@@ -115,7 +120,10 @@ export function useHarvestPage() {
     data: harvestsData,
     loading: harvestsLoading,
     refetch: refetchHarvests,
-  } = useHarvestsQuery({ fetchPolicy: 'cache-and-network' });
+  } = useHarvestsQuery({
+    fetchPolicy: 'cache-and-network',
+    variables: { tenantId },
+  });
 
   // Batches drive the table so a batch with no harvests yet still shows up.
   const {

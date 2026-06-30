@@ -16,6 +16,7 @@ import {
   ID,
 } from '@nestjs/graphql';
 import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
+import { resolveTenantId } from '@common/utils';
 import { PubSub } from 'graphql-subscriptions';
 import { PUB_SUB, ALERT_CREATED_EVENT } from './pubsub';
 
@@ -32,8 +33,9 @@ export class AlertsResolver {
   // VSL-97: real-time push of newly-created alerts (drives toast
   // notifications). Tenant isolation is enforced by `filter`: tenant-scoped
   // users only receive alerts for their own tenant; VGREENS_ADMIN receives
-  // all. Role restrictions mirror the `alerts` query. The authenticated user
-  // is attached to `context.req.user` by the (reused) ClerkAuthGuard.
+  // all (or only the selected tenant when one is passed). Role restrictions
+  // mirror the `alerts` query. The authenticated user is attached to
+  // `context.req.user` by the (reused) ClerkAuthGuard.
   @Subscription(() => Alert, {
     name: 'alertCreated',
     // Extract the alert from the published payload (`{ alertCreated: <alert> }`).
@@ -44,18 +46,31 @@ export class AlertsResolver {
     // undefined payload is filtered out instead of reaching resolve).
     filter: (
       payload: { alertCreated?: Alert } | undefined,
-      _variables: unknown,
+      variables: { tenantId?: string | null } | undefined,
       context: { req?: { user?: User } },
     ) => {
       const user = context?.req?.user;
       const alert = payload?.alertCreated;
       if (!user || !alert) return false;
-      if (user.role === UserRole.VGREENS_ADMIN) return true;
+      if (user.role === UserRole.VGREENS_ADMIN) {
+        // When admin has scoped to a single tenant via the global selector,
+        // only stream alerts for that tenant. Otherwise (no scope) admin
+        // sees the firehose across all tenants.
+        return variables?.tenantId
+          ? alert.tenantId === variables.tenantId
+          : true;
+      }
       return alert.tenantId === user.tenantId;
     },
   })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
-  alertCreated() {
+  alertCreated(
+    // Declared so the variable is exposed in the GraphQL schema for the
+    // subscription's filter to consume; the resolver body itself ignores it.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Args('tenantId', { type: () => ID, nullable: true })
+    _tenantId?: string | null,
+  ) {
     return this.pubSub.asyncIterableIterator<{ alertCreated: Alert }>(
       ALERT_CREATED_EVENT,
     );
@@ -67,17 +82,13 @@ export class AlertsResolver {
     @CurrentUser() currentUser: User,
     @Args('filter', { type: () => AlertsFilterInput, nullable: true })
     filter?: AlertsFilterInput | null,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<Alert[]> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    if (currentUser.role !== UserRole.VGREENS_ADMIN && !currentUser.tenantId) {
-      throw new Error('Tenant ID is required');
-    }
-
-    return this.alertsService.findAllFiltered(tenantId, filter);
+    return this.alertsService.findAllFiltered(
+      resolveTenantId(currentUser, tenantId),
+      filter,
+    );
   }
 
   @Query(() => Alert, { name: 'alert', nullable: true })
@@ -85,13 +96,13 @@ export class AlertsResolver {
   async findOne(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<Alert | null> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    return this.alertsService.findOneById(id, tenantId);
+    return this.alertsService.findOneById(
+      id,
+      resolveTenantId(currentUser, tenantId, false),
+    );
   }
 
   @Mutation(() => Alert)
@@ -100,7 +111,12 @@ export class AlertsResolver {
     @Args('input') input: CreateAlertInput,
     @CurrentUser() currentUser: User,
   ): Promise<Alert> {
-    const tenantId = input.tenantId || currentUser.tenantId;
+    // Admins must supply input.tenantId explicitly when the selector points
+    // at a tenant; non-admins are pinned to their own.
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? input.tenantId
+        : currentUser.tenantId;
 
     if (!tenantId) {
       throw new Error('Tenant ID is required');
@@ -115,13 +131,14 @@ export class AlertsResolver {
     @Args('id', { type: () => ID }) id: string,
     @Args('input') input: UpdateAlertInput,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<Alert> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    return this.alertsService.updateAlert(id, input, tenantId);
+    return this.alertsService.updateAlert(
+      id,
+      input,
+      resolveTenantId(currentUser, tenantId, false),
+    );
   }
 
   @Mutation(() => Alert)
@@ -129,13 +146,14 @@ export class AlertsResolver {
   async acknowledgeAlert(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<Alert> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    return this.alertsService.acknowledgeAlert(id, currentUser.id, tenantId);
+    return this.alertsService.acknowledgeAlert(
+      id,
+      currentUser.id,
+      resolveTenantId(currentUser, tenantId, false),
+    );
   }
 
   @Mutation(() => Alert)
@@ -143,13 +161,14 @@ export class AlertsResolver {
   async resolveAlert(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<Alert> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    return this.alertsService.resolveAlert(id, currentUser.id, tenantId);
+    return this.alertsService.resolveAlert(
+      id,
+      currentUser.id,
+      resolveTenantId(currentUser, tenantId, false),
+    );
   }
 
   @Mutation(() => Boolean, { name: 'runThresholdCheck' })
@@ -170,13 +189,14 @@ export class AlertsResolver {
   async softDeleteAlert(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<boolean> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    await this.alertsService.softDeleteAlert(id, currentUser.id, tenantId);
+    await this.alertsService.softDeleteAlert(
+      id,
+      currentUser.id,
+      resolveTenantId(currentUser, tenantId, false),
+    );
     return true;
   }
 
@@ -185,13 +205,13 @@ export class AlertsResolver {
   async deleteAlert(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<boolean> {
-    const tenantId =
-      currentUser.role === UserRole.VGREENS_ADMIN
-        ? undefined
-        : currentUser.tenantId;
-
-    await this.alertsService.deleteAlert(id, tenantId);
+    await this.alertsService.deleteAlert(
+      id,
+      resolveTenantId(currentUser, tenantId, false),
+    );
     return true;
   }
 }

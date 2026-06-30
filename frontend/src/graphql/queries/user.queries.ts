@@ -52,8 +52,8 @@ export const ME_QUERY = gql`
 `;
 
 export const USERS_QUERY = gql`
-  query Users {
-    users {
+  query Users($tenantId: ID) {
+    users(tenantId: $tenantId) {
       id
       clerkUserId
       email
@@ -79,8 +79,8 @@ export const USERS_QUERY = gql`
 `;
 
 export const USER_QUERY = gql`
-  query User($id: ID!) {
-    user(id: $id) {
+  query User($id: ID!, $tenantId: ID) {
+    user(id: $id, tenantId: $tenantId) {
       id
       clerkUserId
       email

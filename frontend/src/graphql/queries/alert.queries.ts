@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const ALERTS_QUERY = gql`
-  query Alerts($filter: AlertsFilterInput) {
-    alerts(filter: $filter) {
+  query Alerts($filter: AlertsFilterInput, $tenantId: ID) {
+    alerts(filter: $filter, tenantId: $tenantId) {
       id
       tenantId
       tunnelId
@@ -47,8 +47,8 @@ export const ALERTS_QUERY = gql`
 `;
 
 export const ALERT_QUERY = gql`
-  query Alert($id: ID!) {
-    alert(id: $id) {
+  query Alert($id: ID!, $tenantId: ID) {
+    alert(id: $id, tenantId: $tenantId) {
       id
       tenantId
       tunnelId
@@ -119,8 +119,8 @@ export const CREATE_ALERT_MUTATION = gql`
 `;
 
 export const UPDATE_ALERT_MUTATION = gql`
-  mutation UpdateAlert($id: ID!, $input: UpdateAlertInput!) {
-    updateAlert(id: $id, input: $input) {
+  mutation UpdateAlert($id: ID!, $input: UpdateAlertInput!, $tenantId: ID) {
+    updateAlert(id: $id, input: $input, tenantId: $tenantId) {
       id
       tenantId
       tunnelId
@@ -145,8 +145,8 @@ export const UPDATE_ALERT_MUTATION = gql`
 `;
 
 export const ACKNOWLEDGE_ALERT_MUTATION = gql`
-  mutation AcknowledgeAlert($id: ID!) {
-    acknowledgeAlert(id: $id) {
+  mutation AcknowledgeAlert($id: ID!, $tenantId: ID) {
+    acknowledgeAlert(id: $id, tenantId: $tenantId) {
       id
       status
       updatedAt
@@ -155,8 +155,8 @@ export const ACKNOWLEDGE_ALERT_MUTATION = gql`
 `;
 
 export const RESOLVE_ALERT_MUTATION = gql`
-  mutation ResolveAlert($id: ID!) {
-    resolveAlert(id: $id) {
+  mutation ResolveAlert($id: ID!, $tenantId: ID) {
+    resolveAlert(id: $id, tenantId: $tenantId) {
       id
       status
       updatedAt
@@ -165,13 +165,13 @@ export const RESOLVE_ALERT_MUTATION = gql`
 `;
 
 export const SOFT_DELETE_ALERT_MUTATION = gql`
-  mutation SoftDeleteAlert($id: ID!) {
-    softDeleteAlert(id: $id)
+  mutation SoftDeleteAlert($id: ID!, $tenantId: ID) {
+    softDeleteAlert(id: $id, tenantId: $tenantId)
   }
 `;
 
 export const DELETE_ALERT_MUTATION = gql`
-  mutation DeleteAlert($id: ID!) {
-    deleteAlert(id: $id)
+  mutation DeleteAlert($id: ID!, $tenantId: ID) {
+    deleteAlert(id: $id, tenantId: $tenantId)
   }
 `;

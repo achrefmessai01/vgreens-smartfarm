@@ -4,6 +4,7 @@ import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UserInterceptor, TenantInterceptor } from '@common/interceptors';
+import { resolveTenantId } from '@common/utils';
 import { User } from '@modules/users/entities/user.entity';
 import { Greenhouse } from './entities/greenhouse.entity';
 import { GreenhouseService } from './greenhouse.service';
@@ -15,16 +16,6 @@ import { CreateGreenhouseInput, UpdateGreenhouseInput } from './dto';
 export class GreenhouseResolver {
   constructor(private readonly greenhouseService: GreenhouseService) {}
 
-  // Admins see every tenant's greenhouses (tenantId undefined); tenant users are
-  // scoped to their own tenant — same pattern as HarvestsResolver.
-  private resolveTenantId(currentUser: User): string | undefined {
-    if (currentUser.role === UserRole.VGREENS_ADMIN) return undefined;
-    if (!currentUser.tenantId) {
-      throw new Error('Tenant ID is required');
-    }
-    return currentUser.tenantId;
-  }
-
   @Query(() => [Greenhouse], { name: 'greenhouses' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
   async findAll(
@@ -34,9 +25,9 @@ export class GreenhouseResolver {
   ): Promise<Greenhouse[]> {
     // Tenant users are always pinned to their own tenant; admins may pass a
     // tenantId to scope to one tenant (omit it to list every tenant's).
-    const scoped = this.resolveTenantId(currentUser);
-    const effective = scoped ?? tenantId ?? undefined;
-    return this.greenhouseService.findAllScoped(effective);
+    return this.greenhouseService.findAllScoped(
+      resolveTenantId(currentUser, tenantId),
+    );
   }
 
   @Query(() => Greenhouse, { name: 'greenhouse', nullable: true })
@@ -44,10 +35,12 @@ export class GreenhouseResolver {
   async findOne(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<Greenhouse | null> {
     return this.greenhouseService.findOne(
       id,
-      this.resolveTenantId(currentUser),
+      resolveTenantId(currentUser, tenantId, false),
     );
   }
 
@@ -57,7 +50,12 @@ export class GreenhouseResolver {
     @Args('input') input: CreateGreenhouseInput,
     @CurrentUser() currentUser: User,
   ): Promise<Greenhouse> {
-    const tenantId = input.tenantId ?? currentUser.tenantId;
+    // Admins must select a tenant explicitly (via input.tenantId); non-admins
+    // are pinned to their own tenant regardless of the value supplied.
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? input.tenantId
+        : currentUser.tenantId;
     if (!tenantId) {
       throw new Error('Tenant ID is required');
     }
@@ -70,11 +68,13 @@ export class GreenhouseResolver {
     @Args('id', { type: () => ID }) id: string,
     @Args('input') input: UpdateGreenhouseInput,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<Greenhouse> {
     return this.greenhouseService.updateGreenhouse(
       id,
       input,
-      this.resolveTenantId(currentUser),
+      resolveTenantId(currentUser, tenantId, false),
     );
   }
 
@@ -83,11 +83,13 @@ export class GreenhouseResolver {
   async deleteGreenhouse(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
   ): Promise<boolean> {
     await this.greenhouseService.deleteGreenhouse(
       id,
       currentUser.id,
-      this.resolveTenantId(currentUser),
+      resolveTenantId(currentUser, tenantId, false),
     );
     return true;
   }

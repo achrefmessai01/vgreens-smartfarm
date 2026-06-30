@@ -106,6 +106,10 @@ export const tr = {
     online: 'Online',
     degraded: 'Degraded',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'Tüm kiracılar',
+      placeholder: 'Kiracı seç',
+    },
   },
   login: {
     title: 'Tekrar hoş geldiniz',

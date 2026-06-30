@@ -2,6 +2,7 @@ import {
   useGetHarvestDashboardQuery,
   type HarvestDashboardMetrics,
 } from '../../generated/graphql';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 
 export type DateFilter =
   | 'today'
@@ -155,9 +156,16 @@ export function useHarvestDashboard(filter?: DashboardFilter) {
   // Only pass filter if it has at least one property
   const hasFilterValues = queryFilter && Object.keys(queryFilter).length > 0;
 
+  // The selected tenant in the navbar wins over any caller-supplied tenantId
+  // on the local filter — the navbar is the single source of truth for the
+  // currently-viewed tenant when an admin is multi-tenanting.
+  const selectedTenantId = useTenantIdVariable();
+  const tenantId = selectedTenantId ?? filter?.tenantId;
+
   const { data, loading, error, refetch } = useGetHarvestDashboardQuery({
     variables: {
       filter: hasFilterValues ? queryFilter : undefined,
+      tenantId,
     },
     errorPolicy: 'all',
     fetchPolicy: 'cache-and-network',

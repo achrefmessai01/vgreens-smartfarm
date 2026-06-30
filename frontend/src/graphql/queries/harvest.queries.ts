@@ -95,8 +95,8 @@ const HARVEST_FIELDS = gql`
 `;
 
 export const HARVESTS_QUERY = gql`
-  query Harvests($filter: HarvestFilterInput) {
-    harvests(filter: $filter) {
+  query Harvests($filter: HarvestFilterInput, $tenantId: ID) {
+    harvests(filter: $filter, tenantId: $tenantId) {
       ...HarvestFields
     }
   }
@@ -104,8 +104,8 @@ export const HARVESTS_QUERY = gql`
 `;
 
 export const HARVEST_QUERY = gql`
-  query Harvest($id: ID!) {
-    harvest(id: $id) {
+  query Harvest($id: ID!, $tenantId: ID) {
+    harvest(id: $id, tenantId: $tenantId) {
       ...HarvestFields
     }
   }
@@ -113,15 +113,19 @@ export const HARVEST_QUERY = gql`
 `;
 
 export const HARVESTS_CSV_EXPORT_QUERY = gql`
-  query HarvestsCsvExport($filter: HarvestFilterInput, $columns: [String!]) {
-    harvestsCsvExport(filter: $filter, columns: $columns)
+  query HarvestsCsvExport(
+    $filter: HarvestFilterInput
+    $columns: [String!]
+    $tenantId: ID
+  ) {
+    harvestsCsvExport(filter: $filter, columns: $columns, tenantId: $tenantId)
   }
 `;
 
 // Lightweight selection for counting / quick metrics over the harvest list.
 export const HARVESTS_COUNT_QUERY = gql`
-  query HarvestsCount($filter: HarvestFilterInput) {
-    harvests(filter: $filter) {
+  query HarvestsCount($filter: HarvestFilterInput, $tenantId: ID) {
+    harvests(filter: $filter, tenantId: $tenantId) {
       id
       batchId
       date
