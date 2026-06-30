@@ -12,10 +12,16 @@ import {
 } from '@/generated/graphql';
 import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { extractErrorMessage } from '@/lib/extract-error-message';
+import { useToast } from '@/components/ui/toast-provider';
+import { useI18n } from '@/i18n';
 import type { UserFormData } from '@/components/users';
 
 export function useTenantUsersPage() {
   const { user: currentUser, isVGreensAdmin, isTenantAdmin } = useCurrentUser();
+  const { toast } = useToast();
+  const { t } = useI18n();
+  const errorTitle = t.errors.defaultTitle;
   // Honour the VGREENS_ADMIN tenant picker. For regular tenant admins this is
   // always undefined and we fall back to their own tenant id below.
   const selectedTenantId = useTenantIdVariable();
@@ -99,20 +105,33 @@ export function useTenantUsersPage() {
     async (user: User, formData: UserFormData) => {
       setIsLoading(true);
       try {
-        await updateUser({
+        const result = await updateUser({
           variables: { id: user.id, input: formData },
         });
+        // Apollo surfaces GraphQL errors in `result.errors` instead of
+        // rejecting — turn that into a throw so the catch toasts uniformly.
+        if (result.errors?.length) {
+          throw new Error(result.errors[0].message);
+        }
         await refetch();
         setIsSheetOpen(false);
         setEditingUser(null);
         setUpdateConfirmation({ user: null, formData: null, isOpen: false });
       } catch (error) {
         console.error('Error saving user:', error);
+        toast({
+          title: errorTitle,
+          description: extractErrorMessage(error),
+          variant: 'destructive',
+        });
+        // Close the confirmation dialog; keep the sheet open with the user's
+        // edits so they can correct and retry.
+        setUpdateConfirmation({ user: null, formData: null, isOpen: false });
       } finally {
         setIsLoading(false);
       }
     },
-    [refetch, updateUser],
+    [refetch, updateUser, toast, errorTitle],
   );
 
   const handleSubmit = React.useCallback(
@@ -140,6 +159,9 @@ export function useTenantUsersPage() {
             },
           },
         });
+        if (result.errors?.length) {
+          throw new Error(result.errors[0].message);
+        }
         if (result.data?.createUser?.status === UserStatus.Pending) {
           console.log('User created with pending invitation');
         }
@@ -148,11 +170,19 @@ export function useTenantUsersPage() {
         setEditingUser(null);
       } catch (error) {
         console.error('Error saving user:', error);
+        // Toast the backend message AND re-throw so the form can also highlight
+        // the offending field (mirrors the admin hook).
+        toast({
+          title: errorTitle,
+          description: extractErrorMessage(error),
+          variant: 'destructive',
+        });
+        throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [editingUser, createUser, refetch, tenantId],
+    [editingUser, createUser, refetch, tenantId, toast, errorTitle],
   );
 
   const confirmUpdate = React.useCallback(async () => {
