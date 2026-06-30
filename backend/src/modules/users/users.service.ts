@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { BaseService } from '@common/services';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClerkSyncService } from './clerk-sync.service';
@@ -16,6 +17,7 @@ import { mergeUserSettings } from './utils/user-settings.util';
 import { OrderDirection, UserRole } from '@common/enums';
 import { UserStatus } from '@common/enums/user-status.enum';
 import { getAdminEmailDomainError } from './utils/admin-email-domain';
+import { getTenantDomainError } from './utils/tenant-allowed-domains';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -24,9 +26,30 @@ export class UsersService extends BaseService<User> {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Tenant)
+    private readonly tenantRepository: Repository<Tenant>,
     private readonly clerkSyncService: ClerkSyncService,
   ) {
     super(userRepository);
+  }
+
+  /**
+   * Enforce the tenant's `allowedDomains` whitelist. No-op when the tenantId is
+   * missing (admin users have no tenant) or when the tenant has an empty list.
+   * Loaded lazily so the caller doesn't have to pre-fetch the tenant.
+   */
+  private async assertTenantAllowsEmail(
+    tenantId: string | null | undefined,
+    email: string | null | undefined,
+  ): Promise<void> {
+    if (!tenantId) return;
+    const tenant = await this.tenantRepository.findOne({
+      where: { id: tenantId },
+      select: ['id', 'allowedDomains'],
+    });
+    if (!tenant) return; // surfaced separately by the FK / other checks
+    const error = getTenantDomainError(email, tenant.allowedDomains);
+    if (error) throw new BadRequestException(error);
   }
 
   async findByClerkUserId(clerkUserId: string): Promise<User | null> {
@@ -104,6 +127,16 @@ export class UsersService extends BaseService<User> {
       if (domainError) {
         throw new BadRequestException(domainError);
       }
+
+      // Per-tenant whitelist (Tenant.allowedDomains). Layered on top of the
+      // admin-role rule so a non-admin user added to a domain-restricted
+      // tenant is still rejected before a Clerk invitation is sent.
+      await this.assertTenantAllowsEmail(
+        createUserInput.role === UserRole.VGREENS_ADMIN
+          ? null
+          : createUserInput.tenantId,
+        createUserInput.email,
+      );
 
       // If no clerkUserId provided, send invitation via Clerk
       let clerkUserId = createUserInput.clerkUserId;
@@ -230,6 +263,30 @@ export class UsersService extends BaseService<User> {
       throw new ForbiddenException(
         'VGREENS_ADMIN users cannot be assigned to a tenant',
       );
+    }
+
+    // Enforce the destination tenant's allowedDomains whitelist whenever the
+    // user is being moved to a different tenant or their email is being
+    // changed (the existing tenant might restrict the new address). Skipped
+    // when the user is — or is becoming — a VGREENS_ADMIN (no tenant scope).
+    const nextRole = updateUserInput.role ?? user.role;
+    const nextTenantId =
+      updateUserInput.tenantId !== undefined
+        ? updateUserInput.tenantId
+        : user.tenantId;
+    const nextEmail =
+      updateUserInput.email !== undefined ? updateUserInput.email : user.email;
+    const tenantChanging =
+      updateUserInput.tenantId !== undefined &&
+      updateUserInput.tenantId !== user.tenantId;
+    const emailChanging =
+      updateUserInput.email !== undefined &&
+      updateUserInput.email !== user.email;
+    if (
+      nextRole !== UserRole.VGREENS_ADMIN &&
+      (tenantChanging || emailChanging)
+    ) {
+      await this.assertTenantAllowsEmail(nextTenantId, nextEmail);
     }
 
     Object.assign(user, updateUserInput);

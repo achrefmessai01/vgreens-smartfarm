@@ -1,4 +1,10 @@
-import { IsEmail, IsString, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsArray,
+} from 'class-validator';
 import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
@@ -26,4 +32,13 @@ export class CreateTenantInput {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // Email-domain whitelist for this tenant. Empty/omitted = any domain allowed.
+  // Bare domains only ("v-greens.com"); the service normalizes to lowercase and
+  // strips leading "@" or scheme noise before persisting.
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  allowedDomains?: string[];
 }

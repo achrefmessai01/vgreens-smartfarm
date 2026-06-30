@@ -11,6 +11,7 @@ import { InfluxDBService } from '@modules/influxdb/influxdb.service';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
 import { isAllowedSensorField } from './sensor-fields.constants';
 import { DEFAULT_HIDDEN_HARVEST_DASHBOARD_ITEMS } from './dashboard-defaults.constants';
+import { sanitizeAllowedDomains } from '@modules/users/utils/tenant-allowed-domains';
 
 const DEFAULT_BUCKET_RETENTION_SECONDS = 60 * 60 * 24 * 30;
 
@@ -42,6 +43,11 @@ export class TenantsService {
       isActive: createTenantInput.isActive ?? true,
       // Seed metrics that ship "off by default" into the hidden set.
       hiddenHarvestDashboardItems: [...DEFAULT_HIDDEN_HARVEST_DASHBOARD_ITEMS],
+      // Drop empties + duplicates and normalize to bare lowercase so the column
+      // never holds two equivalent rows ("@v-greens.com" vs "v-greens.com").
+      allowedDomains: sanitizeAllowedDomains(
+        createTenantInput.allowedDomains ?? [],
+      ),
     });
 
     const savedTenant = await this.tenantRepository.save(tenant);
@@ -66,6 +72,13 @@ export class TenantsService {
     }
 
     Object.assign(tenant, updateTenantInput);
+    // Same normalization as create: only touch the column when the caller is
+    // actually changing it (undefined = leave the existing list alone).
+    if (updateTenantInput.allowedDomains !== undefined) {
+      tenant.allowedDomains = sanitizeAllowedDomains(
+        updateTenantInput.allowedDomains,
+      );
+    }
     return this.tenantRepository.save(tenant);
   }
 

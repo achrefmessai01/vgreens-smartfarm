@@ -525,6 +525,7 @@ export const ar = {
       waste: 'الفاقد',
       yieldKg: 'الإنتاج (kg)',
       weightKg: 'الوزن (kg)',
+      percentage: 'النسبة المئوية (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'إجمالي الإنتاج (kg)',
       date: 'التاريخ',
@@ -844,6 +845,9 @@ export const ar = {
       searchPlaceholder: 'ابحث عن المستخدمين...',
       confirmDelete: 'هل أنت متأكد من رغبتك في حذف هذا المستخدم؟',
       confirmDeleteDescription: 'لا يمكن التراجع عن هذا الإجراء.',
+      confirmUpdate: 'هل تريد تحديث هذا المستخدم؟',
+      confirmUpdateDescription:
+        'راجع التغييرات — بعد التأكيد سيتم تحديث بيانات المستخدم على الفور.',
       userCreated: 'تم إنشاء المستخدم بنجاح',
       userUpdated: 'تم تحديث المستخدم بنجاح',
       userDeleted: 'تم حذف المستخدم بنجاح',
@@ -1035,6 +1039,16 @@ export const ar = {
         inactive: 'غير نشط',
         notAvailable: 'غير متاح',
         loading: 'جارٍ تحميل المستأجرين...',
+        allowedDomains: 'نطاقات البريد الإلكتروني المسموح بها',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'اتركه فارغًا للسماح بأي نطاق بريد إلكتروني. اضغط على Enter أو فاصلة للإضافة.',
+        allowedDomainsInvalid: 'أدخل نطاقًا صالحًا (مثل example.com)',
+        allowedDomainsRemove: 'إزالة النطاق',
+        domainNotAllowed:
+          'نطاق البريد الإلكتروني هذا غير مسموح به للمستأجر المحدد.',
+        domainTransferWarning:
+          'يؤدي نقل هذا المستخدم إلى تغيير المستأجر. تأكد من أن نطاق البريد الإلكتروني الجديد مسموح به.',
         tabs: {
           features: 'الميزات',
           alertConfiguration: 'إعداد التنبيهات',

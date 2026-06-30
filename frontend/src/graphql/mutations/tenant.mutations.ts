@@ -9,6 +9,7 @@ export const CREATE_TENANT_MUTATION = gql`
       email
       phone
       isActive
+      allowedDomains
       greenhouses {
         name
         doorPosition
@@ -33,6 +34,7 @@ export const UPDATE_TENANT_MUTATION = gql`
       email
       phone
       isActive
+      allowedDomains
       greenhouses {
         name
         doorPosition

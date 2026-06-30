@@ -530,6 +530,7 @@ export const tr = {
       waste: 'Atık',
       yieldKg: 'Verim (kg)',
       weightKg: 'Ağırlık (kg)',
+      percentage: 'Yüzde (%)',
       brixValue: 'Brix (°Bx)',
       totalYieldKg: 'Toplam verim (kg)',
       date: 'Tarih',
@@ -849,6 +850,9 @@ export const tr = {
       searchPlaceholder: 'Kullanıcı ara...',
       confirmDelete: 'Bu kullanıcıyı silmek istediğinizden emin misiniz?',
       confirmDeleteDescription: 'Bu işlem geri alınamaz.',
+      confirmUpdate: 'Bu kullanıcıyı güncellemek istiyor musunuz?',
+      confirmUpdateDescription:
+        'Değişikliklerinizi gözden geçirin — onayladıktan sonra kullanıcı kaydı hemen güncellenecektir.',
       userCreated: 'Kullanıcı başarıyla oluşturuldu',
       userUpdated: 'Kullanıcı başarıyla güncellendi',
       userDeleted: 'Kullanıcı başarıyla silindi',
@@ -1042,6 +1046,16 @@ export const tr = {
         inactive: 'Pasif',
         notAvailable: 'Yok',
         loading: 'Kiracılar yükleniyor...',
+        allowedDomains: 'İzin verilen e-posta alan adları',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Herhangi bir e-posta alan adına izin vermek için boş bırakın. Eklemek için Enter veya virgüle basın.',
+        allowedDomainsInvalid: 'Geçerli bir alan adı girin (ör. example.com)',
+        allowedDomainsRemove: 'Alan adını kaldır',
+        domainNotAllowed:
+          'Bu e-posta alan adı, seçilen kiracı için izin verilmiyor.',
+        domainTransferWarning:
+          'Bu kullanıcıyı taşımak kiracıyı değiştirir. Yeni e-posta alan adına izin verildiğinden emin olun.',
         tabs: {
           features: 'Özellikler',
           alertConfiguration: 'Alarm yapılandırması',

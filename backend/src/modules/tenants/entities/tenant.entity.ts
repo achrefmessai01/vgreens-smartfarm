@@ -88,6 +88,14 @@ export class Tenant extends BaseEntity {
   @Column({ type: 'jsonb', default: () => "'[]'" })
   hiddenHarvestDashboardItems: string[];
 
+  // Whitelist of email domains (e.g. ["v-greens.com", "example.org"]) allowed
+  // when adding/moving users into this tenant. Empty list = unrestricted (any
+  // domain accepted). Stored as a normalized lowercase list; the service
+  // enforces format + uniqueness so the column never holds duplicates.
+  @Field(() => [String], { defaultValue: [] })
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  allowedDomains: string[];
+
   @Field(() => Date)
   createdAt: Date;
 

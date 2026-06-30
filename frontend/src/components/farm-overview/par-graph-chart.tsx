@@ -207,9 +207,9 @@ export function ParGraphChart({
               tooltipType="none"
             />
             <Line
-              dataKey="lowerEdge"
+              dataKey="upperEdge"
               type="monotone"
-              name="lowerEdge"
+              name="Upper Edge"
               stroke="hsl(142 91% 55%)"
               strokeWidth={1.5}
               strokeDasharray="4 4"
@@ -217,9 +217,9 @@ export function ParGraphChart({
               isAnimationActive={false}
             />
             <Line
-              dataKey="upperEdge"
+              dataKey="lowerEdge"
               type="monotone"
-              name="upperEdge"
+              name="Lower Edge"
               stroke="hsl(142 91% 55%)"
               strokeWidth={1.5}
               strokeDasharray="4 4"

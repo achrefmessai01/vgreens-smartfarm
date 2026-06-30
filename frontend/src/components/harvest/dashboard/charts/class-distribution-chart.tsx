@@ -49,7 +49,9 @@ const ClassTooltip = ({ active, payload, label }: ChartTooltipProps) => {
       <p className="font-medium">{label}</p>
       {payload.map((entry, index) => (
         <p key={index} className="text-sm" style={{ color: entry.color }}>
-          {`${entry.name ?? entry.dataKey}: ${Math.round((entry.value ?? 0) * 10) / 10} kg`}
+          {`${entry.name ?? entry.dataKey}: ${
+            typeof entry.value === 'number' ? entry.value.toFixed(1) : 0
+          }%`}
         </p>
       ))}
     </ChartTooltipContainer>
@@ -78,14 +80,20 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
         waste: d.waste,
       }));
   // Flatten the per-class arrays into discrete keys (class0, class1, ...) recharts
-  // can stack, padding to the widest row.
+  // can stack, padding to the widest row. Each row is normalised to percentages
+  // of that row's total (sum of classes + waste) so stacks always reach 100%.
   const maxClasses = Math.max(0, ...rows.map((r) => r.classes.length));
   const chartData = rows.map((r) => {
+    const total =
+      r.classes.reduce((sum, val) => sum + (val ?? 0), 0) + (r.waste ?? 0);
+    const toPct = (value: number) => (total > 0 ? (value / total) * 100 : 0);
     const point: Record<string, number | string> = {
       label: r.label,
-      waste: r.waste,
+      waste: toPct(r.waste ?? 0),
     };
-    for (let i = 0; i < maxClasses; i++) point[`class${i}`] = r.classes[i] ?? 0;
+    for (let i = 0; i < maxClasses; i++) {
+      point[`class${i}`] = toPct(r.classes[i] ?? 0);
+    }
     return point;
   });
   const classIdxs = Array.from({ length: maxClasses }, (_, i) => i);
@@ -100,7 +108,7 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
-              margin={{ top: 20, right: 20, left: 10, bottom: 40 }}
+              margin={{ top: 20, right: 20, left: 0, bottom: 40 }}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -119,10 +127,14 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
               />
               <YAxis
                 fontSize={12}
+                width={60}
+                domain={[0, 100]}
+                tickFormatter={(value: number) => `${value}%`}
                 label={{
-                  value: h?.weightKg ?? 'Weight (kg)',
+                  value: h?.percentage ?? 'Percentage (%)',
                   angle: -90,
                   position: 'insideLeft',
+                  style: { textAnchor: 'middle' },
                 }}
               />
               <Tooltip content={<ClassTooltip />} />
