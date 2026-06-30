@@ -4,7 +4,6 @@ import {
   RoleField,
   EmailField,
   NameFields,
-  TenantField,
   ImageUrlField,
   ClerkUserIdField,
   ActiveStatusField,
@@ -15,6 +14,7 @@ import { FieldGroup } from '@/components/ui/field';
 import type { User, Tenant } from '@/generated/graphql';
 import type { UserFormData, UserFormErrors } from './user-form-types';
 import { useUserManagementForm } from '@/lib/hooks/use-user-management-form';
+import { TenantWithDomainWarning } from './tenant-with-domain-warning';
 
 export type { UserFormData, UserFormErrors };
 
@@ -113,12 +113,13 @@ export const UserManagementForm = React.forwardRef<
           {!hideTenantSelection &&
             isVGreensAdmin &&
             formData.role !== UserRole.VgreensAdmin && (
-              <TenantField
-                value={formData.tenantId}
-                onChange={handleSelectChange('tenantId')}
+              <TenantWithDomainWarning
+                formData={formData}
                 errors={errors}
                 isLoading={isLoading}
                 tenants={tenants}
+                originalTenantId={initialData?.tenantId}
+                onChange={handleSelectChange('tenantId')}
               />
             )}
 

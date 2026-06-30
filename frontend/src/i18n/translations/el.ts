@@ -863,6 +863,9 @@ export const el = {
       searchPlaceholder: 'Αναζήτηση χρηστών...',
       confirmDelete: 'Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτόν τον χρήστη;',
       confirmDeleteDescription: 'Η ενέργεια δεν μπορεί να αναιρεθεί.',
+      confirmUpdate: 'Ενημέρωση αυτού του χρήστη;',
+      confirmUpdateDescription:
+        'Ελέγξτε τις αλλαγές σας — μετά την επιβεβαίωση ο χρήστης θα ενημερωθεί αμέσως.',
       userCreated: 'Ο χρήστης δημιουργήθηκε με επιτυχία',
       userUpdated: 'Ο χρήστης ενημερώθηκε με επιτυχία',
       userDeleted: 'Ο χρήστης διαγράφηκε με επιτυχία',
@@ -1059,6 +1062,16 @@ export const el = {
         inactive: 'Ανενεργός',
         notAvailable: 'Δ/Δ',
         loading: 'Φόρτωση μισθωτών...',
+        allowedDomains: 'Επιτρεπόμενοι τομείς email',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Αφήστε κενό για να επιτρέπεται οποιοσδήποτε τομέας email. Πατήστε Enter ή κόμμα για προσθήκη.',
+        allowedDomainsInvalid: 'Εισαγάγετε έγκυρο τομέα (π.χ. example.com)',
+        allowedDomainsRemove: 'Αφαίρεση τομέα',
+        domainNotAllowed:
+          'Αυτός ο τομέας email δεν επιτρέπεται για τον επιλεγμένο μισθωτή.',
+        domainTransferWarning:
+          'Η μετακίνηση αυτού του χρήστη αλλάζει τον μισθωτή. Βεβαιωθείτε ότι ο νέος τομέας email επιτρέπεται.',
         tabs: {
           features: 'Λειτουργίες',
           alertConfiguration: 'Διαμόρφωση συναγερμών',

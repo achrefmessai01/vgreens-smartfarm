@@ -1,33 +1,19 @@
 'use client';
 
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Field,
-  FieldContent,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import type { Tenant } from '@/generated/graphql';
 import { useFarmConfigQuery } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import * as React from 'react';
+import { AllowedDomainsField } from './allowed-domains-field';
+import { TenantFormFields } from './tenant-form-fields';
+import type {
+  TenantFormData,
+  TenantFormErrors,
+} from './tenant-form.types';
 
-export interface TenantFormData {
-  name: string;
-  companyName?: string;
-  email?: string;
-  phone?: string;
-  isActive: boolean;
-  bayCount?: number;
-  chambersCount?: number;
-}
-
-export interface TenantFormErrors {
-  name?: string;
-  email?: string;
-}
+export type { TenantFormData, TenantFormErrors } from './tenant-form.types';
 
 interface TenantFormProps {
   initialData?: Partial<Tenant>;
@@ -62,6 +48,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
       email: initialData?.email ?? '',
       phone: initialData?.phone ?? '',
       isActive: initialData?.isActive ?? true,
+      allowedDomains: initialData?.allowedDomains ?? [],
       bayCount: undefined,
       chambersCount: undefined,
     });
@@ -76,6 +63,7 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
           email: initialData.email ?? '',
           phone: initialData.phone ?? '',
           isActive: initialData.isActive ?? true,
+          allowedDomains: initialData.allowedDomains ?? [],
         }));
       }
     }, [initialData]);
@@ -121,67 +109,20 @@ export const TenantForm = React.forwardRef<TenantFormRef, TenantFormProps>(
     return (
       <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
         <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="name">{`${tenantsT.name} *`}</FieldLabel>
-            <FieldContent>
-              <Input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange('name')}
-                placeholder={tenantsT.namePlaceholder}
-                aria-invalid={!!errors.name}
-                disabled={isLoading}
-              />
-              {errors.name && <FieldError>{errors.name}</FieldError>}
-            </FieldContent>
-          </Field>
+          <TenantFormFields
+            formData={formData}
+            errors={errors}
+            isLoading={isLoading}
+            onChange={handleChange}
+          />
 
-          <Field>
-            <FieldLabel htmlFor="companyName">
-              {tenantsT.companyName}
-            </FieldLabel>
-            <FieldContent>
-              <Input
-                id="companyName"
-                type="text"
-                value={formData.companyName}
-                onChange={handleChange('companyName')}
-                placeholder={tenantsT.companyPlaceholder}
-                disabled={isLoading}
-              />
-            </FieldContent>
-          </Field>
-
-          <Field>
-            <FieldLabel htmlFor="email">{tenantsT.email}</FieldLabel>
-            <FieldContent>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange('email')}
-                placeholder={tenantsT.emailPlaceholder}
-                aria-invalid={!!errors.email}
-                disabled={isLoading}
-              />
-              {errors.email && <FieldError>{errors.email}</FieldError>}
-            </FieldContent>
-          </Field>
-
-          <Field>
-            <FieldLabel htmlFor="phone">{tenantsT.phone}</FieldLabel>
-            <FieldContent>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={handleChange('phone')}
-                placeholder={tenantsT.phonePlaceholder}
-                disabled={isLoading}
-              />
-            </FieldContent>
-          </Field>
+          <AllowedDomainsField
+            value={formData.allowedDomains}
+            onChange={(next) =>
+              setFormData((prev) => ({ ...prev, allowedDomains: next }))
+            }
+            disabled={isLoading}
+          />
 
           <Field>
             <div className="flex items-center gap-2">

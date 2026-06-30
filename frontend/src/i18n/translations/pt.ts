@@ -856,6 +856,9 @@ export const pt = {
       searchPlaceholder: 'Pesquisar utilizadores...',
       confirmDelete: 'Tem a certeza de que pretende eliminar este utilizador?',
       confirmDeleteDescription: 'Esta ação não pode ser desfeita.',
+      confirmUpdate: 'Atualizar este usuário?',
+      confirmUpdateDescription:
+        'Revise suas alterações — após a confirmação, o usuário será atualizado imediatamente.',
       userCreated: 'Utilizador criado com sucesso',
       userUpdated: 'Utilizador atualizado com sucesso',
       userDeleted: 'Utilizador eliminado com sucesso',
@@ -1051,6 +1054,16 @@ export const pt = {
         inactive: 'Inativo',
         notAvailable: 'N/D',
         loading: 'A carregar inquilinos...',
+        allowedDomains: 'Domínios de e-mail permitidos',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Deixe vazio para permitir qualquer domínio de e-mail. Pressione Enter ou vírgula para adicionar.',
+        allowedDomainsInvalid: 'Introduza um domínio válido (por ex. example.com)',
+        allowedDomainsRemove: 'Remover domínio',
+        domainNotAllowed:
+          'Este domínio de e-mail não é permitido para o inquilino selecionado.',
+        domainTransferWarning:
+          'Mover este utilizador altera o inquilino. Certifique-se de que o novo domínio de e-mail é permitido.',
         tabs: {
           features: 'Funcionalidades',
           alertConfiguration: 'Configuração de alertas',

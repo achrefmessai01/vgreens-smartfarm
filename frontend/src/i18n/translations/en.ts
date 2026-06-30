@@ -867,6 +867,9 @@ export const en = {
       searchPlaceholder: 'Search users...',
       confirmDelete: 'Are you sure you want to delete this user?',
       confirmDeleteDescription: 'This action cannot be undone.',
+      confirmUpdate: 'Update this user?',
+      confirmUpdateDescription:
+        'Review your changes — once confirmed, the user record will be updated immediately.',
       userCreated: 'User created successfully',
       userUpdated: 'User updated successfully',
       userDeleted: 'User deleted successfully',
@@ -1061,6 +1064,16 @@ export const en = {
         inactive: 'Inactive',
         notAvailable: 'N/A',
         loading: 'Loading tenants...',
+        allowedDomains: 'Allowed Email Domains',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Leave empty to allow any email domain. Press Enter or comma to add.',
+        allowedDomainsInvalid: 'Enter a valid domain (e.g. example.com)',
+        allowedDomainsRemove: 'Remove domain',
+        domainNotAllowed:
+          'This email domain is not allowed for the selected tenant.',
+        domainTransferWarning:
+          'Moving this user changes the tenant. Make sure the new email domain is allowed.',
         tabs: {
           features: 'Features',
           alertConfiguration: 'Alert Configuration',

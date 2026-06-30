@@ -11,6 +11,7 @@ export const TENANTS_QUERY = gql`
       isActive
       disabledSensorFields
       hiddenHarvestDashboardItems
+      allowedDomains
       greenhouses {
         name
         doorPosition
@@ -37,6 +38,7 @@ export const TENANT_QUERY = gql`
       isActive
       disabledSensorFields
       hiddenHarvestDashboardItems
+      allowedDomains
       greenhouses {
         name
         doorPosition

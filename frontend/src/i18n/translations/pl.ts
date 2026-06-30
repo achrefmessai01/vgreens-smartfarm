@@ -853,6 +853,9 @@ export const pl = {
       searchPlaceholder: 'Szukaj użytkowników...',
       confirmDelete: 'Czy na pewno chcesz usunąć tego użytkownika?',
       confirmDeleteDescription: 'Tej operacji nie można cofnąć.',
+      confirmUpdate: 'Zaktualizować tego użytkownika?',
+      confirmUpdateDescription:
+        'Przejrzyj zmiany — po potwierdzeniu użytkownik zostanie natychmiast zaktualizowany.',
       userCreated: 'Użytkownik został utworzony',
       userUpdated: 'Użytkownik został zaktualizowany',
       userDeleted: 'Użytkownik został usunięty',
@@ -1048,6 +1051,16 @@ export const pl = {
         inactive: 'Nieaktywny',
         notAvailable: 'Brak',
         loading: 'Ładowanie najemców...',
+        allowedDomains: 'Dozwolone domeny e-mail',
+        allowedDomainsPlaceholder: 'example.com',
+        allowedDomainsHint:
+          'Pozostaw puste, aby zezwolić na dowolną domenę e-mail. Naciśnij Enter lub przecinek, aby dodać.',
+        allowedDomainsInvalid: 'Wprowadź prawidłową domenę (np. example.com)',
+        allowedDomainsRemove: 'Usuń domenę',
+        domainNotAllowed:
+          'Ta domena e-mail nie jest dozwolona dla wybranego najemcy.',
+        domainTransferWarning:
+          'Przeniesienie tego użytkownika zmienia najemcę. Upewnij się, że nowa domena e-mail jest dozwolona.',
         tabs: {
           features: 'Funkcje',
           alertConfiguration: 'Konfiguracja alarmów',
