@@ -93,6 +93,10 @@ export const es = {
     loadingContent: 'Cargando contenido',
     loadingSidebar: 'Cargando barra lateral',
     loadingTable: 'Cargando tabla',
+    tenantSelector: {
+      allTenants: 'Todos los inquilinos',
+      placeholder: 'Seleccionar inquilino',
+    },
   },
   login: {
     title: 'Bienvenido de nuevo',

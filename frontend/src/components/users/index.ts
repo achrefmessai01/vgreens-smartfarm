@@ -4,7 +4,6 @@ export {
   NameFields,
   TenantField,
   ImageUrlField,
-  ClerkUserIdField,
   ActiveStatusField,
 } from './user-form-fields';
 export {

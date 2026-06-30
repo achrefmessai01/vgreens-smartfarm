@@ -2,7 +2,6 @@ import { UserRole } from '@/generated/graphql';
 import type { Tenant } from '@/generated/graphql';
 
 export interface UserFormData {
-  clerkUserId?: string;
   email: string;
   firstName?: string;
   lastName?: string;
@@ -13,7 +12,6 @@ export interface UserFormData {
 }
 
 export interface UserFormErrors {
-  clerkUserId?: string;
   email?: string;
   role?: string;
   tenantId?: string;
@@ -22,10 +20,6 @@ export interface UserFormErrors {
 export interface BaseFieldProps {
   isLoading?: boolean;
   errors: UserFormErrors;
-}
-
-export interface ClerkUserIdFieldProps extends BaseFieldProps {
-  value: string;
 }
 
 export interface EmailFieldProps extends BaseFieldProps {

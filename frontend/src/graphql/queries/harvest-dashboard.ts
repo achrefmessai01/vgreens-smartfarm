@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const GET_HARVEST_DASHBOARD = gql`
-  query GetHarvestDashboard($filter: DashboardFilterInput) {
-    harvestDashboard(filter: $filter) {
+  query GetHarvestDashboard($filter: DashboardFilterInput, $tenantId: ID) {
+    harvestDashboard(filter: $filter, tenantId: $tenantId) {
       species
       variety
       harvestCount

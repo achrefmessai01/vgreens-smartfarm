@@ -8,6 +8,7 @@ import {
   useDeleteHarvestImageMutation,
   useUpdateHarvestMutation,
 } from '@/generated/graphql';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import type {
   BatchDetailsData,
   EntryChange,
@@ -92,6 +93,7 @@ export function useBatchSidebar({
   const [createHarvest, { loading: createLoading }] =
     useCreateHarvestMutation();
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
+  const tenantId = useTenantIdVariable();
   // Photos are stored under the harvest folder when editing, otherwise under
   // the batch folder while a new harvest is being composed.
   const { uploadPhotos, uploading } = useHarvestPhotosUpload(
@@ -517,6 +519,7 @@ export function useBatchSidebar({
               ...timingInput,
               photoUrls: currentData.photos,
               entries,
+              tenantId,
             },
           },
           ...refetchOptions,
@@ -533,6 +536,7 @@ export function useBatchSidebar({
               photoUrls: currentData.photos,
               entries,
             },
+            tenantId,
           },
           ...refetchOptions,
         });
@@ -556,6 +560,7 @@ export function useBatchSidebar({
     updateHarvest,
     createHarvest,
     onCompleted,
+    tenantId,
   ]);
 
   const canSave =

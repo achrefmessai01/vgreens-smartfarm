@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -65,6 +66,29 @@ export function DashboardFilters({
   ];
 
   const hasBatches = batches.length > 0;
+
+  const sortedBatches = React.useMemo(
+    () =>
+      [...batches].sort((a, b) => {
+        const byGreenhouse = (a.greenhouse ?? '').localeCompare(
+          b.greenhouse ?? '',
+          undefined,
+          { numeric: true, sensitivity: 'base' },
+        );
+        if (byGreenhouse !== 0) return byGreenhouse;
+        const byVariety = (a.variety ?? '').localeCompare(
+          b.variety ?? '',
+          undefined,
+          { numeric: true, sensitivity: 'base' },
+        );
+        if (byVariety !== 0) return byVariety;
+        return (a.species ?? '').localeCompare(b.species ?? '', undefined, {
+          numeric: true,
+          sensitivity: 'base',
+        });
+      }),
+    [batches],
+  );
 
   const toggleCompareBatch = (id: string) => {
     if (compareBatchIds.includes(id)) {
@@ -146,7 +170,7 @@ export function DashboardFilters({
             )}
           </div>
           <div className="max-h-72 overflow-y-auto px-2 pb-2">
-            {batches.map((b) => {
+            {sortedBatches.map((b) => {
               const checked = compareBatchIds.includes(b.id);
               const disabled =
                 !checked && compareBatchIds.length >= MAX_COMPARE_BATCHES;

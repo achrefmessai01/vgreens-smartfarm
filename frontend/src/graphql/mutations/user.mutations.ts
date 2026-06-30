@@ -20,8 +20,8 @@ export const CREATE_USER_MUTATION = gql`
 `;
 
 export const UPDATE_USER_MUTATION = gql`
-  mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
-    updateUser(id: $id, input: $input) {
+  mutation UpdateUser($id: ID!, $input: UpdateUserInput!, $tenantId: ID) {
+    updateUser(id: $id, input: $input, tenantId: $tenantId) {
       id
       clerkUserId
       email
@@ -38,8 +38,8 @@ export const UPDATE_USER_MUTATION = gql`
 `;
 
 export const DELETE_USER_MUTATION = gql`
-  mutation DeleteUser($id: ID!) {
-    deleteUser(id: $id)
+  mutation DeleteUser($id: ID!, $tenantId: ID) {
+    deleteUser(id: $id, tenantId: $tenantId)
   }
 `;
 

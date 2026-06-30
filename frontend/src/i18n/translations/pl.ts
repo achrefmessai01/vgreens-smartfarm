@@ -106,6 +106,10 @@ export const pl = {
     online: 'Online',
     degraded: 'Degraded',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'Wszyscy najemcy',
+      placeholder: 'Wybierz najemcę',
+    },
   },
   login: {
     title: 'Witaj ponownie',

@@ -59,6 +59,7 @@ export default function AdminUsersPage() {
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <UserManagementTable
           users={page.users}
+          tenants={page.tenants}
           onEdit={page.handleEdit}
           onDelete={page.handleDelete}
         />

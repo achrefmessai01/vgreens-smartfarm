@@ -51,8 +51,8 @@ export const CREATE_BATCH_MUTATION = gql`
 `;
 
 export const UPDATE_BATCH_MUTATION = gql`
-  mutation UpdateBatch($id: ID!, $input: UpdateBatchInput!) {
-    updateBatch(id: $id, input: $input) {
+  mutation UpdateBatch($id: ID!, $input: UpdateBatchInput!, $tenantId: ID) {
+    updateBatch(id: $id, input: $input, tenantId: $tenantId) {
       ...BatchMutationFields
     }
   }
@@ -60,7 +60,7 @@ export const UPDATE_BATCH_MUTATION = gql`
 `;
 
 export const DELETE_BATCH_MUTATION = gql`
-  mutation DeleteBatch($id: ID!) {
-    deleteBatch(id: $id)
+  mutation DeleteBatch($id: ID!, $tenantId: ID) {
+    deleteBatch(id: $id, tenantId: $tenantId)
   }
 `;

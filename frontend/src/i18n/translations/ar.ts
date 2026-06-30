@@ -106,6 +106,10 @@ export const ar = {
     online: 'Online',
     degraded: 'Degraded',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'جميع المستأجرين',
+      placeholder: 'اختر مستأجرًا',
+    },
   },
   login: {
     title: 'مرحبًا بعودتك',

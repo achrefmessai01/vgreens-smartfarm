@@ -8,20 +8,15 @@ import { useI18n } from '@/i18n';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLogout } from '@/lib/hooks/use-logout';
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features';
+import { useTenantNavItems } from '@/lib/hooks/use-tenant-nav-items';
 import { cn } from '@/lib/utils';
 import {
-  AlertTriangle,
-  Apple,
   Building2,
   ClipboardList,
-  Clock,
-  Cpu,
   Flag,
   Menu,
   Settings,
-  Sprout,
   Users,
-  Video,
   Zap,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -64,7 +59,14 @@ export function Sidebar({
 
   // Always fetch current user to confirm role
   const { user: currentUser, role, loading: userLoading } = useCurrentUser();
-  const { hasFeature, loading: featuresLoading } = useTenantFeatures();
+  // Tenant features are still consulted by `useTenantNavItems` below; we only
+  // need the loading flag here to gate the sidebar skeleton.
+  const { loading: featuresLoading } = useTenantFeatures();
+  // Filtered tenant nav items (role + feature gates applied). Shared with the
+  // in-header `TenantNavbar` so both render the same set in lock-step. Only
+  // surfaces in the sidebar for non-admin users; VGREENS_ADMIN keeps the
+  // admin nav and uses the header `TenantNavbar` to jump into tenant pages.
+  const tenantNavItems = useTenantNavItems();
 
   const handleLogout = React.useCallback(async () => {
     await logout();
@@ -138,69 +140,15 @@ export function Sidebar({
     },
   ];
 
-  // Tenant navigation items - filtered by enabled features
-  const allTenantNavItems: NavItem[] = [
-    {
-      label: t.navigation.farmOverview,
-      href: '/tenant/farm-overview',
-      icon: Sprout,
-      featureKey: 'farm_overview', // Always show farm overview
-    },
-    {
-      label: t.navigation.harvest || 'Harvest',
-      href: '/tenant/harvest',
-      icon: Apple,
-      // Always show harvest - no feature key required
-    },
-    {
-      label: t.navigation.users,
-      href: '/tenant/users',
-      icon: Users,
-      featureKey: 'user_management',
-      // Regular tenant users shouldn't be able to manage other users.
-      allowedRoles: [UserRole.VgreensAdmin, UserRole.TenantAdmin],
-    },
-    {
-      label: t.navigation.alerts,
-      href: '/tenant/alerts',
-      icon: AlertTriangle,
-      featureKey: 'sensor_alerts',
-    },
-    {
-      label: t.navigation.cameraLivestream,
-      href: '/tenant/camera-livestream',
-      icon: Video,
-      featureKey: 'camera_livestream',
-    },
-    {
-      label: t.navigation.history,
-      href: '/tenant/history',
-      icon: Clock,
-      featureKey: 'data_analytics',
-    },
-    {
-      label: t.navigation.deviceStatus,
-      href: '/tenant/devices',
-      icon: Cpu,
-      featureKey: 'device_status',
-      // Device fleet health is an admin concern, not for plain tenant users.
-      allowedRoles: [UserRole.VgreensAdmin, UserRole.TenantAdmin],
-    },
-  ];
+  // Tenant nav items now come from `useTenantNavItems` (above) — single source
+  // of truth shared with the in-header `TenantNavbar`.
 
-  // Filter navigation items based on enabled features and allowed roles.
-  const tenantNavItems: NavItem[] = allTenantNavItems.filter((item) => {
-    // Role gate runs first — admins can see everything but tenant users only
-    // see items their role is explicitly allowed to access.
-    if (item.allowedRoles && role && !item.allowedRoles.includes(role)) {
-      return false;
-    }
-    if (!item.featureKey) return true;
-    if (isVGreensAdmin) return true;
-    return hasFeature(item.featureKey);
-  });
-
-  // Select nav items based on role
+  // Select nav items based on role:
+  // - VGREENS_ADMIN always sees the admin nav in the sidebar, so they never
+  //   lose access to /admin/tenants, /admin/users, etc., even after picking
+  //   a tenant. The in-header `TenantNavbar` provides the tenant-page links
+  //   when a tenant is selected.
+  // - Everyone else sees the filtered tenant nav.
   const navItems = isVGreensAdmin ? adminNavItems : tenantNavItems;
 
   const defaultUser = {

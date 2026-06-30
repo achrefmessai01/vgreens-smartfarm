@@ -107,7 +107,9 @@ export function useFarmLayoutConfig(tenantId: string) {
     try {
       // Delete removed greenhouses, then upsert the rest against the table.
       await Promise.all(
-        removedIds.map((id) => deleteGreenhouse({ variables: { id } })),
+        removedIds.map((id) =>
+          deleteGreenhouse({ variables: { id, tenantId } }),
+        ),
       );
       await Promise.all(
         cleaned.map((r) => {
@@ -121,7 +123,9 @@ export function useFarmLayoutConfig(tenantId: string) {
             hiddenInFarmOverview: r.hiddenInFarmOverview,
           };
           if (r.id) {
-            return updateGreenhouse({ variables: { id: r.id, input } });
+            return updateGreenhouse({
+              variables: { id: r.id, input, tenantId },
+            });
           }
           return createGreenhouse({
             variables: { input: { ...input, tenantId } },

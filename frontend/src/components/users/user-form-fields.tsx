@@ -6,7 +6,6 @@ import type {
   NameFieldsProps,
   TenantFieldProps,
   ImageUrlFieldProps,
-  ClerkUserIdFieldProps,
   ActiveStatusFieldProps,
 } from './user-form-types';
 import {
@@ -20,29 +19,6 @@ import { Input } from '@/components/ui/input';
 import { UserRole } from '@/generated/graphql';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SelectField, type SelectOption } from './select-field';
-
-export function ClerkUserIdField({ value }: ClerkUserIdFieldProps) {
-  const { t } = useI18n();
-  return (
-    <Field>
-      <FieldLabel htmlFor="clerkUserId">
-        {t.pages.admin.users.clerkUserId}
-      </FieldLabel>
-      <FieldContent>
-        <Input
-          id="clerkUserId"
-          type="text"
-          value={value}
-          disabled
-          className="bg-muted"
-        />
-        <p className="text-muted-foreground mt-1 text-xs">
-          {t.pages.admin.users.clerkUserIdDescription}
-        </p>
-      </FieldContent>
-    </Field>
-  );
-}
 
 export function EmailField({
   value,

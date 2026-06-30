@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useDeleteBatchMutation } from '@/generated/graphql';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 
 interface UseDeleteBatchOptions {
   onSuccess?: () => void;
@@ -12,17 +13,18 @@ interface UseDeleteBatchOptions {
 // its entries simply disappear from the table after a refetch.
 export function useDeleteBatch({ onSuccess }: UseDeleteBatchOptions = {}) {
   const [deleteBatch, { loading }] = useDeleteBatchMutation();
+  const tenantId = useTenantIdVariable();
 
   const handleDeleteBatch = React.useCallback(
     async (id: string) => {
       try {
-        await deleteBatch({ variables: { id } });
+        await deleteBatch({ variables: { id, tenantId } });
         onSuccess?.();
       } catch (err) {
         console.error('Failed to delete batch:', err);
       }
     },
-    [deleteBatch, onSuccess],
+    [deleteBatch, onSuccess, tenantId],
   );
 
   return { handleDeleteBatch, loading };

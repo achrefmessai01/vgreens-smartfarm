@@ -106,6 +106,10 @@ export const el = {
     online: 'Online',
     degraded: 'Degraded',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'Όλοι οι ενοικιαστές',
+      placeholder: 'Επιλέξτε ενοικιαστή',
+    },
   },
   login: {
     title: 'Καλώς ήρθατε ξανά',

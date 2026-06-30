@@ -101,6 +101,10 @@ export const fr = {
     online: 'Online',
     degraded: 'Degraded',
     offline: 'Offline',
+    tenantSelector: {
+      allTenants: 'Tous les locataires',
+      placeholder: 'Choisir un locataire',
+    },
   },
   login: {
     title: 'Bon retour',

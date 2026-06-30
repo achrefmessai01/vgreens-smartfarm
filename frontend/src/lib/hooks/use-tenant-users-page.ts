@@ -10,16 +10,22 @@ import {
   UserStatus,
   type User,
 } from '@/generated/graphql';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import type { UserFormData } from '@/components/users';
 
 export function useTenantUsersPage() {
   const { user: currentUser, isVGreensAdmin, isTenantAdmin } = useCurrentUser();
-  const tenantId = currentUser?.tenantId;
+  // Honour the VGREENS_ADMIN tenant picker. For regular tenant admins this is
+  // always undefined and we fall back to their own tenant id below.
+  const selectedTenantId = useTenantIdVariable();
+  const tenantId = selectedTenantId ?? currentUser?.tenantId;
 
   // The `users` query is restricted to admins; skip it for tenant users to
-  // avoid a guaranteed permission error.
+  // avoid a guaranteed permission error. Pass the selected tenant id so the
+  // backend scopes the result to the tenant the admin picked in the navbar.
   const { data, loading, refetch } = useUsersQuery({
+    variables: { tenantId: selectedTenantId },
     skip: !(isVGreensAdmin || isTenantAdmin),
   });
   const [createUser] = useCreateUserMutation();
@@ -44,9 +50,16 @@ export function useTenantUsersPage() {
 
   const users = React.useMemo(() => {
     if (!data?.users) return [];
-    return data.users.filter(
-      (u) => u.tenantId === tenantId && u.role !== UserRole.VgreensAdmin,
-    ) as User[];
+    return data.users.filter((u) => {
+      // Never show VGREENS_ADMIN accounts in tenant-scoped lists.
+      if (u.role === UserRole.VgreensAdmin) return false;
+      // When we have a resolved tenantId (either the admin's picked tenant
+      // or the current tenant admin's own tenant) we scope to that tenant.
+      // If tenantId is undefined — e.g. an admin in "All tenants" mode —
+      // we leave the list untouched so they can see results across tenants.
+      if (tenantId && u.tenantId !== tenantId) return false;
+      return true;
+    }) as User[];
   }, [data?.users, tenantId]);
 
   const handleCreate = React.useCallback(() => {
