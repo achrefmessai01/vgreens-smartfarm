@@ -6,6 +6,7 @@ import {
   SENSOR_OVERVIEW_PARAMETER,
   type ViewMode,
 } from '@/lib/farm-overview-constants';
+import type { OverviewConfiguredSensor } from '@/lib/farm-data-live';
 import type {
   FarmLayoutConfig,
   GreenhouseDimensions,
@@ -33,6 +34,8 @@ export interface FarmOverviewCardProps {
   /** Disabled sensor `_field` set ("Enable Sensors" dropdown). */
   disabledSensorFields: Set<string>;
   bays: Bay[];
+  /** Configured-but-silent sensors for the selected greenhouse (overview map). */
+  overviewConfiguredSensors?: OverviewConfiguredSensor[];
   greenhouseLabel: string;
   /** Optional tenant override forwarded to the embedded PAR graph.
    *  Required for vGreens admins viewing another tenant. */
@@ -71,6 +74,7 @@ export function FarmOverviewCard({
   overviewEnabled,
   disabledSensorFields,
   bays,
+  overviewConfiguredSensors,
   greenhouseLabel,
   parGraphTenantId,
   parGraphGreenhouseName,
@@ -159,6 +163,7 @@ export function FarmOverviewCard({
             <div className="relative flex min-h-0 flex-1 flex-col">
               <FarmDataDisplay
                 bays={bays}
+                overviewConfiguredSensors={overviewConfiguredSensors}
                 viewMode={viewMode}
                 parameter={effectiveParameter}
                 disabledSensorFields={disabledSensorFields}
