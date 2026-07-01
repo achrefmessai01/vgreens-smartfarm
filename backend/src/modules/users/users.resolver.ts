@@ -171,10 +171,14 @@ export class UsersResolver {
           ...createUserInput,
           tenantId: currentUser.tenantId,
         };
-        // Tenant admins cannot create admin users
-        if (createUserInput.role === UserRole.VGREENS_ADMIN) {
+        // Tenant admins cannot create internal vGreens users (VGREENS_ADMIN
+        // or its view-only sibling VGREENS_MEMBER).
+        if (
+          createUserInput.role === UserRole.VGREENS_ADMIN ||
+          createUserInput.role === UserRole.VGREENS_MEMBER
+        ) {
           throw new BadRequestException(
-            'Tenant admins cannot create admin users',
+            'Tenant admins cannot create internal vGreens users',
           );
         }
       }
