@@ -14,7 +14,6 @@ import {
   useBatchSidebar,
   type SidebarMode,
 } from '@/lib/hooks/use-batch-sidebar';
-import { Button } from '@/components/ui/button';
 import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
