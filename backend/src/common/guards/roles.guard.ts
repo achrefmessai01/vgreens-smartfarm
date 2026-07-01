@@ -5,6 +5,8 @@ import { ROLES_KEY } from '../decorators/roles.decorator';
 import { UserRole } from '../enums';
 import { User } from '@modules/users/entities/user.entity';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import type { GraphQLResolveInfo } from 'graphql';
+import { OperationTypeNode } from 'graphql';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -39,9 +41,11 @@ export class RolesGuard implements CanActivate {
     // `@Roles(..., UserRole.VGREENS_MEMBER)`. This keeps the ~60 existing
     // decorators untouched while enforcing "read anywhere admin can, write
     // nowhere" as a single rule.
-    const info = gqlCtx.getInfo?.();
-    const opType: string | undefined = info?.operation?.operation;
-    const isReadOp = opType === 'query' || opType === 'subscription';
+    const info: GraphQLResolveInfo | undefined = gqlCtx.getInfo();
+    const opType: OperationTypeNode | undefined = info?.operation?.operation;
+    const isReadOp =
+      opType === OperationTypeNode.QUERY ||
+      opType === OperationTypeNode.SUBSCRIPTION;
     const effectiveRoles =
       isReadOp &&
       requiredRoles.includes(UserRole.VGREENS_ADMIN) &&
