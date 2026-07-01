@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import {
   ErrorReportSeverityBadge,
   ErrorReportStatusBadge,
@@ -131,13 +131,13 @@ export function SystemErrorCard({ error, onResolve }: SystemErrorCardProps) {
         </div>
 
         {!error.isResolved && (
-          <Button
+          <WriteActionButton
             size="sm"
             onClick={() => onResolve(error.id)}
             className="bg-green-600 hover:bg-green-700"
           >
             <CheckCircle className="h-4 w-4" />
-          </Button>
+          </WriteActionButton>
         )}
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { PageHeader } from '@/components/layout';
-import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Plus } from 'lucide-react';
 import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
@@ -45,14 +45,14 @@ export default function AdminUsersPage() {
         title={t.pages.admin.users.title}
         subtitle={t.pages.admin.users.subtitle}
         actions={
-          <Button
+          <WriteActionButton
             onClick={page.handleCreate}
             disabled={page.isLoading}
             className="w-full sm:w-auto"
           >
             <Plus className="h-4 w-4" />
             {t.pages.admin.users.createUser}
-          </Button>
+          </WriteActionButton>
         }
       />
 

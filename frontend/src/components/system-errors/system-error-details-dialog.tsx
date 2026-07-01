@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { ErrorSourceBadge } from '@/components/ui/error-source-badge';
 import { ErrorTypeBadge } from '@/components/ui/error-type-badge';
 import { ErrorReportSeverityBadge } from '@/components/error-reports/error-report-severity-badge';
@@ -75,7 +75,7 @@ export function SystemErrorDetailsDialog({
               )}
             </div>
             {!error.isResolved && onResolve && (
-              <Button
+              <WriteActionButton
                 onClick={() => onResolve(error.id)}
                 disabled={isResolving}
                 size="sm"
@@ -85,7 +85,7 @@ export function SystemErrorDetailsDialog({
                 {isResolving
                   ? t.pages.admin.systemErrors.resolving
                   : t.pages.admin.systemErrors.resolve}
-              </Button>
+              </WriteActionButton>
             )}
           </div>
 
