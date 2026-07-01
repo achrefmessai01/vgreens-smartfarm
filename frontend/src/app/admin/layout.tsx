@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { UserRole } from '@/generated/graphql';
 import { AppLayout } from '@/components/layout';
 import { useRouter, usePathname } from 'next/navigation';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
@@ -16,7 +15,7 @@ export default function AdminLayout({
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const { user, role, loading } = useCurrentUser();
+  const { user, role, loading, isVGreensInternal } = useCurrentUser();
 
   useEffect(() => {
     if (!isLoaded) {
@@ -34,19 +33,22 @@ export default function AdminLayout({
       return;
     }
 
-    if (role && role !== UserRole.VgreensAdmin) {
+    // Both internal vGreens roles see the admin surface — VGREENS_MEMBER is
+    // the read-only sibling and shares every visibility rule with the admin.
+    // Tenant-scoped roles get bounced back to /tenant/dashboard.
+    if (role && !isVGreensInternal) {
       if (!pathname?.startsWith('/tenant')) {
         router.replace('/tenant/dashboard');
       }
       return;
     }
-  }, [isSignedIn, isLoaded, router, pathname, role, loading]);
+  }, [isSignedIn, isLoaded, router, pathname, role, loading, isVGreensInternal]);
 
   if (!isLoaded || !isSignedIn || loading) {
     return <PageSkeleton />;
   }
 
-  if (role !== UserRole.VgreensAdmin) {
+  if (!isVGreensInternal) {
     return null;
   }
 
