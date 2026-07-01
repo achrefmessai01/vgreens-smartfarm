@@ -94,6 +94,9 @@ export function useSensorCalibrationCapture(params: {
   const [since, setSince] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<CaptureStatus>('idle');
   const [error, setError] = React.useState<string | null>(null);
+  // Milliseconds since the operator pressed calibrate (drives the sidebar
+  // timer). Ticks while a capture is in flight, resets to 0 otherwise.
+  const [elapsedMs, setElapsedMs] = React.useState(0);
   // Guards against firing the persist mutation more than once per capture.
   const firedRef = React.useRef(false);
 
@@ -119,6 +122,19 @@ export function useSensorCalibrationCapture(params: {
     fetchPolicy: 'network-only',
     pollInterval: READING_POLL_MS,
   });
+
+  // Tick the elapsed timer once a second while a capture is in flight.
+  React.useEffect(() => {
+    if ((status !== 'waiting' && status !== 'saving') || !since) {
+      setElapsedMs(0);
+      return;
+    }
+    const startedAt = new Date(since).getTime();
+    const tick = () => setElapsedMs(Date.now() - startedAt);
+    tick();
+    const id = window.setInterval(tick, 1_000);
+    return () => window.clearInterval(id);
+  }, [status, since]);
 
   // Timeout: stop waiting if no transmission arrives within the window.
   React.useEffect(() => {
@@ -192,6 +208,7 @@ export function useSensorCalibrationCapture(params: {
     status,
     bound,
     error,
+    elapsedMs,
     busy: status === 'waiting' || status === 'saving',
     startDry: React.useCallback(() => start('dry'), [start]),
     startSaturated: React.useCallback(() => start('saturated'), [start]),

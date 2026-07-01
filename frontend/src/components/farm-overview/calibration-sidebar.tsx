@@ -17,7 +17,7 @@ import {
   type SoilSensorConfig,
 } from '@/lib/hooks/use-sensor-calibration';
 import { isSoilCalibrated } from '@/lib/soil-calibration';
-import { Droplet, Sprout, TriangleAlert } from 'lucide-react';
+import { Clock, Droplet, Sprout, TriangleAlert } from 'lucide-react';
 
 export interface CalibrationSidebarProps {
   open: boolean;
@@ -32,6 +32,14 @@ function formatReading(value?: number | null): string {
   return value == null ? '—' : value.toFixed(2);
 }
 
+/** Elapsed milliseconds as m:ss. */
+function formatElapsed(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
 export function CalibrationSidebar({
   open,
   onOpenChange,
@@ -39,12 +47,20 @@ export function CalibrationSidebar({
   tenantId,
   onCalibrated,
 }: CalibrationSidebarProps) {
-  const { status, bound, error, busy, startDry, startSaturated, cancel } =
-    useSensorCalibrationCapture({
-      sensorConfigId: sensor?.id ?? null,
-      tenantId,
-      onCalibrated,
-    });
+  const {
+    status,
+    bound,
+    error,
+    elapsedMs,
+    busy,
+    startDry,
+    startSaturated,
+    cancel,
+  } = useSensorCalibrationCapture({
+    sensorConfigId: sensor?.id ?? null,
+    tenantId,
+    onCalibrated,
+  });
 
   // Cancel any in-flight capture when the sensor changes or the sheet closes,
   // so a wait started for one sensor never resolves against another.
@@ -77,9 +93,24 @@ export function CalibrationSidebar({
             ? 'Saving calibration…'
             : 'Waiting for the next sensor transmission (~10 min). Keep the sensor in place.'}
         </p>
-        <Button variant="ghost" size="sm" onClick={cancel} className="h-7 px-2 text-xs">
-          Cancel
-        </Button>
+        <div className="flex items-center justify-between gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={cancel}
+            className="h-7 px-2 text-xs"
+          >
+            Cancel
+          </Button>
+          <span
+            className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs tabular-nums"
+            aria-live="polite"
+            title="Time since you pressed calibrate"
+          >
+            <Clock className="h-3 w-3" />
+            {formatElapsed(elapsedMs)}
+          </span>
+        </div>
       </div>
     );
   };
