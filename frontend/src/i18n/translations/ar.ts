@@ -110,6 +110,7 @@ export const ar = {
       allTenants: 'جميع المستأجرين',
       placeholder: 'اختر مستأجرًا',
     },
+    viewOnlyTooltip: 'حساب للقراءة فقط — هذا الإجراء معطّل.',
   },
   login: {
     title: 'مرحبًا بعودتك',
@@ -695,6 +696,7 @@ export const ar = {
       cratesUnit: 'صناديق',
       totalCrates: 'إجمالي الصناديق',
       qualityClassLabel: 'الجودة {class}',
+      enterQualityClassYield: 'أدخل إنتاج الجودة {class}',
       addQualityClass: 'إضافة فئة جودة',
       removeQualityClass: 'إزالة الفئة',
       remainingKg: 'المتبقي (kg)',
@@ -989,6 +991,7 @@ export const ar = {
         inactive: 'غير نشط',
         pending: 'قيد الانتظار',
         roleVgreensAdmin: 'مسؤول vGreens',
+        roleVgreensMember: 'عضو vGreens',
         roleTenantAdmin: 'مسؤول المستأجر',
         roleTenantUser: 'مستخدم المستأجر',
         roleRequired: 'الدور مطلوب',

@@ -684,6 +684,11 @@ export type HarvestBatchListItem = {
   yieldPerPlant?: Maybe<Scalars['Float']['output']>;
 };
 
+export type HarvestCrateAssignmentInput = {
+  crateId: Scalars['ID']['input'];
+  harvestId: Scalars['ID']['input'];
+};
+
 export type HarvestDashboardMetrics = {
   __typename?: 'HarvestDashboardMetrics';
   averageBrix: Scalars['Float']['output'];
@@ -881,6 +886,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   acknowledgeAlert: Alert;
   assignCropToGreenhouse: GreenhouseCrop;
+  convertBatchInputMode: Array<Harvest>;
   createAlert: Alert;
   createBatch: Batch;
   createCrate: Crate;
@@ -913,6 +919,7 @@ export type Mutation = {
   setMyLanguage: User;
   setTenantDisabledSensorFields: Tenant;
   setTenantHarvestDashboardItems: Tenant;
+  setTenantHarvestDashboardOrder: Tenant;
   softDeleteAlert: Scalars['Boolean']['output'];
   toggleTenantFeature: TenantFeature;
   unassignCropFromGreenhouse: Scalars['Boolean']['output'];
@@ -946,6 +953,14 @@ export type MutationAssignCropToGreenhouseArgs = {
 };
 
 
+export type MutationConvertBatchInputModeArgs = {
+  batchId: Scalars['ID']['input'];
+  crateAssignments?: InputMaybe<Array<HarvestCrateAssignmentInput>>;
+  targetMode: InputMode;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type MutationCreateAlertArgs = {
   input: CreateAlertInput;
 };
@@ -958,6 +973,7 @@ export type MutationCreateBatchArgs = {
 
 export type MutationCreateCrateArgs = {
   input: CreateCrateInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1104,6 +1120,12 @@ export type MutationSetTenantDisabledSensorFieldsArgs = {
 
 export type MutationSetTenantHarvestDashboardItemsArgs = {
   hiddenItems: Array<Scalars['String']['input']>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationSetTenantHarvestDashboardOrderArgs = {
+  orderedIds: Array<Scalars['String']['input']>;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -1312,6 +1334,11 @@ export type QueryBatchesArgs = {
 
 export type QueryCameraLivestreamStreamUrlArgs = {
   cameraId: Scalars['String']['input'];
+};
+
+
+export type QueryCratesArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1582,6 +1609,7 @@ export type Tenant = {
   disabledSensorFields: Array<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   greenhouses?: Maybe<Array<TenantGreenhouse>>;
+  harvestDashboardOrder: Array<Scalars['String']['output']>;
   hiddenHarvestDashboardItems: Array<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   influxBucketName?: Maybe<Scalars['String']['output']>;
@@ -1792,7 +1820,8 @@ export type User = {
 export enum UserRole {
   TenantAdmin = 'TENANT_ADMIN',
   TenantUser = 'TENANT_USER',
-  VgreensAdmin = 'VGREENS_ADMIN'
+  VgreensAdmin = 'VGREENS_ADMIN',
+  VgreensMember = 'VGREENS_MEMBER'
 }
 
 export type UserSettings = {
@@ -1920,6 +1949,7 @@ export type DeleteBatchMutation = { __typename?: 'Mutation', deleteBatch: boolea
 
 export type CreateCrateMutationVariables = Exact<{
   input: CreateCrateInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2022,6 +2052,16 @@ export type UpdateHarvestMutationVariables = Exact<{
 
 export type UpdateHarvestMutation = { __typename?: 'Mutation', updateHarvest: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, startTime?: string | null, stopTime?: string | null, harvesterHeadCount?: number | null, photoUrls: Array<string>, createdAt: any, updatedAt: any, crateId?: string | null, crate?: { __typename?: 'Crate', id: string, weight: number } | null, batch?: { __typename?: 'Batch', id: string, name?: string | null, status: BatchStatus, totalPlants: number, rowLength: number, runningMeter: number, inputMode: InputMode, crateWeight?: number | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: Array<number>, rowY: Array<number>, classKgs?: Array<number> | null, waste: number, crateCounts?: Array<number> | null, remainingKgs?: Array<number> | null, totalFruitWeight: number, avgFruitWeight: number, sampleWeight?: number | null, sampleFruitCount?: number | null, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classKgs: Array<number>, waste: number, fruitCount: number, totalFruitWeight: number, crateCounts?: Array<number> | null, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerRunningMeter?: number | null } } };
 
+export type ConvertBatchInputModeMutationVariables = Exact<{
+  batchId: Scalars['ID']['input'];
+  targetMode: InputMode;
+  crateAssignments?: InputMaybe<Array<HarvestCrateAssignmentInput> | HarvestCrateAssignmentInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ConvertBatchInputModeMutation = { __typename?: 'Mutation', convertBatchInputMode: Array<{ __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, startTime?: string | null, stopTime?: string | null, harvesterHeadCount?: number | null, photoUrls: Array<string>, createdAt: any, updatedAt: any, crateId?: string | null, crate?: { __typename?: 'Crate', id: string, weight: number } | null, batch?: { __typename?: 'Batch', id: string, name?: string | null, status: BatchStatus, totalPlants: number, rowLength: number, runningMeter: number, inputMode: InputMode, crateWeight?: number | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: Array<number>, rowY: Array<number>, classKgs?: Array<number> | null, waste: number, crateCounts?: Array<number> | null, remainingKgs?: Array<number> | null, totalFruitWeight: number, avgFruitWeight: number, sampleWeight?: number | null, sampleFruitCount?: number | null, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classKgs: Array<number>, waste: number, fruitCount: number, totalFruitWeight: number, crateCounts?: Array<number> | null, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerRunningMeter?: number | null } }> };
+
 export type DeleteHarvestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -2098,6 +2138,14 @@ export type SetTenantHarvestDashboardItemsMutationVariables = Exact<{
 
 export type SetTenantHarvestDashboardItemsMutation = { __typename?: 'Mutation', setTenantHarvestDashboardItems: { __typename?: 'Tenant', id: string, hiddenHarvestDashboardItems: Array<string> } };
 
+export type SetTenantHarvestDashboardOrderMutationVariables = Exact<{
+  orderedIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type SetTenantHarvestDashboardOrderMutation = { __typename?: 'Mutation', setTenantHarvestDashboardOrder: { __typename?: 'Tenant', id: string, harvestDashboardOrder: Array<string> } };
+
 export type CreateUserMutationVariables = Exact<{
   input: CreateUserInput;
 }>;
@@ -2151,7 +2199,7 @@ export type GetRecentSystemErrorsQueryVariables = Exact<{
 }>;
 
 
-export type GetRecentSystemErrorsQuery = { __typename?: 'Query', getRecentSystemErrors: Array<{ __typename?: 'SystemError', id: string, source: ErrorSource, errorType: ErrorType, severity: ReportSeverity, errorMessage: string, component?: string | null, action?: string | null, occurrenceCount?: number | null, isResolved: boolean, createdAt: any, updatedAt: any, lastOccurredAt?: any | null, user?: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email?: string | null, id: string, isActive: boolean, createdAt: any, updatedAt: any, clerkUserId: string, role: UserRole } | null, tenant?: { __typename?: 'Tenant', id: string, isActive: boolean, createdAt: any, updatedAt: any, name: string, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, allowedDomains: Array<string> } | null }> };
+export type GetRecentSystemErrorsQuery = { __typename?: 'Query', getRecentSystemErrors: Array<{ __typename?: 'SystemError', id: string, source: ErrorSource, errorType: ErrorType, severity: ReportSeverity, errorMessage: string, component?: string | null, action?: string | null, occurrenceCount?: number | null, isResolved: boolean, createdAt: any, updatedAt: any, lastOccurredAt?: any | null, user?: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email?: string | null, id: string, isActive: boolean, createdAt: any, updatedAt: any, clerkUserId: string, role: UserRole } | null, tenant?: { __typename?: 'Tenant', id: string, isActive: boolean, createdAt: any, updatedAt: any, name: string, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string>, allowedDomains: Array<string> } | null }> };
 
 export type GetSystemErrorStatsQueryVariables = Exact<{
   hours?: InputMaybe<Scalars['Float']['input']>;
@@ -2270,7 +2318,9 @@ export type CameraLivestreamStreamUrlQueryVariables = Exact<{
 
 export type CameraLivestreamStreamUrlQuery = { __typename?: 'Query', cameraLivestreamStreamUrl: { __typename?: 'CameraLivestreamStream', cameraId: string, url?: string | null, expiresAt?: any | null, available: boolean, error?: string | null } };
 
-export type CratesQueryVariables = Exact<{ [key: string]: never; }>;
+export type CratesQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
 export type CratesQuery = { __typename?: 'Query', crates: Array<{ __typename?: 'Crate', id: string, weight: number }> };
@@ -2542,14 +2592,14 @@ export type GreenhouseOptionsQuery = { __typename?: 'Query', greenhouseOptions: 
 export type TenantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, allowedDomains: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null }> };
+export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string>, allowedDomains: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null }> };
 
 export type TenantQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, allowedDomains: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
+export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string>, allowedDomains: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
 
 export type GetTenantBucketQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2568,7 +2618,7 @@ export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, allowedDomains: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string>, allowedDomains: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -3292,8 +3342,8 @@ export type DeleteBatchMutationHookResult = ReturnType<typeof useDeleteBatchMuta
 export type DeleteBatchMutationResult = Apollo.MutationResult<DeleteBatchMutation>;
 export type DeleteBatchMutationOptions = Apollo.BaseMutationOptions<DeleteBatchMutation, DeleteBatchMutationVariables>;
 export const CreateCrateDocument = gql`
-    mutation CreateCrate($input: CreateCrateInput!) {
-  createCrate(input: $input) {
+    mutation CreateCrate($input: CreateCrateInput!, $tenantId: ID) {
+  createCrate(input: $input, tenantId: $tenantId) {
     id
     weight
   }
@@ -3315,6 +3365,7 @@ export type CreateCrateMutationFn = Apollo.MutationFunction<CreateCrateMutation,
  * const [createCrateMutation, { data, loading, error }] = useCreateCrateMutation({
  *   variables: {
  *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -3758,6 +3809,47 @@ export function useUpdateHarvestMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateHarvestMutationHookResult = ReturnType<typeof useUpdateHarvestMutation>;
 export type UpdateHarvestMutationResult = Apollo.MutationResult<UpdateHarvestMutation>;
 export type UpdateHarvestMutationOptions = Apollo.BaseMutationOptions<UpdateHarvestMutation, UpdateHarvestMutationVariables>;
+export const ConvertBatchInputModeDocument = gql`
+    mutation ConvertBatchInputMode($batchId: ID!, $targetMode: InputMode!, $crateAssignments: [HarvestCrateAssignmentInput!], $tenantId: ID) {
+  convertBatchInputMode(
+    batchId: $batchId
+    targetMode: $targetMode
+    crateAssignments: $crateAssignments
+    tenantId: $tenantId
+  ) {
+    ...HarvestMutationFields
+  }
+}
+    ${HarvestMutationFieldsFragmentDoc}`;
+export type ConvertBatchInputModeMutationFn = Apollo.MutationFunction<ConvertBatchInputModeMutation, ConvertBatchInputModeMutationVariables>;
+
+/**
+ * __useConvertBatchInputModeMutation__
+ *
+ * To run a mutation, you first call `useConvertBatchInputModeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConvertBatchInputModeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [convertBatchInputModeMutation, { data, loading, error }] = useConvertBatchInputModeMutation({
+ *   variables: {
+ *      batchId: // value for 'batchId'
+ *      targetMode: // value for 'targetMode'
+ *      crateAssignments: // value for 'crateAssignments'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useConvertBatchInputModeMutation(baseOptions?: Apollo.MutationHookOptions<ConvertBatchInputModeMutation, ConvertBatchInputModeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ConvertBatchInputModeMutation, ConvertBatchInputModeMutationVariables>(ConvertBatchInputModeDocument, options);
+      }
+export type ConvertBatchInputModeMutationHookResult = ReturnType<typeof useConvertBatchInputModeMutation>;
+export type ConvertBatchInputModeMutationResult = Apollo.MutationResult<ConvertBatchInputModeMutation>;
+export type ConvertBatchInputModeMutationOptions = Apollo.BaseMutationOptions<ConvertBatchInputModeMutation, ConvertBatchInputModeMutationVariables>;
 export const DeleteHarvestDocument = gql`
     mutation DeleteHarvest($id: ID!, $tenantId: ID) {
   deleteHarvest(id: $id, tenantId: $tenantId)
@@ -4136,6 +4228,41 @@ export function useSetTenantHarvestDashboardItemsMutation(baseOptions?: Apollo.M
 export type SetTenantHarvestDashboardItemsMutationHookResult = ReturnType<typeof useSetTenantHarvestDashboardItemsMutation>;
 export type SetTenantHarvestDashboardItemsMutationResult = Apollo.MutationResult<SetTenantHarvestDashboardItemsMutation>;
 export type SetTenantHarvestDashboardItemsMutationOptions = Apollo.BaseMutationOptions<SetTenantHarvestDashboardItemsMutation, SetTenantHarvestDashboardItemsMutationVariables>;
+export const SetTenantHarvestDashboardOrderDocument = gql`
+    mutation SetTenantHarvestDashboardOrder($orderedIds: [String!]!, $tenantId: ID) {
+  setTenantHarvestDashboardOrder(orderedIds: $orderedIds, tenantId: $tenantId) {
+    id
+    harvestDashboardOrder
+  }
+}
+    `;
+export type SetTenantHarvestDashboardOrderMutationFn = Apollo.MutationFunction<SetTenantHarvestDashboardOrderMutation, SetTenantHarvestDashboardOrderMutationVariables>;
+
+/**
+ * __useSetTenantHarvestDashboardOrderMutation__
+ *
+ * To run a mutation, you first call `useSetTenantHarvestDashboardOrderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetTenantHarvestDashboardOrderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setTenantHarvestDashboardOrderMutation, { data, loading, error }] = useSetTenantHarvestDashboardOrderMutation({
+ *   variables: {
+ *      orderedIds: // value for 'orderedIds'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useSetTenantHarvestDashboardOrderMutation(baseOptions?: Apollo.MutationHookOptions<SetTenantHarvestDashboardOrderMutation, SetTenantHarvestDashboardOrderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetTenantHarvestDashboardOrderMutation, SetTenantHarvestDashboardOrderMutationVariables>(SetTenantHarvestDashboardOrderDocument, options);
+      }
+export type SetTenantHarvestDashboardOrderMutationHookResult = ReturnType<typeof useSetTenantHarvestDashboardOrderMutation>;
+export type SetTenantHarvestDashboardOrderMutationResult = Apollo.MutationResult<SetTenantHarvestDashboardOrderMutation>;
+export type SetTenantHarvestDashboardOrderMutationOptions = Apollo.BaseMutationOptions<SetTenantHarvestDashboardOrderMutation, SetTenantHarvestDashboardOrderMutationVariables>;
 export const CreateUserDocument = gql`
     mutation CreateUser($input: CreateUserInput!) {
   createUser(input: $input) {
@@ -4407,6 +4534,7 @@ export const GetRecentSystemErrorsDocument = gql`
       name
       disabledSensorFields
       hiddenHarvestDashboardItems
+      harvestDashboardOrder
       allowedDomains
     }
   }
@@ -5168,8 +5296,8 @@ export type CameraLivestreamStreamUrlLazyQueryHookResult = ReturnType<typeof use
 export type CameraLivestreamStreamUrlSuspenseQueryHookResult = ReturnType<typeof useCameraLivestreamStreamUrlSuspenseQuery>;
 export type CameraLivestreamStreamUrlQueryResult = Apollo.QueryResult<CameraLivestreamStreamUrlQuery, CameraLivestreamStreamUrlQueryVariables>;
 export const CratesDocument = gql`
-    query Crates {
-  crates {
+    query Crates($tenantId: ID) {
+  crates(tenantId: $tenantId) {
     id
     weight
   }
@@ -5188,6 +5316,7 @@ export const CratesDocument = gql`
  * @example
  * const { data, loading, error } = useCratesQuery({
  *   variables: {
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -6955,6 +7084,7 @@ export const TenantsDocument = gql`
     isActive
     disabledSensorFields
     hiddenHarvestDashboardItems
+    harvestDashboardOrder
     allowedDomains
     greenhouses {
       name
@@ -7016,6 +7146,7 @@ export const TenantDocument = gql`
     isActive
     disabledSensorFields
     hiddenHarvestDashboardItems
+    harvestDashboardOrder
     allowedDomains
     greenhouses {
       name
@@ -7180,6 +7311,7 @@ export const MeDocument = gql`
       updatedAt
       disabledSensorFields
       hiddenHarvestDashboardItems
+      harvestDashboardOrder
       allowedDomains
       greenhouses {
         name

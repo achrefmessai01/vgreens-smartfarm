@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { TableCell } from '@/components/ui/table';
 import { ErrorReport, ReportStatus } from '@/generated/graphql';
@@ -95,22 +95,22 @@ export function ErrorReportTable({
       header: reportsT.actions,
       accessor: (report) => (
         <div className="flex items-center gap-1">
-          <Button
+          <WriteActionButton
             variant="ghost"
             size="sm"
             onClick={() => onEdit(report)}
             className="h-8 w-8 p-0"
           >
             <Edit2 className="h-3 w-3" />
-          </Button>
-          <Button
+          </WriteActionButton>
+          <WriteActionButton
             variant="ghost"
             size="sm"
             onClick={() => onDelete(report)}
             className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
           >
             <Trash2 className="h-3 w-3" />
-          </Button>
+          </WriteActionButton>
         </div>
       ),
     },
@@ -159,22 +159,22 @@ export function ErrorReportTable({
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-1">
-          <Button
+          <WriteActionButton
             variant="ghost"
             size="sm"
             onClick={() => onEdit(report)}
             className="h-8 w-8 p-0"
           >
             <Edit2 className="h-3 w-3" />
-          </Button>
-          <Button
+          </WriteActionButton>
+          <WriteActionButton
             variant="ghost"
             size="sm"
             onClick={() => onDelete(report)}
             className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
           >
             <Trash2 className="h-3 w-3" />
-          </Button>
+          </WriteActionButton>
         </div>
       </TableCell>
     </>
@@ -190,22 +190,22 @@ export function ErrorReportTable({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <Button
+          <WriteActionButton
             variant="ghost"
             size="sm"
             onClick={() => onEdit(report)}
             className="h-8 w-8 p-0"
           >
             <Edit2 className="h-3 w-3" />
-          </Button>
-          <Button
+          </WriteActionButton>
+          <WriteActionButton
             variant="ghost"
             size="sm"
             onClick={() => onDelete(report)}
             className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
           >
             <Trash2 className="h-3 w-3" />
-          </Button>
+          </WriteActionButton>
         </div>
       </div>
 

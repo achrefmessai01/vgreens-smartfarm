@@ -105,6 +105,7 @@ export const de = {
       allTenants: 'Alle Mandanten',
       placeholder: 'Mandant auswählen',
     },
+    viewOnlyTooltip: 'Nur-Lese-Konto – diese Aktion ist deaktiviert.',
   },
   login: {
     title: 'Willkommen zurück',
@@ -702,6 +703,7 @@ export const de = {
       cratesUnit: 'Kisten',
       totalCrates: 'Kisten gesamt',
       qualityClassLabel: 'Qualität {class}',
+      enterQualityClassYield: 'Qualität {class} Ertrag eingeben',
       addQualityClass: 'Qualitätsklasse hinzufügen',
       removeQualityClass: 'Klasse entfernen',
       remainingKg: 'Rest (kg)',
@@ -1017,6 +1019,7 @@ export const de = {
         inactive: 'Inaktiv',
         pending: 'Ausstehend',
         roleVgreensAdmin: 'vGreens Admin',
+        roleVgreensMember: 'vGreens Mitglied',
         roleTenantAdmin: 'Mandanten-Admin',
         roleTenantUser: 'Mandanten-Benutzer',
         roleRequired: 'Rolle ist erforderlich',

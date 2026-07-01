@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import {
   Sheet,
   SheetContent,
@@ -237,14 +238,14 @@ export function ErrorReportDetails({
 
           {/* Actions */}
           <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row">
-            <Button
+            <WriteActionButton
               onClick={handleUpdate}
               className="flex w-full items-center gap-2 sm:flex-1"
               disabled={isUpdating}
             >
               <Save className="h-4 w-4" />
               {isUpdating ? t.common.loading : detailsT.update}
-            </Button>
+            </WriteActionButton>
             <Button
               variant="outline"
               onClick={onClose}

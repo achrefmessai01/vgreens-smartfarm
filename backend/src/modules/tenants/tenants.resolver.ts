@@ -128,4 +128,21 @@ export class TenantsResolver {
       hiddenItems,
     );
   }
+
+  @Mutation(() => Tenant)
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  async setTenantHarvestDashboardOrder(
+    @CurrentUser() currentUser: User,
+    @Args('orderedIds', { type: () => [String] }) orderedIds: string[],
+    @Args('tenantId', { type: () => ID, nullable: true }) tenantId?: string,
+  ): Promise<Tenant> {
+    const targetTenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? (tenantId ?? currentUser.tenantId)
+        : currentUser.tenantId;
+    return this.tenantsService.setHarvestDashboardOrder(
+      targetTenantId,
+      orderedIds,
+    );
+  }
 }

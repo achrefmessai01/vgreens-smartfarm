@@ -20,6 +20,7 @@ export const ME_QUERY = gql`
         updatedAt
         disabledSensorFields
         hiddenHarvestDashboardItems
+        harvestDashboardOrder
         allowedDomains
         greenhouses {
           name

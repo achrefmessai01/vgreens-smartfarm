@@ -19,7 +19,7 @@ import { useI18n } from '@/i18n';
 import type { UserFormData } from '@/components/users/user-management-form';
 
 export function useAdminUsersPage() {
-  const { role: currentUserRole } = useCurrentUser();
+  const { role: currentUserRole, isVGreensInternal } = useCurrentUser();
   const isVGreensAdmin = currentUserRole === UserRole.VgreensAdmin;
   const { toast } = useToast();
   const { t } = useI18n();
@@ -30,8 +30,11 @@ export function useAdminUsersPage() {
     loading: usersLoading,
     refetch: refetchUsers,
   } = useUsersQuery();
+  // Both internal vGreens roles need the tenants list — admins to power the
+  // tenant picker on create/edit, VGREENS_MEMBER (read-only) to resolve
+  // tenant names in the table's Tenant column and filter dropdown.
   const { data: tenantsData, loading: tenantsLoading } = useTenantsQuery({
-    skip: !isVGreensAdmin,
+    skip: !isVGreensInternal,
   });
 
   const [createUser] = useCreateUserMutation();

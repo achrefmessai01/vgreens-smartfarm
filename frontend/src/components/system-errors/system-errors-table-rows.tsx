@@ -1,6 +1,7 @@
 import { ErrorReportSeverityBadge } from '@/components/error-reports/error-report-severity-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { ErrorSourceBadge } from '@/components/ui/error-source-badge';
 import { ErrorTypeBadge } from '@/components/ui/error-type-badge';
 import { TableCell } from '@/components/ui/table';
@@ -89,7 +90,7 @@ export const useSystemErrorsRow = ({
               <Eye className="h-4 w-4" />
             </Button>
             {!error.isResolved && (
-              <Button
+              <WriteActionButton
                 variant="ghost"
                 size="icon"
                 onClick={() => onResolve(error)}
@@ -97,7 +98,7 @@ export const useSystemErrorsRow = ({
                 disabled={isLoading || isResolving}
               >
                 <CheckCircle2 className="h-4 w-4" />
-              </Button>
+              </WriteActionButton>
             )}
           </div>
         </TableCell>

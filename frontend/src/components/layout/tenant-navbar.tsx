@@ -1,6 +1,5 @@
 'use client';
 
-import { UserRole } from '@/generated/graphql';
 import { useSelectedTenantId } from '@/lib/contexts/selected-tenant-context';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useTenantNavItems } from '@/lib/hooks/use-tenant-nav-items';
@@ -17,15 +16,17 @@ import { usePathname } from 'next/navigation';
  * actually navigate the app.
  *
  * Visibility:
- *  - VGREENS_ADMIN: only when they've picked a tenant in the navbar selector
- *    (otherwise they're in admin mode and the sidebar shows admin links).
+ *  - Internal vGreens users (VGREENS_ADMIN and its view-only sibling
+ *    VGREENS_MEMBER): only when they've picked a tenant in the navbar
+ *    selector (otherwise they're in admin mode and the sidebar shows admin
+ *    links).
  *  - Regular tenant users (TENANT_ADMIN / TENANT_USER): never. They already
  *    have the sidebar pinned to their own tenant, so a duplicate header strip
  *    would just be visual noise.
  */
 export function TenantNavbar() {
   const pathname = usePathname();
-  const { role, loading } = useCurrentUser();
+  const { isVGreensInternal, loading } = useCurrentUser();
   const selectedTenantId = useSelectedTenantId();
   // Pass the selected tenant id so the items are filtered against THAT
   // tenant's enabled features.
@@ -33,10 +34,9 @@ export function TenantNavbar() {
 
   if (loading) return null;
 
-  // VGREENS_ADMIN-only surface. Regular tenant users get the sidebar instead.
-  const isVGreensAdmin = role === UserRole.VgreensAdmin;
-  if (!isVGreensAdmin) return null;
-  // Admin without a picked tenant is in admin mode — hide the tenant strip.
+  // Internal vGreens surface only. Regular tenant users get the sidebar.
+  if (!isVGreensInternal) return null;
+  // Internal user without a picked tenant is in admin mode — hide the strip.
   if (!selectedTenantId) return null;
   if (navItems.length === 0) return null;
 

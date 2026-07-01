@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Alert, AlertStatus } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
@@ -81,7 +82,7 @@ export const renderSecondaryActions = (
 ) => (
   <>
     {onEdit && (
-      <Button
+      <WriteActionButton
         variant="ghost"
         size="icon"
         onClick={(event) => {
@@ -92,10 +93,10 @@ export const renderSecondaryActions = (
         className="h-8 w-8 rounded-full border border-sky-200/80 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/70 dark:text-sky-300 dark:hover:bg-sky-950/40"
       >
         <Pencil className="h-4 w-4" />
-      </Button>
+      </WriteActionButton>
     )}
     {onDelete && (
-      <Button
+      <WriteActionButton
         variant="ghost"
         size="icon"
         onClick={(event) => {
@@ -106,7 +107,7 @@ export const renderSecondaryActions = (
         className="h-8 w-8 rounded-full border border-rose-200/80 text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-900/70 dark:text-rose-300 dark:hover:bg-rose-950/40"
       >
         <Trash2 className="h-4 w-4" />
-      </Button>
+      </WriteActionButton>
     )}
   </>
 );

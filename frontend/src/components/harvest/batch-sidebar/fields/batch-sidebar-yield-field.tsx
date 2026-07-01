@@ -45,6 +45,8 @@ export function YieldDataField({
     rowX.length > 0 || rowY.length > 0,
   );
   const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
+  const classPlaceholderTpl =
+    h?.enterQualityClassYield ?? 'Enter Quality {class} yield';
   const canRemove = classKgs.length > 1;
   // Row segments: at least one pair is always shown while the section is open
   // (seeded on toggle), and the last pair can't be removed.
@@ -112,7 +114,10 @@ export function YieldDataField({
                   onChange?.({ kind: 'classKg', index: i, value: v })
                 }
                 className="h-10 pr-12 text-left text-base"
-                placeholder={h?.enterQualityAYield ?? 'Enter yield'}
+                placeholder={classPlaceholderTpl.replace(
+                  '{class}',
+                  classLetter(i),
+                )}
               />
               <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-sm">
                 kg

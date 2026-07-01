@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Spinner } from '@/components/ui/spinner';
 import { DecimalInput } from '@/components/ui/decimal-input';
 import { useI18n } from '@/i18n';
@@ -19,6 +20,7 @@ import {
   useCreateCrateMutation,
   type CreateCrateMutation,
 } from '@/generated/graphql';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 
 interface AddCrateDialogProps {
   open: boolean;
@@ -44,6 +46,9 @@ export function AddCrateDialog({
   const [weight, setWeight] = React.useState(0);
   const [error, setError] = React.useState<string | null>(null);
   const [createCrate, { loading }] = useCreateCrateMutation();
+  // Add the crate to the tenant in context (needed so an admin creates it in the
+  // tenant they're working in, not their own absent one).
+  const tenantId = useTenantIdVariable();
 
   React.useEffect(() => {
     if (!open) {
@@ -62,7 +67,7 @@ export function AddCrateDialog({
     const failedMessage = h?.crateCreateFailed ?? 'Failed to add crate';
     try {
       const { data, errors } = await createCrate({
-        variables: { input: { weight } },
+        variables: { input: { weight }, tenantId },
       });
       // The client runs mutations with errorPolicy 'all', so GraphQL errors
       // resolve here on the result rather than rejecting — surface them inline.
@@ -122,7 +127,11 @@ export function AddCrateDialog({
             >
               {t.common.cancel}
             </Button>
-            <Button type="submit" disabled={loading} className="sm:flex-1">
+            <WriteActionButton
+              type="submit"
+              disabled={loading}
+              className="sm:flex-1"
+            >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
                   <Spinner />
@@ -131,7 +140,7 @@ export function AddCrateDialog({
               ) : (
                 saveLabel
               )}
-            </Button>
+            </WriteActionButton>
           </DialogFooter>
         </form>
       </DialogContent>

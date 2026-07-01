@@ -110,6 +110,7 @@ export const it = {
       allTenants: 'Tutti i tenant',
       placeholder: 'Seleziona tenant',
     },
+    viewOnlyTooltip: 'Account in sola lettura — questa azione è disattivata.',
   },
   login: {
     title: 'Bentornato',
@@ -708,6 +709,7 @@ export const it = {
       cratesUnit: 'cassette',
       totalCrates: 'Totale cassette',
       qualityClassLabel: 'Qualità {class}',
+      enterQualityClassYield: 'Inserisci la resa Qualità {class}',
       addQualityClass: 'Aggiungi classe di qualità',
       removeQualityClass: 'Rimuovi classe',
       remainingKg: 'Rimanente (kg)',
@@ -1006,6 +1008,7 @@ export const it = {
         inactive: 'Inattivo',
         pending: 'In attesa',
         roleVgreensAdmin: 'Amministratore vGreens',
+        roleVgreensMember: 'Membro vGreens',
         roleTenantAdmin: 'Amministratore tenant',
         roleTenantUser: 'Utente tenant',
         roleRequired: 'Il ruolo è obbligatorio',

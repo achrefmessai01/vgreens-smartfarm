@@ -135,6 +135,7 @@ export default function WarningsPage() {
           onCancel={() =>
             setActionDialog({ isOpen: false, warning: null, action: null })
           }
+          readOnlyExempt
         >
           {actionDialog.warning && (
             <div className="space-y-4">

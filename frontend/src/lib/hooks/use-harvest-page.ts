@@ -230,20 +230,26 @@ export function useHarvestPage() {
     (batch: BatchItem) => {
       setEditReadOnly(true);
       setEditBatchNumber(batch.batchNumber ?? null);
-      editHarvest.populate(batch);
+      editHarvest.populate(
+        batch,
+        (harvests ?? []).filter((h) => h.batchId === batch.id),
+      );
       setEditOpen(true);
     },
-    [editHarvest],
+    [editHarvest, harvests],
   );
 
   const handleBatchEdit = React.useCallback(
     (batch: BatchItem) => {
       setEditReadOnly(false);
       setEditBatchNumber(batch.batchNumber ?? null);
-      editHarvest.populate(batch);
+      editHarvest.populate(
+        batch,
+        (harvests ?? []).filter((h) => h.batchId === batch.id),
+      );
       setEditOpen(true);
     },
-    [editHarvest],
+    [editHarvest, harvests],
   );
 
   // Edit an existing harvest event.

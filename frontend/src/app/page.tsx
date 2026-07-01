@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { UserRole } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
@@ -13,7 +12,12 @@ export default function Home() {
   const router = useRouter();
   const { t } = useI18n();
 
-  const { role, loading: userLoading, error: userError } = useCurrentUser();
+  const {
+    role,
+    loading: userLoading,
+    error: userError,
+    isVGreensInternal,
+  } = useCurrentUser();
 
   const hasUnresolvedMeError = Boolean(userError) && !userLoading && !role;
 
@@ -38,13 +42,22 @@ export default function Home() {
       return;
     }
 
-    // Redirect to first meaningful page per role (dashboard not yet implemented)
-    if (role === UserRole.VgreensAdmin) {
+    // Redirect to first meaningful page per role (dashboard not yet
+    // implemented). Both internal vGreens roles land on /admin/tenants —
+    // VGREENS_MEMBER is the read-only sibling and shares the admin surface.
+    if (isVGreensInternal) {
       router.push('/admin/tenants');
     } else {
       router.push('/tenant/farm-overview');
     }
-  }, [isSignedIn, isLoaded, router, role, userLoading, hasUnresolvedMeError]);
+  }, [
+    isSignedIn,
+    isLoaded,
+    router,
+    isVGreensInternal,
+    userLoading,
+    hasUnresolvedMeError,
+  ]);
 
   if (hasUnresolvedMeError) {
     return (

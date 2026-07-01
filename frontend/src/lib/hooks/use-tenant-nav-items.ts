@@ -51,9 +51,8 @@ export function useTenantNavItems(
   tenantIdOverride?: string,
 ): TenantNavItem[] {
   const { t } = useI18n();
-  const { role } = useCurrentUser();
+  const { role, isVGreensInternal } = useCurrentUser();
   const { hasFeature } = useTenantFeatures(tenantIdOverride);
-  const isVGreensAdmin = role === UserRole.VgreensAdmin;
   const isViewingSpecificTenant = Boolean(tenantIdOverride);
 
   const allItems: TenantNavItem[] = [
@@ -73,7 +72,11 @@ export function useTenantNavItems(
       href: '/tenant/users',
       icon: Users,
       featureKey: 'user_management',
-      allowedRoles: [UserRole.VgreensAdmin, UserRole.TenantAdmin],
+      allowedRoles: [
+        UserRole.VgreensAdmin,
+        UserRole.VgreensMember,
+        UserRole.TenantAdmin,
+      ],
     },
     {
       label: t.navigation.alerts,
@@ -107,10 +110,11 @@ export function useTenantNavItems(
       return false;
     }
     if (!item.featureKey) return true;
-    // Admins normally see every item, but when previewing a specific tenant
-    // we honour that tenant's feature flags so the header nav mirrors what a
-    // user of that tenant would actually see.
-    if (isVGreensAdmin && !isViewingSpecificTenant) return true;
+    // Internal vGreens users (admin + view-only member) normally see every
+    // item, but when previewing a specific tenant we honour that tenant's
+    // feature flags so the header nav mirrors what a user of that tenant
+    // would actually see.
+    if (isVGreensInternal && !isViewingSpecificTenant) return true;
     return hasFeature(item.featureKey);
   });
 }

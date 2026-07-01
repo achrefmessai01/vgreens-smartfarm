@@ -97,6 +97,7 @@ export const es = {
       allTenants: 'Todos los inquilinos',
       placeholder: 'Seleccionar inquilino',
     },
+    viewOnlyTooltip: 'Cuenta de solo lectura — esta acción está desactivada.',
   },
   login: {
     title: 'Bienvenido de nuevo',
@@ -697,6 +698,7 @@ export const es = {
       cratesUnit: 'cajas',
       totalCrates: 'Total de cajas',
       qualityClassLabel: 'Calidad {class}',
+      enterQualityClassYield: 'Introduce el rendimiento de Calidad {class}',
       addQualityClass: 'Añadir clase de calidad',
       removeQualityClass: 'Eliminar clase',
       remainingKg: 'Restante (kg)',
@@ -997,6 +999,7 @@ export const es = {
         inactive: 'Inactivo',
         pending: 'Pendiente',
         roleVgreensAdmin: 'Administrador vGreens',
+        roleVgreensMember: 'Miembro vGreens',
         roleTenantAdmin: 'Administrador de inquilino',
         roleTenantUser: 'Usuario de inquilino',
         roleRequired: 'El rol es obligatorio',

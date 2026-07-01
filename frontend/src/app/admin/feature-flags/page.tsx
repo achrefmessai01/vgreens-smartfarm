@@ -5,7 +5,7 @@ import { FeatureDeleteDialog } from '@/components/features/feature-delete-dialog
 import { FeatureFlagsPageSkeleton } from '@/components/features/feature-flags-page-skeleton';
 import { FeatureFormSheet } from '@/components/features/feature-form-sheet';
 import { PageHeader } from '@/components/layout';
-import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { useI18n } from '@/i18n';
 import { useFeatureManagement } from '@/lib/hooks/use-feature-management';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
@@ -44,14 +44,14 @@ export default function FeatureFlagsPage() {
         title={t.pages.admin.features.title}
         subtitle={t.pages.admin.features.subtitle}
         actions={
-          <Button
+          <WriteActionButton
             onClick={handleCreate}
             disabled={isLoading}
             className="w-full sm:w-auto"
           >
             <Plus className="h-4 w-4" />
             {t.pages.admin.features.createFeature}
-          </Button>
+          </WriteActionButton>
         }
       />
 

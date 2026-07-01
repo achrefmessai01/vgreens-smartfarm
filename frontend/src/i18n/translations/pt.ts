@@ -110,6 +110,7 @@ export const pt = {
       allTenants: 'Todos os inquilinos',
       placeholder: 'Selecionar inquilino',
     },
+    viewOnlyTooltip: 'Conta só de leitura — esta ação está desativada.',
   },
   login: {
     title: 'Bem-vindo de volta',
@@ -706,6 +707,7 @@ export const pt = {
       cratesUnit: 'caixas',
       totalCrates: 'Total de caixas',
       qualityClassLabel: 'Qualidade {class}',
+      enterQualityClassYield: 'Introduza a produção de Qualidade {class}',
       addQualityClass: 'Adicionar classe de qualidade',
       removeQualityClass: 'Remover classe',
       remainingKg: 'Restante (kg)',
@@ -1003,6 +1005,7 @@ export const pt = {
         inactive: 'Inativo',
         pending: 'Pendente',
         roleVgreensAdmin: 'Administrador vGreens',
+        roleVgreensMember: 'Membro vGreens',
         roleTenantAdmin: 'Administrador do inquilino',
         roleTenantUser: 'Utilizador do inquilino',
         roleRequired: 'A função é obrigatória',

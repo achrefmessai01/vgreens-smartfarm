@@ -5,7 +5,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { BaseService } from '@common/services';
@@ -96,16 +96,21 @@ export class UsersService extends BaseService<User> {
         }
       }
 
-      // Only vGreens admins can create users with admin roles
-      if (createUserInput.role === UserRole.VGREENS_ADMIN) {
+      // Only vGreens admins can create internal vGreens users (VGREENS_ADMIN
+      // and its view-only sibling VGREENS_MEMBER). Both are cross-tenant and
+      // therefore must not carry a tenantId.
+      const isInternalRole =
+        createUserInput.role === UserRole.VGREENS_ADMIN ||
+        createUserInput.role === UserRole.VGREENS_MEMBER;
+      if (isInternalRole) {
         if (!currentUser || currentUser.role !== UserRole.VGREENS_ADMIN) {
           throw new ForbiddenException(
-            'Only vGreens admins can create admin users',
+            'Only vGreens admins can create internal vGreens users',
           );
         }
         if (createUserInput.tenantId) {
           throw new ForbiddenException(
-            'VGREENS_ADMIN users cannot be assigned to a tenant',
+            'Internal vGreens users cannot be assigned to a tenant',
           );
         }
       } else {
@@ -130,11 +135,10 @@ export class UsersService extends BaseService<User> {
 
       // Per-tenant whitelist (Tenant.allowedDomains). Layered on top of the
       // admin-role rule so a non-admin user added to a domain-restricted
-      // tenant is still rejected before a Clerk invitation is sent.
+      // tenant is still rejected before a Clerk invitation is sent. Internal
+      // vGreens roles are cross-tenant so we skip this whitelist for them.
       await this.assertTenantAllowsEmail(
-        createUserInput.role === UserRole.VGREENS_ADMIN
-          ? null
-          : createUserInput.tenantId,
+        isInternalRole ? null : createUserInput.tenantId,
         createUserInput.email,
       );
 
@@ -179,10 +183,7 @@ export class UsersService extends BaseService<User> {
         ...createUserInput,
         clerkUserId,
         role: createUserInput.role || UserRole.TENANT_USER,
-        tenantId:
-          createUserInput.role === UserRole.VGREENS_ADMIN
-            ? undefined
-            : createUserInput.tenantId,
+        tenantId: isInternalRole ? undefined : createUserInput.tenantId,
         status: invitationUrl ? UserStatus.PENDING : UserStatus.ACTIVE, // PENDING if invitation sent
         isActive: !invitationUrl, // Inactive if pending invitation
         metadata: invitationUrl
@@ -248,20 +249,33 @@ export class UsersService extends BaseService<User> {
         throw new ForbiddenException('Cannot change your own role');
       }
 
-      if (updateUserInput.role === UserRole.VGREENS_ADMIN) {
+      // Internal vGreens roles (admin + member) are cross-tenant, so promoting
+      // a user into either clears any tenantId in the update payload.
+      const isNextInternalRole =
+        updateUserInput.role === UserRole.VGREENS_ADMIN ||
+        updateUserInput.role === UserRole.VGREENS_MEMBER;
+      const isPrevInternalRole =
+        user.role === UserRole.VGREENS_ADMIN ||
+        user.role === UserRole.VGREENS_MEMBER;
+
+      if (isNextInternalRole) {
         updateUserInput.tenantId = undefined;
-      } else {
-        if (user.role === UserRole.VGREENS_ADMIN && !updateUserInput.tenantId) {
-          throw new ForbiddenException(
-            'Tenant ID is required when changing from VGREENS_ADMIN to non-admin role',
-          );
-        }
+      } else if (isPrevInternalRole && !updateUserInput.tenantId) {
+        // Demoting from an internal role into a tenant-scoped role — a
+        // tenantId is required or the resulting user would be orphaned.
+        throw new ForbiddenException(
+          'Tenant ID is required when demoting an internal vGreens user to a tenant role',
+        );
       }
     }
 
-    if (user.role === UserRole.VGREENS_ADMIN && updateUserInput.tenantId) {
+    if (
+      (user.role === UserRole.VGREENS_ADMIN ||
+        user.role === UserRole.VGREENS_MEMBER) &&
+      updateUserInput.tenantId
+    ) {
       throw new ForbiddenException(
-        'VGREENS_ADMIN users cannot be assigned to a tenant',
+        'Internal vGreens users cannot be assigned to a tenant',
       );
     }
 
@@ -284,6 +298,7 @@ export class UsersService extends BaseService<User> {
       updateUserInput.email !== user.email;
     if (
       nextRole !== UserRole.VGREENS_ADMIN &&
+      nextRole !== UserRole.VGREENS_MEMBER &&
       (tenantChanging || emailChanging)
     ) {
       await this.assertTenantAllowsEmail(nextTenantId, nextEmail);
@@ -301,8 +316,13 @@ export class UsersService extends BaseService<User> {
   }
 
   async findAllByTenant(tenantId: string): Promise<User[]> {
+    // Internal vGreens roles are cross-tenant, so they never appear in a
+    // tenant-scoped user list even if a row somehow carries a tenantId.
     return this.userRepository.find({
-      where: { tenantId, role: Not(UserRole.VGREENS_ADMIN) },
+      where: {
+        tenantId,
+        role: Not(In([UserRole.VGREENS_ADMIN, UserRole.VGREENS_MEMBER])),
+      },
       relations: ['tenant'],
       order: { createdAt: OrderDirection.DESC },
     });
@@ -316,14 +336,22 @@ export class UsersService extends BaseService<User> {
       });
     }
     return this.userRepository.findOne({
-      where: { id, tenantId, role: Not(UserRole.VGREENS_ADMIN) },
+      where: {
+        id,
+        tenantId,
+        role: Not(In([UserRole.VGREENS_ADMIN, UserRole.VGREENS_MEMBER])),
+      },
       relations: ['tenant'],
     });
   }
 
   async findAllAdmins(): Promise<User[]> {
+    // Both internal vGreens roles show up on the admin user list — they share
+    // the same cross-tenant surface.
     return this.userRepository.find({
-      where: { role: UserRole.VGREENS_ADMIN },
+      where: {
+        role: In([UserRole.VGREENS_ADMIN, UserRole.VGREENS_MEMBER]),
+      },
       relations: ['tenant'],
     });
   }
@@ -333,10 +361,12 @@ export class UsersService extends BaseService<User> {
       await this.userRepository.softDelete(id);
       return;
     }
+    // A tenant admin's scoped delete must never reach an internal vGreens
+    // user, even if a bug elsewhere put one in scope.
     await this.userRepository.softDelete({
       id,
       tenantId,
-      role: Not(UserRole.VGREENS_ADMIN),
+      role: Not(In([UserRole.VGREENS_ADMIN, UserRole.VGREENS_MEMBER])),
     });
   }
 

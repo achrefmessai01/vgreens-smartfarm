@@ -110,6 +110,8 @@ export const el = {
       allTenants: 'Όλοι οι ενοικιαστές',
       placeholder: 'Επιλέξτε ενοικιαστή',
     },
+    viewOnlyTooltip:
+      'Λογαριασμός μόνο για ανάγνωση — αυτή η ενέργεια είναι απενεργοποιημένη.',
   },
   login: {
     title: 'Καλώς ήρθατε ξανά',
@@ -712,6 +714,7 @@ export const el = {
       cratesUnit: 'τελάρα',
       totalCrates: 'Σύνολο τελάρων',
       qualityClassLabel: 'Ποιότητα {class}',
+      enterQualityClassYield: 'Εισαγάγετε την απόδοση Ποιότητας {class}',
       addQualityClass: 'Προσθήκη κλάσης ποιότητας',
       removeQualityClass: 'Αφαίρεση κλάσης',
       remainingKg: 'Υπόλοιπο (kg)',
@@ -1011,6 +1014,7 @@ export const el = {
         inactive: 'Ανενεργός',
         pending: 'Σε εκκρεμότητα',
         roleVgreensAdmin: 'Διαχειριστής vGreens',
+        roleVgreensMember: 'Μέλος vGreens',
         roleTenantAdmin: 'Διαχειριστής μισθωτή',
         roleTenantUser: 'Χρήστης μισθωτή',
         roleRequired: 'Ο ρόλος είναι υποχρεωτικός',

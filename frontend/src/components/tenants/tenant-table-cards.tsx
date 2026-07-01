@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Tenant } from '@/generated/graphql';
 import { Edit2, Settings, Trash2, Users } from 'lucide-react';
@@ -99,7 +100,7 @@ export const useTenantCard = ({
             {translations.manageFeatures}
           </Button>
         )}
-        <Button
+        <WriteActionButton
           variant="ghost"
           size="icon"
           onClick={(event) => {
@@ -109,8 +110,8 @@ export const useTenantCard = ({
           className="h-8 w-8"
         >
           <Edit2 className="h-4 w-4" />
-        </Button>
-        <Button
+        </WriteActionButton>
+        <WriteActionButton
           variant="ghost"
           size="icon"
           onClick={(event) => {
@@ -120,7 +121,7 @@ export const useTenantCard = ({
           className="text-destructive hover:text-destructive h-8 w-8"
         >
           <Trash2 className="h-4 w-4" />
-        </Button>
+        </WriteActionButton>
       </div>
     </Card>
   );

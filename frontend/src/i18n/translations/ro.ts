@@ -110,6 +110,8 @@ export const ro = {
       allTenants: 'Toți chiriașii',
       placeholder: 'Selectează chiriaș',
     },
+    viewOnlyTooltip:
+      'Cont doar pentru citire — această acțiune este dezactivată.',
   },
   login: {
     title: 'Bine ai revenit',
@@ -708,6 +710,7 @@ export const ro = {
       cratesUnit: 'lăzi',
       totalCrates: 'Total lăzi',
       qualityClassLabel: 'Calitate {class}',
+      enterQualityClassYield: 'Introdu producția de Calitate {class}',
       addQualityClass: 'Adaugă clasă de calitate',
       removeQualityClass: 'Elimină clasa',
       remainingKg: 'Rămas (kg)',
@@ -1006,6 +1009,7 @@ export const ro = {
         inactive: 'Inactiv',
         pending: 'În așteptare',
         roleVgreensAdmin: 'Administrator vGreens',
+        roleVgreensMember: 'Membru vGreens',
         roleTenantAdmin: 'Administrator chiriaș',
         roleTenantUser: 'Utilizator chiriaș',
         roleRequired: 'Rolul este obligatoriu',

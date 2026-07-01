@@ -569,13 +569,22 @@ export function useSensorMapDrag<T extends DraggableSensorItem>({
       });
 
       const parsedSlot = parseLiveSensorSlotId(slot.id);
+      // Prefer the RAW device/greenhouse from slot.meta over the slot id, whose
+      // whitespace is normalized to `_` — otherwise the commit persists against
+      // the wrong greenhouse for names with spaces (e.g. "Greenhouse Kazuti").
+      const rawDevice =
+        (slot.meta?.device as string | undefined) ||
+        parsedSlot.device ||
+        item.deviceId;
+      const rawGreenhouse =
+        (slot.meta?.greenhouse as string | undefined) ?? parsedSlot.greenhouse;
 
       try {
         await Promise.resolve(
           onSensorPositionCommit({
             slotId: slot.id,
-            deviceId: parsedSlot.device || item.deviceId,
-            greenhouse: parsedSlot.greenhouse,
+            deviceId: rawDevice,
+            greenhouse: rawGreenhouse,
             xPosition: result.xPosition,
             yPosition: result.yPosition,
           }),

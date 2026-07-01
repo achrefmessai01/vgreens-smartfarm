@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { TableCell } from '@/components/ui/table';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { User, UserRole, UserStatus } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { Edit2, Trash2 } from 'lucide-react';
@@ -68,22 +68,22 @@ export const useUserManagementRow = ({
         </TableCell>
         <TableCell className="text-right">
           <div className="flex justify-end gap-2">
-            <Button
+            <WriteActionButton
               variant="ghost"
               size="icon"
               onClick={() => onEdit(user)}
               className="h-8 w-8"
             >
               <Edit2 className="h-4 w-4" />
-            </Button>
-            <Button
+            </WriteActionButton>
+            <WriteActionButton
               variant="ghost"
               size="icon"
               onClick={() => onDelete(user)}
               className="text-destructive hover:text-destructive h-8 w-8"
             >
               <Trash2 className="h-4 w-4" />
-            </Button>
+            </WriteActionButton>
           </div>
         </TableCell>
       </>

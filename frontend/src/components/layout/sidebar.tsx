@@ -58,7 +58,12 @@ export function Sidebar({
   const { theme, setTheme } = useTheme();
 
   // Always fetch current user to confirm role
-  const { user: currentUser, role, loading: userLoading } = useCurrentUser();
+  const {
+    user: currentUser,
+    role,
+    isVGreensInternal,
+    loading: userLoading,
+  } = useCurrentUser();
   // Tenant features are still consulted by `useTenantNavItems` below; we only
   // need the loading flag here to gate the sidebar skeleton.
   const { loading: featuresLoading } = useTenantFeatures();
@@ -78,6 +83,8 @@ export function Sidebar({
   // Use current user if available, otherwise fall back to prop
   const user = currentUser || propUser;
   const isVGreensAdmin = role === UserRole.VgreensAdmin;
+  // VGREENS_MEMBER shares every navigation surface with VGREENS_ADMIN; we key
+  // most of the layout decisions off `isVGreensInternal` from here on down.
 
   // Use external state if provided, otherwise use internal state
   const isCollapsed =
@@ -144,12 +151,12 @@ export function Sidebar({
   // of truth shared with the in-header `TenantNavbar`.
 
   // Select nav items based on role:
-  // - VGREENS_ADMIN always sees the admin nav in the sidebar, so they never
-  //   lose access to /admin/tenants, /admin/users, etc., even after picking
-  //   a tenant. The in-header `TenantNavbar` provides the tenant-page links
-  //   when a tenant is selected.
+  // - Internal vGreens users (VGREENS_ADMIN + VGREENS_MEMBER) always see the
+  //   admin nav in the sidebar, so they never lose access to /admin/tenants,
+  //   /admin/users, etc., even after picking a tenant. The in-header
+  //   `TenantNavbar` provides the tenant-page links when a tenant is selected.
   // - Everyone else sees the filtered tenant nav.
-  const navItems = isVGreensAdmin ? adminNavItems : tenantNavItems;
+  const navItems = isVGreensInternal ? adminNavItems : tenantNavItems;
 
   const defaultUser = {
     name: user?.firstName
@@ -159,8 +166,10 @@ export function Sidebar({
     avatar: user?.imageUrl || '',
   };
 
-  // Show loading state while fetching user or features
-  if (userLoading || (!isVGreensAdmin && featuresLoading)) {
+  // Show loading state while fetching user or features. Internal users don't
+  // depend on tenant feature flags for their nav (they get the admin nav),
+  // so we skip the features-loading gate for them.
+  if (userLoading || (!isVGreensInternal && featuresLoading)) {
     return <SidebarSkeleton />;
   }
 

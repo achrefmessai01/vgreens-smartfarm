@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { TableCell } from '@/components/ui/table';
@@ -82,7 +82,7 @@ export function FeatureTable({
       </TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">
-          <Button
+          <WriteActionButton
             variant="ghost"
             size="icon"
             onClick={() => onEdit(feature)}
@@ -90,8 +90,8 @@ export function FeatureTable({
             disabled={isLoading}
           >
             <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
+          </WriteActionButton>
+          <WriteActionButton
             variant="ghost"
             size="icon"
             onClick={() => onDelete(feature)}
@@ -99,7 +99,7 @@ export function FeatureTable({
             disabled={isLoading}
           >
             <Trash2 className="h-4 w-4" />
-          </Button>
+          </WriteActionButton>
         </div>
       </TableCell>
     </>
@@ -156,7 +156,7 @@ export function FeatureTable({
       {/* Custom-Footer implementation */}
       <div className="flex items-center border-t px-6 pt-2">
         <div className="flex gap-2">
-          <Button
+          <WriteActionButton
             variant="ghost"
             size="icon"
             onClick={() => onEdit(feature)}
@@ -164,8 +164,8 @@ export function FeatureTable({
             disabled={isLoading}
           >
             <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
+          </WriteActionButton>
+          <WriteActionButton
             variant="ghost"
             size="icon"
             onClick={() => onDelete(feature)}
@@ -173,7 +173,7 @@ export function FeatureTable({
             disabled={isLoading}
           >
             <Trash2 className="h-4 w-4" />
-          </Button>
+          </WriteActionButton>
         </div>
       </div>
     </Card>
@@ -187,10 +187,10 @@ export function FeatureTable({
     >
       {onCreate ? (
         <div className="flex justify-end">
-          <Button onClick={onCreate} disabled={isLoading}>
+          <WriteActionButton onClick={onCreate} disabled={isLoading}>
             <Plus className="mr-2 h-4 w-4" />
             {t.pages.admin.features.createFeature}
-          </Button>
+          </WriteActionButton>
         </div>
       ) : null}
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>

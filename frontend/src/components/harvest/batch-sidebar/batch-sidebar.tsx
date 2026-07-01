@@ -14,7 +14,7 @@ import {
   useBatchSidebar,
   type SidebarMode,
 } from '@/lib/hooks/use-batch-sidebar';
-import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CalendarDays, Sparkles } from 'lucide-react';
@@ -343,14 +343,14 @@ export function BatchSidebar({
 
         {!readOnly && (
           <SheetFooter className="bg-background/95 dark:border-primary-foreground/30 border-t px-4 py-4 backdrop-blur-sm sm:px-6">
-            <Button
+            <WriteActionButton
               onClick={handleSave}
               disabled={busy || !canSave}
               className="h-12 w-full text-base font-semibold shadow-sm sm:text-lg"
               size="lg"
             >
               {buttonLabel}
-            </Button>
+            </WriteActionButton>
           </SheetFooter>
         )}
       </SheetContent>

@@ -9,6 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import {
   UserManagementForm,
   type UserManagementFormRef,
@@ -84,7 +85,7 @@ export function UserManagementSheet({
           >
             {t.pages.users.cancel}
           </Button>
-          <Button
+          <WriteActionButton
             onClick={() => formRef.current?.submit()}
             disabled={isLoading}
             className="flex-1"
@@ -94,7 +95,7 @@ export function UserManagementSheet({
               : editingUser
                 ? usersT.updateUser
                 : usersT.createUser}
-          </Button>
+          </WriteActionButton>
         </SheetFooter>
       </SheetContent>
     </Sheet>

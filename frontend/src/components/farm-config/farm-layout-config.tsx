@@ -1,7 +1,7 @@
 'use client';
 
 import { Building, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { useI18n } from '@/i18n';
 import { GreenhouseRow } from './greenhouse-row';
 import { useFarmLayoutConfig } from './use-farm-layout-config';
@@ -23,7 +23,7 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
           <h3 className="text-sm font-semibold">{fl.title}</h3>
           <p className="text-muted-foreground mt-0.5 text-xs">{fl.subtitle}</p>
         </div>
-        <Button
+        <WriteActionButton
           type="submit"
           size="sm"
           disabled={saving}
@@ -31,7 +31,7 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
           form="farm-layout-form"
         >
           {saving ? fl.saving : fl.save}
-        </Button>
+        </WriteActionButton>
       </div>
 
       <form
@@ -44,7 +44,7 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
             <Building className="h-4 w-4" />
             {fl.greenhouses}
           </div>
-          <Button
+          <WriteActionButton
             type="button"
             variant="outline"
             size="sm"
@@ -53,7 +53,7 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
           >
             <Plus className="mr-1 h-4 w-4" />
             {fl.add}
-          </Button>
+          </WriteActionButton>
         </div>
 
         {rows.length === 0 ? (
