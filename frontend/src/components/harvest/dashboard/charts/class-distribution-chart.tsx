@@ -98,6 +98,19 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
   });
   const classIdxs = Array.from({ length: maxClasses }, (_, i) => i);
 
+  // Adaptive x-axis density so labels stop stacking on top of each other:
+  //  - comparing batches → let recharts pick start/end + fill by gap
+  //  - up to ~2 weeks of days → show every tick
+  //  - up to ~45 days (Month view) → weekly ticks
+  //  - longer (Total view, 60+ days) → roughly monthly ticks
+  const xInterval: number | 'preserveStartEnd' = isMulti
+    ? 'preserveStartEnd'
+    : chartData.length <= 14
+      ? 0
+      : chartData.length <= 45
+        ? 6
+        : 29;
+
   return (
     <Card className={className}>
       <div className="p-4 sm:p-6">
@@ -121,14 +134,15 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
                 angle={-35}
                 textAnchor="end"
                 height={55}
-                interval={isMulti ? 'preserveStartEnd' : 0}
-                minTickGap={isMulti ? 20 : undefined}
+                interval={xInterval}
+                minTickGap={isMulti ? 20 : 8}
                 tickMargin={8}
               />
               <YAxis
                 fontSize={12}
-                width={60}
+                width={72}
                 domain={[0, 100]}
+                ticks={[0, 25, 50, 75, 100]}
                 tickFormatter={(value: number) => `${value}%`}
                 label={{
                   value: h?.percentage ?? 'Percentage (%)',
