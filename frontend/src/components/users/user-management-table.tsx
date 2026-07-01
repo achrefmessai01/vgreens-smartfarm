@@ -41,6 +41,7 @@ export function UserManagementTable({
 
   const roleLabels: Record<UserRole, string> = {
     VGREENS_ADMIN: t.pages.admin.users.roleVgreensAdmin,
+    VGREENS_MEMBER: t.pages.admin.users.roleVgreensMember,
     TENANT_ADMIN: t.pages.admin.users.roleTenantAdmin,
     TENANT_USER: t.pages.admin.users.roleTenantUser,
   };
