@@ -119,6 +119,20 @@ export class TenantsService {
     return this.tenantRepository.save(tenant);
   }
 
+  async setHarvestDashboardOrder(
+    id: string,
+    orderedIds: string[],
+  ): Promise<Tenant> {
+    const tenant = await this.findOne(id);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with id ${id} not found`);
+    }
+    // De-dupe while preserving first-seen order — the array is the ordering, so
+    // a duplicated id would otherwise pin the item to its earlier slot.
+    tenant.harvestDashboardOrder = Array.from(new Set(orderedIds));
+    return this.tenantRepository.save(tenant);
+  }
+
   private buildBucketName(
     tenant: Pick<Tenant, 'id' | 'companyName' | 'name'>,
   ): string {

@@ -13,16 +13,30 @@ import {
 } from 'lucide-react';
 import { MetricCard } from './metric-card/metric-card';
 import { DASHBOARD_METRIC_IDS } from './dashboard-items';
+import { SortableGrid } from './sortable-grid';
+import { mergeVisibleOrder } from '@/lib/hooks/use-harvest-dashboard-order';
+
+const GRID_CLASSNAME =
+  'mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:gap-6 md:grid-cols-2 lg:grid-cols-3';
 
 interface DashboardMetricsGridProps {
   data: HarvestDashboardData;
   /** Visibility predicate keyed by dashboard item id. Defaults to all visible. */
   isVisible?: (id: string) => boolean;
+  /** Reorders the metric cards to match the tenant's saved order. */
+  applyOrder?: <T extends { id: string }>(items: T[]) => T[];
+  /** When true, cards become draggable to reorder. */
+  editMode?: boolean;
+  /** Called with the new full metric-id order (hidden items preserved). */
+  onReorder?: (orderedIds: string[]) => void;
 }
 
 export function DashboardMetricsGrid({
   data,
   isVisible = () => true,
+  applyOrder = (items) => items,
+  editMode = false,
+  onReorder,
 }: DashboardMetricsGridProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
@@ -198,15 +212,29 @@ export function DashboardMetricsGrid({
     },
   ];
 
-  const visibleCards = cards.filter((card) => isVisible(card.id));
+  const orderedCards = applyOrder(cards);
+  const visibleCards = orderedCards.filter((card) => isVisible(card.id));
 
   if (visibleCards.length === 0) return null;
 
+  // Reorder only touches visible cards; splice the new visible order back into
+  // the full metric order so hidden cards keep their saved slots.
+  const handleReorder = (orderedVisibleIds: string[]) => {
+    onReorder?.(
+      mergeVisibleOrder(
+        orderedCards.map((card) => card.id),
+        orderedVisibleIds,
+        isVisible,
+      ),
+    );
+  };
+
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {visibleCards.map((card) => (
-        <div key={card.id}>{card.node}</div>
-      ))}
-    </div>
+    <SortableGrid
+      items={visibleCards}
+      className={GRID_CLASSNAME}
+      editMode={editMode}
+      onReorder={handleReorder}
+    />
   );
 }

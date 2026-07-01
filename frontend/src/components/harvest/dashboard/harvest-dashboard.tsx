@@ -1,6 +1,8 @@
 'use client';
 
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/toast-provider';
 import { useI18n } from '@/i18n';
 import { useHarvestBatches } from '@/lib/hooks/use-harvest-batches';
 import {
@@ -9,16 +11,25 @@ import {
 } from '@/lib/hooks/use-harvest-dashboard';
 import { useHarvestDashboardUrlState } from '@/lib/hooks/use-harvest-dashboard-url-state';
 import { useHarvestDashboardVisibility } from '@/lib/hooks/use-harvest-dashboard-visibility';
+import { useHarvestDashboardOrder } from '@/lib/hooks/use-harvest-dashboard-order';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { useSetTenantHarvestDashboardOrderMutation } from '@/generated/graphql';
 import { harvestsLoggedForLabel } from '@/lib/harvest-utils';
-import { AlertTriangle, LayoutDashboard, Package } from 'lucide-react';
+import { AlertTriangle, Check, LayoutDashboard, Move, Package } from 'lucide-react';
 import { DashboardChartsGrid } from './dashboard-charts-grid';
 import { DashboardConfigMenu } from './dashboard-config-menu';
 import { DashboardMetricsGrid } from './dashboard-metrics-grid';
+import {
+  DASHBOARD_CHART_IDS,
+  DASHBOARD_METRIC_IDS,
+} from './dashboard-items';
 import { HarvestDashboardCompare } from './harvest-dashboard-compare';
 import { DashboardFilters } from './harvest-dashboard-filters';
 import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
 import { YieldPredictionCard } from './yield-prediction-card';
+
+const METRIC_ID_SET = new Set<string>(Object.values(DASHBOARD_METRIC_IDS));
+const CHART_ID_SET = new Set<string>(Object.values(DASHBOARD_CHART_IDS));
 
 interface HarvestDashboardProps {
   className?: string;
@@ -54,10 +65,68 @@ export function HarvestDashboard({
 
   const { batches, loading: batchesLoading } = useHarvestBatches();
 
+  const { toast } = useToast();
   const { isTenantAdmin } = useCurrentUser();
   const { isVisible, allHidden, tenantId, hiddenSet } =
     useHarvestDashboardVisibility();
+  const { order, applyOrder } = useHarvestDashboardOrder();
   const canEditDashboard = isTenantAdmin && Boolean(tenantId);
+
+  const [editLayout, setEditLayout] = React.useState(false);
+  const [setOrderMutation] = useSetTenantHarvestDashboardOrderMutation();
+
+  // Persist a full ordered id list (metrics + charts). Optimistic cache update
+  // mirrors the visibility editor so the new order sticks without a refetch.
+  const persistOrder = React.useCallback(
+    async (orderedIds: string[]) => {
+      if (!tenantId) return;
+      try {
+        await setOrderMutation({
+          variables: { orderedIds, tenantId },
+          update: (cache, result) => {
+            const updated = result.data?.setTenantHarvestDashboardOrder;
+            if (!updated) return;
+            cache.modify({
+              id: cache.identify({ __typename: 'Tenant', id: updated.id }),
+              fields: {
+                harvestDashboardOrder: () => updated.harvestDashboardOrder,
+              },
+            });
+          },
+        });
+      } catch (err) {
+        toast({
+          title: h?.configLayoutSaveFailed ?? 'Failed to save dashboard layout',
+          description: err instanceof Error ? err.message : String(err),
+          variant: 'destructive',
+        });
+      }
+    },
+    [setOrderMutation, tenantId, toast, h],
+  );
+
+  // The two grids share one stored list. When one grid reports its new full
+  // order, keep the other category's existing order (from the stored list) and
+  // concatenate — each grid only ever reads its own ids back out.
+  const handleReorderMetrics = React.useCallback(
+    (metricOrder: string[]) => {
+      void persistOrder([
+        ...metricOrder,
+        ...order.filter((id) => CHART_ID_SET.has(id)),
+      ]);
+    },
+    [order, persistOrder],
+  );
+
+  const handleReorderCharts = React.useCallback(
+    (chartOrder: string[]) => {
+      void persistOrder([
+        ...order.filter((id) => METRIC_ID_SET.has(id)),
+        ...chartOrder,
+      ]);
+    },
+    [order, persistOrder],
+  );
 
   const selectedBatch = batchId
     ? batches.find((b) => b.id === batchId)
@@ -184,7 +253,27 @@ export function HarvestDashboard({
           <div className="flex flex-wrap items-center gap-2">
             {filterBar}
             {canEditDashboard && tenantId && (
-              <DashboardConfigMenu tenantId={tenantId} hiddenSet={hiddenSet} />
+              <>
+                <DashboardConfigMenu tenantId={tenantId} hiddenSet={hiddenSet} />
+                <Button
+                  variant={editLayout ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-9 gap-2"
+                  onClick={() => setEditLayout((prev) => !prev)}
+                  aria-pressed={editLayout}
+                >
+                  {editLayout ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Move className="h-4 w-4" />
+                  )}
+                  <span className="text-xs font-medium">
+                    {editLayout
+                      ? (h?.configDoneLayout ?? 'Done')
+                      : (h?.configEditLayout ?? 'Edit layout')}
+                  </span>
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -224,9 +313,21 @@ export function HarvestDashboard({
         </div>
       ) : (
         <>
-          <DashboardMetricsGrid data={data} isVisible={isVisible} />
+          <DashboardMetricsGrid
+            data={data}
+            isVisible={isVisible}
+            applyOrder={applyOrder}
+            editMode={editLayout}
+            onReorder={handleReorderMetrics}
+          />
           <YieldPredictionCard />
-          <DashboardChartsGrid data={data} isVisible={isVisible} />
+          <DashboardChartsGrid
+            data={data}
+            isVisible={isVisible}
+            applyOrder={applyOrder}
+            editMode={editLayout}
+            onReorder={handleReorderCharts}
+          />
         </>
       )}
     </div>
