@@ -424,6 +424,52 @@ export class InfluxDBService implements OnModuleInit, OnModuleDestroy {
     return rows;
   }
 
+  /**
+   * The earliest REAL datapoint for `device`/`field` at or after `since` (an
+   * ISO timestamp). Backs sensor calibration: `getBucketData` returns raw
+   * points (no aggregateWindow/fill/interpolate), sorted ascending by time,
+   * so `limit: 1` yields the first genuine transmission after the operator
+   * pressed calibrate. Returns null when the sensor hasn't transmitted yet.
+   */
+  async getEarliestReadingSince(
+    bucketName: string,
+    options: { device: string; field: string; since: string },
+  ): Promise<{ value: number; time: string } | null> {
+    const rows = await this.getBucketData(bucketName, {
+      start: options.since,
+      device: options.device,
+      field: options.field,
+      limit: 1,
+    });
+    const row = rows[0];
+    if (!row) return null;
+    const value =
+      typeof row._value === 'number' ? row._value : Number(row._value);
+    if (!Number.isFinite(value)) return null;
+    const time = typeof row._time === 'string' ? row._time : '';
+    return { value, time };
+  }
+
+  /**
+   * The latest raw value for `device`/`field`, or null if none in the lookback
+   * window. Used to compute a sensor's live corrected reading on read.
+   */
+  async getLatestReadingValue(
+    bucketName: string,
+    options: { device: string; field: string; start?: string },
+  ): Promise<number | null> {
+    const rows = await this.getBucketDataLastPerSeries(bucketName, {
+      start: options.start ?? '-30d',
+      device: options.device,
+      field: options.field,
+    });
+    const row = rows[0];
+    if (!row) return null;
+    const value =
+      typeof row._value === 'number' ? row._value : Number(row._value);
+    return Number.isFinite(value) ? value : null;
+  }
+
   async getBucketFieldMeansLastMinutes(
     bucketName: string,
     options: {

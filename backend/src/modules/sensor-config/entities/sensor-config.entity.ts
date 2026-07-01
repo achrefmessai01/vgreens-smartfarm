@@ -1,7 +1,7 @@
 import { BaseEntity } from '@common/entities';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { Greenhouse } from '@modules/greenhouse/entities/greenhouse.entity';
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -58,6 +58,19 @@ export class SensorConfig extends BaseEntity {
   @Field({ nullable: true })
   @Column({ type: 'boolean', default: false, nullable: true })
   hiddenInFarmOverview?: boolean;
+
+  // Two-point soil-moisture calibration bounds (raw sensor units). Null until
+  // the sensor is calibrated. avgDryReading maps to 0% moisture,
+  // avgSaturatedReading to 100%. The corrected 0–100% value is NOT stored — it
+  // is recomputed from the live raw reading in the resolver's `correctedValue`
+  // field. Do NOT assume dry < saturated: soil sensors often read inverted.
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  avgDryReading?: number | null;
+
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  avgSaturatedReading?: number | null;
 
   @Field()
   @CreateDateColumn({ type: 'timestamp' })

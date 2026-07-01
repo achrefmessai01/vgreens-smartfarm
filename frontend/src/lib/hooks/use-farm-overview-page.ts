@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { formatFieldToLabel } from '@/lib/farm-data';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data';
+import { useSoilSensorConfigs } from '@/lib/hooks/use-sensor-calibration';
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
 import {
   useSelectedTenantId,
@@ -139,6 +140,28 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       fetchPolicy: 'cache-and-network',
     });
 
+  // Soil sensor calibration bounds (per device). Available to all roles so the
+  // map can render corrected values; admins additionally get the calibration
+  // dropdown (gated below via canEditSensorPositions + server-side on mutate).
+  const {
+    configs: soilSensorConfigs,
+    refetch: refetchSoilSensorConfigs,
+  } = useSoilSensorConfigs(configQueryTenantId);
+
+  const calibrationByDevice = React.useMemo(
+    () =>
+      new Map(
+        soilSensorConfigs.map((c) => [
+          c.device,
+          {
+            avgDryReading: c.avgDryReading,
+            avgSaturatedReading: c.avgSaturatedReading,
+          },
+        ]),
+      ),
+    [soilSensorConfigs],
+  );
+
   const persistedSensorConfigMap = React.useMemo<
     Map<string, SensorConfigOverride>
   >(
@@ -178,8 +201,20 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         ...override,
       });
     }
+    // Fold in soil calibration bounds so the live pipeline can render corrected
+    // moisture values (see farm-data-live).
+    for (const [device, calibration] of calibrationByDevice.entries()) {
+      merged.set(device, {
+        ...(merged.get(device) ?? {}),
+        ...calibration,
+      });
+    }
     return merged;
-  }, [optimisticPositionOverrides, persistedSensorConfigMap]);
+  }, [
+    optimisticPositionOverrides,
+    persistedSensorConfigMap,
+    calibrationByDevice,
+  ]);
 
   React.useEffect(() => {
     setOptimisticPositionOverrides((current) => {
@@ -479,10 +514,10 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
         { label: t.temperature, value: 'temperature' },
         { label: t.humidity, value: 'humidity' },
         { label: t.co2, value: 'co2' },
-        // VSL-169: Soil EC / Soil moisture hidden from the fallback option
-        // list (used when the bucket has no fields yet).
+        // VSL-169: Soil EC stays hidden. Soil moisture is re-enabled (VSL-218,
+        // sensor calibration) so calibrated moisture renders on the overview.
         // { label: t.soilEC, value: 'soil_ec' },
-        // { label: t.soilMoisture, value: 'soil_moisture' },
+        { label: t.soilMoisture, value: 'soil_moisture' },
         { label: t.vpd, value: 'vpd' },
         { label: t.par, value: 'par' },
       ];
@@ -770,6 +805,9 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   return {
     isVGreensAdmin,
     canEditSensorPositions,
+    soilSensorConfigs,
+    refetchSoilSensorConfigs,
+    calibrationTenantId: configQueryTenantId,
     tenants,
     selectedTenantId,
     handleTenantChange,

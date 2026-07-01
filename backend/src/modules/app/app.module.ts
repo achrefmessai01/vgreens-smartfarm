@@ -28,6 +28,7 @@ import { SensorConfigModule } from '../sensor-config/sensor-config.module';
 import { TenantFarmConfigModule } from '../tenant-farm-config/tenant-farm-config.module';
 import { ParGraphModule } from '../par-graph/par-graph.module';
 import { CameraLivestreamModule } from '../camera-livestream/camera-livestream.module';
+import { IrrigationCyclesModule } from '../irrigation-cycles/irrigation-cycles.module';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import {
   TenantInterceptor,
@@ -67,6 +68,7 @@ import {
     TenantFarmConfigModule,
     ParGraphModule,
     CameraLivestreamModule,
+    IrrigationCyclesModule,
   ],
   providers: [
     AppResolver,

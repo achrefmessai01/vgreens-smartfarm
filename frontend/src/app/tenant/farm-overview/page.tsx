@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  CalibrationDropdown,
   CombinedGreenhouseView,
   FarmOverviewCard,
   FarmOverviewPageSkeleton,
@@ -60,6 +61,17 @@ export default function FarmOverviewPage() {
                 hideAllLabel={t.pages.farmOverview.hideAllSensors}
                 visibleSuffixLabel={t.pages.farmOverview.sensorsVisible}
                 overviewLabel={t.pages.farmOverview.enableSensorOverview}
+              />
+            )}
+            {/* Admin-only: soil-sensor calibration. Server enforces the same
+                role on the capture mutations. */}
+            {state.canEditSensorPositions && (
+              <CalibrationDropdown
+                configs={state.soilSensorConfigs}
+                tenantId={state.calibrationTenantId}
+                onCalibrated={() => {
+                  void state.refetchSoilSensorConfigs();
+                }}
               />
             )}
             {state.isVGreensAdmin && (

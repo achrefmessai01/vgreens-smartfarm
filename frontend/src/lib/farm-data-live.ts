@@ -10,6 +10,10 @@ import {
   type DefaultPosition,
   type GreenhouseLayout,
 } from '@/lib/sensor-default-positions';
+import {
+  correctedSoilMoisture,
+  SOIL_MOISTURE_FIELD,
+} from '@/lib/soil-calibration';
 
 /**
  * PostgreSQL SensorConfig override values for a single device.
@@ -21,6 +25,9 @@ export interface SensorConfigOverride {
   xPosition?: number | null;
   yPosition?: number | null;
   hiddenInFarmOverview?: boolean | null;
+  /** Two-point soil-moisture calibration bounds (raw sensor units). */
+  avgDryReading?: number | null;
+  avgSaturatedReading?: number | null;
 }
 
 /**
@@ -148,13 +155,26 @@ function buildSlotsFromRows(
     const key: SlotKey = `${chamberOrGreenhouse}|${device}|${level}`;
     const field = (row._field as string) ?? '';
     if (!field) continue;
-    const value =
+    const rawValue =
       typeof row._value === 'number' ? row._value : Number(row._value) || 0;
+    // Soil moisture renders the CALIBRATED 0–100% value, not the raw reading.
+    // correctedSoilMoisture returns the raw value uncorrected while the sensor
+    // is uncalibrated, and null for a degenerate (dry === saturated)
+    // calibration — which we drop so the tile shows no data rather than a wrong
+    // number.
+    const value =
+      field === SOIL_MOISTURE_FIELD
+        ? correctedSoilMoisture(
+            rawValue,
+            config?.avgDryReading,
+            config?.avgSaturatedReading,
+          )
+        : rawValue;
     const time = (row._time as string) ?? '';
 
     const existing = bySlot.get(key) ?? ({} as FieldValues);
     const existingEntry = existing[field];
-    if (!existingEntry || time > existingEntry.time) {
+    if (value !== null && (!existingEntry || time > existingEntry.time)) {
       existing[field] = { value, time };
       bySlot.set(key, existing);
     }
