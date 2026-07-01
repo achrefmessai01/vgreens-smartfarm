@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import type { Tenant } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
@@ -89,10 +89,10 @@ export function TenantTable({
     >
       {onCreate ? (
         <div className="flex justify-end">
-          <Button onClick={onCreate}>
+          <WriteActionButton onClick={onCreate}>
             <Plus className="mr-2 h-4 w-4" />
             {t.pages.admin.tenants.createTenant}
-          </Button>
+          </WriteActionButton>
         </div>
       ) : null}
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
