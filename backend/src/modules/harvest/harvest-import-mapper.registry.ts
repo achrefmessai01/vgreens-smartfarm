@@ -1,15 +1,27 @@
 /**
  * Harvest Import Mapper Registry
  *
- * Each mapper declares which tenant UUIDs it belongs to.
- * No env vars, no display name guessing — the UUID is the stable identifier.
+ * Mapper-to-tenant mapping is configured via the HARVEST_IMPORT_MAPPERS env var.
+ * No UUIDs hardcoded in source — changes only require a .env update and restart.
+ *
+ * ─── Setup ────────────────────────────────────────────────────────────────────
+ *
+ * Add to your .env:
+ *
+ *   HARVEST_IMPORT_MAPPERS=<tenant-uuid>:knaup
+ *
+ * Multiple tenants (comma-separated):
+ *
+ *   HARVEST_IMPORT_MAPPERS=<uuid1>:knaup,<uuid2>:frutania
  *
  * ─── Adding a new mapper ──────────────────────────────────────────────────────
  *
  *   1. Build the parser in scripts/harvest-import/mappers/<name>.ts
- *   2. Add an entry to MAPPER_REGISTRY below with the tenant UUID(s).
+ *   2. Add '<name>' to HarvestImportMapperKey below
+ *   3. Add the parser function to MAPPER_FNS
+ *   4. Add the tenant UUID entry to HARVEST_IMPORT_MAPPERS in .env
  *
- * Zero other code changes.
+ * Zero other code changes needed.
  */
 
 import {
@@ -30,44 +42,53 @@ export interface MapperResult {
 
 export type MapperFn = (filePath: string) => MapperResult;
 
-interface MapperDefinition {
-  /** Tenant UUIDs that should use this mapper. */
-  tenantIds: string[];
-  parse: MapperFn;
+// ── Parser functions ──────────────────────────────────────────────────────────
+
+const MAPPER_FNS: Record<HarvestImportMapperKey, MapperFn> = {
+  knaup: (filePath: string): KnaupParseResult => parseKnaupFile(filePath),
+  // frutania: parseFrutaniaFile,
+};
+
+// ── Registry (lazy — built on first access so dotenv has time to load) ────────
+
+let _registry: Record<string, HarvestImportMapperKey> | null = null;
+
+function getRegistry(): Record<string, HarvestImportMapperKey> {
+  if (_registry !== null) return _registry;
+
+  const raw = process.env.HARVEST_IMPORT_MAPPERS ?? '';
+  const result: Record<string, HarvestImportMapperKey> = {};
+
+  for (const entry of raw.split(',')) {
+    const trimmed = entry.trim();
+    if (!trimmed) continue;
+
+    const colonIdx = trimmed.indexOf(':');
+    if (colonIdx < 0) continue;
+
+    const tenantId = trimmed.slice(0, colonIdx).trim();
+    const mapperKey = trimmed.slice(colonIdx + 1).trim();
+
+    if (tenantId && mapperKey && isValidMapperKey(mapperKey)) {
+      result[tenantId] = mapperKey;
+    }
+  }
+
+  _registry = result;
+  return _registry;
 }
 
-// ── Registry ──────────────────────────────────────────────────────────────────
-//
-// To add a new mapper: add an entry here with the tenant UUID(s) and parser.
-
-const MAPPER_REGISTRY: Record<HarvestImportMapperKey, MapperDefinition> = {
-  knaup: {
-    tenantIds: ['ed458942-f834-4f06-aa21-8d46b5ed8829'],
-    parse: (filePath: string): KnaupParseResult => parseKnaupFile(filePath),
-  },
-  // frutania: {
-  //   tenantIds: ['<frutania-tenant-uuid>'],
-  //   parse: parseFrutaniaFile,
-  // },
-};
+function isValidMapperKey(key: string): key is HarvestImportMapperKey {
+  return Object.prototype.hasOwnProperty.call(MAPPER_FNS, key);
+}
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
-/**
- * Returns true if this tenant has a mapper configured.
- */
 export function hasMapperForTenant(tenantId: string): boolean {
-  return Object.values(MAPPER_REGISTRY).some((m) =>
-    m.tenantIds.includes(tenantId),
-  );
+  return tenantId in getRegistry();
 }
 
-/**
- * Returns the parse function for a tenant, or null if none configured.
- */
 export function getMapperForTenant(tenantId: string): MapperFn | null {
-  for (const def of Object.values(MAPPER_REGISTRY)) {
-    if (def.tenantIds.includes(tenantId)) return def.parse;
-  }
-  return null;
+  const key = getRegistry()[tenantId];
+  return key ? MAPPER_FNS[key] : null;
 }
