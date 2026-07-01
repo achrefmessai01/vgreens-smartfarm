@@ -104,13 +104,13 @@ export const CONVERT_BATCH_INPUT_MODE_MUTATION = gql`
   mutation ConvertBatchInputMode(
     $batchId: ID!
     $targetMode: InputMode!
-    $crateId: ID
+    $crateAssignments: [HarvestCrateAssignmentInput!]
     $tenantId: ID
   ) {
     convertBatchInputMode(
       batchId: $batchId
       targetMode: $targetMode
-      crateId: $crateId
+      crateAssignments: $crateAssignments
       tenantId: $tenantId
     ) {
       ...HarvestMutationFields

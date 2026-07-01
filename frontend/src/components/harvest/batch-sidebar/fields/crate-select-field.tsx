@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useI18n } from '@/i18n';
 import { Label } from '@/components/ui/label';
 import { useCratesQuery } from '@/generated/graphql';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import { FieldMessage } from '@/components/harvest/field-message';
 import { AddCrateDialog } from './add-crate-dialog';
 
@@ -37,7 +38,10 @@ export function CrateSelectField({
   const { t } = useI18n();
   const h = t.pages.harvest as Record<string, string | undefined> &
     typeof t.pages.harvest;
-  const { data, loading, refetch } = useCratesQuery();
+  // Scope the dropdown to the tenant in context so an admin only sees (and can
+  // only pick) crates belonging to the tenant this harvest/batch is in.
+  const tenantId = useTenantIdVariable();
+  const { data, loading, refetch } = useCratesQuery({ variables: { tenantId } });
   const crates = data?.crates ?? [];
   const [addOpen, setAddOpen] = React.useState(false);
 

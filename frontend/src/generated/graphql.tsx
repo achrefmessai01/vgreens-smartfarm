@@ -684,6 +684,11 @@ export type HarvestBatchListItem = {
   yieldPerPlant?: Maybe<Scalars['Float']['output']>;
 };
 
+export type HarvestCrateAssignmentInput = {
+  crateId: Scalars['ID']['input'];
+  harvestId: Scalars['ID']['input'];
+};
+
 export type HarvestDashboardMetrics = {
   __typename?: 'HarvestDashboardMetrics';
   averageBrix: Scalars['Float']['output'];
@@ -950,7 +955,7 @@ export type MutationAssignCropToGreenhouseArgs = {
 
 export type MutationConvertBatchInputModeArgs = {
   batchId: Scalars['ID']['input'];
-  crateId?: InputMaybe<Scalars['ID']['input']>;
+  crateAssignments?: InputMaybe<Array<HarvestCrateAssignmentInput>>;
   targetMode: InputMode;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -968,6 +973,7 @@ export type MutationCreateBatchArgs = {
 
 export type MutationCreateCrateArgs = {
   input: CreateCrateInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1328,6 +1334,11 @@ export type QueryBatchesArgs = {
 
 export type QueryCameraLivestreamStreamUrlArgs = {
   cameraId: Scalars['String']['input'];
+};
+
+
+export type QueryCratesArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1937,6 +1948,7 @@ export type DeleteBatchMutation = { __typename?: 'Mutation', deleteBatch: boolea
 
 export type CreateCrateMutationVariables = Exact<{
   input: CreateCrateInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -2042,7 +2054,7 @@ export type UpdateHarvestMutation = { __typename?: 'Mutation', updateHarvest: { 
 export type ConvertBatchInputModeMutationVariables = Exact<{
   batchId: Scalars['ID']['input'];
   targetMode: InputMode;
-  crateId?: InputMaybe<Scalars['ID']['input']>;
+  crateAssignments?: InputMaybe<Array<HarvestCrateAssignmentInput> | HarvestCrateAssignmentInput>;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
@@ -2305,7 +2317,9 @@ export type CameraLivestreamStreamUrlQueryVariables = Exact<{
 
 export type CameraLivestreamStreamUrlQuery = { __typename?: 'Query', cameraLivestreamStreamUrl: { __typename?: 'CameraLivestreamStream', cameraId: string, url?: string | null, expiresAt?: any | null, available: boolean, error?: string | null } };
 
-export type CratesQueryVariables = Exact<{ [key: string]: never; }>;
+export type CratesQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
 export type CratesQuery = { __typename?: 'Query', crates: Array<{ __typename?: 'Crate', id: string, weight: number }> };
@@ -3327,8 +3341,8 @@ export type DeleteBatchMutationHookResult = ReturnType<typeof useDeleteBatchMuta
 export type DeleteBatchMutationResult = Apollo.MutationResult<DeleteBatchMutation>;
 export type DeleteBatchMutationOptions = Apollo.BaseMutationOptions<DeleteBatchMutation, DeleteBatchMutationVariables>;
 export const CreateCrateDocument = gql`
-    mutation CreateCrate($input: CreateCrateInput!) {
-  createCrate(input: $input) {
+    mutation CreateCrate($input: CreateCrateInput!, $tenantId: ID) {
+  createCrate(input: $input, tenantId: $tenantId) {
     id
     weight
   }
@@ -3350,6 +3364,7 @@ export type CreateCrateMutationFn = Apollo.MutationFunction<CreateCrateMutation,
  * const [createCrateMutation, { data, loading, error }] = useCreateCrateMutation({
  *   variables: {
  *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */
@@ -3794,11 +3809,11 @@ export type UpdateHarvestMutationHookResult = ReturnType<typeof useUpdateHarvest
 export type UpdateHarvestMutationResult = Apollo.MutationResult<UpdateHarvestMutation>;
 export type UpdateHarvestMutationOptions = Apollo.BaseMutationOptions<UpdateHarvestMutation, UpdateHarvestMutationVariables>;
 export const ConvertBatchInputModeDocument = gql`
-    mutation ConvertBatchInputMode($batchId: ID!, $targetMode: InputMode!, $crateId: ID, $tenantId: ID) {
+    mutation ConvertBatchInputMode($batchId: ID!, $targetMode: InputMode!, $crateAssignments: [HarvestCrateAssignmentInput!], $tenantId: ID) {
   convertBatchInputMode(
     batchId: $batchId
     targetMode: $targetMode
-    crateId: $crateId
+    crateAssignments: $crateAssignments
     tenantId: $tenantId
   ) {
     ...HarvestMutationFields
@@ -3822,7 +3837,7 @@ export type ConvertBatchInputModeMutationFn = Apollo.MutationFunction<ConvertBat
  *   variables: {
  *      batchId: // value for 'batchId'
  *      targetMode: // value for 'targetMode'
- *      crateId: // value for 'crateId'
+ *      crateAssignments: // value for 'crateAssignments'
  *      tenantId: // value for 'tenantId'
  *   },
  * });
@@ -5280,8 +5295,8 @@ export type CameraLivestreamStreamUrlLazyQueryHookResult = ReturnType<typeof use
 export type CameraLivestreamStreamUrlSuspenseQueryHookResult = ReturnType<typeof useCameraLivestreamStreamUrlSuspenseQuery>;
 export type CameraLivestreamStreamUrlQueryResult = Apollo.QueryResult<CameraLivestreamStreamUrlQuery, CameraLivestreamStreamUrlQueryVariables>;
 export const CratesDocument = gql`
-    query Crates {
-  crates {
+    query Crates($tenantId: ID) {
+  crates(tenantId: $tenantId) {
     id
     weight
   }
@@ -5300,6 +5315,7 @@ export const CratesDocument = gql`
  * @example
  * const { data, loading, error } = useCratesQuery({
  *   variables: {
+ *      tenantId: // value for 'tenantId'
  *   },
  * });
  */

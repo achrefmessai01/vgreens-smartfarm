@@ -13,6 +13,7 @@ import { BrixReading } from './entities/brix-reading';
 import { CreateHarvestInput } from './dto/create-harvest.input';
 import { UpdateHarvestInput } from './dto/update-harvest.input';
 import { HarvestEntryInput } from './dto/harvest-entry.input';
+import { HarvestCrateAssignmentInput } from './dto/harvest-crate-assignment.input';
 import { HarvestFilterInput } from './dto/harvest-filter.input';
 import { DashboardFilterInput } from './dto/dashboard-filter.input';
 import { HarvestTotals } from './dto/harvest-totals.dto';
@@ -480,13 +481,13 @@ export class HarvestsService {
   // rewritten together in a single transaction — all or nothing.
   //
   // The crate weight each entry converts against:
-  //  - to CRATE: the one crate the caller chose drives the whole batch, and is
-  //    applied to every harvest (weight-mode harvests carry no crate of their own);
+  //  - to CRATE: each harvest carries its own chosen crate (weight-mode harvests
+  //    have none), supplied per harvest in `crateAssignments`;
   //  - to WEIGHT: each harvest keeps deriving from its own crate weight.
   async convertBatchInputMode(
     batchId: string,
     targetMode: InputMode,
-    crateId: string | null | undefined,
+    crateAssignments: HarvestCrateAssignmentInput[] | null | undefined,
     tenantId?: string,
   ): Promise<Harvest[]> {
     try {
@@ -497,32 +498,44 @@ export class HarvestsService {
         return this.findAllFiltered(tenantId, { batchId });
       }
 
-      // Switching to crate mode needs a crate to derive counts from; validate it
-      // (and its weight) before any write so we never divide by zero.
-      let chosenCrate: Crate | null = null;
-      if (targetMode === InputMode.CRATE) {
-        if (!crateId) {
-          throw new BadRequestException(
-            'A crate must be selected to switch a batch to crate mode',
-          );
-        }
-        chosenCrate = await this.crateService.findOneScoped(crateId, tenantId);
-        if (!chosenCrate) {
-          throw new NotFoundException(`Crate with ID ${crateId} not found`);
-        }
-        if (!(chosenCrate.weight > 0)) {
-          throw new BadRequestException(
-            'The selected crate must have a weight greater than 0',
-          );
-        }
-      }
-
       const harvests = await this.findAllFiltered(tenantId, { batchId });
 
-      // Switching to weight mode reconstructs kg from each harvest's crate
-      // weight; validate every harvest has a positive one up front, before any
-      // write, so the whole conversion fails cleanly rather than half-applying.
-      if (targetMode === InputMode.WEIGHT) {
+      // Resolve the per-harvest crate weight each entry converts against, before
+      // any write, so the whole conversion validates up front and fails cleanly
+      // rather than half-applying.
+      const crateByHarvest = new Map<string, Crate>();
+      if (targetMode === InputMode.CRATE) {
+        // Each harvest in the batch must be assigned a crate; resolve (and cache)
+        // each crate and require a positive weight so we never divide by zero.
+        const assignmentByHarvest = new Map(
+          (crateAssignments ?? []).map((a) => [a.harvestId, a.crateId]),
+        );
+        const crateCache = new Map<string, Crate>();
+        for (const h of harvests) {
+          const crateId = assignmentByHarvest.get(h.id);
+          if (!crateId) {
+            throw new BadRequestException(
+              `Harvest ${h.id} needs a crate to switch to crate mode`,
+            );
+          }
+          let crate = crateCache.get(crateId) ?? null;
+          if (!crate) {
+            crate = await this.crateService.findOneScoped(crateId, tenantId);
+            if (!crate) {
+              throw new NotFoundException(`Crate with ID ${crateId} not found`);
+            }
+            if (!(crate.weight > 0)) {
+              throw new BadRequestException(
+                'The selected crate must have a weight greater than 0',
+              );
+            }
+            crateCache.set(crateId, crate);
+          }
+          crateByHarvest.set(h.id, crate);
+        }
+      } else {
+        // Switching to weight mode reconstructs kg from each harvest's own crate
+        // weight; every harvest must have a positive one.
         for (const h of harvests) {
           const cw = this.harvestCrateWeight(h);
           if (!(cw != null && cw > 0)) {
@@ -534,25 +547,23 @@ export class HarvestsService {
       }
 
       await this.dataSource.transaction(async (manager) => {
-        // Flip the batch flag. Keep the legacy crateWeight fallback in sync when
-        // moving to crate mode. Scalar-only update to avoid cascading the loaded
+        // Flip the batch flag. Scalar-only update to avoid cascading the loaded
         // batch graph.
-        await manager.update(Batch, batchId, {
-          inputMode: targetMode,
-          ...(targetMode === InputMode.CRATE && chosenCrate
-            ? { crateWeight: chosenCrate.weight }
-            : {}),
-        });
+        await manager.update(Batch, batchId, { inputMode: targetMode });
 
         for (const harvest of harvests) {
+          const crate =
+            targetMode === InputMode.CRATE
+              ? (crateByHarvest.get(harvest.id) as Crate)
+              : null;
           const cw =
             targetMode === InputMode.CRATE
-              ? (chosenCrate as Crate).weight
+              ? crate.weight
               : (this.harvestCrateWeight(harvest) as number);
 
-          // Point every harvest at the chosen crate when entering crate mode.
-          if (targetMode === InputMode.CRATE && chosenCrate) {
-            await manager.update(Harvest, harvest.id, { crateId: chosenCrate.id });
+          // Point each harvest at its chosen crate when entering crate mode.
+          if (targetMode === InputMode.CRATE && crate) {
+            await manager.update(Harvest, harvest.id, { crateId: crate.id });
           }
 
           for (const entry of harvest.entries ?? []) {

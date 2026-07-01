@@ -10,6 +10,7 @@ import {
   DashboardFilterInput,
   HarvestDashboardMetrics,
   HarvestBatchListItem,
+  HarvestCrateAssignmentInput,
 } from './dto';
 import { User } from '@modules/users/entities/user.entity';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
@@ -176,15 +177,20 @@ export class HarvestsResolver {
     @Args('batchId', { type: () => ID }) batchId: string,
     @Args('targetMode', { type: () => InputMode }) targetMode: InputMode,
     @CurrentUser() currentUser: User,
-    @Args('crateId', { type: () => ID, nullable: true })
-    crateId?: string | null,
+    // Per-harvest crate choices for a weight -> crate switch; ignored the other
+    // direction (each harvest keeps its own crate weight).
+    @Args('crateAssignments', {
+      type: () => [HarvestCrateAssignmentInput],
+      nullable: true,
+    })
+    crateAssignments?: HarvestCrateAssignmentInput[] | null,
     @Args('tenantId', { type: () => ID, nullable: true })
     tenantId?: string | null,
   ): Promise<Harvest[]> {
     return this.harvestsService.convertBatchInputMode(
       batchId,
       targetMode,
-      crateId,
+      crateAssignments,
       resolveTenantId(currentUser, tenantId, false),
     );
   }
