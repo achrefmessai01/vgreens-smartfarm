@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import {
   Select,
   SelectContent,
@@ -63,14 +64,14 @@ export function ErrorReportQuickActions({
             </SelectItem>
           </SelectContent>
         </Select>
-        <Button
+        <WriteActionButton
           size="sm"
           variant="ghost"
           onClick={handleUpdate}
           disabled={isUpdating}
         >
           <Check className="h-3 w-3" />
-        </Button>
+        </WriteActionButton>
         <Button
           size="sm"
           variant="ghost"

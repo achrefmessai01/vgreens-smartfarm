@@ -1,7 +1,7 @@
 'use client';
 
 import { Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { GreenhouseRowFields } from './greenhouse-row-fields';
@@ -56,7 +56,7 @@ export function GreenhouseRow({
         <span className="text-sm font-medium">
           {greenhouseLabel} {index + 1}
         </span>
-        <Button
+        <WriteActionButton
           type="button"
           variant="ghost"
           size="sm"
@@ -65,7 +65,7 @@ export function GreenhouseRow({
           onClick={() => onRemove(index)}
         >
           <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+        </WriteActionButton>
       </div>
 
       <GreenhouseRowFields
