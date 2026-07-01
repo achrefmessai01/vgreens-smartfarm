@@ -79,3 +79,18 @@ export const SET_TENANT_HARVEST_DASHBOARD_ITEMS_MUTATION = gql`
     }
   }
 `;
+
+export const SET_TENANT_HARVEST_DASHBOARD_ORDER_MUTATION = gql`
+  mutation SetTenantHarvestDashboardOrder(
+    $orderedIds: [String!]!
+    $tenantId: ID
+  ) {
+    setTenantHarvestDashboardOrder(
+      orderedIds: $orderedIds
+      tenantId: $tenantId
+    ) {
+      id
+      harvestDashboardOrder
+    }
+  }
+`;

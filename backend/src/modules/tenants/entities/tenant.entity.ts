@@ -88,6 +88,16 @@ export class Tenant extends BaseEntity {
   @Column({ type: 'jsonb', default: () => "'[]'" })
   hiddenHarvestDashboardItems: string[];
 
+  // Per-tenant display order for the harvest dashboard, stored as an ordered
+  // list of item ids (mixing metric + chart ids). Empty = no custom order, so
+  // the frontend falls back to the registry order. Ids not present here fall
+  // to the end in registry order, so newly added items surface without a
+  // migration. Reordering is scoped per grid on the client; both grids share
+  // this single list and each filters to its own ids.
+  @Field(() => [String], { defaultValue: [] })
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  harvestDashboardOrder: string[];
+
   // Whitelist of email domains (e.g. ["v-greens.com", "example.org"]) allowed
   // when adding/moving users into this tenant. Empty list = unrestricted (any
   // domain accepted). Stored as a normalized lowercase list; the service
