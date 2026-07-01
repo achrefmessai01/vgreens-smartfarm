@@ -11,6 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { useI18n } from '@/i18n';
 import type { CreateBatchMutation } from '@/generated/graphql';
 import { CreateBatchFormFields } from './form/create-batch-form-fields';
@@ -75,7 +76,7 @@ export function CreateBatchDialog({
           </div>
 
           <SheetFooter className="bg-background/95 dark:border-primary-foreground/30 gap-2 border-t px-4 py-4 backdrop-blur-sm sm:px-6">
-            <Button
+            <WriteActionButton
               type="submit"
               disabled={loading}
               className="h-12 w-full text-base font-semibold shadow-sm sm:text-lg"
@@ -84,7 +85,7 @@ export function CreateBatchDialog({
               {loading
                 ? h?.creating || 'Creating...'
                 : h?.addBatchTitle || 'Add Batch'}
-            </Button>
+            </WriteActionButton>
             <Button
               type="button"
               variant="outline"

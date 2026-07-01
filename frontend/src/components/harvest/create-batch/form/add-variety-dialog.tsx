@@ -5,6 +5,7 @@ import { Dialog, DialogTitle, DialogHeader, DialogFooter, DialogContent, DialogD
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useI18n } from '@/i18n';
@@ -139,7 +140,11 @@ export function AddVarietyDialog({
             >
               {t.common.cancel}
             </Button>
-            <Button type="submit" disabled={loading} className="sm:flex-1">
+            <WriteActionButton
+              type="submit"
+              disabled={loading}
+              className="sm:flex-1"
+            >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
                   <Spinner />
@@ -148,7 +153,7 @@ export function AddVarietyDialog({
               ) : (
                 saveLabel
               )}
-            </Button>
+            </WriteActionButton>
           </DialogFooter>
         </form>
       </DialogContent>

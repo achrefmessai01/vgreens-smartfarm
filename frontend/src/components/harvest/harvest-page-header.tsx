@@ -3,6 +3,7 @@
 import { useI18n } from '@/i18n';
 import { Download, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { harvestsLoggedLabel } from '@/lib/harvest-utils';
 import type { HarvestSummary } from '@/types/harvest.types';
 
@@ -58,14 +59,14 @@ export function HarvestPageHeader({
           )}
 
           {onCreateBatch && (
-            <Button
+            <WriteActionButton
               onClick={onCreateBatch}
               disabled={isLoading}
               className="group relative w-full overflow-hidden bg-gradient-to-br from-green-500 to-green-600 text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:from-green-600 hover:to-green-700 hover:shadow-lg active:translate-y-0 sm:w-auto"
             >
               <Plus className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
               {t.pages.harvest?.createBatch || 'Create Batch'}
-            </Button>
+            </WriteActionButton>
           )}
         </div>
       </div>

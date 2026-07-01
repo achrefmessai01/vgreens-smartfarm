@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Spinner } from '@/components/ui/spinner';
 import { DecimalInput } from '@/components/ui/decimal-input';
 import { useI18n } from '@/i18n';
@@ -126,7 +127,11 @@ export function AddCrateDialog({
             >
               {t.common.cancel}
             </Button>
-            <Button type="submit" disabled={loading} className="sm:flex-1">
+            <WriteActionButton
+              type="submit"
+              disabled={loading}
+              className="sm:flex-1"
+            >
               {loading ? (
                 <span className="inline-flex items-center gap-2">
                   <Spinner />
@@ -135,7 +140,7 @@ export function AddCrateDialog({
               ) : (
                 saveLabel
               )}
-            </Button>
+            </WriteActionButton>
           </DialogFooter>
         </form>
       </DialogContent>

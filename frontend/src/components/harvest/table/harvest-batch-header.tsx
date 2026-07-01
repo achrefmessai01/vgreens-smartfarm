@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { AccordionTrigger } from '@/components/ui/accordion';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useI18n } from '@/i18n';
@@ -70,7 +71,7 @@ export function HarvestBatchHeader({
             </p>
           </AccordionTrigger>
           <div className="flex shrink-0 items-center gap-1">
-            <Button
+            <WriteActionButton
               size="icon"
               variant="ghost"
               className={`${ACTION_BASE} ${HOVER_GREEN}`}
@@ -78,7 +79,7 @@ export function HarvestBatchHeader({
               aria-label={h?.logEntry ?? 'Log Entry'}
             >
               <Plus className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-            </Button>
+            </WriteActionButton>
             <Button
               size="icon"
               variant="ghost"
@@ -88,7 +89,7 @@ export function HarvestBatchHeader({
             >
               <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
             </Button>
-            <Button
+            <WriteActionButton
               size="icon"
               variant="ghost"
               className={`${ACTION_BASE} ${HOVER_BLUE}`}
@@ -96,8 +97,8 @@ export function HarvestBatchHeader({
               aria-label={h?.editBatch ?? 'Edit Batch'}
             >
               <Pencil className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-            </Button>
-            <Button
+            </WriteActionButton>
+            <WriteActionButton
               size="icon"
               variant="ghost"
               className={`${ACTION_BASE} ${HOVER_DANGER}`}
@@ -105,7 +106,7 @@ export function HarvestBatchHeader({
               aria-label={h?.deleteBatch ?? 'Delete Batch'}
             >
               <Trash2 className="text-destructive h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-            </Button>
+            </WriteActionButton>
           </div>
         </div>
       </div>
