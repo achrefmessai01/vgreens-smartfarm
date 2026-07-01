@@ -105,9 +105,13 @@ export function isIdColumn(key: string): boolean {
   return key === 'id' || key.endsWith('Id');
 }
 
-// vGreens admins may export every column; tenant roles never get ID fields.
+// Internal vGreens roles (admin + member) may export every column, including
+// tenant/batch IDs — they operate cross-tenant. Tenant-scoped roles never get
+// raw ID fields in the CSV.
 export function permittedColumnsForRole(role: UserRole): string[] {
-  if (role === UserRole.VGREENS_ADMIN) return [...ALL_EXPORT_COLUMNS];
+  if (role === UserRole.VGREENS_ADMIN || role === UserRole.VGREENS_MEMBER) {
+    return [...ALL_EXPORT_COLUMNS];
+  }
   return ALL_EXPORT_COLUMNS.filter((key) => !isIdColumn(key));
 }
 
