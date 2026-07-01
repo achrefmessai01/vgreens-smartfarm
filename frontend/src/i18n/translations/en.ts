@@ -105,6 +105,7 @@ export const en = {
       allTenants: 'All tenants',
       placeholder: 'Select tenant',
     },
+    viewOnlyTooltip: 'Read-only account — this action is disabled.',
   },
   login: {
     title: 'Welcome back',

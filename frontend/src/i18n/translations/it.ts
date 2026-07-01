@@ -110,6 +110,7 @@ export const it = {
       allTenants: 'Tutti i tenant',
       placeholder: 'Seleziona tenant',
     },
+    viewOnlyTooltip: 'Account in sola lettura — questa azione è disattivata.',
   },
   login: {
     title: 'Bentornato',

@@ -110,6 +110,7 @@ export const ar = {
       allTenants: 'جميع المستأجرين',
       placeholder: 'اختر مستأجرًا',
     },
+    viewOnlyTooltip: 'حساب للقراءة فقط — هذا الإجراء معطّل.',
   },
   login: {
     title: 'مرحبًا بعودتك',

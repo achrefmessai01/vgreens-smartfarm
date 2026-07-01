@@ -110,6 +110,8 @@ export const ro = {
       allTenants: 'Toți chiriașii',
       placeholder: 'Selectează chiriaș',
     },
+    viewOnlyTooltip:
+      'Cont doar pentru citire — această acțiune este dezactivată.',
   },
   login: {
     title: 'Bine ai revenit',

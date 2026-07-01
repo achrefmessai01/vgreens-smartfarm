@@ -110,6 +110,7 @@ export const tr = {
       allTenants: 'Tüm kiracılar',
       placeholder: 'Kiracı seç',
     },
+    viewOnlyTooltip: 'Yalnızca okuma hesabı — bu eylem devre dışı.',
   },
   login: {
     title: 'Tekrar hoş geldiniz',

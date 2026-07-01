@@ -105,6 +105,7 @@ export const fr = {
       allTenants: 'Tous les locataires',
       placeholder: 'Choisir un locataire',
     },
+    viewOnlyTooltip: 'Compte en lecture seule — cette action est désactivée.',
   },
   login: {
     title: 'Bon retour',

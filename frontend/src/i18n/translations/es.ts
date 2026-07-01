@@ -97,6 +97,7 @@ export const es = {
       allTenants: 'Todos los inquilinos',
       placeholder: 'Seleccionar inquilino',
     },
+    viewOnlyTooltip: 'Cuenta de solo lectura — esta acción está desactivada.',
   },
   login: {
     title: 'Bienvenido de nuevo',

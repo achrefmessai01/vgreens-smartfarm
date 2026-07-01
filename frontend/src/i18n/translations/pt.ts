@@ -110,6 +110,7 @@ export const pt = {
       allTenants: 'Todos os inquilinos',
       placeholder: 'Selecionar inquilino',
     },
+    viewOnlyTooltip: 'Conta só de leitura — esta ação está desativada.',
   },
   login: {
     title: 'Bem-vindo de volta',

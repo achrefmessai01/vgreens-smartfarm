@@ -110,6 +110,7 @@ export const pl = {
       allTenants: 'Wszyscy najemcy',
       placeholder: 'Wybierz najemcę',
     },
+    viewOnlyTooltip: 'Konto tylko do odczytu — ta akcja jest wyłączona.',
   },
   login: {
     title: 'Witaj ponownie',

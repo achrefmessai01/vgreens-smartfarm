@@ -105,6 +105,7 @@ export const de = {
       allTenants: 'Alle Mandanten',
       placeholder: 'Mandant auswählen',
     },
+    viewOnlyTooltip: 'Nur-Lese-Konto – diese Aktion ist deaktiviert.',
   },
   login: {
     title: 'Willkommen zurück',
