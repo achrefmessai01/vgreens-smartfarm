@@ -110,6 +110,8 @@ export const el = {
       allTenants: 'Όλοι οι ενοικιαστές',
       placeholder: 'Επιλέξτε ενοικιαστή',
     },
+    viewOnlyTooltip:
+      'Λογαριασμός μόνο για ανάγνωση — αυτή η ενέργεια είναι απενεργοποιημένη.',
   },
   login: {
     title: 'Καλώς ήρθατε ξανά',
@@ -1011,6 +1013,7 @@ export const el = {
         inactive: 'Ανενεργός',
         pending: 'Σε εκκρεμότητα',
         roleVgreensAdmin: 'Διαχειριστής vGreens',
+        roleVgreensMember: 'Μέλος vGreens',
         roleTenantAdmin: 'Διαχειριστής μισθωτή',
         roleTenantUser: 'Χρήστης μισθωτή',
         roleRequired: 'Ο ρόλος είναι υποχρεωτικός',

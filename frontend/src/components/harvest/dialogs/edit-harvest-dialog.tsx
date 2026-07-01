@@ -11,6 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { useI18n } from '@/i18n';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 import type { EditBatchHarvest } from '@/lib/hooks/use-edit-harvest';
@@ -223,7 +224,7 @@ export function EditHarvestDialog({
                   >
                     {h?.cancel ?? 'Cancel'}
                   </Button>
-                  <Button
+                  <WriteActionButton
                     type="button"
                     onClick={handleConfirmConvert}
                     disabled={loading}
@@ -232,13 +233,13 @@ export function EditHarvestDialog({
                     {loading
                       ? (h?.updating ?? 'Updating...')
                       : (h?.convertModeConfirm ?? 'Convert')}
-                  </Button>
+                  </WriteActionButton>
                 </div>
               </div>
             ) : (
               <>
                 {!readOnly && (
-                  <Button
+                  <WriteActionButton
                     type="submit"
                     disabled={loading || needsCrate}
                     className="h-12 w-full text-base font-semibold shadow-sm sm:text-lg"
@@ -247,7 +248,7 @@ export function EditHarvestDialog({
                     {loading
                       ? (h?.updating ?? 'Updating...')
                       : (h?.update ?? 'Update')}
-                  </Button>
+                  </WriteActionButton>
                 )}
                 <Button
                   type="button"

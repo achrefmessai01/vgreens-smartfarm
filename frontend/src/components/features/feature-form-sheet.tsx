@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/sheet';
 import { useI18n } from '@/i18n';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import type { Feature } from '@/generated/graphql';
 
 interface FeatureFormSheetProps {
@@ -76,7 +77,7 @@ export function FeatureFormSheet({
           >
             {t.pages.users.cancel}
           </Button>
-          <Button
+          <WriteActionButton
             onClick={() => formRef.current?.submit()}
             disabled={isLoading}
             className="flex-1"
@@ -86,7 +87,7 @@ export function FeatureFormSheet({
               : feature
                 ? t.pages.admin.features.updateFeature
                 : t.pages.admin.features.createFeature}
-          </Button>
+          </WriteActionButton>
         </SheetFooter>
       </SheetContent>
     </Sheet>

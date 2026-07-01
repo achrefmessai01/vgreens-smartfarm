@@ -110,6 +110,7 @@ export const pt = {
       allTenants: 'Todos os inquilinos',
       placeholder: 'Selecionar inquilino',
     },
+    viewOnlyTooltip: 'Conta só de leitura — esta ação está desativada.',
   },
   login: {
     title: 'Bem-vindo de volta',
@@ -1003,6 +1004,7 @@ export const pt = {
         inactive: 'Inativo',
         pending: 'Pendente',
         roleVgreensAdmin: 'Administrador vGreens',
+        roleVgreensMember: 'Membro vGreens',
         roleTenantAdmin: 'Administrador do inquilino',
         roleTenantUser: 'Utilizador do inquilino',
         roleRequired: 'A função é obrigatória',

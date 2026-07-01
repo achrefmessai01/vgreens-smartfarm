@@ -10,8 +10,12 @@ import { emailMatchesDomains } from './email-domain';
  * Roles/tenants with no configured domain are not restricted.
  */
 
-/** Domains allowed to hold the VGREENS_ADMIN role. */
-const VGREENS_ADMIN_DOMAINS = ['v-greens.com'];
+/**
+ * Domains allowed to hold internal vGreens roles (VGREENS_ADMIN and
+ * VGREENS_MEMBER). VGREENS_MEMBER is a view-only sibling of VGREENS_ADMIN and
+ * therefore shares the same email-domain restriction.
+ */
+const VGREENS_INTERNAL_DOMAINS = ['v-greens.com'];
 
 /**
  * Allowed TENANT_ADMIN email domains, keyed by tenant id. Only tenants listed
@@ -35,10 +39,10 @@ export function getAdminEmailDomainError(
   email: string | undefined | null,
   tenantId: string | undefined | null,
 ): string | null {
-  if (role === UserRole.VGREENS_ADMIN) {
-    return emailMatchesDomains(email, VGREENS_ADMIN_DOMAINS)
+  if (role === UserRole.VGREENS_ADMIN || role === UserRole.VGREENS_MEMBER) {
+    return emailMatchesDomains(email, VGREENS_INTERNAL_DOMAINS)
       ? null
-      : `Only emails on ${VGREENS_ADMIN_DOMAINS.map((d) => `@${d}`).join(', ')} can be assigned the vGreens admin role.`;
+      : `Only emails on ${VGREENS_INTERNAL_DOMAINS.map((d) => `@${d}`).join(', ')} can be assigned an internal vGreens role.`;
   }
 
   if (role === UserRole.TENANT_ADMIN) {

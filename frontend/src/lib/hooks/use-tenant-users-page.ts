@@ -18,21 +18,28 @@ import { useI18n } from '@/i18n';
 import type { UserFormData } from '@/components/users';
 
 export function useTenantUsersPage() {
-  const { user: currentUser, isVGreensAdmin, isTenantAdmin } = useCurrentUser();
+  const {
+    user: currentUser,
+    isVGreensInternal,
+    isTenantAdmin,
+  } = useCurrentUser();
   const { toast } = useToast();
   const { t } = useI18n();
   const errorTitle = t.errors.defaultTitle;
   // Honour the VGREENS_ADMIN tenant picker. For regular tenant admins this is
-  // always undefined and we fall back to their own tenant id below.
+  // always undefined and we fall back to their own tenant id below. The
+  // read-only VGREENS_MEMBER sibling shares the same picker, so we treat
+  // both internal roles the same for read access here.
   const selectedTenantId = useTenantIdVariable();
   const tenantId = selectedTenantId ?? currentUser?.tenantId;
 
-  // The `users` query is restricted to admins; skip it for tenant users to
-  // avoid a guaranteed permission error. Pass the selected tenant id so the
-  // backend scopes the result to the tenant the admin picked in the navbar.
+  // The `users` query is restricted to admins + internal read-only members;
+  // skip it for tenant users to avoid a guaranteed permission error. Pass the
+  // selected tenant id so the backend scopes the result to the tenant the
+  // admin picked in the navbar.
   const { data, loading, refetch } = useUsersQuery({
     variables: { tenantId: selectedTenantId },
-    skip: !(isVGreensAdmin || isTenantAdmin),
+    skip: !(isVGreensInternal || isTenantAdmin),
   });
   const [createUser] = useCreateUserMutation();
   const [updateUser] = useUpdateUserMutation();
@@ -57,8 +64,14 @@ export function useTenantUsersPage() {
   const users = React.useMemo(() => {
     if (!data?.users) return [];
     return data.users.filter((u) => {
-      // Never show VGREENS_ADMIN accounts in tenant-scoped lists.
-      if (u.role === UserRole.VgreensAdmin) return false;
+      // Never show internal vGreens accounts (admin or its read-only member
+      // sibling) in tenant-scoped lists — they live outside any tenant.
+      if (
+        u.role === UserRole.VgreensAdmin ||
+        u.role === UserRole.VgreensMember
+      ) {
+        return false;
+      }
       // When we have a resolved tenantId (either the admin's picked tenant
       // or the current tenant admin's own tenant) we scope to that tenant.
       // If tenantId is undefined — e.g. an admin in "All tenants" mode —

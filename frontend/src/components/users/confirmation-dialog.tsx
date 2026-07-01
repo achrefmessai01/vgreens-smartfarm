@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { useI18n } from '@/i18n';
 
 export interface ConfirmationDialogProps {
@@ -24,6 +25,12 @@ export interface ConfirmationDialogProps {
   onConfirm: () => void;
   onCancel?: () => void;
   isLoading?: boolean;
+  /**
+   * When `true`, skip the view-only write guard on the confirm button. Set
+   * this for confirmations that VGREENS_MEMBER is allowed to perform, such
+   * as acknowledging or resolving an alert.
+   */
+  readOnlyExempt?: boolean;
   children?: React.ReactNode;
 }
 
@@ -38,8 +45,10 @@ export function ConfirmationDialog({
   onConfirm,
   onCancel,
   isLoading = false,
+  readOnlyExempt = false,
   children,
 }: ConfirmationDialogProps) {
+  const ConfirmButton = readOnlyExempt ? Button : WriteActionButton;
   const { t } = useI18n();
   const resolvedConfirmLabel = confirmLabel ?? t.common.confirm;
   const resolvedCancelLabel = cancelLabel ?? t.common.cancel;
@@ -77,7 +86,7 @@ export function ConfirmationDialog({
           >
             {resolvedCancelLabel}
           </Button>
-          <Button
+          <ConfirmButton
             variant={variant === 'destructive' ? 'destructive' : 'default'}
             onClick={handleConfirm}
             disabled={isLoading}
@@ -91,7 +100,7 @@ export function ConfirmationDialog({
             ) : (
               resolvedConfirmLabel
             )}
-          </Button>
+          </ConfirmButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

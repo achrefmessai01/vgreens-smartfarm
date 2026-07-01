@@ -110,6 +110,7 @@ export const pl = {
       allTenants: 'Wszyscy najemcy',
       placeholder: 'Wybierz najemcę',
     },
+    viewOnlyTooltip: 'Konto tylko do odczytu — ta akcja jest wyłączona.',
   },
   login: {
     title: 'Witaj ponownie',
@@ -999,6 +1000,7 @@ export const pl = {
         inactive: 'Nieaktywny',
         pending: 'Oczekujący',
         roleVgreensAdmin: 'Administrator vGreens',
+        roleVgreensMember: 'Członek vGreens',
         roleTenantAdmin: 'Administrator najemcy',
         roleTenantUser: 'Użytkownik najemcy',
         roleRequired: 'Rola jest wymagana',

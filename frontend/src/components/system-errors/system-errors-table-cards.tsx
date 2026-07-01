@@ -1,6 +1,7 @@
 import { ErrorReportSeverityBadge } from '@/components/error-reports/error-report-severity-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ErrorSourceBadge } from '@/components/ui/error-source-badge';
 import { ErrorTypeBadge } from '@/components/ui/error-type-badge';
@@ -133,7 +134,7 @@ export const useSystemErrorsCard = ({
               {t.pages.admin.systemErrors.view}
             </Button>
             {!error.isResolved && (
-              <Button
+              <WriteActionButton
                 variant="ghost"
                 size="sm"
                 onClick={() => onResolve(error)}
@@ -142,7 +143,7 @@ export const useSystemErrorsCard = ({
               >
                 <CheckCircle2 className="mr-2 h-4 w-4" />
                 {t.pages.admin.systemErrors.resolve}
-              </Button>
+              </WriteActionButton>
             )}
           </div>
         </div>

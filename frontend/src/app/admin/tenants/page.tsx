@@ -7,6 +7,7 @@ import {
   type TenantFormRef,
 } from '@/components/tenants';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Plus } from 'lucide-react';
 import { ContentSkeleton } from '@/components/ui/content-skeleton';
 import {
@@ -54,14 +55,14 @@ export default function TenantsPage() {
         title={t.pages.admin.tenants.title}
         subtitle={t.pages.admin.tenants.subtitle}
         actions={
-          <Button
+          <WriteActionButton
             onClick={page.handleCreate}
             disabled={page.isLoading}
             className="w-full sm:w-auto"
           >
             <Plus className="h-4 w-4" />
             {t.pages.admin.tenants.createTenant}
-          </Button>
+          </WriteActionButton>
         }
       />
 
@@ -106,7 +107,7 @@ export default function TenantsPage() {
             >
               {t.pages.users.cancel}
             </Button>
-            <Button
+            <WriteActionButton
               onClick={() => formRef.current?.submit()}
               disabled={page.isLoading}
               className="flex-1"
@@ -116,7 +117,7 @@ export default function TenantsPage() {
                 : page.editingTenant
                   ? t.pages.admin.tenants.updateTenant
                   : t.pages.admin.tenants.createTenant}
-            </Button>
+            </WriteActionButton>
           </SheetFooter>
         </SheetContent>
       </Sheet>

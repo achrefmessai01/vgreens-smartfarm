@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import {
   Dialog,
   DialogContent,
@@ -55,11 +56,15 @@ export function DeleteHarvestDialog({
           >
             {h?.cancel ?? 'Cancel'}
           </Button>
-          <Button variant="destructive" onClick={onConfirm} disabled={loading}>
+          <WriteActionButton
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={loading}
+          >
             {loading
               ? (h?.deleting ?? 'Deleting...')
               : (confirmLabel ?? h?.confirmDelete ?? 'Delete')}
-          </Button>
+          </WriteActionButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -105,6 +105,7 @@ export const fr = {
       allTenants: 'Tous les locataires',
       placeholder: 'Choisir un locataire',
     },
+    viewOnlyTooltip: 'Compte en lecture seule — cette action est désactivée.',
   },
   login: {
     title: 'Bon retour',
@@ -989,6 +990,7 @@ export const fr = {
         inactive: 'Inactif',
         pending: 'En attente',
         roleVgreensAdmin: 'Admin vGreens',
+        roleVgreensMember: 'Membre vGreens',
         roleTenantAdmin: 'Admin locataire',
         roleTenantUser: 'Utilisateur',
         roleRequired: 'Le rôle est requis',

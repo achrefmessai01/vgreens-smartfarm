@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { User, UserRole, UserStatus } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { Edit2, Trash2 } from 'lucide-react';
@@ -87,7 +87,7 @@ export const useUserManagementCard = ({
         {/* Custom-Footer implementation - using card-footer breaks ux */}
         <div className="flex items-center border-t px-6 pt-2">
           <div className="flex gap-2">
-            <Button
+            <WriteActionButton
               variant="ghost"
               size="icon"
               onClick={() => onEdit(user)}
@@ -95,8 +95,8 @@ export const useUserManagementCard = ({
               disabled={isLoading}
             >
               <Edit2 className="h-4 w-4" />
-            </Button>
-            <Button
+            </WriteActionButton>
+            <WriteActionButton
               variant="ghost"
               size="icon"
               onClick={() => onDelete(user)}
@@ -104,7 +104,7 @@ export const useUserManagementCard = ({
               disabled={isLoading}
             >
               <Trash2 className="h-4 w-4" />
-            </Button>
+            </WriteActionButton>
           </div>
         </div>
       </Card>

@@ -105,6 +105,7 @@ export const en = {
       allTenants: 'All tenants',
       placeholder: 'Select tenant',
     },
+    viewOnlyTooltip: 'Read-only account — this action is disabled.',
   },
   login: {
     title: 'Welcome back',
@@ -1024,6 +1025,7 @@ export const en = {
         inactive: 'Inactive',
         pending: 'Pending',
         roleVgreensAdmin: 'vGreens Admin',
+        roleVgreensMember: 'vGreens Member',
         roleTenantAdmin: 'Tenant Admin',
         roleTenantUser: 'Tenant User',
         roleRequired: 'Role is required',

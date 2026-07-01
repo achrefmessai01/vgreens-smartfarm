@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { TableCell } from '@/components/ui/table';
 import type { Tenant } from '@/generated/graphql';
 import { Edit2, Settings, Trash2, Users } from 'lucide-react';
@@ -86,7 +87,7 @@ export const useTenantRow = ({
               <Settings className="h-4 w-4" />
             </Button>
           )}
-          <Button
+          <WriteActionButton
             variant="ghost"
             size="icon"
             onClick={(e) => {
@@ -96,8 +97,8 @@ export const useTenantRow = ({
             className="h-8 w-8"
           >
             <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
+          </WriteActionButton>
+          <WriteActionButton
             variant="ghost"
             size="icon"
             onClick={(e) => {
@@ -107,7 +108,7 @@ export const useTenantRow = ({
             className="text-destructive hover:text-destructive h-8 w-8"
           >
             <Trash2 className="h-4 w-4" />
-          </Button>
+          </WriteActionButton>
         </div>
       </TableCell>
     </>

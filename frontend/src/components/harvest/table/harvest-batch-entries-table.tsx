@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import {
   Table,
   TableBody,
@@ -111,7 +112,7 @@ export function HarvestBatchEntriesTable({
                   >
                     <Eye className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                   </Button>
-                  <Button
+                  <WriteActionButton
                     variant="ghost"
                     size="icon"
                     className={`${ACTION_BASE} ${HOVER_TEAL}`}
@@ -119,8 +120,8 @@ export function HarvestBatchEntriesTable({
                     aria-label={h?.editHarvest ?? 'Edit Harvest'}
                   >
                     <Pencil className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                  </Button>
-                  <Button
+                  </WriteActionButton>
+                  <WriteActionButton
                     variant="ghost"
                     size="icon"
                     className={`${ACTION_BASE} ${HOVER_DANGER}`}
@@ -128,7 +129,7 @@ export function HarvestBatchEntriesTable({
                     aria-label={h?.deleteHarvest ?? 'Delete Harvest'}
                   >
                     <Trash2 className="text-destructive h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-                  </Button>
+                  </WriteActionButton>
                 </div>
               </TableCell>
             </TableRow>

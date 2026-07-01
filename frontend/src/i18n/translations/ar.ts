@@ -110,6 +110,7 @@ export const ar = {
       allTenants: 'جميع المستأجرين',
       placeholder: 'اختر مستأجرًا',
     },
+    viewOnlyTooltip: 'حساب للقراءة فقط — هذا الإجراء معطّل.',
   },
   login: {
     title: 'مرحبًا بعودتك',
@@ -989,6 +990,7 @@ export const ar = {
         inactive: 'غير نشط',
         pending: 'قيد الانتظار',
         roleVgreensAdmin: 'مسؤول vGreens',
+        roleVgreensMember: 'عضو vGreens',
         roleTenantAdmin: 'مسؤول المستأجر',
         roleTenantUser: 'مستخدم المستأجر',
         roleRequired: 'الدور مطلوب',

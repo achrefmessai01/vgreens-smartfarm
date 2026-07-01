@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { User, UserRole, type Tenant } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
@@ -41,6 +41,7 @@ export function UserManagementTable({
 
   const roleLabels: Record<UserRole, string> = {
     VGREENS_ADMIN: t.pages.admin.users.roleVgreensAdmin,
+    VGREENS_MEMBER: t.pages.admin.users.roleVgreensMember,
     TENANT_ADMIN: t.pages.admin.users.roleTenantAdmin,
     TENANT_USER: t.pages.admin.users.roleTenantUser,
   };
@@ -90,10 +91,10 @@ export function UserManagementTable({
   // `headerActions`) so it sits on the same row as the search + filter
   // controls instead of consuming a separate row above the table.
   const headerActions = onCreate ? (
-    <Button onClick={onCreate} disabled={isLoading}>
+    <WriteActionButton onClick={onCreate} disabled={isLoading}>
       <Plus className="h-4 w-4" />
       {t.pages.admin.users.createUser}
-    </Button>
+    </WriteActionButton>
   ) : undefined;
 
   return (

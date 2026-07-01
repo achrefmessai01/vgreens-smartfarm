@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { formatHarvestDate } from '@/lib/harvest-utils';
 import {
@@ -107,7 +108,7 @@ export function HarvestBatchEntriesCards({
                 <Eye className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                 {h?.viewDetails ?? 'View Details'}
               </Button>
-              <Button
+              <WriteActionButton
                 variant="outline"
                 size="sm"
                 className={OUTLINE_TEAL}
@@ -116,8 +117,8 @@ export function HarvestBatchEntriesCards({
               >
                 <Pencil className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                 {h?.editHarvest ?? 'Edit'}
-              </Button>
-              <Button
+              </WriteActionButton>
+              <WriteActionButton
                 variant="destructive"
                 size="sm"
                 className={DESTRUCTIVE_BTN}
@@ -126,7 +127,7 @@ export function HarvestBatchEntriesCards({
               >
                 <Trash2 className="mr-1 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
                 {h?.deleteHarvest ?? 'Delete'}
-              </Button>
+              </WriteActionButton>
             </div>
           </div>
         </div>

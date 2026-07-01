@@ -68,6 +68,13 @@ export function buildDataSourceOptions(env: EnvSource): DataSourceOptions {
     entities: [join(root, `**/*.entity.${ext}`)],
     migrations: [join(root, `migrations/*.${ext}`)],
     migrationsTableName: 'typeorm_migrations',
+    // Each migration runs in its own transaction (TypeORM's default 'all'
+    // mode wraps every pending migration in one transaction and refuses
+    // per-migration opt-outs). We need per-migration opt-outs because some
+    // Postgres DDL cannot run inside a transaction — notably `ALTER TYPE
+    // ... ADD VALUE` on older Postgres and `CREATE INDEX CONCURRENTLY`.
+    // Those migrations declare `transaction = false`; 'each' honors it.
+    migrationsTransactionMode: 'each',
     // Never auto-sync. The only way schema changes reach the DB is via a
     // committed migration. This is the change that closes the prod-risk gap
     // the codebase had under `synchronize: true`.

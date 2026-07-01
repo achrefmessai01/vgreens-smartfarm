@@ -110,6 +110,7 @@ export const tr = {
       allTenants: 'Tüm kiracılar',
       placeholder: 'Kiracı seç',
     },
+    viewOnlyTooltip: 'Yalnızca okuma hesabı — bu eylem devre dışı.',
   },
   login: {
     title: 'Tekrar hoş geldiniz',
@@ -995,6 +996,7 @@ export const tr = {
         inactive: 'Pasif',
         pending: 'Beklemede',
         roleVgreensAdmin: 'vGreens Yöneticisi',
+        roleVgreensMember: 'vGreens Üyesi',
         roleTenantAdmin: 'Kiracı yöneticisi',
         roleTenantUser: 'Kiracı kullanıcısı',
         roleRequired: 'Rol zorunludur',

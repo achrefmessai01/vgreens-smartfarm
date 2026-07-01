@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import {
   Dialog,
   DialogContent,
@@ -54,13 +55,13 @@ export function ErrorReportDeleteDialog({
           <Button variant="outline" onClick={onClose} disabled={isDeleting}>
             {deleteT.cancel}
           </Button>
-          <Button
+          <WriteActionButton
             variant="destructive"
             onClick={handleConfirm}
             disabled={isDeleting}
           >
             {isDeleting ? t.common.loading : deleteT.confirm}
-          </Button>
+          </WriteActionButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

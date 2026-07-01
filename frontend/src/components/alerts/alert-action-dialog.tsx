@@ -64,6 +64,7 @@ export function AlertActionDialog({
       onConfirm={onConfirm}
       onCancel={onCancel}
       isLoading={isLoading}
+      readOnlyExempt
     >
       {isLoading ? (
         <div className="space-y-4">

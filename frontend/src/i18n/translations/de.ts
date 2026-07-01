@@ -105,6 +105,7 @@ export const de = {
       allTenants: 'Alle Mandanten',
       placeholder: 'Mandant auswählen',
     },
+    viewOnlyTooltip: 'Nur-Lese-Konto – diese Aktion ist deaktiviert.',
   },
   login: {
     title: 'Willkommen zurück',
@@ -1017,6 +1018,7 @@ export const de = {
         inactive: 'Inaktiv',
         pending: 'Ausstehend',
         roleVgreensAdmin: 'vGreens Admin',
+        roleVgreensMember: 'vGreens Mitglied',
         roleTenantAdmin: 'Mandanten-Admin',
         roleTenantUser: 'Mandanten-Benutzer',
         roleRequired: 'Rolle ist erforderlich',

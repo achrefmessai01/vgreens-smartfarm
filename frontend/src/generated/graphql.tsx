@@ -1820,7 +1820,8 @@ export type User = {
 export enum UserRole {
   TenantAdmin = 'TENANT_ADMIN',
   TenantUser = 'TENANT_USER',
-  VgreensAdmin = 'VGREENS_ADMIN'
+  VgreensAdmin = 'VGREENS_ADMIN',
+  VgreensMember = 'VGREENS_MEMBER'
 }
 
 export type UserSettings = {

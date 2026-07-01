@@ -97,6 +97,7 @@ export const es = {
       allTenants: 'Todos los inquilinos',
       placeholder: 'Seleccionar inquilino',
     },
+    viewOnlyTooltip: 'Cuenta de solo lectura — esta acción está desactivada.',
   },
   login: {
     title: 'Bienvenido de nuevo',
@@ -997,6 +998,7 @@ export const es = {
         inactive: 'Inactivo',
         pending: 'Pendiente',
         roleVgreensAdmin: 'Administrador vGreens',
+        roleVgreensMember: 'Miembro vGreens',
         roleTenantAdmin: 'Administrador de inquilino',
         roleTenantUser: 'Usuario de inquilino',
         roleRequired: 'El rol es obligatorio',

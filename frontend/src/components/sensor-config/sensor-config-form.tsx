@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -261,7 +262,7 @@ export function SensorConfigForm({
 
       <div className="flex items-center justify-between">
         {hasConfig ? (
-          <Button
+          <WriteActionButton
             type="button"
             variant="ghost"
             size="sm"
@@ -274,7 +275,7 @@ export function SensorConfigForm({
           >
             <Trash2 className="h-3.5 w-3.5" />
             {sc.resetToDefaults}
-          </Button>
+          </WriteActionButton>
         ) : (
           <span />
         )}
@@ -289,14 +290,14 @@ export function SensorConfigForm({
           >
             {sc.cancel}
           </Button>
-          <Button
+          <WriteActionButton
             type="submit"
             size="sm"
             disabled={saving}
             className="min-w-16"
           >
             {saving ? sc.saving : sc.save}
-          </Button>
+          </WriteActionButton>
         </div>
       </div>
     </form>

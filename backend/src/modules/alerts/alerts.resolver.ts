@@ -142,7 +142,15 @@ export class AlertsResolver {
   }
 
   @Mutation(() => Alert)
-  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  // VGREENS_MEMBER is view-only overall, but alert acknowledgement is a
+  // low-risk workflow action we let them perform so on-call reviewers can
+  // clear the queue without escalating to VGREENS_ADMIN.
+  @Roles(
+    UserRole.VGREENS_ADMIN,
+    UserRole.VGREENS_MEMBER,
+    UserRole.TENANT_ADMIN,
+    UserRole.TENANT_USER,
+  )
   async acknowledgeAlert(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() currentUser: User,

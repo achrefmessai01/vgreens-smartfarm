@@ -11,10 +11,10 @@ import {
 } from '@/lib/contexts/selected-tenant-context';
 
 /**
- * Global tenant selector that lives in the app navbar. Only VGREENS_ADMIN
- * users see it — for everyone else it renders nothing and the underlying
- * `SelectedTenantProvider` value stays `null` (which means "use my own
- * tenant" on the backend).
+ * Global tenant selector that lives in the app navbar. Internal vGreens users
+ * (VGREENS_ADMIN + the view-only VGREENS_MEMBER) see it — for everyone else
+ * it renders nothing and the underlying `SelectedTenantProvider` value stays
+ * `null` (which means "use my own tenant" on the backend).
  *
  * Backed by the shared `SelectedTenantProvider`, so changing the value here
  * propagates to every hook that consumes `useTenantIdVariable()`. The
@@ -28,16 +28,16 @@ const ALL_TENANTS_SENTINEL = '__all__';
 
 export function NavbarTenantSelector() {
   const { t } = useI18n();
-  const { isVGreensAdmin } = useCurrentUser();
+  const { isVGreensInternal } = useCurrentUser();
   const selectedTenantId = useSelectedTenantId();
   const setSelectedTenantId = useSetSelectedTenantId();
 
   const { data } = useTenantsQuery({
-    skip: !isVGreensAdmin,
+    skip: !isVGreensInternal,
     fetchPolicy: 'cache-first',
   });
 
-  if (!isVGreensAdmin) return null;
+  if (!isVGreensInternal) return null;
 
   const tenants = data?.tenants ?? [];
   if (tenants.length === 0) return null;

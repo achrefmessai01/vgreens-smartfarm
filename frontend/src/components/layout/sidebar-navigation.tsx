@@ -96,34 +96,39 @@ export const getTenantNavItems = (t: Translations): NavItem[] => [
   },
 ];
 
-// Filter navigation items based on enabled features
+// Filter navigation items based on enabled features. `isVGreensInternal`
+// covers both VGREENS_ADMIN and its view-only sibling VGREENS_MEMBER —
+// both bypass the feature-flag gate.
 export const filterTenantNavItems = (
   allItems: NavItem[],
   hasFeature: (key: string) => boolean,
-  isVGreensAdmin: boolean,
+  isVGreensInternal: boolean,
 ): NavItem[] => {
   return allItems.filter((item) => {
     // Always show items without featureKey or if feature is enabled
     if (!item.featureKey) return true;
-    // For admin users, show all items
-    if (isVGreensAdmin) return true;
+    // Internal vGreens users see every item
+    if (isVGreensInternal) return true;
     // For tenant users, check if feature is enabled
     return hasFeature(item.featureKey);
   });
 };
 
-// Get navigation items based on user role
+// Get navigation items based on user role. Internal vGreens roles
+// (VGREENS_ADMIN + VGREENS_MEMBER) share the admin nav; they navigate into
+// tenant pages via the in-header TenantNavbar once a tenant is picked.
 export const getNavigationItems = (
   role: UserRole | undefined,
   t: Translations,
   hasFeature: (key: string) => boolean,
 ): NavItem[] => {
-  const isVGreensAdmin = role === UserRole.VgreensAdmin;
+  const isVGreensInternal =
+    role === UserRole.VgreensAdmin || role === UserRole.VgreensMember;
 
-  if (isVGreensAdmin) {
+  if (isVGreensInternal) {
     return getAdminNavItems(t);
   }
 
   const allTenantItems = getTenantNavItems(t);
-  return filterTenantNavItems(allTenantItems, hasFeature, isVGreensAdmin);
+  return filterTenantNavItems(allTenantItems, hasFeature, isVGreensInternal);
 };
