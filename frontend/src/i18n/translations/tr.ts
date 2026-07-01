@@ -995,6 +995,7 @@ export const tr = {
         inactive: 'Pasif',
         pending: 'Beklemede',
         roleVgreensAdmin: 'vGreens Yöneticisi',
+        roleVgreensMember: 'vGreens Üyesi',
         roleTenantAdmin: 'Kiracı yöneticisi',
         roleTenantUser: 'Kiracı kullanıcısı',
         roleRequired: 'Rol zorunludur',

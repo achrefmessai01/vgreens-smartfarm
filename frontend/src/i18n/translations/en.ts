@@ -1024,6 +1024,7 @@ export const en = {
         inactive: 'Inactive',
         pending: 'Pending',
         roleVgreensAdmin: 'vGreens Admin',
+        roleVgreensMember: 'vGreens Member',
         roleTenantAdmin: 'Tenant Admin',
         roleTenantUser: 'Tenant User',
         roleRequired: 'Role is required',

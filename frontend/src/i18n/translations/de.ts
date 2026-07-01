@@ -1017,6 +1017,7 @@ export const de = {
         inactive: 'Inaktiv',
         pending: 'Ausstehend',
         roleVgreensAdmin: 'vGreens Admin',
+        roleVgreensMember: 'vGreens Mitglied',
         roleTenantAdmin: 'Mandanten-Admin',
         roleTenantUser: 'Mandanten-Benutzer',
         roleRequired: 'Rolle ist erforderlich',

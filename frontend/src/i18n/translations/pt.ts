@@ -1003,6 +1003,7 @@ export const pt = {
         inactive: 'Inativo',
         pending: 'Pendente',
         roleVgreensAdmin: 'Administrador vGreens',
+        roleVgreensMember: 'Membro vGreens',
         roleTenantAdmin: 'Administrador do inquilino',
         roleTenantUser: 'Utilizador do inquilino',
         roleRequired: 'A função é obrigatória',

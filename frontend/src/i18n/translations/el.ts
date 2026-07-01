@@ -1011,6 +1011,7 @@ export const el = {
         inactive: 'Ανενεργός',
         pending: 'Σε εκκρεμότητα',
         roleVgreensAdmin: 'Διαχειριστής vGreens',
+        roleVgreensMember: 'Μέλος vGreens',
         roleTenantAdmin: 'Διαχειριστής μισθωτή',
         roleTenantUser: 'Χρήστης μισθωτή',
         roleRequired: 'Ο ρόλος είναι υποχρεωτικός',

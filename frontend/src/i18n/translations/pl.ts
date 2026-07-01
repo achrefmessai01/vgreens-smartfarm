@@ -999,6 +999,7 @@ export const pl = {
         inactive: 'Nieaktywny',
         pending: 'Oczekujący',
         roleVgreensAdmin: 'Administrator vGreens',
+        roleVgreensMember: 'Członek vGreens',
         roleTenantAdmin: 'Administrator najemcy',
         roleTenantUser: 'Użytkownik najemcy',
         roleRequired: 'Rola jest wymagana',

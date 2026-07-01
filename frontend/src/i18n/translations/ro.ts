@@ -1006,6 +1006,7 @@ export const ro = {
         inactive: 'Inactiv',
         pending: 'În așteptare',
         roleVgreensAdmin: 'Administrator vGreens',
+        roleVgreensMember: 'Membru vGreens',
         roleTenantAdmin: 'Administrator chiriaș',
         roleTenantUser: 'Utilizator chiriaș',
         roleRequired: 'Rolul este obligatoriu',
