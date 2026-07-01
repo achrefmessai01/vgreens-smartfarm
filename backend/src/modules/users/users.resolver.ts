@@ -121,10 +121,16 @@ export class UsersResolver {
     @Args('tenantId', { type: () => ID, nullable: true })
     tenantId?: string | null,
   ): Promise<User[]> {
-    // VGREENS_ADMIN: with a tenantId filter from the global selector we mirror
-    // tenant-admin view (`findAllByTenant`); without one we surface every user
-    // across tenants for cross-tenant administration.
-    if (currentUser.role === UserRole.VGREENS_ADMIN) {
+    // Internal vGreens roles (VGREENS_ADMIN + its read-only sibling
+    // VGREENS_MEMBER) share the same cross-tenant read surface: with a
+    // tenantId filter from the global selector we mirror tenant-admin view
+    // (`findAllByTenant`); without one we surface every user across tenants.
+    // Writes stay gated by @Roles decorators — the guard only expands read
+    // access for VGREENS_MEMBER (see RolesGuard).
+    const isInternal =
+      currentUser.role === UserRole.VGREENS_ADMIN ||
+      currentUser.role === UserRole.VGREENS_MEMBER;
+    if (isInternal) {
       return tenantId
         ? this.usersService.findAllByTenant(tenantId)
         : this.usersService.findAllWithTenant();
