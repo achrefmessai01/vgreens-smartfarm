@@ -31,7 +31,8 @@
     "migration:revert": "npm run typeorm -- migration:revert",
     "migration:revert:prod": "npm run typeorm:prod -- migration:revert",
     "schema:log": "npm run typeorm -- schema:log",
-    "schema:drop": "npm run typeorm -- schema:drop"
+    "schema:drop": "npm run typeorm -- schema:drop",
+    "import:harvest": "node --require ts-node/register --require tsconfig-paths/register scripts/import-harvest-excel.ts"
   },
   "dependencies": {
     "@apollo/server": "^5.2.0",
@@ -62,7 +63,8 @@
     "svix": "^1.82.0",
     "typeorm": "^0.3.28",
     "uuid": "^13.0.0",
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "xlsx": "^0.18.5"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -89,6 +91,7 @@
     "@nestjs/testing": "^11.1.10",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
+    "@types/multer": "^2.1.0",
     "@types/node": "^25.0.3",
     "@types/supertest": "^6.0.3",
     "@types/uuid": "^11.0.0",

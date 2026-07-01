@@ -63,7 +63,12 @@ async function bootstrap() {
     }),
   );
 
+  // Scope the GraphQL multipart middleware to /graphql only.
+  // Without a path filter it intercepts every multipart request, including
+  // REST file uploads (e.g. POST /harvests/import), and rejects them because
+  // they don't follow the GraphQL multipart spec.
   app.use(
+    '/graphql',
     graphqlUploadExpress({
       maxFileSize: 10_000_000,
       maxFiles: 10,
