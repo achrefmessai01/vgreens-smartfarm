@@ -390,12 +390,15 @@ async function resolveOrCreateBatch(
   }
 
   // ── Find existing batch by name (case-insensitive) ─────────────────────────
+  // If duplicates exist, prefer the manually-created batch (has a batchNumber)
+  // over any import-created one (batchNumber is null).
   const batchRepo = dataSource.getRepository(Batch);
   const existing = await batchRepo
     .createQueryBuilder('b')
     .where('b.tenantId = :tenantId', { tenantId })
     .andWhere('LOWER(b.name) = :name', { name: row.batchName.toLowerCase() })
     .andWhere('b.deletedAt IS NULL')
+    .orderBy('CASE WHEN b.batchNumber IS NULL THEN 1 ELSE 0 END', 'ASC')
     .getOne();
 
   if (existing) {
