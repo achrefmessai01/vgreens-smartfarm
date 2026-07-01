@@ -708,6 +708,7 @@ export const ro = {
       cratesUnit: 'lăzi',
       totalCrates: 'Total lăzi',
       qualityClassLabel: 'Calitate {class}',
+      enterQualityClassYield: 'Introdu producția de Calitate {class}',
       addQualityClass: 'Adaugă clasă de calitate',
       removeQualityClass: 'Elimină clasa',
       remainingKg: 'Rămas (kg)',

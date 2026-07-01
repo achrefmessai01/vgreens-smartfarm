@@ -700,6 +700,7 @@ export const tr = {
       cratesUnit: 'kasa',
       totalCrates: 'Toplam kasa',
       qualityClassLabel: 'Kalite {class}',
+      enterQualityClassYield: 'Kalite {class} verimi girin',
       addQualityClass: 'Kalite sınıfı ekle',
       removeQualityClass: 'Sınıfı kaldır',
       remainingKg: 'Kalan (kg)',

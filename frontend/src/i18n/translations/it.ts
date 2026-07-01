@@ -708,6 +708,7 @@ export const it = {
       cratesUnit: 'cassette',
       totalCrates: 'Totale cassette',
       qualityClassLabel: 'Qualità {class}',
+      enterQualityClassYield: 'Inserisci la resa Qualità {class}',
       addQualityClass: 'Aggiungi classe di qualità',
       removeQualityClass: 'Rimuovi classe',
       remainingKg: 'Rimanente (kg)',

@@ -695,6 +695,7 @@ export const ar = {
       cratesUnit: 'صناديق',
       totalCrates: 'إجمالي الصناديق',
       qualityClassLabel: 'الجودة {class}',
+      enterQualityClassYield: 'أدخل إنتاج الجودة {class}',
       addQualityClass: 'إضافة فئة جودة',
       removeQualityClass: 'إزالة الفئة',
       remainingKg: 'المتبقي (kg)',

@@ -712,6 +712,7 @@ export const el = {
       cratesUnit: 'τελάρα',
       totalCrates: 'Σύνολο τελάρων',
       qualityClassLabel: 'Ποιότητα {class}',
+      enterQualityClassYield: 'Εισαγάγετε την απόδοση Ποιότητας {class}',
       addQualityClass: 'Προσθήκη κλάσης ποιότητας',
       removeQualityClass: 'Αφαίρεση κλάσης',
       remainingKg: 'Υπόλοιπο (kg)',

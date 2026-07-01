@@ -704,6 +704,7 @@ export const pl = {
       cratesUnit: 'skrzynki',
       totalCrates: 'Łącznie skrzynek',
       qualityClassLabel: 'Jakość {class}',
+      enterQualityClassYield: 'Wprowadź plon Jakości {class}',
       addQualityClass: 'Dodaj klasę jakości',
       removeQualityClass: 'Usuń klasę',
       remainingKg: 'Pozostało (kg)',
