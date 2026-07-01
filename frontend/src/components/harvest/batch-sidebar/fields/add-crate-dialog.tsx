@@ -19,6 +19,7 @@ import {
   useCreateCrateMutation,
   type CreateCrateMutation,
 } from '@/generated/graphql';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 
 interface AddCrateDialogProps {
   open: boolean;
@@ -44,6 +45,9 @@ export function AddCrateDialog({
   const [weight, setWeight] = React.useState(0);
   const [error, setError] = React.useState<string | null>(null);
   const [createCrate, { loading }] = useCreateCrateMutation();
+  // Add the crate to the tenant in context (needed so an admin creates it in the
+  // tenant they're working in, not their own absent one).
+  const tenantId = useTenantIdVariable();
 
   React.useEffect(() => {
     if (!open) {
@@ -62,7 +66,7 @@ export function AddCrateDialog({
     const failedMessage = h?.crateCreateFailed ?? 'Failed to add crate';
     try {
       const { data, errors } = await createCrate({
-        variables: { input: { weight } },
+        variables: { input: { weight }, tenantId },
       });
       // The client runs mutations with errorPolicy 'all', so GraphQL errors
       // resolve here on the result rather than rejecting — surface them inline.
