@@ -104,7 +104,8 @@ export const UserManagementForm = React.forwardRef<
 
           {!hideTenantSelection &&
             isVGreensAdmin &&
-            formData.role !== UserRole.VgreensAdmin && (
+            formData.role !== UserRole.VgreensAdmin &&
+            formData.role !== UserRole.VgreensMember && (
               <TenantWithDomainWarning
                 formData={formData}
                 errors={errors}

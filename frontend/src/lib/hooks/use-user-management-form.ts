@@ -87,6 +87,7 @@ export function useUserManagementForm({
       !hideTenantSelection &&
       formData.role &&
       formData.role !== UserRole.VgreensAdmin &&
+      formData.role !== UserRole.VgreensMember &&
       !formData.tenantId
     ) {
       newErrors.tenantId = t.pages.admin.users.tenantRequired;
@@ -100,14 +101,13 @@ export function useUserManagementForm({
     e.preventDefault();
     if (!validateForm()) return;
 
+    const isVGreensRole =
+      formData.role === UserRole.VgreensAdmin ||
+      formData.role === UserRole.VgreensMember;
     const submitData: UserFormData = {
       ...formData,
       tenantId:
-        formData.role === UserRole.VgreensAdmin
-          ? undefined
-          : hideTenantSelection
-            ? undefined
-            : formData.tenantId,
+        isVGreensRole || hideTenantSelection ? undefined : formData.tenantId,
     };
 
     try {
