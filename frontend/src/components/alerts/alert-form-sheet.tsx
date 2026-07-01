@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/sheet';
 import { useI18n } from '@/i18n';
 import { Button } from '@/components/ui/button';
+import { WriteActionButton } from '@/components/ui/write-action-button';
 import type { Alert } from '@/generated/graphql';
 import { AlertForm, type AlertFormRef } from './alert-form';
 
@@ -66,7 +67,7 @@ export function AlertFormSheet({
           >
             {t.pages.alerts.cancel}
           </Button>
-          <Button
+          <WriteActionButton
             onClick={() => formRef.current?.submit()}
             disabled={isLoading}
             className="flex-1"
@@ -76,7 +77,7 @@ export function AlertFormSheet({
               : alert
                 ? t.pages.alerts.updateAlert
                 : t.pages.alerts.createAlert}
-          </Button>
+          </WriteActionButton>
         </SheetFooter>
       </SheetContent>
     </Sheet>
