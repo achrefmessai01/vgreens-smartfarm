@@ -881,6 +881,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   acknowledgeAlert: Alert;
   assignCropToGreenhouse: GreenhouseCrop;
+  convertBatchInputMode: Array<Harvest>;
   createAlert: Alert;
   createBatch: Batch;
   createCrate: Crate;
@@ -943,6 +944,14 @@ export type MutationAcknowledgeAlertArgs = {
 export type MutationAssignCropToGreenhouseArgs = {
   cropId: Scalars['ID']['input'];
   greenhouseId: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationConvertBatchInputModeArgs = {
+  batchId: Scalars['ID']['input'];
+  crateId?: InputMaybe<Scalars['ID']['input']>;
+  targetMode: InputMode;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -2029,6 +2038,16 @@ export type UpdateHarvestMutationVariables = Exact<{
 
 
 export type UpdateHarvestMutation = { __typename?: 'Mutation', updateHarvest: { __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, startTime?: string | null, stopTime?: string | null, harvesterHeadCount?: number | null, photoUrls: Array<string>, createdAt: any, updatedAt: any, crateId?: string | null, crate?: { __typename?: 'Crate', id: string, weight: number } | null, batch?: { __typename?: 'Batch', id: string, name?: string | null, status: BatchStatus, totalPlants: number, rowLength: number, runningMeter: number, inputMode: InputMode, crateWeight?: number | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: Array<number>, rowY: Array<number>, classKgs?: Array<number> | null, waste: number, crateCounts?: Array<number> | null, remainingKgs?: Array<number> | null, totalFruitWeight: number, avgFruitWeight: number, sampleWeight?: number | null, sampleFruitCount?: number | null, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classKgs: Array<number>, waste: number, fruitCount: number, totalFruitWeight: number, crateCounts?: Array<number> | null, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerRunningMeter?: number | null } } };
+
+export type ConvertBatchInputModeMutationVariables = Exact<{
+  batchId: Scalars['ID']['input'];
+  targetMode: InputMode;
+  crateId?: InputMaybe<Scalars['ID']['input']>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ConvertBatchInputModeMutation = { __typename?: 'Mutation', convertBatchInputMode: Array<{ __typename?: 'Harvest', id: string, tenantId: string, createdById?: string | null, batchId: string, date: any, startTime?: string | null, stopTime?: string | null, harvesterHeadCount?: number | null, photoUrls: Array<string>, createdAt: any, updatedAt: any, crateId?: string | null, crate?: { __typename?: 'Crate', id: string, weight: number } | null, batch?: { __typename?: 'Batch', id: string, name?: string | null, status: BatchStatus, totalPlants: number, rowLength: number, runningMeter: number, inputMode: InputMode, crateWeight?: number | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null } | null, entries: Array<{ __typename?: 'HarvestEntry', id: string, rowX: Array<number>, rowY: Array<number>, classKgs?: Array<number> | null, waste: number, crateCounts?: Array<number> | null, remainingKgs?: Array<number> | null, totalFruitWeight: number, avgFruitWeight: number, sampleWeight?: number | null, sampleFruitCount?: number | null, avgBrix: number, brixReadings: Array<{ __typename?: 'BrixReading', class: HarvestQualityClass, value: number }> }>, totals: { __typename?: 'HarvestTotals', classKgs: Array<number>, waste: number, fruitCount: number, totalFruitWeight: number, crateCounts?: Array<number> | null, avgFruitWeight?: number | null, avgBrix?: number | null, yieldPerPlant?: number | null, yieldPerRunningMeter?: number | null } }> };
 
 export type DeleteHarvestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3774,6 +3793,47 @@ export function useUpdateHarvestMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateHarvestMutationHookResult = ReturnType<typeof useUpdateHarvestMutation>;
 export type UpdateHarvestMutationResult = Apollo.MutationResult<UpdateHarvestMutation>;
 export type UpdateHarvestMutationOptions = Apollo.BaseMutationOptions<UpdateHarvestMutation, UpdateHarvestMutationVariables>;
+export const ConvertBatchInputModeDocument = gql`
+    mutation ConvertBatchInputMode($batchId: ID!, $targetMode: InputMode!, $crateId: ID, $tenantId: ID) {
+  convertBatchInputMode(
+    batchId: $batchId
+    targetMode: $targetMode
+    crateId: $crateId
+    tenantId: $tenantId
+  ) {
+    ...HarvestMutationFields
+  }
+}
+    ${HarvestMutationFieldsFragmentDoc}`;
+export type ConvertBatchInputModeMutationFn = Apollo.MutationFunction<ConvertBatchInputModeMutation, ConvertBatchInputModeMutationVariables>;
+
+/**
+ * __useConvertBatchInputModeMutation__
+ *
+ * To run a mutation, you first call `useConvertBatchInputModeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConvertBatchInputModeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [convertBatchInputModeMutation, { data, loading, error }] = useConvertBatchInputModeMutation({
+ *   variables: {
+ *      batchId: // value for 'batchId'
+ *      targetMode: // value for 'targetMode'
+ *      crateId: // value for 'crateId'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useConvertBatchInputModeMutation(baseOptions?: Apollo.MutationHookOptions<ConvertBatchInputModeMutation, ConvertBatchInputModeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ConvertBatchInputModeMutation, ConvertBatchInputModeMutationVariables>(ConvertBatchInputModeDocument, options);
+      }
+export type ConvertBatchInputModeMutationHookResult = ReturnType<typeof useConvertBatchInputModeMutation>;
+export type ConvertBatchInputModeMutationResult = Apollo.MutationResult<ConvertBatchInputModeMutation>;
+export type ConvertBatchInputModeMutationOptions = Apollo.BaseMutationOptions<ConvertBatchInputModeMutation, ConvertBatchInputModeMutationVariables>;
 export const DeleteHarvestDocument = gql`
     mutation DeleteHarvest($id: ID!, $tenantId: ID) {
   deleteHarvest(id: $id, tenantId: $tenantId)

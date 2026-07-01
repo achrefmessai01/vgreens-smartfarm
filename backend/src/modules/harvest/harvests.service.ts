@@ -6,7 +6,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DeepPartial } from 'typeorm';
+import { Repository, DeepPartial, DataSource } from 'typeorm';
 import { Harvest } from './entities/harvest.entity';
 import { HarvestEntry } from './entities/harvest-entry.entity';
 import { BrixReading } from './entities/brix-reading';
@@ -25,6 +25,7 @@ import { BatchService } from '@modules/batch/batch.service';
 import { Crate } from '@modules/crate/entities/crate.entity';
 import { CrateService } from '@modules/crate/crate.service';
 import { entryTotalWeight } from './utils/harvest-weight.util';
+import { weightToCrate, crateToWeight } from './utils/harvest-conversion.util';
 import { computeHarvestTotals } from './utils/harvest-totals.util';
 import {
   buildDashboardMetrics,
@@ -43,6 +44,7 @@ export class HarvestsService {
     private readonly entryRepository: Repository<HarvestEntry>,
     private readonly batchService: BatchService,
     private readonly crateService: CrateService,
+    private readonly dataSource: DataSource,
   ) {}
 
   // tenant + batch + greenhouse + entries + creator: everything the totals,
@@ -468,6 +470,135 @@ export class HarvestsService {
         error instanceof Error ? error.stack : undefined,
       );
       throw new InternalServerErrorException('Failed to update harvest');
+    }
+  }
+
+  // Flip a batch between weight and crate mode, converting every entry of every
+  // harvest in the batch in place (index = quality-class identity, preserved).
+  // inputMode is a batch-level field, so the scope is the whole batch, not one
+  // harvest. The batch flag, each harvest's crate, and every entry's arrays are
+  // rewritten together in a single transaction — all or nothing.
+  //
+  // The crate weight each entry converts against:
+  //  - to CRATE: the one crate the caller chose drives the whole batch, and is
+  //    applied to every harvest (weight-mode harvests carry no crate of their own);
+  //  - to WEIGHT: each harvest keeps deriving from its own crate weight.
+  async convertBatchInputMode(
+    batchId: string,
+    targetMode: InputMode,
+    crateId: string | null | undefined,
+    tenantId?: string,
+  ): Promise<Harvest[]> {
+    try {
+      const batch = await this.batchService.findOneById(batchId, tenantId);
+
+      // Already in the requested mode: nothing to convert.
+      if (batch.inputMode === targetMode) {
+        return this.findAllFiltered(tenantId, { batchId });
+      }
+
+      // Switching to crate mode needs a crate to derive counts from; validate it
+      // (and its weight) before any write so we never divide by zero.
+      let chosenCrate: Crate | null = null;
+      if (targetMode === InputMode.CRATE) {
+        if (!crateId) {
+          throw new BadRequestException(
+            'A crate must be selected to switch a batch to crate mode',
+          );
+        }
+        chosenCrate = await this.crateService.findOneScoped(crateId, tenantId);
+        if (!chosenCrate) {
+          throw new NotFoundException(`Crate with ID ${crateId} not found`);
+        }
+        if (!(chosenCrate.weight > 0)) {
+          throw new BadRequestException(
+            'The selected crate must have a weight greater than 0',
+          );
+        }
+      }
+
+      const harvests = await this.findAllFiltered(tenantId, { batchId });
+
+      // Switching to weight mode reconstructs kg from each harvest's crate
+      // weight; validate every harvest has a positive one up front, before any
+      // write, so the whole conversion fails cleanly rather than half-applying.
+      if (targetMode === InputMode.WEIGHT) {
+        for (const h of harvests) {
+          const cw = this.harvestCrateWeight(h);
+          if (!(cw != null && cw > 0)) {
+            throw new BadRequestException(
+              `Harvest ${h.id} has no crate weight to convert from; set a crate first`,
+            );
+          }
+        }
+      }
+
+      await this.dataSource.transaction(async (manager) => {
+        // Flip the batch flag. Keep the legacy crateWeight fallback in sync when
+        // moving to crate mode. Scalar-only update to avoid cascading the loaded
+        // batch graph.
+        await manager.update(Batch, batchId, {
+          inputMode: targetMode,
+          ...(targetMode === InputMode.CRATE && chosenCrate
+            ? { crateWeight: chosenCrate.weight }
+            : {}),
+        });
+
+        for (const harvest of harvests) {
+          const cw =
+            targetMode === InputMode.CRATE
+              ? (chosenCrate as Crate).weight
+              : (this.harvestCrateWeight(harvest) as number);
+
+          // Point every harvest at the chosen crate when entering crate mode.
+          if (targetMode === InputMode.CRATE && chosenCrate) {
+            await manager.update(Harvest, harvest.id, { crateId: chosenCrate.id });
+          }
+
+          for (const entry of harvest.entries ?? []) {
+            if (targetMode === InputMode.CRATE) {
+              const { crateCounts, remainingKgs } = weightToCrate(
+                entry.classKgs ?? [],
+                cw,
+              );
+              // Store the mode's arrays; null the other mode's so an entry only
+              // ever carries its active mode's data (mirrors buildEntry).
+              await manager.update(HarvestEntry, entry.id, {
+                crateCounts,
+                remainingKgs,
+                classKgs: null,
+              });
+            } else {
+              const { classKgs } = crateToWeight(
+                entry.crateCounts ?? [],
+                entry.remainingKgs ?? [],
+                cw,
+              );
+              await manager.update(HarvestEntry, entry.id, {
+                classKgs,
+                crateCounts: null,
+                remainingKgs: null,
+              });
+            }
+          }
+        }
+      });
+
+      return this.findAllFiltered(tenantId, { batchId });
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      this.logger.error(
+        `convertBatchInputMode failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw new InternalServerErrorException(
+        'Failed to convert batch input mode',
+      );
     }
   }
 

@@ -2,7 +2,9 @@
 
 import * as React from 'react';
 import {
+  HarvestsDocument,
   InputMode,
+  useConvertBatchInputModeMutation,
   useUpdateBatchMutation,
   type BatchesQuery,
 } from '@/generated/graphql';
@@ -96,29 +98,73 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
   const [formData, setFormData] = React.useState<BatchFormData>(EMPTY_FORM);
   const [errors, setErrors] = React.useState<BatchFormErrors>({});
   const [batchId, setBatchId] = React.useState<string | null>(null);
+  // The batch's mode as loaded; compared against formData.inputMode to detect a
+  // switch that needs a (batch-wide) entry conversion.
+  const [originalInputMode, setOriginalInputMode] = React.useState<InputMode>(
+    InputMode.Weight,
+  );
+  // Crate chosen for a weight -> crate switch: crate mode derives kg from a crate
+  // weight, so one must be picked before the conversion can run. Only its id is
+  // sent; the backend re-resolves the weight.
+  const [crate, setCrate] = React.useState<{
+    id: string;
+    weight: number;
+  } | null>(null);
   const [updateBatch, { loading }] = useUpdateBatchMutation();
+  const [convertMode, { loading: converting }] =
+    useConvertBatchInputModeMutation();
   const tenantId = useTenantIdVariable();
 
   const populate = React.useCallback((batch: BatchItem) => {
     setBatchId(batch.id);
     setFormData(batchToFormData(batch));
+    setOriginalInputMode(batch.inputMode ?? InputMode.Weight);
+    setCrate(null);
     setErrors({});
   }, []);
 
   const reset = React.useCallback(() => {
     setBatchId(null);
     setFormData(EMPTY_FORM);
+    setOriginalInputMode(InputMode.Weight);
+    setCrate(null);
     setErrors({});
   }, []);
 
+  // Switching a batch's input mode converts every harvest entry in the batch, so
+  // it's a distinct, confirmed action layered on top of the plain metadata save.
+  const modeChanged = formData.inputMode !== originalInputMode;
+  const switchingToCrate = modeChanged && formData.inputMode === InputMode.Crate;
+  // Crate mode can't be derived without a crate weight — block the switch until
+  // one is chosen (mirrors the sidebar's crate-required gate).
+  const needsCrate = switchingToCrate && !crate;
+
   const handleSubmit = React.useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
       const validationErrors = validateEditForm(formData);
       setErrors(validationErrors);
       if (Object.keys(validationErrors).length > 0 || !batchId) return;
+      // A crate-mode switch without a chosen crate can't be converted.
+      if (needsCrate) return;
 
       try {
+        // Flip the mode first (converts every harvest entry in the batch, in a
+        // single server-side transaction) so the metadata update below sees and
+        // returns the new mode. Skipped when the mode is unchanged.
+        if (modeChanged) {
+          await convertMode({
+            variables: {
+              batchId,
+              targetMode: formData.inputMode,
+              crateId: switchingToCrate ? crate?.id : null,
+              tenantId,
+            },
+            refetchQueries: [{ query: HarvestsDocument }],
+            awaitRefetchQueries: true,
+          });
+        }
+
         const rowSpacing = computeRowSpacing(formData);
         await updateBatch({
           variables: {
@@ -157,16 +203,34 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
         console.error('Failed to update batch:', err);
       }
     },
-    [formData, batchId, updateBatch, reset, onSuccess, tenantId],
+    [
+      formData,
+      batchId,
+      needsCrate,
+      modeChanged,
+      switchingToCrate,
+      crate,
+      convertMode,
+      updateBatch,
+      reset,
+      onSuccess,
+      tenantId,
+    ],
   );
 
   return {
     formData,
     setFormData,
     errors,
-    loading,
+    loading: loading || converting,
     populate,
     reset,
     handleSubmit,
+    // Input-mode switch state, consumed by the edit dialog to render the crate
+    // picker + confirmation and gate the save.
+    modeChanged,
+    needsCrate,
+    crate,
+    setCrate,
   };
 }

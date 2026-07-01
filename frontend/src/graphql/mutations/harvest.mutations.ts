@@ -97,6 +97,28 @@ export const UPDATE_HARVEST_MUTATION = gql`
   ${HARVEST_MUTATION_FIELDS}
 `;
 
+// Flip a whole batch between weight and crate mode. Returns every harvest in the
+// batch with its converted entries + nested batch.inputMode, so Apollo normalizes
+// the updated Batch and each Harvest by id in one round trip.
+export const CONVERT_BATCH_INPUT_MODE_MUTATION = gql`
+  mutation ConvertBatchInputMode(
+    $batchId: ID!
+    $targetMode: InputMode!
+    $crateId: ID
+    $tenantId: ID
+  ) {
+    convertBatchInputMode(
+      batchId: $batchId
+      targetMode: $targetMode
+      crateId: $crateId
+      tenantId: $tenantId
+    ) {
+      ...HarvestMutationFields
+    }
+  }
+  ${HARVEST_MUTATION_FIELDS}
+`;
+
 export const DELETE_HARVEST_MUTATION = gql`
   mutation DeleteHarvest($id: ID!, $tenantId: ID) {
     deleteHarvest(id: $id, tenantId: $tenantId)

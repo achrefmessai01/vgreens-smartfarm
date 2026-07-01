@@ -734,6 +734,11 @@ export const en = {
       inputMode: 'Yield input mode',
       weightMode: 'Weight (kg)',
       crateMode: 'Crates',
+      selectCrateToConvert: 'Select a crate to convert',
+      convertModeTitle: 'Switch input mode?',
+      convertModeDescription:
+        'This converts every harvest entry in this batch to the new input mode. You can switch back at any time.',
+      convertModeConfirm: 'Convert',
       crateWeight: 'Crate Weight (kg)',
       enterCrateWeight: 'Weight of one full crate',
       crateWeightLabel: 'Crate weight: {weight} kg',
