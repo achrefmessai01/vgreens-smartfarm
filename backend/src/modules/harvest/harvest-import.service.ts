@@ -1,6 +1,7 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { FileUpload } from 'graphql-upload-ts';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { runImport } from '../../../scripts/harvest-import/engine';
 import type { ImportReport } from '../../../scripts/harvest-import/types';
@@ -17,13 +18,30 @@ export class HarvestImportService {
     return hasMapperForTenant(tenantId);
   }
 
+  async importForTenant(
+    fileUpload: Promise<FileUpload>,
+    tenantId: string,
+    dryRun: boolean,
+  ): Promise<ImportReport> {
+    const tenant = await this.dataSource
+      .getRepository(Tenant)
+      .findOne({ where: { id: tenantId } });
+
+    if (!tenant) {
+      throw new NotFoundException(`Tenant "${tenantId}" not found.`);
+    }
+
+    return this.importFile(fileUpload, tenant, dryRun);
+  }
+
   async importFile(
-    file: Express.Multer.File,
+    fileUpload: Promise<FileUpload>,
     tenant: Tenant,
     dryRun: boolean,
   ): Promise<ImportReport> {
-    const mapperFn = getMapperForTenant(tenant.id);
+    const file = await Promise.resolve(fileUpload);
 
+    const mapperFn = getMapperForTenant(tenant.id);
     if (!mapperFn) {
       throw new BadRequestException(
         `Harvest import is not configured for "${tenant.name}".`,
@@ -34,14 +52,23 @@ export class HarvestImportService {
     const fs = await import('fs');
     const path = await import('path');
 
-    const ext = path.extname(file.originalname).toLowerCase() || '.xls';
+    const ext = path.extname(file.filename).toLowerCase() || '.xls';
     const tmpPath = path.join(
       os.tmpdir(),
       `harvest-import-${Date.now()}${ext}`,
     );
 
     try {
-      fs.writeFileSync(tmpPath, file.buffer);
+      // pipe upload to disk before passing to xlsx parser
+      await new Promise<void>((resolve, reject) => {
+        const readStream = file.createReadStream();
+        const writeStream = fs.createWriteStream(tmpPath);
+        readStream.pipe(writeStream);
+        writeStream.on('finish', resolve);
+        writeStream.on('error', reject);
+        readStream.on('error', reject);
+      });
+
       const { rows, issues } = mapperFn(tmpPath);
       return await runImport(
         this.dataSource,
@@ -49,15 +76,13 @@ export class HarvestImportService {
         rows,
         issues,
         'knaup',
-        file.originalname,
+        file.filename,
         dryRun,
       );
     } finally {
       try {
         fs.unlinkSync(tmpPath);
-      } catch {
-        // ignore cleanup errors
-      }
+      } catch { /* best-effort */ }
     }
   }
 }

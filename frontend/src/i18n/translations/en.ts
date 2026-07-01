@@ -572,6 +572,16 @@ export const en = {
       importResultSkipped: 'Skipped (duplicates)',
       importResultFailed: 'Failed rows',
       importResultDryRun: 'Dry-run — no data was written',
+      importUnsupportedFile:
+        'Unsupported file type. Please upload an XLS, XLSX, or CSV file.',
+      importErrorNoTenant:
+        'Please select a tenant that has a mapper configured before importing.',
+      importErrorNoMapper:
+        'Harvest import is not available for your farm. Contact the vGreens team to set it up.',
+      importDropHint: 'Drop file here or click to browse',
+      importDropFormats: 'XLS, XLSX, or CSV · max 10 MB',
+      importClose: 'Close',
+      importRunning: 'Running…',
       exporting: 'Exporting…',
       exportSuccess: 'Harvest data exported',
       exportError: 'Failed to export harvest data',

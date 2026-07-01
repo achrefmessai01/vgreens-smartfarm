@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useMutation } from '@apollo/client';
 import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import {
@@ -22,6 +22,7 @@ import {
 import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast-provider';
+import { IMPORT_HARVEST_MUTATION } from '@/graphql/mutations/harvest.mutations';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -55,23 +56,17 @@ interface HarvestImportDialogProps {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
+const ALLOWED_EXTS = ['.xls', '.xlsx', '.csv'];
 const ALLOWED_TYPES = [
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/csv',
   'application/csv',
 ];
-const ALLOWED_EXTS = ['.xls', '.xlsx', '.csv'];
 
 function isAllowedFile(file: File): boolean {
   const ext = '.' + (file.name.split('.').pop() ?? '').toLowerCase();
   return ALLOWED_EXTS.includes(ext) || ALLOWED_TYPES.includes(file.type);
-}
-
-function getBackendBase(): string {
-  const endpoint =
-    process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT ?? 'http://localhost:8080/graphql';
-  return endpoint.replace(/\/graphql\/?$/, '').replace(/\/+$/, '');
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -84,7 +79,6 @@ export function HarvestImportDialog({
 }: HarvestImportDialogProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const { getToken } = useAuth();
   const { toast } = useToast();
   const { isVGreensAdmin } = useCurrentUser();
   // For VGREENS_ADMIN: the currently selected tenant in the admin switcher.
@@ -94,11 +88,14 @@ export function HarvestImportDialog({
   const [file, setFile] = React.useState<File | null>(null);
   const [dragOver, setDragOver] = React.useState(false);
   const [dryRun, setDryRun] = React.useState(true);
-  const [isImporting, setIsImporting] = React.useState(false);
   const [report, setReport] = React.useState<ImportReport | null>(null);
   const [importError, setImportError] = React.useState<string | null>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const [runImport, { loading: isImporting }] = useMutation<{
+    importHarvest: ImportReport;
+  }>(IMPORT_HARVEST_MUTATION);
 
   // Reset state whenever the dialog opens
   React.useEffect(() => {
@@ -114,7 +111,8 @@ export function HarvestImportDialog({
     if (!selected) return;
     if (!isAllowedFile(selected)) {
       setImportError(
-        `Unsupported file type. Please upload an XLS, XLSX, or CSV file.`,
+        h?.importUnsupportedFile ??
+          'Unsupported file type. Please upload an XLS, XLSX, or CSV file.',
       );
       return;
     }
@@ -140,64 +138,57 @@ export function HarvestImportDialog({
 
     // VGREENS_ADMIN must have a tenant selected in the admin switcher.
     if (isVGreensAdmin && !selectedTenantId) {
-      setImportError('Please select a tenant that has a mapper configured before importing.');
+      setImportError(
+        h?.importErrorNoTenant ??
+          'Please select a tenant that has a mapper configured before importing.',
+      );
       return;
     }
 
     // TENANT_ADMIN: double-check that their farm has a mapper configured.
     if (!isVGreensAdmin && importAvailable === false) {
-      setImportError('Harvest import is not available for your farm. Contact the vGreens team to set it up.');
+      setImportError(
+        h?.importErrorNoMapper ??
+          'Harvest import is not available for your farm. Contact the vGreens team to set it up.',
+      );
       return;
     }
 
-    setIsImporting(true);
     setReport(null);
     setImportError(null);
 
     try {
-      const token = await getToken();
-      if (!token) throw new Error('Not authenticated');
-
-      const form = new FormData();
-      form.append('file', file);
-
-      const params = new URLSearchParams({ dryRun: String(dryRun) });
-      if (selectedTenantId) params.set('tenantId', selectedTenantId);
-      const url = `${getBackendBase()}/harvests/import?${params.toString()}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
+      const { data } = await runImport({
+        variables: {
+          input: {
+            file,
+            dryRun,
+            tenantId: selectedTenantId ?? null,
+          },
+        },
       });
 
-      const body = (await res.json()) as ImportReport | { message: string };
+      const result = data?.importHarvest;
+      if (!result) throw new Error('No response from server');
 
-      if (!res.ok) {
-        const msg =
-          (body as { message: string }).message ?? `Server error ${res.status}`;
-        throw new Error(msg);
-      }
-
-      const result = body as ImportReport;
       setReport(result);
 
       if (!dryRun && result.created > 0) {
         toast({
           title: h?.importSuccess ?? 'Import complete',
-          description: `${result.created} harvest entries created.`,
+          description: `${result.created} ${h?.importResultCreated ?? 'Created'}`,
         });
         onImported?.();
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Import failed';
+      const msg =
+        err instanceof Error ? err.message : (h?.importError ?? 'Import failed');
       setImportError(msg);
       toast({
         title: h?.importError ?? 'Import failed',
         description: msg,
         variant: 'destructive',
       });
-    } finally {
-      setIsImporting(false);
     }
   };
 
@@ -285,10 +276,10 @@ export function HarvestImportDialog({
                 <Upload className="text-muted-foreground h-8 w-8" />
                 <div>
                   <p className="text-sm font-medium">
-                    Drop file here or click to browse
+                    {h?.importDropHint ?? 'Drop file here or click to browse'}
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    XLS, XLSX, or CSV · max 10 MB
+                    {h?.importDropFormats ?? 'XLS, XLSX, or CSV · max 10 MB'}
                   </p>
                 </div>
               </>
@@ -404,7 +395,9 @@ export function HarvestImportDialog({
             disabled={isImporting}
             className="w-full sm:w-auto sm:min-w-[6rem]"
           >
-            {isImporting ? 'Running…' : 'Close'}
+            {isImporting
+              ? (h?.importRunning ?? 'Running…')
+              : (h?.importClose ?? 'Close')}
           </Button>
           <Button
             onClick={handleImport}
