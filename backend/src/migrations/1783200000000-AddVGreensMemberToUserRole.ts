@@ -20,9 +20,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * environment is not expected — the safer path is to leave the value in place
  * and stop assigning it.
  */
-export class AddVGreensMemberToUserRole1783200000000
-  implements MigrationInterface
-{
+export class AddVGreensMemberToUserRole1783200000000 implements MigrationInterface {
   name = 'AddVGreensMemberToUserRole1783200000000';
   transaction = false as const;
 
@@ -34,9 +32,9 @@ export class AddVGreensMemberToUserRole1783200000000
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Safety guard: refuse to downgrade if any user is still on the new role.
-    const rows: { count: string }[] = await queryRunner.query(
+    const rows = (await queryRunner.query(
       `SELECT COUNT(*)::text AS count FROM "users" WHERE "role" = 'VGREENS_MEMBER'`,
-    );
+    )) as { count: string }[];
     if (Number(rows?.[0]?.count ?? '0') > 0) {
       throw new Error(
         'Refusing to remove VGREENS_MEMBER from users_role_enum: users still hold this role.',
