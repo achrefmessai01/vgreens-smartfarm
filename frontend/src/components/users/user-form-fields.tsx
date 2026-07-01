@@ -143,6 +143,16 @@ export function RoleField({
     });
   }
 
+  if (
+    (!allowedRoles || allowedRoles.includes(UserRole.VgreensMember)) &&
+    isVGreensAdmin
+  ) {
+    roleOptions.push({
+      value: UserRole.VgreensMember,
+      label: t.pages.admin.users.roleVgreensMember,
+    });
+  }
+
   if (!allowedRoles || allowedRoles.includes(UserRole.TenantAdmin)) {
     roleOptions.push({
       value: UserRole.TenantAdmin,
