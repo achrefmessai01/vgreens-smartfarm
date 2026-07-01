@@ -34,9 +34,8 @@ const CROP_PREFIX_MAP: Record<string, string> = {
 
 
 const PARCEL_BATCH_MAP: Record<string, { batchName: string; greenhouseName: string }> = {
-  'GWH vorne': { batchName: 'Erdbeere - Lady Emma', greenhouseName: 'Greenhouse 1' },
-
-  
+  'GWH vorne':  { batchName: 'Erdbeere - Lady Emma', greenhouseName: 'Greenhouse 1' },
+  'GWH hinten': { batchName: 'Karima Floris', greenhouseName: 'Greenhouse 2' },
 };
 
 interface ParsedParcel {
