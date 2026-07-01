@@ -759,6 +759,7 @@ export const en = {
       cratesUnit: 'crates',
       totalCrates: 'Total crates',
       qualityClassLabel: 'Quality {class}',
+      enterQualityClassYield: 'Enter Quality {class} yield',
       addQualityClass: 'Add quality class',
       removeQualityClass: 'Remove class',
       remainingKg: 'Remaining (kg)',

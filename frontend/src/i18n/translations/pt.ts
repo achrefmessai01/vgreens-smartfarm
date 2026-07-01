@@ -707,6 +707,7 @@ export const pt = {
       cratesUnit: 'caixas',
       totalCrates: 'Total de caixas',
       qualityClassLabel: 'Qualidade {class}',
+      enterQualityClassYield: 'Introduza a produção de Qualidade {class}',
       addQualityClass: 'Adicionar classe de qualidade',
       removeQualityClass: 'Remover classe',
       remainingKg: 'Restante (kg)',
