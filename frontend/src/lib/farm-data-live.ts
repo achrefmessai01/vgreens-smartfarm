@@ -7,6 +7,7 @@ import type {
 } from '@/types/farm.types';
 import {
   computeDefaultSensorPositions,
+  type DefaultPosition,
   type GreenhouseLayout,
 } from '@/lib/sensor-default-positions';
 
@@ -20,6 +21,42 @@ export interface SensorConfigOverride {
   xPosition?: number | null;
   yPosition?: number | null;
   hiddenInFarmOverview?: boolean | null;
+}
+
+/**
+ * A sensor configured for a greenhouse, with its resolved map position. Used to
+ * surface configured-but-silent sensors on the all-sensors overview map even
+ * when they currently report no data (see `useAllSensorsMapData`).
+ */
+export interface OverviewConfiguredSensor {
+  device: string;
+  greenhouse: string;
+  xPosition: number;
+  yPosition: number;
+  hidden: boolean;
+}
+
+/**
+ * Resolve a sensor's map position from its SensorConfig override, falling back
+ * to a computed default. A saved `(0, 0)` is treated as a legacy/seed value
+ * ("not positioned") rather than a deliberate placement at the greenhouse
+ * origin, so those sensors fall back to the computed default instead of piling
+ * up in one corner of the map.
+ */
+export function resolveSensorPosition(
+  config: SensorConfigOverride | undefined,
+  fallback: DefaultPosition | undefined,
+): { xPosition?: number; yPosition?: number } {
+  const isLegacyZero = config?.xPosition === 0 && config?.yPosition === 0;
+  const xPosition =
+    typeof config?.xPosition === 'number' && !isLegacyZero
+      ? config.xPosition
+      : fallback?.xPosition;
+  const yPosition =
+    typeof config?.yPosition === 'number' && !isLegacyZero
+      ? config.yPosition
+      : fallback?.yPosition;
+  return { xPosition, yPosition };
 }
 
 /** One row from getBucketData (each item has a "data" object). */
@@ -88,6 +125,13 @@ function buildSlotsFromRows(
      * unmodified device name) stay reliable.
      */
     device?: string;
+    /**
+     * Raw (un-normalised) greenhouse DISPLAY name for this slot. Slot ids strip
+     * whitespace, so parsing the greenhouse out of the id is lossy — keep the
+     * raw value here so a position commit persists against the right greenhouse
+     * (names may contain spaces, e.g. "Greenhouse Kazuti").
+     */
+    greenhouse?: string;
   };
 
   const bySlot = new Map<SlotKey, FieldValues>();
@@ -116,18 +160,10 @@ function buildSlotsFromRows(
     }
 
     const fallback = device ? defaultPositions.get(device) : undefined;
-    // Treat (0, 0) as a legacy/seed value rather than a deliberate placement
-    // at the greenhouse origin — fall back to the computed default so those
-    // sensors don't pile up in one corner of the map.
-    const isLegacyZero = config?.xPosition === 0 && config?.yPosition === 0;
-    const xPos =
-      typeof config?.xPosition === 'number' && !isLegacyZero
-        ? config.xPosition
-        : fallback?.xPosition;
-    const yPos =
-      typeof config?.yPosition === 'number' && !isLegacyZero
-        ? config.yPosition
-        : fallback?.yPosition;
+    const { xPosition: xPos, yPosition: yPos } = resolveSensorPosition(
+      config,
+      fallback,
+    );
 
     metaBySlot.set(key, {
       _start: (row._start as string) ?? undefined,
@@ -141,6 +177,7 @@ function buildSlotsFromRows(
       // queries. Left undefined when the tenant doesn't tag with `greenhouse`.
       influxGreenhouse: (row.greenhouse as string) || undefined,
       device: device || undefined,
+      greenhouse: chamberOrGreenhouse || undefined,
       ...(Number.isFinite(xPos) && xPos != null && { xPosition: xPos }),
       ...(Number.isFinite(yPos) && yPos != null && { yPosition: yPos }),
       ...(config?.hiddenInFarmOverview === true && {
@@ -197,6 +234,15 @@ function buildBayFromSlots(
     rows,
     batchId: null,
   };
+}
+
+/**
+ * A bay with no slots, named after a greenhouse. Used on the Sensor Overview
+ * tab when a greenhouse has no live data at all, so the all-sensors map still
+ * renders and can host its configured-but-silent sensor markers.
+ */
+export function createEmptyBay(name: string): Bay {
+  return { id: `bay-empty-${name}`, name, index: 0, rows: [], batchId: null };
 }
 
 export function influxRowsToBays(

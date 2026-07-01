@@ -1,4 +1,4 @@
-import { UserRole } from '@common/enums';
+import { UserRole, InputMode } from '@common/enums';
 import { Harvest } from './entities/harvest.entity';
 import { HarvestTotals } from './dto/harvest-totals.dto';
 import { HarvestsService } from './harvests.service';
@@ -10,6 +10,7 @@ import {
   DashboardFilterInput,
   HarvestDashboardMetrics,
   HarvestBatchListItem,
+  HarvestCrateAssignmentInput,
 } from './dto';
 import { User } from '@modules/users/entities/user.entity';
 import { UseGuards, UseInterceptors } from '@nestjs/common';
@@ -163,6 +164,33 @@ export class HarvestsResolver {
     return this.harvestsService.updateHarvest(
       id,
       input,
+      resolveTenantId(currentUser, tenantId, false),
+    );
+  }
+
+  // Flip a whole batch between weight and crate mode, converting every harvest
+  // entry's per-class arrays. Returns the batch's harvests with their converted
+  // entries so the client cache updates in one round trip.
+  @Mutation(() => [Harvest], { name: 'convertBatchInputMode' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  async convertBatchInputMode(
+    @Args('batchId', { type: () => ID }) batchId: string,
+    @Args('targetMode', { type: () => InputMode }) targetMode: InputMode,
+    @CurrentUser() currentUser: User,
+    // Per-harvest crate choices for a weight -> crate switch; ignored the other
+    // direction (each harvest keeps its own crate weight).
+    @Args('crateAssignments', {
+      type: () => [HarvestCrateAssignmentInput],
+      nullable: true,
+    })
+    crateAssignments?: HarvestCrateAssignmentInput[] | null,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
+  ): Promise<Harvest[]> {
+    return this.harvestsService.convertBatchInputMode(
+      batchId,
+      targetMode,
+      crateAssignments,
       resolveTenantId(currentUser, tenantId, false),
     );
   }

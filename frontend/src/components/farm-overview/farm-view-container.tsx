@@ -2,6 +2,7 @@ import {
   SENSOR_OVERVIEW_PARAMETER,
   type ViewMode,
 } from '@/lib/farm-overview-constants';
+import type { OverviewConfiguredSensor } from '@/lib/farm-data-live';
 import type {
   FarmLayoutConfig,
   GreenhouseDimensions,
@@ -16,6 +17,8 @@ import { ViewSingleBay } from './views/view-single-bay';
 
 interface FarmDataDisplayProps {
   bays: Bay[];
+  /** Configured-but-silent sensors for the selected greenhouse (overview map). */
+  overviewConfiguredSensors?: OverviewConfiguredSensor[];
   viewMode: ViewMode;
   parameter: ParameterType;
   /** Disabled sensor `_field` set ("Enable Sensors" dropdown) — all-sensors map. */
@@ -46,6 +49,7 @@ interface FarmDataDisplayProps {
 
 export function FarmDataDisplay({
   bays,
+  overviewConfiguredSensors,
   viewMode,
   parameter,
   disabledSensorFields,
@@ -66,12 +70,19 @@ export function FarmDataDisplay({
   invalidDropDescription,
   readOnly,
 }: FarmDataDisplayProps) {
-  const showEmpty = bays.length === 0 && viewMode !== 'graph';
+  // The Sensor Overview map has no graph sub-mode, but the view mode can still
+  // be left on 'graph' when arriving from the PAR tab (it is intentionally not
+  // reset). Treat overview as non-graph here so it always gets real dimensions
+  // (otherwise the map renders "Configure greenhouse dimensions to view layout").
+  const isOverview = parameter === SENSOR_OVERVIEW_PARAMETER;
+  const isGraph = viewMode === 'graph' && !isOverview;
+
+  const showEmpty = bays.length === 0 && !isGraph;
   if (showEmpty) {
     return <EmptyState message={noDataMessage} />;
   }
 
-  const dims = viewMode !== 'graph' ? greenhouseDimensions : null;
+  const dims = !isGraph ? greenhouseDimensions : null;
   // Horizontal layout renders the greenhouse rotated 90°, so the on-screen
   // axes swap: the length (y) runs left→right and the width (x) runs top→bottom.
   const horizontalAxisDim = dims
@@ -88,7 +99,7 @@ export function FarmDataDisplay({
   return (
     <div
       className={
-        viewMode === 'graph'
+        isGraph
           ? 'flex h-full min-h-0 w-full min-w-0 flex-col overflow-x-clip'
           : 'flex h-full min-h-0 w-full min-w-0 flex-col overflow-x-clip p-0.5 sm:p-2'
       }
@@ -100,6 +111,7 @@ export function FarmDataDisplay({
             bay={bays[0]}
             tenantId={parGraphTenantId}
             disabledSensorFields={disabledSensorFields}
+            configuredSensors={overviewConfiguredSensors}
             selectedSlotId={selectedSlotId}
             onSelectSlot={onSelectSlot}
             className="h-full w-full"

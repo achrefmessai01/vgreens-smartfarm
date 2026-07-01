@@ -107,6 +107,7 @@ export default function FarmOverviewPage() {
               overviewEnabled={state.overviewEnabled}
               disabledSensorFields={state.disabledSensorFields}
               bays={state.bays}
+              overviewConfiguredSensors={state.overviewConfiguredSensors}
               greenhouseLabel={state.greenhouseLabel}
               parGraphTenantId={state.tenantIdOverride}
               parGraphGreenhouseName={state.greenhouseLabel}

@@ -192,6 +192,12 @@ export default function HarvestPage() {
           onReset={editHarvest.reset}
           readOnly={editReadOnly}
           batchNumber={editBatchNumber}
+          modeChanged={editHarvest.modeChanged}
+          switchingToCrate={editHarvest.switchingToCrate}
+          needsCrate={editHarvest.needsCrate}
+          harvests={editHarvest.harvests}
+          crateByHarvest={editHarvest.crateByHarvest}
+          onCrateForHarvest={editHarvest.setCrateForHarvest}
         />
 
         <DeleteHarvestDialog
