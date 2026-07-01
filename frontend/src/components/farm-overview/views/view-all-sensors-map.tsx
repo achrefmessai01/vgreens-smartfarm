@@ -29,6 +29,7 @@ import {
   type SensorMapType,
 } from '@/lib/sensor-map-positions';
 import { cn } from '@/lib/utils';
+import type { OverviewConfiguredSensor } from '@/lib/farm-data-live';
 import type { Bay } from '@/types/farm.types';
 import type { SensorPositionCommit } from '@/types/sensor-map';
 import type { AllSensorMarker } from '@/types/view-single-bay.types';
@@ -97,6 +98,12 @@ export interface ViewAllSensorsMapProps {
   tenantId?: string | null;
   /** Disabled InfluxDB `_field` set from the "Enable Sensors" dropdown. */
   disabledSensorFields: Set<string>;
+  /**
+   * Sensors configured for this greenhouse (from SensorConfig), including ones
+   * currently sending no data. Rendered as extra markers so the map shows the
+   * full installed fleet, not just live devices.
+   */
+  configuredSensors?: OverviewConfiguredSensor[];
   selectedSlotId: string | null;
   onSelectSlot: (slotId: string | null) => void;
   onSensorPositionCommit: (
@@ -305,11 +312,18 @@ function AllSensorsMarker({
           ? undefined
           : async (nextXPosition, nextYPosition) => {
               const parsedSlot = parseLiveSensorSlotId(slot.id);
+              // Prefer RAW device/greenhouse from slot.meta over the
+              // whitespace-normalized slot id (see sensor-map-shared).
               await Promise.resolve(
                 onSensorPositionCommit({
                   slotId: slot.id,
-                  deviceId: parsedSlot.device || deviceId,
-                  greenhouse: parsedSlot.greenhouse,
+                  deviceId:
+                    (slot.meta?.device as string | undefined) ||
+                    parsedSlot.device ||
+                    deviceId,
+                  greenhouse:
+                    (slot.meta?.greenhouse as string | undefined) ??
+                    parsedSlot.greenhouse,
                   xPosition: nextXPosition,
                   yPosition: nextYPosition,
                 }),
@@ -391,6 +405,7 @@ export function ViewAllSensorsMap({
   bay,
   tenantId,
   disabledSensorFields,
+  configuredSensors,
   selectedSlotId,
   onSelectSlot,
   className,
@@ -411,6 +426,7 @@ export function ViewAllSensorsMap({
     bay,
     disabledSensorFields,
     greenhouseDimensions,
+    configuredSensors,
   );
 
   // Every marker shows its device liveness status on hover. Only fetch the

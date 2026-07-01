@@ -21,7 +21,16 @@ import {
   useUpsertSensorConfigMutation,
   type Tenant,
 } from '@/generated/graphql';
-import type { SensorConfigOverride } from '@/lib/farm-data-live';
+import {
+  createEmptyBay,
+  resolveSensorPosition,
+  type OverviewConfiguredSensor,
+  type SensorConfigOverride,
+} from '@/lib/farm-data-live';
+import {
+  computeDefaultSensorPositions,
+  type GreenhouseLayout,
+} from '@/lib/sensor-default-positions';
 import {
   DEFAULT_FARM_LAYOUT,
   type FarmLayoutConfig,
@@ -362,7 +371,13 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
           ...(persisted ?? {}),
           xPosition: nextX,
           yPosition: nextY,
-          greenhouse: greenhouse || persisted?.greenhouse,
+          // A drag never moves a sensor to another greenhouse (the canvas is
+          // per-greenhouse), so keep the persisted RAW greenhouse name. The
+          // `greenhouse` from the drag payload is derived from the slot id,
+          // whose whitespace is normalized to `_` — using it here would break
+          // the `cfg.greenhouse === gh.name` overview filter (and never
+          // reconcile) for greenhouses whose names contain spaces.
+          greenhouse: persisted?.greenhouse ?? greenhouse,
         });
         return next;
       });
@@ -579,6 +594,56 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     }
   }, [activeGreenhouseTab, tenantGreenhouses.length]);
 
+  // Every sensor CONFIGURED for the selected greenhouse, with a resolved map
+  // position — including ones that currently send no data (so the Sensor
+  // Overview map can show the full installed fleet, not just live devices).
+  // Unpositioned sensors get the same greenhouse-layout fallback used for live
+  // sensors. Only meaningful for a specific greenhouse tab (not Combined).
+  const overviewConfiguredSensors = React.useMemo<OverviewConfiguredSensor[]>(() => {
+    if (activeGreenhouseTab === 0) return [];
+    const gh = tenantGreenhouses[activeGreenhouseTab - 1];
+    if (!gh) return [];
+
+    const deviceGreenhouse = new Map<string, string | undefined | null>();
+    for (const [device, cfg] of sensorConfigMap.entries()) {
+      if (cfg.greenhouse === gh.name) deviceGreenhouse.set(device, gh.name);
+    }
+    if (deviceGreenhouse.size === 0) return [];
+
+    const layout: GreenhouseLayout = {
+      name: gh.name,
+      xDimension: gh.xDimension,
+      yDimension: gh.yDimension,
+      bayCount: gh.bayCount ?? null,
+    };
+    const defaults = computeDefaultSensorPositions(deviceGreenhouse, [layout]);
+
+    const out: OverviewConfiguredSensor[] = [];
+    for (const device of deviceGreenhouse.keys()) {
+      const cfg = sensorConfigMap.get(device);
+      const { xPosition, yPosition } = resolveSensorPosition(
+        cfg,
+        defaults.get(device),
+      );
+      if (
+        typeof xPosition !== 'number' ||
+        typeof yPosition !== 'number' ||
+        !Number.isFinite(xPosition) ||
+        !Number.isFinite(yPosition)
+      ) {
+        continue;
+      }
+      out.push({
+        device,
+        greenhouse: gh.name,
+        xPosition,
+        yPosition,
+        hidden: cfg?.hiddenInFarmOverview === true,
+      });
+    }
+    return out;
+  }, [activeGreenhouseTab, tenantGreenhouses, sensorConfigMap]);
+
   // Bays returned by influxRowsToBays are sorted alphabetically by chamber
   // name and only include greenhouses that currently emit sensor data — so
   // the array indices do NOT align with `tenantGreenhouses` indices. Match
@@ -593,8 +658,25 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
       totalGreenhouses: tenantGreenhouses.length,
       sensorConfigMap,
     });
-    return bay ? [bay] : [];
-  }, [activeGreenhouseTab, bays, tenantGreenhouses, sensorConfigMap]);
+    if (bay) return [bay];
+    // No live data for this greenhouse. On the Sensor Overview tab we still
+    // want to show the full installed fleet, so synthesize an empty bay to
+    // host the configured sensor markers.
+    if (
+      effectiveParameter === SENSOR_OVERVIEW_PARAMETER &&
+      overviewConfiguredSensors.length > 0
+    ) {
+      return [createEmptyBay(gh.name)];
+    }
+    return [];
+  }, [
+    activeGreenhouseTab,
+    bays,
+    tenantGreenhouses,
+    sensorConfigMap,
+    effectiveParameter,
+    overviewConfiguredSensors,
+  ]);
 
   // Map each slot id to its REAL InfluxDB `greenhouse` tag (from slot meta),
   // so the history drawer can scope its query to the exact series. The slot
@@ -712,6 +794,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     historyDrawerOpen,
     setHistoryDrawerOpen,
     bays: selectedBays,
+    overviewConfiguredSensors,
     greenhouseLabel,
     combinedGreenhouses,
     getParameterLabel,

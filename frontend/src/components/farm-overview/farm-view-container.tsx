@@ -2,6 +2,7 @@ import {
   SENSOR_OVERVIEW_PARAMETER,
   type ViewMode,
 } from '@/lib/farm-overview-constants';
+import type { OverviewConfiguredSensor } from '@/lib/farm-data-live';
 import type {
   FarmLayoutConfig,
   GreenhouseDimensions,
@@ -16,6 +17,8 @@ import { ViewSingleBay } from './views/view-single-bay';
 
 interface FarmDataDisplayProps {
   bays: Bay[];
+  /** Configured-but-silent sensors for the selected greenhouse (overview map). */
+  overviewConfiguredSensors?: OverviewConfiguredSensor[];
   viewMode: ViewMode;
   parameter: ParameterType;
   /** Disabled sensor `_field` set ("Enable Sensors" dropdown) — all-sensors map. */
@@ -46,6 +49,7 @@ interface FarmDataDisplayProps {
 
 export function FarmDataDisplay({
   bays,
+  overviewConfiguredSensors,
   viewMode,
   parameter,
   disabledSensorFields,
@@ -100,6 +104,7 @@ export function FarmDataDisplay({
             bay={bays[0]}
             tenantId={parGraphTenantId}
             disabledSensorFields={disabledSensorFields}
+            configuredSensors={overviewConfiguredSensors}
             selectedSlotId={selectedSlotId}
             onSelectSlot={onSelectSlot}
             className="h-full w-full"
