@@ -52,10 +52,13 @@ variables:
   image: node:20-alpine
 
 .migrate_install: &migrate_install
+  # Migrations run via ts-node against `src/config/data-source.ts` (see
+  # `typeorm` script in backend/package.json), so no `npm run build` step is
+  # needed here — that also sidesteps a CI flake where `nest build` occasionally
+  # did not emit `dist/config/data-source.js`, breaking the compiled-CLI path.
   - cd backend
   - apk add --no-cache git
   - npm ci --no-audit --no-fund
-  - npm run build
 
 migrate_show_staging:
   <<: *node_image
@@ -66,7 +69,7 @@ migrate_show_staging:
     - *migrate_install
   script:
     - echo "=== Pending migrations on STAGING DB ==="
-    - npm run migration:show:prod
+    - npm run migration:show
   environment:
     name: staging/backend
     action: prepare
@@ -81,7 +84,7 @@ migrate_show_production:
     - *migrate_install
   script:
     - echo "=== Pending migrations on PRODUCTION DB ==="
-    - npm run migration:show:prod
+    - npm run migration:show
   environment:
     name: production/backend
     action: prepare
@@ -98,9 +101,9 @@ migrate_run_staging:
     - *migrate_install
   script:
     - echo "=== Applying migrations on STAGING DB ==="
-    - npm run migration:run:prod
+    - npm run migration:run
     - echo "=== Post-apply state ==="
-    - npm run migration:show:prod
+    - npm run migration:show
   environment:
     name: staging/backend
     action: prepare
@@ -117,9 +120,9 @@ migrate_run_production:
     - *migrate_install
   script:
     - echo "=== Applying migrations on PRODUCTION DB ==="
-    - npm run migration:run:prod
+    - npm run migration:run
     - echo "=== Post-apply state ==="
-    - npm run migration:show:prod
+    - npm run migration:show
   environment:
     name: production/backend
     action: prepare
@@ -134,8 +137,8 @@ migrate_revert_staging:
     - *migrate_install
   script:
     - echo "=== Reverting last migration on STAGING DB ==="
-    - npm run migration:revert:prod
-    - npm run migration:show:prod
+    - npm run migration:revert
+    - npm run migration:show
   environment:
     name: staging/backend
     action: prepare
@@ -150,8 +153,8 @@ migrate_revert_production:
     - *migrate_install
   script:
     - echo "=== Reverting last migration on PRODUCTION DB ==="
-    - npm run migration:revert:prod
-    - npm run migration:show:prod
+    - npm run migration:revert
+    - npm run migration:show
   environment:
     name: production/backend
     action: prepare
