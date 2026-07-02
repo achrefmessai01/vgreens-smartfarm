@@ -4,10 +4,10 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -150,8 +150,8 @@ export function DashboardFilters({
         </SelectContent>
       </Select>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Popover>
+        <PopoverTrigger asChild>
           <Button
             variant="outline"
             size="sm"
@@ -161,8 +161,8 @@ export function DashboardFilters({
             <Leaf className="h-4 w-4" aria-hidden />
             <span className="truncate">{triggerLabel}</span>
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" sideOffset={6} className="w-72 p-0">
+        </PopoverTrigger>
+        <PopoverContent align="end" sideOffset={6} className="w-72 p-0">
           <div className="text-muted-foreground px-3 pt-3 pb-2 text-xs font-medium">
             {(h?.pickBatches ?? 'Pick up to {max} batches to compare').replace(
               '{max}',
@@ -174,6 +174,10 @@ export function DashboardFilters({
               const checked = compareBatchIds.includes(b.id);
               const disabled =
                 !checked && compareBatchIds.length >= MAX_COMPARE_BATCHES;
+              // Popover has no menu-item selection semantics, so multi-toggle
+              // works out of the box — the panel only closes on outside click
+              // or Escape. The whole label is clickable so the checkbox +
+              // text act as one hit target.
               return (
                 <label
                   key={b.id}
@@ -198,8 +202,8 @@ export function DashboardFilters({
               );
             })}
           </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

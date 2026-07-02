@@ -362,5 +362,6 @@ export function useHarvestPage() {
     handleBatchDeleteRequest,
     isBatchDelete,
     handleDeleteConfirm,
+    refetchAll,
   };
 }

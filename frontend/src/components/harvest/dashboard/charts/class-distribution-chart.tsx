@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
 import { classLetter } from '@/lib/harvest-utils';
 import {
+  ChartTitle,
   ChartTooltipContainer,
   type ChartTooltipProps,
 } from '../chart-helpers';
@@ -33,6 +34,7 @@ interface ClassDistributionSeries {
 type ClassDistributionChartProps = {
   className?: string;
   title?: string;
+  subtitle?: string;
 } & (
   | { data: ClassDistributionData[]; series?: never }
   | { series: ClassDistributionSeries[]; data?: never }
@@ -61,7 +63,7 @@ const ClassTooltip = ({ active, payload, label }: ChartTooltipProps) => {
 export function ClassDistributionChart(props: ClassDistributionChartProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
-  const { className, title } = props;
+  const { className, title, subtitle } = props;
   const isMulti = 'series' in props && props.series !== undefined;
   const wasteName = h?.waste ?? 'Waste';
   const classLabelTpl = h?.qualityClassLabel ?? 'Quality {class}';
@@ -114,9 +116,10 @@ export function ClassDistributionChart(props: ClassDistributionChartProps) {
   return (
     <Card className={className}>
       <div className="p-4 sm:p-6">
-        <h3 className="mb-4 text-lg font-semibold">
-          {title ?? h?.classDistribution ?? 'Class Distribution'}
-        </h3>
+        <ChartTitle
+          title={title ?? h?.classDistribution ?? 'Class Distribution'}
+          subtitle={subtitle}
+        />
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart

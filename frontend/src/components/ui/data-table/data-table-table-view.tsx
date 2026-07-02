@@ -25,6 +25,7 @@ export function DataTableTableView<T extends { id: string | number }>({
   onRowClick,
 }: DataTableTableViewProps<T>) {
   return (
+    <div className="w-full overflow-x-auto">
     <Table className="[&_td]:px-4 [&_td]:py-3">
       <TableHeader>
         <TableRow className="border-border/60 bg-muted/20 border-b hover:bg-transparent">
@@ -57,5 +58,6 @@ export function DataTableTableView<T extends { id: string | number }>({
         ))}
       </TableBody>
     </Table>
+    </div>
   );
 }

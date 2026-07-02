@@ -13,6 +13,7 @@ import {
   formatWastePercent,
   harvestsLoggedLabel,
 } from '@/lib/harvest-utils';
+import { useLocaleFormatters } from '@/i18n/use-locale-formatters';
 import type { BatchGroupView } from './use-batch-group-view';
 import { interactiveProps } from './harvest-batch-summary-utils';
 
@@ -28,6 +29,7 @@ export function HarvestBatchCollapsedTable({
   onExpand,
   onKeyDown,
 }: Props) {
+  const { formatNum } = useLocaleFormatters();
   const {
     h,
     locale,
@@ -77,17 +79,17 @@ export function HarvestBatchCollapsedTable({
           <TableCell>
             {agg.avgFruitWeight == null
               ? '—'
-              : `${agg.avgFruitWeight.toFixed(1)} g`}
+              : `${formatNum(agg.avgFruitWeight, 1)} g`}
           </TableCell>
           <TableCell>
             {agg.yieldPerPlant == null
               ? '—'
-              : `${agg.yieldPerPlant.toFixed(2)} kg`}
+              : `${formatNum(agg.yieldPerPlant * 1000, 1)} g`}
           </TableCell>
           <TableCell>
             {agg.yieldPerRunningMeter == null
               ? '—'
-              : `${Number(agg.yieldPerRunningMeter.toFixed(3))} kg/m`}
+              : `${formatNum(agg.yieldPerRunningMeter, 3)} kg/m`}
           </TableCell>
         </TableRow>
       </TableBody>

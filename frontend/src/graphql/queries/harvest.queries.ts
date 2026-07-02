@@ -152,3 +152,9 @@ export const HARVEST_IMAGES_QUERY = gql`
     }
   }
 `;
+
+export const HARVEST_IMPORT_AVAILABLE_QUERY = gql`
+  query HarvestImportAvailable {
+    harvestImportAvailable
+  }
+`;

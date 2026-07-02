@@ -46,7 +46,7 @@ export const useTenantRow = ({
     <>
       <TableCell className="font-medium">{tenant.name}</TableCell>
       <TableCell>{tenant.companyName || '-'}</TableCell>
-      <TableCell>{tenant.email || '-'}</TableCell>
+      <TableCell className="max-w-[220px] truncate">{tenant.email || '-'}</TableCell>
       <TableCell>{tenant.phone || '-'}</TableCell>
       <TableCell>
         {onViewUsers ? (

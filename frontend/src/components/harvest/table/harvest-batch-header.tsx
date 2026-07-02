@@ -67,7 +67,11 @@ export function HarvestBatchHeader({
           <AccordionTrigger className="min-w-0 flex-1 py-0 hover:no-underline">
             <p className="truncate text-base font-semibold sm:text-lg">
               {getGreenhouseLabel(batch?.greenhouse?.name)}
-              {batch?.variety?.name ? ` - ${batch.variety.name}` : ''}
+              {batch?.variety?.name
+                ? ` - ${batch.variety.name}`
+                : batch?.name
+                  ? ` - ${batch.name}`
+                  : ''}
             </p>
           </AccordionTrigger>
           <div className="flex shrink-0 items-center gap-1">

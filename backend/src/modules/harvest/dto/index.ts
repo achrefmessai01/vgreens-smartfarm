@@ -6,6 +6,8 @@ export { HarvestFilterInput } from './harvest-filter.input';
 export { DashboardFilterInput } from './dashboard-filter.input';
 export { HarvestBatchListItem } from './harvest-batch-list-item.dto';
 export { HarvestTotals } from './harvest-totals.dto';
+export { ImportHarvestInput } from './import-harvest.input';
+export { ImportReportType, RowIssueType } from './import-report.type';
 export {
   HarvestDashboardMetrics,
   YieldOverTimeData,
