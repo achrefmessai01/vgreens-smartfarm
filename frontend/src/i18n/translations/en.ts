@@ -829,7 +829,7 @@ export const en = {
       yieldPerSquareMeter: 'Yield per m²',
       yieldPerSquareMeterSubtitle: 'Total kg per m²',
       yieldPerSquareMeterNoData: 'Set cultivation area on the batch',
-      yieldPerPlantSubtitle: 'Sellable kg per plant',
+      yieldPerPlantSubtitle: 'Sellable g per plant',
       yieldPerPlantNoData: 'Set Total Plants on the batch',
       fruitWeightTrendOverTime: 'Fruit Weight Trend Over Time',
       fruitWeightValue: 'Fruit Weight (g)',

@@ -82,7 +82,7 @@ export function HarvestBatchCollapsedTable({
           <TableCell>
             {agg.yieldPerPlant == null
               ? '—'
-              : `${agg.yieldPerPlant.toFixed(2)} kg`}
+              : `${(agg.yieldPerPlant * 1000).toFixed(1)} g`}
           </TableCell>
           <TableCell>
             {agg.yieldPerRunningMeter == null

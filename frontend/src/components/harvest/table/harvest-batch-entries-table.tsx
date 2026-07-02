@@ -91,7 +91,7 @@ export function HarvestBatchEntriesTable({
               <TableCell>
                 {totals.yieldPerPlant == null
                   ? '—'
-                  : `${totals.yieldPerPlant.toFixed(2)} kg`}
+                  : `${(totals.yieldPerPlant * 1000).toFixed(1)} g`}
               </TableCell>
               <TableCell>
                 {totals.yieldPerRunningMeter == null

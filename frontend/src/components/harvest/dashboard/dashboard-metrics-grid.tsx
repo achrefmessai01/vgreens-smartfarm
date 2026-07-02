@@ -107,12 +107,12 @@ export function DashboardMetricsGrid({
           value={
             data.yieldPerPlant == null
               ? '—'
-              : `${data.yieldPerPlant.toFixed(2)} kg`
+              : `${(data.yieldPerPlant * 1000).toFixed(1)} g`
           }
           subtitle={
             data.yieldPerPlant == null
               ? (h?.yieldPerPlantNoData ?? 'Set Total Plants on the batch')
-              : (h?.yieldPerPlantSubtitle ?? 'Sellable kg per plant')
+              : (h?.yieldPerPlantSubtitle ?? 'Sellable g per plant')
           }
           icon={<Sprout className="h-4 w-4" />}
           color="default"

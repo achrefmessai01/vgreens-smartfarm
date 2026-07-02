@@ -189,7 +189,7 @@ export const DEFAULT_COLUMN_LABELS: Record<ExportColumnKey, string> = {
   fruitCount: 'Fruit Count',
   totalFruitWeight: 'Total Fruit Weight (kg)',
   avgFruitWeight: 'Avg Fruit Weight (g)',
-  yieldPerPlant: 'Yield per Plant',
+  yieldPerPlant: 'Yield per Plant (g)',
   yieldPerRunningMeter: 'Yield per Running Meter',
   photoUrls: 'Photo URLs',
   tenantId: 'Tenant ID',

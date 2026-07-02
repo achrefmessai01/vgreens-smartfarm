@@ -228,7 +228,7 @@ export function HarvestDashboardCompare({
                       ? '–'
                       : yieldPerPlant == null
                         ? '—'
-                        : `${yieldPerPlant.toFixed(2)} kg`}
+                        : `${(yieldPerPlant * 1000).toFixed(1)} g`}
                   </p>
                 </div>
                 <div>
