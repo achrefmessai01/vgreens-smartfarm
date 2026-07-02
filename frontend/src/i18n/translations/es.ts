@@ -673,6 +673,7 @@ export const es = {
       wasteRatio: 'Proporción de desperdicio',
       brixMeasurements: 'Mediciones Brix',
       average: 'Promedio',
+      averageByClass: 'Prom. {class}',
       todaysHarvest: 'Cosecha de hoy',
       yieldData: 'Datos de rendimiento',
       qualityMetrics: 'Métricas de calidad',

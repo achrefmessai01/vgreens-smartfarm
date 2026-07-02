@@ -670,6 +670,7 @@ export const fr = {
       wasteRatio: 'Ratio de déchets',
       brixMeasurements: 'Mesures Brix',
       average: 'Moyenne',
+      averageByClass: 'Moy. {class}',
       todaysHarvest: "Récolte d'aujourd'hui",
       yieldData: 'Données de rendement',
       qualityMetrics: 'Indicateurs de qualité',

@@ -689,6 +689,7 @@ export const el = {
       wasteRatio: 'Αναλογία αποβλήτων',
       brixMeasurements: 'Μετρήσεις Brix',
       average: 'Μέσος όρος',
+      averageByClass: 'Μ.Ο. {class}',
       todaysHarvest: 'Σημερινή συγκομιδή',
       yieldData: 'Δεδομένα απόδοσης',
       qualityMetrics: 'Δείκτες ποιότητας',

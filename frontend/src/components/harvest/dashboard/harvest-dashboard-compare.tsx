@@ -60,14 +60,49 @@ export function HarvestDashboardCompare({
   const { t } = useI18n();
   const h = t.pages.harvest;
 
+  // Chart legends should mirror the picker: greenhouse first, variety second,
+  // and skip the species/crop (it's the same crop across compared batches).
+  // Falls back to batch.name if either piece is missing.
+  const compareLabel = (batch: HarvestBatchListItem) => {
+    const greenhouse = batch.greenhouse?.trim();
+    const variety = batch.variety?.trim();
+    if (greenhouse && variety) return `${greenhouse} - ${variety}`;
+    if (greenhouse) return greenhouse;
+    if (variety) return variety;
+    return batch.name;
+  };
+
   const selected = compareBatchIds
     .map((id, idx) => {
       const batch = batches.find((b) => b.id === id);
       return batch
-        ? { batch, color: COMPARE_COLORS[idx % COMPARE_COLORS.length] }
+        ? {
+            batch,
+            color: COMPARE_COLORS[idx % COMPARE_COLORS.length],
+            label: compareLabel(batch),
+          }
         : null;
     })
-    .filter((x): x is { batch: HarvestBatchListItem; color: string } => !!x);
+    .filter(
+      (
+        x,
+      ): x is {
+        batch: HarvestBatchListItem;
+        color: string;
+        label: string;
+      } => !!x,
+    );
+
+  // Compare charts share a subtitle showing the crop(s) being compared. Most
+  // sessions compare varieties within a single crop, so this collapses to a
+  // single species; mixed-crop compares list all unique species deduped.
+  const cropSubtitle = Array.from(
+    new Set(
+      selected
+        .map(({ batch }) => batch.species?.trim())
+        .filter((s): s is string => Boolean(s)),
+    ),
+  ).join(', ');
 
   const [loaded, setLoaded] = useState<Record<string, LoadedBatch>>({});
 
@@ -86,48 +121,48 @@ export function HarvestDashboardCompare({
     );
   }
 
-  const yieldSeries = selected.map(({ batch, color }) => ({
+  const yieldSeries = selected.map(({ batch, color, label }) => ({
     batchId: batch.id,
-    batchName: batch.name,
+    batchName: label,
     color,
     data: loaded[batch.id]?.data?.yieldOverTime ?? [],
   }));
 
-  const yieldPerRunningMeterSeries = selected.map(({ batch, color }) => ({
+  const yieldPerRunningMeterSeries = selected.map(({ batch, color, label }) => ({
     batchId: batch.id,
-    batchName: batch.name,
+    batchName: label,
     color,
     data: loaded[batch.id]?.data?.yieldPerRunningMeterTrend ?? [],
   }));
 
-  const brixSeries = selected.map(({ batch, color }) => ({
+  const brixSeries = selected.map(({ batch, color, label }) => ({
     batchId: batch.id,
-    batchName: batch.name,
+    batchName: label,
     color,
     data: loaded[batch.id]?.data?.brixTrend ?? [],
   }));
 
-  const fruitWeightSeries = selected.map(({ batch, color }) => ({
+  const fruitWeightSeries = selected.map(({ batch, color, label }) => ({
     batchId: batch.id,
-    batchName: batch.name,
+    batchName: label,
     color,
     data: loaded[batch.id]?.data?.fruitWeightTrend ?? [],
   }));
 
-  const cumulativeSeries = selected.map(({ batch, color }) => ({
+  const cumulativeSeries = selected.map(({ batch, color, label }) => ({
     batchId: batch.id,
-    batchName: batch.name,
+    batchName: label,
     color,
     data: loaded[batch.id]?.data?.cumulativeYield ?? [],
   }));
 
-  const classSeries = selected.map(({ batch, color }) => {
+  const classSeries = selected.map(({ batch, color, label }) => {
     const data = loaded[batch.id]?.data;
     // classTotals is the per-quality sellable breakdown, positional and dynamic
     // (index 0=A, 1=B, 2=C, ...) — exactly the per-class array the chart stacks.
     return {
       batchId: batch.id,
-      batchName: batch.name,
+      batchName: label,
       color,
       classes: data?.classTotals ?? [],
       waste: data?.wasteTotal ?? 0,
@@ -163,7 +198,7 @@ export function HarvestDashboardCompare({
               : 'md:grid-cols-2 lg:grid-cols-4'
         }`}
       >
-        {selected.map(({ batch, color }) => {
+        {selected.map(({ batch, color, label }) => {
           const state = loaded[batch.id];
           const data = state?.data;
           const isLoading = state?.loading ?? true;
@@ -184,9 +219,9 @@ export function HarvestDashboardCompare({
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{batch.name}</p>
+                  <p className="truncate text-sm font-semibold">{label}</p>
                   <p className="text-muted-foreground truncate text-xs">
-                    {batch.species} · {batch.variety}
+                    {batch.species}
                   </p>
                 </div>
                 <span
@@ -275,12 +310,18 @@ export function HarvestDashboardCompare({
       </div>
 
       <div className="grid grid-cols-1 items-start gap-4 sm:gap-6 lg:grid-cols-2">
-        <YieldOverTimeChart series={yieldSeries} />
-        <YieldPerRunningMeterChart series={yieldPerRunningMeterSeries} />
-        <ClassDistributionChart series={classSeries} />
-        <BrixTrendChart series={brixSeries} />
-        <FruitWeightTrendChart series={fruitWeightSeries} />
-        <CumulativeYieldChart series={cumulativeSeries} />
+        <YieldOverTimeChart series={yieldSeries} subtitle={cropSubtitle} />
+        <YieldPerRunningMeterChart
+          series={yieldPerRunningMeterSeries}
+          subtitle={cropSubtitle}
+        />
+        <ClassDistributionChart series={classSeries} subtitle={cropSubtitle} />
+        <BrixTrendChart series={brixSeries} subtitle={cropSubtitle} />
+        <FruitWeightTrendChart
+          series={fruitWeightSeries}
+          subtitle={cropSubtitle}
+        />
+        <CumulativeYieldChart series={cumulativeSeries} subtitle={cropSubtitle} />
       </div>
     </div>
   );

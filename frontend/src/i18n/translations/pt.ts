@@ -682,6 +682,7 @@ export const pt = {
       wasteRatio: 'Rácio de desperdício',
       brixMeasurements: 'Medições Brix',
       average: 'Média',
+      averageByClass: 'Méd. {class}',
       todaysHarvest: 'Colheita de hoje',
       yieldData: 'Dados de produção',
       qualityMetrics: 'Métricas de qualidade',

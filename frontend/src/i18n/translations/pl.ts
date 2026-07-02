@@ -680,6 +680,7 @@ export const pl = {
       wasteRatio: 'Udział odpadów',
       brixMeasurements: 'Pomiary Brix',
       average: 'Średnia',
+      averageByClass: 'Śr. {class}',
       todaysHarvest: 'Dzisiejszy zbiór',
       yieldData: 'Dane plonu',
       qualityMetrics: 'Wskaźniki jakości',

@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
 import {
   ChartDot,
+  ChartTitle,
   ChartTooltipContainer,
   type ChartTooltipProps,
 } from '../chart-helpers';
@@ -31,6 +32,7 @@ interface YieldPerRunningMeterSeries {
 type YieldPerRunningMeterChartProps = {
   className?: string;
   title?: string;
+  subtitle?: string;
 } & (
   | { data: YieldPerRunningMeterData[]; series?: never }
   | { series: YieldPerRunningMeterSeries[]; data?: never }
@@ -84,7 +86,7 @@ export function YieldPerRunningMeterChart(
   props: YieldPerRunningMeterChartProps,
 ) {
   const { t } = useI18n();
-  const { className, title } = props;
+  const { className, title, subtitle } = props;
   const isMulti = 'series' in props && props.series !== undefined;
 
   const chartData = isMulti ? mergeSeries(props.series) : props.data;
@@ -92,11 +94,14 @@ export function YieldPerRunningMeterChart(
   return (
     <Card className={className}>
       <div className="p-4 sm:p-6">
-        <h3 className="mb-4 text-lg font-semibold">
-          {title ??
+        <ChartTitle
+          title={
+            title ??
             t.pages.harvest?.yieldPerRunningMeterOverTime ??
-            'Yield per Running Meter Over Time'}
-        </h3>
+            'Yield per Running Meter Over Time'
+          }
+          subtitle={subtitle}
+        />
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
