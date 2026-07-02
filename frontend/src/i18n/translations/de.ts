@@ -818,7 +818,7 @@ export const de = {
       yieldPerSquareMeter: 'Ertrag pro m²',
       yieldPerSquareMeterSubtitle: 'Gesamt-kg pro m²',
       yieldPerSquareMeterNoData: 'Anbaufläche im Batch festlegen',
-      yieldPerPlantSubtitle: 'Verkaufsfähige kg pro Pflanze',
+      yieldPerPlantSubtitle: 'Verkaufsfähige g pro Pflanze',
       yieldPerPlantNoData: 'Gesamtpflanzen für die Charge festlegen',
       fruitWeightTrendOverTime: 'Fruchtgewichts-Trend im Zeitverlauf',
       fruitWeightValue: 'Fruchtgewicht (g)',
