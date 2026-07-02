@@ -114,7 +114,7 @@ export function DashboardMetricsGrid({
           subtitle={
             data.yieldPerPlant == null
               ? (h?.yieldPerPlantNoData ?? 'Set Total Plants on the batch')
-              : (h?.yieldPerPlantSubtitle ?? 'Sellable kg per plant')
+              : (h?.yieldPerPlantSubtitle ?? 'Sellable g per plant')
           }
           icon={<Sprout className="h-4 w-4" />}
           color="default"

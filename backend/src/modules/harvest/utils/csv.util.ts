@@ -81,7 +81,7 @@ const COLUMN_DEFS: ColumnDef[] = [
   { key: 'fruitCount', value: (h) => num(h.totals?.fruitCount) },
   { key: 'totalFruitWeight', value: (h) => num(h.totals?.totalFruitWeight) },
   { key: 'avgFruitWeight', value: (h) => num(h.totals?.avgFruitWeight) },
-  { key: 'yieldPerPlant', value: (h) => num(h.totals?.yieldPerPlant) },
+  { key: 'yieldPerPlant', value: (h) => num(h.totals?.yieldPerPlant != null ? h.totals.yieldPerPlant * 1000 : null) },
   {
     key: 'yieldPerRunningMeter',
     value: (h) => num(h.totals?.yieldPerRunningMeter),

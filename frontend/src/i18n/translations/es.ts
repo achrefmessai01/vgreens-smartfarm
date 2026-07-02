@@ -518,6 +518,8 @@ export const es = {
       yieldPerRunningMeterOverTime:
         'Rendimiento por metro lineal a lo largo del tiempo',
       yieldPerRunningMeterUnit: 'Rendimiento (kg/m lineal)',
+      yieldPerPlant: 'Rendimiento por planta',
+      yieldPerPlantShort: 'Rendimiento/Planta',
       yieldPerRunningMeterShort: 'Rendimiento/m',
       yieldPerRunningMeter: 'Rendimiento por metro lineal',
       yieldPerRunningMeterSubtitle: 'kg vendibles por metro lineal',
@@ -525,6 +527,8 @@ export const es = {
       yieldPerSquareMeter: 'Rendimiento por m²',
       yieldPerSquareMeterSubtitle: 'kg totales por m²',
       yieldPerSquareMeterNoData: 'Establece el área de cultivo del lote',
+      yieldPerPlantSubtitle: 'g vendibles por planta',
+      yieldPerPlantNoData: 'Establece el número total de plantas del lote',
       classDistribution: 'Distribución por clase',
       brixTrendOverTime: 'Tendencia Brix a lo largo del tiempo',
       cumulativeYieldProgress: 'Progreso acumulado del rendimiento',
