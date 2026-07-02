@@ -14,10 +14,6 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
   private readonly logger = new Logger(GraphQLExceptionFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
-    // ── REST (HTTP) context ───────────────────────────────────────────────────
-    // The filter is global (APP_FILTER) so it catches REST exceptions too.
-    // For HTTP contexts we must write a JSON response directly — returning a
-    // GraphQLError here would leave the response unsent.
     if (host.getType() === 'http') {
       const res = host.switchToHttp().getResponse<Response>();
 
@@ -43,7 +39,6 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
       return res.status(500).json({ statusCode: 500, message: 'Internal server error' });
     }
 
-    // ── GraphQL context ───────────────────────────────────────────────────────
     GqlArgumentsHost.create(host);
 
     if (exception instanceof GraphQLError) {
