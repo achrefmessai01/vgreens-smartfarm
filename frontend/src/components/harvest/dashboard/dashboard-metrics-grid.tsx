@@ -1,4 +1,5 @@
 import { useI18n } from '@/i18n';
+import { useLocaleFormatters } from '@/i18n/use-locale-formatters';
 import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
 import {
   Activity,
@@ -40,6 +41,7 @@ export function DashboardMetricsGrid({
 }: DashboardMetricsGridProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  const { formatNum } = useLocaleFormatters();
 
   const acrossHarvests =
     h?.acrossHarvests?.replace('{count}', data.harvestCount.toString()) ??
@@ -69,7 +71,7 @@ export function DashboardMetricsGrid({
       node: (
         <MetricCard
           title={h?.totalMarketableYield ?? 'Marketable Yield'}
-          value={`${sellableTotal.toFixed(2)} kg`}
+          value={`${formatNum(sellableTotal, 2)} kg`}
           subtitle={acrossHarvests}
           icon={<TrendingUp className="h-4 w-4" />}
           color="success"
@@ -81,8 +83,8 @@ export function DashboardMetricsGrid({
       node: (
         <MetricCard
           title={primaryTitle}
-          value={`${primaryPercent.toFixed(1)}%`}
-          subtitle={`${sellableTotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
+          value={`${formatNum(primaryPercent, 1)}%`}
+          subtitle={`${formatNum(sellableTotal, 2)} ${h?.kgTotal ?? 'kg total'}`}
           icon={<Package className="h-4 w-4" />}
           color="success"
         />
@@ -93,8 +95,8 @@ export function DashboardMetricsGrid({
       node: (
         <MetricCard
           title={secondaryTitle}
-          value={`${secondaryPercent.toFixed(1)}%`}
-          subtitle={`${secondaryTotal.toFixed(2)} ${h?.kgTotal ?? 'kg total'}`}
+          value={`${formatNum(secondaryPercent, 1)}%`}
+          subtitle={`${formatNum(secondaryTotal, 2)} ${h?.kgTotal ?? 'kg total'}`}
           color="error"
         />
       ),
@@ -107,7 +109,7 @@ export function DashboardMetricsGrid({
           value={
             data.yieldPerPlant == null
               ? '—'
-              : `${(data.yieldPerPlant * 1000).toFixed(1)} g`
+              : `${formatNum(data.yieldPerPlant * 1000, 1)} g`
           }
           subtitle={
             data.yieldPerPlant == null
@@ -127,7 +129,7 @@ export function DashboardMetricsGrid({
           value={
             data.yieldPerRunningMeter == null
               ? '—'
-              : `${Number(data.yieldPerRunningMeter.toFixed(3))} kg/m`
+              : `${formatNum(data.yieldPerRunningMeter, 3)} kg/m`
           }
           subtitle={
             data.yieldPerRunningMeter == null
@@ -146,7 +148,7 @@ export function DashboardMetricsGrid({
       node: (
         <MetricCard
           title={h?.averageFruitWeight ?? 'Average Fruit Weight'}
-          value={`${data.averageFruitWeight?.toFixed(1) ?? 0} g`}
+          value={`${formatNum(data.averageFruitWeight ?? 0, 1)} g`}
           subtitle={h?.avgWeightPerFruit ?? 'Average weight per fruit'}
           icon={<Scale className="h-4 w-4" />}
           color="info"
@@ -158,7 +160,7 @@ export function DashboardMetricsGrid({
       node: (
         <MetricCard
           title={h?.averageBrix ?? 'Average Brix'}
-          value={`${data.averageBrix?.toFixed(1) ?? 0}°Bx`}
+          value={`${formatNum(data.averageBrix ?? 0, 1)}°Bx`}
           subtitle={h?.qualityIndicator ?? 'Quality indicator'}
           icon={<Target className="h-4 w-4" />}
           color="info"
@@ -173,7 +175,7 @@ export function DashboardMetricsGrid({
           value={
             data.yieldPerSquareMeter == null
               ? '—'
-              : `${data.yieldPerSquareMeter.toFixed(2)} kg/m²`
+              : `${formatNum(data.yieldPerSquareMeter, 2)} kg/m²`
           }
           subtitle={
             data.yieldPerSquareMeter == null

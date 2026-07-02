@@ -2,6 +2,7 @@ import { UserRole, InputMode } from '@common/enums';
 import { Harvest } from './entities/harvest.entity';
 import { HarvestTotals } from './dto/harvest-totals.dto';
 import { HarvestsService } from './harvests.service';
+import { HarvestImportService } from './harvest-import.service';
 import { Roles, CurrentUser } from '@common/decorators';
 import {
   CreateHarvestInput,
@@ -11,9 +12,11 @@ import {
   HarvestDashboardMetrics,
   HarvestBatchListItem,
   HarvestCrateAssignmentInput,
+  ImportHarvestInput,
+  ImportReportType,
 } from './dto';
 import { User } from '@modules/users/entities/user.entity';
-import { UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClerkAuthGuard, RolesGuard } from '@common/guards';
 import {
   Resolver,
@@ -35,13 +38,14 @@ import {
 @UseInterceptors(UserInterceptor, TenantInterceptor)
 @Resolver(() => Harvest)
 export class HarvestsResolver {
-  constructor(private readonly harvestsService: HarvestsService) {}
+  constructor(
+    private readonly harvestsService: HarvestsService,
+    private readonly harvestImportService: HarvestImportService,
+  ) {}
 
   // Computed aggregate of the harvest's entries — replaces the omitted DB view.
   @ResolveField(() => HarvestTotals, { name: 'totals' })
   totals(@Parent() harvest: Harvest): HarvestTotals {
-    // Crate-mode kg derive from the harvest's selected crate (falling back to
-    // the legacy batch.crateWeight for harvests not yet repointed).
     const crateWeight =
       harvest.crate?.weight ?? harvest.batch?.crateWeight ?? null;
     return this.harvestsService.computeTotals(
@@ -92,11 +96,9 @@ export class HarvestsResolver {
     tenantId?: string | null,
   ): Promise<string> {
     const scopedTenantId = resolveTenantId(currentUser, tenantId);
-
     const permitted = permittedColumnsForRole(currentUser.role);
     const requested = columns && columns.length > 0 ? columns : permitted;
     const selected = permitted.filter((key) => requested.includes(key));
-
     const harvests = await this.harvestsService.findAllForExport(
       scopedTenantId,
       filter ?? undefined,
@@ -131,24 +133,28 @@ export class HarvestsResolver {
     );
   }
 
+  // true if the tenant has an import mapper wired up (or user is superadmin)
+  @Query(() => Boolean, { name: 'harvestImportAvailable' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  harvestImportAvailable(@CurrentUser() currentUser: User): boolean {
+    if (currentUser.role === UserRole.VGREENS_ADMIN) return true;
+    const tenantId = currentUser.tenantId;
+    if (!tenantId) return false;
+    return this.harvestImportService.hasMapperForTenant(tenantId);
+  }
+
   @Mutation(() => Harvest)
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
   async createHarvest(
     @Args('input') input: CreateHarvestInput,
     @CurrentUser() currentUser: User,
   ): Promise<Harvest> {
-    // For admins, input.tenantId is required and used directly. For non-admins
-    // we ignore any supplied input.tenantId in favour of their own tenant.
     const tenantId =
       currentUser.role === UserRole.VGREENS_ADMIN
         ? input.tenantId
         : currentUser.tenantId;
-    if (!tenantId) {
-      throw new Error('Tenant ID is required');
-    }
-    if (!currentUser.id) {
-      throw new Error('User ID is required');
-    }
+    if (!tenantId) throw new Error('Tenant ID is required');
+    if (!currentUser.id) throw new Error('User ID is required');
     return this.harvestsService.createHarvest(input, tenantId, currentUser.id);
   }
 
@@ -168,17 +174,12 @@ export class HarvestsResolver {
     );
   }
 
-  // Flip a whole batch between weight and crate mode, converting every harvest
-  // entry's per-class arrays. Returns the batch's harvests with their converted
-  // entries so the client cache updates in one round trip.
   @Mutation(() => [Harvest], { name: 'convertBatchInputMode' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
   async convertBatchInputMode(
     @Args('batchId', { type: () => ID }) batchId: string,
     @Args('targetMode', { type: () => InputMode }) targetMode: InputMode,
     @CurrentUser() currentUser: User,
-    // Per-harvest crate choices for a weight -> crate switch; ignored the other
-    // direction (each harvest keeps its own crate weight).
     @Args('crateAssignments', {
       type: () => [HarvestCrateAssignmentInput],
       nullable: true,
@@ -209,5 +210,31 @@ export class HarvestsResolver {
       resolveTenantId(currentUser, tenantId, false),
     );
     return true;
+  }
+
+  @Mutation(() => ImportReportType, { name: 'importHarvest' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  async importHarvest(
+    @Args('input') input: ImportHarvestInput,
+    @CurrentUser() currentUser: User,
+  ): Promise<ImportReportType> {
+    const tenantId =
+      currentUser.role === UserRole.VGREENS_ADMIN
+        ? input.tenantId
+        : currentUser.tenantId;
+
+    if (!tenantId) {
+      throw new BadRequestException(
+        currentUser.role === UserRole.VGREENS_ADMIN
+          ? 'Supply input.tenantId to specify the target tenant.'
+          : 'Authenticated user has no tenant associated.',
+      );
+    }
+
+    return this.harvestImportService.importForTenant(
+      input.file,
+      tenantId,
+      input.dryRun ?? true,
+    ) as Promise<ImportReportType>;
   }
 }

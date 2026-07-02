@@ -11,6 +11,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
 import {
+  ChartTitle,
   ChartTooltipContainer,
   type ChartTooltipProps,
 } from '../chart-helpers';
@@ -32,6 +33,7 @@ interface CumulativeYieldSeries {
 type CumulativeYieldChartProps = {
   className?: string;
   title?: string;
+  subtitle?: string;
 } & (
   | { data: CumulativeYieldPoint[]; series?: never }
   | { series: CumulativeYieldSeries[]; data?: never }
@@ -54,7 +56,7 @@ export function CumulativeYieldChart(props: CumulativeYieldChartProps) {
   return (
     <Card className={props.className}>
       <div className="p-4 sm:p-6">
-        <h3 className="mb-4 text-lg font-semibold">{cardTitle}</h3>
+        <ChartTitle title={cardTitle} subtitle={props.subtitle} />
         {isMulti ? (
           <MultiBatchView
             series={props.series}

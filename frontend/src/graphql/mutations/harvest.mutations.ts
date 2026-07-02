@@ -142,3 +142,29 @@ export const DELETE_HARVEST_IMAGE_MUTATION = gql`
     deleteImage(input: { path: $path })
   }
 `;
+
+export const IMPORT_HARVEST_MUTATION = gql`
+  mutation ImportHarvest($input: ImportHarvestInput!) {
+    importHarvest(input: $input) {
+      tenant
+      tenantId
+      file
+      mapper
+      dryRun
+      startedAt
+      finishedAt
+      totalRows
+      validRows
+      invalidRows
+      created
+      skippedDuplicates
+      failed
+      issues {
+        sourceRow
+        level
+        reason
+      }
+      globalWarnings
+    }
+  }
+`;

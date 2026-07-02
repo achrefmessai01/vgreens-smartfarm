@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
 import {
   ChartDot,
+  ChartTitle,
   ChartTooltipContainer,
   type ChartTooltipProps,
 } from '../chart-helpers';
@@ -31,6 +32,7 @@ interface YieldSeries {
 type YieldOverTimeChartProps = {
   className?: string;
   title?: string;
+  subtitle?: string;
 } & (
   | { data: YieldOverTimeData[]; series?: never }
   | { series: YieldSeries[]; data?: never }
@@ -72,7 +74,7 @@ function mergeSeries(series: YieldSeries[]): Array<Record<string, unknown>> {
 
 export function YieldOverTimeChart(props: YieldOverTimeChartProps) {
   const { t } = useI18n();
-  const { className, title } = props;
+  const { className, title, subtitle } = props;
   const isMulti = 'series' in props && props.series !== undefined;
 
   const chartData = isMulti ? mergeSeries(props.series) : props.data;
@@ -80,9 +82,10 @@ export function YieldOverTimeChart(props: YieldOverTimeChartProps) {
   return (
     <Card className={className}>
       <div className="p-4 sm:p-6">
-        <h3 className="mb-4 text-lg font-semibold">
-          {title ?? t.pages.harvest?.yieldOverTime ?? 'Yield Over Time'}
-        </h3>
+        <ChartTitle
+          title={title ?? t.pages.harvest?.yieldOverTime ?? 'Yield Over Time'}
+          subtitle={subtitle}
+        />
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart

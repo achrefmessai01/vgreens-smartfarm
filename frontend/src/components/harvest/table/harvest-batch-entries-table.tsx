@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { formatHarvestDate } from '@/lib/harvest-utils';
+import { useLocaleFormatters } from '@/i18n/use-locale-formatters';
 import {
   getCreatedByLabel,
   type HarvestItem,
@@ -40,6 +41,7 @@ export function HarvestBatchEntriesTable({
   onSidebarEdit,
   onDelete,
 }: EntriesTableProps) {
+  const { formatNum } = useLocaleFormatters();
   const {
     h,
     entries,
@@ -86,17 +88,17 @@ export function HarvestBatchEntriesTable({
               <TableCell>
                 {totals.avgFruitWeight == null
                   ? '—'
-                  : `${totals.avgFruitWeight.toFixed(1)} g`}
+                  : `${formatNum(totals.avgFruitWeight, 1)} g`}
               </TableCell>
               <TableCell>
                 {totals.yieldPerPlant == null
                   ? '—'
-                  : `${(totals.yieldPerPlant * 1000).toFixed(1)} g`}
+                  : `${formatNum(totals.yieldPerPlant * 1000, 1)} g`}
               </TableCell>
               <TableCell>
                 {totals.yieldPerRunningMeter == null
                   ? '—'
-                  : `${Number(totals.yieldPerRunningMeter.toFixed(3))} kg/m`}
+                  : `${formatNum(totals.yieldPerRunningMeter, 3)} kg/m`}
               </TableCell>
               <TableCell className="max-w-[220px] truncate">
                 {getCreatedByLabel(entry)}
