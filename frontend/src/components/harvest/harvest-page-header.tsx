@@ -1,7 +1,7 @@
 'use client';
 
 import { useI18n } from '@/i18n';
-import { Download, Plus } from 'lucide-react';
+import { Download, Plus, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WriteActionButton } from '@/components/ui/write-action-button';
 import { harvestsLoggedLabel } from '@/lib/harvest-utils';
@@ -12,6 +12,12 @@ interface HarvestPageHeaderProps {
   title: string;
   onCreateBatch?: () => void;
   onExportClick?: () => void;
+  /**
+   * When provided the Import button is rendered. The page is responsible for
+   * only passing this callback when useHarvestImportAvailable() returns true,
+   * so the button is hidden for tenants without a mapper configured.
+   */
+  onImportClick?: () => void;
   isLoading?: boolean;
   /** Sort/filter controls rendered alongside the action buttons. */
   filters?: React.ReactNode;
@@ -22,6 +28,7 @@ export function HarvestPageHeader({
   title,
   onCreateBatch,
   onExportClick,
+  onImportClick,
   isLoading = false,
   filters,
 }: HarvestPageHeaderProps) {
@@ -55,6 +62,20 @@ export function HarvestPageHeader({
             >
               <Download className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
               {t.pages.harvest?.exportCsv || 'Export CSV'}
+            </Button>
+          )}
+
+          {/* Import button is only rendered when the parent confirms the tenant
+              has a mapper — onImportClick is undefined otherwise. */}
+          {onImportClick && (
+            <Button
+              onClick={onImportClick}
+              disabled={isLoading}
+              variant="outline"
+              className="group relative w-full overflow-hidden border-[#016f7c]/30 bg-gradient-to-br from-white to-[#016f7c]/[0.03] text-[#016f7c] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#016f7c] hover:from-[#016f7c]/10 hover:to-[#016f7c]/5 hover:text-[#016f7c] hover:shadow-md sm:w-auto dark:border-teal-300/40 dark:from-[#016f7c]/15 dark:to-[#016f7c]/25 dark:text-teal-200 dark:hover:border-teal-200 dark:hover:from-[#016f7c]/25 dark:hover:to-[#016f7c]/40 dark:hover:text-teal-100 dark:hover:shadow-[0_4px_14px_-2px_rgba(94,234,212,0.25)]"
+            >
+              <Upload className="mr-2 h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5" />
+              {t.pages.harvest?.importExcel || 'Import Data'}
             </Button>
           )}
 
