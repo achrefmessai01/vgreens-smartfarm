@@ -59,6 +59,15 @@ export function useLocaleFormatters() {
     [tag],
   );
 
+  const formatNum = React.useCallback(
+    (value: number | null | undefined, digits: number) =>
+      formatNumber(value, {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits,
+      }),
+    [formatNumber],
+  );
+
   const formatCurrency = React.useCallback(
     (value: number | null | undefined, currency: string = 'EUR') =>
       formatNumber(value, { style: 'currency', currency }),
@@ -94,6 +103,7 @@ export function useLocaleFormatters() {
     formatTime,
     formatDateTime,
     formatNumber,
+    formatNum,
     formatCurrency,
     formatRelativeTime,
   };

@@ -2,6 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
+import { useLocaleFormatters } from '@/i18n/use-locale-formatters';
 import type { HarvestBatchListItem } from '@/lib/hooks/use-harvest-batches';
 import {
   useHarvestDashboard,
@@ -59,6 +60,7 @@ export function HarvestDashboardCompare({
 }: HarvestDashboardCompareProps) {
   const { t } = useI18n();
   const h = t.pages.harvest;
+  const { formatNum } = useLocaleFormatters();
 
   // Chart legends should mirror the picker: greenhouse first, variety second,
   // and skip the species/crop (it's the same crop across compared batches).
@@ -235,7 +237,7 @@ export function HarvestDashboardCompare({
                     {h?.totalYield ?? 'Total Yield'}
                   </p>
                   <p className="text-sm font-semibold">
-                    {isLoading ? '–' : `${totalYield.toFixed(1)} kg`}
+                    {isLoading ? '–' : `${formatNum(totalYield, 1)} kg`}
                   </p>
                 </div>
                 <div>
@@ -243,7 +245,7 @@ export function HarvestDashboardCompare({
                     {h?.averageBrix ?? 'Avg Brix'}
                   </p>
                   <p className="text-sm font-semibold">
-                    {isLoading ? '–' : `${averageBrix.toFixed(1)}°Bx`}
+                    {isLoading ? '–' : `${formatNum(averageBrix, 1)}°Bx`}
                   </p>
                 </div>
                 <div>
@@ -251,7 +253,7 @@ export function HarvestDashboardCompare({
                     {h?.averageFruitWeight ?? 'Avg Fruit Weight'}
                   </p>
                   <p className="text-sm font-semibold">
-                    {isLoading ? '–' : `${averageFruitWeight.toFixed(1)} g`}
+                    {isLoading ? '–' : `${formatNum(averageFruitWeight, 1)} g`}
                   </p>
                 </div>
                 <div>
@@ -263,7 +265,7 @@ export function HarvestDashboardCompare({
                       ? '–'
                       : yieldPerPlant == null
                         ? '—'
-                        : `${yieldPerPlant.toFixed(2)} kg`}
+                        : `${formatNum(yieldPerPlant * 1000, 1)} g`}
                   </p>
                 </div>
                 <div>
@@ -271,7 +273,7 @@ export function HarvestDashboardCompare({
                     {h?.marketablePercent ?? 'Marketable %'}
                   </p>
                   <p className="text-sm font-semibold text-emerald-600">
-                    {isLoading ? '–' : `${marketablePercent.toFixed(1)}%`}
+                    {isLoading ? '–' : `${formatNum(marketablePercent, 1)}%`}
                   </p>
                 </div>
                 <div>
@@ -279,7 +281,7 @@ export function HarvestDashboardCompare({
                     {h?.wastePercent ?? 'Waste %'}
                   </p>
                   <p className="text-sm font-semibold text-red-600">
-                    {isLoading ? '–' : `${wastePercent.toFixed(1)}%`}
+                    {isLoading ? '–' : `${formatNum(wastePercent, 1)}%`}
                   </p>
                 </div>
                 <div>
