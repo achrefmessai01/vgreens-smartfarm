@@ -685,6 +685,7 @@ export const ro = {
       wasteRatio: 'Raport deșeuri',
       brixMeasurements: 'Măsurători Brix',
       average: 'Medie',
+      averageByClass: 'Medie {class}',
       todaysHarvest: 'Recolta de astăzi',
       yieldData: 'Date producție',
       qualityMetrics: 'Indicatori de calitate',

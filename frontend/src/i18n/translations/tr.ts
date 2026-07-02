@@ -676,6 +676,7 @@ export const tr = {
       wasteRatio: 'Atık oranı',
       brixMeasurements: 'Brix ölçümleri',
       average: 'Ortalama',
+      averageByClass: 'Ort. {class}',
       todaysHarvest: 'Bugünün hasatı',
       yieldData: 'Verim verileri',
       qualityMetrics: 'Kalite metrikleri',

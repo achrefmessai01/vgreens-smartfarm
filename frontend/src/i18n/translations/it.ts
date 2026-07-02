@@ -684,6 +684,7 @@ export const it = {
       wasteRatio: 'Rapporto di scarto',
       brixMeasurements: 'Misurazioni Brix',
       average: 'Media',
+      averageByClass: 'Media {class}',
       todaysHarvest: 'Raccolto di oggi',
       yieldData: 'Dati di resa',
       qualityMetrics: 'Metriche di qualità',

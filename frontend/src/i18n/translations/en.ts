@@ -669,6 +669,7 @@ export const en = {
       wasteRatio: 'Waste Ratio',
       brixMeasurements: 'Brix Measurements',
       average: 'Average',
+      averageByClass: 'Avg {class}',
       todaysHarvest: 'Today Harvest',
       addEntry: 'Add entry',
       entryLabel: 'Entry {n}',

@@ -671,6 +671,7 @@ export const ar = {
       wasteRatio: 'نسبة الفاقد',
       brixMeasurements: 'قياسات Brix',
       average: 'المتوسط',
+      averageByClass: 'متوسط {class}',
       todaysHarvest: 'حصاد اليوم',
       yieldData: 'بيانات الإنتاج',
       qualityMetrics: 'مقاييس الجودة',
