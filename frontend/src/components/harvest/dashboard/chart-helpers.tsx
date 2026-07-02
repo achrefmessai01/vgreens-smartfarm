@@ -46,3 +46,28 @@ export function ChartDot({ cx = 0, cy = 0, fill, stroke }: ChartDotProps) {
     />
   );
 }
+
+interface ChartTitleProps {
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  /** Bottom margin applied to the whole title block. Some charts need extra
+   * breathing room before the plot area, so callers can override the default. */
+  className?: string;
+}
+
+// Renders the standard chart heading, optionally with a muted subtitle line
+// below (used in compare mode to surface the shared crop name).
+export function ChartTitle({
+  title,
+  subtitle,
+  className = 'mb-4',
+}: ChartTitleProps) {
+  return (
+    <div className={className}>
+      <h3 className="text-lg font-semibold">{title}</h3>
+      {subtitle && (
+        <p className="text-muted-foreground mt-0.5 text-xs">{subtitle}</p>
+      )}
+    </div>
+  );
+}

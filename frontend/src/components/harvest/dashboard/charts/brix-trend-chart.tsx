@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { useI18n } from '@/i18n';
 import {
   ChartDot,
+  ChartTitle,
   ChartTooltipContainer,
   type ChartTooltipProps,
 } from '../chart-helpers';
@@ -31,6 +32,7 @@ interface BrixSeries {
 type BrixTrendChartProps = {
   className?: string;
   title?: string;
+  subtitle?: string;
 } & (
   | { data: BrixTrendData[]; series?: never }
   | { series: BrixSeries[]; data?: never }
@@ -72,7 +74,7 @@ function mergeSeries(series: BrixSeries[]): Array<Record<string, unknown>> {
 
 export function BrixTrendChart(props: BrixTrendChartProps) {
   const { t } = useI18n();
-  const { className, title } = props;
+  const { className, title, subtitle } = props;
   const isMulti = 'series' in props && props.series !== undefined;
 
   const chartData = isMulti ? mergeSeries(props.series) : props.data;
@@ -80,11 +82,15 @@ export function BrixTrendChart(props: BrixTrendChartProps) {
   return (
     <Card className={className}>
       <div className="p-6">
-        <h3 className="mb-8 text-lg font-semibold">
-          {title ??
+        <ChartTitle
+          className="mb-8"
+          title={
+            title ??
             t.pages.harvest?.brixTrendOverTime ??
-            'Brix Trend Over Time'}
-        </h3>
+            'Brix Trend Over Time'
+          }
+          subtitle={subtitle}
+        />
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart

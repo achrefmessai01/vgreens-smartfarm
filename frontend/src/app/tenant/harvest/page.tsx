@@ -8,6 +8,7 @@ import {
   EditHarvestDialog,
   HarvestDashboard,
   HarvestExportDialog,
+  HarvestImportDialog,
   HarvestPageHeader,
   HarvestTable,
   PeriodFilter,
@@ -16,6 +17,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n';
 import { useHarvestPage } from '@/lib/hooks/use-harvest-page';
+import { useHarvestImportAvailable } from '@/lib/hooks/use-harvest-import-available';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { BarChart3, History } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -73,9 +75,14 @@ export default function HarvestPage() {
     handleDeleteRequest,
     handleBatchDeleteRequest,
     isBatchDelete,
+    refetchAll,
   } = useHarvestPage();
 
+  // true = tenant has a mapper configured; false = no mapper; null = loading
+  const importAvailable = useHarvestImportAvailable();
+
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   return (
     <FeatureGuard featureKey="harvest_management">
@@ -143,6 +150,7 @@ export default function HarvestPage() {
                 title={t.pages.harvest?.harvestEntryTitle || 'Harvest Entry'}
                 onCreateBatch={handleCreateBatch}
                 onExportClick={() => setExportDialogOpen(true)}
+                onImportClick={importAvailable === true ? () => setImportDialogOpen(true) : undefined}
                 filters={
                   <>
                     <PeriodFilter
@@ -235,6 +243,13 @@ export default function HarvestPage() {
         <HarvestExportDialog
           open={exportDialogOpen}
           onOpenChange={setExportDialogOpen}
+        />
+
+        <HarvestImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          onImported={refetchAll}
+          importAvailable={importAvailable ?? false}
         />
       </div>
     </FeatureGuard>

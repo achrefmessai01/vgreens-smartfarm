@@ -63,7 +63,9 @@ async function bootstrap() {
     }),
   );
 
+  // Scope to /graphql so it doesn't intercept multipart requests on other routes.
   app.use(
+    '/graphql',
     graphqlUploadExpress({
       maxFileSize: 10_000_000,
       maxFiles: 10,

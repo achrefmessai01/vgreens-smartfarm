@@ -1,4 +1,8 @@
-import { BatchStatus, InputMode } from '@/generated/graphql';
+import {
+  BatchStatus,
+  HarvestQualityClass,
+  InputMode,
+} from '@/generated/graphql';
 import type { Locale } from '@/i18n/config';
 import type { Translations } from '@/i18n/translations';
 import type {
@@ -70,6 +74,39 @@ export function computeAvgBrix(readings: number[]): number {
       (values.reduce((sum, value) => sum + value, 0) / values.length) * 10,
     ) / 10
   );
+}
+
+/**
+ * Per-class average Brix, keyed by HarvestQualityClass. Readings with a value
+ * of 0 (empty cells) are ignored so they don't drag the average down. A class
+ * with no populated readings gets 0 — the caller decides whether to render
+ * that as "0.0" or hide the row. Rounded to one decimal to match
+ * `computeAvgBrix`.
+ */
+export function computeAvgBrixByClass(
+  readings: number[],
+  classes: HarvestQualityClass[],
+): Record<HarvestQualityClass, number> {
+  const buckets: Record<HarvestQualityClass, number[]> = {
+    [HarvestQualityClass.A]: [],
+    [HarvestQualityClass.B]: [],
+    [HarvestQualityClass.C]: [],
+  };
+  readings.forEach((v, i) => {
+    if (v > 0) {
+      const cls = classes[i] ?? HarvestQualityClass.A;
+      buckets[cls].push(v);
+    }
+  });
+  const avg = (vals: number[]) =>
+    vals.length === 0
+      ? 0
+      : Math.round((vals.reduce((s, v) => s + v, 0) / vals.length) * 10) / 10;
+  return {
+    [HarvestQualityClass.A]: avg(buckets[HarvestQualityClass.A]),
+    [HarvestQualityClass.B]: avg(buckets[HarvestQualityClass.B]),
+    [HarvestQualityClass.C]: avg(buckets[HarvestQualityClass.C]),
+  };
 }
 
 /**

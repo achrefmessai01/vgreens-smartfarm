@@ -15,17 +15,20 @@ import { useHarvestDashboardOrder } from '@/lib/hooks/use-harvest-dashboard-orde
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useSetTenantHarvestDashboardOrderMutation } from '@/generated/graphql';
 import { harvestsLoggedForLabel } from '@/lib/harvest-utils';
-import { AlertTriangle, Check, LayoutDashboard, Move, Package } from 'lucide-react';
+import {
+  AlertTriangle,
+  Check,
+  LayoutDashboard,
+  Move,
+  Package,
+} from 'lucide-react';
 import { DashboardChartsGrid } from './dashboard-charts-grid';
 import { DashboardConfigMenu } from './dashboard-config-menu';
 import { DashboardMetricsGrid } from './dashboard-metrics-grid';
-import {
-  DASHBOARD_CHART_IDS,
-  DASHBOARD_METRIC_IDS,
-} from './dashboard-items';
+import { DASHBOARD_CHART_IDS, DASHBOARD_METRIC_IDS } from './dashboard-items';
 import { HarvestDashboardCompare } from './harvest-dashboard-compare';
 import { DashboardFilters } from './harvest-dashboard-filters';
-import { HarvestDashboardSkeleton } from './harvest-dashboard-skeleton';
+import { HarvestDashboardBodySkeleton } from './harvest-dashboard-body-skeleton';
 import { YieldPredictionCard } from './yield-prediction-card';
 
 const METRIC_ID_SET = new Set<string>(Object.values(DASHBOARD_METRIC_IDS));
@@ -151,64 +154,47 @@ export function HarvestDashboard({
   const filterLabel: string =
     typeof filterLabelRaw === 'string' ? filterLabelRaw : period;
 
-  const filterBar = (
-    <DashboardFilters
-      period={period}
-      onPeriodChange={setPeriod}
-      batches={batches}
-      batchesLoading={batchesLoading}
-      compareBatchIds={compareBatchIds}
-      onCompareBatchesChange={setCompareBatchIds}
-    />
-  );
+  // Keep the header (with the DashboardFilters popover) mounted in the exact
+  // same tree position across every state — compare, skeleton, error, no-data,
+  // all-hidden, and default. Early returns that swap out the tree would
+  // unmount the popover mid-interaction, which would make selecting a batch
+  // look like a full app reload / close the picker between clicks.
+  const showingSkeleton = loading && !data;
 
-  if (compareMode) {
-    return (
-      <div className={className}>
-        <div className="bg-card mb-5 rounded-xl border p-3 sm:mb-6 sm:p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
-                {h?.performanceDashboard ?? 'Performance Dashboard'}
-              </h1>
-              <p className="text-muted-foreground mt-1 text-sm">
-                {(compareBatchIds.length === 1
-                  ? (h?.comparing ?? 'Comparing {count} batch for {filter}')
-                  : (h?.comparingPlural ??
-                    'Comparing {count} batches for {filter}')
-                )
-                  .replace('{count}', String(compareBatchIds.length))
-                  .replace('{filter}', filterLabel)}
-              </p>
-            </div>
-            {filterBar}
-          </div>
-        </div>
+  const subtitle: string | null = (() => {
+    if (compareMode) {
+      const key =
+        compareBatchIds.length === 1
+          ? (h?.comparing ?? 'Comparing {count} batch for {filter}')
+          : (h?.comparingPlural ??
+            'Comparing {count} batches for {filter}');
+      return key
+        .replace('{count}', String(compareBatchIds.length))
+        .replace('{filter}', filterLabel);
+    }
+    if (showingSkeleton || error) return null;
+    const count = data?.harvestCount ?? 0;
+    const phrase = `${count} ${harvestsLoggedForLabel(count, h, locale)} ${filterLabel}`;
+    return selectedBatch ? `${selectedBatch.name} · ${phrase}` : phrase;
+  })();
+
+  const noData = !compareMode && !showingSkeleton && !error && (!data || data.harvestCount === 0);
+
+  const body = (() => {
+    if (compareMode) {
+      return (
         <HarvestDashboardCompare
           batches={batches}
           compareBatchIds={compareBatchIds}
           period={period}
         />
-      </div>
-    );
-  }
-
-  if (loading && !data)
-    return <HarvestDashboardSkeleton className={className} />;
-
-  if (error) {
-    return (
-      <div className={className}>
-        <div className="bg-card mb-5 rounded-xl border p-3 sm:mb-6 sm:p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
-                {h?.performanceDashboard ?? 'Performance Dashboard'}
-              </h1>
-            </div>
-            {filterBar}
-          </div>
-        </div>
+      );
+    }
+    if (showingSkeleton) {
+      return <HarvestDashboardBodySkeleton />;
+    }
+    if (error) {
+      return (
         <div className="flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px]">
           <div className="max-w-md text-center">
             <AlertTriangle className="text-destructive mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
@@ -220,11 +206,72 @@ export function HarvestDashboard({
             </Button>
           </div>
         </div>
-      </div>
+      );
+    }
+    if (noData) {
+      return (
+        <div className="flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px]">
+          <div className="max-w-md text-center">
+            <Package className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
+            <p className="text-muted-foreground text-sm sm:text-base">
+              {selectedBatch
+                ? (
+                    h?.noHarvestsForBatch ??
+                    'No harvests for {name} in {filter}'
+                  )
+                    .replace('{name}', selectedBatch.name)
+                    .replace('{filter}', filterLabel)
+                : (h?.noHarvestsYet ?? 'No harvest data available')}
+            </p>
+          </div>
+        </div>
+      );
+    }
+    if (allHidden) {
+      return (
+        <div className="flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px]">
+          <div className="max-w-md text-center">
+            <LayoutDashboard className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
+            <p className="text-foreground mb-1 text-sm font-medium sm:text-base">
+              {h?.configEmptyTitle ?? 'No dashboard items selected'}
+            </p>
+            <p className="text-muted-foreground text-sm">
+              {canEditDashboard
+                ? (h?.configEmptyHintAdmin ??
+                  'Use "Edit dashboard" to choose what appears here.')
+                : (h?.configEmptyHint ??
+                  'No visualizations are enabled for this dashboard.')}
+            </p>
+          </div>
+        </div>
+      );
+    }
+    // `noData` above narrows data on the runtime level (it would have hit the
+    // noData branch if data were undefined) but TS can't see that through the
+    // IIFE — guard explicitly so the grid props stay strictly typed.
+    if (!data) return null;
+    return (
+      <>
+        <DashboardMetricsGrid
+          data={data}
+          isVisible={isVisible}
+          applyOrder={applyOrder}
+          editMode={editLayout}
+          onReorder={handleReorderMetrics}
+        />
+        <YieldPredictionCard />
+        <DashboardChartsGrid
+          data={data}
+          isVisible={isVisible}
+          applyOrder={applyOrder}
+          editMode={editLayout}
+          onReorder={handleReorderCharts}
+        />
+      </>
     );
-  }
+  })();
 
-  const noData = !data || data.harvestCount === 0;
+  const showEditControls = !compareMode && canEditDashboard && tenantId;
 
   return (
     <div className={className}>
@@ -234,16 +281,10 @@ export function HarvestDashboard({
             <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
               {h?.performanceDashboard ?? 'Performance Dashboard'}
             </h1>
-            <p className="text-muted-foreground mt-1 text-sm">
-              {(() => {
-                const count = data?.harvestCount ?? 0;
-                const phrase = `${count} ${harvestsLoggedForLabel(count, h, locale)} ${filterLabel}`;
-                return selectedBatch
-                  ? `${selectedBatch.name} · ${phrase}`
-                  : phrase;
-              })()}
-            </p>
-            {isStaleBatchId && (
+            {subtitle && (
+              <p className="text-muted-foreground mt-1 text-sm">{subtitle}</p>
+            )}
+            {!compareMode && isStaleBatchId && (
               <p className="mt-1 text-xs text-amber-600">
                 {h?.selectedBatchNotFound ??
                   'Selected batch not found — showing all batches.'}
@@ -251,10 +292,20 @@ export function HarvestDashboard({
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {filterBar}
-            {canEditDashboard && tenantId && (
+            <DashboardFilters
+              period={period}
+              onPeriodChange={setPeriod}
+              batches={batches}
+              batchesLoading={batchesLoading}
+              compareBatchIds={compareBatchIds}
+              onCompareBatchesChange={setCompareBatchIds}
+            />
+            {showEditControls && (
               <>
-                <DashboardConfigMenu tenantId={tenantId} hiddenSet={hiddenSet} />
+                <DashboardConfigMenu
+                  tenantId={tenantId}
+                  hiddenSet={hiddenSet}
+                />
                 <Button
                   variant={editLayout ? 'default' : 'outline'}
                   size="sm"
@@ -279,57 +330,7 @@ export function HarvestDashboard({
         </div>
       </div>
 
-      {noData ? (
-        <div className="flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px]">
-          <div className="max-w-md text-center">
-            <Package className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
-            <p className="text-muted-foreground text-sm sm:text-base">
-              {selectedBatch
-                ? (
-                    h?.noHarvestsForBatch ??
-                    'No harvests for {name} in {filter}'
-                  )
-                    .replace('{name}', selectedBatch.name)
-                    .replace('{filter}', filterLabel)
-                : (h?.noHarvestsYet ?? 'No harvest data available')}
-            </p>
-          </div>
-        </div>
-      ) : allHidden ? (
-        <div className="flex min-h-[300px] items-center justify-center px-4 sm:min-h-[400px]">
-          <div className="max-w-md text-center">
-            <LayoutDashboard className="text-muted-foreground mx-auto mb-3 h-6 w-6 sm:mb-4 sm:h-8 sm:w-8" />
-            <p className="text-foreground mb-1 text-sm font-medium sm:text-base">
-              {h?.configEmptyTitle ?? 'No dashboard items selected'}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              {canEditDashboard
-                ? (h?.configEmptyHintAdmin ??
-                  'Use "Edit dashboard" to choose what appears here.')
-                : (h?.configEmptyHint ??
-                  'No visualizations are enabled for this dashboard.')}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
-          <DashboardMetricsGrid
-            data={data}
-            isVisible={isVisible}
-            applyOrder={applyOrder}
-            editMode={editLayout}
-            onReorder={handleReorderMetrics}
-          />
-          <YieldPredictionCard />
-          <DashboardChartsGrid
-            data={data}
-            isVisible={isVisible}
-            applyOrder={applyOrder}
-            editMode={editLayout}
-            onReorder={handleReorderCharts}
-          />
-        </>
-      )}
+      {body}
     </div>
   );
 }
