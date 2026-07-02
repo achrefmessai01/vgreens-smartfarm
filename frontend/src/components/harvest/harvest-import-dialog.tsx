@@ -158,7 +158,7 @@ export function HarvestImportDialog({
     setImportError(null);
 
     try {
-      const { data } = await runImport({
+      const { data, errors } = await runImport({
         variables: {
           input: {
             file,
@@ -166,10 +166,13 @@ export function HarvestImportDialog({
             tenantId: selectedTenantId ?? null,
           },
         },
+        errorPolicy: 'all',
       });
 
+      if (errors?.length) throw new Error(errors[0].message);
+
       const result = data?.importHarvest;
-      if (!result) throw new Error('No response from server');
+      if (!result) throw new Error(h?.importError ?? 'Import failed');
 
       setReport(result);
 
