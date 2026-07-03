@@ -50,10 +50,15 @@ export function SortControls({
       value: 'PLANTING_DATE:ASC',
       label: `${h.sortByPlantingDate} (${h.oldestFirst})`,
     },
+    { value: 'NAME:ASC', label: `${h.sortByBatchName} (${h.azOrder})` },
+    { value: 'NAME:DESC', label: `${h.sortByBatchName} (${h.zaOrder})` },
     { value: 'CROP:ASC', label: `${h.sortByCrop} (${h.azOrder})` },
     { value: 'CROP:DESC', label: `${h.sortByCrop} (${h.zaOrder})` },
     { value: 'GREENHOUSE:ASC', label: `${h.sortByGreenhouse} (${h.azOrder})` },
     { value: 'GREENHOUSE:DESC', label: `${h.sortByGreenhouse} (${h.zaOrder})` },
+    // Manual drag-and-drop rank (persisted on the batch, tenant-shared). Always
+    // ascending, so it needs no direction pair.
+    { value: 'MANUAL_ORDER:ASC', label: h.sortManualOrder },
   ];
 
   return (

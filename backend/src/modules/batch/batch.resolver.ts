@@ -90,6 +90,23 @@ export class BatchResolver {
     );
   }
 
+  // Persist a manual drag-and-drop order for the tenant's batches. `ids` is the
+  // full batch list in its new order; each id's position becomes its sortOrder.
+  // Returns the batches in the saved order so the client cache updates directly.
+  @Mutation(() => [Batch], { name: 'reorderBatches' })
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
+  async reorderBatches(
+    @Args('ids', { type: () => [ID] }) ids: string[],
+    @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
+  ): Promise<Batch[]> {
+    return this.batchService.reorderBatches(
+      ids,
+      resolveTenantId(currentUser, tenantId),
+    );
+  }
+
   @Mutation(() => Boolean)
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
   async deleteBatch(

@@ -1,11 +1,15 @@
 'use client';
 
 import * as React from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
 } from '@/components/ui/accordion';
+import { cn } from '@/lib/utils';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { useBatchGroupView } from './use-batch-group-view';
 import { HarvestBatchHeader } from './harvest-batch-header';
@@ -56,6 +60,42 @@ export function HarvestBatchGroup({
   const { h, entries } = view;
   const hasEntries = entries.length > 0;
 
+  // Sortable wiring: the whole card moves (setNodeRef + transform), but only the
+  // grip handle in the header activates a drag (setActivatorNodeRef + listeners),
+  // so clicking the card still expands/collapses it.
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: group.key });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  // The grip is built here (where the sortable refs/listeners are local) and
+  // handed to the header as a node, so only it activates a drag while the rest
+  // of the card keeps its expand/collapse click. stopPropagation guards a plain
+  // click on the grip from toggling the accordion.
+  const handle = (
+    <button
+      type="button"
+      ref={setActivatorNodeRef}
+      {...attributes}
+      {...listeners}
+      onClick={(e) => e.stopPropagation()}
+      aria-label={h?.dragToReorder ?? 'Drag to reorder'}
+      title={h?.dragToReorder ?? 'Drag to reorder'}
+      className="text-muted-foreground/40 hover:text-foreground hover:bg-accent -ml-1.5 flex h-8 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded-md transition-colors active:cursor-grabbing"
+    >
+      <GripVertical className="h-4 w-4" />
+    </button>
+  );
+
   // Clicking the collapsed row expands the batch — same UX users get from the
   // title chevron. Keyboard users get Enter/Space via the handler below.
   const expandBatch = React.useCallback(() => {
@@ -72,26 +112,32 @@ export function HarvestBatchGroup({
   );
 
   return (
-    <Accordion
-      type="single"
-      collapsible
-      value={collapsed ? '' : group.key}
-      onValueChange={(value) =>
-        onToggleCollapse?.(group.key, value !== group.key)
-      }
-    >
-      <AccordionItem
-        value={group.key}
-        className="bg-card rounded-xl border px-3 pb-2 shadow-sm sm:px-4"
+    <div ref={setNodeRef} style={style} className={isDragging ? 'z-10' : undefined}>
+      <Accordion
+        type="single"
+        collapsible
+        value={collapsed ? '' : group.key}
+        onValueChange={(value) =>
+          onToggleCollapse?.(group.key, value !== group.key)
+        }
       >
-        <HarvestBatchHeader
-          group={group}
-          entries={entries}
-          onLogEntry={onLogEntry}
-          onViewBatch={onViewBatch}
-          onEditBatch={onEditBatch}
-          onDeleteBatch={onDeleteBatch}
-        />
+        <AccordionItem
+          value={group.key}
+          className={cn(
+            'bg-card rounded-xl border px-3 pb-2 shadow-sm transition-shadow sm:px-4',
+            // Lift the card while dragging so it clearly floats above the rest.
+            isDragging && 'ring-primary/40 opacity-90 shadow-xl ring-2',
+          )}
+        >
+          <HarvestBatchHeader
+            group={group}
+            entries={entries}
+            handle={handle}
+            onLogEntry={onLogEntry}
+            onViewBatch={onViewBatch}
+            onEditBatch={onEditBatch}
+            onDeleteBatch={onDeleteBatch}
+          />
 
         {collapsed && hasEntries && (
           <div className="border-t pt-1">
@@ -133,6 +179,7 @@ export function HarvestBatchGroup({
           )}
         </AccordionContent>
       </AccordionItem>
-    </Accordion>
+      </Accordion>
+    </div>
   );
 }

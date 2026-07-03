@@ -20,6 +20,8 @@ import type {
 interface HarvestBatchHeaderProps {
   group: BatchGroup;
   entries: HarvestItem[];
+  /** Drag-handle node (grip) built by the sortable parent; rendered at the row start. */
+  handle?: React.ReactNode;
   onLogEntry?: (batch: BatchItem) => void;
   onViewBatch?: (batch: BatchItem) => void;
   onEditBatch?: (batch: BatchItem) => void;
@@ -41,6 +43,7 @@ const HOVER_DANGER =
 export function HarvestBatchHeader({
   group,
   entries,
+  handle,
   onLogEntry,
   onViewBatch,
   onEditBatch,
@@ -64,6 +67,7 @@ export function HarvestBatchHeader({
     <>
       <div className="pt-3">
         <div className="flex items-center justify-between gap-2">
+          {handle}
           <AccordionTrigger className="min-w-0 flex-1 py-0 hover:no-underline">
             <p className="truncate text-base font-semibold sm:text-lg">
               {getGreenhouseLabel(batch?.greenhouse?.name)}
