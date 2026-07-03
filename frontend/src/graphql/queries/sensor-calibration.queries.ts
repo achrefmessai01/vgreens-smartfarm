@@ -10,6 +10,8 @@ export const SOIL_SENSOR_CONFIGS_QUERY = gql`
       id
       device
       greenhouse
+      greenhouseId
+      irrigationCycleId
       avgDryReading
       avgSaturatedReading
       isCalibrated

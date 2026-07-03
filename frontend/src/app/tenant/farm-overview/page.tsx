@@ -63,14 +63,18 @@ export default function FarmOverviewPage() {
                 overviewLabel={t.pages.farmOverview.enableSensorOverview}
               />
             )}
-            {/* Admin-only: soil-sensor calibration. Server enforces the same
-                role on the capture mutations. */}
+            {/* Admin-only: soil-sensor calibration by irrigation cycle.
+                Server enforces the same role on the cycles query and the
+                capture mutations. */}
             {state.canEditSensorPositions && (
               <CalibrationDropdown
-                configs={state.soilSensorConfigs}
+                cycles={state.irrigationCycles}
                 tenantId={state.calibrationTenantId}
                 onCalibrated={() => {
+                  // Refresh both: bounds live on sensor_configs (drives the
+                  // map's corrected values), the sidebar rows on the cycle.
                   void state.refetchSoilSensorConfigs();
+                  void state.refetchIrrigationCycles();
                 }}
               />
             )}

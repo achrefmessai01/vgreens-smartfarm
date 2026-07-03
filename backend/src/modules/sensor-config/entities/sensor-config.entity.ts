@@ -1,6 +1,7 @@
 import { BaseEntity } from '@common/entities';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { Greenhouse } from '@modules/greenhouse/entities/greenhouse.entity';
+import { IrrigationCycle } from '@modules/irrigation-cycles/entities/irrigation-cycle.entity';
 import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
 import {
   Column,
@@ -50,6 +51,18 @@ export class SensorConfig extends BaseEntity {
   @ManyToOne(() => Greenhouse, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'greenhouseId' })
   greenhouseRef?: Greenhouse | null;
+
+  // Groups this SOIL sensor into an irrigation cycle (one cycle per sensor).
+  // Soil-only and same-greenhouse are enforced in IrrigationCyclesService on
+  // assignment; deleting a cycle is blocked while sensors are assigned, so the
+  // FK's SET NULL only covers out-of-band deletes.
+  @Field(() => ID, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  irrigationCycleId?: string | null;
+
+  @ManyToOne(() => IrrigationCycle, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'irrigationCycleId' })
+  irrigationCycleRef?: IrrigationCycle | null;
 
   @Field({ nullable: true })
   @Column({ type: 'varchar', length: 128, nullable: true })

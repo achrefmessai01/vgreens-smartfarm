@@ -13,6 +13,7 @@ import {
   FarmLayoutConfig,
   GreenhouseCropsConfig,
 } from '@/components/farm-config';
+import { IrrigationCyclesConfig } from '@/components/irrigation-cycles';
 
 export function TenantDetailsTabs() {
   const { t } = useI18n();
@@ -66,6 +67,7 @@ export function TenantDetailsTabs() {
           <div className="flex min-w-0 flex-col gap-6">
             <SensorVisibilityConfig tenantId={tenantId} />
             <FarmLayoutConfig tenantId={tenantId} />
+            <IrrigationCyclesConfig tenantId={tenantId} />
             <GreenhouseCropsConfig tenantId={tenantId} />
             <SensorConfigTable tenantId={tenantId} />
           </div>

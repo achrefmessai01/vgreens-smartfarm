@@ -7,6 +7,7 @@ import { formatFieldToLabel } from '@/lib/farm-data';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLiveFarmData } from '@/lib/hooks/use-live-farm-data';
 import { useSoilSensorConfigs } from '@/lib/hooks/use-sensor-calibration';
+import { useIrrigationCycles } from '@/lib/hooks/use-irrigation-cycles';
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
 import {
   useSelectedTenantId,
@@ -147,6 +148,16 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     configs: soilSensorConfigs,
     refetch: refetchSoilSensorConfigs,
   } = useSoilSensorConfigs(configQueryTenantId);
+
+  // Irrigation cycles power the calibration dropdown (a cycle groups the soil
+  // sensors the sidebar calibrates). The query is admin-only server-side, so
+  // skip it entirely for regular tenant users.
+  const {
+    cycles: irrigationCycles,
+    refetch: refetchIrrigationCycles,
+  } = useIrrigationCycles(
+    canEditSensorPositions ? configQueryTenantId : undefined,
+  );
 
   const calibrationByDevice = React.useMemo(
     () =>
@@ -807,6 +818,8 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     canEditSensorPositions,
     soilSensorConfigs,
     refetchSoilSensorConfigs,
+    irrigationCycles,
+    refetchIrrigationCycles,
     calibrationTenantId: configQueryTenantId,
     tenants,
     selectedTenantId,
