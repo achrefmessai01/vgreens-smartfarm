@@ -9,7 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import { InputType, Field, ID, Float, Int } from '@nestjs/graphql';
-import { BatchStatus, InputMode } from '@common/enums';
+import { BatchStatus } from '@common/enums';
 
 @InputType()
 export class CreateBatchInput {
@@ -51,24 +51,6 @@ export class CreateBatchInput {
   @IsOptional()
   @IsEnum(BatchStatus)
   status?: BatchStatus;
-
-  // Yield input mode, fixed at creation. Crate mode requires a positive
-  // crateWeight (enforced in the service).
-  @Field(() => InputMode, {
-    nullable: true,
-    defaultValue: InputMode.WEIGHT,
-  })
-  @IsOptional()
-  @IsEnum(InputMode)
-  inputMode?: InputMode;
-
-  // Weight of one crate (kg). Required and must be > 0 when inputMode is crate;
-  // ignored (left null) for weight mode.
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  @Min(0.0001)
-  crateWeight?: number;
 
   @Field({ description: 'Planting date (ISO date string)' })
   @IsDateString()

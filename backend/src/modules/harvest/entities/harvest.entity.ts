@@ -15,6 +15,7 @@ import { User } from '@modules/users/entities/user.entity';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { Batch } from '@modules/batch/entities/batch.entity';
 import { Crate } from '@modules/crate/entities/crate.entity';
+import { InputMode } from '@common/enums';
 import { HarvestEntry } from './harvest-entry.entity';
 import { HarvestTotals } from '../dto/harvest-totals.dto';
 
@@ -53,6 +54,22 @@ export class Harvest {
   @ManyToOne(() => Batch, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'batchId' })
   batch?: Batch;
+
+  /**
+   * How THIS harvest records yield: direct per-quality kg (weight) or per-quality
+   * crate counts + remainder (crate). Per-harvest — one batch can hold harvests
+   * in different modes. Set at creation (backfilled from the parent batch's old
+   * batch-level mode) and only changed via the convert mutation, which rewrites
+   * the entries alongside the flag.
+   */
+  @Field(() => InputMode)
+  @Column({
+    type: 'enum',
+    enum: InputMode,
+    enumName: 'harvests_input_mode_enum',
+    default: InputMode.WEIGHT,
+  })
+  inputMode: InputMode;
 
   /**
    * The crate this harvest was logged with (crate-mode only). Its weight drives

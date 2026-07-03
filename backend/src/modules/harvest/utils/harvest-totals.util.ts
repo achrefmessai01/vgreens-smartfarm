@@ -5,9 +5,10 @@ import type { HarvestEntry } from '../entities/harvest-entry.entity';
 import type { HarvestTotals } from '../dto/harvest-totals.dto';
 import { entryClassWeights, totalFruitWeight } from './harvest-weight.util';
 
-// Derive a harvest's totals from its entries (+ parent batch for the yields).
-// Pure: all weight derivation flows through the harvest-weight util, so both
-// input modes and any number of quality classes are handled in one place.
+// Derive a harvest's totals from its entries (+ the harvest's own inputMode
+// for weight derivation + parent batch for the yields). Pure: all weight
+// derivation flows through the harvest-weight util, so both input modes and
+// any number of quality classes are handled in one place.
 //
 // avgFruitWeight and avgBrix are SAMPLE-WEIGHTED means (by sampleFruitCount), so
 // a larger sample counts proportionally more. fruitCount is the SUM of the
@@ -15,6 +16,7 @@ import { entryClassWeights, totalFruitWeight } from './harvest-weight.util';
 // harvested. totalFruitWeight INCLUDES waste.
 export function computeHarvestTotals(
   entries: HarvestEntry[] | undefined,
+  inputMode?: InputMode | null,
   batch?: Batch | null,
   crateWeight?: number | null,
 ): HarvestTotals {
@@ -22,23 +24,27 @@ export function computeHarvestTotals(
 
   // Per-class sellable kg (waste excluded): the per-entry class arrays summed
   // element-wise into one positional array (index 0=A, 1=B, ...), as wide as the
-  // widest entry. Dynamic and unbounded — no fixed A/B/C. crateWeight (the
-  // harvest's selected crate) overrides the legacy batch.crateWeight.
+  // widest entry. Dynamic and unbounded — no fixed A/B/C. crateWeight is the
+  // harvest's selected crate weight (legacy batch.crateWeight fallback resolved
+  // by the caller).
   const classKgs = sumByIndex(
-    list.map((e) => entryClassWeights(e, batch, crateWeight)),
+    list.map((e) => entryClassWeights(e, inputMode, crateWeight)),
   ).map((kg) => roundTo(kg, 3));
 
   const waste = roundTo(sum(list.map((e) => e.waste ?? 0)), 3);
   // Total harvested weight = sellable across all classes + waste. Waste counts
   // toward the weight and is still reported separately above.
-  const totalWeight = roundTo(totalFruitWeight(list, batch, crateWeight), 3);
+  const totalWeight = roundTo(
+    totalFruitWeight(list, inputMode, crateWeight),
+    3,
+  );
 
   // Total fruits SAMPLED across the entries — not an estimate of fruits harvested.
   const fruitCount = sum(list.map((e) => e.sampleFruitCount ?? 0));
 
   // Per-class crate counts, summed element-wise the same way. Crate-mode only —
   // null otherwise so the field reflects "not applicable".
-  const isCrate = batch?.inputMode === InputMode.CRATE;
+  const isCrate = inputMode === InputMode.CRATE;
   const crateCounts = isCrate
     ? sumByIndex(list.map((e) => e.crateCounts ?? []))
     : null;

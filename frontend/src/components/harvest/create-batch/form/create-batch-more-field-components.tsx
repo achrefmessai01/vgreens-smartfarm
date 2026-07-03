@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { DecimalInput } from '@/components/ui/decimal-input';
 import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n';
-import { InputMode, useVarietiesQuery } from '@/generated/graphql';
+import { useVarietiesQuery } from '@/generated/graphql';
 import type { BatchFormData, BatchFormErrors } from '@/types/batch.types';
 import { FieldMessage } from '@/components/harvest/field-message';
 import { AddVarietyDialog } from './add-variety-dialog';
@@ -520,57 +520,6 @@ export function HeadsPerSlabField({
         disabled={disabled}
         className="h-10"
       />
-    </div>
-  );
-}
-
-/**
- * Yield input mode toggle (weight vs crate), fixed at batch creation. Sets only
- * the mode, which drives the harvest layout (crate counts vs direct kg) — the
- * crate WEIGHT is no longer a batch field; it's chosen per-harvest from the
- * tenant's crates.
- */
-export function InputModeField({
-  formData,
-  setFormData,
-  disabled = false,
-  // inputMode is fixed at creation: when editing an existing batch the toggle is
-  // locked.
-  lockMode = false,
-}: FormFieldProps & { lockMode?: boolean }) {
-  const { t } = useI18n();
-  const h = t.pages.harvest;
-
-  const modes: ReadonlyArray<{ mode: InputMode; label: string }> = [
-    { mode: InputMode.Weight, label: h?.weightMode ?? 'Weight (kg)' },
-    { mode: InputMode.Crate, label: h?.crateMode ?? 'Crates' },
-  ];
-
-  return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium">
-        {h?.inputMode ?? 'Yield input mode'}
-      </Label>
-      <div className="grid grid-cols-2 gap-2">
-        {modes.map(({ mode, label }) => (
-          <button
-            key={mode}
-            type="button"
-            disabled={disabled || lockMode}
-            onClick={() =>
-              setFormData((prev) => ({ ...prev, inputMode: mode }))
-            }
-            className={`h-10 rounded-md border px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              formData.inputMode === mode
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-input bg-background text-muted-foreground hover:bg-muted/50'
-            }`}
-            aria-pressed={formData.inputMode === mode}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

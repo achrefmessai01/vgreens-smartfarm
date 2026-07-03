@@ -13,6 +13,7 @@ import {
   batchToBatchDetails,
 } from '@/lib/harvest-utils';
 import {
+  InputMode,
   useHarvestsQuery,
   useBatchesQuery,
   useReorderBatchesMutation,
@@ -273,26 +274,20 @@ export function useHarvestPage() {
     (batch: BatchItem) => {
       setEditReadOnly(true);
       setEditBatchNumber(batch.batchNumber ?? null);
-      editHarvest.populate(
-        batch,
-        (harvests ?? []).filter((h) => h.batchId === batch.id),
-      );
+      editHarvest.populate(batch);
       setEditOpen(true);
     },
-    [editHarvest, harvests],
+    [editHarvest],
   );
 
   const handleBatchEdit = React.useCallback(
     (batch: BatchItem) => {
       setEditReadOnly(false);
       setEditBatchNumber(batch.batchNumber ?? null);
-      editHarvest.populate(
-        batch,
-        (harvests ?? []).filter((h) => h.batchId === batch.id),
-      );
+      editHarvest.populate(batch);
       setEditOpen(true);
     },
-    [editHarvest, harvests],
+    [editHarvest],
   );
 
   // Edit an existing harvest event.
@@ -325,17 +320,26 @@ export function useHarvestPage() {
     setBatchSidebarOpen(true);
   }, []);
 
-  // Log a brand-new harvest for an existing batch.
-  const handleLogEntry = React.useCallback((batch: BatchItem) => {
-    setPendingBatch({
-      batchId: batch.id,
-      harvestId: null,
-      details: batchToBatchDetails(batch),
-      initialDate: null,
-    });
-    setSidebarMode('create');
-    setBatchSidebarOpen(true);
-  }, []);
+  // Log a brand-new harvest for an existing batch. The per-harvest input mode
+  // defaults to the batch's most recent harvest's mode (the list is sorted
+  // date DESC), so consecutive harvests keep the grower's habit; a batch with
+  // no harvests yet starts in weight mode.
+  const handleLogEntry = React.useCallback(
+    (batch: BatchItem) => {
+      const lastMode =
+        (harvests ?? []).find((h) => h.batchId === batch.id)?.inputMode ??
+        InputMode.Weight;
+      setPendingBatch({
+        batchId: batch.id,
+        harvestId: null,
+        details: batchToBatchDetails(batch, lastMode),
+        initialDate: null,
+      });
+      setSidebarMode('create');
+      setBatchSidebarOpen(true);
+    },
+    [harvests],
+  );
 
   const handleDeleteRequest = React.useCallback((harvest: HarvestItem) => {
     setIsBatchDelete(false);

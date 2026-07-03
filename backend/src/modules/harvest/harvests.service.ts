@@ -13,7 +13,6 @@ import { BrixReading } from './entities/brix-reading';
 import { CreateHarvestInput } from './dto/create-harvest.input';
 import { UpdateHarvestInput } from './dto/update-harvest.input';
 import { HarvestEntryInput } from './dto/harvest-entry.input';
-import { HarvestCrateAssignmentInput } from './dto/harvest-crate-assignment.input';
 import { HarvestFilterInput } from './dto/harvest-filter.input';
 import { DashboardFilterInput } from './dto/dashboard-filter.input';
 import { HarvestTotals } from './dto/harvest-totals.dto';
@@ -73,16 +72,16 @@ export class HarvestsService {
   }
 
   /**
-   * Resolve and validate a harvest's crate against its batch. Weight-mode
-   * batches carry none (returns null); crate-mode batches require a crate that
-   * belongs to the caller's tenant.
+   * Resolve and validate a harvest's crate against its own input mode.
+   * Weight-mode harvests carry none (returns null); crate-mode harvests
+   * require a crate that belongs to the caller's tenant.
    */
   private async resolveCrate(
     crateId: string | null | undefined,
-    batch: Batch,
+    inputMode: InputMode,
     tenantId: string | undefined,
   ): Promise<Crate | null> {
-    if (batch.inputMode !== InputMode.CRATE) return null;
+    if (inputMode !== InputMode.CRATE) return null;
     if (!crateId) {
       throw new BadRequestException(
         'A crate must be selected for crate-mode harvests',
@@ -145,16 +144,17 @@ export class HarvestsService {
   // counted. Logged, never rejected.
   private warnCrateRemainder(
     input: HarvestEntryInput,
-    batch: Batch,
+    inputMode: InputMode,
     crateWeight: number | null,
+    batchId: string,
   ): void {
-    if (batch.inputMode !== InputMode.CRATE) return;
+    if (inputMode !== InputMode.CRATE) return;
     const weight = crateWeight ?? 0;
     if (weight <= 0) return;
     (input.remainingKgs ?? []).forEach((remainder, i) => {
       if ((remainder ?? 0) >= weight) {
         this.logger.warn(
-          `Crate entry remainingKg[${this.classLetter(i)}]=${remainder} >= crateWeight=${weight} (batch ${batch.id}); that is another full crate.`,
+          `Crate entry remainingKg[${this.classLetter(i)}]=${remainder} >= crateWeight=${weight} (batch ${batchId}); that is another full crate.`,
         );
       }
     });
@@ -189,12 +189,13 @@ export class HarvestsService {
   //
   // Both modes store per-quality arrays now: weight mode the kg directly
   // (classKgs), crate mode the counts + remainders (kg derived at read from the
-  // batch's current crateWeight, so a crateWeight edit propagates). The derived
-  // fields (totalFruitWeight, avgFruitWeight) are always computed at read via the
-  // helpers below and left 0 in storage.
+  // harvest's crate weight, so a crate change propagates). The derived fields
+  // (totalFruitWeight, avgFruitWeight) are always computed at read via the
+  // helpers below and left 0 in storage. The mode is the HARVEST's own, not the
+  // batch's.
   private buildEntry(
     input: HarvestEntryInput,
-    batch: Batch,
+    inputMode: InputMode,
   ): DeepPartial<HarvestEntry> {
     const brixReadings: BrixReading[] = (input.brixReadings ?? []).map((b) => ({
       class: b.class,
@@ -215,7 +216,7 @@ export class HarvestsService {
       avgBrix: this.entryAvgBrix(brixReadings),
     };
 
-    if (batch.inputMode === InputMode.CRATE) {
+    if (inputMode === InputMode.CRATE) {
       return {
         ...common,
         crateCounts: input.crateCounts ?? [],
@@ -225,15 +226,17 @@ export class HarvestsService {
     return { ...common, classKgs: input.classKgs ?? [] };
   }
 
-  // Derive a harvest's totals from its entries (+ parent batch for the yields).
-  // The computation is a pure function (harvest-totals.util); this thin method is
-  // the seam the resolver and the read paths call.
+  // Derive a harvest's totals from its entries (+ the harvest's own inputMode
+  // for weight derivation + parent batch for the yields). The computation is a
+  // pure function (harvest-totals.util); this thin method is the seam the
+  // resolver and the read paths call.
   computeTotals(
     entries: HarvestEntry[] | undefined,
+    inputMode?: InputMode | null,
     batch?: Batch | null,
     crateWeight?: number | null,
   ): HarvestTotals {
-    return computeHarvestTotals(entries, batch, crateWeight);
+    return computeHarvestTotals(entries, inputMode, batch, crateWeight);
   }
 
   async findAllFiltered(
@@ -309,6 +312,7 @@ export class HarvestsService {
     for (const h of harvests) {
       h.totals = this.computeTotals(
         h.entries,
+        h.inputMode,
         h.batch,
         this.harvestCrateWeight(h),
       );
@@ -341,16 +345,19 @@ export class HarvestsService {
     createdById: string,
   ): Promise<Harvest> {
     try {
-      // Validates the batch exists and belongs to the tenant; also gives us the
-      // mode + crateWeight needed to build crate-mode entries.
-      const batch = await this.batchService.findOneById(
-        input.batchId,
-        tenantId,
-      );
-      const crate = await this.resolveCrate(input.crateId, batch, tenantId);
+      // Validates the batch exists and belongs to the tenant. The input mode is
+      // the HARVEST's own choice now (defaulting to weight), not the batch's.
+      await this.batchService.findOneById(input.batchId, tenantId);
+      const inputMode = input.inputMode ?? InputMode.WEIGHT;
+      const crate = await this.resolveCrate(input.crateId, inputMode, tenantId);
       (input.entries ?? []).forEach((e) => {
         this.validateRowSegments(e);
-        this.warnCrateRemainder(e, batch, crate?.weight ?? null);
+        this.warnCrateRemainder(
+          e,
+          inputMode,
+          crate?.weight ?? null,
+          input.batchId,
+        );
       });
 
       this.validateTiming(input.startTime, input.stopTime);
@@ -358,6 +365,7 @@ export class HarvestsService {
       const harvest = this.harvestRepository.create({
         tenantId,
         batchId: input.batchId,
+        inputMode,
         crateId: crate?.id ?? null,
         createdById,
         date: new Date(input.date),
@@ -365,7 +373,9 @@ export class HarvestsService {
         stopTime: input.stopTime ?? null,
         harvesterHeadCount: input.harvesterHeadCount ?? null,
         photoUrls: input.photoUrls ?? [],
-        entries: (input.entries ?? []).map((e) => this.buildEntry(e, batch)),
+        entries: (input.entries ?? []).map((e) =>
+          this.buildEntry(e, inputMode),
+        ),
       });
 
       const saved = await this.harvestRepository.save(harvest);
@@ -393,30 +403,32 @@ export class HarvestsService {
     try {
       const harvest = await this.findOneById(id, tenantId);
 
-      // Resolve the batch we'll build entries against: the new one if the
-      // harvest is being reassigned, otherwise the already-loaded parent.
-      let batch = harvest.batch ?? null;
+      // Reassigning the harvest to another batch only needs the target
+      // validated — the input mode is the harvest's own and moves with it.
       if (input.batchId !== undefined) {
-        batch = await this.batchService.findOneById(input.batchId, tenantId);
+        await this.batchService.findOneById(input.batchId, tenantId);
         harvest.batchId = input.batchId;
       }
       if (input.date !== undefined) harvest.date = new Date(input.date);
       if (input.photoUrls !== undefined) harvest.photoUrls = input.photoUrls;
 
       // Re-resolve the crate against the merged state: an explicit crateId
-      // reassigns it, otherwise the stored crate is kept.
-      let crateWeight: number | null = null;
-      if (batch) {
-        const nextCrateId =
-          input.crateId !== undefined ? input.crateId : harvest.crateId;
-        const crate = await this.resolveCrate(nextCrateId, batch, tenantId);
-        harvest.crateId = crate?.id ?? null;
-        // Keep the loaded relation in sync: TypeORM derives the FK from the
-        // relation object on save, which would otherwise override crateId with
-        // the stale value and silently drop the reassignment.
-        harvest.crate = crate;
-        crateWeight = crate?.weight ?? null;
-      }
+      // reassigns it, otherwise the stored crate is kept. Validation keys off
+      // the harvest's own (immutable-on-update) input mode; mode changes go
+      // through convertHarvestInputMode.
+      const nextCrateId =
+        input.crateId !== undefined ? input.crateId : harvest.crateId;
+      const crate = await this.resolveCrate(
+        nextCrateId,
+        harvest.inputMode,
+        tenantId,
+      );
+      harvest.crateId = crate?.id ?? null;
+      // Keep the loaded relation in sync: TypeORM derives the FK from the
+      // relation object on save, which would otherwise override crateId with
+      // the stale value and silently drop the reassignment.
+      harvest.crate = crate;
+      const crateWeight: number | null = crate?.weight ?? null;
 
       // Validate timing against the merged (final) state: a field left out of
       // the input keeps its stored value; an explicit null clears it.
@@ -433,24 +445,23 @@ export class HarvestsService {
 
       await this.harvestRepository.save(harvest);
 
-      // Entries are authoritative when supplied: replace the whole set.
+      // Entries are authoritative when supplied: replace the whole set. They
+      // are rebuilt in the harvest's own input mode.
       if (input.entries !== undefined) {
         await this.entryRepository.delete({ harvestId: id });
         if (input.entries.length > 0) {
-          if (!batch) {
-            batch = await this.batchService.findOneById(
-              harvest.batchId,
-              tenantId,
-            );
-          }
-          const resolvedBatch = batch;
           input.entries.forEach((e) => {
             this.validateRowSegments(e);
-            this.warnCrateRemainder(e, resolvedBatch, crateWeight);
+            this.warnCrateRemainder(
+              e,
+              harvest.inputMode,
+              crateWeight,
+              harvest.batchId,
+            );
           });
           const entries = input.entries.map((e) =>
             this.entryRepository.create({
-              ...this.buildEntry(e, resolvedBatch),
+              ...this.buildEntry(e, harvest.inputMode),
               harvestId: id,
             }),
           );
@@ -474,128 +485,105 @@ export class HarvestsService {
     }
   }
 
-  // Flip a batch between weight and crate mode, converting every entry of every
-  // harvest in the batch in place (index = quality-class identity, preserved).
-  // inputMode is a batch-level field, so the scope is the whole batch, not one
-  // harvest. The batch flag, each harvest's crate, and every entry's arrays are
-  // rewritten together in a single transaction — all or nothing.
+  // Flip ONE harvest between weight and crate mode, converting each of its
+  // entries in place (index = quality-class identity, preserved). inputMode is
+  // a per-harvest field, so the scope is a single harvest — sibling harvests in
+  // the same batch are untouched and a batch can end up holding both modes.
+  // The harvest's flag, its crate, and every entry's arrays are rewritten
+  // together in a single transaction — all or nothing.
   //
-  // The crate weight each entry converts against:
-  //  - to CRATE: each harvest carries its own chosen crate (weight-mode harvests
-  //    have none), supplied per harvest in `crateAssignments`;
-  //  - to WEIGHT: each harvest keeps deriving from its own crate weight.
-  async convertBatchInputMode(
-    batchId: string,
+  // The crate weight the entries convert against:
+  //  - to CRATE: the crate supplied in `crateId` (required; the harvest is
+  //    pointed at it);
+  //  - to WEIGHT: the harvest's own current crate weight (kept, so a switch
+  //    back reuses it).
+  async convertHarvestInputMode(
+    harvestId: string,
     targetMode: InputMode,
-    crateAssignments: HarvestCrateAssignmentInput[] | null | undefined,
+    crateId: string | null | undefined,
     tenantId?: string,
-  ): Promise<Harvest[]> {
+  ): Promise<Harvest> {
     try {
-      const batch = await this.batchService.findOneById(batchId, tenantId);
+      const harvest = await this.findOneById(harvestId, tenantId);
 
       // Already in the requested mode: nothing to convert.
-      if (batch.inputMode === targetMode) {
-        return this.findAllFiltered(tenantId, { batchId });
-      }
+      if (harvest.inputMode === targetMode) return harvest;
 
-      const harvests = await this.findAllFiltered(tenantId, { batchId });
-
-      // Resolve the per-harvest crate weight each entry converts against, before
-      // any write, so the whole conversion validates up front and fails cleanly
-      // rather than half-applying.
-      const crateByHarvest = new Map<string, Crate>();
+      // Resolve the crate weight the entries convert against before any write,
+      // so the conversion validates up front and fails cleanly.
+      let crate: Crate | null = null;
+      let crateWeight: number;
       if (targetMode === InputMode.CRATE) {
-        // Each harvest in the batch must be assigned a crate; resolve (and cache)
-        // each crate and require a positive weight so we never divide by zero.
-        const assignmentByHarvest = new Map(
-          (crateAssignments ?? []).map((a) => [a.harvestId, a.crateId]),
-        );
-        const crateCache = new Map<string, Crate>();
-        for (const h of harvests) {
-          const crateId = assignmentByHarvest.get(h.id);
-          if (!crateId) {
-            throw new BadRequestException(
-              `Harvest ${h.id} needs a crate to switch to crate mode`,
-            );
-          }
-          let crate = crateCache.get(crateId) ?? null;
-          if (!crate) {
-            crate = await this.crateService.findOneScoped(crateId, tenantId);
-            if (!crate) {
-              throw new NotFoundException(`Crate with ID ${crateId} not found`);
-            }
-            if (!(crate.weight > 0)) {
-              throw new BadRequestException(
-                'The selected crate must have a weight greater than 0',
-              );
-            }
-            crateCache.set(crateId, crate);
-          }
-          crateByHarvest.set(h.id, crate);
+        // Crate mode derives kg from a crate weight, so a crate is required and
+        // must have a positive weight (we never divide by zero).
+        if (!crateId) {
+          throw new BadRequestException(
+            'A crate must be selected to switch this harvest to crate mode',
+          );
         }
+        crate = await this.crateService.findOneScoped(crateId, tenantId);
+        if (!crate) {
+          throw new NotFoundException(`Crate with ID ${crateId} not found`);
+        }
+        if (!(crate.weight > 0)) {
+          throw new BadRequestException(
+            'The selected crate must have a weight greater than 0',
+          );
+        }
+        crateWeight = crate.weight;
       } else {
-        // Switching to weight mode reconstructs kg from each harvest's own crate
-        // weight; every harvest must have a positive one.
-        for (const h of harvests) {
-          const cw = this.harvestCrateWeight(h);
-          if (!(cw != null && cw > 0)) {
-            throw new BadRequestException(
-              `Harvest ${h.id} has no crate weight to convert from; set a crate first`,
-            );
-          }
+        // Switching to weight mode reconstructs kg from the harvest's own crate
+        // weight; it must have a positive one.
+        const cw = this.harvestCrateWeight(harvest);
+        if (!(cw != null && cw > 0)) {
+          throw new BadRequestException(
+            `Harvest ${harvestId} has no crate weight to convert from; set a crate first`,
+          );
         }
+        crateWeight = cw;
       }
 
       await this.dataSource.transaction(async (manager) => {
-        // Flip the batch flag. Scalar-only update to avoid cascading the loaded
-        // batch graph.
-        await manager.update(Batch, batchId, { inputMode: targetMode });
+        // Flip the harvest's flag (and point it at the chosen crate when
+        // entering crate mode; leaving keeps the crate so a switch back reuses
+        // it). Scalar-only update to avoid cascading the loaded graph.
+        await manager.update(
+          Harvest,
+          harvestId,
+          crate
+            ? { inputMode: targetMode, crateId: crate.id }
+            : { inputMode: targetMode },
+        );
 
-        for (const harvest of harvests) {
-          const crate =
-            targetMode === InputMode.CRATE
-              ? (crateByHarvest.get(harvest.id) as Crate)
-              : null;
-          const cw =
-            targetMode === InputMode.CRATE
-              ? crate.weight
-              : (this.harvestCrateWeight(harvest) as number);
-
-          // Point each harvest at its chosen crate when entering crate mode.
-          if (targetMode === InputMode.CRATE && crate) {
-            await manager.update(Harvest, harvest.id, { crateId: crate.id });
-          }
-
-          for (const entry of harvest.entries ?? []) {
-            if (targetMode === InputMode.CRATE) {
-              const { crateCounts, remainingKgs } = weightToCrate(
-                entry.classKgs ?? [],
-                cw,
-              );
-              // Store the mode's arrays; null the other mode's so an entry only
-              // ever carries its active mode's data (mirrors buildEntry).
-              await manager.update(HarvestEntry, entry.id, {
-                crateCounts,
-                remainingKgs,
-                classKgs: null,
-              });
-            } else {
-              const { classKgs } = crateToWeight(
-                entry.crateCounts ?? [],
-                entry.remainingKgs ?? [],
-                cw,
-              );
-              await manager.update(HarvestEntry, entry.id, {
-                classKgs,
-                crateCounts: null,
-                remainingKgs: null,
-              });
-            }
+        for (const entry of harvest.entries ?? []) {
+          if (targetMode === InputMode.CRATE) {
+            const { crateCounts, remainingKgs } = weightToCrate(
+              entry.classKgs ?? [],
+              crateWeight,
+            );
+            // Store the mode's arrays; null the other mode's so an entry only
+            // ever carries its active mode's data (mirrors buildEntry).
+            await manager.update(HarvestEntry, entry.id, {
+              crateCounts,
+              remainingKgs,
+              classKgs: null,
+            });
+          } else {
+            const { classKgs } = crateToWeight(
+              entry.crateCounts ?? [],
+              entry.remainingKgs ?? [],
+              crateWeight,
+            );
+            await manager.update(HarvestEntry, entry.id, {
+              classKgs,
+              crateCounts: null,
+              remainingKgs: null,
+            });
           }
         }
       });
 
-      return this.findAllFiltered(tenantId, { batchId });
+      return this.findOneById(harvestId, tenantId);
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -604,11 +592,11 @@ export class HarvestsService {
         throw error;
       }
       this.logger.error(
-        `convertBatchInputMode failed: ${error instanceof Error ? error.message : String(error)}`,
+        `convertHarvestInputMode failed: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
       );
       throw new InternalServerErrorException(
-        'Failed to convert batch input mode',
+        'Failed to convert harvest input mode',
       );
     }
   }
@@ -643,11 +631,11 @@ export class HarvestsService {
 
     const weightByBatch = new Map<string, number>();
     for (const h of harvests) {
-      // entryTotalWeight reads crate-mode entries off the batch's crateWeight;
-      // findAllFiltered already joins h.batch.
+      // entryTotalWeight reads crate-mode entries off the harvest's own mode +
+      // crate weight; findAllFiltered already joins h.crate/h.batch.
       const crateWeight = this.harvestCrateWeight(h);
       const weight = (h.entries ?? []).reduce(
-        (s, e) => s + entryTotalWeight(e, h.batch, crateWeight),
+        (s, e) => s + entryTotalWeight(e, h.inputMode, crateWeight),
         0,
       );
       weightByBatch.set(
@@ -731,6 +719,7 @@ export class HarvestsService {
         harvest,
         totals: this.computeTotals(
           harvest.entries,
+          harvest.inputMode,
           harvest.batch,
           this.harvestCrateWeight(harvest),
         ),

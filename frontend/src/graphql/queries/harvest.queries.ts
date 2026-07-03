@@ -16,6 +16,7 @@ const HARVEST_FIELDS = gql`
     photoUrls
     createdAt
     updatedAt
+    inputMode
     crateId
     crate {
       id
@@ -49,7 +50,6 @@ const HARVEST_FIELDS = gql`
       totalPlants
       lostPlants
       replicates
-      inputMode
       crateWeight
       greenhouse {
         id

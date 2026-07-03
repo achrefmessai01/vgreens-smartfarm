@@ -764,11 +764,9 @@ export const en = {
       weightMode: 'Weight (kg)',
       crateMode: 'Crates',
       selectCrateToConvert: 'Select a crate to convert',
-      chooseCratePerHarvest: 'Choose a crate for each harvest',
-      noHarvestsToConvert: 'This batch has no harvests to convert yet.',
       convertModeTitle: 'Switch input mode?',
       convertModeDescription:
-        'This converts every harvest entry in this batch to the new input mode. You can switch back at any time.',
+        "This converts this harvest's entries to the new input mode. You can switch back at any time.",
       convertModeConfirm: 'Convert',
       crateWeight: 'Crate Weight (kg)',
       enterCrateWeight: 'Weight of one full crate',

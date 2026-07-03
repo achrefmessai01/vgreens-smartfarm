@@ -1,4 +1,4 @@
-import { BatchStatus } from '@/generated/graphql';
+import { BatchStatus, InputMode } from '@/generated/graphql';
 import type { BatchFormData } from '@/types/batch.types';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { createEmptyEntry } from '@/types/batch-sidebar.types';
@@ -39,7 +39,9 @@ export function createBatchDetailsFromForm(
     totalPlants: formData.totalPlants,
     lostPlants: formData.lostPlants,
     replicates,
-    inputMode: formData.inputMode,
+    // Input mode is per-harvest now: a fresh batch's first harvest starts in
+    // weight mode and the sidebar's toggle switches it before saving.
+    inputMode: InputMode.Weight,
     // A freshly created batch has no harvest yet, so no crate is selected — the
     // sidebar requires the user to pick one when logging the first crate-mode
     // harvest. crateWeight follows the selection (null until then).

@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsDateString,
   IsArray,
+  IsEnum,
   IsInt,
   Min,
   Matches,
@@ -11,6 +12,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { InputType, Field, ID, Int } from '@nestjs/graphql';
+import { InputMode } from '@common/enums';
 import { HarvestEntryInput } from './harvest-entry.input';
 
 // Wall-clock time-of-day in 24h HH:mm (e.g. "08:30"). Cross-field ordering
@@ -32,8 +34,22 @@ export class CreateHarvestInput {
   batchId: string;
 
   /**
+   * How THIS harvest records yield (per-harvest — sibling harvests in the same
+   * batch may differ). Defaults to weight. Set at creation; later mode changes
+   * go through convertHarvestInputMode so the stored entries are converted
+   * alongside the flag.
+   */
+  @Field(() => InputMode, {
+    nullable: true,
+    defaultValue: InputMode.WEIGHT,
+  })
+  @IsOptional()
+  @IsEnum(InputMode)
+  inputMode?: InputMode;
+
+  /**
    * Selected crate (its weight drives crate-mode kg). Optional here, but the
-   * service requires it for crate-mode batches and ignores it for weight mode.
+   * service requires it for crate-mode harvests and ignores it for weight mode.
    */
   @Field(() => ID, { nullable: true })
   @IsOptional()

@@ -1,5 +1,3 @@
-import type { InputMode } from '@/generated/graphql';
-
 export interface BatchFormData {
   // Cascading selection: greenhouse -> crop (required) -> variety (optional).
   // sourceGreenhouse / cropId / varietyId hold the selected entity ids.
@@ -30,10 +28,6 @@ export interface BatchFormData {
   // Number of heads per slab. Tomato-only, optional metadata; 0 means "unset"
   // (the form's empty convention) and is persisted as null.
   headsPerSlab: number;
-  // Yield input mode, fixed at creation. Drives the harvest layout (crate counts
-  // vs direct kg). The crate WEIGHT is no longer a batch field — it's selected
-  // per-harvest from the tenant's crates when logging a crate-mode harvest.
-  inputMode: InputMode;
 }
 
 export interface BatchFormErrors {

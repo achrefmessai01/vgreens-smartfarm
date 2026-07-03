@@ -15,15 +15,18 @@ import {
   type SidebarMode,
 } from '@/lib/hooks/use-batch-sidebar';
 import { WriteActionButton } from '@/components/ui/write-action-button';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CalendarDays, Sparkles } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Sparkles } from 'lucide-react';
+import { InputMode } from '@/generated/graphql';
 import { PhotosField } from './fields/batch-sidebar-photos-field';
 import type { BatchDetailsData } from '@/types/batch-sidebar.types';
 import { entryHasData } from '@/types/batch-sidebar.types';
 import { FieldMessage } from '@/components/harvest/field-message';
 import { isTomatoSpecies } from '@/lib/harvest-utils';
 import { HarvestEntryCard } from './fields/harvest-entry-card';
+import { HarvestInputModeField } from './fields/input-mode-field';
 import { CrateSelectField } from './fields/crate-select-field';
 
 export interface BatchSidebarProps {
@@ -73,6 +76,14 @@ export function BatchSidebar({
     isCrateMode,
     crateError,
     handleCrateSelect,
+    pendingMode,
+    pendingCrate,
+    pendingCrateMissing,
+    converting,
+    handleModeSelect,
+    cancelModeSwitch,
+    handlePendingCrateSelect,
+    handleConfirmModeSwitch,
     confirmedWasteEntries,
     setWasteConfirmed,
     handleBrixChange,
@@ -265,6 +276,64 @@ export function BatchSidebar({
                       {timingErrors.harvesterHeadCount}
                     </FieldMessage>
                   </div>
+                </div>
+
+                {/* Per-harvest yield input mode. Creating: flips the entry
+                    layout directly. Editing: stages a server-side conversion
+                    of this harvest's stored entries, confirmed inline below
+                    (with a crate picker when switching to crate mode). */}
+                <div className="bg-card space-y-3 rounded-xl border p-3 shadow-sm">
+                  <HarvestInputModeField
+                    value={currentData.inputMode}
+                    pendingValue={pendingMode}
+                    onSelect={handleModeSelect}
+                    disabled={busy}
+                  />
+                  {pendingMode !== null && (
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-2 text-sm">
+                        <AlertTriangle className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                        <span>
+                          {h?.convertModeDescription ??
+                            "This converts this harvest's entries to the new input mode. You can switch back at any time."}
+                        </span>
+                      </div>
+                      {pendingMode === InputMode.Crate && (
+                        <CrateSelectField
+                          value={pendingCrate?.id ?? null}
+                          onSelect={handlePendingCrateSelect}
+                          error={
+                            pendingCrateMissing
+                              ? (h?.selectCrateToConvert ??
+                                'Select a crate to convert')
+                              : undefined
+                          }
+                          disabled={busy}
+                        />
+                      )}
+                      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={cancelModeSwitch}
+                          disabled={busy}
+                          className="w-full sm:w-auto"
+                        >
+                          {h?.cancel ?? 'Cancel'}
+                        </Button>
+                        <WriteActionButton
+                          type="button"
+                          onClick={handleConfirmModeSwitch}
+                          disabled={busy || pendingCrateMissing}
+                          className="w-full sm:w-auto"
+                        >
+                          {converting
+                            ? (h?.updating ?? 'Updating...')
+                            : (h?.convertModeConfirm ?? 'Convert')}
+                        </WriteActionButton>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Crate selector: crate-mode only, between the harvesters

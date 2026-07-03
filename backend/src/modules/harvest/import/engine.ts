@@ -227,16 +227,17 @@ export async function runImport(
     try {
       await dataSource.transaction(async (manager) => {
         // Single INSERT for all new harvests
-        const harvestResult = await manager
-          .getRepository(Harvest)
-          .insert(
-            toCreate.map((p) => ({
-              tenantId: tenant!.id,
-              batchId: p.batch.id,
-              date: new Date(p.harvestDate),
-              photoUrls: [],
-            })),
-          );
+        const harvestResult = await manager.getRepository(Harvest).insert(
+          toCreate.map((p) => ({
+            tenantId: tenant!.id,
+            batchId: p.batch.id,
+            // Imported rows carry direct kg (classKgs), so every imported
+            // harvest is a weight-mode harvest.
+            inputMode: InputMode.WEIGHT,
+            date: new Date(p.harvestDate),
+            photoUrls: [],
+          })),
+        );
 
         // Build all entries, mapping each to its newly inserted harvest ID
         const allEntries = toCreate.flatMap((p, i) => {
@@ -414,7 +415,6 @@ async function resolveOrCreateBatch(
     greenhouseId: greenhouse?.id ?? null,
     name: row.batchName,
     status: BatchStatus.ACTIVE,
-    inputMode: InputMode.WEIGHT,
     plantingDate: new Date(),
     totalPlants: row.totalPlantsHint ?? 0,
     numberOfRows: 0,

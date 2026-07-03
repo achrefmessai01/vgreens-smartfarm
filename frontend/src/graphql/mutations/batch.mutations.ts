@@ -24,7 +24,6 @@ const BATCH_MUTATION_FIELDS = gql`
     avgHeadsPerPlant
     slabLength
     headsPerSlab
-    inputMode
     crateWeight
     greenhouse {
       id
