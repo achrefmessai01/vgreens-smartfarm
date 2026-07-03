@@ -711,6 +711,11 @@ export const ar = {
       inputMode: 'وضع إدخال المحصول',
       weightMode: 'الوزن (kg)',
       crateMode: 'صناديق',
+      selectCrateToConvert: 'اختر صندوقًا للتحويل',
+      convertModeTitle: 'تغيير وضع الإدخال؟',
+      convertModeDescription:
+        'سيؤدي هذا إلى تحويل إدخالات هذا الحصاد إلى وضع الإدخال الجديد. يمكنك التبديل مرة أخرى في أي وقت.',
+      convertModeConfirm: 'تحويل',
       crateWeight: 'وزن الصندوق (kg)',
       enterCrateWeight: 'وزن صندوق ممتلئ',
       crateWeightLabel: 'وزن الصندوق: {weight} kg',

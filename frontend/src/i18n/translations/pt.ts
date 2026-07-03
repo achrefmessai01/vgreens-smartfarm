@@ -724,6 +724,11 @@ export const pt = {
       inputMode: 'Modo de registo do rendimento',
       weightMode: 'Peso (kg)',
       crateMode: 'Caixas',
+      selectCrateToConvert: 'Selecionar uma caixa para converter',
+      convertModeTitle: 'Mudar o modo de registo?',
+      convertModeDescription:
+        'Isto converte os registos desta colheita para o novo modo de registo. Pode voltar a mudar a qualquer momento.',
+      convertModeConfirm: 'Converter',
       crateWeight: 'Peso da caixa (kg)',
       enterCrateWeight: 'Peso de uma caixa cheia',
       crateWeightLabel: 'Peso da caixa: {weight} kg',

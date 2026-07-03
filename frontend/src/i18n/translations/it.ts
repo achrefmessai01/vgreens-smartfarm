@@ -726,6 +726,11 @@ export const it = {
       inputMode: 'Modalità di inserimento resa',
       weightMode: 'Peso (kg)',
       crateMode: 'Cassette',
+      selectCrateToConvert: 'Seleziona una cassetta per la conversione',
+      convertModeTitle: 'Cambiare la modalità di inserimento?',
+      convertModeDescription:
+        'Questo converte le registrazioni di questa raccolta nella nuova modalità di inserimento. Puoi tornare indietro in qualsiasi momento.',
+      convertModeConfirm: 'Converti',
       crateWeight: 'Peso cassetta (kg)',
       enterCrateWeight: 'Peso di una cassetta piena',
       crateWeightLabel: 'Peso cassetta: {weight} kg',

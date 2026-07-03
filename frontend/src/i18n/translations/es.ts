@@ -714,6 +714,11 @@ export const es = {
       inputMode: 'Modo de registro del rendimiento',
       weightMode: 'Peso (kg)',
       crateMode: 'Cajas',
+      selectCrateToConvert: 'Seleccionar una caja para convertir',
+      convertModeTitle: '¿Cambiar el modo de registro?',
+      convertModeDescription:
+        'Esto convierte los registros de esta cosecha al nuevo modo de registro. Se puede volver a cambiar en cualquier momento.',
+      convertModeConfirm: 'Convertir',
       crateWeight: 'Peso de la caja (kg)',
       enterCrateWeight: 'Peso de una caja llena',
       crateWeightLabel: 'Peso de la caja: {weight} kg',

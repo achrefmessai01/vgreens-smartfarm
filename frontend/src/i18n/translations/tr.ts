@@ -717,6 +717,11 @@ export const tr = {
       inputMode: 'Verim giriş modu',
       weightMode: 'Ağırlık (kg)',
       crateMode: 'Kasalar',
+      selectCrateToConvert: 'Dönüştürmek için bir kasa seçin',
+      convertModeTitle: 'Giriş modu değiştirilsin mi?',
+      convertModeDescription:
+        'Bu işlem, bu hasadın kayıtlarını yeni giriş moduna dönüştürür. İstediğiniz zaman geri dönebilirsiniz.',
+      convertModeConfirm: 'Dönüştür',
       crateWeight: 'Kasa ağırlığı (kg)',
       enterCrateWeight: 'Bir dolu kasanın ağırlığı',
       crateWeightLabel: 'Kasa ağırlığı: {weight} kg',

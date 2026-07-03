@@ -712,6 +712,11 @@ export const fr = {
       inputMode: 'Mode de saisie du rendement',
       weightMode: 'Poids (kg)',
       crateMode: 'Caisses',
+      selectCrateToConvert: 'Sélectionner une caisse pour la conversion',
+      convertModeTitle: 'Changer le mode de saisie ?',
+      convertModeDescription:
+        'Cela convertit les saisies de cette récolte vers le nouveau mode de saisie. Vous pouvez revenir en arrière à tout moment.',
+      convertModeConfirm: 'Convertir',
       crateWeight: 'Poids de la caisse (kg)',
       enterCrateWeight: "Poids d'une caisse pleine",
       crateWeightLabel: 'Poids de la caisse : {weight} kg',

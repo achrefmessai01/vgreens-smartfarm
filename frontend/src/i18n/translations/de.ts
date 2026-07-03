@@ -714,6 +714,11 @@ export const de = {
       inputMode: 'Ertragserfassung',
       weightMode: 'Gewicht (kg)',
       crateMode: 'Kisten',
+      selectCrateToConvert: 'Kiste für die Umrechnung auswählen',
+      convertModeTitle: 'Erfassungsmodus wechseln?',
+      convertModeDescription:
+        'Dadurch werden die Einträge dieser Ernte in den neuen Erfassungsmodus umgerechnet. Ein Wechsel zurück ist jederzeit möglich.',
+      convertModeConfirm: 'Umrechnen',
       crateWeight: 'Kistengewicht (kg)',
       enterCrateWeight: 'Gewicht einer vollen Kiste',
       crateWeightLabel: 'Kistengewicht: {weight} kg',
