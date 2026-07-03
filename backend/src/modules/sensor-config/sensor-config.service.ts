@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpsertSensorConfigInput } from './dto';
 import { SensorConfig } from './entities/sensor-config.entity';
+import { SOIL_DEVICE_REGEX } from './calibration.util';
 
 @Injectable()
 export class SensorConfigService {
@@ -74,5 +75,61 @@ export class SensorConfigService {
     if (!config) throw new NotFoundException(`SensorConfig ${id} not found`);
     await this.repo.remove(config);
     return true;
+  }
+
+  /**
+   * The tenant's SOIL sensor configs (device matches `^Soil_`, case-insensitive)
+   * that are NOT hidden from the farm overview — the set the calibration
+   * dropdown offers and whose corrected values render on the map. Postgres LIKE
+   * treats `_` as a wildcard, so the pattern escapes it (`Soil\_%`).
+   */
+  async findSoilByTenant(tenantId: string): Promise<SensorConfig[]> {
+    return this.repo
+      .createQueryBuilder('config')
+      .leftJoinAndSelect('config.greenhouseRef', 'greenhouseRef')
+      .where('config.tenantId = :tenantId', { tenantId })
+      .andWhere('config.device ILIKE :pattern', { pattern: 'Soil\\_%' })
+      .andWhere('config.hiddenInFarmOverview IS NOT TRUE')
+      .orderBy('config.device', 'ASC')
+      .getMany();
+  }
+
+  async findByIdForTenant(
+    id: string,
+    tenantId: string,
+  ): Promise<SensorConfig | null> {
+    return this.repo.findOne({
+      where: { id, tenantId },
+      relations: ['greenhouseRef'],
+    });
+  }
+
+  /** True iff the device name identifies a soil sensor. */
+  isSoilDevice(device: string): boolean {
+    return SOIL_DEVICE_REGEX.test(device);
+  }
+
+  /**
+   * Persists a single calibration bound on the sensor (`null` clears it). A
+   * one-column UPDATE scoped by (id, tenantId) is atomic on its own — the
+   * other bound and every other column are untouched. Returns the reloaded
+   * config.
+   */
+  async saveCalibrationBound(
+    id: string,
+    tenantId: string,
+    patch:
+      | { avgDryReading: number | null }
+      | { avgSaturatedReading: number | null },
+  ): Promise<SensorConfig> {
+    const result = await this.repo.update({ id, tenantId }, patch);
+    if (!result.affected) {
+      throw new NotFoundException(`SensorConfig ${id} not found`);
+    }
+    const updated = await this.findByIdForTenant(id, tenantId);
+    if (!updated) {
+      throw new NotFoundException(`SensorConfig ${id} not found`);
+    }
+    return updated;
   }
 }

@@ -513,14 +513,16 @@ export const fr = {
       daysActive: 'Jours actifs',
       sincePlanting: 'Depuis la plantation',
       yieldOverTime: 'Rendement dans le temps',
-      yieldPerRunningMeterOverTime: 'Rendement par mètre linéaire dans le temps',
+      yieldPerRunningMeterOverTime:
+        'Rendement par mètre linéaire dans le temps',
       yieldPerRunningMeterUnit: 'Rendement (kg/m linéaire)',
       yieldPerPlant: 'Rendement par plante',
       yieldPerPlantShort: 'Rendement/Plante',
       yieldPerRunningMeterShort: 'Rendement/m',
       yieldPerRunningMeter: 'Rendement par mètre linéaire',
       yieldPerRunningMeterSubtitle: 'kg commercialisables par mètre linéaire',
-      yieldPerRunningMeterNoData: 'Définir la longueur de rang et le nombre de rangs du lot',
+      yieldPerRunningMeterNoData:
+        'Définir la longueur de rang et le nombre de rangs du lot',
       yieldPerSquareMeter: 'Rendement par m²',
       yieldPerSquareMeterSubtitle: 'kg totaux par m²',
       yieldPerSquareMeterNoData: 'Définir la surface de culture du lot',
@@ -715,7 +717,8 @@ export const fr = {
       crateOptionLabel: '{weight} kg',
       addCrateOption: '+ Ajouter une nouvelle caisse…',
       addCrate: 'Ajouter une caisse',
-      addCrateDescription: 'Créer une nouvelle taille de caisse pour ce locataire.',
+      addCrateDescription:
+        'Créer une nouvelle taille de caisse pour ce locataire.',
       crateWeightRequired: 'Le poids de la caisse doit être supérieur à 0',
       crateCreateFailed: "Échec de l'ajout de la caisse",
       saveCrate: 'Enregistrer',
@@ -808,7 +811,8 @@ export const fr = {
       rowSegmentLabel: 'Segment {n}',
       addRowPair: 'Ajouter un segment de rangée',
       removeRowPair: 'Supprimer le segment',
-      rowSegmentsOverlap: 'Les segments doivent être ordonnés et ne pas se chevaucher',
+      rowSegmentsOverlap:
+        'Les segments doivent être ordonnés et ne pas se chevaucher',
       addBrixMeasurements: 'Ajouter des mesures Brix',
       fruitWeightMeasurement: 'Poids des fruits',
       trossWeightMeasurement: 'Poids du Tross',
@@ -1079,7 +1083,8 @@ export const fr = {
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:
           'Laissez vide pour autoriser n’importe quel domaine e-mail. Appuyez sur Entrée ou virgule pour ajouter.',
-        allowedDomainsInvalid: 'Saisissez un domaine valide (par ex. example.com)',
+        allowedDomainsInvalid:
+          'Saisissez un domaine valide (par ex. example.com)',
         allowedDomainsRemove: 'Supprimer le domaine',
         domainNotAllowed:
           'Ce domaine e-mail n’est pas autorisé pour le locataire sélectionné.',
@@ -1127,8 +1132,17 @@ export const fr = {
           notConfigured: 'Non configuré',
         },
         farmLayout: {
+          validationError:
+            'Certaines serres ont des valeurs non valides. Corrigez les champs signalés puis enregistrez à nouveau.',
+          saveFailed: 'Échec de l’enregistrement. Veuillez réessayer.',
+          nameRequired: 'Le nom est requis.',
+          dimensionsInvalid:
+            'La largeur et la longueur doivent être supérieures à 0.',
+          bayCountInvalid:
+            'Les travées doivent être un nombre entier d’au moins 1.',
           title: 'Plan de la ferme',
-          subtitle: 'Configurer noms et dimensions des serres',
+          subtitle:
+            'Configurer les serres, leurs cultures et cycles d’irrigation',
           save: 'Enregistrer',
           saving: 'Enregistrement…',
           greenhouses: 'Serres',

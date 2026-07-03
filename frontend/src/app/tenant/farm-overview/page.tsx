@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  CalibrationDropdown,
   CombinedGreenhouseView,
   FarmOverviewCard,
   FarmOverviewPageSkeleton,
@@ -60,6 +61,21 @@ export default function FarmOverviewPage() {
                 hideAllLabel={t.pages.farmOverview.hideAllSensors}
                 visibleSuffixLabel={t.pages.farmOverview.sensorsVisible}
                 overviewLabel={t.pages.farmOverview.enableSensorOverview}
+              />
+            )}
+            {/* Admin-only: soil-sensor calibration by irrigation cycle.
+                Server enforces the same role on the cycles query and the
+                capture mutations. */}
+            {state.canEditSensorPositions && (
+              <CalibrationDropdown
+                cycles={state.irrigationCycles}
+                tenantId={state.calibrationTenantId}
+                onCalibrated={() => {
+                  // Refresh both: bounds live on sensor_configs (drives the
+                  // map's corrected values), the sidebar rows on the cycle.
+                  void state.refetchSoilSensorConfigs();
+                  void state.refetchIrrigationCycles();
+                }}
               />
             )}
             {state.isVGreensAdmin && (

@@ -525,14 +525,16 @@ export const pt = {
       daysActive: 'Dias ativos',
       sincePlanting: 'Desde a plantação',
       yieldOverTime: 'Produção ao longo do tempo',
-      yieldPerRunningMeterOverTime: 'Produção por metro linear ao longo do tempo',
+      yieldPerRunningMeterOverTime:
+        'Produção por metro linear ao longo do tempo',
       yieldPerRunningMeterUnit: 'Produção (kg/m linear)',
       yieldPerPlant: 'Produção por planta',
       yieldPerPlantShort: 'Produção/Planta',
       yieldPerRunningMeterShort: 'Produção/m',
       yieldPerRunningMeter: 'Produção por metro linear',
       yieldPerRunningMeterSubtitle: 'kg vendáveis por metro linear',
-      yieldPerRunningMeterNoData: 'Defina o comprimento da fileira e o número de fileiras no lote',
+      yieldPerRunningMeterNoData:
+        'Defina o comprimento da fileira e o número de fileiras no lote',
       yieldPerSquareMeter: 'Produção por m²',
       yieldPerSquareMeterSubtitle: 'kg totais por m²',
       yieldPerSquareMeterNoData: 'Defina a área de cultivo no lote',
@@ -727,7 +729,8 @@ export const pt = {
       crateOptionLabel: '{weight} kg',
       addCrateOption: '+ Adicionar nova caixa...',
       addCrate: 'Adicionar caixa',
-      addCrateDescription: 'Criar um novo tamanho de caixa para este inquilino.',
+      addCrateDescription:
+        'Criar um novo tamanho de caixa para este inquilino.',
       crateWeightRequired: 'O peso da caixa deve ser maior que 0',
       crateCreateFailed: 'Falha ao adicionar a caixa',
       saveCrate: 'Guardar',
@@ -820,7 +823,8 @@ export const pt = {
       rowSegmentLabel: 'Segmento {n}',
       addRowPair: 'Adicionar segmento de linha',
       removeRowPair: 'Remover segmento',
-      rowSegmentsOverlap: 'Os segmentos devem estar ordenados e não se sobrepor',
+      rowSegmentsOverlap:
+        'Os segmentos devem estar ordenados e não se sobrepor',
       addBrixMeasurements: 'Adicionar medições Brix',
       fruitWeightMeasurement: 'Peso do fruto',
       trossWeightMeasurement: 'Peso do Tross',
@@ -1095,7 +1099,8 @@ export const pt = {
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:
           'Deixe vazio para permitir qualquer domínio de e-mail. Pressione Enter ou vírgula para adicionar.',
-        allowedDomainsInvalid: 'Introduza um domínio válido (por ex. example.com)',
+        allowedDomainsInvalid:
+          'Introduza um domínio válido (por ex. example.com)',
         allowedDomainsRemove: 'Remover domínio',
         domainNotAllowed:
           'Este domínio de e-mail não é permitido para o inquilino selecionado.',
@@ -1148,8 +1153,16 @@ export const pt = {
           notConfigured: 'Não configurado',
         },
         farmLayout: {
+          validationError:
+            'Algumas estufas têm valores inválidos. Corrija os campos assinalados e guarde novamente.',
+          saveFailed: 'Falha ao guardar. Tente novamente.',
+          nameRequired: 'O nome é obrigatório.',
+          dimensionsInvalid:
+            'A largura e o comprimento devem ser superiores a 0.',
+          bayCountInvalid:
+            'As naves devem ser um número inteiro de pelo menos 1.',
           title: 'Esquema da quinta',
-          subtitle: 'Configure os nomes e dimensões das estufas',
+          subtitle: 'Configure as estufas, as suas culturas e ciclos de rega',
           save: 'Guardar',
           saving: 'A guardar…',
           greenhouses: 'Estufas',
