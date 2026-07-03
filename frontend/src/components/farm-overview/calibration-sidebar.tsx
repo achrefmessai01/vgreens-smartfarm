@@ -119,8 +119,18 @@ export function CalibrationSidebar({
   const [view, setView] = React.useState<'overview' | CalibrationPhase>(
     'overview',
   );
-  const { captures, anyBusy, now, start, startAll, cancel, cancelAll } =
-    useCycleCalibration({ tenantId, onCalibrated });
+  const {
+    captures,
+    clearing,
+    anyBusy,
+    now,
+    start,
+    startAll,
+    cancel,
+    cancelAll,
+    clearBound,
+    clearAll,
+  } = useCycleCalibration({ tenantId, onCalibrated });
 
   // Abandon all in-flight captures when the sheet closes (explicit close is a
   // cancel — status is client-side only)…
@@ -194,6 +204,7 @@ export function CalibrationSidebar({
       (capture.status === 'waiting' || capture.status === 'saving');
     const busyThisPhase = busy && capture.phase === phase;
     const busyOtherPhase = busy && capture.phase !== phase;
+    const isClearing = clearing[sensor.id] === true;
     const errored =
       capture !== undefined &&
       capture.status === 'error' &&
@@ -241,21 +252,35 @@ export function CalibrationSidebar({
                 Cancel
               </Button>
             ) : (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 px-2 text-xs"
-                disabled={busyOtherPhase}
-                onClick={() => start(sensor.id, phase)}
-              >
-                <Droplet
-                  className={cn(
-                    'mr-1 h-3 w-3',
-                    phase === 'saturated' && 'fill-current',
-                  )}
-                />
-                {value != null || errored ? 'Recalibrate' : 'Calibrate'}
-              </Button>
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 px-2 text-xs"
+                  disabled={busyOtherPhase || isClearing}
+                  onClick={() => start(sensor.id, phase)}
+                >
+                  <Droplet
+                    className={cn(
+                      'mr-1 h-3 w-3',
+                      phase === 'saturated' && 'fill-current',
+                    )}
+                  />
+                  {value != null || errored ? 'Recalibrate' : 'Calibrate'}
+                </Button>
+                {value != null && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive h-7 px-2 text-xs"
+                    disabled={busyOtherPhase || isClearing}
+                    onClick={() => void clearBound(sensor.id, phase)}
+                    aria-label={`Clear ${PHASE_META[phase].boundLabel} of ${sensor.device}`}
+                  >
+                    {isClearing ? 'Clearing…' : 'Clear'}
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -312,6 +337,15 @@ export function CalibrationSidebar({
       })
       .map((s) => s.id);
     const runningCount = sensors.length - idleSensorIds.length;
+    // Sensors whose bound for this phase can be cleared right now.
+    const clearableSensorIds = sensors
+      .filter(
+        (s) =>
+          phaseValue(s, phase) != null &&
+          idleSensorIds.includes(s.id) &&
+          clearing[s.id] !== true,
+      )
+      .map((s) => s.id);
 
     return (
       <>
@@ -327,20 +361,31 @@ export function CalibrationSidebar({
 
         <div className="bg-card rounded-xl border p-3 shadow-sm">
           <p className="text-muted-foreground text-xs">{meta.instruction}</p>
-          <div className="mt-2.5 flex items-center justify-between gap-3">
-            <Button
-              size="sm"
-              disabled={idleSensorIds.length === 0}
-              onClick={() => startAll(idleSensorIds, phase)}
-            >
-              <Droplet
-                className={cn(
-                  'mr-1.5 h-3.5 w-3.5',
-                  phase === 'saturated' && 'fill-current',
-                )}
-              />
-              Calibrate all sensors
-            </Button>
+          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                disabled={idleSensorIds.length === 0}
+                onClick={() => startAll(idleSensorIds, phase)}
+              >
+                <Droplet
+                  className={cn(
+                    'mr-1.5 h-3.5 w-3.5',
+                    phase === 'saturated' && 'fill-current',
+                  )}
+                />
+                Calibrate all sensors
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-muted-foreground hover:text-destructive"
+                disabled={clearableSensorIds.length === 0}
+                onClick={() => clearAll(clearableSensorIds, phase)}
+              >
+                Clear all
+              </Button>
+            </div>
             {runningCount > 0 && (
               <span className="text-muted-foreground text-xs tabular-nums">
                 {runningCount} running
@@ -386,8 +431,8 @@ export function CalibrationSidebar({
             <p className="text-muted-foreground text-sm">No cycle selected.</p>
           ) : sensors.length === 0 ? (
             <p className="text-muted-foreground text-sm">
-              No soil sensors are assigned to this cycle yet. Assign them in
-              the Farm Overview Configuration.
+              No soil sensors are assigned to this cycle yet. Assign them in the
+              Farm Overview Configuration.
             </p>
           ) : view === 'overview' ? (
             <>

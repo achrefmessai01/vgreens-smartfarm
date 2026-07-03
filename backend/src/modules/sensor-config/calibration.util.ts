@@ -34,9 +34,10 @@ export function isSensorCalibrated(
  *    UNCORRECTED, so the farm overview keeps showing a value.
  *  - dry === saturated (degenerate calibration, divide-by-zero) → returns null;
  *    callers should surface a "dry and saturated readings are equal" message.
- *  - Otherwise → the calibrated percentage. NOT clamped to [0, 100]: the
- *    denominator may be negative (inverted sensors) and out-of-range readings
- *    are meaningful signal, not something to hide.
+ *  - Otherwise → the calibrated percentage, clamped to [0, 100]: readings
+ *    beyond the calibration bounds (soil drier than the dry capture, wetter
+ *    than the saturated one, or bounds captured under the wrong conditions)
+ *    must never render as a negative or >100% moisture.
  */
 export function computeCorrectedMoisture(
   raw: number,
@@ -49,5 +50,7 @@ export function computeCorrectedMoisture(
   if (avgSaturatedReading === avgDryReading) {
     return null;
   }
-  return ((raw - avgDryReading) / (avgSaturatedReading - avgDryReading)) * 100;
+  const percent =
+    ((raw - avgDryReading) / (avgSaturatedReading - avgDryReading)) * 100;
+  return Math.min(100, Math.max(0, percent));
 }

@@ -359,6 +359,48 @@ export class SensorConfigResolver {
     );
   }
 
+  // Clear the DRY calibration bound without recapturing — e.g. to discard a
+  // test calibration taken under the wrong conditions. The sensor's corrected
+  // value falls back to the raw reading once either bound is null. Admin-only.
+  @Mutation(() => SensorConfig)
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  async clearDryCalibration(
+    @CurrentUser() currentUser: User,
+    @Args('sensorConfigId', { type: () => ID }) sensorConfigId: string,
+    @Args('tenantId', { type: () => ID, nullable: true }) tenantId?: string,
+  ): Promise<SensorConfig> {
+    const { targetTenantId } = await this.resolveSoilSensor(
+      currentUser,
+      sensorConfigId,
+      tenantId,
+    );
+    return this.sensorConfigService.saveCalibrationBound(
+      sensorConfigId,
+      targetTenantId,
+      { avgDryReading: null },
+    );
+  }
+
+  // Clear the SATURATED calibration bound. Same semantics as dry; admin-only.
+  @Mutation(() => SensorConfig)
+  @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
+  async clearSaturatedCalibration(
+    @CurrentUser() currentUser: User,
+    @Args('sensorConfigId', { type: () => ID }) sensorConfigId: string,
+    @Args('tenantId', { type: () => ID, nullable: true }) tenantId?: string,
+  ): Promise<SensorConfig> {
+    const { targetTenantId } = await this.resolveSoilSensor(
+      currentUser,
+      sensorConfigId,
+      tenantId,
+    );
+    return this.sensorConfigService.saveCalibrationBound(
+      sensorConfigId,
+      targetTenantId,
+      { avgSaturatedReading: null },
+    );
+  }
+
   // Expose the linked greenhouse's name as `greenhouse` so existing name-based
   // consumers (farm overview, sensor map, default positions) keep working.
   @ResolveField(() => String, { name: 'greenhouse', nullable: true })
@@ -395,13 +437,14 @@ export class SensorConfigResolver {
     );
   }
 
-  // Shared: resolve the sensor's tenant + Influx bucket + device, verifying the
-  // sensor exists, belongs to the tenant, and is a soil sensor.
-  private async resolveCalibrationTarget(
+  // Shared: verify the sensor exists, belongs to the tenant, and is a soil
+  // sensor. Enough on its own for mutations that only touch the config row
+  // (e.g. clearing bounds).
+  private async resolveSoilSensor(
     currentUser: User,
     sensorConfigId: string,
     tenantId?: string,
-  ): Promise<{ targetTenantId: string; bucketName: string; device: string }> {
+  ): Promise<{ targetTenantId: string; device: string }> {
     const targetTenantId = this.resolveTargetTenantId(currentUser, tenantId);
     const config = await this.sensorConfigService.findByIdForTenant(
       sensorConfigId,
@@ -415,6 +458,21 @@ export class SensorConfigResolver {
         `Sensor "${config.device}" is not a soil sensor and cannot be calibrated`,
       );
     }
+    return { targetTenantId, device: config.device };
+  }
+
+  // Shared: resolveSoilSensor plus the tenant's Influx bucket, for reads and
+  // captures that need sensor data.
+  private async resolveCalibrationTarget(
+    currentUser: User,
+    sensorConfigId: string,
+    tenantId?: string,
+  ): Promise<{ targetTenantId: string; bucketName: string; device: string }> {
+    const { targetTenantId, device } = await this.resolveSoilSensor(
+      currentUser,
+      sensorConfigId,
+      tenantId,
+    );
     const tenant = await this.tenantsService.findOne(targetTenantId);
     if (!tenant?.influxBucketName) {
       throw new BadRequestException(
@@ -424,7 +482,7 @@ export class SensorConfigResolver {
     return {
       targetTenantId,
       bucketName: tenant.influxBucketName,
-      device: config.device,
+      device,
     };
   }
 

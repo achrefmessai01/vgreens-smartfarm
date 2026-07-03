@@ -6,6 +6,8 @@ import { CALIBRATION_READING_QUERY } from '@/graphql/queries/sensor-calibration.
 import {
   CAPTURE_DRY_CALIBRATION_MUTATION,
   CAPTURE_SATURATED_CALIBRATION_MUTATION,
+  CLEAR_DRY_CALIBRATION_MUTATION,
+  CLEAR_SATURATED_CALIBRATION_MUTATION,
 } from '@/graphql/mutations/sensor-calibration.mutations';
 
 // Hand-typed rather than generated — see use-sensor-calibration.ts.
@@ -38,6 +40,10 @@ interface CalibrationReadingVars {
 interface CaptureVars {
   sensorConfigId: string;
   since: string;
+  tenantId?: string | null;
+}
+interface ClearVars {
+  sensorConfigId: string;
   tenantId?: string | null;
 }
 
@@ -202,6 +208,60 @@ export function useCycleCalibration(params: {
     setCaptures({});
   }, []);
 
+  // Sensor ids with a clear-bound mutation in flight. Kept separate from
+  // `captures` (those model the long-running transmission wait; clearing is a
+  // quick persist with no cancel semantics).
+  const [clearing, setClearing] = React.useState<Record<string, boolean>>({});
+
+  /**
+   * Discard a persisted bound without recapturing. No-op while the sensor has
+   * a capture or another clear running. Failures surface through the same
+   * per-row error state as captures.
+   */
+  const clearBound = React.useCallback(
+    async (sensorConfigId: string, phase: CalibrationPhase) => {
+      if (tokensRef.current.has(sensorConfigId)) return;
+      let alreadyClearing = false;
+      setClearing((prev) => {
+        alreadyClearing = prev[sensorConfigId] === true;
+        return alreadyClearing ? prev : { ...prev, [sensorConfigId]: true };
+      });
+      if (alreadyClearing) return;
+      try {
+        await client.mutate<unknown, ClearVars>({
+          mutation:
+            phase === 'dry'
+              ? CLEAR_DRY_CALIBRATION_MUTATION
+              : CLEAR_SATURATED_CALIBRATION_MUTATION,
+          variables: { sensorConfigId, tenantId: tenantId ?? null },
+        });
+        onCalibratedRef.current?.();
+      } catch (e: unknown) {
+        patchCapture(sensorConfigId, {
+          phase,
+          status: 'error',
+          error: e instanceof Error ? e.message : String(e),
+          startedAt: Date.now(),
+        });
+      } finally {
+        setClearing((prev) => {
+          const next = { ...prev };
+          delete next[sensorConfigId];
+          return next;
+        });
+      }
+    },
+    [client, patchCapture, tenantId],
+  );
+
+  /** Bulk: clear the phase's bound for every given sensor. */
+  const clearAll = React.useCallback(
+    (sensorConfigIds: string[], phase: CalibrationPhase) => {
+      for (const id of sensorConfigIds) void clearBound(id, phase);
+    },
+    [clearBound],
+  );
+
   // Abandon everything on unmount so no loop mutates after the UI is gone.
   React.useEffect(() => {
     const tokens = tokensRef.current;
@@ -230,5 +290,16 @@ export function useCycleCalibration(params: {
     return () => window.clearInterval(id);
   }, [anyBusy]);
 
-  return { captures, anyBusy, now, start, startAll, cancel, cancelAll };
+  return {
+    captures,
+    clearing,
+    anyBusy,
+    now,
+    start,
+    startAll,
+    cancel,
+    cancelAll,
+    clearBound,
+    clearAll,
+  };
 }

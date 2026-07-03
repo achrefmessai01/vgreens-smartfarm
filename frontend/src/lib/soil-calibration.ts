@@ -26,8 +26,8 @@ export function isSoilCalibrated(
  *  - Either bound null (uncalibrated) → raw reading UNCORRECTED (overview keeps
  *    showing a value).
  *  - dry === saturated (degenerate) → null; the UI surfaces a clear message.
- *  - Otherwise → the calibrated percentage. NOT clamped: the denominator may be
- *    negative for inverted sensors and out-of-range values are real signal.
+ *  - Otherwise → the calibrated percentage, clamped to [0, 100]: readings
+ *    beyond the calibration bounds must never render as negative or >100%.
  */
 export function correctedSoilMoisture(
   raw: number,
@@ -40,7 +40,7 @@ export function correctedSoilMoisture(
   if (avgSaturatedReading === avgDryReading) {
     return null;
   }
-  return (
-    ((raw - avgDryReading) / (avgSaturatedReading - avgDryReading)) * 100
-  );
+  const percent =
+    ((raw - avgDryReading) / (avgSaturatedReading - avgDryReading)) * 100;
+  return Math.min(100, Math.max(0, percent));
 }

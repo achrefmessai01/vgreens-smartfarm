@@ -110,14 +110,17 @@ export class SensorConfigService {
   }
 
   /**
-   * Persists a single calibration bound on the sensor. A one-column UPDATE
-   * scoped by (id, tenantId) is atomic on its own — the other bound and every
-   * other column are untouched. Returns the reloaded config.
+   * Persists a single calibration bound on the sensor (`null` clears it). A
+   * one-column UPDATE scoped by (id, tenantId) is atomic on its own — the
+   * other bound and every other column are untouched. Returns the reloaded
+   * config.
    */
   async saveCalibrationBound(
     id: string,
     tenantId: string,
-    patch: { avgDryReading: number } | { avgSaturatedReading: number },
+    patch:
+      | { avgDryReading: number | null }
+      | { avgSaturatedReading: number | null },
   ): Promise<SensorConfig> {
     const result = await this.repo.update({ id, tenantId }, patch);
     if (!result.affected) {
