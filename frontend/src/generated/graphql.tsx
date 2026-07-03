@@ -121,6 +121,7 @@ export type Batch = {
   /** Running meters: numberOfRows × rowLength (m). Total cultivated row length across all rows of the batch. 0 when either factor is 0. */
   runningMeter: Scalars['Float']['output'];
   slabLength?: Maybe<Scalars['Float']['output']>;
+  sortOrder?: Maybe<Scalars['Int']['output']>;
   startRow?: Maybe<Scalars['Float']['output']>;
   status: BatchStatus;
   tenant?: Maybe<Tenant>;
@@ -791,6 +792,8 @@ export enum HarvestQualityClass {
 export enum HarvestSortField {
   Crop = 'CROP',
   Greenhouse = 'GREENHOUSE',
+  ManualOrder = 'MANUAL_ORDER',
+  Name = 'NAME',
   PlantingDate = 'PLANTING_DATE'
 }
 
@@ -860,6 +863,34 @@ export type ImageFile = {
   url?: Maybe<Scalars['String']['output']>;
 };
 
+export type ImportHarvestInput = {
+  /** Validate only, no writes. Defaults to true. */
+  dryRun?: InputMaybe<Scalars['Boolean']['input']>;
+  /** XLS/XLSX/CSV file. */
+  file: Scalars['Upload']['input'];
+  /** Target tenant — required for superadmin, ignored otherwise. */
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type ImportReportType = {
+  __typename?: 'ImportReportType';
+  created: Scalars['Int']['output'];
+  dryRun: Scalars['Boolean']['output'];
+  failed: Scalars['Int']['output'];
+  file: Scalars['String']['output'];
+  finishedAt: Scalars['String']['output'];
+  globalWarnings: Array<Scalars['String']['output']>;
+  invalidRows: Scalars['Int']['output'];
+  issues: Array<RowIssueType>;
+  mapper: Scalars['String']['output'];
+  skippedDuplicates: Scalars['Int']['output'];
+  startedAt: Scalars['String']['output'];
+  tenant: Scalars['String']['output'];
+  tenantId: Scalars['String']['output'];
+  totalRows: Scalars['Int']['output'];
+  validRows: Scalars['Int']['output'];
+};
+
 export type InfluxDbData = {
   __typename?: 'InfluxDBData';
   data: Scalars['JSONObject']['output'];
@@ -910,7 +941,9 @@ export type Mutation = {
   deleteSensorConfig: Scalars['Boolean']['output'];
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  importHarvest: ImportReportType;
   logSystemError: SystemError;
+  reorderBatches: Array<Batch>;
   resolveAlert: Alert;
   resolveErrorReport: ErrorReport;
   resolveSystemError: SystemError;
@@ -1073,8 +1106,19 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationImportHarvestArgs = {
+  input: ImportHarvestInput;
+};
+
+
 export type MutationLogSystemErrorArgs = {
   input: CreateSystemErrorInput;
+};
+
+
+export type MutationReorderBatchesArgs = {
+  ids: Array<Scalars['ID']['input']>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1285,6 +1329,7 @@ export type Query = {
   harvest?: Maybe<Harvest>;
   harvestBatches: Array<HarvestBatchListItem>;
   harvestDashboard: HarvestDashboardMetrics;
+  harvestImportAvailable: Scalars['Boolean']['output'];
   harvests: Array<Harvest>;
   harvestsCsvExport: Scalars['String']['output'];
   health: Scalars['String']['output'];
@@ -1529,6 +1574,13 @@ export enum ReportStatus {
   Open = 'OPEN',
   Resolved = 'RESOLVED'
 }
+
+export type RowIssueType = {
+  __typename?: 'RowIssueType';
+  level: Scalars['String']['output'];
+  reason: Scalars['String']['output'];
+  sourceRow: Scalars['Int']['output'];
+};
 
 export type SensorConfig = {
   __typename?: 'SensorConfig';
@@ -1947,6 +1999,14 @@ export type DeleteBatchMutationVariables = Exact<{
 
 export type DeleteBatchMutation = { __typename?: 'Mutation', deleteBatch: boolean };
 
+export type ReorderBatchesMutationVariables = Exact<{
+  ids: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ReorderBatchesMutation = { __typename?: 'Mutation', reorderBatches: Array<{ __typename?: 'Batch', id: string, sortOrder?: number | null }> };
+
 export type CreateCrateMutationVariables = Exact<{
   input: CreateCrateInput;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -2083,6 +2143,13 @@ export type DeleteHarvestImageMutationVariables = Exact<{
 
 
 export type DeleteHarvestImageMutation = { __typename?: 'Mutation', deleteImage: boolean };
+
+export type ImportHarvestMutationVariables = Exact<{
+  input: ImportHarvestInput;
+}>;
+
+
+export type ImportHarvestMutation = { __typename?: 'Mutation', importHarvest: { __typename?: 'ImportReportType', tenant: string, tenantId: string, file: string, mapper: string, dryRun: boolean, startedAt: string, finishedAt: string, totalRows: number, validRows: number, invalidRows: number, created: number, skippedDuplicates: number, failed: number, globalWarnings: Array<string>, issues: Array<{ __typename?: 'RowIssueType', sourceRow: number, level: string, reason: string }> } };
 
 export type UpsertSensorConfigMutationVariables = Exact<{
   input: UpsertSensorConfigInput;
@@ -2280,7 +2347,7 @@ export type DeleteAlertMutationVariables = Exact<{
 
 export type DeleteAlertMutation = { __typename?: 'Mutation', deleteAlert: boolean };
 
-export type BatchFieldsFragment = { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, runningMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, avgHeadsPerPlant?: number | null, slabLength?: number | null, headsPerSlab?: number | null, inputMode: InputMode, crateWeight?: number | null, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null };
+export type BatchFieldsFragment = { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, sortOrder?: number | null, plantingDate: any, numberOfRows: number, rowLength: number, runningMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, avgHeadsPerPlant?: number | null, slabLength?: number | null, headsPerSlab?: number | null, inputMode: InputMode, crateWeight?: number | null, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null };
 
 export type BatchesQueryVariables = Exact<{
   filter?: InputMaybe<BatchFilterInput>;
@@ -2289,7 +2356,7 @@ export type BatchesQueryVariables = Exact<{
 }>;
 
 
-export type BatchesQuery = { __typename?: 'Query', batches: Array<{ __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, runningMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, avgHeadsPerPlant?: number | null, slabLength?: number | null, headsPerSlab?: number | null, inputMode: InputMode, crateWeight?: number | null, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null }> };
+export type BatchesQuery = { __typename?: 'Query', batches: Array<{ __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, sortOrder?: number | null, plantingDate: any, numberOfRows: number, rowLength: number, runningMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, avgHeadsPerPlant?: number | null, slabLength?: number | null, headsPerSlab?: number | null, inputMode: InputMode, crateWeight?: number | null, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null }> };
 
 export type BatchQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2297,7 +2364,7 @@ export type BatchQueryVariables = Exact<{
 }>;
 
 
-export type BatchQuery = { __typename?: 'Query', batch?: { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, runningMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, avgHeadsPerPlant?: number | null, slabLength?: number | null, headsPerSlab?: number | null, inputMode: InputMode, crateWeight?: number | null, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null } | null };
+export type BatchQuery = { __typename?: 'Query', batch?: { __typename?: 'Batch', id: string, tenantId: string, createdById?: string | null, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, sortOrder?: number | null, plantingDate: any, numberOfRows: number, rowLength: number, runningMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, replicates: number, avgHeadsPerPlant?: number | null, slabLength?: number | null, headsPerSlab?: number | null, inputMode: InputMode, crateWeight?: number | null, createdAt: any, updatedAt: any, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null } | null };
 
 export type HarvestBatchesQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -2536,6 +2603,11 @@ export type HarvestImagesQueryVariables = Exact<{
 
 
 export type HarvestImagesQuery = { __typename?: 'Query', images: Array<{ __typename?: 'ImageFile', path: string, filename: string, mimeType?: string | null, url?: string | null }> };
+
+export type HarvestImportAvailableQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type HarvestImportAvailableQuery = { __typename?: 'Query', harvestImportAvailable: boolean };
 
 export type GetBucketDataQueryVariables = Exact<{
   input: GetBucketDataInput;
@@ -2811,6 +2883,7 @@ export const BatchFieldsFragmentDoc = gql`
   name
   batchNumber
   status
+  sortOrder
   plantingDate
   numberOfRows
   rowLength
@@ -3341,6 +3414,41 @@ export function useDeleteBatchMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteBatchMutationHookResult = ReturnType<typeof useDeleteBatchMutation>;
 export type DeleteBatchMutationResult = Apollo.MutationResult<DeleteBatchMutation>;
 export type DeleteBatchMutationOptions = Apollo.BaseMutationOptions<DeleteBatchMutation, DeleteBatchMutationVariables>;
+export const ReorderBatchesDocument = gql`
+    mutation ReorderBatches($ids: [ID!]!, $tenantId: ID) {
+  reorderBatches(ids: $ids, tenantId: $tenantId) {
+    id
+    sortOrder
+  }
+}
+    `;
+export type ReorderBatchesMutationFn = Apollo.MutationFunction<ReorderBatchesMutation, ReorderBatchesMutationVariables>;
+
+/**
+ * __useReorderBatchesMutation__
+ *
+ * To run a mutation, you first call `useReorderBatchesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReorderBatchesMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [reorderBatchesMutation, { data, loading, error }] = useReorderBatchesMutation({
+ *   variables: {
+ *      ids: // value for 'ids'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useReorderBatchesMutation(baseOptions?: Apollo.MutationHookOptions<ReorderBatchesMutation, ReorderBatchesMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ReorderBatchesMutation, ReorderBatchesMutationVariables>(ReorderBatchesDocument, options);
+      }
+export type ReorderBatchesMutationHookResult = ReturnType<typeof useReorderBatchesMutation>;
+export type ReorderBatchesMutationResult = Apollo.MutationResult<ReorderBatchesMutation>;
+export type ReorderBatchesMutationOptions = Apollo.BaseMutationOptions<ReorderBatchesMutation, ReorderBatchesMutationVariables>;
 export const CreateCrateDocument = gql`
     mutation CreateCrate($input: CreateCrateInput!, $tenantId: ID) {
   createCrate(input: $input, tenantId: $tenantId) {
@@ -3950,6 +4058,57 @@ export function useDeleteHarvestImageMutation(baseOptions?: Apollo.MutationHookO
 export type DeleteHarvestImageMutationHookResult = ReturnType<typeof useDeleteHarvestImageMutation>;
 export type DeleteHarvestImageMutationResult = Apollo.MutationResult<DeleteHarvestImageMutation>;
 export type DeleteHarvestImageMutationOptions = Apollo.BaseMutationOptions<DeleteHarvestImageMutation, DeleteHarvestImageMutationVariables>;
+export const ImportHarvestDocument = gql`
+    mutation ImportHarvest($input: ImportHarvestInput!) {
+  importHarvest(input: $input) {
+    tenant
+    tenantId
+    file
+    mapper
+    dryRun
+    startedAt
+    finishedAt
+    totalRows
+    validRows
+    invalidRows
+    created
+    skippedDuplicates
+    failed
+    issues {
+      sourceRow
+      level
+      reason
+    }
+    globalWarnings
+  }
+}
+    `;
+export type ImportHarvestMutationFn = Apollo.MutationFunction<ImportHarvestMutation, ImportHarvestMutationVariables>;
+
+/**
+ * __useImportHarvestMutation__
+ *
+ * To run a mutation, you first call `useImportHarvestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useImportHarvestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [importHarvestMutation, { data, loading, error }] = useImportHarvestMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useImportHarvestMutation(baseOptions?: Apollo.MutationHookOptions<ImportHarvestMutation, ImportHarvestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ImportHarvestMutation, ImportHarvestMutationVariables>(ImportHarvestDocument, options);
+      }
+export type ImportHarvestMutationHookResult = ReturnType<typeof useImportHarvestMutation>;
+export type ImportHarvestMutationResult = Apollo.MutationResult<ImportHarvestMutation>;
+export type ImportHarvestMutationOptions = Apollo.BaseMutationOptions<ImportHarvestMutation, ImportHarvestMutationVariables>;
 export const UpsertSensorConfigDocument = gql`
     mutation UpsertSensorConfig($input: UpsertSensorConfigInput!, $tenantId: ID) {
   upsertSensorConfig(input: $input, tenantId: $tenantId) {
@@ -6728,6 +6887,46 @@ export type HarvestImagesQueryHookResult = ReturnType<typeof useHarvestImagesQue
 export type HarvestImagesLazyQueryHookResult = ReturnType<typeof useHarvestImagesLazyQuery>;
 export type HarvestImagesSuspenseQueryHookResult = ReturnType<typeof useHarvestImagesSuspenseQuery>;
 export type HarvestImagesQueryResult = Apollo.QueryResult<HarvestImagesQuery, HarvestImagesQueryVariables>;
+export const HarvestImportAvailableDocument = gql`
+    query HarvestImportAvailable {
+  harvestImportAvailable
+}
+    `;
+
+/**
+ * __useHarvestImportAvailableQuery__
+ *
+ * To run a query within a React component, call `useHarvestImportAvailableQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHarvestImportAvailableQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHarvestImportAvailableQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useHarvestImportAvailableQuery(baseOptions?: Apollo.QueryHookOptions<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>(HarvestImportAvailableDocument, options);
+      }
+export function useHarvestImportAvailableLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>(HarvestImportAvailableDocument, options);
+        }
+// @ts-ignore
+export function useHarvestImportAvailableSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>;
+export function useHarvestImportAvailableSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>): Apollo.UseSuspenseQueryResult<HarvestImportAvailableQuery | undefined, HarvestImportAvailableQueryVariables>;
+export function useHarvestImportAvailableSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>(HarvestImportAvailableDocument, options);
+        }
+export type HarvestImportAvailableQueryHookResult = ReturnType<typeof useHarvestImportAvailableQuery>;
+export type HarvestImportAvailableLazyQueryHookResult = ReturnType<typeof useHarvestImportAvailableLazyQuery>;
+export type HarvestImportAvailableSuspenseQueryHookResult = ReturnType<typeof useHarvestImportAvailableSuspenseQuery>;
+export type HarvestImportAvailableQueryResult = Apollo.QueryResult<HarvestImportAvailableQuery, HarvestImportAvailableQueryVariables>;
 export const GetBucketDataDocument = gql`
     query GetBucketData($input: GetBucketDataInput!) {
   getBucketData(input: $input) {

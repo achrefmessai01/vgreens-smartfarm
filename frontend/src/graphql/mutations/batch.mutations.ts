@@ -64,3 +64,15 @@ export const DELETE_BATCH_MUTATION = gql`
     deleteBatch(id: $id, tenantId: $tenantId)
   }
 `;
+
+// Persist a manual drag-and-drop order for the tenant's batches. `ids` is the
+// full list in its new order; the server writes each id's position as its
+// sortOrder and returns the batches in that order so the cache updates.
+export const REORDER_BATCHES_MUTATION = gql`
+  mutation ReorderBatches($ids: [ID!]!, $tenantId: ID) {
+    reorderBatches(ids: $ids, tenantId: $tenantId) {
+      id
+      sortOrder
+    }
+  }
+`;

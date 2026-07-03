@@ -21,6 +21,8 @@ const FIELD_EXPRESSIONS: Record<HarvestSortField, string> = {
   [HarvestSortField.CROP]: 'LOWER(crop.name)',
   [HarvestSortField.GREENHOUSE]: 'LOWER(greenhouse.name)',
   [HarvestSortField.PLANTING_DATE]: 'batch.plantingDate',
+  [HarvestSortField.NAME]: 'LOWER(batch.name)',
+  [HarvestSortField.MANUAL_ORDER]: 'batch.sortOrder',
 };
 
 /**
@@ -36,7 +38,13 @@ const FIELD_EXPRESSIONS: Record<HarvestSortField, string> = {
  */
 export function buildBatchOrderBy(sort?: BatchSortInput | null): OrderClause[] {
   const field = sort?.field ?? DEFAULT_BATCH_SORT_FIELD;
-  const direction = sort?.direction ?? DEFAULT_BATCH_SORT_DIRECTION;
+  // MANUAL_ORDER is the user's saved drag-and-drop rank: it is meaningful only
+  // ascending (0,1,2,…), so ignore any client direction and pin it ASC. Batches
+  // with no saved rank (null sortOrder) fall to the end via NULLS LAST below.
+  const direction =
+    field === HarvestSortField.MANUAL_ORDER
+      ? OrderDirection.ASC
+      : (sort?.direction ?? DEFAULT_BATCH_SORT_DIRECTION);
 
   const primary: OrderClause = {
     expression: FIELD_EXPRESSIONS[field],
@@ -54,7 +62,7 @@ export function buildBatchOrderBy(sort?: BatchSortInput | null): OrderClause[] {
       nulls: 'NULLS LAST',
     });
   } else {
-    // Name-sorted: break ties by newest planting first.
+    // CROP / GREENHOUSE / NAME / MANUAL_ORDER: break ties by newest planting first.
     clauses.push({
       expression: 'batch.plantingDate',
       direction: OrderDirection.DESC,

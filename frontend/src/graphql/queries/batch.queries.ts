@@ -11,6 +11,7 @@ const BATCH_FIELDS = gql`
     name
     batchNumber
     status
+    sortOrder
     plantingDate
     numberOfRows
     rowLength
