@@ -9,7 +9,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DoorPosition as DoorPositionEnum } from '@/generated/graphql';
-import type { GreenhouseRowData } from './use-farm-layout-config';
+import type {
+  GreenhouseRowData,
+  GreenhouseRowErrors,
+} from './use-farm-layout-config';
 
 // Door-position select options derived from the GraphQL enum so adding a new
 // position only requires a schema update — no manual list to maintain.
@@ -24,6 +27,7 @@ interface GreenhouseRowFieldsProps {
   row: GreenhouseRowData;
   index: number;
   disabled: boolean;
+  errors?: GreenhouseRowErrors;
   nameLabel: string;
   xLabel: string;
   yLabel: string;
@@ -41,6 +45,7 @@ export function GreenhouseRowFields({
   row,
   index,
   disabled,
+  errors,
   nameLabel,
   xLabel,
   yLabel,
@@ -63,6 +68,7 @@ export function GreenhouseRowFields({
           placeholder={namePlaceholder}
           value={row.name}
           disabled={disabled}
+          aria-invalid={errors?.name || undefined}
           onChange={(e) => onChange(index, { name: e.target.value })}
         />
       </div>
@@ -78,6 +84,7 @@ export function GreenhouseRowFields({
           placeholder={xPlaceholder}
           value={row.xDimension}
           disabled={disabled}
+          aria-invalid={errors?.dimensions || undefined}
           onChange={(e) =>
             onChange(index, { xDimension: Number(e.target.value) })
           }
@@ -95,6 +102,7 @@ export function GreenhouseRowFields({
           placeholder={yPlaceholder}
           value={row.yDimension}
           disabled={disabled}
+          aria-invalid={errors?.dimensions || undefined}
           onChange={(e) =>
             onChange(index, { yDimension: Number(e.target.value) })
           }
@@ -112,6 +120,7 @@ export function GreenhouseRowFields({
           placeholder={bayCountPlaceholder}
           value={row.bayCount ?? ''}
           disabled={disabled}
+          aria-invalid={errors?.bayCount || undefined}
           onChange={(e) =>
             onChange(index, {
               bayCount:

@@ -12,8 +12,11 @@ import {
 } from '@/generated/graphql';
 
 // One editable greenhouse row. `id` is present for rows that already exist in
-// the greenhouses table; absent for freshly added rows.
+// the greenhouses table; absent for freshly added rows. `key` is a stable
+// client-side identity (the id for saved rows, a counter for new ones) so
+// per-row expansion state and validation errors survive removals above.
 export interface GreenhouseRowData {
+  key: string;
   id?: string;
   name: string;
   xDimension: number;
@@ -23,6 +26,15 @@ export interface GreenhouseRowData {
   isHorizontal?: boolean | null;
   hiddenInFarmOverview?: boolean | null;
 }
+
+/** Which of a row's fields failed validation on the last save attempt. */
+export interface GreenhouseRowErrors {
+  name?: boolean;
+  dimensions?: boolean;
+  bayCount?: boolean;
+}
+
+export type FarmLayoutSaveError = 'validation' | 'server' | null;
 
 export function useFarmLayoutConfig(tenantId: string) {
   const { data, refetch } = useGreenhousesQuery({
@@ -45,11 +57,18 @@ export function useFarmLayoutConfig(tenantId: string) {
   const [rows, setRows] = React.useState<GreenhouseRowData[]>([]);
   // Ids of existing rows the user removed; deleted from the table on save.
   const [removedIds, setRemovedIds] = React.useState<string[]>([]);
+  // Validation results of the last save attempt, keyed by row key.
+  const [rowErrors, setRowErrors] = React.useState<
+    Record<string, GreenhouseRowErrors>
+  >({});
+  const [saveError, setSaveError] = React.useState<FarmLayoutSaveError>(null);
+  const newRowCounter = React.useRef(0);
 
   React.useEffect(() => {
     if (!data?.greenhouses) return;
     setRows(
       data.greenhouses.map((g) => ({
+        key: g.id,
         id: g.id,
         name: g.name,
         xDimension: g.xDimension ?? 0,
@@ -61,11 +80,20 @@ export function useFarmLayoutConfig(tenantId: string) {
       })),
     );
     setRemovedIds([]);
+    setRowErrors({});
   }, [data?.greenhouses]);
 
   const addRow = React.useCallback(
     () =>
-      setRows((prev) => [...prev, { name: '', xDimension: 0, yDimension: 0 }]),
+      setRows((prev) => [
+        ...prev,
+        {
+          key: `new-${newRowCounter.current++}`,
+          name: '',
+          xDimension: 0,
+          yDimension: 0,
+        },
+      ]),
     [],
   );
 
@@ -89,22 +117,35 @@ export function useFarmLayoutConfig(tenantId: string) {
 
   // Triggered by the header Save button (plain onClick — the rows are not
   // wrapped in a <form> so each greenhouse card can host its own cycle form).
-  const handleSubmit = async () => {
-    const cleaned = rows
-      .map((r) => ({
-        id: r.id,
-        name: r.name.trim(),
-        xDimension: Number(r.xDimension),
-        yDimension: Number(r.yDimension),
-        doorPosition: r.doorPosition ?? null,
-        bayCount: r.bayCount ?? null,
-        isHorizontal: r.isHorizontal ?? false,
-        hiddenInFarmOverview: r.hiddenInFarmOverview ?? false,
-      }))
-      .filter((r) => r.name.length > 0);
-    if (cleaned.some((r) => r.xDimension <= 0 || r.yDimension <= 0)) return;
+  // Returns the validation errors when the save was blocked by them, so the
+  // caller can expand the offending cards; null means the save ran.
+  const handleSubmit = async (): Promise<Record<
+    string,
+    GreenhouseRowErrors
+  > | null> => {
+    const errors: Record<string, GreenhouseRowErrors> = {};
+    for (const r of rows) {
+      const e: GreenhouseRowErrors = {};
+      if (r.name.trim().length === 0) e.name = true;
+      if (!(Number(r.xDimension) > 0) || !(Number(r.yDimension) > 0)) {
+        e.dimensions = true;
+      }
+      if (
+        r.bayCount != null &&
+        (!Number.isInteger(Number(r.bayCount)) || Number(r.bayCount) < 1)
+      ) {
+        e.bayCount = true;
+      }
+      if (Object.keys(e).length > 0) errors[r.key] = e;
+    }
+    setRowErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setSaveError('validation');
+      return errors;
+    }
 
     setSaving(true);
+    setSaveError(null);
     try {
       // Delete removed greenhouses, then upsert the rest against the table.
       await Promise.all(
@@ -113,15 +154,15 @@ export function useFarmLayoutConfig(tenantId: string) {
         ),
       );
       await Promise.all(
-        cleaned.map((r) => {
+        rows.map((r) => {
           const input = {
-            name: r.name,
-            xDimension: r.xDimension,
-            yDimension: r.yDimension,
-            doorPosition: r.doorPosition,
-            bayCount: r.bayCount,
-            isHorizontal: r.isHorizontal,
-            hiddenInFarmOverview: r.hiddenInFarmOverview,
+            name: r.name.trim(),
+            xDimension: Number(r.xDimension),
+            yDimension: Number(r.yDimension),
+            doorPosition: r.doorPosition ?? null,
+            bayCount: r.bayCount ?? null,
+            isHorizontal: r.isHorizontal ?? false,
+            hiddenInFarmOverview: r.hiddenInFarmOverview ?? false,
           };
           if (r.id) {
             return updateGreenhouse({
@@ -134,10 +175,23 @@ export function useFarmLayoutConfig(tenantId: string) {
         }),
       );
       await refetch();
+    } catch (err) {
+      console.error('Failed to save farm layout:', err);
+      setSaveError('server');
     } finally {
       setSaving(false);
     }
+    return null;
   };
 
-  return { rows, saving, addRow, updateRow, removeRow, handleSubmit };
+  return {
+    rows,
+    saving,
+    rowErrors,
+    saveError,
+    addRow,
+    updateRow,
+    removeRow,
+    handleSubmit,
+  };
 }

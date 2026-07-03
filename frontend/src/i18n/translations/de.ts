@@ -719,7 +719,8 @@ export const de = {
       crateOptionLabel: '{weight} kg',
       addCrateOption: '+ Neue Kiste hinzufügen...',
       addCrate: 'Kiste hinzufügen',
-      addCrateDescription: 'Eine neue Kistengröße für diesen Mandanten erstellen.',
+      addCrateDescription:
+        'Eine neue Kistengröße für diesen Mandanten erstellen.',
       crateWeightRequired: 'Das Kistengewicht muss größer als 0 sein',
       crateCreateFailed: 'Kiste konnte nicht hinzugefügt werden',
       saveCrate: 'Speichern',
@@ -812,7 +813,8 @@ export const de = {
       rowSegmentLabel: 'Abschnitt {n}',
       addRowPair: 'Reihenabschnitt hinzufügen',
       removeRowPair: 'Abschnitt entfernen',
-      rowSegmentsOverlap: 'Abschnitte sollten geordnet sein und sich nicht überschneiden',
+      rowSegmentsOverlap:
+        'Abschnitte sollten geordnet sein und sich nicht überschneiden',
       addBrixMeasurements: 'Brix-Messungen hinzufügen',
       fruitWeightMeasurement: 'Fruchtgewicht',
       trossWeightMeasurement: 'Trossgewicht',
@@ -839,7 +841,8 @@ export const de = {
       yieldPerRunningMeterShort: 'Ertrag/m',
       yieldPerRunningMeter: 'Ertrag pro laufendem Meter',
       yieldPerRunningMeterSubtitle: 'Verkaufsfähige kg pro laufendem Meter',
-      yieldPerRunningMeterNoData: 'Reihenlänge und Anzahl der Reihen im Batch festlegen',
+      yieldPerRunningMeterNoData:
+        'Reihenlänge und Anzahl der Reihen im Batch festlegen',
       yieldPerSquareMeter: 'Ertrag pro m²',
       yieldPerSquareMeterSubtitle: 'Gesamt-kg pro m²',
       yieldPerSquareMeterNoData: 'Anbaufläche im Batch festlegen',
@@ -1230,8 +1233,16 @@ export const de = {
           notConfigured: 'Nicht konfiguriert',
         },
         farmLayout: {
+          validationError:
+            'Einige Gewächshäuser haben ungültige Werte. Bitte die markierten Felder korrigieren und erneut speichern.',
+          saveFailed: 'Speichern fehlgeschlagen. Bitte erneut versuchen.',
+          nameRequired: 'Name ist erforderlich.',
+          dimensionsInvalid: 'Breite und Länge müssen größer als 0 sein.',
+          bayCountInvalid:
+            'Reihen müssen eine ganze Zahl von mindestens 1 sein.',
           title: 'Farm-Layout',
-          subtitle: 'Gewächshäuser, ihre Kulturen und Bewässerungszyklen konfigurieren',
+          subtitle:
+            'Gewächshäuser, ihre Kulturen und Bewässerungszyklen konfigurieren',
           save: 'Speichern',
           saving: 'Wird gespeichert…',
           greenhouses: 'Gewächshäuser',
@@ -1245,7 +1256,8 @@ export const de = {
           bayCountLabel: 'Reihen',
           orientationLabel: 'Horizontale Anordnung',
           visibilityLabel: 'In Farm-Übersicht sichtbar',
-          visibilityHint: 'Aus, um dieses Gewächshaus aus den Tabs auszublenden.',
+          visibilityHint:
+            'Aus, um dieses Gewächshaus aus den Tabs auszublenden.',
           bayCountPlaceholder: '0',
           namePlaceholder: 'z. B. Erdbeer-Halle',
           xDimensionPlaceholder: '0,0',

@@ -36,6 +36,7 @@ export function GreenhouseCropsSection({
   const [assignCrop] = useAssignCropToGreenhouseMutation();
   const [unassignCrop] = useUnassignCropFromGreenhouseMutation();
   const [pending, setPending] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
   const assignedIds = React.useMemo(
     () => new Set((assignedData?.crops ?? []).map((c) => c.id)),
@@ -44,6 +45,7 @@ export function GreenhouseCropsSection({
 
   const toggle = async (cropId: string, assigned: boolean) => {
     setPending(cropId);
+    setError(null);
     try {
       if (assigned) {
         await unassignCrop({ variables: { greenhouseId, cropId } });
@@ -53,6 +55,7 @@ export function GreenhouseCropsSection({
       await refetch();
     } catch (err) {
       console.error('Failed to update greenhouse crop assignment:', err);
+      setError(ca.updateFailed);
     } finally {
       setPending(null);
     }
@@ -64,6 +67,11 @@ export function GreenhouseCropsSection({
         <Sprout className="h-3.5 w-3.5" />
         {ca.title}
       </div>
+      {error && (
+        <div className="mb-2 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-300">
+          {error}
+        </div>
+      )}
       {catalogLoading && crops.length === 0 ? (
         <p className="text-muted-foreground text-sm">{ca.loading}</p>
       ) : crops.length === 0 ? (

@@ -530,7 +530,8 @@ export const pl = {
       yieldPerRunningMeterShort: 'Plon/m',
       yieldPerRunningMeter: 'Plon na metr bieżący',
       yieldPerRunningMeterSubtitle: 'Sprzedażne kg na metr bieżący',
-      yieldPerRunningMeterNoData: 'Ustaw długość rzędu i liczbę rzędów w partii',
+      yieldPerRunningMeterNoData:
+        'Ustaw długość rzędu i liczbę rzędów w partii',
       yieldPerSquareMeter: 'Plon na m²',
       yieldPerSquareMeterSubtitle: 'Łączne kg na m²',
       yieldPerSquareMeterNoData: 'Ustaw powierzchnię uprawy w partii',
@@ -817,7 +818,8 @@ export const pl = {
       rowSegmentLabel: 'Segment {n}',
       addRowPair: 'Dodaj segment rzędu',
       removeRowPair: 'Usuń segment',
-      rowSegmentsOverlap: 'Segmenty powinny być uporządkowane i nie nakładać się',
+      rowSegmentsOverlap:
+        'Segmenty powinny być uporządkowane i nie nakładać się',
       addBrixMeasurements: 'Dodaj pomiary Brix',
       fruitWeightMeasurement: 'Masa owocu',
       trossWeightMeasurement: 'Masa Tross',
@@ -1143,6 +1145,12 @@ export const pl = {
           notConfigured: 'Nie skonfigurowano',
         },
         farmLayout: {
+          validationError:
+            'Niektóre szklarnie mają nieprawidłowe wartości. Popraw oznaczone pola i zapisz ponownie.',
+          saveFailed: 'Zapisywanie nie powiodło się. Spróbuj ponownie.',
+          nameRequired: 'Nazwa jest wymagana.',
+          dimensionsInvalid: 'Szerokość i długość muszą być większe niż 0.',
+          bayCountInvalid: 'Boksy muszą być liczbą całkowitą co najmniej 1.',
           title: 'Układ farmy',
           subtitle: 'Skonfiguruj szklarnie, ich uprawy i cykle nawadniania',
           save: 'Zapisz',

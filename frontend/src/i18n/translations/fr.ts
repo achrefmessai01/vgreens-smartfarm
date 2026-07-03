@@ -1132,6 +1132,14 @@ export const fr = {
           notConfigured: 'Non configuré',
         },
         farmLayout: {
+          validationError:
+            'Certaines serres ont des valeurs non valides. Corrigez les champs signalés puis enregistrez à nouveau.',
+          saveFailed: 'Échec de l’enregistrement. Veuillez réessayer.',
+          nameRequired: 'Le nom est requis.',
+          dimensionsInvalid:
+            'La largeur et la longueur doivent être supérieures à 0.',
+          bayCountInvalid:
+            'Les travées doivent être un nombre entier d’au moins 1.',
           title: 'Plan de la ferme',
           subtitle:
             'Configurer les serres, leurs cultures et cycles d’irrigation',
