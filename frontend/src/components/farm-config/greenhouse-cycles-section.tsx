@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { useGreenhousesQuery } from '@/generated/graphql';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,8 +22,9 @@ import {
 } from '@/lib/hooks/use-sensor-calibration';
 import { Droplets, Plus, Trash2, X } from 'lucide-react';
 
-interface IrrigationCyclesConfigProps {
+interface GreenhouseCyclesSectionProps {
   tenantId: string;
+  greenhouseId: string;
 }
 
 function errorMessage(e: unknown): string {
@@ -69,30 +69,26 @@ function CycleNameInput({
 }
 
 /**
- * Farm-Overview-Configuration section: create irrigation cycles (name +
- * greenhouse, tenant-scoped — a greenhouse can have many) and assign SOIL
- * sensors to them. Only soil sensors in the cycle's own greenhouse are
- * offered; the server enforces both rules again. The farm-overview
- * calibration dropdown lists these cycles.
+ * One saved greenhouse's irrigation cycles, rendered inside its Farm Layout
+ * card: create cycles (name only — the greenhouse is implied by the card) and
+ * assign the greenhouse's SOIL sensors to them. The server enforces both the
+ * soil-only and same-greenhouse rules again. The farm-overview calibration
+ * dropdown lists these cycles.
  */
-export function IrrigationCyclesConfig({
+export function GreenhouseCyclesSection({
   tenantId,
-}: IrrigationCyclesConfigProps) {
-  const { data: greenhousesData } = useGreenhousesQuery({
-    variables: { tenantId },
-    skip: !tenantId,
-    fetchPolicy: 'cache-and-network',
-  });
-  const greenhouses = greenhousesData?.greenhouses ?? [];
-
-  const { cycles, refetch: refetchCycles } = useIrrigationCycles(tenantId);
+  greenhouseId,
+}: GreenhouseCyclesSectionProps) {
+  const { cycles: allCycles, refetch: refetchCycles } =
+    useIrrigationCycles(tenantId);
   const { configs: soilConfigs, refetch: refetchSoilConfigs } =
     useSoilSensorConfigs(tenantId);
   const { createCycle, renameCycle, deleteCycle, assignSensor, saving } =
     useIrrigationCycleMutations(tenantId);
 
+  const cycles = allCycles.filter((c) => c.greenhouseId === greenhouseId);
+
   const [newName, setNewName] = React.useState('');
-  const [newGreenhouseId, setNewGreenhouseId] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
 
   const runAction = React.useCallback(
@@ -112,9 +108,9 @@ export function IrrigationCyclesConfig({
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     const name = newName.trim();
-    if (!name || !newGreenhouseId) return;
+    if (!name) return;
     void runAction(async () => {
-      await createCycle(name, newGreenhouseId);
+      await createCycle(name, greenhouseId);
       setNewName('');
     });
   };
@@ -122,37 +118,29 @@ export function IrrigationCyclesConfig({
   const sensorsOfCycle = (cycle: IrrigationCycle): SoilSensorConfig[] =>
     soilConfigs.filter((s) => s.irrigationCycleId === cycle.id);
 
-  // Only soil sensors in the cycle's greenhouse that aren't grouped yet.
-  const assignableFor = (cycle: IrrigationCycle): SoilSensorConfig[] =>
-    soilConfigs.filter(
-      (s) =>
-        s.irrigationCycleId == null &&
-        cycle.greenhouseId != null &&
-        s.greenhouseId === cycle.greenhouseId,
-    );
+  // Only this greenhouse's soil sensors that aren't grouped yet.
+  const assignable = soilConfigs.filter(
+    (s) => s.irrigationCycleId == null && s.greenhouseId === greenhouseId,
+  );
 
   return (
-    <div className="bg-card border-border/60 rounded-xl border shadow-sm">
-      <div className="border-border/40 border-b px-6 py-4">
-        <h3 className="text-sm font-semibold">Irrigation cycles</h3>
-        <p className="text-muted-foreground mt-0.5 text-xs">
-          Group a greenhouse&apos;s soil sensors into irrigation cycles — the
-          farm overview calibrates per cycle. Only soil sensors in the
-          cycle&apos;s greenhouse can be assigned.
-        </p>
+    <div className="border-border/40 border-t px-4 py-3">
+      <div className="text-muted-foreground mb-2 flex items-center gap-2 text-xs font-medium">
+        <Droplets className="h-3.5 w-3.5" />
+        Irrigation cycles
       </div>
 
-      <div className="space-y-4 p-6">
-        <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-2">
-          <div className="flex min-w-0 flex-1 basis-48 flex-col gap-1.5">
+      <div className="space-y-3">
+        <form onSubmit={handleCreate} className="flex items-end gap-2">
+          <div className="flex max-w-72 min-w-0 flex-1 flex-col gap-1.5">
             <label
-              htmlFor="new-cycle-name"
+              htmlFor={`new-cycle-name-${greenhouseId}`}
               className="text-muted-foreground text-xs font-medium"
             >
               Cycle name
             </label>
             <Input
-              id="new-cycle-name"
+              id={`new-cycle-name-${greenhouseId}`}
               value={newName}
               disabled={saving}
               onChange={(e) => setNewName(e.target.value)}
@@ -160,41 +148,11 @@ export function IrrigationCyclesConfig({
               className="h-9"
             />
           </div>
-          <div className="flex min-w-0 flex-1 basis-48 flex-col gap-1.5">
-            <label
-              htmlFor="new-cycle-greenhouse"
-              className="text-muted-foreground text-xs font-medium"
-            >
-              Greenhouse
-            </label>
-            <Select
-              value={newGreenhouseId}
-              onValueChange={setNewGreenhouseId}
-              disabled={saving}
-            >
-              <SelectTrigger id="new-cycle-greenhouse" className="h-9 w-full">
-                <SelectValue placeholder="Select greenhouse" />
-              </SelectTrigger>
-              <SelectContent>
-                {greenhouses.length === 0 ? (
-                  <div className="text-muted-foreground px-2 py-1.5 text-xs">
-                    No greenhouses configured
-                  </div>
-                ) : (
-                  greenhouses.map((gh) => (
-                    <SelectItem key={gh.id} value={gh.id}>
-                      {gh.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          </div>
           <Button
             type="submit"
             size="sm"
             className="h-9"
-            disabled={saving || !newName.trim() || !newGreenhouseId}
+            disabled={saving || !newName.trim()}
           >
             <Plus className="mr-1 h-4 w-4" />
             Add cycle
@@ -215,11 +173,10 @@ export function IrrigationCyclesConfig({
           <div className="space-y-3">
             {cycles.map((cycle) => {
               const assigned = sensorsOfCycle(cycle);
-              const assignable = assignableFor(cycle);
               return (
                 <div
                   key={cycle.id}
-                  className="border-border/60 rounded-lg border p-4"
+                  className="border-border/60 bg-card rounded-lg border p-4"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Droplets className="text-primary h-4 w-4 shrink-0" />
@@ -230,9 +187,6 @@ export function IrrigationCyclesConfig({
                         void runAction(() => renameCycle(cycle.id, name))
                       }
                     />
-                    <Badge variant="secondary" className="text-[10px]">
-                      {cycle.greenhouse ?? 'No greenhouse'}
-                    </Badge>
                     <Button
                       type="button"
                       variant="ghost"

@@ -1153,7 +1153,7 @@ export const it = {
         },
         farmLayout: {
           title: 'Planimetria della fattoria',
-          subtitle: 'Configura nomi e dimensioni delle serre',
+          subtitle: 'Configura le serre, le loro colture e i cicli di irrigazione',
           save: 'Salva',
           saving: 'Salvataggio…',
           greenhouses: 'Serre',

@@ -1138,7 +1138,7 @@ export const tr = {
         },
         farmLayout: {
           title: 'Çiftlik düzeni',
-          subtitle: 'Sera adlarını ve boyutlarını yapılandırın',
+          subtitle: 'Seraları, ürünlerini ve sulama döngülerini yapılandırın',
           save: 'Kaydet',
           saving: 'Kaydediliyor…',
           greenhouses: 'Seralar',

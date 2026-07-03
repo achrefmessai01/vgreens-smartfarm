@@ -1144,7 +1144,7 @@ export const pl = {
         },
         farmLayout: {
           title: 'Układ farmy',
-          subtitle: 'Skonfiguruj nazwy i wymiary szklarni',
+          subtitle: 'Skonfiguruj szklarnie, ich uprawy i cykle nawadniania',
           save: 'Zapisz',
           saving: 'Zapisywanie…',
           greenhouses: 'Szklarnie',

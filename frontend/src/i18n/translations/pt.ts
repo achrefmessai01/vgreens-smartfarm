@@ -1149,7 +1149,7 @@ export const pt = {
         },
         farmLayout: {
           title: 'Esquema da quinta',
-          subtitle: 'Configure os nomes e dimensões das estufas',
+          subtitle: 'Configure as estufas, as suas culturas e ciclos de rega',
           save: 'Guardar',
           saving: 'A guardar…',
           greenhouses: 'Estufas',

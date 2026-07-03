@@ -4,6 +4,8 @@ import { Building, Plus } from 'lucide-react';
 import { WriteActionButton } from '@/components/ui/write-action-button';
 import { useI18n } from '@/i18n';
 import { GreenhouseRow } from './greenhouse-row';
+import { GreenhouseCropsSection } from './greenhouse-crops-section';
+import { GreenhouseCyclesSection } from './greenhouse-cycles-section';
 import { useFarmLayoutConfig } from './use-farm-layout-config';
 
 interface FarmLayoutConfigProps {
@@ -24,21 +26,17 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
           <p className="text-muted-foreground mt-0.5 text-xs">{fl.subtitle}</p>
         </div>
         <WriteActionButton
-          type="submit"
+          type="button"
           size="sm"
           disabled={saving}
           className="min-w-16"
-          form="farm-layout-form"
+          onClick={() => void handleSubmit()}
         >
           {saving ? fl.saving : fl.save}
         </WriteActionButton>
       </div>
 
-      <form
-        id="farm-layout-form"
-        onSubmit={handleSubmit}
-        className="space-y-3 p-6"
-      >
+      <div className="space-y-3 p-6">
         <div className="flex items-center justify-between">
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <Building className="h-4 w-4" />
@@ -61,7 +59,7 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
         ) : (
           rows.map((row, index) => (
             <GreenhouseRow
-              key={`gh-${index}`}
+              key={row.id ?? `gh-new-${index}`}
               row={row}
               index={index}
               disabled={saving}
@@ -81,10 +79,24 @@ export function FarmLayoutConfig({ tenantId }: FarmLayoutConfigProps) {
               bayCountPlaceholder={fl.bayCountPlaceholder}
               onChange={updateRow}
               onRemove={removeRow}
-            />
+            >
+              {row.id ? (
+                <>
+                  <GreenhouseCropsSection greenhouseId={row.id} />
+                  <GreenhouseCyclesSection
+                    tenantId={tenantId}
+                    greenhouseId={row.id}
+                  />
+                </>
+              ) : (
+                <p className="text-muted-foreground border-border/40 border-t px-4 py-3 text-xs">
+                  Save the greenhouse to assign crops and irrigation cycles.
+                </p>
+              )}
+            </GreenhouseRow>
           ))
         )}
-      </form>
+      </div>
     </div>
   );
 }

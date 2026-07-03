@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { Trash2 } from 'lucide-react';
 import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -27,6 +28,8 @@ interface GreenhouseRowProps {
   bayCountPlaceholder: string;
   onChange: (index: number, patch: Partial<GreenhouseRowData>) => void;
   onRemove: (index: number) => void;
+  /** Extra per-greenhouse sections (crops, irrigation cycles) rendered at the bottom of the card. */
+  children?: React.ReactNode;
 }
 
 export function GreenhouseRow({
@@ -49,6 +52,7 @@ export function GreenhouseRow({
   bayCountPlaceholder,
   onChange,
   onRemove,
+  children,
 }: GreenhouseRowProps) {
   return (
     <div className="bg-muted/30 border-border/60 rounded-lg border">
@@ -126,6 +130,8 @@ export function GreenhouseRow({
           />
         </div>
       </div>
+
+      {children}
     </div>
   );
 }

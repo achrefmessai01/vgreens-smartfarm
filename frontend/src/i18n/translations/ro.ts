@@ -1152,7 +1152,7 @@ export const ro = {
         },
         farmLayout: {
           title: 'Plan fermă',
-          subtitle: 'Configurează numele și dimensiunile serelor',
+          subtitle: 'Configurează serele, culturile și ciclurile lor de irigare',
           save: 'Salvează',
           saving: 'Se salvează…',
           greenhouses: 'Sere',

@@ -1144,7 +1144,7 @@ export const es = {
         },
         farmLayout: {
           title: 'Diseño de la granja',
-          subtitle: 'Configura los nombres y dimensiones de los invernaderos',
+          subtitle: 'Configura los invernaderos, sus cultivos y ciclos de riego',
           save: 'Guardar',
           saving: 'Guardando…',
           greenhouses: 'Invernaderos',

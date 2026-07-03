@@ -1231,7 +1231,7 @@ export const de = {
         },
         farmLayout: {
           title: 'Farm-Layout',
-          subtitle: 'Gewächshausnamen und -abmessungen konfigurieren',
+          subtitle: 'Gewächshäuser, ihre Kulturen und Bewässerungszyklen konfigurieren',
           save: 'Speichern',
           saving: 'Wird gespeichert…',
           greenhouses: 'Gewächshäuser',

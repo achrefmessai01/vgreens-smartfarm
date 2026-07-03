@@ -87,8 +87,9 @@ export function useFarmLayoutConfig(tenantId: string) {
     [],
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Triggered by the header Save button (plain onClick — the rows are not
+  // wrapped in a <form> so each greenhouse card can host its own cycle form).
+  const handleSubmit = async () => {
     const cleaned = rows
       .map((r) => ({
         id: r.id,

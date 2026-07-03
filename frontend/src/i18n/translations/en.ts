@@ -850,7 +850,8 @@ export const en = {
       yieldPerRunningMeterShort: 'Yield/m',
       yieldPerRunningMeter: 'Yield per Running Meter',
       yieldPerRunningMeterSubtitle: 'Sellable kg per running metre',
-      yieldPerRunningMeterNoData: 'Set Row Length and Number of Rows on the batch',
+      yieldPerRunningMeterNoData:
+        'Set Row Length and Number of Rows on the batch',
       yieldPerSquareMeter: 'Yield per m²',
       yieldPerSquareMeterSubtitle: 'Total kg per m²',
       yieldPerSquareMeterNoData: 'Set cultivation area on the batch',
@@ -1162,7 +1163,7 @@ export const en = {
         },
         farmLayout: {
           title: 'Farm Layout',
-          subtitle: 'Configure greenhouse names and dimensions',
+          subtitle: 'Configure greenhouses, their crops and irrigation cycles',
           save: 'Save',
           saving: 'Saving…',
           greenhouses: 'Greenhouses',
