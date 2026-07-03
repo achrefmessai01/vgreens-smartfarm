@@ -19,7 +19,7 @@ import { BatchFilterInput } from './dto/batch-filter.input';
 import { BatchSortInput } from './dto/batch-sort.input';
 import { buildBatchOrderBy } from './utils/batch-order.util';
 import { buildBatchNumber } from '@modules/harvest/utils/batch-number.util';
-import { InputMode } from '@common/enums';
+import { InputMode, HarvestSortField, OrderDirection } from '@common/enums';
 
 @Injectable()
 export class BatchService extends BaseService<Batch> {
@@ -197,6 +197,28 @@ export class BatchService extends BaseService<Batch> {
     });
 
     return qb.getMany();
+  }
+
+  /**
+   * Persist a manual drag-and-drop order for the tenant's batches: each id's
+   * position in `ids` becomes its `sortOrder` (0-based). The order is
+   * tenant-shared, so every update is scoped to the tenant — a client can never
+   * renumber another tenant's batches. Runs in a single transaction so the list
+   * is never left half-renumbered, then returns the batches in the saved order.
+   */
+  async reorderBatches(ids: string[], tenantId?: string): Promise<Batch[]> {
+    await this.batchRepository.manager.transaction(async (manager) => {
+      for (let index = 0; index < ids.length; index++) {
+        const where: { id: string; tenantId?: string } = { id: ids[index] };
+        if (tenantId !== undefined) where.tenantId = tenantId;
+        await manager.update(Batch, where, { sortOrder: index });
+      }
+    });
+
+    return this.findAllScoped(tenantId, null, {
+      field: HarvestSortField.MANUAL_ORDER,
+      direction: OrderDirection.ASC,
+    });
   }
 
   async findOneById(id: string, tenantId?: string): Promise<Batch> {

@@ -15,12 +15,14 @@ import {
 import {
   useHarvestsQuery,
   useBatchesQuery,
+  useReorderBatchesMutation,
   type HarvestsQuery,
   type BatchesQuery,
   type CreateBatchMutation,
 } from '@/generated/graphql';
 import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import { useHarvestViewSettings } from '@/lib/hooks/use-harvest-view-settings';
+import { applyDashboardOrder } from '@/lib/hooks/use-harvest-dashboard-order';
 import {
   setSort,
   setRange,
@@ -30,6 +32,8 @@ import {
   type HarvestViewState,
   type HarvestSort,
   HarvestDateRangePreset,
+  HarvestSortField,
+  OrderDirection,
 } from '@/components/harvest/harvest-view-settings';
 
 export type HarvestItem = HarvestsQuery['harvests'][number];
@@ -69,39 +73,47 @@ export function useHarvestPage() {
     }
   }, [viewLoading, persistedValue]);
 
+  // Optimistic manual order: the ordered batch-id list the user just produced by
+  // dragging. Applied on top of the server list so a drop reorders instantly,
+  // without waiting for the reorder mutation + refetch to round-trip. Empty
+  // means "no local override" — the server-sorted order shows as-is. Cleared
+  // whenever the user picks a different sort from the dropdown.
+  const [manualOrder, setManualOrder] = React.useState<string[]>([]);
+
+  // persist() fires a mutation whose optimisticResponse writes the Apollo cache
+  // synchronously, so it must run from the event handler — never inside a
+  // setView updater, which React executes during the render phase (that would
+  // update `me` subscribers like TenantLayout mid-render). We compute `next`
+  // from the current `view` and both set + persist it outside any updater.
   const handleSortChange = React.useCallback(
     (sort: HarvestSort) => {
-      setView((current) => {
-        const next = setSort(current, sort);
-        persistView(next);
-        return next;
-      });
+      // A picked sort replaces any drag override so the chosen order wins.
+      setManualOrder([]);
+      const next = setSort(view, sort);
+      setView(next);
+      persistView(next);
     },
-    [persistView],
+    [view, persistView],
   );
 
   const handleRangeChange = React.useCallback(
     (range: HarvestDateRangePreset) => {
-      setView((current) => {
-        const next = setRange(current, range);
-        persistView(next);
-        return next;
-      });
+      const next = setRange(view, range);
+      setView(next);
+      persistView(next);
     },
-    [persistView],
+    [view, persistView],
   );
 
   // Collapse / expand a single batch's row, persisting the per-user state.
   const handleToggleCollapse = React.useCallback(
     (batchId: string, collapsed: boolean) => {
-      setView((current) => {
-        const next = setBatchCollapsed(current, batchId, collapsed);
-        if (next === current) return current;
-        persistView(next);
-        return next;
-      });
+      const next = setBatchCollapsed(view, batchId, collapsed);
+      if (next === view) return;
+      setView(next);
+      persistView(next);
     },
-    [persistView],
+    [view, persistView],
   );
 
   // Active tenant scope (only meaningful for VGREENS_ADMIN; everyone else
@@ -146,6 +158,37 @@ export function useHarvestPage() {
     void refetchHarvests();
     void refetchBatches();
   }, [refetchHarvests, refetchBatches]);
+
+  const [reorderBatchesMutation] = useReorderBatchesMutation();
+
+  // Display order: apply the optimistic drag override (if any) over the
+  // server-sorted list. `applyDashboardOrder` is stable and keeps ids missing
+  // from the override at the end, so a freshly created batch still shows up.
+  const orderedBatches = React.useMemo(
+    () =>
+      manualOrder.length > 0 ? applyDashboardOrder(batches, manualOrder) : batches,
+    [batches, manualOrder],
+  );
+
+  // A drop in the list: dragging always means "this is my custom order", so we
+  // (1) show it instantly via the override, (2) persist the new tenant-shared
+  // rank, and (3) switch the active sort to MANUAL_ORDER so the arrangement
+  // sticks across reloads. All side effects run here in the event handler.
+  const handleReorder = React.useCallback(
+    (orderedIds: string[]) => {
+      setManualOrder(orderedIds);
+      void reorderBatchesMutation({ variables: { ids: orderedIds, tenantId } });
+      if (view.sort.field !== HarvestSortField.ManualOrder) {
+        const next = setSort(view, {
+          field: HarvestSortField.ManualOrder,
+          direction: OrderDirection.Asc,
+        });
+        setView(next);
+        persistView(next);
+      }
+    },
+    [reorderBatchesMutation, tenantId, view, persistView],
+  );
 
   const summary: HarvestSummary = React.useMemo(
     () => computeSummary(harvests ?? []),
@@ -326,7 +369,7 @@ export function useHarvestPage() {
 
   return {
     harvests,
-    batches,
+    batches: orderedBatches,
     summary,
     loading,
     // Sort + filter view state for the presentational controls.
@@ -335,6 +378,8 @@ export function useHarvestPage() {
     handleSortChange,
     handleRangeChange,
     handleToggleCollapse,
+    // Drag-and-drop reordering (always available in the list).
+    handleReorder,
     createBatchOpen,
     setCreateBatchOpen,
     batchSidebarOpen,
