@@ -16,7 +16,7 @@
  *
  * ─── Adding a new mapper ──────────────────────────────────────────────────────
  *
- *   1. Build the parser in scripts/harvest-import/mappers/<name>.ts
+ *   1. Build the parser in src/modules/harvest/import/mappers/<name>.ts
  *   2. Add '<name>' to HarvestImportMapperKey below
  *   3. Add the parser function to MAPPER_FNS
  *   4. Add the tenant UUID entry to HARVEST_IMPORT_MAPPERS in .env
@@ -27,8 +27,8 @@
 import {
   parseKnaupFile,
   type KnaupParseResult,
-} from '../../../scripts/harvest-import/mappers/knaup';
-import type { ParsedRow, RowIssue } from '../../../scripts/harvest-import/types';
+} from './import/mappers/knaup';
+import type { ParsedRow, RowIssue } from './import/types';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

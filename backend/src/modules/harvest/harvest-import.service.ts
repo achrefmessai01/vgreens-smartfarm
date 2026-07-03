@@ -3,8 +3,8 @@ import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { FileUpload } from 'graphql-upload-ts';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
-import { runImport } from '../../../scripts/harvest-import/engine';
-import type { ImportReport } from '../../../scripts/harvest-import/types';
+import { runImport } from './import/engine';
+import type { ImportReport } from './import/types';
 import {
   hasMapperForTenant,
   getMapperForTenant,
