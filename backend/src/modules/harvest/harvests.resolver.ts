@@ -11,7 +11,6 @@ import {
   DashboardFilterInput,
   HarvestDashboardMetrics,
   HarvestBatchListItem,
-  HarvestCrateAssignmentInput,
   ImportHarvestInput,
   ImportReportType,
 } from './dto';
@@ -50,6 +49,7 @@ export class HarvestsResolver {
       harvest.crate?.weight ?? harvest.batch?.crateWeight ?? null;
     return this.harvestsService.computeTotals(
       harvest.entries,
+      harvest.inputMode,
       harvest.batch,
       crateWeight,
     );
@@ -174,24 +174,24 @@ export class HarvestsResolver {
     );
   }
 
-  @Mutation(() => [Harvest], { name: 'convertBatchInputMode' })
+  // Flip ONE harvest between weight and crate mode, converting its entries in
+  // place. `crateId` is required when switching to crate mode (the harvest is
+  // pointed at it) and ignored when switching to weight.
+  @Mutation(() => Harvest, { name: 'convertHarvestInputMode' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
-  async convertBatchInputMode(
-    @Args('batchId', { type: () => ID }) batchId: string,
+  async convertHarvestInputMode(
+    @Args('harvestId', { type: () => ID }) harvestId: string,
     @Args('targetMode', { type: () => InputMode }) targetMode: InputMode,
     @CurrentUser() currentUser: User,
-    @Args('crateAssignments', {
-      type: () => [HarvestCrateAssignmentInput],
-      nullable: true,
-    })
-    crateAssignments?: HarvestCrateAssignmentInput[] | null,
+    @Args('crateId', { type: () => ID, nullable: true })
+    crateId?: string | null,
     @Args('tenantId', { type: () => ID, nullable: true })
     tenantId?: string | null,
-  ): Promise<Harvest[]> {
-    return this.harvestsService.convertBatchInputMode(
-      batchId,
+  ): Promise<Harvest> {
+    return this.harvestsService.convertHarvestInputMode(
+      harvestId,
       targetMode,
-      crateAssignments,
+      crateId,
       resolveTenantId(currentUser, tenantId, false),
     );
   }

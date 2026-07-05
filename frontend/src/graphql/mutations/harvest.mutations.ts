@@ -16,6 +16,7 @@ const HARVEST_MUTATION_FIELDS = gql`
     photoUrls
     createdAt
     updatedAt
+    inputMode
     crateId
     crate {
       id
@@ -36,7 +37,6 @@ const HARVEST_MUTATION_FIELDS = gql`
       totalPlants
       rowLength
       runningMeter
-      inputMode
       crateWeight
       greenhouse {
         id
@@ -97,20 +97,21 @@ export const UPDATE_HARVEST_MUTATION = gql`
   ${HARVEST_MUTATION_FIELDS}
 `;
 
-// Flip a whole batch between weight and crate mode. Returns every harvest in the
-// batch with its converted entries + nested batch.inputMode, so Apollo normalizes
-// the updated Batch and each Harvest by id in one round trip.
-export const CONVERT_BATCH_INPUT_MODE_MUTATION = gql`
-  mutation ConvertBatchInputMode(
-    $batchId: ID!
+// Flip ONE harvest between weight and crate mode, converting its entries in
+// place. `crateId` is required when switching to crate mode (the harvest is
+// pointed at it) and ignored when switching to weight. Returns the harvest with
+// its converted entries + new inputMode, so Apollo renormalizes it by id.
+export const CONVERT_HARVEST_INPUT_MODE_MUTATION = gql`
+  mutation ConvertHarvestInputMode(
+    $harvestId: ID!
     $targetMode: InputMode!
-    $crateAssignments: [HarvestCrateAssignmentInput!]
+    $crateId: ID
     $tenantId: ID
   ) {
-    convertBatchInputMode(
-      batchId: $batchId
+    convertHarvestInputMode(
+      harvestId: $harvestId
       targetMode: $targetMode
-      crateAssignments: $crateAssignments
+      crateId: $crateId
       tenantId: $tenantId
     ) {
       ...HarvestMutationFields

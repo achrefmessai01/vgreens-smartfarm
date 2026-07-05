@@ -726,6 +726,11 @@ export const ro = {
       inputMode: 'Mod de introducere a producției',
       weightMode: 'Greutate (kg)',
       crateMode: 'Lăzi',
+      selectCrateToConvert: 'Selectați o ladă pentru conversie',
+      convertModeTitle: 'Schimbați modul de introducere?',
+      convertModeDescription:
+        'Aceasta convertește înregistrările acestei recolte în noul mod de introducere. Puteți reveni oricând.',
+      convertModeConfirm: 'Convertește',
       crateWeight: 'Greutatea lăzii (kg)',
       enterCrateWeight: 'Greutatea unei lăzi pline',
       crateWeightLabel: 'Greutatea lăzii: {weight} kg',

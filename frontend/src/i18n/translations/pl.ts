@@ -721,6 +721,11 @@ export const pl = {
       inputMode: 'Tryb wprowadzania plonu',
       weightMode: 'Waga (kg)',
       crateMode: 'Skrzynki',
+      selectCrateToConvert: 'Wybierz skrzynkę do przeliczenia',
+      convertModeTitle: 'Zmienić tryb wprowadzania?',
+      convertModeDescription:
+        'Spowoduje to przeliczenie wpisów tego zbioru na nowy tryb wprowadzania. W każdej chwili można wrócić do poprzedniego trybu.',
+      convertModeConfirm: 'Przelicz',
       crateWeight: 'Waga skrzynki (kg)',
       enterCrateWeight: 'Waga jednej pełnej skrzynki',
       crateWeightLabel: 'Waga skrzynki: {weight} kg',

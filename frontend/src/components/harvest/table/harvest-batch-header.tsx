@@ -68,16 +68,23 @@ export function HarvestBatchHeader({
       <div className="pt-3">
         <div className="flex items-center justify-between gap-2">
           {handle}
-          <AccordionTrigger className="min-w-0 flex-1 py-0 hover:no-underline">
-            <p className="truncate text-base font-semibold sm:text-lg">
-              {getGreenhouseLabel(batch?.greenhouse?.name)}
-              {batch?.variety?.name
-                ? ` - ${batch.variety.name}`
-                : batch?.name
-                  ? ` - ${batch.name}`
-                  : ''}
-            </p>
-          </AccordionTrigger>
+          {/* AccordionTrigger's outer Header div is content-sized, so as the
+              MIDDLE child of this justify-between row it would float to the
+              center (it sat left only while it was the first child, before the
+              drag grip). The flex-1 wrapper claims the free space instead,
+              keeping the title left, right next to the grip. */}
+          <div className="flex min-w-0 flex-1">
+            <AccordionTrigger className="min-w-0 py-0 hover:no-underline">
+              <p className="truncate text-base font-semibold sm:text-lg">
+                {getGreenhouseLabel(batch?.greenhouse?.name)}
+                {batch?.variety?.name
+                  ? ` - ${batch.variety.name}`
+                  : batch?.name
+                    ? ` - ${batch.name}`
+                    : ''}
+              </p>
+            </AccordionTrigger>
+          </div>
           <div className="flex shrink-0 items-center gap-1">
             <WriteActionButton
               size="icon"

@@ -109,10 +109,8 @@ export interface BatchLike {
   // the read model so older queries/fixtures without it still type-check; the
   // form falls back to 1 when absent.
   replicates?: number | null;
-  // Yield input mode, fixed at creation. Optional on the read model so older
-  // queries/fixtures without it still type-check; treated as weight when absent.
-  inputMode?: InputMode | null;
-  // Weight of one crate (kg) for crate-mode batches; null in weight mode.
+  // Legacy crate weight (kg). Superseded by the per-harvest crate; kept as a
+  // read fallback for crate-mode harvests not yet repointed.
   crateWeight?: number | null;
   greenhouse?: { id: string; name: string } | null;
 }
@@ -131,6 +129,10 @@ export interface HarvestLike {
   harvesterHeadCount?: number | null;
   photoUrls?: string[] | null;
   batch?: BatchLike | null;
+  // How THIS harvest records yield — per-harvest, so one batch can hold
+  // harvests in different modes. Optional on the read model so older
+  // queries/fixtures without it still type-check; treated as weight when absent.
+  inputMode?: InputMode | null;
   // The crate this harvest was logged with (crate-mode only). Its weight drives
   // crate-mode kg derivation, superseding batch.crateWeight. Null in weight mode.
   crateId?: string | null;

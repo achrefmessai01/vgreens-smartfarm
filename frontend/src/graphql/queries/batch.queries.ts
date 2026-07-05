@@ -27,7 +27,6 @@ const BATCH_FIELDS = gql`
     avgHeadsPerPlant
     slabLength
     headsPerSlab
-    inputMode
     crateWeight
     createdAt
     updatedAt

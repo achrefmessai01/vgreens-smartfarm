@@ -386,8 +386,12 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
 }
 
 // Editable entries for a harvest. A harvest with no entries yet starts with one
-// blank entry so the sidebar always has a card to fill in.
-export function harvestToEntries(h: HarvestLike): HarvestEntryData[] {
+// blank entry so the sidebar always has a card to fill in. Takes just the
+// entries slice so callers holding a partial harvest (e.g. a mutation result)
+// can rebuild the form too.
+export function harvestToEntries(
+  h: Pick<HarvestLike, 'entries'>,
+): HarvestEntryData[] {
   if (h.entries && h.entries.length > 0) {
     return h.entries.map(entryLikeToEntryData);
   }
@@ -451,14 +455,16 @@ function daysSince(plantingDate: string): number {
 
 /**
  * Build the sidebar's batch-details view-model from a batch's planting fields.
- * The crate (crate-mode only) comes from the harvest, not the batch: `crateId`
+ * The input mode and the crate are per-HARVEST now, so both come from the
+ * harvest (or a caller-chosen default for a fresh one), not the batch: `crateId`
  * is the selected crate and `crateWeight` mirrors its weight for kg derivation.
- * A fresh harvest passes none, so the user must pick a crate before saving.
+ * A fresh harvest passes no crate, so the user must pick one before saving.
  */
 function batchToDetails(
   batch: BatchLike,
   entries: HarvestEntryData[],
   photos: string[],
+  inputMode: InputMode,
   crate?: { id: string; weight: number } | null,
 ): BatchDetailsData {
   return {
@@ -484,7 +490,7 @@ function batchToDetails(
     totalPlants: batch.totalPlants,
     lostPlants: batch.lostPlants,
     replicates: replicateCount(batch),
-    inputMode: batch.inputMode ?? InputMode.Weight,
+    inputMode,
     crateId: crate?.id ?? null,
     crateWeight: crate?.weight ?? null,
     plantingDate: batch.plantingDate,
@@ -520,15 +526,21 @@ export function harvestToBatchDetails(h: HarvestLike): BatchDetailsData {
     batch,
     harvestToEntries(h),
     h.photoUrls ?? [],
+    h.inputMode ?? InputMode.Weight,
     h.crate ?? null,
   );
 }
 
-// Sidebar view-model for a freshly created batch (no harvest yet): one blank
-// entry per configured replicate, no photos.
-export function batchToBatchDetails(batch: BatchLike): BatchDetailsData {
+// Sidebar view-model for a fresh harvest of a batch (none stored yet): one
+// blank entry per configured replicate, no photos. `defaultInputMode` seeds the
+// per-harvest mode toggle — callers pass the batch's latest harvest's mode so
+// consecutive harvests keep the grower's habit; a brand-new batch gets weight.
+export function batchToBatchDetails(
+  batch: BatchLike,
+  defaultInputMode: InputMode = InputMode.Weight,
+): BatchDetailsData {
   const entries = Array.from({ length: replicateCount(batch) }, () =>
     createEmptyEntry(),
   );
-  return batchToDetails(batch, entries, []);
+  return batchToDetails(batch, entries, [], defaultInputMode);
 }

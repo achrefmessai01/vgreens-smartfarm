@@ -730,6 +730,11 @@ export const el = {
       inputMode: 'Τρόπος καταχώρισης απόδοσης',
       weightMode: 'Βάρος (kg)',
       crateMode: 'Τελάρα',
+      selectCrateToConvert: 'Επιλέξτε τελάρο για τη μετατροπή',
+      convertModeTitle: 'Αλλαγή τρόπου καταχώρισης;',
+      convertModeDescription:
+        'Αυτό μετατρέπει τις καταχωρίσεις αυτής της συγκομιδής στον νέο τρόπο καταχώρισης. Μπορείτε να επιστρέψετε ανά πάσα στιγμή.',
+      convertModeConfirm: 'Μετατροπή',
       crateWeight: 'Βάρος τελάρου (kg)',
       enterCrateWeight: 'Βάρος ενός γεμάτου τελάρου',
       crateWeightLabel: 'Βάρος τελάρου: {weight} kg',

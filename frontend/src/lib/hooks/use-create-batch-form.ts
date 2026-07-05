@@ -3,7 +3,6 @@
 import * as React from 'react';
 import {
   BatchStatus,
-  InputMode,
   useCreateBatchMutation,
   type CreateBatchMutation,
 } from '@/generated/graphql';
@@ -30,7 +29,6 @@ const INITIAL_FORM_DATA: BatchFormData = {
   avgHeadsPerPlant: 0,
   slabLength: 0,
   headsPerSlab: 0,
-  inputMode: InputMode.Weight,
 };
 
 function computeRowSpacing(data: BatchFormData): number {
@@ -128,9 +126,8 @@ export function useCreateBatchForm({
               avgHeadsPerPlant: formData.avgHeadsPerPlant || undefined,
               slabLength: formData.slabLength || undefined,
               headsPerSlab: formData.headsPerSlab || undefined,
-              // crateWeight is no longer set on the batch — crate weight is
-              // chosen per-harvest from the tenant's crates.
-              inputMode: formData.inputMode,
+              // The yield input mode (and crate) is per-HARVEST — chosen when
+              // logging each harvest, so the batch carries neither.
               status: BatchStatus.Active,
               tenantId,
             },

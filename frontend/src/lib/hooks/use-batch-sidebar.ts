@@ -4,6 +4,7 @@ import {
   HarvestQualityClass,
   HarvestsDocument,
   InputMode,
+  useConvertHarvestInputModeMutation,
   useCreateHarvestMutation,
   useDeleteHarvestImageMutation,
   useUpdateHarvestMutation,
@@ -19,8 +20,10 @@ import {
   entryQualityTotalKg,
   extractStoragePathFromUrl,
   formatTimeOfDay,
+  harvestToEntries,
   wasteExceedsQualityTotal,
 } from '@/lib/harvest-utils';
+import { useToast } from '@/components/ui/toast-provider';
 import * as React from 'react';
 
 export type SidebarMode = 'create' | 'edit' | 'view';
@@ -90,9 +93,22 @@ export function useBatchSidebar({
   const [confirmedWasteEntries, setConfirmedWasteEntries] = React.useState<
     ReadonlySet<number>
   >(() => new Set());
+  // Per-harvest input-mode switch (edit mode): the target mode staged by the
+  // toggle, awaiting confirmation — converting stored entries is a server-side,
+  // confirmed action. null = no switch pending.
+  const [pendingMode, setPendingMode] = React.useState<InputMode | null>(null);
+  // Crate chosen for a staged weight -> crate switch (crate mode derives kg
+  // from a crate weight, so one must be picked before converting).
+  const [pendingCrate, setPendingCrate] = React.useState<{
+    id: string;
+    weight: number;
+  } | null>(null);
   const [createHarvest, { loading: createLoading }] =
     useCreateHarvestMutation();
   const [updateHarvest, { loading }] = useUpdateHarvestMutation();
+  const [convertMode, { loading: converting }] =
+    useConvertHarvestInputModeMutation();
+  const { toast } = useToast();
   const tenantId = useTenantIdVariable();
   // Photos are stored under the harvest folder when editing, otherwise under
   // the batch folder while a new harvest is being composed.
@@ -116,8 +132,11 @@ export function useBatchSidebar({
         ? ''
         : String(initialHeadCount),
     );
-    // Fresh data: no waste warnings have been acknowledged yet.
+    // Fresh data: no waste warnings have been acknowledged yet, and no
+    // input-mode switch is staged.
     setConfirmedWasteEntries(new Set());
+    setPendingMode(null);
+    setPendingCrate(null);
   }, [
     batchData,
     mode,
@@ -220,6 +239,102 @@ export function useBatchSidebar({
     },
     [],
   );
+
+  // Pick a target mode from the per-harvest toggle. Creating: flip the form
+  // layout directly — nothing is stored yet and the entry state carries both
+  // modes' arrays, so switching back and forth loses nothing. Editing: STAGE
+  // the switch instead — the stored entries have to be converted server-side,
+  // which is a confirmed action (handleConfirmModeSwitch).
+  const handleModeSelect = React.useCallback(
+    (target: InputMode) => {
+      if (!currentData) return;
+      if (target === currentData.inputMode) {
+        setPendingMode(null);
+        return;
+      }
+      if (mode === 'create') {
+        setLocalData((prev) => (prev ? { ...prev, inputMode: target } : prev));
+        return;
+      }
+      setPendingMode(target);
+      // Seed the conversion crate with the harvest's current one (if any) so a
+      // switch back reuses it.
+      setPendingCrate(
+        currentData.crateId && currentData.crateWeight != null
+          ? { id: currentData.crateId, weight: currentData.crateWeight }
+          : null,
+      );
+    },
+    [currentData, mode],
+  );
+
+  const cancelModeSwitch = React.useCallback(() => {
+    setPendingMode(null);
+    setPendingCrate(null);
+  }, []);
+
+  const handlePendingCrateSelect = React.useCallback(
+    (id: string, weight: number) => {
+      setPendingCrate({ id, weight });
+    },
+    [],
+  );
+
+  // A staged weight -> crate switch can't convert without a crate weight.
+  const pendingCrateMissing =
+    pendingMode === InputMode.Crate && !pendingCrate;
+
+  // Confirm the staged switch: convert THIS harvest's stored entries
+  // server-side (one transaction), then rebuild the local form from the
+  // converted harvest so the user keeps editing in the new mode. In-form entry
+  // edits not yet saved are superseded by the converted stored values.
+  const handleConfirmModeSwitch = React.useCallback(async () => {
+    if (!harvestId || !pendingMode) return;
+    if (pendingMode === InputMode.Crate && !pendingCrate) return;
+    try {
+      const res = await convertMode({
+        variables: {
+          harvestId,
+          targetMode: pendingMode,
+          crateId:
+            pendingMode === InputMode.Crate ? pendingCrate?.id : undefined,
+          tenantId,
+        },
+        refetchQueries: [{ query: HarvestsDocument }],
+        awaitRefetchQueries: true,
+      });
+      // The Apollo client uses errorPolicy: 'all', so a server-side failure
+      // resolves (with errors) instead of rejecting. Surface it explicitly —
+      // otherwise a rolled-back conversion looks like a silent success.
+      if (res.errors?.length) {
+        throw new Error(res.errors.map((e) => e.message).join('; '));
+      }
+      const converted = res.data?.convertHarvestInputMode;
+      if (converted) {
+        setLocalData((prev) =>
+          prev
+            ? {
+                ...prev,
+                inputMode: converted.inputMode,
+                crateId: converted.crateId ?? null,
+                crateWeight: converted.crate?.weight ?? null,
+                entries: harvestToEntries(converted),
+              }
+            : prev,
+        );
+      }
+      setPendingMode(null);
+      setPendingCrate(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Failed to switch harvest input mode:', err);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to switch input mode',
+        description: message,
+      });
+    }
+  }, [harvestId, pendingMode, pendingCrate, convertMode, tenantId, toast]);
 
   const handleBrixChange = React.useCallback(
     (entryIndex: number, readingIndex: number, value: number) => {
@@ -567,11 +682,14 @@ export function useBatchSidebar({
     (mode === 'create' ? Boolean(batchId) : Boolean(harvestId)) &&
     !hasTimingErrors &&
     !hasUnconfirmedWasteWarning &&
-    !crateMissing;
+    !crateMissing &&
+    // An unconfirmed mode switch must be resolved (converted or cancelled)
+    // before the harvest can be saved.
+    pendingMode === null;
 
   return {
     currentData,
-    loading: loading || createLoading || uploading,
+    loading: loading || createLoading || uploading || converting,
     mode,
     canSave,
     harvestDate,
@@ -586,6 +704,15 @@ export function useBatchSidebar({
     isCrateMode: Boolean(isCrateMode),
     crateError,
     handleCrateSelect,
+    // Per-harvest input-mode switch state + actions.
+    pendingMode,
+    pendingCrate,
+    pendingCrateMissing,
+    converting,
+    handleModeSelect,
+    cancelModeSwitch,
+    handlePendingCrateSelect,
+    handleConfirmModeSwitch,
     confirmedWasteEntries,
     setWasteConfirmed,
     handleBrixChange,

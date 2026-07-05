@@ -13,7 +13,6 @@ import {
   EndRowField,
   HeadsPerPlantField,
   HeadsPerSlabField,
-  InputModeField,
   LostPlantsField,
   NumberOfRowsField,
   PlantsPerMeterField,
@@ -31,8 +30,6 @@ interface CreateBatchFormFieldsProps {
   setFormData: React.Dispatch<React.SetStateAction<BatchFormData>>;
   errors: BatchFormErrors;
   disabled?: boolean;
-  // Lock the input-mode toggle (edit flow): mode is fixed at creation.
-  lockMode?: boolean;
 }
 
 export function CreateBatchFormFields({
@@ -40,7 +37,6 @@ export function CreateBatchFormFields({
   setFormData,
   errors,
   disabled = false,
-  lockMode = false,
 }: CreateBatchFormFieldsProps) {
   // Resolve the selected crop's name (from the same greenhouse-scoped crop list
   // the CropField uses) to decide whether to surface the tomato-only
@@ -174,13 +170,6 @@ export function CreateBatchFormFields({
           </div>
         </>
       )}
-      <InputModeField
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        disabled={disabled}
-        lockMode={lockMode}
-      />
     </div>
   );
 }

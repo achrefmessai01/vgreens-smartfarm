@@ -105,7 +105,10 @@ export interface BatchDetailsData {
   // Replicate samples configured on the batch; drives how many entry cards a
   // fresh harvest starts with. Always at least 1.
   replicates: number;
-  // Yield input mode (fixed at creation). Drives which form layout renders.
+  // Yield input mode of THIS harvest (per-harvest — sibling harvests in the
+  // same batch may differ). Drives which form layout renders. Seeded from the
+  // stored harvest when editing, or from the batch's latest harvest (falling
+  // back to weight) when creating.
   inputMode: InputMode;
   // The crate selected for this harvest (crate mode only). crateId is the chosen
   // crate's id (null until picked / in weight mode); crateWeight mirrors that
