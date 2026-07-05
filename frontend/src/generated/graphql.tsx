@@ -169,6 +169,12 @@ export type BrixTrendData = {
   date: Scalars['String']['output'];
 };
 
+export type CalibrationReading = {
+  __typename?: 'CalibrationReading';
+  time: Scalars['String']['output'];
+  value: Scalars['Float']['output'];
+};
+
 export type CameraLivestreamFeed = {
   __typename?: 'CameraLivestreamFeed';
   available: Scalars['Boolean']['output'];
@@ -317,6 +323,11 @@ export type CreateImageUploadInput = {
   folder?: InputMaybe<Scalars['String']['input']>;
   /** Optional tenant override. Only honoured for vGreens admins; for others the tenant is taken from the current user. */
   tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type CreateIrrigationCycleInput = {
+  greenhouseId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
 };
 
 export type CreateSystemErrorInput = {
@@ -896,6 +907,19 @@ export enum InputMode {
   Weight = 'WEIGHT'
 }
 
+export type IrrigationCycle = {
+  __typename?: 'IrrigationCycle';
+  createdAt: Scalars['DateTime']['output'];
+  greenhouse?: Maybe<Scalars['String']['output']>;
+  greenhouseId?: Maybe<Scalars['ID']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  sensors: Array<SensorConfig>;
+  tenant?: Maybe<Tenant>;
+  tenantId: Scalars['ID']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
 export type ListImagesInput = {
   /** Folder under the tenant prefix to list, e.g. "harvest". Defaults to listing all images for the tenant. */
   folder?: InputMaybe<Scalars['String']['input']>;
@@ -911,6 +935,11 @@ export type Mutation = {
   __typename?: 'Mutation';
   acknowledgeAlert: Alert;
   assignCropToGreenhouse: GreenhouseCrop;
+  assignSensorToIrrigationCycle: SensorConfig;
+  captureDryCalibration: SensorConfig;
+  captureSaturatedCalibration: SensorConfig;
+  clearDryCalibration: SensorConfig;
+  clearSaturatedCalibration: SensorConfig;
   convertHarvestInputMode: Harvest;
   createAlert: Alert;
   createBatch: Batch;
@@ -921,6 +950,7 @@ export type Mutation = {
   createHarvest: Harvest;
   /** Create a signed URL that allows the client to upload an image directly to Supabase Storage. */
   createImageUploadUrl: SignedUrl;
+  createIrrigationCycle: IrrigationCycle;
   createTenant: Tenant;
   createUser: User;
   createVariety: Variety;
@@ -932,9 +962,11 @@ export type Mutation = {
   deleteHarvest: Scalars['Boolean']['output'];
   /** Delete an image from Supabase Storage. Non-admins can only delete their tenant images. */
   deleteImage: Scalars['Boolean']['output'];
+  deleteIrrigationCycle: Scalars['Boolean']['output'];
   deleteSensorConfig: Scalars['Boolean']['output'];
   deleteTenant: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
+  deleteVariety: Scalars['Boolean']['output'];
   importHarvest: ImportReportType;
   logSystemError: SystemError;
   reorderBatches: Array<Batch>;
@@ -957,9 +989,11 @@ export type Mutation = {
   updateFeature: Feature;
   updateGreenhouse: Greenhouse;
   updateHarvest: Harvest;
+  updateIrrigationCycle: IrrigationCycle;
   updateMyHarvestViewSettings: User;
   updateTenant: Tenant;
   updateUser: User;
+  updateVariety: Variety;
   /** Upload an image file directly via GraphQL and store it in Supabase Storage. */
   uploadImage: ImageFile;
   upsertFarmConfig: TenantFarmConfig;
@@ -976,6 +1010,39 @@ export type MutationAcknowledgeAlertArgs = {
 export type MutationAssignCropToGreenhouseArgs = {
   cropId: Scalars['ID']['input'];
   greenhouseId: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationAssignSensorToIrrigationCycleArgs = {
+  irrigationCycleId?: InputMaybe<Scalars['ID']['input']>;
+  sensorConfigId: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationCaptureDryCalibrationArgs = {
+  sensorConfigId: Scalars['ID']['input'];
+  since: Scalars['String']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationCaptureSaturatedCalibrationArgs = {
+  sensorConfigId: Scalars['ID']['input'];
+  since: Scalars['String']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationClearDryCalibrationArgs = {
+  sensorConfigId: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationClearSaturatedCalibrationArgs = {
+  sensorConfigId: Scalars['ID']['input'];
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -1026,6 +1093,12 @@ export type MutationCreateHarvestArgs = {
 
 export type MutationCreateImageUploadUrlArgs = {
   input: CreateImageUploadInput;
+};
+
+
+export type MutationCreateIrrigationCycleArgs = {
+  input: CreateIrrigationCycleInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1083,6 +1156,12 @@ export type MutationDeleteImageArgs = {
 };
 
 
+export type MutationDeleteIrrigationCycleArgs = {
+  id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type MutationDeleteSensorConfigArgs = {
   id: Scalars['ID']['input'];
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -1097,6 +1176,11 @@ export type MutationDeleteTenantArgs = {
 export type MutationDeleteUserArgs = {
   id: Scalars['ID']['input'];
   tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationDeleteVarietyArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1232,6 +1316,13 @@ export type MutationUpdateHarvestArgs = {
 };
 
 
+export type MutationUpdateIrrigationCycleArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateIrrigationCycleInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type MutationUpdateMyHarvestViewSettingsArgs = {
   input: HarvestViewSettingsInput;
 };
@@ -1247,6 +1338,12 @@ export type MutationUpdateUserArgs = {
   id: Scalars['ID']['input'];
   input: UpdateUserInput;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationUpdateVarietyArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateVarietyInput;
 };
 
 
@@ -1298,6 +1395,7 @@ export type Query = {
   alerts: Array<Alert>;
   batch?: Maybe<Batch>;
   batches: Array<Batch>;
+  calibrationReading?: Maybe<CalibrationReading>;
   cameraLivestreamFeeds: Array<CameraLivestreamFeed>;
   cameraLivestreamStreamUrl: CameraLivestreamStream;
   crates: Array<Crate>;
@@ -1329,11 +1427,13 @@ export type Query = {
   health: Scalars['String']['output'];
   /** List images stored for the current tenant (or a specific tenant for admins). */
   images: Array<ImageFile>;
+  irrigationCycles: Array<IrrigationCycle>;
   me?: Maybe<User>;
   sensorConfigs: Array<SensorConfig>;
   sensorDevices: Array<Scalars['String']['output']>;
   /** Create a time-limited signed URL for viewing or downloading a private image. */
   signedImageUrl: SignedUrl;
+  soilSensorConfigs: Array<SensorConfig>;
   tenant?: Maybe<Tenant>;
   tenantFeatures: Array<TenantFeature>;
   tenantGreenhouses: Array<Scalars['String']['output']>;
@@ -1367,6 +1467,13 @@ export type QueryBatchArgs = {
 export type QueryBatchesArgs = {
   filter?: InputMaybe<BatchFilterInput>;
   sort?: InputMaybe<BatchSortInput>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryCalibrationReadingArgs = {
+  sensorConfigId: Scalars['ID']['input'];
+  since: Scalars['String']['input'];
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -1508,6 +1615,11 @@ export type QueryImagesArgs = {
 };
 
 
+export type QueryIrrigationCyclesArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type QuerySensorConfigsArgs = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -1520,6 +1632,11 @@ export type QuerySensorDevicesArgs = {
 
 export type QuerySignedImageUrlArgs = {
   input: GetSignedImageUrlInput;
+};
+
+
+export type QuerySoilSensorConfigsArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1578,13 +1695,18 @@ export type RowIssueType = {
 
 export type SensorConfig = {
   __typename?: 'SensorConfig';
+  avgDryReading?: Maybe<Scalars['Float']['output']>;
+  avgSaturatedReading?: Maybe<Scalars['Float']['output']>;
   city?: Maybe<Scalars['String']['output']>;
+  correctedValue?: Maybe<Scalars['Float']['output']>;
   createdAt: Scalars['DateTime']['output'];
   device: Scalars['String']['output'];
   greenhouse?: Maybe<Scalars['String']['output']>;
   greenhouseId?: Maybe<Scalars['ID']['output']>;
   hiddenInFarmOverview?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
+  irrigationCycleId?: Maybe<Scalars['ID']['output']>;
+  isCalibrated: Scalars['Boolean']['output'];
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -1796,6 +1918,10 @@ export type UpdateHarvestInput = {
   stopTime?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateIrrigationCycleInput = {
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateTenantInput = {
   allowedDomains?: InputMaybe<Array<Scalars['String']['input']>>;
   companyName?: InputMaybe<Scalars['String']['input']>;
@@ -1814,6 +1940,11 @@ export type UpdateUserInput = {
   lastName?: InputMaybe<Scalars['String']['input']>;
   role?: InputMaybe<UserRole>;
   tenantId?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateVarietyInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UploadImageInput = {
@@ -2143,6 +2274,74 @@ export type ImportHarvestMutationVariables = Exact<{
 
 export type ImportHarvestMutation = { __typename?: 'Mutation', importHarvest: { __typename?: 'ImportReportType', tenant: string, tenantId: string, file: string, mapper: string, dryRun: boolean, startedAt: string, finishedAt: string, totalRows: number, validRows: number, invalidRows: number, created: number, skippedDuplicates: number, failed: number, globalWarnings: Array<string>, issues: Array<{ __typename?: 'RowIssueType', sourceRow: number, level: string, reason: string }> } };
 
+export type CreateIrrigationCycleMutationVariables = Exact<{
+  input: CreateIrrigationCycleInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CreateIrrigationCycleMutation = { __typename?: 'Mutation', createIrrigationCycle: { __typename?: 'IrrigationCycle', id: string, name: string, greenhouseId?: string | null, greenhouse?: string | null } };
+
+export type UpdateIrrigationCycleMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateIrrigationCycleInput;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type UpdateIrrigationCycleMutation = { __typename?: 'Mutation', updateIrrigationCycle: { __typename?: 'IrrigationCycle', id: string, name: string, greenhouseId?: string | null, greenhouse?: string | null } };
+
+export type DeleteIrrigationCycleMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DeleteIrrigationCycleMutation = { __typename?: 'Mutation', deleteIrrigationCycle: boolean };
+
+export type AssignSensorToIrrigationCycleMutationVariables = Exact<{
+  sensorConfigId: Scalars['ID']['input'];
+  irrigationCycleId?: InputMaybe<Scalars['ID']['input']>;
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type AssignSensorToIrrigationCycleMutation = { __typename?: 'Mutation', assignSensorToIrrigationCycle: { __typename?: 'SensorConfig', id: string, device: string, irrigationCycleId?: string | null } };
+
+export type CaptureDryCalibrationMutationVariables = Exact<{
+  sensorConfigId: Scalars['ID']['input'];
+  since: Scalars['String']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CaptureDryCalibrationMutation = { __typename?: 'Mutation', captureDryCalibration: { __typename?: 'SensorConfig', id: string, device: string, avgDryReading?: number | null, avgSaturatedReading?: number | null, isCalibrated: boolean } };
+
+export type CaptureSaturatedCalibrationMutationVariables = Exact<{
+  sensorConfigId: Scalars['ID']['input'];
+  since: Scalars['String']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CaptureSaturatedCalibrationMutation = { __typename?: 'Mutation', captureSaturatedCalibration: { __typename?: 'SensorConfig', id: string, device: string, avgDryReading?: number | null, avgSaturatedReading?: number | null, isCalibrated: boolean } };
+
+export type ClearDryCalibrationMutationVariables = Exact<{
+  sensorConfigId: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClearDryCalibrationMutation = { __typename?: 'Mutation', clearDryCalibration: { __typename?: 'SensorConfig', id: string, device: string, avgDryReading?: number | null, avgSaturatedReading?: number | null, isCalibrated: boolean } };
+
+export type ClearSaturatedCalibrationMutationVariables = Exact<{
+  sensorConfigId: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClearSaturatedCalibrationMutation = { __typename?: 'Mutation', clearSaturatedCalibration: { __typename?: 'SensorConfig', id: string, device: string, avgDryReading?: number | null, avgSaturatedReading?: number | null, isCalibrated: boolean } };
+
 export type UpsertSensorConfigMutationVariables = Exact<{
   input: UpsertSensorConfigInput;
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -2396,14 +2595,29 @@ export type VarietiesQueryVariables = Exact<{
 }>;
 
 
-export type VarietiesQuery = { __typename?: 'Query', varieties: Array<{ __typename?: 'Variety', id: string, name: string }> };
+export type VarietiesQuery = { __typename?: 'Query', varieties: Array<{ __typename?: 'Variety', id: string, name: string, description?: string | null }> };
 
 export type CreateVarietyMutationVariables = Exact<{
   input: CreateVarietyInput;
 }>;
 
 
-export type CreateVarietyMutation = { __typename?: 'Mutation', createVariety: { __typename?: 'Variety', id: string, name: string, cropId: string } };
+export type CreateVarietyMutation = { __typename?: 'Mutation', createVariety: { __typename?: 'Variety', id: string, name: string, cropId: string, description?: string | null } };
+
+export type UpdateVarietyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateVarietyInput;
+}>;
+
+
+export type UpdateVarietyMutation = { __typename?: 'Mutation', updateVariety: { __typename?: 'Variety', id: string, name: string, cropId: string, description?: string | null } };
+
+export type DeleteVarietyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteVarietyMutation = { __typename?: 'Mutation', deleteVariety: boolean };
 
 export type DeviceStatusesQueryVariables = Exact<{
   input?: InputMaybe<DeviceStatusInput>;
@@ -2631,6 +2845,29 @@ export type GetParDliForTenantQueryVariables = Exact<{
 
 
 export type GetParDliForTenantQuery = { __typename?: 'Query', getParDliForTenant: { __typename?: 'TenantParDli', combined: { __typename?: 'ParDliResult', currentPPFD?: number | null, currentDLI?: number | null, todaysGraphData: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }>, lowerEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }>, upperEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }> }, greenhouses: Array<{ __typename?: 'GreenhouseParDli', name: string, data: { __typename?: 'ParDliResult', currentPPFD?: number | null, currentDLI?: number | null, todaysGraphData: Array<{ __typename?: 'ParDliPoint', time: any, dli: number }>, lowerEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }>, upperEdge: Array<{ __typename?: 'ParDliBandPoint', hour: number, dli?: number | null }> } }> } };
+
+export type IrrigationCyclesQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type IrrigationCyclesQuery = { __typename?: 'Query', irrigationCycles: Array<{ __typename?: 'IrrigationCycle', id: string, name: string, greenhouseId?: string | null, greenhouse?: string | null, sensors: Array<{ __typename?: 'SensorConfig', id: string, device: string, greenhouseId?: string | null, irrigationCycleId?: string | null, avgDryReading?: number | null, avgSaturatedReading?: number | null, isCalibrated: boolean }> }> };
+
+export type SoilSensorConfigsQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type SoilSensorConfigsQuery = { __typename?: 'Query', soilSensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, device: string, greenhouse?: string | null, greenhouseId?: string | null, irrigationCycleId?: string | null, avgDryReading?: number | null, avgSaturatedReading?: number | null, isCalibrated: boolean }> };
+
+export type CalibrationReadingQueryVariables = Exact<{
+  sensorConfigId: Scalars['ID']['input'];
+  since: Scalars['String']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type CalibrationReadingQuery = { __typename?: 'Query', calibrationReading?: { __typename?: 'CalibrationReading', value: number, time: string } | null };
 
 export type SensorConfigsQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -4099,6 +4336,316 @@ export function useImportHarvestMutation(baseOptions?: Apollo.MutationHookOption
 export type ImportHarvestMutationHookResult = ReturnType<typeof useImportHarvestMutation>;
 export type ImportHarvestMutationResult = Apollo.MutationResult<ImportHarvestMutation>;
 export type ImportHarvestMutationOptions = Apollo.BaseMutationOptions<ImportHarvestMutation, ImportHarvestMutationVariables>;
+export const CreateIrrigationCycleDocument = gql`
+    mutation CreateIrrigationCycle($input: CreateIrrigationCycleInput!, $tenantId: ID) {
+  createIrrigationCycle(input: $input, tenantId: $tenantId) {
+    id
+    name
+    greenhouseId
+    greenhouse
+  }
+}
+    `;
+export type CreateIrrigationCycleMutationFn = Apollo.MutationFunction<CreateIrrigationCycleMutation, CreateIrrigationCycleMutationVariables>;
+
+/**
+ * __useCreateIrrigationCycleMutation__
+ *
+ * To run a mutation, you first call `useCreateIrrigationCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateIrrigationCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createIrrigationCycleMutation, { data, loading, error }] = useCreateIrrigationCycleMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useCreateIrrigationCycleMutation(baseOptions?: Apollo.MutationHookOptions<CreateIrrigationCycleMutation, CreateIrrigationCycleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateIrrigationCycleMutation, CreateIrrigationCycleMutationVariables>(CreateIrrigationCycleDocument, options);
+      }
+export type CreateIrrigationCycleMutationHookResult = ReturnType<typeof useCreateIrrigationCycleMutation>;
+export type CreateIrrigationCycleMutationResult = Apollo.MutationResult<CreateIrrigationCycleMutation>;
+export type CreateIrrigationCycleMutationOptions = Apollo.BaseMutationOptions<CreateIrrigationCycleMutation, CreateIrrigationCycleMutationVariables>;
+export const UpdateIrrigationCycleDocument = gql`
+    mutation UpdateIrrigationCycle($id: ID!, $input: UpdateIrrigationCycleInput!, $tenantId: ID) {
+  updateIrrigationCycle(id: $id, input: $input, tenantId: $tenantId) {
+    id
+    name
+    greenhouseId
+    greenhouse
+  }
+}
+    `;
+export type UpdateIrrigationCycleMutationFn = Apollo.MutationFunction<UpdateIrrigationCycleMutation, UpdateIrrigationCycleMutationVariables>;
+
+/**
+ * __useUpdateIrrigationCycleMutation__
+ *
+ * To run a mutation, you first call `useUpdateIrrigationCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateIrrigationCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateIrrigationCycleMutation, { data, loading, error }] = useUpdateIrrigationCycleMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useUpdateIrrigationCycleMutation(baseOptions?: Apollo.MutationHookOptions<UpdateIrrigationCycleMutation, UpdateIrrigationCycleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateIrrigationCycleMutation, UpdateIrrigationCycleMutationVariables>(UpdateIrrigationCycleDocument, options);
+      }
+export type UpdateIrrigationCycleMutationHookResult = ReturnType<typeof useUpdateIrrigationCycleMutation>;
+export type UpdateIrrigationCycleMutationResult = Apollo.MutationResult<UpdateIrrigationCycleMutation>;
+export type UpdateIrrigationCycleMutationOptions = Apollo.BaseMutationOptions<UpdateIrrigationCycleMutation, UpdateIrrigationCycleMutationVariables>;
+export const DeleteIrrigationCycleDocument = gql`
+    mutation DeleteIrrigationCycle($id: ID!, $tenantId: ID) {
+  deleteIrrigationCycle(id: $id, tenantId: $tenantId)
+}
+    `;
+export type DeleteIrrigationCycleMutationFn = Apollo.MutationFunction<DeleteIrrigationCycleMutation, DeleteIrrigationCycleMutationVariables>;
+
+/**
+ * __useDeleteIrrigationCycleMutation__
+ *
+ * To run a mutation, you first call `useDeleteIrrigationCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteIrrigationCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteIrrigationCycleMutation, { data, loading, error }] = useDeleteIrrigationCycleMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useDeleteIrrigationCycleMutation(baseOptions?: Apollo.MutationHookOptions<DeleteIrrigationCycleMutation, DeleteIrrigationCycleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteIrrigationCycleMutation, DeleteIrrigationCycleMutationVariables>(DeleteIrrigationCycleDocument, options);
+      }
+export type DeleteIrrigationCycleMutationHookResult = ReturnType<typeof useDeleteIrrigationCycleMutation>;
+export type DeleteIrrigationCycleMutationResult = Apollo.MutationResult<DeleteIrrigationCycleMutation>;
+export type DeleteIrrigationCycleMutationOptions = Apollo.BaseMutationOptions<DeleteIrrigationCycleMutation, DeleteIrrigationCycleMutationVariables>;
+export const AssignSensorToIrrigationCycleDocument = gql`
+    mutation AssignSensorToIrrigationCycle($sensorConfigId: ID!, $irrigationCycleId: ID, $tenantId: ID) {
+  assignSensorToIrrigationCycle(
+    sensorConfigId: $sensorConfigId
+    irrigationCycleId: $irrigationCycleId
+    tenantId: $tenantId
+  ) {
+    id
+    device
+    irrigationCycleId
+  }
+}
+    `;
+export type AssignSensorToIrrigationCycleMutationFn = Apollo.MutationFunction<AssignSensorToIrrigationCycleMutation, AssignSensorToIrrigationCycleMutationVariables>;
+
+/**
+ * __useAssignSensorToIrrigationCycleMutation__
+ *
+ * To run a mutation, you first call `useAssignSensorToIrrigationCycleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAssignSensorToIrrigationCycleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [assignSensorToIrrigationCycleMutation, { data, loading, error }] = useAssignSensorToIrrigationCycleMutation({
+ *   variables: {
+ *      sensorConfigId: // value for 'sensorConfigId'
+ *      irrigationCycleId: // value for 'irrigationCycleId'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useAssignSensorToIrrigationCycleMutation(baseOptions?: Apollo.MutationHookOptions<AssignSensorToIrrigationCycleMutation, AssignSensorToIrrigationCycleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AssignSensorToIrrigationCycleMutation, AssignSensorToIrrigationCycleMutationVariables>(AssignSensorToIrrigationCycleDocument, options);
+      }
+export type AssignSensorToIrrigationCycleMutationHookResult = ReturnType<typeof useAssignSensorToIrrigationCycleMutation>;
+export type AssignSensorToIrrigationCycleMutationResult = Apollo.MutationResult<AssignSensorToIrrigationCycleMutation>;
+export type AssignSensorToIrrigationCycleMutationOptions = Apollo.BaseMutationOptions<AssignSensorToIrrigationCycleMutation, AssignSensorToIrrigationCycleMutationVariables>;
+export const CaptureDryCalibrationDocument = gql`
+    mutation CaptureDryCalibration($sensorConfigId: ID!, $since: String!, $tenantId: ID) {
+  captureDryCalibration(
+    sensorConfigId: $sensorConfigId
+    since: $since
+    tenantId: $tenantId
+  ) {
+    id
+    device
+    avgDryReading
+    avgSaturatedReading
+    isCalibrated
+  }
+}
+    `;
+export type CaptureDryCalibrationMutationFn = Apollo.MutationFunction<CaptureDryCalibrationMutation, CaptureDryCalibrationMutationVariables>;
+
+/**
+ * __useCaptureDryCalibrationMutation__
+ *
+ * To run a mutation, you first call `useCaptureDryCalibrationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCaptureDryCalibrationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [captureDryCalibrationMutation, { data, loading, error }] = useCaptureDryCalibrationMutation({
+ *   variables: {
+ *      sensorConfigId: // value for 'sensorConfigId'
+ *      since: // value for 'since'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useCaptureDryCalibrationMutation(baseOptions?: Apollo.MutationHookOptions<CaptureDryCalibrationMutation, CaptureDryCalibrationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CaptureDryCalibrationMutation, CaptureDryCalibrationMutationVariables>(CaptureDryCalibrationDocument, options);
+      }
+export type CaptureDryCalibrationMutationHookResult = ReturnType<typeof useCaptureDryCalibrationMutation>;
+export type CaptureDryCalibrationMutationResult = Apollo.MutationResult<CaptureDryCalibrationMutation>;
+export type CaptureDryCalibrationMutationOptions = Apollo.BaseMutationOptions<CaptureDryCalibrationMutation, CaptureDryCalibrationMutationVariables>;
+export const CaptureSaturatedCalibrationDocument = gql`
+    mutation CaptureSaturatedCalibration($sensorConfigId: ID!, $since: String!, $tenantId: ID) {
+  captureSaturatedCalibration(
+    sensorConfigId: $sensorConfigId
+    since: $since
+    tenantId: $tenantId
+  ) {
+    id
+    device
+    avgDryReading
+    avgSaturatedReading
+    isCalibrated
+  }
+}
+    `;
+export type CaptureSaturatedCalibrationMutationFn = Apollo.MutationFunction<CaptureSaturatedCalibrationMutation, CaptureSaturatedCalibrationMutationVariables>;
+
+/**
+ * __useCaptureSaturatedCalibrationMutation__
+ *
+ * To run a mutation, you first call `useCaptureSaturatedCalibrationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCaptureSaturatedCalibrationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [captureSaturatedCalibrationMutation, { data, loading, error }] = useCaptureSaturatedCalibrationMutation({
+ *   variables: {
+ *      sensorConfigId: // value for 'sensorConfigId'
+ *      since: // value for 'since'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useCaptureSaturatedCalibrationMutation(baseOptions?: Apollo.MutationHookOptions<CaptureSaturatedCalibrationMutation, CaptureSaturatedCalibrationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CaptureSaturatedCalibrationMutation, CaptureSaturatedCalibrationMutationVariables>(CaptureSaturatedCalibrationDocument, options);
+      }
+export type CaptureSaturatedCalibrationMutationHookResult = ReturnType<typeof useCaptureSaturatedCalibrationMutation>;
+export type CaptureSaturatedCalibrationMutationResult = Apollo.MutationResult<CaptureSaturatedCalibrationMutation>;
+export type CaptureSaturatedCalibrationMutationOptions = Apollo.BaseMutationOptions<CaptureSaturatedCalibrationMutation, CaptureSaturatedCalibrationMutationVariables>;
+export const ClearDryCalibrationDocument = gql`
+    mutation ClearDryCalibration($sensorConfigId: ID!, $tenantId: ID) {
+  clearDryCalibration(sensorConfigId: $sensorConfigId, tenantId: $tenantId) {
+    id
+    device
+    avgDryReading
+    avgSaturatedReading
+    isCalibrated
+  }
+}
+    `;
+export type ClearDryCalibrationMutationFn = Apollo.MutationFunction<ClearDryCalibrationMutation, ClearDryCalibrationMutationVariables>;
+
+/**
+ * __useClearDryCalibrationMutation__
+ *
+ * To run a mutation, you first call `useClearDryCalibrationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useClearDryCalibrationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [clearDryCalibrationMutation, { data, loading, error }] = useClearDryCalibrationMutation({
+ *   variables: {
+ *      sensorConfigId: // value for 'sensorConfigId'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useClearDryCalibrationMutation(baseOptions?: Apollo.MutationHookOptions<ClearDryCalibrationMutation, ClearDryCalibrationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ClearDryCalibrationMutation, ClearDryCalibrationMutationVariables>(ClearDryCalibrationDocument, options);
+      }
+export type ClearDryCalibrationMutationHookResult = ReturnType<typeof useClearDryCalibrationMutation>;
+export type ClearDryCalibrationMutationResult = Apollo.MutationResult<ClearDryCalibrationMutation>;
+export type ClearDryCalibrationMutationOptions = Apollo.BaseMutationOptions<ClearDryCalibrationMutation, ClearDryCalibrationMutationVariables>;
+export const ClearSaturatedCalibrationDocument = gql`
+    mutation ClearSaturatedCalibration($sensorConfigId: ID!, $tenantId: ID) {
+  clearSaturatedCalibration(sensorConfigId: $sensorConfigId, tenantId: $tenantId) {
+    id
+    device
+    avgDryReading
+    avgSaturatedReading
+    isCalibrated
+  }
+}
+    `;
+export type ClearSaturatedCalibrationMutationFn = Apollo.MutationFunction<ClearSaturatedCalibrationMutation, ClearSaturatedCalibrationMutationVariables>;
+
+/**
+ * __useClearSaturatedCalibrationMutation__
+ *
+ * To run a mutation, you first call `useClearSaturatedCalibrationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useClearSaturatedCalibrationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [clearSaturatedCalibrationMutation, { data, loading, error }] = useClearSaturatedCalibrationMutation({
+ *   variables: {
+ *      sensorConfigId: // value for 'sensorConfigId'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useClearSaturatedCalibrationMutation(baseOptions?: Apollo.MutationHookOptions<ClearSaturatedCalibrationMutation, ClearSaturatedCalibrationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ClearSaturatedCalibrationMutation, ClearSaturatedCalibrationMutationVariables>(ClearSaturatedCalibrationDocument, options);
+      }
+export type ClearSaturatedCalibrationMutationHookResult = ReturnType<typeof useClearSaturatedCalibrationMutation>;
+export type ClearSaturatedCalibrationMutationResult = Apollo.MutationResult<ClearSaturatedCalibrationMutation>;
+export type ClearSaturatedCalibrationMutationOptions = Apollo.BaseMutationOptions<ClearSaturatedCalibrationMutation, ClearSaturatedCalibrationMutationVariables>;
 export const UpsertSensorConfigDocument = gql`
     mutation UpsertSensorConfig($input: UpsertSensorConfigInput!, $tenantId: ID) {
   upsertSensorConfig(input: $input, tenantId: $tenantId) {
@@ -5537,6 +6084,7 @@ export const VarietiesDocument = gql`
   varieties(cropId: $cropId) {
     id
     name
+    description
   }
 }
     `;
@@ -5582,6 +6130,7 @@ export const CreateVarietyDocument = gql`
     id
     name
     cropId
+    description
   }
 }
     `;
@@ -5611,6 +6160,74 @@ export function useCreateVarietyMutation(baseOptions?: Apollo.MutationHookOption
 export type CreateVarietyMutationHookResult = ReturnType<typeof useCreateVarietyMutation>;
 export type CreateVarietyMutationResult = Apollo.MutationResult<CreateVarietyMutation>;
 export type CreateVarietyMutationOptions = Apollo.BaseMutationOptions<CreateVarietyMutation, CreateVarietyMutationVariables>;
+export const UpdateVarietyDocument = gql`
+    mutation UpdateVariety($id: ID!, $input: UpdateVarietyInput!) {
+  updateVariety(id: $id, input: $input) {
+    id
+    name
+    cropId
+    description
+  }
+}
+    `;
+export type UpdateVarietyMutationFn = Apollo.MutationFunction<UpdateVarietyMutation, UpdateVarietyMutationVariables>;
+
+/**
+ * __useUpdateVarietyMutation__
+ *
+ * To run a mutation, you first call `useUpdateVarietyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateVarietyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateVarietyMutation, { data, loading, error }] = useUpdateVarietyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateVarietyMutation(baseOptions?: Apollo.MutationHookOptions<UpdateVarietyMutation, UpdateVarietyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateVarietyMutation, UpdateVarietyMutationVariables>(UpdateVarietyDocument, options);
+      }
+export type UpdateVarietyMutationHookResult = ReturnType<typeof useUpdateVarietyMutation>;
+export type UpdateVarietyMutationResult = Apollo.MutationResult<UpdateVarietyMutation>;
+export type UpdateVarietyMutationOptions = Apollo.BaseMutationOptions<UpdateVarietyMutation, UpdateVarietyMutationVariables>;
+export const DeleteVarietyDocument = gql`
+    mutation DeleteVariety($id: ID!) {
+  deleteVariety(id: $id)
+}
+    `;
+export type DeleteVarietyMutationFn = Apollo.MutationFunction<DeleteVarietyMutation, DeleteVarietyMutationVariables>;
+
+/**
+ * __useDeleteVarietyMutation__
+ *
+ * To run a mutation, you first call `useDeleteVarietyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteVarietyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteVarietyMutation, { data, loading, error }] = useDeleteVarietyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteVarietyMutation(baseOptions?: Apollo.MutationHookOptions<DeleteVarietyMutation, DeleteVarietyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteVarietyMutation, DeleteVarietyMutationVariables>(DeleteVarietyDocument, options);
+      }
+export type DeleteVarietyMutationHookResult = ReturnType<typeof useDeleteVarietyMutation>;
+export type DeleteVarietyMutationResult = Apollo.MutationResult<DeleteVarietyMutation>;
+export type DeleteVarietyMutationOptions = Apollo.BaseMutationOptions<DeleteVarietyMutation, DeleteVarietyMutationVariables>;
 export const DeviceStatusesDocument = gql`
     query DeviceStatuses($input: DeviceStatusInput) {
   deviceStatuses(input: $input) {
@@ -7127,6 +7744,161 @@ export type GetParDliForTenantQueryHookResult = ReturnType<typeof useGetParDliFo
 export type GetParDliForTenantLazyQueryHookResult = ReturnType<typeof useGetParDliForTenantLazyQuery>;
 export type GetParDliForTenantSuspenseQueryHookResult = ReturnType<typeof useGetParDliForTenantSuspenseQuery>;
 export type GetParDliForTenantQueryResult = Apollo.QueryResult<GetParDliForTenantQuery, GetParDliForTenantQueryVariables>;
+export const IrrigationCyclesDocument = gql`
+    query IrrigationCycles($tenantId: ID) {
+  irrigationCycles(tenantId: $tenantId) {
+    id
+    name
+    greenhouseId
+    greenhouse
+    sensors {
+      id
+      device
+      greenhouseId
+      irrigationCycleId
+      avgDryReading
+      avgSaturatedReading
+      isCalibrated
+    }
+  }
+}
+    `;
+
+/**
+ * __useIrrigationCyclesQuery__
+ *
+ * To run a query within a React component, call `useIrrigationCyclesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIrrigationCyclesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIrrigationCyclesQuery({
+ *   variables: {
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useIrrigationCyclesQuery(baseOptions?: Apollo.QueryHookOptions<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>(IrrigationCyclesDocument, options);
+      }
+export function useIrrigationCyclesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>(IrrigationCyclesDocument, options);
+        }
+// @ts-ignore
+export function useIrrigationCyclesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>): Apollo.UseSuspenseQueryResult<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>;
+export function useIrrigationCyclesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>): Apollo.UseSuspenseQueryResult<IrrigationCyclesQuery | undefined, IrrigationCyclesQueryVariables>;
+export function useIrrigationCyclesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>(IrrigationCyclesDocument, options);
+        }
+export type IrrigationCyclesQueryHookResult = ReturnType<typeof useIrrigationCyclesQuery>;
+export type IrrigationCyclesLazyQueryHookResult = ReturnType<typeof useIrrigationCyclesLazyQuery>;
+export type IrrigationCyclesSuspenseQueryHookResult = ReturnType<typeof useIrrigationCyclesSuspenseQuery>;
+export type IrrigationCyclesQueryResult = Apollo.QueryResult<IrrigationCyclesQuery, IrrigationCyclesQueryVariables>;
+export const SoilSensorConfigsDocument = gql`
+    query SoilSensorConfigs($tenantId: ID) {
+  soilSensorConfigs(tenantId: $tenantId) {
+    id
+    device
+    greenhouse
+    greenhouseId
+    irrigationCycleId
+    avgDryReading
+    avgSaturatedReading
+    isCalibrated
+  }
+}
+    `;
+
+/**
+ * __useSoilSensorConfigsQuery__
+ *
+ * To run a query within a React component, call `useSoilSensorConfigsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSoilSensorConfigsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSoilSensorConfigsQuery({
+ *   variables: {
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useSoilSensorConfigsQuery(baseOptions?: Apollo.QueryHookOptions<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>(SoilSensorConfigsDocument, options);
+      }
+export function useSoilSensorConfigsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>(SoilSensorConfigsDocument, options);
+        }
+// @ts-ignore
+export function useSoilSensorConfigsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>): Apollo.UseSuspenseQueryResult<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>;
+export function useSoilSensorConfigsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>): Apollo.UseSuspenseQueryResult<SoilSensorConfigsQuery | undefined, SoilSensorConfigsQueryVariables>;
+export function useSoilSensorConfigsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>(SoilSensorConfigsDocument, options);
+        }
+export type SoilSensorConfigsQueryHookResult = ReturnType<typeof useSoilSensorConfigsQuery>;
+export type SoilSensorConfigsLazyQueryHookResult = ReturnType<typeof useSoilSensorConfigsLazyQuery>;
+export type SoilSensorConfigsSuspenseQueryHookResult = ReturnType<typeof useSoilSensorConfigsSuspenseQuery>;
+export type SoilSensorConfigsQueryResult = Apollo.QueryResult<SoilSensorConfigsQuery, SoilSensorConfigsQueryVariables>;
+export const CalibrationReadingDocument = gql`
+    query CalibrationReading($sensorConfigId: ID!, $since: String!, $tenantId: ID) {
+  calibrationReading(
+    sensorConfigId: $sensorConfigId
+    since: $since
+    tenantId: $tenantId
+  ) {
+    value
+    time
+  }
+}
+    `;
+
+/**
+ * __useCalibrationReadingQuery__
+ *
+ * To run a query within a React component, call `useCalibrationReadingQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCalibrationReadingQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCalibrationReadingQuery({
+ *   variables: {
+ *      sensorConfigId: // value for 'sensorConfigId'
+ *      since: // value for 'since'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useCalibrationReadingQuery(baseOptions: Apollo.QueryHookOptions<CalibrationReadingQuery, CalibrationReadingQueryVariables> & ({ variables: CalibrationReadingQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CalibrationReadingQuery, CalibrationReadingQueryVariables>(CalibrationReadingDocument, options);
+      }
+export function useCalibrationReadingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CalibrationReadingQuery, CalibrationReadingQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CalibrationReadingQuery, CalibrationReadingQueryVariables>(CalibrationReadingDocument, options);
+        }
+// @ts-ignore
+export function useCalibrationReadingSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CalibrationReadingQuery, CalibrationReadingQueryVariables>): Apollo.UseSuspenseQueryResult<CalibrationReadingQuery, CalibrationReadingQueryVariables>;
+export function useCalibrationReadingSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CalibrationReadingQuery, CalibrationReadingQueryVariables>): Apollo.UseSuspenseQueryResult<CalibrationReadingQuery | undefined, CalibrationReadingQueryVariables>;
+export function useCalibrationReadingSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CalibrationReadingQuery, CalibrationReadingQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CalibrationReadingQuery, CalibrationReadingQueryVariables>(CalibrationReadingDocument, options);
+        }
+export type CalibrationReadingQueryHookResult = ReturnType<typeof useCalibrationReadingQuery>;
+export type CalibrationReadingLazyQueryHookResult = ReturnType<typeof useCalibrationReadingLazyQuery>;
+export type CalibrationReadingSuspenseQueryHookResult = ReturnType<typeof useCalibrationReadingSuspenseQuery>;
+export type CalibrationReadingQueryResult = Apollo.QueryResult<CalibrationReadingQuery, CalibrationReadingQueryVariables>;
 export const SensorConfigsDocument = gql`
     query SensorConfigs($tenantId: ID) {
   sensorConfigs(tenantId: $tenantId) {
