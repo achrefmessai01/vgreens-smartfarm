@@ -555,6 +555,9 @@ export const en = {
       oldestFirst: 'oldest first',
       azOrder: 'A–Z',
       zaOrder: 'Z–A',
+      sortByBatchName: 'Batch name',
+      sortManualOrder: 'Custom order',
+      dragToReorder: 'Drag to reorder',
       plantingDateRange: 'Planting date',
       createBatch: 'Create Batch',
       exportCsv: 'Export CSV',
@@ -850,7 +853,8 @@ export const en = {
       yieldPerRunningMeterShort: 'Yield/m',
       yieldPerRunningMeter: 'Yield per Running Meter',
       yieldPerRunningMeterSubtitle: 'Sellable kg per running metre',
-      yieldPerRunningMeterNoData: 'Set Row Length and Number of Rows on the batch',
+      yieldPerRunningMeterNoData:
+        'Set Row Length and Number of Rows on the batch',
       yieldPerSquareMeter: 'Yield per m²',
       yieldPerSquareMeterSubtitle: 'Total kg per m²',
       yieldPerSquareMeterNoData: 'Set cultivation area on the batch',
@@ -1161,8 +1165,14 @@ export const en = {
           notConfigured: 'Not configured',
         },
         farmLayout: {
+          validationError:
+            'Some greenhouses have invalid values. Fix the highlighted fields and save again.',
+          saveFailed: 'Saving failed. Please try again.',
+          nameRequired: 'Name is required.',
+          dimensionsInvalid: 'Width and length must be greater than 0.',
+          bayCountInvalid: 'Bays must be a whole number of at least 1.',
           title: 'Farm Layout',
-          subtitle: 'Configure greenhouse names and dimensions',
+          subtitle: 'Configure greenhouses, their crops and irrigation cycles',
           save: 'Save',
           saving: 'Saving…',
           greenhouses: 'Greenhouses',
@@ -1184,6 +1194,8 @@ export const en = {
           doorPositionPlaceholder: 'Select position',
         },
         cropAssignment: {
+          updateFailed:
+            'Updating the crop assignment failed. Please try again.',
           title: 'Greenhouse Crops',
           subtitle: 'Choose which crops each greenhouse may grow',
           noGreenhouses: 'Add a greenhouse first to assign crops.',

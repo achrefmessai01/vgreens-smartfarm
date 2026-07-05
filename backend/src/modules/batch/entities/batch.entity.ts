@@ -101,6 +101,14 @@ export class Batch {
   })
   status: BatchStatus;
 
+  // The user-defined manual rank of this batch within the tenant's harvest list,
+  // set by drag-and-drop reordering. Tenant-shared (not per-user). Nullable: a
+  // batch that has never been placed in a custom order stays null and sorts to
+  // the end when MANUAL_ORDER is the active sort. Ascending = top of the list.
+  @Field(() => Int, { nullable: true })
+  @Column({ type: 'int', nullable: true })
+  sortOrder?: number | null;
+
   // How this batch's harvests record yield. Fixed at creation. In crate mode,
   // entries store per-quality crate counts + a remainder and the kg/total are
   // derived from crateWeight at read time (so editing crateWeight propagates).

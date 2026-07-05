@@ -9,10 +9,7 @@ import {
   SensorConfigTable,
   SensorVisibilityConfig,
 } from '@/components/sensor-config';
-import {
-  FarmLayoutConfig,
-  GreenhouseCropsConfig,
-} from '@/components/farm-config';
+import { FarmLayoutConfig } from '@/components/farm-config';
 
 export function TenantDetailsTabs() {
   const { t } = useI18n();
@@ -66,7 +63,6 @@ export function TenantDetailsTabs() {
           <div className="flex min-w-0 flex-col gap-6">
             <SensorVisibilityConfig tenantId={tenantId} />
             <FarmLayoutConfig tenantId={tenantId} />
-            <GreenhouseCropsConfig tenantId={tenantId} />
             <SensorConfigTable tenantId={tenantId} />
           </div>
         )}

@@ -1,7 +1,8 @@
 import { BaseEntity } from '@common/entities';
 import { Tenant } from '@modules/tenants/entities/tenant.entity';
 import { Greenhouse } from '@modules/greenhouse/entities/greenhouse.entity';
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { IrrigationCycle } from '@modules/irrigation-cycles/entities/irrigation-cycle.entity';
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -51,6 +52,18 @@ export class SensorConfig extends BaseEntity {
   @JoinColumn({ name: 'greenhouseId' })
   greenhouseRef?: Greenhouse | null;
 
+  // Groups this SOIL sensor into an irrigation cycle (one cycle per sensor).
+  // Soil-only and same-greenhouse are enforced in IrrigationCyclesService on
+  // assignment; deleting a cycle is blocked while sensors are assigned, so the
+  // FK's SET NULL only covers out-of-band deletes.
+  @Field(() => ID, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  irrigationCycleId?: string | null;
+
+  @ManyToOne(() => IrrigationCycle, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'irrigationCycleId' })
+  irrigationCycleRef?: IrrigationCycle | null;
+
   @Field({ nullable: true })
   @Column({ type: 'varchar', length: 128, nullable: true })
   city?: string;
@@ -58,6 +71,19 @@ export class SensorConfig extends BaseEntity {
   @Field({ nullable: true })
   @Column({ type: 'boolean', default: false, nullable: true })
   hiddenInFarmOverview?: boolean;
+
+  // Two-point soil-moisture calibration bounds (raw sensor units). Null until
+  // the sensor is calibrated. avgDryReading maps to 0% moisture,
+  // avgSaturatedReading to 100%. The corrected 0–100% value is NOT stored — it
+  // is recomputed from the live raw reading in the resolver's `correctedValue`
+  // field. Do NOT assume dry < saturated: soil sensors often read inverted.
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  avgDryReading?: number | null;
+
+  @Field(() => Float, { nullable: true })
+  @Column({ type: 'double precision', nullable: true })
+  avgSaturatedReading?: number | null;
 
   @Field()
   @CreateDateColumn({ type: 'timestamp' })

@@ -523,7 +523,8 @@ export const es = {
       yieldPerRunningMeterShort: 'Rendimiento/m',
       yieldPerRunningMeter: 'Rendimiento por metro lineal',
       yieldPerRunningMeterSubtitle: 'kg vendibles por metro lineal',
-      yieldPerRunningMeterNoData: 'Establece la longitud de fila y el número de filas del lote',
+      yieldPerRunningMeterNoData:
+        'Establece la longitud de fila y el número de filas del lote',
       yieldPerSquareMeter: 'Rendimiento por m²',
       yieldPerSquareMeterSubtitle: 'kg totales por m²',
       yieldPerSquareMeterNoData: 'Establece el área de cultivo del lote',
@@ -563,6 +564,9 @@ export const es = {
       oldestFirst: 'más antiguos primero',
       azOrder: 'A–Z',
       zaOrder: 'Z–A',
+      sortByBatchName: 'Nombre del lote',
+      sortManualOrder: 'Orden personalizado',
+      dragToReorder: 'Arrastrar para reordenar',
       plantingDateRange: 'Fecha de plantación',
       createBatch: 'Crear lote',
       exportCsv: 'Exportar CSV',
@@ -811,7 +815,8 @@ export const es = {
       rowSegmentLabel: 'Segmento {n}',
       addRowPair: 'Añadir segmento de fila',
       removeRowPair: 'Eliminar segmento',
-      rowSegmentsOverlap: 'Los segmentos deben estar ordenados y no superponerse',
+      rowSegmentsOverlap:
+        'Los segmentos deben estar ordenados y no superponerse',
       addBrixMeasurements: 'Añadir mediciones Brix',
       fruitWeightMeasurement: 'Peso del fruto',
       trossWeightMeasurement: 'Peso del Tross',
@@ -1090,7 +1095,8 @@ export const es = {
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:
           'Déjelo vacío para permitir cualquier dominio de correo. Pulse Intro o coma para añadir.',
-        allowedDomainsInvalid: 'Introduzca un dominio válido (p. ej., example.com)',
+        allowedDomainsInvalid:
+          'Introduzca un dominio válido (p. ej., example.com)',
         allowedDomainsRemove: 'Eliminar dominio',
         domainNotAllowed:
           'Este dominio de correo no está permitido para el inquilino seleccionado.',
@@ -1143,8 +1149,17 @@ export const es = {
           notConfigured: 'Sin configurar',
         },
         farmLayout: {
+          validationError:
+            'Algunos invernaderos tienen valores no válidos. Corrige los campos marcados y guarda de nuevo.',
+          saveFailed: 'Error al guardar. Inténtalo de nuevo.',
+          nameRequired: 'El nombre es obligatorio.',
+          dimensionsInvalid:
+            'La anchura y la longitud deben ser mayores que 0.',
+          bayCountInvalid:
+            'Las naves deben ser un número entero de al menos 1.',
           title: 'Diseño de la granja',
-          subtitle: 'Configura los nombres y dimensiones de los invernaderos',
+          subtitle:
+            'Configura los invernaderos, sus cultivos y ciclos de riego',
           save: 'Guardar',
           saving: 'Guardando…',
           greenhouses: 'Invernaderos',
@@ -1158,7 +1173,8 @@ export const es = {
           bayCountLabel: 'Naves',
           orientationLabel: 'Disposición horizontal',
           visibilityLabel: 'Visible en Vista de la granja',
-          visibilityHint: 'Desactiva para ocultar este invernadero de las pestañas.',
+          visibilityHint:
+            'Desactiva para ocultar este invernadero de las pestañas.',
           bayCountPlaceholder: '0',
           namePlaceholder: 'p. ej., Sala de fresas',
           xDimensionPlaceholder: '0,0',

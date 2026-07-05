@@ -23,6 +23,7 @@ export { FarmOverviewCard } from './farm-overview-card';
 export { ParameterSelector } from './parameter-selector';
 export { GreenhouseSelector } from './greenhouse-selector';
 export { SensorVisibilityDropdown } from './sensor-visibility-dropdown';
+export { CalibrationDropdown } from './calibration-dropdown';
 export { CombinedGreenhouseView } from './combined-greenhouse';
 export { HistoryChartSkeleton } from './history-chart-skeleton';
 export type { FarmOverviewCardProps } from './farm-overview-card';

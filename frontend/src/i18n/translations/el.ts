@@ -537,7 +537,8 @@ export const el = {
       yieldPerRunningMeterShort: 'Απόδοση/m',
       yieldPerRunningMeter: 'Απόδοση ανά τρέχον μέτρο',
       yieldPerRunningMeterSubtitle: 'Εμπορεύσιμα kg ανά τρέχον μέτρο',
-      yieldPerRunningMeterNoData: 'Ορίστε το μήκος σειράς και τον αριθμό σειρών στην παρτίδα',
+      yieldPerRunningMeterNoData:
+        'Ορίστε το μήκος σειράς και τον αριθμό σειρών στην παρτίδα',
       yieldPerSquareMeter: 'Απόδοση ανά m²',
       yieldPerSquareMeterSubtitle: 'Συνολικά kg ανά m²',
       yieldPerSquareMeterNoData: 'Ορίστε την έκταση καλλιέργειας στην παρτίδα',
@@ -578,6 +579,9 @@ export const el = {
       oldestFirst: 'πρώτα τα παλαιότερα',
       azOrder: 'Α–Ω',
       zaOrder: 'Ω–Α',
+      sortByBatchName: 'Όνομα παρτίδας',
+      sortManualOrder: 'Προσαρμοσμένη σειρά',
+      dragToReorder: 'Σύρετε για αναδιάταξη',
       plantingDateRange: 'Ημερομηνία φύτευσης',
       createBatch: 'Δημιουργία παρτίδας',
       exportCsv: 'Εξαγωγή CSV',
@@ -734,8 +738,10 @@ export const el = {
       crateOptionLabel: '{weight} kg',
       addCrateOption: '+ Προσθήκη νέου τελάρου...',
       addCrate: 'Προσθήκη τελάρου',
-      addCrateDescription: 'Δημιουργήστε ένα νέο μέγεθος τελάρου για αυτόν τον μισθωτή.',
-      crateWeightRequired: 'Το βάρος του τελάρου πρέπει να είναι μεγαλύτερο από 0',
+      addCrateDescription:
+        'Δημιουργήστε ένα νέο μέγεθος τελάρου για αυτόν τον μισθωτή.',
+      crateWeightRequired:
+        'Το βάρος του τελάρου πρέπει να είναι μεγαλύτερο από 0',
       crateCreateFailed: 'Αποτυχία προσθήκης τελάρου',
       saveCrate: 'Αποθήκευση',
       crateYieldData: 'Απόδοση ανά τελάρο',
@@ -828,7 +834,8 @@ export const el = {
       rowSegmentLabel: 'Τμήμα {n}',
       addRowPair: 'Προσθήκη τμήματος σειράς',
       removeRowPair: 'Αφαίρεση τμήματος',
-      rowSegmentsOverlap: 'Τα τμήματα πρέπει να είναι ταξινομημένα και να μην επικαλύπτονται',
+      rowSegmentsOverlap:
+        'Τα τμήματα πρέπει να είναι ταξινομημένα και να μην επικαλύπτονται',
       addBrixMeasurements: 'Προσθήκη μετρήσεων Brix',
       fruitWeightMeasurement: 'Βάρος καρπού',
       trossWeightMeasurement: 'Βάρος Tross',
@@ -1156,8 +1163,17 @@ export const el = {
           notConfigured: 'Μη διαμορφωμένο',
         },
         farmLayout: {
+          validationError:
+            'Ορισμένα θερμοκήπια έχουν μη έγκυρες τιμές. Διορθώστε τα επισημασμένα πεδία και αποθηκεύστε ξανά.',
+          saveFailed: 'Η αποθήκευση απέτυχε. Δοκιμάστε ξανά.',
+          nameRequired: 'Το όνομα είναι υποχρεωτικό.',
+          dimensionsInvalid:
+            'Το πλάτος και το μήκος πρέπει να είναι μεγαλύτερα από 0.',
+          bayCountInvalid:
+            'Τα διαμερίσματα πρέπει να είναι ακέραιος αριθμός τουλάχιστον 1.',
           title: 'Διάταξη φάρμας',
-          subtitle: 'Ρυθμίστε τα ονόματα και τις διαστάσεις των θερμοκηπίων',
+          subtitle:
+            'Ρυθμίστε τα θερμοκήπια, τις καλλιέργειες και τους κύκλους άρδευσής τους',
           save: 'Αποθήκευση',
           saving: 'Αποθήκευση…',
           greenhouses: 'Θερμοκήπια',

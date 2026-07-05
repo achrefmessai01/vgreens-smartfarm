@@ -526,7 +526,8 @@ export const tr = {
       yieldPerRunningMeterShort: 'Verim/m',
       yieldPerRunningMeter: 'Tul metre başına verim',
       yieldPerRunningMeterSubtitle: 'Tul metre başına satılabilir kg',
-      yieldPerRunningMeterNoData: 'Partide sıra uzunluğunu ve sıra sayısını ayarlayın',
+      yieldPerRunningMeterNoData:
+        'Partide sıra uzunluğunu ve sıra sayısını ayarlayın',
       yieldPerSquareMeter: 'm² başına verim',
       yieldPerSquareMeterSubtitle: 'm² başına toplam kg',
       yieldPerSquareMeterNoData: 'Partide ekim alanını ayarlayın',
@@ -566,6 +567,9 @@ export const tr = {
       oldestFirst: 'önce en eski',
       azOrder: 'A–Z',
       zaOrder: 'Z–A',
+      sortByBatchName: 'Parti adı',
+      sortManualOrder: 'Özel sıralama',
+      dragToReorder: 'Yeniden sıralamak için sürükleyin',
       plantingDateRange: 'Dikim tarihi',
       createBatch: 'Parti oluştur',
       exportCsv: 'CSV Dışa Aktar',
@@ -1137,8 +1141,15 @@ export const tr = {
           notConfigured: 'Yapılandırılmamış',
         },
         farmLayout: {
+          validationError:
+            'Bazı seralarda geçersiz değerler var. İşaretli alanları düzeltip tekrar kaydedin.',
+          saveFailed: 'Kaydetme başarısız oldu. Lütfen tekrar deneyin.',
+          nameRequired: 'Ad gereklidir.',
+          dimensionsInvalid: 'Genişlik ve uzunluk 0’dan büyük olmalıdır.',
+          bayCountInvalid:
+            'Bölmeler en az 1 olacak şekilde tam sayı olmalıdır.',
           title: 'Çiftlik düzeni',
-          subtitle: 'Sera adlarını ve boyutlarını yapılandırın',
+          subtitle: 'Seraları, ürünlerini ve sulama döngülerini yapılandırın',
           save: 'Kaydet',
           saving: 'Kaydediliyor…',
           greenhouses: 'Seralar',

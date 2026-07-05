@@ -535,7 +535,8 @@ export const ro = {
       yieldPerRunningMeterShort: 'Producție/m',
       yieldPerRunningMeter: 'Producție pe metru liniar',
       yieldPerRunningMeterSubtitle: 'kg vandabile pe metru liniar',
-      yieldPerRunningMeterNoData: 'Setați lungimea rândului și numărul de rânduri în lot',
+      yieldPerRunningMeterNoData:
+        'Setați lungimea rândului și numărul de rânduri în lot',
       yieldPerSquareMeter: 'Producție pe m²',
       yieldPerSquareMeterSubtitle: 'kg totale pe m²',
       yieldPerSquareMeterNoData: 'Setați suprafața de cultivare în lot',
@@ -575,6 +576,9 @@ export const ro = {
       oldestFirst: 'cele mai vechi întâi',
       azOrder: 'A–Z',
       zaOrder: 'Z–A',
+      sortByBatchName: 'Numele lotului',
+      sortManualOrder: 'Ordine personalizată',
+      dragToReorder: 'Trage pentru a reordona',
       plantingDateRange: 'Data plantării',
       createBatch: 'Creează lot',
       exportCsv: 'Exportă CSV',
@@ -730,7 +734,8 @@ export const ro = {
       crateOptionLabel: '{weight} kg',
       addCrateOption: '+ Adaugă ladă nouă...',
       addCrate: 'Adaugă ladă',
-      addCrateDescription: 'Creați o nouă dimensiune de ladă pentru acest chiriaș.',
+      addCrateDescription:
+        'Creați o nouă dimensiune de ladă pentru acest chiriaș.',
       crateWeightRequired: 'Greutatea lăzii trebuie să fie mai mare decât 0',
       crateCreateFailed: 'Adăugarea lăzii a eșuat',
       saveCrate: 'Salvează',
@@ -823,7 +828,8 @@ export const ro = {
       rowSegmentLabel: 'Segment {n}',
       addRowPair: 'Adaugă segment de rând',
       removeRowPair: 'Elimină segmentul',
-      rowSegmentsOverlap: 'Segmentele trebuie să fie ordonate și să nu se suprapună',
+      rowSegmentsOverlap:
+        'Segmentele trebuie să fie ordonate și să nu se suprapună',
       addBrixMeasurements: 'Adaugă măsurători Brix',
       fruitWeightMeasurement: 'Greutatea fructului',
       trossWeightMeasurement: 'Greutatea Tross',
@@ -1099,7 +1105,8 @@ export const ro = {
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:
           'Lăsați gol pentru a permite orice domeniu de e-mail. Apăsați Enter sau virgulă pentru a adăuga.',
-        allowedDomainsInvalid: 'Introduceți un domeniu valid (de ex. example.com)',
+        allowedDomainsInvalid:
+          'Introduceți un domeniu valid (de ex. example.com)',
         allowedDomainsRemove: 'Eliminați domeniul',
         domainNotAllowed:
           'Acest domeniu de e-mail nu este permis pentru chiriașul selectat.',
@@ -1151,8 +1158,17 @@ export const ro = {
           notConfigured: 'Neconfigurat',
         },
         farmLayout: {
+          validationError:
+            'Unele sere au valori nevalide. Corectează câmpurile evidențiate și salvează din nou.',
+          saveFailed: 'Salvarea a eșuat. Încearcă din nou.',
+          nameRequired: 'Numele este obligatoriu.',
+          dimensionsInvalid:
+            'Lățimea și lungimea trebuie să fie mai mari decât 0.',
+          bayCountInvalid:
+            'Traveele trebuie să fie un număr întreg de cel puțin 1.',
           title: 'Plan fermă',
-          subtitle: 'Configurează numele și dimensiunile serelor',
+          subtitle:
+            'Configurează serele, culturile și ciclurile lor de irigare',
           save: 'Salvează',
           saving: 'Se salvează…',
           greenhouses: 'Sere',
@@ -1166,7 +1182,8 @@ export const ro = {
           bayCountLabel: 'Travee',
           orientationLabel: 'Aspect orizontal',
           visibilityLabel: 'Vizibil în Prezentare fermă',
-          visibilityHint: 'Dezactivează pentru a ascunde această seră din file.',
+          visibilityHint:
+            'Dezactivează pentru a ascunde această seră din file.',
           bayCountPlaceholder: '0',
           namePlaceholder: 'ex. Sala căpșunilor',
           xDimensionPlaceholder: '0,0',

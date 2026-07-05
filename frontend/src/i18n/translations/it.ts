@@ -534,10 +534,12 @@ export const it = {
       yieldPerRunningMeterShort: 'Resa/m',
       yieldPerRunningMeter: 'Resa per metro lineare',
       yieldPerRunningMeterSubtitle: 'kg vendibili per metro lineare',
-      yieldPerRunningMeterNoData: 'Imposta la lunghezza della fila e il numero di file nel lotto',
+      yieldPerRunningMeterNoData:
+        'Imposta la lunghezza della fila e il numero di file nel lotto',
       yieldPerSquareMeter: 'Resa per m²',
       yieldPerSquareMeterSubtitle: 'kg totali per m²',
-      yieldPerSquareMeterNoData: 'Imposta la superficie di coltivazione nel lotto',
+      yieldPerSquareMeterNoData:
+        'Imposta la superficie di coltivazione nel lotto',
       yieldPerPlantSubtitle: 'g vendibili per pianta',
       yieldPerPlantNoData: 'Imposta il numero totale di piante nel lotto',
       classDistribution: 'Distribuzione per classe',
@@ -574,6 +576,9 @@ export const it = {
       oldestFirst: 'prima i più vecchi',
       azOrder: 'A–Z',
       zaOrder: 'Z–A',
+      sortByBatchName: 'Nome del lotto',
+      sortManualOrder: 'Ordine personalizzato',
+      dragToReorder: 'Trascina per riordinare',
       plantingDateRange: 'Data di impianto',
       createBatch: 'Crea lotto',
       exportCsv: 'Esporta CSV',
@@ -729,7 +734,8 @@ export const it = {
       crateOptionLabel: '{weight} kg',
       addCrateOption: '+ Aggiungi nuova cassetta...',
       addCrate: 'Aggiungi cassetta',
-      addCrateDescription: 'Crea una nuova dimensione di cassetta per questo tenant.',
+      addCrateDescription:
+        'Crea una nuova dimensione di cassetta per questo tenant.',
       crateWeightRequired: 'Il peso della cassetta deve essere maggiore di 0',
       crateCreateFailed: 'Impossibile aggiungere la cassetta',
       saveCrate: 'Salva',
@@ -1152,8 +1158,17 @@ export const it = {
           notConfigured: 'Non configurato',
         },
         farmLayout: {
+          validationError:
+            'Alcune serre hanno valori non validi. Correggi i campi evidenziati e salva di nuovo.',
+          saveFailed: 'Salvataggio non riuscito. Riprova.',
+          nameRequired: 'Il nome è obbligatorio.',
+          dimensionsInvalid:
+            'Larghezza e lunghezza devono essere maggiori di 0.',
+          bayCountInvalid:
+            'Le campate devono essere un numero intero di almeno 1.',
           title: 'Planimetria della fattoria',
-          subtitle: 'Configura nomi e dimensioni delle serre',
+          subtitle:
+            'Configura le serre, le loro colture e i cicli di irrigazione',
           save: 'Salva',
           saving: 'Salvataggio…',
           greenhouses: 'Serre',
