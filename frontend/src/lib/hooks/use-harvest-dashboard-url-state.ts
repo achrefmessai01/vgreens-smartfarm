@@ -40,7 +40,7 @@ export function useHarvestDashboardUrlState(): HarvestDashboardUrlState {
 
   const period = useMemo<DateFilter>(() => {
     const raw = searchParams.get('period') as DateFilter | null;
-    return raw && VALID_PERIODS.has(raw) ? raw : 'thisMonth';
+    return raw && VALID_PERIODS.has(raw) ? raw : 'total';
   }, [searchParams]);
 
   const compareParam = searchParams.get('compare');
@@ -64,7 +64,7 @@ export function useHarvestDashboardUrlState(): HarvestDashboardUrlState {
   const setPeriod = useCallback(
     (next: DateFilter) => {
       writeParams((params) => {
-        if (next === 'thisMonth') params.delete('period');
+        if (next === 'total') params.delete('period');
         else params.set('period', next);
       });
     },
