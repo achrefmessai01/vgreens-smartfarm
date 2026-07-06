@@ -24,7 +24,7 @@ import { Batch } from '@modules/batch/entities/batch.entity';
 import { BatchService } from '@modules/batch/batch.service';
 import { Crate } from '@modules/crate/entities/crate.entity';
 import { CrateService } from '@modules/crate/crate.service';
-import { entryTotalWeight } from './utils/harvest-weight.util';
+import { entrySellableWeight } from './utils/harvest-weight.util';
 import { weightToCrate, crateToWeight } from './utils/harvest-conversion.util';
 import { computeHarvestTotals } from './utils/harvest-totals.util';
 import {
@@ -663,7 +663,7 @@ export class HarvestsService {
   }
 
   // Batch selector list: every batch in scope, with kg/plant derived from the
-  // sum of its harvest entries' totalFruitWeight.
+  // sum of its harvest entries' sellable weight (yield never includes waste).
   async findBatchesForSelector(
     tenantId: string | undefined,
   ): Promise<HarvestBatchListItem[]> {
@@ -672,11 +672,11 @@ export class HarvestsService {
 
     const weightByBatch = new Map<string, number>();
     for (const h of harvests) {
-      // entryTotalWeight reads crate-mode entries off the harvest's own mode +
-      // crate weight; findAllFiltered already joins h.crate/h.batch.
+      // entrySellableWeight reads crate-mode entries off the harvest's own mode
+      // + crate weight; findAllFiltered already joins h.crate/h.batch.
       const crateWeight = this.harvestCrateWeight(h);
       const weight = (h.entries ?? []).reduce(
-        (s, e) => s + entryTotalWeight(e, h.inputMode, crateWeight),
+        (s, e) => s + entrySellableWeight(e, h.inputMode, crateWeight),
         0,
       );
       weightByBatch.set(

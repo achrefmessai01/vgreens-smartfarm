@@ -76,7 +76,10 @@ export class HarvestDashboardMetrics {
   @Field(() => Int)
   harvestCount: number;
 
-  @Field(() => Float)
+  @Field(() => Float, {
+    description:
+      'Total sellable yield (kg) across all quality classes. Waste is NEVER included in yield; it is reported separately as wasteTotal.',
+  })
   totalYield: number;
 
   @Field(() => Float)
@@ -88,21 +91,21 @@ export class HarvestDashboardMetrics {
   @Field(() => Float, {
     nullable: true,
     description:
-      'Weighted kg per living plant across selected batches: Σ totalFruitWeight / Σ livingPlants. Null when no batch in scope has livingPlants > 0.',
+      'Weighted sellable kg per living plant across selected batches (waste excluded): Σ sellable weight / Σ livingPlants. Null when no batch in scope has livingPlants > 0.',
   })
   yieldPerPlant: number | null;
 
   @Field(() => Float, {
     nullable: true,
     description:
-      'Weighted kg per running metre across selected batches: Σ totalFruitWeight / Σ runningMeter (numberOfRows × rowLength). Null when no batch in scope has runningMeter > 0.',
+      'Weighted sellable kg per running metre across selected batches (waste excluded): Σ sellable weight / Σ runningMeter (numberOfRows × rowLength). Null when no batch in scope has runningMeter > 0.',
   })
   yieldPerRunningMeter: number | null;
 
   @Field(() => Float, {
     nullable: true,
     description:
-      'Total yield per m² across selected batches: Σ totalFruitWeight / Σ cultivationArea (distinct batches). Null when no batch in scope has cultivationArea > 0.',
+      'Sellable yield per m² across selected batches (waste excluded): Σ sellable weight / Σ cultivationArea (distinct batches). Null when no batch in scope has cultivationArea > 0.',
   })
   yieldPerSquareMeter: number | null;
 

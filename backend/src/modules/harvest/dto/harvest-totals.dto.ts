@@ -50,14 +50,14 @@ export class HarvestTotals {
   @Field(() => Float, {
     nullable: true,
     description:
-      'totalFruitWeight / living plants, where living plants = batch.totalPlants − batch.lostPlants. Null when living plants is 0/negative/missing.',
+      'Sellable weight (totalFruitWeight − waste; yield never includes waste) / living plants, where living plants = batch.totalPlants − batch.lostPlants. Null when living plants is 0/negative/missing.',
   })
   yieldPerPlant: number | null;
 
   @Field(() => Float, {
     nullable: true,
     description:
-      'totalFruitWeight / batch.runningMeter (numberOfRows × rowLength). kg per running metre across all rows of the batch. Null when runningMeter is 0/missing.',
+      'Sellable weight (totalFruitWeight − waste; yield never includes waste) / batch.runningMeter (numberOfRows × rowLength). kg per running metre across all rows of the batch. Null when runningMeter is 0/missing.',
   })
   yieldPerRunningMeter: number | null;
 }

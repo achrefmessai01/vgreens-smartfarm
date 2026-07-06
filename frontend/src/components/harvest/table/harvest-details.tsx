@@ -65,9 +65,11 @@ export function HarvestDetails({
   const isCrate = harvest.inputMode === InputMode.Crate;
   const crateWeight = harvest.crate?.weight ?? harvest.batch?.crateWeight ?? null;
   const cratesLabel = h?.cratesUnit ?? 'crates';
-  // Total yield = the service-computed totalFruitWeight, which already sums all
-  // (dynamic) quality classes plus waste, in both input modes.
-  const totalYield = totals.totalFruitWeight;
+  // Total yield = sellable weight only (yield never includes waste): the
+  // service-computed totalFruitWeight sums all (dynamic) quality classes PLUS
+  // waste, so waste is subtracted back out here. Waste stays visible in its
+  // own row below.
+  const totalYield = totals.totalFruitWeight - totals.waste;
   // A muted color cycle for the per-class value labels.
   const classColors = [
     'text-green-600',

@@ -47,12 +47,9 @@ export function DashboardMetricsGrid({
     h?.acrossHarvests?.replace('{count}', data.harvestCount.toString()) ??
     `Across ${data.harvestCount} harvests`;
 
-  // Total yield (= Quality A + B + C + waste) comes straight from the backend.
-  // Sellable (marketable) total is everything except waste — that's what we
-  // surface as the headline tile now; the gross totalYield is no longer shown
-  // because it's misleading next to a "waste %" tile (it includes the waste).
-  const totalYieldDisplay = data.totalYield ?? 0;
-  const sellableTotal = totalYieldDisplay - (data.wasteTotal ?? 0);
+  // totalYield comes from the backend already waste-free (yield never includes
+  // waste): it is the sellable/marketable kg across all quality classes.
+  const sellableTotal = data.totalYield ?? 0;
   const primaryPercent = data.marketablePercent ?? 0;
   const secondaryPercent = data.wastePercent ?? 0;
   const secondaryTotal = data.wasteTotal ?? 0;
