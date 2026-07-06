@@ -42,6 +42,7 @@ export class SensorConfigService {
 
     if (existing) {
       Object.assign(existing, {
+        profile: input.profile ?? existing.profile,
         xPosition: input.xPosition ?? existing.xPosition,
         yPosition: input.yPosition ?? existing.yPosition,
         greenhouseId: input.greenhouseId ?? existing.greenhouseId,
@@ -50,10 +51,7 @@ export class SensorConfigService {
           input.hiddenInFarmOverview ?? existing.hiddenInFarmOverview ?? false,
       });
       await this.repo.save(existing);
-      return this.findOneByDevice(
-        tenantId,
-        input.device,
-      ) as Promise<SensorConfig>;
+      return this.findOneByDevice(tenantId, input.device);
     }
 
     const config = this.repo.create({
@@ -64,10 +62,35 @@ export class SensorConfigService {
       hiddenInFarmOverview: input.hiddenInFarmOverview ?? false,
     });
     await this.repo.save(config);
-    return this.findOneByDevice(
-      tenantId,
-      input.device,
-    ) as Promise<SensorConfig>;
+    return this.findOneByDevice(tenantId, input.device);
+  }
+
+  /**
+   * Aligns stored configs with the profiles InfluxDB reports: sets `profile`
+   * on every config whose device appears in the map with a different value.
+   * Devices absent from the map keep their stored profile — no profile-tagged
+   * points in the lookback window is not evidence the profile changed.
+   * Returns the number of rows updated.
+   */
+  async applyDeviceProfiles(
+    tenantId: string,
+    profiles: Map<string, string>,
+  ): Promise<number> {
+    if (profiles.size === 0) return 0;
+    const configs = await this.repo.find({ where: { tenantId } });
+    const changed = configs.filter((config) => {
+      const profile = profiles.get(config.device);
+      return profile != null && profile !== config.profile;
+    });
+    if (changed.length === 0) return 0;
+    for (const config of changed) {
+      config.profile = profiles.get(config.device);
+    }
+    await this.repo.save(changed);
+    this.logger.log(
+      `Synced ${changed.length} sensor profile(s) from InfluxDB for tenant ${tenantId}`,
+    );
+    return changed.length;
   }
 
   async delete(id: string, tenantId: string): Promise<boolean> {

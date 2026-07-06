@@ -18,6 +18,8 @@ import * as React from 'react';
 
 export interface SensorRow {
   device: string;
+  /** Device profile: saved config wins, else the `profile` tag from InfluxDB. */
+  profile: string | null;
   config: SensorConfig | null;
   defaultPosition: DefaultPosition | null;
   /** Greenhouse the sensor is tagged with in InfluxDB (when no override). */
@@ -86,7 +88,17 @@ export function useSensorConfig(tenantId: string) {
     [configsData?.sensorConfigs],
   );
   const devices = React.useMemo(
-    () => devicesData?.sensorDevices ?? [],
+    () => (devicesData?.sensorDevices ?? []).map((d) => d.device),
+    [devicesData?.sensorDevices],
+  );
+  // Profile per device as reported by InfluxDB's `profile` tag.
+  const deviceProfiles = React.useMemo(
+    () =>
+      new Map(
+        (devicesData?.sensorDevices ?? [])
+          .filter((d) => d.profile)
+          .map((d) => [d.device, d.profile as string]),
+      ),
     [devicesData?.sensorDevices],
   );
 
@@ -114,11 +126,13 @@ export function useSensorConfig(tenantId: string) {
       )
       .map((device) => ({
         device,
+        profile:
+          configMap.get(device)?.profile ?? deviceProfiles.get(device) ?? null,
         config: configMap.get(device) ?? null,
         defaultPosition: defaultPositions.get(device) ?? null,
         defaultGreenhouse: deviceInfluxGreenhouse.get(device) ?? null,
       }));
-  }, [configs, devices, defaultPositions, deviceInfluxGreenhouse]);
+  }, [configs, devices, defaultPositions, deviceInfluxGreenhouse, deviceProfiles]);
 
   const handleSave = React.useCallback(
     async (input: {

@@ -33,6 +33,13 @@ export class SensorConfig extends BaseEntity {
   @Column({ type: 'varchar', length: 128 })
   device: string;
 
+  // Device profile as reported by the ingest pipeline's `profile` tag in
+  // InfluxDB. Synced from Influx on upsert (see SensorConfigResolver); null
+  // until the device has written profile-tagged points.
+  @Field({ nullable: true })
+  @Column({ type: 'varchar', length: 128, nullable: true })
+  profile?: string | null;
+
   @Field({ nullable: true })
   @Column({ type: 'float', default: 0, nullable: true })
   xPosition?: number;

@@ -19,7 +19,11 @@ import { UserRole } from '@common/enums';
 import { User } from '@modules/users/entities/user.entity';
 import { SensorConfigService } from './sensor-config.service';
 import { SensorConfig } from './entities/sensor-config.entity';
-import { CalibrationReading, UpsertSensorConfigInput } from './dto';
+import {
+  CalibrationReading,
+  SensorDevice,
+  UpsertSensorConfigInput,
+} from './dto';
 import {
   computeCorrectedMoisture,
   isSensorCalibrated,
@@ -100,16 +104,30 @@ export class SensorConfigResolver {
     });
   }
 
-  @Query(() => [String], { name: 'sensorDevices' })
+  // The devices present in the tenant's Influx bucket, each paired with the
+  // device profile it reports via the `profile` tag (null when the device has
+  // no profile-tagged points yet). Since the full device→profile map is in
+  // hand anyway, the tenant's stored sensor_configs are reconciled with it as
+  // a side effect — existing rows pick up their profile the next time anyone
+  // loads the sensor list, with no extra Influx query.
+  @Query(() => [SensorDevice], { name: 'sensorDevices' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
   async uniqueDevices(
     @CurrentUser() currentUser: User,
     @Args('tenantId', { type: () => ID, nullable: true }) tenantId?: string,
-  ): Promise<string[]> {
+  ): Promise<SensorDevice[]> {
     const targetTenantId = this.resolveTargetTenantId(currentUser, tenantId);
     const tenant = await this.tenantsService.findOne(targetTenantId);
     if (!tenant?.influxBucketName) return [];
-    return this.influxDBService.getUniqueDevices(tenant.influxBucketName);
+    const [devices, profiles] = await Promise.all([
+      this.influxDBService.getUniqueDevices(tenant.influxBucketName),
+      this.influxDBService.getDeviceProfiles(tenant.influxBucketName),
+    ]);
+    await this.sensorConfigService.applyDeviceProfiles(
+      targetTenantId,
+      profiles,
+    );
+    return devices.map((device) => ({ device, profile: profiles.get(device) }));
   }
 
   @Query(() => [String], { name: 'greenhouseOptions' })
@@ -237,7 +255,33 @@ export class SensorConfigResolver {
   ): Promise<SensorConfig> {
     const targetTenantId = this.resolveTargetTenantId(currentUser, tenantId);
     await this.validatePositionRange(targetTenantId, input);
+    await this.resolveDeviceProfile(targetTenantId, input);
     return this.sensorConfigService.upsert(input, targetTenantId);
+  }
+
+  // Fills input.profile from the device's InfluxDB `profile` tag when neither
+  // the caller nor the stored row has one, so sensor_configs.profile converges
+  // on what the ingest pipeline writes without every client having to know
+  // it. Skipped once a profile is known — saves (e.g. map position drags)
+  // then cost no extra Influx round-trip.
+  private async resolveDeviceProfile(
+    tenantId: string,
+    input: UpsertSensorConfigInput,
+  ): Promise<void> {
+    if (input.profile != null) return;
+    const existing = await this.sensorConfigService.findOneByDevice(
+      tenantId,
+      input.device,
+    );
+    if (existing?.profile) return;
+    const tenant = await this.tenantsService.findOne(tenantId);
+    if (!tenant?.influxBucketName) return;
+    const profiles = await this.influxDBService.getDeviceProfiles(
+      tenant.influxBucketName,
+      { device: input.device },
+    );
+    const profile = profiles.get(input.device);
+    if (profile) input.profile = profile;
   }
 
   @Mutation(() => Boolean)

@@ -1431,7 +1431,7 @@ export type Query = {
   irrigationCycles: Array<IrrigationCycle>;
   me?: Maybe<User>;
   sensorConfigs: Array<SensorConfig>;
-  sensorDevices: Array<Scalars['String']['output']>;
+  sensorDevices: Array<SensorDevice>;
   /** Create a time-limited signed URL for viewing or downloading a private image. */
   signedImageUrl: SignedUrl;
   soilSensorConfigs: Array<SensorConfig>;
@@ -1708,11 +1708,18 @@ export type SensorConfig = {
   id: Scalars['ID']['output'];
   irrigationCycleId?: Maybe<Scalars['ID']['output']>;
   isCalibrated: Scalars['Boolean']['output'];
+  profile?: Maybe<Scalars['String']['output']>;
   tenant?: Maybe<Tenant>;
   tenantId: Scalars['ID']['output'];
   updatedAt: Scalars['DateTime']['output'];
   xPosition?: Maybe<Scalars['Float']['output']>;
   yPosition?: Maybe<Scalars['Float']['output']>;
+};
+
+export type SensorDevice = {
+  __typename?: 'SensorDevice';
+  device: Scalars['String']['output'];
+  profile?: Maybe<Scalars['String']['output']>;
 };
 
 export type SignedUrl = {
@@ -1979,6 +1986,7 @@ export type UpsertSensorConfigInput = {
   device: Scalars['String']['input'];
   greenhouseId?: InputMaybe<Scalars['ID']['input']>;
   hiddenInFarmOverview?: InputMaybe<Scalars['Boolean']['input']>;
+  profile?: InputMaybe<Scalars['String']['input']>;
   xPosition?: InputMaybe<Scalars['Float']['input']>;
   yPosition?: InputMaybe<Scalars['Float']['input']>;
 };
@@ -2890,14 +2898,14 @@ export type SensorConfigsQueryVariables = Exact<{
 }>;
 
 
-export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, xPosition?: number | null, yPosition?: number | null, greenhouseId?: string | null, greenhouse?: string | null, city?: string | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any }> };
+export type SensorConfigsQuery = { __typename?: 'Query', sensorConfigs: Array<{ __typename?: 'SensorConfig', id: string, tenantId: string, device: string, profile?: string | null, xPosition?: number | null, yPosition?: number | null, greenhouseId?: string | null, greenhouse?: string | null, city?: string | null, hiddenInFarmOverview?: boolean | null, createdAt: any, updatedAt: any }> };
 
 export type SensorDevicesQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type SensorDevicesQuery = { __typename?: 'Query', sensorDevices: Array<string> };
+export type SensorDevicesQuery = { __typename?: 'Query', sensorDevices: Array<{ __typename?: 'SensorDevice', device: string, profile?: string | null }> };
 
 export type GreenhouseOptionsQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -7959,6 +7967,7 @@ export const SensorConfigsDocument = gql`
     id
     tenantId
     device
+    profile
     xPosition
     yPosition
     greenhouseId
@@ -8008,7 +8017,10 @@ export type SensorConfigsSuspenseQueryHookResult = ReturnType<typeof useSensorCo
 export type SensorConfigsQueryResult = Apollo.QueryResult<SensorConfigsQuery, SensorConfigsQueryVariables>;
 export const SensorDevicesDocument = gql`
     query SensorDevices($tenantId: ID) {
-  sensorDevices(tenantId: $tenantId)
+  sensorDevices(tenantId: $tenantId) {
+    device
+    profile
+  }
 }
     `;
 
