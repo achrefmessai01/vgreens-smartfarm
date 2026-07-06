@@ -11,12 +11,12 @@ import { WriteActionButton } from '@/components/ui/write-action-button';
 import { ErrorSourceBadge } from '@/components/ui/error-source-badge';
 import { ErrorTypeBadge } from '@/components/ui/error-type-badge';
 import { ErrorReportSeverityBadge } from '@/components/error-reports/error-report-severity-badge';
-import { SystemError } from '@/generated/graphql';
+import type { SystemErrorData } from '@/lib/graphql-compat';
 import { useI18n, useLocaleFormatters } from '@/i18n';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface SystemErrorDetailsDialogProps {
-  error: SystemError | null;
+  error: SystemErrorData | null;
   open: boolean;
   onClose: () => void;
   onResolve?: (errorId: string, resolutionNotes?: string) => Promise<void>;

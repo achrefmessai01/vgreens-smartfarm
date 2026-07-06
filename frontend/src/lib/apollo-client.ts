@@ -113,7 +113,39 @@ export const createApolloClient = (
 
   return new ApolloClient({
     link,
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        // The consolidated settings blobs (VSL-279) are un-normalized objects
+        // cached on their parent entity. Different documents select different
+        // subsets of their keys (e.g. the i18n sync only reads
+        // userSettings.preferredLanguage), and Apollo's default is to REPLACE
+        // the whole object on write — dropping the keys the narrower document
+        // didn't select. Shallow-merging keeps every key that was ever
+        // fetched/written.
+        User: {
+          fields: {
+            userSettings: {
+              // A null incoming value wins (the server cleared the blob);
+              // otherwise merge keys over whatever is already cached.
+              merge: (existing: object | null, incoming: object | null) =>
+                existing == null || incoming == null
+                  ? incoming
+                  : { ...existing, ...incoming },
+            },
+          },
+        },
+        Tenant: {
+          fields: {
+            settings: {
+              merge: (existing: object | null, incoming: object | null) =>
+                existing == null || incoming == null
+                  ? incoming
+                  : { ...existing, ...incoming },
+            },
+          },
+        },
+      },
+    }),
     defaultOptions: {
       watchQuery: {
         fetchPolicy: 'cache-and-network',

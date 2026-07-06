@@ -295,14 +295,14 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const tenantDisabledSensorFields = React.useMemo<string[]>(() => {
     if (isVGreensAdmin) {
       const tenant = tenants.find((tn) => tn.id === selectedTenantId);
-      return tenant?.disabledSensorFields ?? [];
+      return tenant?.settings?.disabledSensorFields ?? [];
     }
-    return user?.tenant?.disabledSensorFields ?? [];
+    return user?.tenant?.settings?.disabledSensorFields ?? [];
   }, [
     isVGreensAdmin,
     tenants,
     selectedTenantId,
-    user?.tenant?.disabledSensorFields,
+    user?.tenant?.settings?.disabledSensorFields,
   ]);
 
   const disabledSensorFieldsSet = React.useMemo(
@@ -344,7 +344,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
             cache.modify({
               id: cache.identify({ __typename: 'Tenant', id: updated.id }),
               fields: {
-                disabledSensorFields: () => updated.disabledSensorFields,
+                settings: () => updated.settings,
               },
             });
           },

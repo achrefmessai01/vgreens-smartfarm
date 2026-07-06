@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { WriteActionButton } from '@/components/ui/write-action-button';
 import { TableCell } from '@/components/ui/table';
-import type { Tenant } from '@/generated/graphql';
+import type { TenantData } from '@/lib/graphql-compat';
 import { Edit2, Settings, Trash2, Users } from 'lucide-react';
 import { useTenantCard } from './tenant-table-cards';
 
@@ -11,10 +11,10 @@ import { useTenantCard } from './tenant-table-cards';
  */
 
 interface TenantRowProps {
-  onEdit: (tenant: Tenant) => void;
-  onDelete: (tenant: Tenant) => void;
-  onViewUsers?: (tenant: Tenant) => void;
-  onManageFeatures?: (tenant: Tenant) => void;
+  onEdit: (tenant: TenantData) => void;
+  onDelete: (tenant: TenantData) => void;
+  onViewUsers?: (tenant: TenantData) => void;
+  onManageFeatures?: (tenant: TenantData) => void;
   translations: {
     active: string;
     inactive: string;
@@ -42,7 +42,7 @@ export const useTenantRow = ({
     translations,
   });
 
-  const renderRow = (tenant: Tenant) => (
+  const renderRow = (tenant: TenantData) => (
     <>
       <TableCell className="font-medium">{tenant.name}</TableCell>
       <TableCell>{tenant.companyName || '-'}</TableCell>

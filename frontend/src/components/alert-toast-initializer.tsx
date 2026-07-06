@@ -1,10 +1,10 @@
 'use client';
 
-import { type User } from '@/generated/graphql';
+import type { UserData } from '@/lib/graphql-compat';
 import { useAlertToastListener } from '@/lib/hooks/use-alert-toast-listener';
 
 interface AlertToastInitializerProps {
-  user?: User;
+  user?: UserData;
 }
 
 /**

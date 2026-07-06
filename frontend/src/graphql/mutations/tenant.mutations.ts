@@ -60,7 +60,11 @@ export const SET_TENANT_DISABLED_SENSOR_FIELDS_MUTATION = gql`
   mutation SetTenantDisabledSensorFields($fields: [String!]!, $tenantId: ID) {
     setTenantDisabledSensorFields(fields: $fields, tenantId: $tenantId) {
       id
-      disabledSensorFields
+      settings {
+        disabledSensorFields
+        hiddenHarvestDashboardItems
+        harvestDashboardOrder
+      }
     }
   }
 `;
@@ -75,7 +79,11 @@ export const SET_TENANT_HARVEST_DASHBOARD_ITEMS_MUTATION = gql`
       tenantId: $tenantId
     ) {
       id
-      hiddenHarvestDashboardItems
+      settings {
+        disabledSensorFields
+        hiddenHarvestDashboardItems
+        harvestDashboardOrder
+      }
     }
   }
 `;
@@ -90,7 +98,11 @@ export const SET_TENANT_HARVEST_DASHBOARD_ORDER_MUTATION = gql`
       tenantId: $tenantId
     ) {
       id
-      harvestDashboardOrder
+      settings {
+        disabledSensorFields
+        hiddenHarvestDashboardItems
+        harvestDashboardOrder
+      }
     }
   }
 `;

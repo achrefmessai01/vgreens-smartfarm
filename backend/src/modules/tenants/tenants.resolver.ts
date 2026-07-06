@@ -14,6 +14,10 @@ import {
 } from '@nestjs/graphql';
 import { CreateTenantInput, UpdateTenantInput } from './dto';
 import { Tenant, TenantGreenhouse } from './entities/tenant.entity';
+import {
+  composeTenantSettings,
+  TenantSettings,
+} from './entities/tenant-settings';
 import { TenantsService } from './tenants.service';
 import { GreenhouseService } from '@modules/greenhouse/greenhouse.service';
 
@@ -43,6 +47,14 @@ export class TenantsResolver {
       isHorizontal: g.isHorizontal,
       hiddenInFarmOverview: g.hiddenInFarmOverview ?? false,
     }));
+  }
+
+  // Canonical read surface for the consolidated settings blob (VSL-279).
+  // Resolved through composeTenantSettings so every key is guaranteed present
+  // ([] fallback) even for rows whose jsonb is still `{}` or pre-backfill.
+  @ResolveField(() => TenantSettings, { name: 'settings' })
+  settings(@Parent() tenant: Tenant): TenantSettings {
+    return composeTenantSettings(tenant);
   }
 
   @Query(() => [Tenant])

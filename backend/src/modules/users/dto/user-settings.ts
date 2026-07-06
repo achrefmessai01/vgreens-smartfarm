@@ -47,6 +47,24 @@ export class HarvestViewSettings {
 export class UserSettings {
   @Field(() => HarvestViewSettings, { nullable: true })
   harvestView?: HarvestViewSettings | null;
+
+  /**
+   * BCP 47-style locale code from the language switcher (e.g. "en", "de").
+   * Consolidated here from the deprecated `users.preferredLanguage` column
+   * (VSL-279); validated by the `setMyLanguage` mutation. Absent key = user
+   * never picked a language (client default applies).
+   */
+  @Field({ nullable: true })
+  preferredLanguage?: string | null;
+
+  /**
+   * Farm-overview time range: a preset key (`5m`…`ytd`) or
+   * `custom:<fromISO>|<toISO>`. Consolidated here from the deprecated
+   * `users.farmOverviewTimeRange` column (VSL-279); validated by the
+   * `setMyFarmOverviewTimeRange` mutation.
+   */
+  @Field({ nullable: true })
+  farmOverviewTimeRange?: string | null;
 }
 
 // ---- Input mirrors (structurally validated by class-validator) ----

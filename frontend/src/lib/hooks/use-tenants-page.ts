@@ -7,10 +7,10 @@ import {
   useUpdateTenantMutation,
   useDeleteTenantMutation,
   useUpsertFarmConfigMutation,
-  type Tenant,
 } from '@/generated/graphql';
 import { useRouter } from 'next/navigation';
 import type { TenantFormData } from '@/components/tenants/tenant-form';
+import type { TenantData } from '@/lib/graphql-compat';
 
 export function useTenantsPage() {
   const router = useRouter();
@@ -21,10 +21,10 @@ export function useTenantsPage() {
   const [upsertFarmConfig] = useUpsertFarmConfigMutation();
 
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
-  const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null);
+  const [editingTenant, setEditingTenant] = React.useState<TenantData | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = React.useState<{
-    tenant: Tenant | null;
+    tenant: TenantData | null;
     isOpen: boolean;
   }>({ tenant: null, isOpen: false });
 
@@ -35,12 +35,12 @@ export function useTenantsPage() {
     setIsSheetOpen(true);
   }, []);
 
-  const handleEdit = React.useCallback((tenant: Tenant) => {
+  const handleEdit = React.useCallback((tenant: TenantData) => {
     setEditingTenant(tenant);
     setIsSheetOpen(true);
   }, []);
 
-  const handleDelete = React.useCallback((tenant: Tenant) => {
+  const handleDelete = React.useCallback((tenant: TenantData) => {
     setDeleteConfirmation({ tenant, isOpen: true });
   }, []);
 
@@ -50,14 +50,14 @@ export function useTenantsPage() {
   }, []);
 
   const handleManageFeatures = React.useCallback(
-    (tenant: Tenant) => {
+    (tenant: TenantData) => {
       router.push(`/admin/tenants/${tenant.id}`);
     },
     [router],
   );
 
   const handleRowClick = React.useCallback(
-    (tenant: Tenant) => {
+    (tenant: TenantData) => {
       router.push(`/tenant/farm-overview?tenantId=${tenant.id}`);
     },
     [router],

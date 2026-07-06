@@ -1,6 +1,6 @@
 'use client';
 
-import { User } from '@/generated/graphql';
+import type { UserData } from '@/lib/graphql-compat';
 import { useI18n } from '@/i18n';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { SelectedTenantProvider } from '@/lib/contexts/selected-tenant-context';
@@ -12,7 +12,7 @@ import { TenantNavbar } from './tenant-navbar';
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  user?: User;
+  user?: UserData;
   onLogout?: () => void;
 }
 

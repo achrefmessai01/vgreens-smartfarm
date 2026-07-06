@@ -375,6 +375,11 @@ export class UsersService extends BaseService<User> {
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
+    // Expand-phase dual-write (VSL-279): userSettings is the canonical home,
+    // the flat column is kept in sync so a migration rollback stays lossless.
+    user.userSettings = mergeUserSettings(user.userSettings, {
+      preferredLanguage: language,
+    });
     user.preferredLanguage = language;
     return this.userRepository.save(user);
   }
@@ -384,6 +389,10 @@ export class UsersService extends BaseService<User> {
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
+    // Expand-phase dual-write (VSL-279) — see setPreferredLanguage.
+    user.userSettings = mergeUserSettings(user.userSettings, {
+      farmOverviewTimeRange: value,
+    });
     user.farmOverviewTimeRange = value;
     return this.userRepository.save(user);
   }

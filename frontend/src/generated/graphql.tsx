@@ -710,17 +710,18 @@ export type HarvestDashboardMetrics = {
   harvestCount: Scalars['Int']['output'];
   marketablePercent: Scalars['Float']['output'];
   species: Scalars['String']['output'];
+  /** Total sellable yield (kg) across all quality classes. Waste is NEVER included in yield; it is reported separately as wasteTotal. */
   totalYield: Scalars['Float']['output'];
   variety: Scalars['String']['output'];
   wastePercent: Scalars['Float']['output'];
   wasteTotal: Scalars['Float']['output'];
   yieldOverTime: Array<YieldOverTimeData>;
-  /** Weighted kg per living plant across selected batches: Σ totalFruitWeight / Σ livingPlants. Null when no batch in scope has livingPlants > 0. */
+  /** Weighted sellable kg per living plant across selected batches (waste excluded): Σ sellable weight / Σ livingPlants. Null when no batch in scope has livingPlants > 0. */
   yieldPerPlant?: Maybe<Scalars['Float']['output']>;
-  /** Weighted kg per running metre across selected batches: Σ totalFruitWeight / Σ runningMeter (numberOfRows × rowLength). Null when no batch in scope has runningMeter > 0. */
+  /** Weighted sellable kg per running metre across selected batches (waste excluded): Σ sellable weight / Σ runningMeter (numberOfRows × rowLength). Null when no batch in scope has runningMeter > 0. */
   yieldPerRunningMeter?: Maybe<Scalars['Float']['output']>;
   yieldPerRunningMeterTrend: Array<YieldPerRunningMeterData>;
-  /** Total yield per m² across selected batches: Σ totalFruitWeight / Σ cultivationArea (distinct batches). Null when no batch in scope has cultivationArea > 0. */
+  /** Sellable yield per m² across selected batches (waste excluded): Σ sellable weight / Σ cultivationArea (distinct batches). Null when no batch in scope has cultivationArea > 0. */
   yieldPerSquareMeter?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -818,9 +819,9 @@ export type HarvestTotals = {
   totalFruitWeight: Scalars['Float']['output'];
   /** SUM of entries.waste */
   waste: Scalars['Float']['output'];
-  /** totalFruitWeight / living plants, where living plants = batch.totalPlants − batch.lostPlants. Null when living plants is 0/negative/missing. */
+  /** Sellable weight (totalFruitWeight − waste; yield never includes waste) / living plants, where living plants = batch.totalPlants − batch.lostPlants. Null when living plants is 0/negative/missing. */
   yieldPerPlant?: Maybe<Scalars['Float']['output']>;
-  /** totalFruitWeight / batch.runningMeter (numberOfRows × rowLength). kg per running metre across all rows of the batch. Null when runningMeter is 0/missing. */
+  /** Sellable weight (totalFruitWeight − waste; yield never includes waste) / batch.runningMeter (numberOfRows × rowLength). kg per running metre across all rows of the batch. Null when runningMeter is 0/missing. */
   yieldPerRunningMeter?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -1774,16 +1775,20 @@ export type Tenant = {
   allowedDomains: Array<Scalars['String']['output']>;
   companyName?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
+  /** @deprecated Moved into Tenant.settings.disabledSensorFields. */
   disabledSensorFields: Array<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   greenhouses?: Maybe<Array<TenantGreenhouse>>;
+  /** @deprecated Moved into Tenant.settings.harvestDashboardOrder. */
   harvestDashboardOrder: Array<Scalars['String']['output']>;
+  /** @deprecated Moved into Tenant.settings.hiddenHarvestDashboardItems. */
   hiddenHarvestDashboardItems: Array<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   influxBucketName?: Maybe<Scalars['String']['output']>;
   isActive: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   phone?: Maybe<Scalars['String']['output']>;
+  settings: TenantSettings;
   tenantFeatures?: Maybe<Array<TenantFeature>>;
   tenantId?: Maybe<Scalars['ID']['output']>;
   timezone?: Maybe<Scalars['String']['output']>;
@@ -1829,6 +1834,13 @@ export type TenantParDli = {
   __typename?: 'TenantParDli';
   combined: ParDliResult;
   greenhouses: Array<GreenhouseParDli>;
+};
+
+export type TenantSettings = {
+  __typename?: 'TenantSettings';
+  disabledSensorFields: Array<Scalars['String']['output']>;
+  harvestDashboardOrder: Array<Scalars['String']['output']>;
+  hiddenHarvestDashboardItems: Array<Scalars['String']['output']>;
 };
 
 export type ToggleTenantFeatureInput = {
@@ -1976,12 +1988,14 @@ export type User = {
   clerkUserId: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
   email?: Maybe<Scalars['String']['output']>;
+  /** @deprecated Moved into userSettings.farmOverviewTimeRange. */
   farmOverviewTimeRange?: Maybe<Scalars['String']['output']>;
   firstName?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   imageUrl?: Maybe<Scalars['String']['output']>;
   isActive: Scalars['Boolean']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
+  /** @deprecated Moved into userSettings.preferredLanguage. */
   preferredLanguage?: Maybe<Scalars['String']['output']>;
   role: UserRole;
   status?: Maybe<UserStatus>;
@@ -2001,7 +2015,9 @@ export enum UserRole {
 
 export type UserSettings = {
   __typename?: 'UserSettings';
+  farmOverviewTimeRange?: Maybe<Scalars['String']['output']>;
   harvestView?: Maybe<HarvestViewSettings>;
+  preferredLanguage?: Maybe<Scalars['String']['output']>;
 };
 
 /** User invitation and activation status */
@@ -2386,7 +2402,7 @@ export type SetTenantDisabledSensorFieldsMutationVariables = Exact<{
 }>;
 
 
-export type SetTenantDisabledSensorFieldsMutation = { __typename?: 'Mutation', setTenantDisabledSensorFields: { __typename?: 'Tenant', id: string, disabledSensorFields: Array<string> } };
+export type SetTenantDisabledSensorFieldsMutation = { __typename?: 'Mutation', setTenantDisabledSensorFields: { __typename?: 'Tenant', id: string, settings: { __typename?: 'TenantSettings', disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string> } } };
 
 export type SetTenantHarvestDashboardItemsMutationVariables = Exact<{
   hiddenItems: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -2394,7 +2410,7 @@ export type SetTenantHarvestDashboardItemsMutationVariables = Exact<{
 }>;
 
 
-export type SetTenantHarvestDashboardItemsMutation = { __typename?: 'Mutation', setTenantHarvestDashboardItems: { __typename?: 'Tenant', id: string, hiddenHarvestDashboardItems: Array<string> } };
+export type SetTenantHarvestDashboardItemsMutation = { __typename?: 'Mutation', setTenantHarvestDashboardItems: { __typename?: 'Tenant', id: string, settings: { __typename?: 'TenantSettings', disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string> } } };
 
 export type SetTenantHarvestDashboardOrderMutationVariables = Exact<{
   orderedIds: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -2402,7 +2418,7 @@ export type SetTenantHarvestDashboardOrderMutationVariables = Exact<{
 }>;
 
 
-export type SetTenantHarvestDashboardOrderMutation = { __typename?: 'Mutation', setTenantHarvestDashboardOrder: { __typename?: 'Tenant', id: string, harvestDashboardOrder: Array<string> } };
+export type SetTenantHarvestDashboardOrderMutation = { __typename?: 'Mutation', setTenantHarvestDashboardOrder: { __typename?: 'Tenant', id: string, settings: { __typename?: 'TenantSettings', disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string> } } };
 
 export type CreateUserMutationVariables = Exact<{
   input: CreateUserInput;
@@ -2433,21 +2449,21 @@ export type SetMyLanguageMutationVariables = Exact<{
 }>;
 
 
-export type SetMyLanguageMutation = { __typename?: 'Mutation', setMyLanguage: { __typename?: 'User', id: string, preferredLanguage?: string | null } };
+export type SetMyLanguageMutation = { __typename?: 'Mutation', setMyLanguage: { __typename?: 'User', id: string, userSettings?: { __typename?: 'UserSettings', preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } };
 
 export type SetMyFarmOverviewTimeRangeMutationVariables = Exact<{
   value: Scalars['String']['input'];
 }>;
 
 
-export type SetMyFarmOverviewTimeRangeMutation = { __typename?: 'Mutation', setMyFarmOverviewTimeRange: { __typename?: 'User', id: string, farmOverviewTimeRange?: string | null } };
+export type SetMyFarmOverviewTimeRangeMutation = { __typename?: 'Mutation', setMyFarmOverviewTimeRange: { __typename?: 'User', id: string, userSettings?: { __typename?: 'UserSettings', preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } };
 
 export type UpdateMyHarvestViewSettingsMutationVariables = Exact<{
   input: HarvestViewSettingsInput;
 }>;
 
 
-export type UpdateMyHarvestViewSettingsMutation = { __typename?: 'Mutation', updateMyHarvestViewSettings: { __typename?: 'User', id: string, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } };
+export type UpdateMyHarvestViewSettingsMutation = { __typename?: 'Mutation', updateMyHarvestViewSettings: { __typename?: 'User', id: string, userSettings?: { __typename?: 'UserSettings', preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } };
 
 export type GetRecentSystemErrorsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Float']['input']>;
@@ -2457,7 +2473,7 @@ export type GetRecentSystemErrorsQueryVariables = Exact<{
 }>;
 
 
-export type GetRecentSystemErrorsQuery = { __typename?: 'Query', getRecentSystemErrors: Array<{ __typename?: 'SystemError', id: string, source: ErrorSource, errorType: ErrorType, severity: ReportSeverity, errorMessage: string, component?: string | null, action?: string | null, occurrenceCount?: number | null, isResolved: boolean, createdAt: any, updatedAt: any, lastOccurredAt?: any | null, user?: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email?: string | null, id: string, isActive: boolean, createdAt: any, updatedAt: any, clerkUserId: string, role: UserRole } | null, tenant?: { __typename?: 'Tenant', id: string, isActive: boolean, createdAt: any, updatedAt: any, name: string, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string>, allowedDomains: Array<string> } | null }> };
+export type GetRecentSystemErrorsQuery = { __typename?: 'Query', getRecentSystemErrors: Array<{ __typename?: 'SystemError', id: string, source: ErrorSource, errorType: ErrorType, severity: ReportSeverity, errorMessage: string, component?: string | null, action?: string | null, occurrenceCount?: number | null, isResolved: boolean, createdAt: any, updatedAt: any, lastOccurredAt?: any | null, user?: { __typename?: 'User', firstName?: string | null, lastName?: string | null, email?: string | null, id: string, isActive: boolean, createdAt: any, updatedAt: any, clerkUserId: string, role: UserRole } | null, tenant?: { __typename?: 'Tenant', id: string, isActive: boolean, createdAt: any, updatedAt: any, name: string, allowedDomains: Array<string>, settings: { __typename?: 'TenantSettings', disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string> } } | null }> };
 
 export type GetSystemErrorStatsQueryVariables = Exact<{
   hours?: InputMaybe<Scalars['Float']['input']>;
@@ -2893,14 +2909,14 @@ export type GreenhouseOptionsQuery = { __typename?: 'Query', greenhouseOptions: 
 export type TenantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string>, allowedDomains: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null }> };
+export type TenantsQuery = { __typename?: 'Query', tenants: Array<{ __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, allowedDomains: Array<string>, createdAt: any, updatedAt: any, settings: { __typename?: 'TenantSettings', disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string> }, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null }> };
 
 export type TenantQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string>, allowedDomains: Array<string>, createdAt: any, updatedAt: any, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
+export type TenantQuery = { __typename?: 'Query', tenant?: { __typename?: 'Tenant', id: string, name: string, companyName?: string | null, email?: string | null, phone?: string | null, isActive: boolean, allowedDomains: Array<string>, createdAt: any, updatedAt: any, settings: { __typename?: 'TenantSettings', disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string> }, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, doorPosition?: DoorPosition | null, xDimension: number, yDimension: number, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null, users?: Array<{ __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null, role: UserRole }> | null } | null };
 
 export type GetTenantBucketQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2919,7 +2935,7 @@ export type TenantGreenhousesQuery = { __typename?: 'Query', tenantGreenhouses: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string>, allowedDomains: Array<string>, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, clerkUserId: string, email?: string | null, firstName?: string | null, lastName?: string | null, imageUrl?: string | null, role: UserRole, tenantId?: string | null, isActive: boolean, status?: UserStatus | null, createdAt: any, updatedAt: any, tenant?: { __typename?: 'Tenant', id: string, name: string, influxBucketName?: string | null, createdAt: any, isActive: boolean, updatedAt: any, allowedDomains: Array<string>, settings: { __typename?: 'TenantSettings', disabledSensorFields: Array<string>, hiddenHarvestDashboardItems: Array<string>, harvestDashboardOrder: Array<string> }, greenhouses?: Array<{ __typename?: 'TenantGreenhouse', name: string, xDimension: number, yDimension: number, doorPosition?: DoorPosition | null, bayCount?: number | null, isHorizontal?: boolean | null, hiddenInFarmOverview?: boolean | null }> | null } | null, userSettings?: { __typename?: 'UserSettings', preferredLanguage?: string | null, farmOverviewTimeRange?: string | null, harvestView?: { __typename?: 'HarvestViewSettings', range?: HarvestDateRangePreset | null, collapsedBatchIds?: Array<string> | null, sort?: { __typename?: 'HarvestViewSort', field: HarvestSortField, direction: OrderDirection } | null } | null } | null } | null };
 
 export type UsersQueryVariables = Exact<{
   tenantId?: InputMaybe<Scalars['ID']['input']>;
@@ -4858,7 +4874,11 @@ export const SetTenantDisabledSensorFieldsDocument = gql`
     mutation SetTenantDisabledSensorFields($fields: [String!]!, $tenantId: ID) {
   setTenantDisabledSensorFields(fields: $fields, tenantId: $tenantId) {
     id
-    disabledSensorFields
+    settings {
+      disabledSensorFields
+      hiddenHarvestDashboardItems
+      harvestDashboardOrder
+    }
   }
 }
     `;
@@ -4893,7 +4913,11 @@ export const SetTenantHarvestDashboardItemsDocument = gql`
     mutation SetTenantHarvestDashboardItems($hiddenItems: [String!]!, $tenantId: ID) {
   setTenantHarvestDashboardItems(hiddenItems: $hiddenItems, tenantId: $tenantId) {
     id
-    hiddenHarvestDashboardItems
+    settings {
+      disabledSensorFields
+      hiddenHarvestDashboardItems
+      harvestDashboardOrder
+    }
   }
 }
     `;
@@ -4928,7 +4952,11 @@ export const SetTenantHarvestDashboardOrderDocument = gql`
     mutation SetTenantHarvestDashboardOrder($orderedIds: [String!]!, $tenantId: ID) {
   setTenantHarvestDashboardOrder(orderedIds: $orderedIds, tenantId: $tenantId) {
     id
-    harvestDashboardOrder
+    settings {
+      disabledSensorFields
+      hiddenHarvestDashboardItems
+      harvestDashboardOrder
+    }
   }
 }
     `;
@@ -5084,7 +5112,18 @@ export const SetMyLanguageDocument = gql`
     mutation SetMyLanguage($language: String!) {
   setMyLanguage(language: $language) {
     id
-    preferredLanguage
+    userSettings {
+      preferredLanguage
+      farmOverviewTimeRange
+      harvestView {
+        sort {
+          field
+          direction
+        }
+        range
+        collapsedBatchIds
+      }
+    }
   }
 }
     `;
@@ -5118,7 +5157,18 @@ export const SetMyFarmOverviewTimeRangeDocument = gql`
     mutation SetMyFarmOverviewTimeRange($value: String!) {
   setMyFarmOverviewTimeRange(value: $value) {
     id
-    farmOverviewTimeRange
+    userSettings {
+      preferredLanguage
+      farmOverviewTimeRange
+      harvestView {
+        sort {
+          field
+          direction
+        }
+        range
+        collapsedBatchIds
+      }
+    }
   }
 }
     `;
@@ -5153,6 +5203,8 @@ export const UpdateMyHarvestViewSettingsDocument = gql`
   updateMyHarvestViewSettings(input: $input) {
     id
     userSettings {
+      preferredLanguage
+      farmOverviewTimeRange
       harvestView {
         sort {
           field
@@ -5228,9 +5280,11 @@ export const GetRecentSystemErrorsDocument = gql`
       createdAt
       updatedAt
       name
-      disabledSensorFields
-      hiddenHarvestDashboardItems
-      harvestDashboardOrder
+      settings {
+        disabledSensorFields
+        hiddenHarvestDashboardItems
+        harvestDashboardOrder
+      }
       allowedDomains
     }
   }
@@ -8043,9 +8097,11 @@ export const TenantsDocument = gql`
     email
     phone
     isActive
-    disabledSensorFields
-    hiddenHarvestDashboardItems
-    harvestDashboardOrder
+    settings {
+      disabledSensorFields
+      hiddenHarvestDashboardItems
+      harvestDashboardOrder
+    }
     allowedDomains
     greenhouses {
       name
@@ -8105,9 +8161,11 @@ export const TenantDocument = gql`
     email
     phone
     isActive
-    disabledSensorFields
-    hiddenHarvestDashboardItems
-    harvestDashboardOrder
+    settings {
+      disabledSensorFields
+      hiddenHarvestDashboardItems
+      harvestDashboardOrder
+    }
     allowedDomains
     greenhouses {
       name
@@ -8270,9 +8328,11 @@ export const MeDocument = gql`
       createdAt
       isActive
       updatedAt
-      disabledSensorFields
-      hiddenHarvestDashboardItems
-      harvestDashboardOrder
+      settings {
+        disabledSensorFields
+        hiddenHarvestDashboardItems
+        harvestDashboardOrder
+      }
       allowedDomains
       greenhouses {
         name
@@ -8286,9 +8346,9 @@ export const MeDocument = gql`
     }
     isActive
     status
-    preferredLanguage
-    farmOverviewTimeRange
     userSettings {
+      preferredLanguage
+      farmOverviewTimeRange
       harvestView {
         sort {
           field

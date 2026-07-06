@@ -32,8 +32,8 @@ export function SensorVisibilityConfig({
   });
 
   const disabledFields = React.useMemo(
-    () => new Set(data?.tenant?.disabledSensorFields ?? []),
-    [data?.tenant?.disabledSensorFields],
+    () => new Set(data?.tenant?.settings?.disabledSensorFields ?? []),
+    [data?.tenant?.settings?.disabledSensorFields],
   );
 
   const [setDisabledMutation] = useSetTenantDisabledSensorFieldsMutation();
@@ -41,7 +41,7 @@ export function SensorVisibilityConfig({
 
   const handleToggle = React.useCallback(
     async (fields: string[], enabled: boolean) => {
-      const next = new Set(data?.tenant?.disabledSensorFields ?? []);
+      const next = new Set(data?.tenant?.settings?.disabledSensorFields ?? []);
       for (const field of fields) {
         if (enabled) {
           next.delete(field);
@@ -59,7 +59,7 @@ export function SensorVisibilityConfig({
             cache.modify({
               id: cache.identify({ __typename: 'Tenant', id: updated.id }),
               fields: {
-                disabledSensorFields: () => updated.disabledSensorFields,
+                settings: () => updated.settings,
               },
             });
           },
@@ -75,7 +75,7 @@ export function SensorVisibilityConfig({
       }
     },
     [
-      data?.tenant?.disabledSensorFields,
+      data?.tenant?.settings?.disabledSensorFields,
       setDisabledMutation,
       t,
       tenantId,

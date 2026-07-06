@@ -8,7 +8,8 @@ import {
   SystemErrorsTable,
 } from '@/components/system-errors';
 import { Badge } from '@/components/ui/badge';
-import { ErrorSource, ReportSeverity, SystemError } from '@/generated/graphql';
+import { ErrorSource, ReportSeverity } from '@/generated/graphql';
+import type { SystemErrorData } from '@/lib/graphql-compat';
 import { useI18n } from '@/i18n';
 import {
   useResolveSystemError,
@@ -21,7 +22,7 @@ import { useState } from 'react';
 
 export default function AdminSystemErrorsPage() {
   const { t } = useI18n();
-  const [selectedError, setSelectedError] = useState<SystemError | null>(null);
+  const [selectedError, setSelectedError] = useState<SystemErrorData | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // Filters
@@ -71,7 +72,7 @@ export default function AdminSystemErrorsPage() {
     }
   };
 
-  const handleViewDetails = (error: SystemError) => {
+  const handleViewDetails = (error: SystemErrorData) => {
     setSelectedError(error);
     setIsDetailsOpen(true);
   };

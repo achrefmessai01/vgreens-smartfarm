@@ -9,9 +9,11 @@ export const TENANTS_QUERY = gql`
       email
       phone
       isActive
-      disabledSensorFields
-      hiddenHarvestDashboardItems
-      harvestDashboardOrder
+      settings {
+        disabledSensorFields
+        hiddenHarvestDashboardItems
+        harvestDashboardOrder
+      }
       allowedDomains
       greenhouses {
         name
@@ -37,9 +39,11 @@ export const TENANT_QUERY = gql`
       email
       phone
       isActive
-      disabledSensorFields
-      hiddenHarvestDashboardItems
-      harvestDashboardOrder
+      settings {
+        disabledSensorFields
+        hiddenHarvestDashboardItems
+        harvestDashboardOrder
+      }
       allowedDomains
       greenhouses {
         name

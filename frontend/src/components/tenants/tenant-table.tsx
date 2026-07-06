@@ -2,7 +2,7 @@
 
 import { DataTable, type Column } from '@/components/ui/data-table/data-table';
 import { WriteActionButton } from '@/components/ui/write-action-button';
-import type { Tenant } from '@/generated/graphql';
+import type { TenantData } from '@/lib/graphql-compat';
 import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
@@ -10,13 +10,13 @@ import { Plus } from 'lucide-react';
 import { useTenantRow } from './tenant-table-rows';
 
 interface TenantTableProps {
-  tenants: Tenant[];
-  onEdit: (tenant: Tenant) => void;
-  onDelete: (tenant: Tenant) => void;
+  tenants: TenantData[];
+  onEdit: (tenant: TenantData) => void;
+  onDelete: (tenant: TenantData) => void;
   onCreate?: () => void;
-  onViewUsers?: (tenant: Tenant) => void;
-  onManageFeatures?: (tenant: Tenant) => void;
-  onRowClick?: (tenant: Tenant) => void;
+  onViewUsers?: (tenant: TenantData) => void;
+  onManageFeatures?: (tenant: TenantData) => void;
+  onRowClick?: (tenant: TenantData) => void;
 }
 
 export function TenantTable({
@@ -49,7 +49,7 @@ export function TenantTable({
     },
   });
 
-  const columns: Column<Tenant>[] = [
+  const columns: Column<TenantData>[] = [
     {
       key: 'name',
       header: t.pages.admin.tenants.name,

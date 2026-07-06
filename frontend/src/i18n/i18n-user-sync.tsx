@@ -18,7 +18,9 @@ const ME_LANGUAGE_QUERY = gql`
   query MeLanguage {
     me {
       id
-      preferredLanguage
+      userSettings {
+        preferredLanguage
+      }
     }
   }
 `;
@@ -27,13 +29,18 @@ const SET_MY_LANGUAGE = gql`
   mutation SetMyLanguageInline($language: String!) {
     setMyLanguage(language: $language) {
       id
-      preferredLanguage
+      userSettings {
+        preferredLanguage
+      }
     }
   }
 `;
 
 interface MeLanguageResult {
-  me: { id: string; preferredLanguage: string | null } | null;
+  me: {
+    id: string;
+    userSettings: { preferredLanguage: string | null } | null;
+  } | null;
 }
 
 interface SetMyLanguageVars {
@@ -70,7 +77,7 @@ export function I18nUserSync() {
   );
 
   const userId = data?.me?.id ?? null;
-  const persistedLanguage = data?.me?.preferredLanguage ?? null;
+  const persistedLanguage = data?.me?.userSettings?.preferredLanguage ?? null;
 
   // 1. One-shot pull from `me` after login. We track the user id we've
   //    already synced for so a tab refresh doesn't keep overwriting the

@@ -9,6 +9,10 @@ import {
 } from '@nestjs/common';
 import { InfluxDBService } from '@modules/influxdb/influxdb.service';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
+import {
+  composeTenantSettings,
+  TenantSettings,
+} from './entities/tenant-settings';
 import { isAllowedSensorField } from './sensor-fields.constants';
 import { DEFAULT_HIDDEN_HARVEST_DASHBOARD_ITEMS } from './dashboard-defaults.constants';
 import { sanitizeAllowedDomains } from '@modules/users/utils/tenant-allowed-domains';
@@ -37,12 +41,33 @@ export class TenantsService {
     });
   }
 
+  /**
+   * Expand-phase dual-write (VSL-279): patch one key of the consolidated
+   * `settings` blob AND its deprecated flat column in the same save, keeping
+   * the two representations byte-identical so the migration's down path stays
+   * lossless. Patching on top of composeTenantSettings (blob-first) preserves
+   * blob-only state — e.g. legacy ids normalized by the backfill — instead of
+   * resurrecting stale flat-column values.
+   */
+  private applySetting<K extends keyof TenantSettings>(
+    tenant: Tenant,
+    key: K,
+    value: TenantSettings[K],
+  ): void {
+    tenant.settings = { ...composeTenantSettings(tenant), [key]: value };
+    tenant[key] = value;
+  }
+
   async create(createTenantInput: CreateTenantInput): Promise<Tenant> {
+    // Seed metrics that ship "off by default" into the hidden set.
+    const hiddenHarvestDashboardItems = [
+      ...DEFAULT_HIDDEN_HARVEST_DASHBOARD_ITEMS,
+    ];
     const tenant = this.tenantRepository.create({
       ...createTenantInput,
       isActive: createTenantInput.isActive ?? true,
-      // Seed metrics that ship "off by default" into the hidden set.
-      hiddenHarvestDashboardItems: [...DEFAULT_HIDDEN_HARVEST_DASHBOARD_ITEMS],
+      hiddenHarvestDashboardItems,
+      settings: composeTenantSettings({ hiddenHarvestDashboardItems }),
       // Drop empties + duplicates and normalize to bare lowercase so the column
       // never holds two equivalent rows ("@v-greens.com" vs "v-greens.com").
       allowedDomains: sanitizeAllowedDomains(
@@ -103,7 +128,7 @@ export class TenantsService {
     if (!tenant) {
       throw new NotFoundException(`Tenant with id ${id} not found`);
     }
-    tenant.disabledSensorFields = Array.from(new Set(fields));
+    this.applySetting(tenant, 'disabledSensorFields', [...new Set(fields)]);
     return this.tenantRepository.save(tenant);
   }
 
@@ -115,7 +140,9 @@ export class TenantsService {
     if (!tenant) {
       throw new NotFoundException(`Tenant with id ${id} not found`);
     }
-    tenant.hiddenHarvestDashboardItems = Array.from(new Set(items));
+    this.applySetting(tenant, 'hiddenHarvestDashboardItems', [
+      ...new Set(items),
+    ]);
     return this.tenantRepository.save(tenant);
   }
 
@@ -129,7 +156,7 @@ export class TenantsService {
     }
     // De-dupe while preserving first-seen order — the array is the ordering, so
     // a duplicated id would otherwise pin the item to its earlier slot.
-    tenant.harvestDashboardOrder = Array.from(new Set(orderedIds));
+    this.applySetting(tenant, 'harvestDashboardOrder', [...new Set(orderedIds)]);
     return this.tenantRepository.save(tenant);
   }
 

@@ -42,9 +42,11 @@ export const GET_RECENT_SYSTEM_ERRORS = gql`
         createdAt
         updatedAt
         name
-        disabledSensorFields
-        hiddenHarvestDashboardItems
-        harvestDashboardOrder
+        settings {
+          disabledSensorFields
+          hiddenHarvestDashboardItems
+          harvestDashboardOrder
+        }
         allowedDomains
       }
     }

@@ -92,7 +92,7 @@ export function HarvestDashboard({
             cache.modify({
               id: cache.identify({ __typename: 'Tenant', id: updated.id }),
               fields: {
-                harvestDashboardOrder: () => updated.harvestDashboardOrder,
+                settings: () => updated.settings,
               },
             });
           },

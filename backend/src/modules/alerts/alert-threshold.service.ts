@@ -9,6 +9,7 @@ import { AlertsService } from './alerts.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { isInTimeGate } from './alert-threshold-time';
 import { TenantsService } from '@modules/tenants/tenants.service';
+import { composeTenantSettings } from '@modules/tenants/entities/tenant-settings';
 import { InfluxDBService } from '@modules/influxdb/influxdb.service';
 
 const FIELD_DISPLAY_NAMES: Record<string, string> = {
@@ -120,7 +121,7 @@ export class AlertThresholdService {
           tenant.id,
           bucket,
           tenant.timezone,
-          tenant.disabledSensorFields ?? [],
+          composeTenantSettings(tenant).disabledSensorFields,
         );
       }
     } catch (error) {
@@ -140,7 +141,7 @@ export class AlertThresholdService {
       tenantId,
       bucketName,
       tenant?.timezone,
-      tenant?.disabledSensorFields ?? [],
+      tenant ? composeTenantSettings(tenant).disabledSensorFields : [],
     );
   }
 

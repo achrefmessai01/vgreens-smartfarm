@@ -1,6 +1,6 @@
 'use client';
 
-import { User } from '@/generated/graphql';
+import type { UserData } from '@/lib/graphql-compat';
 import { useI18n } from '@/i18n';
 import * as React from 'react';
 import { Navbar } from './navbar';
@@ -9,7 +9,7 @@ import { TenantNavbar } from './tenant-navbar';
 
 interface AppMobileLayoutProps {
   children: React.ReactNode;
-  user?: User;
+  user?: UserData;
   onLogout?: () => void;
 }
 

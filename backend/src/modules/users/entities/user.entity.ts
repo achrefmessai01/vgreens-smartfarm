@@ -93,23 +93,23 @@ export class User extends BaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   userSettings?: UserSettings | null;
 
-  /**
-   * BCP 47-style locale code the user picked in the language switcher
-   * (e.g. "en", "de", "ar"). Persisted so the preference follows the user
-   * across browsers / devices. Validated by the GraphQL `setMyLanguage`
-   * mutation against the supported locale list.
-   */
-  @Field({ nullable: true })
+  // The two columns below moved into the `userSettings` blob (VSL-279).
+  // Expand phase: the service dual-writes them so a migration rollback stays
+  // lossless; a later contract migration drops the columns and these fields.
+
+  /** @deprecated Canonical home is `userSettings.preferredLanguage`. */
+  @Field({
+    nullable: true,
+    deprecationReason: 'Moved into userSettings.preferredLanguage.',
+  })
   @Column({ type: 'varchar', length: 8, nullable: true })
   preferredLanguage?: string;
 
-  /**
-   * User's saved time-range for the farm overview combined view. Either a
-   * preset key (`5m`, `1h`, `24h`, `7d`, `30d`, `90d`, `ytd`) or a custom
-   * range encoded as `custom:<fromISO>:<toISO>`. Validated server-side by
-   * the `setMyFarmOverviewTimeRange` mutation.
-   */
-  @Field({ nullable: true })
+  /** @deprecated Canonical home is `userSettings.farmOverviewTimeRange`. */
+  @Field({
+    nullable: true,
+    deprecationReason: 'Moved into userSettings.farmOverviewTimeRange.',
+  })
   @Column({ type: 'varchar', length: 96, nullable: true })
   farmOverviewTimeRange?: string;
 

@@ -5,16 +5,16 @@ import {
   type Column,
   type FilterConfigOption,
 } from '@/components/ui/data-table';
-import { SystemError } from '@/generated/graphql';
+import type { SystemErrorData } from '@/lib/graphql-compat';
 import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
 import { useSystemErrorsRow } from './system-errors-table-rows';
 
 interface SystemErrorsTableProps {
-  errors: SystemError[];
+  errors: SystemErrorData[];
   isLoading?: boolean;
-  onResolve: (error: SystemError) => void;
-  onViewDetails: (error: SystemError) => void;
+  onResolve: (error: SystemErrorData) => void;
+  onViewDetails: (error: SystemErrorData) => void;
   isResolving?: boolean;
   filterConfigs?: FilterConfigOption[];
 }
@@ -38,7 +38,7 @@ export function SystemErrorsTable({
     isResolving,
   });
 
-  const columns: Column<SystemError>[] = [
+  const columns: Column<SystemErrorData>[] = [
     { key: 'errorMessage', header: t.pages.admin.systemErrors.columnMessage },
     { key: 'component', header: t.pages.admin.systemErrors.columnComponent },
     { key: 'errorType', header: t.pages.admin.systemErrors.columnType },
