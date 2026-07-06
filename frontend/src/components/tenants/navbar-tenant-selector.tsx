@@ -1,6 +1,7 @@
 'use client';
 
 import { Building2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { StyledSelect } from '@/components/ui/styled-select';
 import { useI18n } from '@/i18n';
 import { useTenantsQuery } from '@/generated/graphql';
@@ -28,6 +29,7 @@ const ALL_TENANTS_SENTINEL = '__all__';
 
 export function NavbarTenantSelector() {
   const { t } = useI18n();
+  const router = useRouter();
   const { isVGreensInternal } = useCurrentUser();
   const selectedTenantId = useSelectedTenantId();
   const setSelectedTenantId = useSetSelectedTenantId();
@@ -54,6 +56,9 @@ export function NavbarTenantSelector() {
       setSelectedTenantId(null);
     } else {
       setSelectedTenantId(value);
+      // Always land on Farm Overview when switching to a tenant so the admin
+      // never ends up on a page that belongs to the previously-viewed tenant.
+      router.push('/tenant/farm-overview');
     }
   };
 

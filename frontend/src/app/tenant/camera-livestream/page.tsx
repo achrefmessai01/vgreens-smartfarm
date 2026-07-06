@@ -18,6 +18,7 @@ import { resolveLivestreamUrl } from '@/lib/livestream-url';
 import { useI18n } from '@/i18n';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 import type {
   CameraLivestreamFeed,
   CameraLivestreamStream,
@@ -37,11 +38,12 @@ export default function CameraLivestreamPage() {
   const router = useRouter();
   const { t } = useI18n();
   const { user, loading: userLoading } = useCurrentUser();
+  const tenantId = useTenantIdVariable();
   const {
     enabledFeatures,
     loading: featuresLoading,
     dataLoaded: featuresDataLoaded,
-  } = useTenantFeatures();
+  } = useTenantFeatures(tenantId);
   const hasAccess = canAccessCameraLivestream({
     user,
     enabledFeatures,
@@ -52,9 +54,15 @@ export default function CameraLivestreamPage() {
     null,
   );
 
+  // Reset selected camera when the tenant changes so stale cameras don't linger.
+  React.useEffect(() => {
+    setSelectedCameraId(null);
+  }, [tenantId]);
+
   const { data, loading, refetch, error } =
     useQuery<CameraLivestreamFeedsResult>(CAMERA_LIVESTREAM_FEEDS_QUERY, {
       skip: userLoading || !featuresDataLoaded || !hasAccess,
+      variables: { tenantId },
       fetchPolicy: 'network-only',
       notifyOnNetworkStatusChange: true,
     });
@@ -64,7 +72,7 @@ export default function CameraLivestreamPage() {
     { data: streamData, loading: streamLoading, error: streamError },
   ] = useLazyQuery<CameraLivestreamStreamResult>(
     CAMERA_LIVESTREAM_STREAM_URL_QUERY,
-    { fetchPolicy: 'network-only' },
+    { fetchPolicy: 'network-only', variables: { tenantId } },
   );
 
   const cameras = data?.cameraLivestreamFeeds ?? [];

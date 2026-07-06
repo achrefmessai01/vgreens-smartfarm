@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const CAMERA_LIVESTREAM_FEEDS_QUERY = gql`
-  query CameraLivestreamFeeds {
-    cameraLivestreamFeeds {
+  query CameraLivestreamFeeds($tenantId: String) {
+    cameraLivestreamFeeds(tenantId: $tenantId) {
       id
       name
       path
@@ -16,8 +16,8 @@ export const CAMERA_LIVESTREAM_FEEDS_QUERY = gql`
 `;
 
 export const CAMERA_LIVESTREAM_STREAM_URL_QUERY = gql`
-  query CameraLivestreamStreamUrl($cameraId: String!) {
-    cameraLivestreamStreamUrl(cameraId: $cameraId) {
+  query CameraLivestreamStreamUrl($cameraId: String!, $tenantId: String) {
+    cameraLivestreamStreamUrl(cameraId: $cameraId, tenantId: $tenantId) {
       cameraId
       url
       expiresAt
