@@ -45,9 +45,10 @@ const sellable = (t: HarvestTotals): number => t.totalFruitWeight - t.waste;
 
 // ── weighted aggregations ──────────────────────────────────────────────────
 
-// Σ totalFruitWeight / Σ denominator, with the denominator counted ONCE per
+// Σ sellable weight / Σ denominator, with the denominator counted ONCE per
 // batch (a batch harvested twice must not double its plant count / length).
-// Null when no in-scope batch has a positive denominator.
+// Yields never include waste. Null when no in-scope batch has a positive
+// denominator.
 function ratioByBatch(
   items: HarvestWithTotals[],
   denomOf: (batch: Batch) => number,
@@ -56,10 +57,7 @@ function ratioByBatch(
   const denomByBatch = new Map<string, number>();
   for (const { harvest, totals } of items) {
     const id = harvest.batchId;
-    weightByBatch.set(
-      id,
-      (weightByBatch.get(id) ?? 0) + totals.totalFruitWeight,
-    );
+    weightByBatch.set(id, (weightByBatch.get(id) ?? 0) + sellable(totals));
     if (harvest.batch) denomByBatch.set(id, denomOf(harvest.batch));
   }
   let weight = 0;
@@ -237,16 +235,17 @@ export function buildDashboardMetrics(
   items: HarvestWithTotals[],
 ): HarvestDashboardMetrics {
   const totalWaste = sum(items.map((i) => i.totals.waste));
-  // totalFruitWeight already includes waste, so it IS the total yield; sellable
-  // is the remainder (all quality classes, not just A/B/C).
-  const totalYield = sum(items.map((i) => i.totals.totalFruitWeight));
-  const totalSellable = totalYield - totalWaste;
+  // Yield NEVER includes waste: totalYield is the sellable weight across all
+  // quality classes. The gross picked weight (sellable + waste) exists only as
+  // the denominator for the waste/marketable percentages.
+  const totalSellable = sum(items.map((i) => sellable(i.totals)));
+  const totalPicked = totalSellable + totalWaste;
 
   return {
     species: topName(items, (i) => i.harvest.batch?.crop?.name),
     variety: topName(items, (i) => i.harvest.batch?.variety?.name),
     harvestCount: items.length,
-    totalYield: roundTo(totalYield, 1),
+    totalYield: roundTo(totalSellable, 1),
     averageBrix: roundTo(
       sampleWeightedAverage(items, (t) => t.avgBrix),
       1,
@@ -259,11 +258,11 @@ export function buildDashboardMetrics(
     yieldPerRunningMeter: ratioByBatch(items, (b) => b.runningMeter ?? 0),
     yieldPerSquareMeter: ratioByBatch(items, (b) => b.cultivationArea ?? 0),
     marketablePercent: roundTo(
-      totalYield > 0 ? (totalSellable / totalYield) * 100 : 0,
+      totalPicked > 0 ? (totalSellable / totalPicked) * 100 : 0,
       1,
     ),
     wastePercent: roundTo(
-      totalYield > 0 ? (totalWaste / totalYield) * 100 : 0,
+      totalPicked > 0 ? (totalWaste / totalPicked) * 100 : 0,
       1,
     ),
     wasteTotal: roundTo(totalWaste, 1),

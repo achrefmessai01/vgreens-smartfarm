@@ -15,8 +15,8 @@ export type BatchGroup = {
 // entries' (already service-computed) totals. Mirrors the backend aggregation
 // (see HarvestService): class figures + weights/counts SUM; Brix and avg fruit
 // weight are the UNWEIGHTED mean of the per-entry values (ignoring null/0);
-// the two yields recompute from the summed weight over the batch's
-// plants / running metres.
+// the two yields recompute from the summed sellable weight (waste excluded)
+// over the batch's plants / running metres.
 export interface AggregatedBatchTotals {
   // Per-quality kg sums, positional and dynamic (index 0=A, 1=B, ...), as wide as
   // the widest entry in the group.
@@ -67,12 +67,15 @@ export function aggregateBatchTotals(
   const avgFruitWeight =
     fruitWeightValues.length > 0 ? roundTo(mean(fruitWeightValues), 3) : null;
 
+  // Yields never include waste: divide the sellable portion (totalFruitWeight
+  // includes waste, so subtract it back out) by the batch denominators.
+  const sellableWeight = totalFruitWeight - waste;
   const totalPlants = batch?.totalPlants ?? 0;
   const runningMeter = batch?.runningMeter ?? 0;
   const yieldPerPlant =
-    totalPlants > 0 ? roundTo(totalFruitWeight / totalPlants, 3) : null;
+    totalPlants > 0 ? roundTo(sellableWeight / totalPlants, 3) : null;
   const yieldPerRunningMeter =
-    runningMeter > 0 ? roundTo(totalFruitWeight / runningMeter, 3) : null;
+    runningMeter > 0 ? roundTo(sellableWeight / runningMeter, 3) : null;
 
   return {
     classKgs: classKgs.map((v) => roundTo(v ?? 0, 3)),

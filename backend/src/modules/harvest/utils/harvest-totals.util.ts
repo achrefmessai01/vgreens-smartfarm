@@ -75,15 +75,16 @@ export function computeHarvestTotals(
         )
       : null;
 
-  // Yields divide by living plants (planted − lost) and the running metres
-  // (numberOfRows × rowLength). Null-safe: never divide by a zero/missing
-  // denominator.
+  // Yields divide the SELLABLE weight (waste never counts toward yield) by
+  // living plants (planted − lost) and the running metres (numberOfRows ×
+  // rowLength). Null-safe: never divide by a zero/missing denominator.
+  const sellableWeight = totalWeight - waste;
   const livingPlants = batch?.livingPlants ?? 0;
   const runningMeter = batch?.runningMeter ?? 0;
   const yieldPerPlant =
-    livingPlants > 0 ? roundTo(totalWeight / livingPlants, 3) : null;
+    livingPlants > 0 ? roundTo(sellableWeight / livingPlants, 3) : null;
   const yieldPerRunningMeter =
-    runningMeter > 0 ? roundTo(totalWeight / runningMeter, 3) : null;
+    runningMeter > 0 ? roundTo(sellableWeight / runningMeter, 3) : null;
 
   return {
     classKgs,
