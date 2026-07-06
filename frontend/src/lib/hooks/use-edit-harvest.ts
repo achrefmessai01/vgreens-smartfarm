@@ -126,7 +126,10 @@ export function useEditHarvest({ onSuccess }: UseEditHarvestOptions = {}) {
             id: batchId,
             input: {
               cropId: formData.cropId,
-              varietyId: formData.varietyId || undefined,
+              // Send null (not undefined) when varietyId is cleared so the
+              // backend explicitly clears it instead of keeping the old value.
+              // undefined means "don't touch" — null means "clear".
+              varietyId: formData.varietyId || null,
               plantingDate: formData.plantingDate,
               cultivationArea: formData.cultivationArea,
               greenhouseId: formData.sourceGreenhouse.trim() || undefined,
