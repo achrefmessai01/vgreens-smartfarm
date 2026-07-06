@@ -196,6 +196,7 @@ export class HarvestsService {
   private buildEntry(
     input: HarvestEntryInput,
     inputMode: InputMode,
+    position: number,
   ): DeepPartial<HarvestEntry> {
     const brixReadings: BrixReading[] = (input.brixReadings ?? []).map((b) => ({
       class: b.class,
@@ -203,6 +204,7 @@ export class HarvestsService {
     }));
 
     const common = {
+      position,
       rowX: input.rowX ?? [],
       rowY: input.rowY ?? [],
       waste: input.waste ?? 0,
@@ -246,7 +248,8 @@ export class HarvestsService {
     try {
       const qb = this.withRelations()
         .orderBy('harvest.date', OrderDirection.DESC)
-        .addOrderBy('harvest.createdAt', OrderDirection.DESC);
+        .addOrderBy('harvest.createdAt', OrderDirection.DESC)
+        .addOrderBy('entries.position', OrderDirection.ASC);
 
       if (tenantId !== undefined) {
         qb.andWhere('harvest.tenantId = :tenantId', { tenantId });
@@ -324,7 +327,9 @@ export class HarvestsService {
     id: string,
     tenantId?: string,
   ): Promise<Harvest | null> {
-    const qb = this.withRelations().where('harvest.id = :id', { id });
+    const qb = this.withRelations()
+      .where('harvest.id = :id', { id })
+      .orderBy('entries.position', OrderDirection.ASC);
     if (tenantId !== undefined) {
       qb.andWhere('harvest.tenantId = :tenantId', { tenantId });
     }
@@ -373,8 +378,8 @@ export class HarvestsService {
         stopTime: input.stopTime ?? null,
         harvesterHeadCount: input.harvesterHeadCount ?? null,
         photoUrls: input.photoUrls ?? [],
-        entries: (input.entries ?? []).map((e) =>
-          this.buildEntry(e, inputMode),
+        entries: (input.entries ?? []).map((e, i) =>
+          this.buildEntry(e, inputMode, i),
         ),
       });
 
@@ -459,9 +464,9 @@ export class HarvestsService {
               harvest.batchId,
             );
           });
-          const entries = input.entries.map((e) =>
+          const entries = input.entries.map((e, i) =>
             this.entryRepository.create({
-              ...this.buildEntry(e, harvest.inputMode),
+              ...this.buildEntry(e, harvest.inputMode, i),
               harvestId: id,
             }),
           );
@@ -665,10 +670,9 @@ export class HarvestsService {
     filter?: DashboardFilterInput | null,
   ): Promise<HarvestDashboardMetrics> {
     try {
-      const qb = this.withRelations().orderBy(
-        'harvest.date',
-        OrderDirection.ASC,
-      );
+      const qb = this.withRelations()
+        .orderBy('harvest.date', OrderDirection.ASC)
+        .addOrderBy('entries.position', OrderDirection.ASC);
 
       if (tenantId !== undefined) {
         qb.andWhere('harvest.tenantId = :tenantId', { tenantId });
