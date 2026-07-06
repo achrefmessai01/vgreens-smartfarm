@@ -33,6 +33,15 @@ export class HarvestEntry {
   @JoinColumn({ name: 'harvestId' })
   harvest?: Harvest;
 
+  // Zero-based position of the entry within its harvest, mirroring the order
+  // the entries were entered in the form. The authoritative sort key for
+  // reads: createdAt can't be trusted on legacy rows (whole-set replacement on
+  // update used to stamp identical timestamps). Updates reconcile stored
+  // entries against the input by this position. Not exposed via GraphQL — the
+  // API contract is simply "entries arrive in entry order".
+  @Column({ type: 'int', default: 0 })
+  position: number;
+
   // Parallel arrays of harvested row segments: rowX[i] pairs with rowY[i] to
   // span segment i (rowX[i] -> rowY[i]); the space between segment i's end and
   // segment i+1's start is a gap. The two arrays are always kept equal-length.

@@ -710,6 +710,7 @@ export const tr = {
       average: 'Ortalama',
       averageByClass: 'Ort. {class}',
       todaysHarvest: 'Bugünün hasatı',
+      reorderEntry: 'Girişi yeniden sıralamak için sürükleyin',
       yieldData: 'Verim verileri',
       qualityMetrics: 'Kalite metrikleri',
       enterMarketableYield: 'Pazarlanabilir verimi girin',

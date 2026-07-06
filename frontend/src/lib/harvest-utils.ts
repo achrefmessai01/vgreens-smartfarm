@@ -9,7 +9,7 @@ import type {
   BatchDetailsData,
   HarvestEntryData,
 } from '@/types/batch-sidebar.types';
-import { createEmptyEntry } from '@/types/batch-sidebar.types';
+import { createEmptyEntry, newEntryUid } from '@/types/batch-sidebar.types';
 import type {
   BatchLike,
   HarvestEntryLike,
@@ -369,6 +369,7 @@ function entryLikeToEntryData(entry: HarvestEntryLike): HarvestEntryData {
     entry.remainingKgs,
   );
   return {
+    uid: newEntryUid(),
     classKgs: cls.classKgs,
     crateCounts: cls.crateCounts,
     remainingKgs: cls.remainingKgs,

@@ -701,6 +701,7 @@ export const en = {
       addEntry: 'Add entry',
       entryLabel: 'Entry {n}',
       removeEntry: 'Remove entry',
+      reorderEntry: 'Drag to reorder entry',
       yieldData: 'Yield Data',
       qualityMetrics: 'Quality Metrics',
       enterMarketableYield: 'Enter marketable yield',

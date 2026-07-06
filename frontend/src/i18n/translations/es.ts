@@ -707,6 +707,7 @@ export const es = {
       average: 'Promedio',
       averageByClass: 'Prom. {class}',
       todaysHarvest: 'Cosecha de hoy',
+      reorderEntry: 'Arrastra para reordenar la entrada',
       yieldData: 'Datos de rendimiento',
       qualityMetrics: 'Métricas de calidad',
       enterMarketableYield: 'Introduce el rendimiento comercializable',

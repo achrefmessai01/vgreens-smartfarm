@@ -717,6 +717,7 @@ export const pt = {
       average: 'Média',
       averageByClass: 'Méd. {class}',
       todaysHarvest: 'Colheita de hoje',
+      reorderEntry: 'Arraste para reordenar a entrada',
       yieldData: 'Dados de produção',
       qualityMetrics: 'Métricas de qualidade',
       enterMarketableYield: 'Introduza a produção comercializável',

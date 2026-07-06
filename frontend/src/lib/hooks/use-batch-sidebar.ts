@@ -24,6 +24,7 @@ import {
   wasteExceedsQualityTotal,
 } from '@/lib/harvest-utils';
 import { useToast } from '@/components/ui/toast-provider';
+import { arrayMove } from '@dnd-kit/sortable';
 import * as React from 'react';
 
 export type SidebarMode = 'create' | 'edit' | 'view';
@@ -422,6 +423,29 @@ export function useBatchSidebar({
     [],
   );
 
+  // Drag-and-drop reorder: move an entry to a new place in the list. The saved
+  // order follows the array order (the backend assigns positions by index).
+  // The index-keyed waste acknowledgements are shifted alongside so each stays
+  // attached to its entry.
+  const handleReorderEntries = React.useCallback((from: number, to: number) => {
+    if (from === to) return;
+    setLocalData((prev) => {
+      if (!prev) return prev;
+      return { ...prev, entries: arrayMove(prev.entries, from, to) };
+    });
+    setConfirmedWasteEntries((prev) => {
+      if (prev.size === 0) return prev;
+      const next = new Set<number>();
+      prev.forEach((i) => {
+        if (i === from) next.add(to);
+        else if (from < to && i > from && i <= to) next.add(i - 1);
+        else if (to < from && i >= to && i < from) next.add(i + 1);
+        else next.add(i);
+      });
+      return next;
+    });
+  }, []);
+
   const handleEntryChange = React.useCallback(
     (entryIndex: number, change: EntryChange) => {
       // Any change to the quantities feeding the waste/quality comparison
@@ -723,6 +747,7 @@ export function useBatchSidebar({
     handleSampleWeightChange,
     handleSampleFruitCountChange,
     handleEntryChange,
+    handleReorderEntries,
     handleSetShowBrix,
     handleSetShowFruitWeight,
     handlePhotoUpload,

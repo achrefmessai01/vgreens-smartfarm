@@ -704,6 +704,7 @@ export const ar = {
       average: 'المتوسط',
       averageByClass: 'متوسط {class}',
       todaysHarvest: 'حصاد اليوم',
+      reorderEntry: 'اسحب لإعادة ترتيب الإدخال',
       yieldData: 'بيانات الإنتاج',
       qualityMetrics: 'مقاييس الجودة',
       enterMarketableYield: 'أدخل الإنتاج القابل للتسويق',

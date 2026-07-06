@@ -723,6 +723,7 @@ export const el = {
       average: 'Μέσος όρος',
       averageByClass: 'Μ.Ο. {class}',
       todaysHarvest: 'Σημερινή συγκομιδή',
+      reorderEntry: 'Σύρετε για αναδιάταξη της καταχώρισης',
       yieldData: 'Δεδομένα απόδοσης',
       qualityMetrics: 'Δείκτες ποιότητας',
       enterMarketableYield: 'Εισαγάγετε την εμπορεύσιμη απόδοση',
