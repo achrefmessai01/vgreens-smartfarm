@@ -10,6 +10,7 @@ import { IsNull, Repository } from 'typeorm';
 import { BaseService } from '@common/services';
 import { Crop } from '@modules/crop/entities/crop.entity';
 import { Variety } from '@modules/variety/entities/variety.entity';
+import { Greenhouse } from '@modules/greenhouse/entities/greenhouse.entity';
 import { GreenhouseCrop } from '@modules/greenhouse-crop/entities/greenhouse-crop.entity';
 import { Harvest } from '@modules/harvest/entities/harvest.entity';
 import { Batch } from './entities/batch.entity';
@@ -297,8 +298,15 @@ export class BatchService extends BaseService<Batch> {
   ): Promise<Batch> {
     const batch = await this.findOneById(id, tenantId);
 
-    if (input.greenhouseId !== undefined)
+    if (input.greenhouseId !== undefined) {
       batch.greenhouseId = input.greenhouseId;
+      // Sync the relation object so TypeORM's save() uses the new FK instead
+      // of resolving the column from the stale loaded relation — same pattern
+      // used below for crop/variety.
+      batch.greenhouse = input.greenhouseId
+        ? ({ id: input.greenhouseId } as Greenhouse)
+        : null;
+    }
 
     // Re-validate the greenhouse -> crop -> variety chain whenever any link in
     // it changes, against the resulting combination. When the chain changes we
