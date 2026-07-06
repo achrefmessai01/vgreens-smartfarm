@@ -5,7 +5,9 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FeaturesService } from '@modules/features/features.service';
+import { TenantsService } from '@modules/tenants/tenants.service';
 import { User } from '@modules/users/entities/user.entity';
+import { resolveTenantId } from '@common/utils/resolve-tenant-id.util';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import {
   CAMERA_LIVESTREAM_FEATURE_KEY,
@@ -39,6 +41,7 @@ export class CameraLivestreamService {
   constructor(
     private readonly configService: ConfigService,
     private readonly featuresService: FeaturesService,
+    private readonly tenantsService: TenantsService,
   ) {
     const url = this.configService.get<string>('SUPABASE_URL');
     const serviceRoleKey = this.configService.get<string>(
@@ -67,9 +70,12 @@ export class CameraLivestreamService {
 
   private async resolveTenantContext(
     currentUser: User,
+    tenantIdOverride?: string,
   ): Promise<CameraLivestreamTenantConfig | null> {
-    const tenantFeatures = currentUser.tenantId
-      ? await this.featuresService.getTenantFeatures(currentUser.tenantId)
+    const effectiveTenantId = resolveTenantId(currentUser, tenantIdOverride, false);
+
+    const tenantFeatures = effectiveTenantId
+      ? await this.featuresService.getTenantFeatures(effectiveTenantId)
       : [];
     const tenantFeature =
       tenantFeatures.find(
@@ -77,7 +83,14 @@ export class CameraLivestreamService {
           tenantFeature.feature?.key === CAMERA_LIVESTREAM_FEATURE_KEY,
       ) ?? null;
 
-    const localConfig = getLocalCameraLivestreamConfig(currentUser.tenant);
+    // For admin users, currentUser.tenant is null — load the tenant by id.
+    const tenant =
+      currentUser.tenant ??
+      (effectiveTenantId
+        ? await this.tenantsService.findOne(effectiveTenantId)
+        : null);
+
+    const localConfig = getLocalCameraLivestreamConfig(tenant);
     const featureConfig = parseCameraLivestreamConfig(tenantFeature?.config);
     // DB feature config wins, but tenant feature configs created before the
     // streamFolder field existed inherit the in-code default so live streams
@@ -105,8 +118,8 @@ export class CameraLivestreamService {
     return livestreamConfig;
   }
 
-  async listCameras(currentUser: User): Promise<CameraLivestreamFeed[]> {
-    const livestreamConfig = await this.resolveTenantContext(currentUser);
+  async listCameras(currentUser: User, tenantId?: string): Promise<CameraLivestreamFeed[]> {
+    const livestreamConfig = await this.resolveTenantContext(currentUser, tenantId);
 
     if (!livestreamConfig) {
       return [];
@@ -122,6 +135,7 @@ export class CameraLivestreamService {
   async createStream(
     currentUser: User,
     cameraId: string,
+    tenantId?: string,
   ): Promise<CameraLivestreamStream> {
     const unavailable: CameraLivestreamStream = {
       cameraId,
@@ -131,7 +145,7 @@ export class CameraLivestreamService {
       error: 'Livestream currently unavailable',
     };
 
-    const livestreamConfig = await this.resolveTenantContext(currentUser);
+    const livestreamConfig = await this.resolveTenantContext(currentUser, tenantId);
     if (!livestreamConfig) {
       return unavailable;
     }
