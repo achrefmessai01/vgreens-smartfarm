@@ -218,14 +218,22 @@ export class HarvestsService {
       avgBrix: this.entryAvgBrix(brixReadings),
     };
 
+    // The inactive mode's arrays are explicitly nulled so an in-place entry
+    // update can never leave stale other-mode data behind.
     if (inputMode === InputMode.CRATE) {
       return {
         ...common,
         crateCounts: input.crateCounts ?? [],
         remainingKgs: input.remainingKgs ?? [],
+        classKgs: null,
       };
     }
-    return { ...common, classKgs: input.classKgs ?? [] };
+    return {
+      ...common,
+      classKgs: input.classKgs ?? [],
+      crateCounts: null,
+      remainingKgs: null,
+    };
   }
 
   // Derive a harvest's totals from its entries (+ the harvest's own inputMode
@@ -378,12 +386,27 @@ export class HarvestsService {
         stopTime: input.stopTime ?? null,
         harvesterHeadCount: input.harvesterHeadCount ?? null,
         photoUrls: input.photoUrls ?? [],
-        entries: (input.entries ?? []).map((e, i) =>
-          this.buildEntry(e, inputMode, i),
-        ),
       });
 
       const saved = await this.harvestRepository.save(harvest);
+      // Insert entries one at a time rather than as one batched insert: a
+      // multi-row insert stamps every row with the identical createdAt, while
+      // sequential saves give each entry its own timestamp in form order.
+      try {
+        for (const [i, e] of (input.entries ?? []).entries()) {
+          await this.entryRepository.save(
+            this.entryRepository.create({
+              ...this.buildEntry(e, inputMode, i),
+              harvestId: saved.id,
+            }),
+          );
+        }
+      } catch (error) {
+        // Don't leave a half-created harvest behind (cascade removes any
+        // entries that did make it in).
+        await this.harvestRepository.delete(saved.id);
+        throw error;
+      }
       return this.findOneById(saved.id, tenantId);
     } catch (error) {
       if (
@@ -450,27 +473,40 @@ export class HarvestsService {
 
       await this.harvestRepository.save(harvest);
 
-      // Entries are authoritative when supplied: replace the whole set. They
-      // are rebuilt in the harvest's own input mode.
+      // Entries are authoritative when supplied, but the stored rows are
+      // reconciled IN PLACE by position rather than deleted and reinserted:
+      // input entry i overwrites the stored entry at position i (keeping its
+      // id and original createdAt), entries beyond the stored count are
+      // appended one at a time (each with its own createdAt), and surplus
+      // stored rows are removed. All are rebuilt in the harvest's own input
+      // mode.
       if (input.entries !== undefined) {
-        await this.entryRepository.delete({ harvestId: id });
-        if (input.entries.length > 0) {
-          input.entries.forEach((e) => {
-            this.validateRowSegments(e);
-            this.warnCrateRemainder(
-              e,
-              harvest.inputMode,
-              crateWeight,
-              harvest.batchId,
-            );
-          });
-          const entries = input.entries.map((e, i) =>
-            this.entryRepository.create({
-              ...this.buildEntry(e, harvest.inputMode, i),
-              harvestId: id,
-            }),
+        input.entries.forEach((e) => {
+          this.validateRowSegments(e);
+          this.warnCrateRemainder(
+            e,
+            harvest.inputMode,
+            crateWeight,
+            harvest.batchId,
           );
-          await this.entryRepository.save(entries);
+        });
+        const existing = await this.entryRepository.find({
+          where: { harvestId: id },
+          order: { position: 'ASC', createdAt: 'ASC', id: 'ASC' },
+        });
+        for (const [i, e] of input.entries.entries()) {
+          const built = this.buildEntry(e, harvest.inputMode, i);
+          if (i < existing.length) {
+            await this.entryRepository.update(existing[i].id, built);
+          } else {
+            await this.entryRepository.save(
+              this.entryRepository.create({ ...built, harvestId: id }),
+            );
+          }
+        }
+        const surplus = existing.slice(input.entries.length);
+        if (surplus.length > 0) {
+          await this.entryRepository.delete(surplus.map((e) => e.id));
         }
       }
 

@@ -34,10 +34,11 @@ export class HarvestEntry {
   harvest?: Harvest;
 
   // Zero-based position of the entry within its harvest, mirroring the order
-  // the entries were entered in the form. Entries are replaced as a whole set
-  // on update (one batched insert -> identical createdAt), so createdAt cannot
-  // order them; reads sort by this column instead. Not exposed via GraphQL —
-  // the API contract is simply "entries arrive in entry order".
+  // the entries were entered in the form. The authoritative sort key for
+  // reads: createdAt can't be trusted on legacy rows (whole-set replacement on
+  // update used to stamp identical timestamps). Updates reconcile stored
+  // entries against the input by this position. Not exposed via GraphQL — the
+  // API contract is simply "entries arrive in entry order".
   @Column({ type: 'int', default: 0 })
   position: number;
 
