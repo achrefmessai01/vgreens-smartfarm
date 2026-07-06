@@ -629,6 +629,7 @@ export function useBatchSidebar({
           variables: {
             input: {
               batchId,
+              inputMode: currentData.inputMode,
               crateId,
               date: isoDate,
               ...timingInput,
