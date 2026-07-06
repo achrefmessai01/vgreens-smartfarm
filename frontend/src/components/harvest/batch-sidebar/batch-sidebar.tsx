@@ -26,6 +26,7 @@ import { entryHasData } from '@/types/batch-sidebar.types';
 import { FieldMessage } from '@/components/harvest/field-message';
 import { isTomatoSpecies } from '@/lib/harvest-utils';
 import { HarvestEntryCard } from './fields/harvest-entry-card';
+import { SortableEntryList } from './fields/sortable-entry-list';
 import { HarvestInputModeField } from './fields/input-mode-field';
 import { CrateSelectField } from './fields/crate-select-field';
 
@@ -93,6 +94,7 @@ export function BatchSidebar({
     handleSampleWeightChange,
     handleSampleFruitCountChange,
     handleEntryChange,
+    handleReorderEntries,
     handleSetShowBrix,
     handleSetShowFruitWeight,
     handlePhotoUpload,
@@ -350,45 +352,56 @@ export function BatchSidebar({
                   </div>
                 )}
 
-                {currentData.entries.map((entry, index) => (
-                  <HarvestEntryCard
-                    key={index}
-                    entry={entry}
-                    index={index}
-                    inputMode={currentData.inputMode}
-                    crateWeight={currentData.crateWeight}
-                    isTomato={isTomatoSpecies(currentData.species)}
-                    batchStartRow={currentData.startRow}
-                    batchEndRow={currentData.endRow}
-                    wasteConfirmed={confirmedWasteEntries.has(index)}
-                    onConfirmWasteChange={(confirmed) =>
-                      setWasteConfirmed(index, confirmed)
-                    }
-                    defaultOpen={index === 0 || entryHasData(entry)}
-                    onChange={(change) => handleEntryChange(index, change)}
-                    onBrixChange={(readingIndex, value) =>
-                      handleBrixChange(index, readingIndex, value)
-                    }
-                    onBrixClassChange={(readingIndex, value) =>
-                      handleBrixClassChange(index, readingIndex, value)
-                    }
-                    onAddBrixReading={() => handleAddBrixReading(index)}
-                    onRemoveBrixReading={(readingIndex) =>
-                      handleRemoveBrixReading(index, readingIndex)
-                    }
-                    onSetShowBrix={(show) => handleSetShowBrix(index, show)}
-                    onSampleWeightChange={(value) =>
-                      handleSampleWeightChange(index, value)
-                    }
-                    onSampleFruitCountChange={(value) =>
-                      handleSampleFruitCountChange(index, value)
-                    }
-                    onSetShowFruitWeight={(show) =>
-                      handleSetShowFruitWeight(index, show)
-                    }
-                    isLoading={busy}
-                  />
-                ))}
+                {/* Entry cards, drag-and-drop reorderable via the grip handle
+                    in each header. The saved order follows the list order. */}
+                <SortableEntryList
+                  ids={currentData.entries.map((entry) => entry.uid)}
+                  disabled={readOnly || busy}
+                  dragHandleLabel={h?.reorderEntry ?? 'Drag to reorder entry'}
+                  onReorder={handleReorderEntries}
+                  renderEntry={(index, dragHandle) => {
+                    const entry = currentData.entries[index];
+                    return (
+                      <HarvestEntryCard
+                        entry={entry}
+                        index={index}
+                        inputMode={currentData.inputMode}
+                        crateWeight={currentData.crateWeight}
+                        isTomato={isTomatoSpecies(currentData.species)}
+                        batchStartRow={currentData.startRow}
+                        batchEndRow={currentData.endRow}
+                        wasteConfirmed={confirmedWasteEntries.has(index)}
+                        onConfirmWasteChange={(confirmed) =>
+                          setWasteConfirmed(index, confirmed)
+                        }
+                        dragHandle={dragHandle}
+                        defaultOpen={index === 0 || entryHasData(entry)}
+                        onChange={(change) => handleEntryChange(index, change)}
+                        onBrixChange={(readingIndex, value) =>
+                          handleBrixChange(index, readingIndex, value)
+                        }
+                        onBrixClassChange={(readingIndex, value) =>
+                          handleBrixClassChange(index, readingIndex, value)
+                        }
+                        onAddBrixReading={() => handleAddBrixReading(index)}
+                        onRemoveBrixReading={(readingIndex) =>
+                          handleRemoveBrixReading(index, readingIndex)
+                        }
+                        onSetShowBrix={(show) => handleSetShowBrix(index, show)}
+                        onSampleWeightChange={(value) =>
+                          handleSampleWeightChange(index, value)
+                        }
+                        onSampleFruitCountChange={(value) =>
+                          handleSampleFruitCountChange(index, value)
+                        }
+                        onSetShowFruitWeight={(show) =>
+                          handleSetShowFruitWeight(index, show)
+                        }
+                        isLoading={busy}
+                      />
+                    );
+                  }}
+                />
 
                 <div className="bg-card rounded-xl border p-3 shadow-sm">
                   <PhotosField

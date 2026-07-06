@@ -5,6 +5,9 @@ import type { BatchStatus, InputMode } from '@/generated/graphql';
 // brix readings and fruit-weight measurement. `showBrix`/`showFruitWeight`
 // control whether the optional sections are expanded for this entry.
 export interface HarvestEntryData {
+  // Client-local identity for list keys and drag-and-drop reordering. Never
+  // sent to the API — the save maps entries to input objects positionally.
+  uid: string;
   // Per-quality inputs, positional and dynamic (index 0=A, 1=B, 2=C, ...). Both
   // modes start with one class (A) and the form can add/remove classes. Weight
   // mode uses classKgs (kg per class); crate mode uses crateCounts + remainingKgs
@@ -60,9 +63,16 @@ export function entryHasData(entry: HarvestEntryData): boolean {
   );
 }
 
+// Session-unique id for a form entry (see HarvestEntryData.uid).
+let entryUidCounter = 0;
+export function newEntryUid(): string {
+  return `entry-${++entryUidCounter}`;
+}
+
 export function createEmptyEntry(): HarvestEntryData {
   // Start with a single quality class (A); more can be added in the form.
   return {
+    uid: newEntryUid(),
     classKgs: [0],
     crateCounts: [0],
     remainingKgs: [0],

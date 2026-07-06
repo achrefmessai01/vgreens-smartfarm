@@ -29,6 +29,9 @@ export interface HarvestEntryCardProps {
   // exceeding the summed quality yield for this entry, and the setter to toggle it.
   wasteConfirmed: boolean;
   onConfirmWasteChange: (confirmed: boolean) => void;
+  // Grip element carrying the drag-and-drop listeners, rendered in the card
+  // header (see SortableEntryList). null/undefined hides it (view mode).
+  dragHandle?: React.ReactNode;
   defaultOpen?: boolean;
   onChange: (change: EntryChange) => void;
   onBrixChange: (readingIndex: number, value: number) => void;
@@ -52,6 +55,7 @@ export function HarvestEntryCard({
   batchEndRow,
   wasteConfirmed,
   onConfirmWasteChange,
+  dragHandle,
   defaultOpen = false,
   onChange,
   onBrixChange,
@@ -82,6 +86,7 @@ export function HarvestEntryCard({
   return (
     <div className="bg-card rounded-xl border shadow-sm">
       <div className="flex items-center justify-between gap-2 p-3">
+        {dragHandle}
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
