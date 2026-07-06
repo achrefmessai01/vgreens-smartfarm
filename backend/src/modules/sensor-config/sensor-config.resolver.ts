@@ -462,7 +462,7 @@ export class SensorConfigResolver {
   // (dry === saturated). Only computed for soil sensors.
   @ResolveField(() => Float, { name: 'correctedValue', nullable: true })
   async correctedValue(@Parent() config: SensorConfig): Promise<number | null> {
-    if (!this.sensorConfigService.isSoilDevice(config.device)) return null;
+    if (!this.sensorConfigService.isSoilSensor(config)) return null;
     if (!config.tenantId) return null;
     const tenant = await this.tenantsService.findOne(config.tenantId);
     if (!tenant?.influxBucketName) return null;
@@ -494,7 +494,7 @@ export class SensorConfigResolver {
     if (!config) {
       throw new NotFoundException(`SensorConfig ${sensorConfigId} not found`);
     }
-    if (!this.sensorConfigService.isSoilDevice(config.device)) {
+    if (!this.sensorConfigService.isSoilSensor(config)) {
       throw new BadRequestException(
         `Sensor "${config.device}" is not a soil sensor and cannot be calibrated`,
       );

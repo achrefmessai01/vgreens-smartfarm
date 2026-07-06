@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpsertSensorConfigInput } from './dto';
 import { SensorConfig } from './entities/sensor-config.entity';
-import { SOIL_DEVICE_REGEX } from './calibration.util';
+import { isSoilSensor } from './calibration.util';
 
 @Injectable()
 export class SensorConfigService {
@@ -102,20 +102,18 @@ export class SensorConfigService {
   }
 
   /**
-   * The tenant's SOIL sensor configs (device matches `^Soil_`, case-insensitive)
-   * that are NOT hidden from the farm overview — the set the calibration
-   * dropdown offers and whose corrected values render on the map. Postgres LIKE
-   * treats `_` as a wildcard, so the pattern escapes it (`Soil\_%`).
+   * The tenant's SOIL sensor configs that are NOT hidden from the farm
+   * overview — the set the calibration dropdown offers and whose corrected
+   * values render on the map. Soil detection is profile-based with a
+   * device-name fallback (see `isSoilSensor`); filtering happens in JS so the
+   * detection logic has a single home rather than a SQL twin. Tenant fleets
+   * are tens of rows, so the full fetch is cheap.
    */
   async findSoilByTenant(tenantId: string): Promise<SensorConfig[]> {
-    return this.repo
-      .createQueryBuilder('config')
-      .leftJoinAndSelect('config.greenhouseRef', 'greenhouseRef')
-      .where('config.tenantId = :tenantId', { tenantId })
-      .andWhere('config.device ILIKE :pattern', { pattern: 'Soil\\_%' })
-      .andWhere('config.hiddenInFarmOverview IS NOT TRUE')
-      .orderBy('config.device', 'ASC')
-      .getMany();
+    const configs = await this.findAllByTenant(tenantId);
+    return configs.filter(
+      (config) => isSoilSensor(config) && config.hiddenInFarmOverview !== true,
+    );
   }
 
   async findByIdForTenant(
@@ -128,9 +126,12 @@ export class SensorConfigService {
     });
   }
 
-  /** True iff the device name identifies a soil sensor. */
-  isSoilDevice(device: string): boolean {
-    return SOIL_DEVICE_REGEX.test(device);
+  /**
+   * True iff the config identifies a soil sensor — by its InfluxDB device
+   * profile when known, by the legacy `Soil_` name prefix otherwise.
+   */
+  isSoilSensor(sensor: Pick<SensorConfig, 'device' | 'profile'>): boolean {
+    return isSoilSensor(sensor);
   }
 
   /**

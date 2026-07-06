@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GreenhouseService } from '@modules/greenhouse/greenhouse.service';
 import { SensorConfig } from '@modules/sensor-config/entities/sensor-config.entity';
-import { SOIL_DEVICE_REGEX } from '@modules/sensor-config/calibration.util';
+import { isSoilSensor } from '@modules/sensor-config/calibration.util';
 import { CreateIrrigationCycleInput, UpdateIrrigationCycleInput } from './dto';
 import { IrrigationCycle } from './entities/irrigation-cycle.entity';
 
@@ -111,7 +111,7 @@ export class IrrigationCyclesService {
     if (!sensor) {
       throw new NotFoundException(`SensorConfig ${sensorConfigId} not found`);
     }
-    if (!SOIL_DEVICE_REGEX.test(sensor.device)) {
+    if (!isSoilSensor(sensor)) {
       throw new BadRequestException(
         `Sensor "${sensor.device}" is not a soil sensor and cannot join an irrigation cycle`,
       );

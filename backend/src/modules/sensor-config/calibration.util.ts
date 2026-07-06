@@ -7,11 +7,48 @@
 export const SOIL_MOISTURE_FIELD = 'soil_moisture';
 
 /**
- * A `sensor_configs.device` is a soil sensor iff its name starts with `Soil_`
- * (case-insensitive) — the established convention (see the frontend
- * `deriveSensorType`). Used to scope the calibration dropdown query.
+ * Legacy fallback: a `sensor_configs.device` is a soil sensor iff its name
+ * starts with `Soil_` (case-insensitive). Only consulted when the row has no
+ * InfluxDB `profile` yet — profile-based detection (`isSoilSensor`) is the
+ * source of truth.
  */
 export const SOIL_DEVICE_REGEX = /^Soil_/i;
+
+/**
+ * Soil-sensor device profiles, exactly as stored in `sensor_configs.profile`
+ * (synced from the InfluxDB `profile` tag — the ChirpStack device-profile
+ * name). This is the full set observed in production (2026-07-06): all three
+ * are Dragino SE01-LB soil moisture & EC probes (`SE01-LB-C` is a calibrated
+ * FDR unit). The air/light profiles seen alongside (`S31B`, `S31LB-LB`,
+ * `S210X`, `SenseCAP 210x`) are deliberately absent. Matched case-insensitively
+ * and exactly — extend the set when new soil hardware is onboarded.
+ */
+export const SOIL_SENSOR_PROFILES = new Set([
+  'dragino-se0x-lb',
+  'se01-lb',
+  'se01-lb-c',
+]);
+
+/** True iff the InfluxDB device profile identifies a soil sensor. */
+export function isSoilProfile(profile?: string | null): boolean {
+  return (
+    profile != null && SOIL_SENSOR_PROFILES.has(profile.trim().toLowerCase())
+  );
+}
+
+/**
+ * Soil-sensor detection: the device profile decides when known; the legacy
+ * `Soil_` device-name prefix is the fallback for rows without a profile yet.
+ * A known non-soil profile overrides the name — the profile reports what the
+ * hardware actually is.
+ */
+export function isSoilSensor(sensor: {
+  device: string;
+  profile?: string | null;
+}): boolean {
+  if (sensor.profile) return isSoilProfile(sensor.profile);
+  return SOIL_DEVICE_REGEX.test(sensor.device);
+}
 
 /** True once both bounds are set AND distinct (a usable calibration). */
 export function isSensorCalibrated(
