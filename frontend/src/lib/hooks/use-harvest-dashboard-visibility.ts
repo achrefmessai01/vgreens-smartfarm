@@ -22,8 +22,8 @@ export function useHarvestDashboardVisibility() {
   const tenantId = tenant?.id;
 
   const hiddenSet = React.useMemo(
-    () => new Set(tenant?.hiddenHarvestDashboardItems ?? []),
-    [tenant?.hiddenHarvestDashboardItems],
+    () => new Set(tenant?.settings?.hiddenHarvestDashboardItems ?? []),
+    [tenant?.settings?.hiddenHarvestDashboardItems],
   );
 
   const isVisible = React.useCallback(

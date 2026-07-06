@@ -63,8 +63,8 @@ export function useHarvestDashboardOrder() {
   const tenantId = tenant?.id;
 
   const order = React.useMemo<string[]>(
-    () => tenant?.harvestDashboardOrder ?? [],
-    [tenant?.harvestDashboardOrder],
+    () => tenant?.settings?.harvestDashboardOrder ?? [],
+    [tenant?.settings?.harvestDashboardOrder],
   );
 
   const applyOrder = React.useCallback(

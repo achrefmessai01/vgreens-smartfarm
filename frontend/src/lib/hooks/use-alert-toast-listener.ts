@@ -3,10 +3,10 @@
 import * as React from 'react';
 import {
   AlertStatus,
-  type User,
   UserRole,
   useTenantFeaturesQuery,
 } from '@/generated/graphql';
+import type { UserData } from '@/lib/graphql-compat';
 import { useSubscription } from '@apollo/client/react';
 import { ALERT_CREATED_SUBSCRIPTION } from '@/graphql/subscriptions/alert.subscriptions';
 import { useToast } from '@/components/ui/toast-provider';
@@ -60,7 +60,7 @@ function formatAlertDescription(alert: ToastableAlert, fallback: string) {
   return parts.length > 0 ? parts.join(' | ') : fallback;
 }
 
-export function useAlertToastListener(user?: User): void {
+export function useAlertToastListener(user?: UserData): void {
   const { t } = useI18n();
   const { toast } = useToast();
   const seenAlertIdsRef = React.useRef<Set<string>>(new Set());

@@ -5,7 +5,7 @@ import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ErrorSourceBadge } from '@/components/ui/error-source-badge';
 import { ErrorTypeBadge } from '@/components/ui/error-type-badge';
-import { SystemError } from '@/generated/graphql';
+import type { SystemErrorData } from '@/lib/graphql-compat';
 import { useI18n, useLocaleFormatters } from '@/i18n';
 import { CheckCircle2, Eye } from 'lucide-react';
 
@@ -14,8 +14,8 @@ import { CheckCircle2, Eye } from 'lucide-react';
  */
 
 interface SystemErrorsCardProps {
-  onResolve: (error: SystemError) => void;
-  onViewDetails: (error: SystemError) => void;
+  onResolve: (error: SystemErrorData) => void;
+  onViewDetails: (error: SystemErrorData) => void;
   isLoading?: boolean;
   isResolving?: boolean;
 }
@@ -29,7 +29,7 @@ export const useSystemErrorsCard = ({
   const { t } = useI18n();
   const { formatRelativeTime } = useLocaleFormatters();
 
-  const renderCard = (error: SystemError) => {
+  const renderCard = (error: SystemErrorData) => {
     const userName = error.user
       ? `${error.user.firstName ?? ''} ${error.user.lastName ?? ''}`.trim() ||
         error.user.email

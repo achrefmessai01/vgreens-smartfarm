@@ -3,7 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { SidebarSkeleton } from '@/components/ui/sidebar-skeleton';
-import { User, UserRole } from '@/generated/graphql';
+import { UserRole } from '@/generated/graphql';
+import type { UserData } from '@/lib/graphql-compat';
 import { useI18n } from '@/i18n';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLogout } from '@/lib/hooks/use-logout';
@@ -38,7 +39,7 @@ interface NavItem {
 }
 
 interface SidebarProps {
-  user?: User | null;
+  user?: UserData | null;
   onLogout?: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: (collapsed: boolean) => void;

@@ -18,9 +18,11 @@ export const ME_QUERY = gql`
         createdAt
         isActive
         updatedAt
-        disabledSensorFields
-        hiddenHarvestDashboardItems
-        harvestDashboardOrder
+        settings {
+          disabledSensorFields
+          hiddenHarvestDashboardItems
+          harvestDashboardOrder
+        }
         allowedDomains
         greenhouses {
           name
@@ -34,9 +36,9 @@ export const ME_QUERY = gql`
       }
       isActive
       status
-      preferredLanguage
-      farmOverviewTimeRange
       userSettings {
+        preferredLanguage
+        farmOverviewTimeRange
         harvestView {
           sort {
             field

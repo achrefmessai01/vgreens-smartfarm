@@ -131,7 +131,8 @@ const DEFAULT_RANGE: TimeRangeValue = {
  */
 export function useFarmOverviewTimeRange() {
   const { data, loading } = useMeQuery({ fetchPolicy: 'cache-first' });
-  const persistedValue = data?.me?.farmOverviewTimeRange ?? null;
+  const userSettings = data?.me?.userSettings ?? null;
+  const persistedValue = userSettings?.farmOverviewTimeRange ?? null;
   const userId = data?.me?.id ?? null;
 
   const value = React.useMemo<TimeRangeValue>(
@@ -147,12 +148,19 @@ export function useFarmOverviewTimeRange() {
       if (!userId) return;
       void mutate({
         variables: { value: serialized },
+        // The mutation selects the full userSettings blob, so the optimistic
+        // object carries the untouched sibling keys from the cached `me`.
         optimisticResponse: {
           __typename: 'Mutation',
           setMyFarmOverviewTimeRange: {
             __typename: 'User',
             id: userId,
-            farmOverviewTimeRange: serialized,
+            userSettings: {
+              __typename: 'UserSettings',
+              preferredLanguage: userSettings?.preferredLanguage ?? null,
+              farmOverviewTimeRange: serialized,
+              harvestView: userSettings?.harvestView ?? null,
+            },
           },
         },
         update: (cache, result) => {
@@ -161,7 +169,7 @@ export function useFarmOverviewTimeRange() {
           cache.modify({
             id: cache.identify({ __typename: 'User', id: updated.id }),
             fields: {
-              farmOverviewTimeRange: () => updated.farmOverviewTimeRange,
+              userSettings: () => updated.userSettings,
             },
           });
         },
@@ -169,7 +177,7 @@ export function useFarmOverviewTimeRange() {
         console.warn('[farm-overview] setMyFarmOverviewTimeRange failed', err);
       });
     },
-    [mutate, userId],
+    [mutate, userId, userSettings],
   );
 
   return { value, setValue, loading };

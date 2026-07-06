@@ -24,10 +24,11 @@ import {
 export function useHarvestViewSettings() {
   const { data, loading } = useMeQuery({ fetchPolicy: 'cache-first' });
   const userId = data?.me?.id ?? null;
+  const userSettings = data?.me?.userSettings ?? null;
 
   const persistedValue = React.useMemo<HarvestViewState>(
-    () => parseHarvestView(data?.me?.userSettings?.harvestView),
-    [data?.me?.userSettings?.harvestView],
+    () => parseHarvestView(userSettings?.harvestView),
+    [userSettings?.harvestView],
   );
 
   const [mutate] = useUpdateMyHarvestViewSettingsMutation();
@@ -38,6 +39,8 @@ export function useHarvestViewSettings() {
       const input = toSettingsInput(state);
       void mutate({
         variables: { input },
+        // Full-blob selection: carry the untouched scalar keys through the
+        // optimistic write from the cached `me`.
         optimisticResponse: {
           __typename: 'Mutation',
           updateMyHarvestViewSettings: {
@@ -45,6 +48,8 @@ export function useHarvestViewSettings() {
             id: userId,
             userSettings: {
               __typename: 'UserSettings',
+              preferredLanguage: userSettings?.preferredLanguage ?? null,
+              farmOverviewTimeRange: userSettings?.farmOverviewTimeRange ?? null,
               harvestView: {
                 __typename: 'HarvestViewSettings',
                 sort: {
@@ -72,7 +77,7 @@ export function useHarvestViewSettings() {
         console.warn('[harvest-view] updateMyHarvestViewSettings failed', err);
       });
     },
-    [mutate, userId],
+    [mutate, userId, userSettings],
   );
 
   return { persistedValue, persist, loading };

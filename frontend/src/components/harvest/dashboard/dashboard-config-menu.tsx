@@ -63,8 +63,7 @@ export function DashboardConfigMenu({
             cache.modify({
               id: cache.identify({ __typename: 'Tenant', id: updated.id }),
               fields: {
-                hiddenHarvestDashboardItems: () =>
-                  updated.hiddenHarvestDashboardItems,
+                settings: () => updated.settings,
               },
             });
           },

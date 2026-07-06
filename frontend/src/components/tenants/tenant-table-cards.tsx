@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { WriteActionButton } from '@/components/ui/write-action-button';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Tenant } from '@/generated/graphql';
+import type { TenantData } from '@/lib/graphql-compat';
 import { Edit2, Settings, Trash2, Users } from 'lucide-react';
 
 /**
@@ -10,10 +10,10 @@ import { Edit2, Settings, Trash2, Users } from 'lucide-react';
  */
 
 interface TenantCardProps {
-  onEdit: (tenant: Tenant) => void;
-  onDelete: (tenant: Tenant) => void;
-  onViewUsers?: (tenant: Tenant) => void;
-  onManageFeatures?: (tenant: Tenant) => void;
+  onEdit: (tenant: TenantData) => void;
+  onDelete: (tenant: TenantData) => void;
+  onViewUsers?: (tenant: TenantData) => void;
+  onManageFeatures?: (tenant: TenantData) => void;
   translations: {
     active: string;
     inactive: string;
@@ -32,7 +32,7 @@ export const useTenantCard = ({
   onManageFeatures,
   translations,
 }: TenantCardProps) => {
-  const renderCard = (tenant: Tenant) => (
+  const renderCard = (tenant: TenantData) => (
     <Card className="gap-2 overflow-hidden border py-2 shadow-none">
       {/* Custom-Header implementation - using card-header breaks ux */}
       <div className="flex flex-row items-center justify-between border-b px-6 pb-2">

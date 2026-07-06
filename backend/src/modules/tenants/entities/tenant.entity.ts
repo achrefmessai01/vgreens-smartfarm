@@ -4,6 +4,7 @@ import { TenantFeature } from '@modules/features/entities/tenant-feature.entity'
 import { User } from '@modules/users/entities/user.entity';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Column, Entity, OneToMany } from 'typeorm';
+import { TenantSettings } from './tenant-settings';
 
 @ObjectType()
 export class TenantGreenhouse {
@@ -80,11 +81,33 @@ export class Tenant extends BaseEntity {
   // TenantsResolver backed by the dedicated `greenhouses` table (the single
   // source of truth). The TenantGreenhouse ObjectType above is the exposed shape.
 
-  @Field(() => [String], { defaultValue: [] })
+  /**
+   * Consolidated settings blob (VSL-279) — canonical home of the three arrays
+   * below. Exposed to GraphQL via the `settings` resolve field on
+   * TenantsResolver (composeTenantSettings), which normalizes missing keys to
+   * `[]`, so there is deliberately no @Field here. `Partial` because a fresh
+   * row defaults to `{}` until a service write composes the full object.
+   */
+  @Column({ type: 'jsonb', default: () => "'{}'" })
+  settings: Partial<TenantSettings>;
+
+  // The three columns below are the deprecated flat homes of the settings
+  // blob. Expand phase: services dual-write them alongside `settings` so a
+  // migration rollback stays lossless; a later contract migration drops them
+  // together with these GraphQL fields.
+
+  @Field(() => [String], {
+    defaultValue: [],
+    deprecationReason: 'Moved into Tenant.settings.disabledSensorFields.',
+  })
   @Column({ type: 'jsonb', default: () => "'[]'" })
   disabledSensorFields: string[];
 
-  @Field(() => [String], { defaultValue: [] })
+  @Field(() => [String], {
+    defaultValue: [],
+    deprecationReason:
+      'Moved into Tenant.settings.hiddenHarvestDashboardItems.',
+  })
   @Column({ type: 'jsonb', default: () => "'[]'" })
   hiddenHarvestDashboardItems: string[];
 
@@ -94,7 +117,10 @@ export class Tenant extends BaseEntity {
   // to the end in registry order, so newly added items surface without a
   // migration. Reordering is scoped per grid on the client; both grids share
   // this single list and each filters to its own ids.
-  @Field(() => [String], { defaultValue: [] })
+  @Field(() => [String], {
+    defaultValue: [],
+    deprecationReason: 'Moved into Tenant.settings.harvestDashboardOrder.',
+  })
   @Column({ type: 'jsonb', default: () => "'[]'" })
   harvestDashboardOrder: string[];
 
