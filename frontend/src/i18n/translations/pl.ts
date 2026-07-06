@@ -714,6 +714,7 @@ export const pl = {
       average: 'Średnia',
       averageByClass: 'Śr. {class}',
       todaysHarvest: 'Dzisiejszy zbiór',
+      reorderEntry: 'Przeciągnij, aby zmienić kolejność wpisu',
       yieldData: 'Dane plonu',
       qualityMetrics: 'Wskaźniki jakości',
       enterMarketableYield: 'Wprowadź plon handlowy',

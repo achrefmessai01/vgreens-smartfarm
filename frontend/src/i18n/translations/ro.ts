@@ -719,6 +719,7 @@ export const ro = {
       average: 'Medie',
       averageByClass: 'Medie {class}',
       todaysHarvest: 'Recolta de astăzi',
+      reorderEntry: 'Trage pentru a reordona intrarea',
       yieldData: 'Date producție',
       qualityMetrics: 'Indicatori de calitate',
       enterMarketableYield: 'Introdu producția comercializabilă',

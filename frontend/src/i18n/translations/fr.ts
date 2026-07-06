@@ -705,6 +705,7 @@ export const fr = {
       average: 'Moyenne',
       averageByClass: 'Moy. {class}',
       todaysHarvest: "Récolte d'aujourd'hui",
+      reorderEntry: "Glisser pour réorganiser l'entrée",
       yieldData: 'Données de rendement',
       qualityMetrics: 'Indicateurs de qualité',
       enterMarketableYield: 'Saisir le rendement commercialisable',

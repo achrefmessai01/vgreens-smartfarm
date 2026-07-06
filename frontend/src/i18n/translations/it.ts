@@ -719,6 +719,7 @@ export const it = {
       average: 'Media',
       averageByClass: 'Media {class}',
       todaysHarvest: 'Raccolto di oggi',
+      reorderEntry: 'Trascina per riordinare la voce',
       yieldData: 'Dati di resa',
       qualityMetrics: 'Metriche di qualità',
       enterMarketableYield: 'Inserisci la resa commerciabile',

@@ -707,6 +707,7 @@ export const de = {
       average: 'Durchschnitt',
       averageByClass: 'Ø {class}',
       todaysHarvest: 'Heutige Ernte',
+      reorderEntry: 'Ziehen, um den Eintrag neu anzuordnen',
       yieldData: 'Ertragsdaten',
       qualityMetrics: 'Qualitätskennzahlen',
       enterMarketableYield: 'Vermarktbaren Ertrag eingeben',
