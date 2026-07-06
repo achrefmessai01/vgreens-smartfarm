@@ -6,6 +6,7 @@ export const SENSOR_CONFIGS_QUERY = gql`
       id
       tenantId
       device
+      profile
       xPosition
       yPosition
       greenhouseId
@@ -20,7 +21,10 @@ export const SENSOR_CONFIGS_QUERY = gql`
 
 export const SENSOR_DEVICES_QUERY = gql`
   query SensorDevices($tenantId: ID) {
-    sensorDevices(tenantId: $tenantId)
+    sensorDevices(tenantId: $tenantId) {
+      device
+      profile
+    }
   }
 `;
 

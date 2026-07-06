@@ -16,6 +16,13 @@ export class UpsertSensorConfigInput {
   @IsNotEmpty()
   device: string;
 
+  // Usually omitted by clients — the resolver fills it from the device's
+  // InfluxDB `profile` tag when neither input nor the stored row has one.
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  profile?: string;
+
   @Field(() => Float, { nullable: true })
   @IsNumber()
   @IsOptional()

@@ -1137,6 +1137,68 @@ schema.tagValues(bucket: "${escaped}", tag: "${tag}")`;
   }
 
   /**
+   * Maps each device in the bucket to the device profile it reports via the
+   * `profile` tag. Looks back 30 days (the same window `schema.tagValues`
+   * defaults to, and the buckets' retention). When a device has written
+   * points under more than one profile in the window, the most recent point
+   * wins. Devices without profile-tagged points are absent from the map.
+   * Returns an empty map on error so callers degrade gracefully.
+   */
+  async getDeviceProfiles(
+    bucketName: string,
+    options?: { device?: string },
+  ): Promise<Map<string, string>> {
+    if (!this.client || !this.queryApi) {
+      this.logger.warn('InfluxDB client not initialized');
+      return new Map();
+    }
+
+    const escape = (v: string) => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const deviceClause = options?.device
+      ? `\n  |> filter(fn: (r) => r["device"] == "${escape(options.device)}")`
+      : '';
+    const flux = `from(bucket: "${escape(bucketName)}")
+  |> range(start: -30d)
+  |> filter(fn: (r) => exists r["device"] and exists r["profile"])${deviceClause}
+  |> group(columns: ["device", "profile"])
+  |> last()
+  |> keep(columns: ["device", "profile", "_time"])`;
+
+    const result = new Map<string, string>();
+    try {
+      const rows = await this.runQueryRows(flux);
+      const timeOf = (row: Record<string, unknown>): number => {
+        const ms =
+          row._time instanceof Date
+            ? row._time.getTime()
+            : new Date(
+                String((row as { _time?: string })._time ?? ''),
+              ).getTime();
+        return Number.isNaN(ms) ? 0 : ms;
+      };
+      // Ascending by time, then overwrite — the newest profile per device wins.
+      rows.sort((a, b) => timeOf(a) - timeOf(b));
+      for (const row of rows) {
+        const device = typeof row.device === 'string' ? row.device : '';
+        const profile = typeof row.profile === 'string' ? row.profile : '';
+        if (device && profile) result.set(device, profile);
+      }
+    } catch (error) {
+      this.logger.warn(
+        `getDeviceProfiles failed for bucket "${bucketName}": ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      return new Map();
+    }
+
+    this.logger.debug(
+      `getDeviceProfiles("${bucketName}"): ${result.size} devices with profiles`,
+    );
+    return result;
+  }
+
+  /**
    * Builds a Flux `range(...)` clause. `start` may be a relative duration
    * (e.g. `-7d`) or an absolute ISO timestamp; `stop` is an optional absolute
    * ISO timestamp. ISO values are wrapped in `time(v: ...)`.
