@@ -160,12 +160,12 @@ export function canAccessCameraLivestream(params: {
 }): boolean {
   const { user, hasTenantFeature, hasTenantConfig } = params;
 
-  if (!user?.tenantId) {
-    return false;
-  }
-
   if (user.role === UserRole.VGREENS_ADMIN) {
     return hasTenantFeature || hasTenantConfig;
+  }
+
+  if (!user?.tenantId) {
+    return false;
   }
 
   // Camera livestream is a tenant-specific capability. It should only be enabled for tenants explicitly configured for this feature.

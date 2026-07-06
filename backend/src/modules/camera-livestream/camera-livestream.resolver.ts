@@ -21,8 +21,9 @@ export class CameraLivestreamResolver {
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN, UserRole.TENANT_USER)
   cameraLivestreamFeeds(
     @CurrentUser() currentUser: User,
+    @Args('tenantId', { nullable: true, type: () => String }) tenantId?: string,
   ): Promise<CameraLivestreamFeed[]> {
-    return this.cameraLivestreamService.listCameras(currentUser);
+    return this.cameraLivestreamService.listCameras(currentUser, tenantId);
   }
 
   @Query(() => CameraLivestreamStream, {
@@ -32,7 +33,8 @@ export class CameraLivestreamResolver {
   cameraLivestreamStreamUrl(
     @CurrentUser() currentUser: User,
     @Args('cameraId') cameraId: string,
+    @Args('tenantId', { nullable: true, type: () => String }) tenantId?: string,
   ): Promise<CameraLivestreamStream> {
-    return this.cameraLivestreamService.createStream(currentUser, cameraId);
+    return this.cameraLivestreamService.createStream(currentUser, cameraId, tenantId);
   }
 }
