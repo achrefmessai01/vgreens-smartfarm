@@ -254,8 +254,12 @@ export class SensorConfigResolver {
     @Args('tenantId', { type: () => ID, nullable: true }) tenantId?: string,
   ): Promise<SensorConfig> {
     const targetTenantId = this.resolveTargetTenantId(currentUser, tenantId);
-    await this.validatePositionRange(targetTenantId, input);
-    await this.resolveDeviceProfile(targetTenantId, input);
+    const existing = await this.sensorConfigService.findOneByDevice(
+      targetTenantId,
+      input.device,
+    );
+    await this.validatePositionRange(targetTenantId, input, existing);
+    await this.resolveDeviceProfile(targetTenantId, input, existing);
     return this.sensorConfigService.upsert(input, targetTenantId);
   }
 
@@ -267,13 +271,9 @@ export class SensorConfigResolver {
   private async resolveDeviceProfile(
     tenantId: string,
     input: UpsertSensorConfigInput,
+    existing: SensorConfig | null,
   ): Promise<void> {
-    if (input.profile != null) return;
-    const existing = await this.sensorConfigService.findOneByDevice(
-      tenantId,
-      input.device,
-    );
-    if (existing?.profile) return;
+    if (input.profile != null || existing?.profile) return;
     const tenant = await this.tenantsService.findOne(tenantId);
     if (!tenant?.influxBucketName) return;
     const profiles = await this.influxDBService.getDeviceProfiles(
@@ -311,14 +311,11 @@ export class SensorConfigResolver {
   private async validatePositionRange(
     tenantId: string,
     input: UpsertSensorConfigInput,
+    existingConfig: SensorConfig | null,
   ): Promise<void> {
     const hasPositionInput = input.xPosition != null || input.yPosition != null;
     if (!hasPositionInput) return;
 
-    const existingConfig = await this.sensorConfigService.findOneByDevice(
-      tenantId,
-      input.device,
-    );
     const greenhouseId = input.greenhouseId ?? existingConfig?.greenhouseId;
     if (!greenhouseId) return;
 

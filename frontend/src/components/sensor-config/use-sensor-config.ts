@@ -6,7 +6,7 @@ import {
   useSensorConfigsQuery,
   useSensorDevicesQuery,
   useUpsertSensorConfigMutation,
-  type SensorConfig,
+  type SensorConfigsQuery,
 } from '@/generated/graphql';
 import {
   computeDefaultSensorPositions,
@@ -15,6 +15,9 @@ import {
 import { useTenantBucketName } from '@/lib/hooks/use-tenant-bucket';
 import { useTenantGreenhouseLayouts } from '@/lib/hooks/use-tenant-greenhouse-layouts';
 import * as React from 'react';
+
+/** The shape SensorConfigsQuery actually selects (not the full entity type). */
+export type SensorConfig = SensorConfigsQuery['sensorConfigs'][number];
 
 export interface SensorRow {
   device: string;
@@ -87,20 +90,18 @@ export function useSensorConfig(tenantId: string) {
     () => configsData?.sensorConfigs ?? [],
     [configsData?.sensorConfigs],
   );
-  const devices = React.useMemo(
-    () => (devicesData?.sensorDevices ?? []).map((d) => d.device),
-    [devicesData?.sensorDevices],
-  );
-  // Profile per device as reported by InfluxDB's `profile` tag.
-  const deviceProfiles = React.useMemo(
-    () =>
-      new Map(
-        (devicesData?.sensorDevices ?? [])
-          .filter((d) => d.profile)
-          .map((d) => [d.device, d.profile as string]),
-      ),
-    [devicesData?.sensorDevices],
-  );
+  // Device names plus each device's `profile` tag as reported by InfluxDB.
+  const { devices, deviceProfiles } = React.useMemo(() => {
+    const sensorDevices = devicesData?.sensorDevices ?? [];
+    const profiles = new Map<string, string>();
+    for (const { device, profile } of sensorDevices) {
+      if (profile) profiles.set(device, profile);
+    }
+    return {
+      devices: sensorDevices.map((d) => d.device),
+      deviceProfiles: profiles,
+    };
+  }, [devicesData?.sensorDevices]);
 
   // Default positions: distribute devices across each greenhouse's bays.
   // The "greenhouse" key is taken from the override if set, otherwise from
@@ -124,15 +125,23 @@ export function useSensorConfig(tenantId: string) {
       .sort((a, b) =>
         a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
       )
-      .map((device) => ({
-        device,
-        profile:
-          configMap.get(device)?.profile ?? deviceProfiles.get(device) ?? null,
-        config: configMap.get(device) ?? null,
-        defaultPosition: defaultPositions.get(device) ?? null,
-        defaultGreenhouse: deviceInfluxGreenhouse.get(device) ?? null,
-      }));
-  }, [configs, devices, defaultPositions, deviceInfluxGreenhouse, deviceProfiles]);
+      .map((device) => {
+        const config = configMap.get(device) ?? null;
+        return {
+          device,
+          profile: config?.profile ?? deviceProfiles.get(device) ?? null,
+          config,
+          defaultPosition: defaultPositions.get(device) ?? null,
+          defaultGreenhouse: deviceInfluxGreenhouse.get(device) ?? null,
+        };
+      });
+  }, [
+    configs,
+    devices,
+    defaultPositions,
+    deviceInfluxGreenhouse,
+    deviceProfiles,
+  ]);
 
   const handleSave = React.useCallback(
     async (input: {

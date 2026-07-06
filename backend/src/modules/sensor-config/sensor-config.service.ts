@@ -78,14 +78,15 @@ export class SensorConfigService {
   ): Promise<number> {
     if (profiles.size === 0) return 0;
     const configs = await this.repo.find({ where: { tenantId } });
-    const changed = configs.filter((config) => {
+    const changed: SensorConfig[] = [];
+    for (const config of configs) {
       const profile = profiles.get(config.device);
-      return profile != null && profile !== config.profile;
-    });
-    if (changed.length === 0) return 0;
-    for (const config of changed) {
-      config.profile = profiles.get(config.device);
+      if (profile != null && profile !== config.profile) {
+        config.profile = profile;
+        changed.push(config);
+      }
     }
+    if (changed.length === 0) return 0;
     await this.repo.save(changed);
     this.logger.log(
       `Synced ${changed.length} sensor profile(s) from InfluxDB for tenant ${tenantId}`,

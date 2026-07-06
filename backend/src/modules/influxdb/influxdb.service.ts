@@ -1164,24 +1164,24 @@ schema.tagValues(bucket: "${escaped}", tag: "${tag}")`;
   |> last()
   |> keep(columns: ["device", "profile", "_time"])`;
 
-    const latestByDevice = new Map<string, { profile: string; time: number }>();
+    const result = new Map<string, string>();
     try {
       const rows = await this.runQueryRows(flux);
-      for (const row of rows) {
-        const device = typeof row.device === 'string' ? row.device : '';
-        const profile = typeof row.profile === 'string' ? row.profile : '';
-        if (!device || !profile) continue;
-        const timeMs =
+      const timeOf = (row: Record<string, unknown>): number => {
+        const ms =
           row._time instanceof Date
             ? row._time.getTime()
             : new Date(
                 String((row as { _time?: string })._time ?? ''),
               ).getTime();
-        const time = Number.isNaN(timeMs) ? 0 : timeMs;
-        const existing = latestByDevice.get(device);
-        if (!existing || time > existing.time) {
-          latestByDevice.set(device, { profile, time });
-        }
+        return Number.isNaN(ms) ? 0 : ms;
+      };
+      // Ascending by time, then overwrite — the newest profile per device wins.
+      rows.sort((a, b) => timeOf(a) - timeOf(b));
+      for (const row of rows) {
+        const device = typeof row.device === 'string' ? row.device : '';
+        const profile = typeof row.profile === 'string' ? row.profile : '';
+        if (device && profile) result.set(device, profile);
       }
     } catch (error) {
       this.logger.warn(
@@ -1192,10 +1192,6 @@ schema.tagValues(bucket: "${escaped}", tag: "${tag}")`;
       return new Map();
     }
 
-    const result = new Map<string, string>();
-    for (const [device, { profile }] of latestByDevice) {
-      result.set(device, profile);
-    }
     this.logger.debug(
       `getDeviceProfiles("${bucketName}"): ${result.size} devices with profiles`,
     );
