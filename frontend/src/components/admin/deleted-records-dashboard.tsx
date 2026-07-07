@@ -4,18 +4,12 @@ import * as React from 'react';
 import { RotateCcw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DataTable, type Column } from '@/components/ui/data-table/data-table';
+import { TableCell } from '@/components/ui/table';
 import { useAdminHistory } from '@/lib/hooks/use-admin-history';
 import { useI18n } from '@/i18n';
+import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
 
 function formatDate(value?: string | Date | null): string {
   if (!value) return '—';
@@ -36,20 +30,6 @@ function deletedByLabel(
   return name || deletedBy.email || '—';
 }
 
-function TableSkeleton({ cols }: { cols: number }) {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <TableRow key={i}>
-          {Array.from({ length: cols }).map((__, j) => (
-            <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
-          ))}
-        </TableRow>
-      ))}
-    </>
-  );
-}
-
 export function DeletedRecordsDashboard() {
   const {
     tenantId,
@@ -65,6 +45,25 @@ export function DeletedRecordsDashboard() {
 
   const { t } = useI18n();
   const h = t.pages.admin.history;
+  const paginationConfig = usePaginationConfig();
+
+  const batchColumns: Column<any>[] = [
+    { key: 'batch',       header: h.colBatch },
+    { key: 'greenhouse',  header: h.colGreenhouse },
+    { key: 'cropVariety', header: h.colCropVariety },
+    { key: 'deletedAt',   header: h.colDeletedAt },
+    { key: 'deletedBy',   header: h.colDeletedBy },
+    { key: 'action',      header: h.colAction, headerClassName: 'text-right' },
+  ];
+
+  const harvestColumns: Column<any>[] = [
+    { key: 'harvestDate',    header: h.colHarvestDate },
+    { key: 'batch',          header: h.colBatch },
+    { key: 'greenhouseCrop', header: h.colGreenhouseCrop },
+    { key: 'deletedAt',      header: h.colDeletedAt },
+    { key: 'deletedBy',      header: h.colDeletedBy },
+    { key: 'action',         header: h.colAction, headerClassName: 'text-right' },
+  ];
 
   if (!tenantId) {
     return (
@@ -94,122 +93,98 @@ export function DeletedRecordsDashboard() {
 
       <TabsContent value="batches" className="space-y-3">
         <p className="text-muted-foreground text-sm">{h.batchesNote}</p>
-        <div className="rounded-xl border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{h.colBatch}</TableHead>
-                <TableHead>{h.colGreenhouse}</TableHead>
-                <TableHead>{h.colCropVariety}</TableHead>
-                <TableHead>{h.colDeletedAt}</TableHead>
-                <TableHead>{h.colDeletedBy}</TableHead>
-                <TableHead className="text-right">{h.colAction}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {batchesLoading ? (
-                <TableSkeleton cols={6} />
-              ) : deletedBatches.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-muted-foreground py-10 text-center text-sm">
-                    {h.noBatches}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                deletedBatches.map((batch: any) => (
-                  <TableRow key={batch.id}>
-                    <TableCell className="font-medium">
-                      <div>{batch.name ?? '—'}</div>
-                      {batch.batchNumber && (
-                        <div className="text-muted-foreground font-mono text-xs">{batch.batchNumber}</div>
-                      )}
-                    </TableCell>
-                    <TableCell>{batch.greenhouse?.name ?? '—'}</TableCell>
-                    <TableCell>
-                      <div>{batch.crop?.name ?? '—'}</div>
-                      {batch.variety?.name && (
-                        <div className="text-muted-foreground text-xs">{batch.variety.name}</div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm">{formatDate(batch.deletedAt)}</TableCell>
-                    <TableCell className="text-sm">{deletedByLabel(batch.deletedBy)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => restoreBatch(batch.id)}
-                        disabled={restoringBatch}
-                      >
-                        <RotateCcw className="mr-1 h-3 w-3" />
-                        {h.restore}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <DataTable
+          data={deletedBatches}
+          columns={batchColumns}
+          isLoading={batchesLoading}
+          searchConfig={{
+            placeholder: h.colBatch,
+            onSearch: (query, batch) =>
+              (batch.name ?? '').toLowerCase().includes(query.toLowerCase()),
+          }}
+          emptyState={{ title: h.noBatches }}
+          defaultPageSize={paginationConfig.defaultPageSize}
+          pageSizeOptions={paginationConfig.pageSizeOptions}
+          paginationLabels={paginationConfig.paginationLabels}
+          renderRow={(batch) => (
+            <>
+              <TableCell className="font-medium">
+                <div>{batch.name ?? '—'}</div>
+                {batch.batchNumber && (
+                  <div className="text-muted-foreground font-mono text-xs">{batch.batchNumber}</div>
+                )}
+              </TableCell>
+              <TableCell>{batch.greenhouse?.name ?? '—'}</TableCell>
+              <TableCell>
+                <div>{batch.crop?.name ?? '—'}</div>
+                {batch.variety?.name && (
+                  <div className="text-muted-foreground text-xs">{batch.variety.name}</div>
+                )}
+              </TableCell>
+              <TableCell className="text-sm">{formatDate(batch.deletedAt)}</TableCell>
+              <TableCell className="text-sm">{deletedByLabel(batch.deletedBy)}</TableCell>
+              <TableCell className="text-right">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => restoreBatch(batch.id)}
+                  disabled={restoringBatch}
+                >
+                  <RotateCcw className="mr-1 h-3 w-3" />
+                  {h.restore}
+                </Button>
+              </TableCell>
+            </>
+          )}
+        />
       </TabsContent>
 
       <TabsContent value="harvests" className="space-y-3">
         <p className="text-muted-foreground text-sm">{h.harvestsNote}</p>
-        <div className="rounded-xl border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{h.colHarvestDate}</TableHead>
-                <TableHead>{h.colBatch}</TableHead>
-                <TableHead>{h.colGreenhouseCrop}</TableHead>
-                <TableHead>{h.colDeletedAt}</TableHead>
-                <TableHead>{h.colDeletedBy}</TableHead>
-                <TableHead className="text-right">{h.colAction}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {harvestsLoading ? (
-                <TableSkeleton cols={6} />
-              ) : deletedHarvests.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-muted-foreground py-10 text-center text-sm">
-                    {h.noHarvests}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                deletedHarvests.map((harvest: any) => (
-                  <TableRow key={harvest.id}>
-                    <TableCell className="font-medium">{formatDate(harvest.date)}</TableCell>
-                    <TableCell>
-                      <div>{harvest.batch?.name ?? '—'}</div>
-                      {harvest.batch?.batchNumber && (
-                        <div className="text-muted-foreground font-mono text-xs">{harvest.batch.batchNumber}</div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div>{harvest.batch?.greenhouse?.name ?? '—'}</div>
-                      {harvest.batch?.crop?.name && (
-                        <div className="text-muted-foreground text-xs">{harvest.batch.crop.name}</div>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm">{formatDate(harvest.deletedAt)}</TableCell>
-                    <TableCell className="text-sm">{deletedByLabel(harvest.deletedBy)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => restoreHarvest(harvest.id)}
-                        disabled={restoringHarvest}
-                      >
-                        <RotateCcw className="mr-1 h-3 w-3" />
-                        {h.restore}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <DataTable
+          data={deletedHarvests}
+          columns={harvestColumns}
+          isLoading={harvestsLoading}
+          searchConfig={{
+            placeholder: h.colBatch,
+            onSearch: (query, harvest) =>
+              (harvest.batch?.name ?? '').toLowerCase().includes(query.toLowerCase()),
+          }}
+          emptyState={{ title: h.noHarvests }}
+          defaultPageSize={paginationConfig.defaultPageSize}
+          pageSizeOptions={paginationConfig.pageSizeOptions}
+          paginationLabels={paginationConfig.paginationLabels}
+          renderRow={(harvest) => (
+            <>
+              <TableCell className="font-medium">{formatDate(harvest.date)}</TableCell>
+              <TableCell>
+                <div>{harvest.batch?.name ?? '—'}</div>
+                {harvest.batch?.batchNumber && (
+                  <div className="text-muted-foreground font-mono text-xs">{harvest.batch.batchNumber}</div>
+                )}
+              </TableCell>
+              <TableCell>
+                <div>{harvest.batch?.greenhouse?.name ?? '—'}</div>
+                {harvest.batch?.crop?.name && (
+                  <div className="text-muted-foreground text-xs">{harvest.batch.crop.name}</div>
+                )}
+              </TableCell>
+              <TableCell className="text-sm">{formatDate(harvest.deletedAt)}</TableCell>
+              <TableCell className="text-sm">{deletedByLabel(harvest.deletedBy)}</TableCell>
+              <TableCell className="text-right">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => restoreHarvest(harvest.id)}
+                  disabled={restoringHarvest}
+                >
+                  <RotateCcw className="mr-1 h-3 w-3" />
+                  {h.restore}
+                </Button>
+              </TableCell>
+            </>
+          )}
+        />
       </TabsContent>
     </Tabs>
   );
