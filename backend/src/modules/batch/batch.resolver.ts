@@ -122,4 +122,31 @@ export class BatchResolver {
     );
     return true;
   }
+
+  @Query(() => [Batch], { name: 'deletedBatches' })
+  @Roles(UserRole.VGREENS_ADMIN)
+  async deletedBatches(
+    @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
+  ): Promise<Batch[]> {
+    return this.batchService.findDeletedBatches(
+      resolveTenantId(currentUser, tenantId),
+    );
+  }
+
+  @Mutation(() => Batch, { name: 'restoreBatch' })
+  @Roles(UserRole.VGREENS_ADMIN)
+  async restoreBatch(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
+  ): Promise<Batch> {
+    return this.batchService.restoreBatch(
+      id,
+      resolveTenantId(currentUser, tenantId),
+    );
+  }
+
 }

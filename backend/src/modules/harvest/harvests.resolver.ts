@@ -212,6 +212,32 @@ export class HarvestsResolver {
     return true;
   }
 
+  @Query(() => [Harvest], { name: 'deletedHarvests' })
+  @Roles(UserRole.VGREENS_ADMIN)
+  async deletedHarvests(
+    @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
+  ): Promise<Harvest[]> {
+    return this.harvestsService.findDeletedHarvests(
+      resolveTenantId(currentUser, tenantId),
+    );
+  }
+
+  @Mutation(() => Harvest, { name: 'restoreHarvest' })
+  @Roles(UserRole.VGREENS_ADMIN)
+  async restoreHarvest(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() currentUser: User,
+    @Args('tenantId', { type: () => ID, nullable: true })
+    tenantId?: string | null,
+  ): Promise<Harvest> {
+    return this.harvestsService.restoreHarvest(
+      id,
+      resolveTenantId(currentUser, tenantId),
+    );
+  }
+
   @Mutation(() => ImportReportType, { name: 'importHarvest' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
   async importHarvest(

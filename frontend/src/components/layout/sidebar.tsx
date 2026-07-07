@@ -17,6 +17,7 @@ import {
   Flag,
   Menu,
   Settings,
+  Trash2,
   Users,
   Zap,
 } from 'lucide-react';
@@ -140,6 +141,11 @@ export function Sidebar({
       label: t.navigation.systemErrors,
       href: '/admin/system-errors',
       icon: Zap,
+    },
+    {
+      label: t.navigation.adminHistory ?? 'History',
+      href: '/admin/history',
+      icon: Trash2,
     },
     {
       label: t.navigation.settings,

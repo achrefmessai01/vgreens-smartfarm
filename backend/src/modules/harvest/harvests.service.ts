@@ -6,7 +6,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DeepPartial, DataSource } from 'typeorm';
+import { IsNull, Not, Repository, DeepPartial, DataSource } from 'typeorm';
 import { Harvest } from './entities/harvest.entity';
 import { HarvestEntry } from './entities/harvest-entry.entity';
 import { BrixReading } from './entities/brix-reading';
@@ -777,5 +777,43 @@ export class HarvestsService {
         'Failed to fetch dashboard metrics',
       );
     }
+  }
+
+  // Only returns harvests deleted standalone — batch-cascade deletes are restored via restoreBatch.
+  async findDeletedHarvests(tenantId?: string): Promise<Harvest[]> {
+    const qb = this.harvestRepository
+      .createQueryBuilder('harvest')
+      .withDeleted()
+      .leftJoinAndSelect('harvest.batch', 'batch')
+      .leftJoinAndSelect('batch.greenhouse', 'greenhouse')
+      .leftJoinAndSelect('batch.crop', 'crop')
+      .leftJoinAndSelect('harvest.tenant', 'tenant')
+      .leftJoinAndSelect('harvest.deletedBy', 'deletedBy')
+      .where('harvest.deletedAt IS NOT NULL')
+      .andWhere('batch.deletedAt IS NULL');
+
+    if (tenantId !== undefined) {
+      qb.andWhere('harvest.tenantId = :tenantId', { tenantId });
+    }
+
+    return qb.orderBy('harvest.deletedAt', 'DESC').getMany();
+  }
+
+  async restoreHarvest(id: string, tenantId?: string): Promise<Harvest> {
+    const qb = this.harvestRepository
+      .createQueryBuilder('harvest')
+      .withDeleted()
+      .where('harvest.id = :id', { id })
+      .andWhere('harvest.deletedAt IS NOT NULL');
+    if (tenantId !== undefined) {
+      qb.andWhere('harvest.tenantId = :tenantId', { tenantId });
+    }
+    const harvest = await qb.getOne();
+    if (!harvest) {
+      throw new NotFoundException(`Deleted harvest with ID ${id} not found`);
+    }
+
+    await this.harvestRepository.restore(id);
+    return this.findOneById(id, tenantId);
   }
 }
