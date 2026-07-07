@@ -1120,6 +1120,9 @@ export const ar = {
         inactive: 'غير نشط',
         notAvailable: 'غير متاح',
         loading: 'جارٍ تحميل المستأجرين...',
+        searchPlaceholder: 'ابحث عن المستأجرين...',
+        noTenants: 'لم يتم العثور على مستأجرين',
+        noTenantsDescription: 'ابدأ بإنشاء مستأجر جديد',
         allowedDomains: 'نطاقات البريد الإلكتروني المسموح بها',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

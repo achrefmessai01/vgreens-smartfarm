@@ -1141,6 +1141,9 @@ export const pt = {
         inactive: 'Inativo',
         notAvailable: 'N/D',
         loading: 'A carregar inquilinos...',
+        searchPlaceholder: 'Buscar inquilinos...',
+        noTenants: 'Nenhum inquilino encontrado',
+        noTenantsDescription: 'Comece criando um novo inquilino',
         allowedDomains: 'Domínios de e-mail permitidos',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

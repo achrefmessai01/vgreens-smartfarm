@@ -1136,6 +1136,9 @@ export const pl = {
         inactive: 'Nieaktywny',
         notAvailable: 'Brak',
         loading: 'Ładowanie najemców...',
+        searchPlaceholder: 'Szukaj najemców...',
+        noTenants: 'Nie znaleziono najemców',
+        noTenantsDescription: 'Zacznij od utworzenia nowego najemcy',
         allowedDomains: 'Dozwolone domeny e-mail',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

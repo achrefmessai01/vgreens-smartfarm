@@ -1125,6 +1125,9 @@ export const fr = {
         inactive: 'Inactif',
         notAvailable: 'N/D',
         loading: 'Chargement…',
+        searchPlaceholder: 'Rechercher des locataires...',
+        noTenants: 'Aucun locataire trouvé',
+        noTenantsDescription: 'Commencez par créer un nouveau locataire',
         allowedDomains: 'Domaines e-mail autorisés',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

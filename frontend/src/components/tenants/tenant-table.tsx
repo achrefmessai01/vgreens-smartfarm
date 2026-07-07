@@ -6,6 +6,7 @@ import type { TenantData } from '@/lib/graphql-compat';
 import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
+import { useTenantTableFilters } from '@/lib/hooks/use-tenant-table-filters';
 import { Plus } from 'lucide-react';
 import { useTenantRow } from './tenant-table-rows';
 
@@ -19,6 +20,12 @@ interface TenantTableProps {
   onRowClick?: (tenant: TenantData) => void;
 }
 
+/**
+ * Tenant Management table shell. Structural mirror of `UserManagementTable`:
+ * search + status filter state lives in `useTenantTableFilters` and this
+ * component stays presentational — columns, row/card renderers, and the
+ * `DataTable` toolbar wiring only.
+ */
 export function TenantTable({
   tenants,
   onEdit,
@@ -31,8 +38,9 @@ export function TenantTable({
   const { t } = useI18n();
   const paginationConfig = usePaginationConfig();
   const { isMobile } = useResponsiveBreakpoint('lg');
+  const { filteredTenants, searchQuery, setSearchQuery, filterConfigs } =
+    useTenantTableFilters({ tenants });
 
-  // Get row and card renderers from dedicated modules
   const { renderRow, renderCard } = useTenantRow({
     onEdit,
     onDelete,
@@ -50,30 +58,12 @@ export function TenantTable({
   });
 
   const columns: Column<TenantData>[] = [
-    {
-      key: 'name',
-      header: t.pages.admin.tenants.name,
-    },
-    {
-      key: 'companyName',
-      header: t.pages.admin.tenants.company,
-    },
-    {
-      key: 'email',
-      header: t.pages.admin.tenants.email,
-    },
-    {
-      key: 'phone',
-      header: t.pages.admin.tenants.phone,
-    },
-    {
-      key: 'users',
-      header: t.pages.admin.tenants.users,
-    },
-    {
-      key: 'isActive',
-      header: t.pages.admin.tenants.status,
-    },
+    { key: 'name', header: t.pages.admin.tenants.name },
+    { key: 'companyName', header: t.pages.admin.tenants.company },
+    { key: 'email', header: t.pages.admin.tenants.email },
+    { key: 'phone', header: t.pages.admin.tenants.phone },
+    { key: 'users', header: t.pages.admin.tenants.users },
+    { key: 'isActive', header: t.pages.admin.tenants.status },
     {
       key: 'actions',
       header: t.pages.admin.tenants.actions,
@@ -81,27 +71,39 @@ export function TenantTable({
     },
   ];
 
+  // When the page hasn't been given an `onCreate` we skip the toolbar action
+  // slot entirely — matches the users table which uses the same pattern.
+  const headerActions = onCreate ? (
+    <WriteActionButton onClick={onCreate}>
+      <Plus className="h-4 w-4" />
+      {t.pages.admin.tenants.createTenant}
+    </WriteActionButton>
+  ) : undefined;
+
   return (
     <div
       className={
         isMobile ? 'flex flex-col gap-4' : 'flex h-full min-h-0 flex-col gap-4'
       }
     >
-      {onCreate ? (
-        <div className="flex justify-end">
-          <WriteActionButton onClick={onCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            {t.pages.admin.tenants.createTenant}
-          </WriteActionButton>
-        </div>
-      ) : null}
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
         <DataTable
-          data={tenants}
+          data={filteredTenants}
           columns={columns}
           renderRow={renderRow}
           renderCard={renderCard}
           onRowClick={onRowClick}
+          searchConfig={{
+            placeholder: t.pages.admin.tenants.searchPlaceholder,
+          }}
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterConfigs={filterConfigs}
+          headerActions={headerActions}
+          emptyState={{
+            title: t.pages.admin.tenants.noTenants,
+            description: t.pages.admin.tenants.noTenantsDescription,
+          }}
           paginationVariant="compact"
           defaultPageSize={paginationConfig.defaultPageSize}
           pageSizeOptions={paginationConfig.pageSizeOptions}

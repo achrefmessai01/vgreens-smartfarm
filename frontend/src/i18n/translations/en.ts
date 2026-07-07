@@ -1146,6 +1146,9 @@ export const en = {
         inactive: 'Inactive',
         notAvailable: 'N/A',
         loading: 'Loading tenants...',
+        searchPlaceholder: 'Search tenants...',
+        noTenants: 'No tenants found',
+        noTenantsDescription: 'Get started by creating a new tenant',
         allowedDomains: 'Allowed Email Domains',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

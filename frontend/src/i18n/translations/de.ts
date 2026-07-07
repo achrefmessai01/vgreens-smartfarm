@@ -1223,6 +1223,10 @@ export const de = {
         inactive: 'Inaktiv',
         notAvailable: 'N/V',
         loading: 'Mandanten werden geladen...',
+        searchPlaceholder: 'Tenants suchen...',
+        noTenants: 'Keine Tenants gefunden',
+        noTenantsDescription:
+          'Legen Sie einen neuen Tenant an, um zu starten',
         allowedDomains: 'Zugelassene E-Mail-Domains',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

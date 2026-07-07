@@ -1144,6 +1144,9 @@ export const it = {
         inactive: 'Inattivo',
         notAvailable: 'N/D',
         loading: 'Caricamento tenant...',
+        searchPlaceholder: 'Cerca tenant...',
+        noTenants: 'Nessun tenant trovato',
+        noTenantsDescription: 'Inizia creando un nuovo tenant',
         allowedDomains: 'Domini email consentiti',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

@@ -1144,6 +1144,9 @@ export const ro = {
         inactive: 'Inactiv',
         notAvailable: 'N/A',
         loading: 'Se încarcă chiriașii...',
+        searchPlaceholder: 'Caută chiriași...',
+        noTenants: 'Nu s-au găsit chiriași',
+        noTenantsDescription: 'Începe prin a crea un chiriaș nou',
         allowedDomains: 'Domenii de e-mail permise',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

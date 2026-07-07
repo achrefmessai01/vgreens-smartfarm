@@ -1129,6 +1129,9 @@ export const tr = {
         inactive: 'Pasif',
         notAvailable: 'Yok',
         loading: 'Kiracılar yükleniyor...',
+        searchPlaceholder: 'Kiracıları ara...',
+        noTenants: 'Kiracı bulunamadı',
+        noTenantsDescription: 'Yeni bir kiracı oluşturarak başlayın',
         allowedDomains: 'İzin verilen e-posta alan adları',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

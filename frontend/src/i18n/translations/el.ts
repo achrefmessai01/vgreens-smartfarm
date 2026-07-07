@@ -1150,6 +1150,9 @@ export const el = {
         inactive: 'Ανενεργός',
         notAvailable: 'Δ/Δ',
         loading: 'Φόρτωση μισθωτών...',
+        searchPlaceholder: 'Αναζήτηση ενοίκων...',
+        noTenants: 'Δεν βρέθηκαν ένοικοι',
+        noTenantsDescription: 'Ξεκινήστε δημιουργώντας έναν νέο ένοικο',
         allowedDomains: 'Επιτρεπόμενοι τομείς email',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:
