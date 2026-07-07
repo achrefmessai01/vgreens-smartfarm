@@ -318,6 +318,7 @@ export const es = {
       enableSensorOverview: 'Mapa de sensores',
       subtitle:
         'Información en tiempo real sobre el funcionamiento de tu granja',
+      openConfigSettings: 'Abrir ajustes de configuración',
       batches: 'Lotes',
       onTime: 'A tiempo',
       delayed: 'Retrasado',
@@ -1244,6 +1245,14 @@ export const es = {
         manageFeaturesSubtitle:
           'Gestiona qué funciones están habilitadas para este inquilino',
         noFeaturesAvailable: 'No hay funciones disponibles',
+        noFeaturesMatch: 'Ninguna función coincide con los filtros.',
+        searchFeatures: 'Buscar funciones',
+        searchFeaturesPlaceholder: 'Buscar...',
+        filterAll: 'Todas',
+        filterOn: 'Activas',
+        filterOff: 'Inactivas',
+        enabledStatus: 'Activada',
+        disabledStatus: 'Desactivada',
         enabled: 'habilitadas',
         of: 'de',
         featureNotAvailableTitle: 'Función no disponible',

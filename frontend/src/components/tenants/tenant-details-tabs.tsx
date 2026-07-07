@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n';
 import { TenantFeaturesTab } from './tenant-features-tab';
@@ -11,12 +11,32 @@ import {
 } from '@/components/sensor-config';
 import { FarmLayoutConfig } from '@/components/farm-config';
 
+// Tab values must match the `?tab=` URL param values used for deep links (e.g.
+// the "config settings" shortcut on the farm-overview page opens this page with
+// `?tab=farm-overview`).
+const VALID_TABS = new Set(['features', 'alerts', 'farm-overview']);
+
 export function TenantDetailsTabs() {
   const { t } = useI18n();
   const tabs = t.pages.admin.tenants.tabs;
   const params = useParams();
+  const searchParams = useSearchParams();
   const tenantId = params.tenantId as string;
-  const [activeTab, setActiveTab] = React.useState('features');
+  const tabFromUrl = searchParams.get('tab');
+  const initialTab =
+    tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : 'features';
+  const [activeTab, setActiveTab] = React.useState(initialTab);
+
+  // Keep the active tab in sync with the URL when it changes (e.g. the user
+  // opens another deep link in the same tab). We deliberately don't push the
+  // tab back into the URL on click — the URL param is a one-way deep-link
+  // entry point, not a canonical mirror of local state.
+  React.useEffect(() => {
+    if (tabFromUrl && VALID_TABS.has(tabFromUrl) && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabFromUrl]);
 
   return (
     <Tabs

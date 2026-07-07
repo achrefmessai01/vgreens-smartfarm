@@ -1479,8 +1479,14 @@ export type QueryCalibrationReadingArgs = {
 };
 
 
+export type QueryCameraLivestreamFeedsArgs = {
+  tenantId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryCameraLivestreamStreamUrlArgs = {
   cameraId: Scalars['String']['input'];
+  tenantId?: InputMaybe<Scalars['String']['input']>;
 };
 
 

@@ -319,6 +319,7 @@ export const en = {
     farmOverview: {
       title: 'Farm Overview',
       subtitle: 'Real-time insights into your farm operations',
+      openConfigSettings: 'Open configuration settings',
       enableSensors: 'Enable Sensors',
       showAllSensors: 'Show all',
       hideAllSensors: 'Hide all',
@@ -1256,6 +1257,14 @@ export const en = {
         manageFeaturesSubtitle:
           'Manage which features are enabled for this tenant',
         noFeaturesAvailable: 'No features available',
+        noFeaturesMatch: 'No features match your filters.',
+        searchFeatures: 'Search features',
+        searchFeaturesPlaceholder: 'Search...',
+        filterAll: 'All',
+        filterOn: 'On',
+        filterOff: 'Off',
+        enabledStatus: 'Enabled',
+        disabledStatus: 'Disabled',
         enabled: 'enabled',
         of: 'of',
         featureNotAvailableTitle: 'Feature Not Available',

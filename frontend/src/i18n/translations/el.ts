@@ -333,6 +333,7 @@ export const el = {
       enableSensorOverview: 'Χάρτης αισθητήρων',
       subtitle:
         'Πληροφορίες σε πραγματικό χρόνο για τις δραστηριότητες της φάρμας σας',
+      openConfigSettings: 'Άνοιγμα ρυθμίσεων διαμόρφωσης',
       batches: 'Παρτίδες',
       onTime: 'Στην ώρα',
       delayed: 'Καθυστερημένο',
@@ -1257,6 +1258,14 @@ export const el = {
         manageFeaturesSubtitle:
           'Διαχειριστείτε ποιες λειτουργίες είναι ενεργοποιημένες για αυτόν τον μισθωτή',
         noFeaturesAvailable: 'Δεν υπάρχουν διαθέσιμες λειτουργίες',
+        noFeaturesMatch: 'Καμία λειτουργία δεν ταιριάζει με τα φίλτρα.',
+        searchFeatures: 'Αναζήτηση λειτουργιών',
+        searchFeaturesPlaceholder: 'Αναζήτηση...',
+        filterAll: 'Όλες',
+        filterOn: 'Ενεργές',
+        filterOff: 'Ανενεργές',
+        enabledStatus: 'Ενεργοποιημένη',
+        disabledStatus: 'Απενεργοποιημένη',
         enabled: 'ενεργοποιημένες',
         of: 'από',
         featureNotAvailableTitle: 'Η λειτουργία δεν είναι διαθέσιμη',
