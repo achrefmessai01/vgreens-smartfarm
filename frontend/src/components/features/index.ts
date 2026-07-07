@@ -5,6 +5,7 @@ export {
 } from './feature-form';
 export { FeatureList } from './feature-list';
 export { FeatureGuard } from './feature-guard';
+export { FeatureIcon, getFeatureIcon } from './feature-icon';
 export { FeatureTable } from './feature-table';
 export { FeatureToggle } from './feature-toggle';
 export { FeatureFormSheet } from './feature-form-sheet';

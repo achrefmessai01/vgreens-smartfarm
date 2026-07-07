@@ -59,7 +59,7 @@ export function CalibrationDropdown({
           <Button
             variant="outline"
             size="sm"
-            className="h-9 gap-2 rounded-full"
+            className="h-9 gap-2 rounded-lg"
             aria-label={triggerLabel}
           >
             <SlidersHorizontal className="h-4 w-4" />

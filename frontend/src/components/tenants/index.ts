@@ -4,6 +4,5 @@ export {
   type TenantFormData,
 } from './tenant-form';
 export { TenantTable } from './tenant-table';
-export { TenantSelector } from './tenant-selector';
 export { TenantDetailsTabs } from './tenant-details-tabs';
 export { TenantFeaturesTab } from './tenant-features-tab';

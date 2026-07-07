@@ -5,11 +5,9 @@ import { FeatureDeleteDialog } from '@/components/features/feature-delete-dialog
 import { FeatureFlagsPageSkeleton } from '@/components/features/feature-flags-page-skeleton';
 import { FeatureFormSheet } from '@/components/features/feature-form-sheet';
 import { PageHeader } from '@/components/layout';
-import { WriteActionButton } from '@/components/ui/write-action-button';
 import { useI18n } from '@/i18n';
 import { useFeatureManagement } from '@/lib/hooks/use-feature-management';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
-import { Plus } from 'lucide-react';
 
 export default function FeatureFlagsPage() {
   const { t } = useI18n();
@@ -43,16 +41,6 @@ export default function FeatureFlagsPage() {
       <PageHeader
         title={t.pages.admin.features.title}
         subtitle={t.pages.admin.features.subtitle}
-        actions={
-          <WriteActionButton
-            onClick={handleCreate}
-            disabled={isLoading}
-            className="w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4" />
-            {t.pages.admin.features.createFeature}
-          </WriteActionButton>
-        }
       />
 
       <div className={isMobile ? '' : 'min-h-0 flex-1'}>
@@ -60,6 +48,7 @@ export default function FeatureFlagsPage() {
           features={features}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onCreate={handleCreate}
           isLoading={isLoading}
         />
       </div>

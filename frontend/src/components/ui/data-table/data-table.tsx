@@ -281,7 +281,7 @@ export function DataTable<T extends { id: string | number }>({
                   className={
                     showCardView
                       ? 'flex-1' // Mobile: no overflow, let content grow naturally
-                      : 'min-h-0 flex-1 overflow-y-auto' // Desktop: fixed height with scroll
+                      : 'scrollbar-hide min-h-0 flex-1 overflow-y-auto' // Desktop: fixed height with scroll, scrollbar visually hidden
                   }
                 >
                   {/* Render card view on mobile when available */}

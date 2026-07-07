@@ -1,7 +1,6 @@
 'use client';
 
 import { useI18n, useLocaleFormatters } from '@/i18n';
-import { NavbarTenantSelector } from '@/components/tenants/navbar-tenant-selector';
 import { UserMenu } from './user-menu';
 
 interface NavbarProps {
@@ -45,9 +44,9 @@ export function Navbar({ user, welcomeMessage, dateInfo }: NavbarProps) {
         </div>
       </div>
 
-      {/* Right Section */}
+      {/* Right Section — tenant selection now lives in the sidebar
+          (`SidebarTenantCard`), so the navbar only carries the user menu. */}
       <div className="ml-2 flex items-center gap-2">
-        <NavbarTenantSelector />
         <UserMenu />
       </div>
     </nav>
