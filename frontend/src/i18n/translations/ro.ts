@@ -1109,6 +1109,10 @@ export const ro = {
         emailRequired: 'E-mail *',
         notAvailable: 'N/A',
         loading: 'Se încarcă utilizatorii...',
+        user: 'Utilizator',
+        noTenant: 'Fără chiriaș',
+        viewList: 'Vizualizare listă',
+        viewGrid: 'Vizualizare grilă',
       },
       tenants: {
         title: 'Gestionarea chiriașilor',

@@ -1099,6 +1099,10 @@ export const es = {
         emailRequired: 'Correo electrónico *',
         notAvailable: 'N/D',
         loading: 'Cargando usuarios...',
+        user: 'Usuario',
+        noTenant: 'Sin inquilino',
+        viewList: 'Vista de lista',
+        viewGrid: 'Vista de cuadrícula',
       },
       tenants: {
         title: 'Gestión de inquilinos',

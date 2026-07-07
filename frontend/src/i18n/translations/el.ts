@@ -1115,6 +1115,10 @@ export const el = {
         emailRequired: 'E-mail *',
         notAvailable: 'Δ/Δ',
         loading: 'Φόρτωση χρηστών...',
+        user: 'Χρήστης',
+        noTenant: 'Χωρίς μισθωτή',
+        viewList: 'Προβολή λίστας',
+        viewGrid: 'Προβολή πλέγματος',
       },
       tenants: {
         title: 'Διαχείριση μισθωτών',

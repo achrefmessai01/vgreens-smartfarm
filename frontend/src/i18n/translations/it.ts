@@ -1109,6 +1109,10 @@ export const it = {
         emailRequired: 'Email *',
         notAvailable: 'N/D',
         loading: 'Caricamento utenti...',
+        user: 'Utente',
+        noTenant: 'Nessun tenant',
+        viewList: 'Vista elenco',
+        viewGrid: 'Vista griglia',
       },
       tenants: {
         title: 'Gestione tenant',

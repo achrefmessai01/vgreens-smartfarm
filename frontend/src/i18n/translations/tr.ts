@@ -1094,6 +1094,10 @@ export const tr = {
         emailRequired: 'E-posta *',
         notAvailable: 'Yok',
         loading: 'Kullanıcılar yükleniyor...',
+        user: 'Kullanıcı',
+        noTenant: 'Kiracı yok',
+        viewList: 'Liste görünümü',
+        viewGrid: 'Izgara görünümü',
       },
       tenants: {
         title: 'Kiracı yönetimi',

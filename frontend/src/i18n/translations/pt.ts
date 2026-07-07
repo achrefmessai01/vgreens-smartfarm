@@ -1106,6 +1106,10 @@ export const pt = {
         emailRequired: 'E-mail *',
         notAvailable: 'N/D',
         loading: 'A carregar utilizadores...',
+        user: 'Utilizador',
+        noTenant: 'Sem inquilino',
+        viewList: 'Vista de lista',
+        viewGrid: 'Vista de grelha',
       },
       tenants: {
         title: 'Gestão de inquilinos',

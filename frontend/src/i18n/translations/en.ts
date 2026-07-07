@@ -1111,6 +1111,10 @@ export const en = {
         emailRequired: 'Email *',
         notAvailable: 'N/A',
         loading: 'Loading users...',
+        user: 'User',
+        noTenant: 'No tenant',
+        viewList: 'List view',
+        viewGrid: 'Grid view',
       },
       tenants: {
         title: 'Tenant Management',

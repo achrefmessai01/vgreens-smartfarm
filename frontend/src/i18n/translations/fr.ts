@@ -1091,6 +1091,10 @@ export const fr = {
         emailRequired: 'E-mail *',
         notAvailable: 'N/D',
         loading: 'Chargement…',
+        user: 'Utilisateur',
+        noTenant: 'Aucun locataire',
+        viewList: 'Vue liste',
+        viewGrid: 'Vue grille',
       },
       tenants: {
         title: 'Gestion des locataires',

@@ -1115,6 +1115,10 @@ export const de = {
         emailRequired: 'E-Mail *',
         notAvailable: 'N/V',
         loading: 'Benutzer werden geladen...',
+        user: 'Benutzer',
+        noTenant: 'Kein Mandant',
+        viewList: 'Listenansicht',
+        viewGrid: 'Rasteransicht',
       },
       reports: {
         title: 'Fehlerberichts-Verwaltung',

@@ -1086,6 +1086,10 @@ export const ar = {
         emailRequired: 'البريد الإلكتروني *',
         notAvailable: 'غير متاح',
         loading: 'جارٍ تحميل المستخدمين...',
+        user: 'المستخدم',
+        noTenant: 'لا يوجد مستأجر',
+        viewList: 'عرض القائمة',
+        viewGrid: 'عرض الشبكة',
       },
       tenants: {
         title: 'إدارة المستأجرين',

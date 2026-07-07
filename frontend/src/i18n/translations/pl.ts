@@ -1101,6 +1101,10 @@ export const pl = {
         emailRequired: 'E-mail *',
         notAvailable: 'Brak',
         loading: 'Ładowanie użytkowników...',
+        user: 'Użytkownik',
+        noTenant: 'Brak najemcy',
+        viewList: 'Widok listy',
+        viewGrid: 'Widok siatki',
       },
       tenants: {
         title: 'Zarządzanie najemcami',
