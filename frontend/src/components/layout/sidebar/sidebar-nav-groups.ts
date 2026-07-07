@@ -14,12 +14,17 @@ export interface SidebarNavItem extends SidebarNavItemDef {
  * Section order drives which uppercase headers appear where. Everything not
  * listed here (i.e. items with no group) falls into the unlabeled bucket
  * rendered before the labeled sections.
+ *
+ * MANAGEMENT sits above OVERVIEW because on the admin surface it's the
+ * primary daily workflow (Tenants / Users / Feature Flags) — Overview
+ * (Reports) is a secondary reference view. Tenant-side items follow with
+ * FARM / MONITORING, and SYSTEM stays pinned at the bottom.
  */
 export const GROUP_ORDER: NavGroup[] = [
+  'management',
   'overview',
   'farm',
   'monitoring',
-  'management',
   'system',
 ];
 

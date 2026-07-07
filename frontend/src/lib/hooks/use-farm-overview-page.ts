@@ -760,20 +760,30 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
   const combinedGreenhouses = React.useMemo(() => {
     if (tenantGreenhouses.length === 0) {
       // Fallback: no tenant greenhouses configured — synthesize from layout.
+      // Key on the index so two synthesized slots can never collide, even if
+      // both fall back to the same bay id.
       return Array.from({ length: farmLayout.chambersCount }, (_, i) => ({
-        key: bays[i]?.id ?? `greenhouse_${i + 1}`,
+        key: `synth-${i}`,
         label: ghLabels[i] || `Greenhouse ${i + 1}`,
         bay: bays[i] ?? null,
       }));
     }
     // Match each greenhouse to its bay (see selectedBays note + helper).
+    // Key on the tenant Greenhouse.id rather than the resolved bay id —
+    // `findBayForGreenhouse` has fallback branches (singleton, positional,
+    // substring) that can legitimately return the same bay for multiple
+    // greenhouses, which used to produce duplicate React keys and the
+    // "two children with the same key `bay-0`" warning.
     return tenantGreenhouses.map((gh, i) => {
       const bay = findBayForGreenhouse(bays, gh.name, i, {
         totalGreenhouses: tenantGreenhouses.length,
         sensorConfigMap,
       });
       return {
-        key: bay?.id ?? `greenhouse_${i + 1}`,
+        // Index-prefixed key so duplicates or blank names can't collide, and
+        // so two greenhouses that legitimately resolve to the same bay still
+        // render as distinct cards.
+        key: `gh-${i}-${gh.name || 'unnamed'}`,
         label: gh.name || ghLabels[i] || `Greenhouse ${i + 1}`,
         bay,
       };

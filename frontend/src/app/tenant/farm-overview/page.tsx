@@ -14,7 +14,6 @@ import {
 import { TimeRangeSelector } from '@/components/farm-overview/time-range-selector';
 import { FeatureGuard } from '@/components/features/feature-guard';
 import { PageHeader } from '@/components/layout/page-header';
-import { TenantSelector } from '@/components/tenants';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { useFarmOverviewPage } from '@/lib/hooks/use-farm-overview-page';
@@ -48,7 +47,7 @@ export default function FarmOverviewPage() {
   if (state.loading) {
     return (
       <FeatureGuard featureKey="farm_overview">
-        <FarmOverviewPageSkeleton showTenantSelector={state.isVGreensAdmin} />
+        <FarmOverviewPageSkeleton />
       </FeatureGuard>
     );
   }
@@ -97,15 +96,10 @@ export default function FarmOverviewPage() {
                 }}
               />
             )}
-            {state.isVGreensAdmin && (
-              <TenantSelector
-                tenants={state.tenants}
-                selectedTenantId={state.tenantSelectorValue}
-                onTenantChange={state.handleTenantChange}
-                label={t.pages.admin.users.selectTenant || 'Select tenant'}
-                placeholder={t.pages.admin.users.selectTenant}
-              />
-            )}
+            {/* Tenant switching lives exclusively in the sidebar
+                (`SidebarTenantCard`) now; the page-level dropdown that used
+                to sit here was removed in favor of the shared
+                `SelectedTenantProvider` context. */}
             {/* vGreens-internal shortcut into the tenant's farm-overview
                 config tab (SensorVisibility + FarmLayout + SensorConfig).
                 The deep link uses `?tab=farm-overview` which TenantDetailsTabs
@@ -115,7 +109,7 @@ export default function FarmOverviewPage() {
                 asChild
                 variant="outline"
                 size="sm"
-                className="h-9 gap-2 rounded-full"
+                className="h-9 gap-2 rounded-lg"
                 aria-label={openConfigLabel}
                 title={openConfigLabel}
               >

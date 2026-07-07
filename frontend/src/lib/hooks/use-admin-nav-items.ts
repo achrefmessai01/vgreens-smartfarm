@@ -35,17 +35,14 @@ export function useAdminNavItems(): AdminNavItem[] {
   const { t } = useI18n();
   return React.useMemo(
     () => [
+      // Tenants sits at the top of MANAGEMENT — it's the primary admin
+      // workflow, and grouping it alongside Users + Feature Flags makes the
+      // "tenant-scoped controls" section read as a single unit.
       {
         label: t.navigation.tenants,
         href: '/admin/tenants',
         icon: Building2,
-        group: 'overview',
-      },
-      {
-        label: t.navigation.reports,
-        href: '/admin/reports',
-        icon: ClipboardList,
-        group: 'overview',
+        group: 'management',
       },
       {
         label: t.navigation.adminUsers,
@@ -58,6 +55,12 @@ export function useAdminNavItems(): AdminNavItem[] {
         href: '/admin/feature-flags',
         icon: Flag,
         group: 'management',
+      },
+      {
+        label: t.navigation.reports,
+        href: '/admin/reports',
+        icon: ClipboardList,
+        group: 'overview',
       },
       {
         label: t.navigation.systemErrors,

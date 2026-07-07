@@ -27,9 +27,10 @@ interface SidebarTenantCardProps {
 
 /**
  * Sidebar tenant selector card — only rendered for VGREENS_ADMIN and
- * VGREENS_MEMBER (both of whom can pivot between tenants). Reuses the shared
- * `SelectedTenantProvider` so any change here also updates the in-header
- * `NavbarTenantSelector`.
+ * VGREENS_MEMBER (both of whom can pivot between tenants). This is the sole
+ * tenant-switcher surface in the app; the navbar and page-level dropdowns
+ * that used to duplicate it have been removed in favor of the shared
+ * `SelectedTenantProvider` context.
  *
  * When the sidebar is collapsed the card shrinks to a single icon so it still
  * hints at the tenant context without dominating the rail.
