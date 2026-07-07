@@ -62,7 +62,9 @@ export function TenantTable({
     { key: 'companyName', header: t.pages.admin.tenants.company },
     { key: 'email', header: t.pages.admin.tenants.email },
     { key: 'phone', header: t.pages.admin.tenants.phone },
-    { key: 'users', header: t.pages.admin.tenants.users },
+    // Users column intentionally omitted from the table — the mobile card
+    // still surfaces "View Users" as a footer button when `onViewUsers` is
+    // wired, but the desktop grid stays focused on tenant identity fields.
     { key: 'isActive', header: t.pages.admin.tenants.status },
     {
       key: 'actions',

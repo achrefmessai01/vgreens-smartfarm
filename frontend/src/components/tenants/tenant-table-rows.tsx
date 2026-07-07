@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { WriteActionButton } from '@/components/ui/write-action-button';
 import { TableCell } from '@/components/ui/table';
 import type { TenantData } from '@/lib/graphql-compat';
-import { Edit2, Settings, Trash2, Users } from 'lucide-react';
+import { Edit2, Settings, Trash2 } from 'lucide-react';
 import { useTenantCard } from './tenant-table-cards';
 
 /**
@@ -48,24 +48,6 @@ export const useTenantRow = ({
       <TableCell>{tenant.companyName || '-'}</TableCell>
       <TableCell className="max-w-[220px] truncate">{tenant.email || '-'}</TableCell>
       <TableCell>{tenant.phone || '-'}</TableCell>
-      <TableCell>
-        {onViewUsers ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onViewUsers(tenant);
-            }}
-            className="h-6 px-2"
-          >
-            <Users className="mr-1 h-4 w-4" />
-            {translations.viewUsers}
-          </Button>
-        ) : (
-          <span className="text-muted-foreground">-</span>
-        )}
-      </TableCell>
       <TableCell>
         <Badge variant={tenant.isActive ? 'default' : 'secondary'}>
           {tenant.isActive ? translations.active : translations.inactive}
