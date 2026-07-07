@@ -1123,6 +1123,12 @@ export const ar = {
         searchPlaceholder: 'ابحث عن المستأجرين...',
         noTenants: 'لم يتم العثور على مستأجرين',
         noTenantsDescription: 'ابدأ بإنشاء مستأجر جديد',
+        tenant: 'المستأجر',
+        contact: 'جهة الاتصال',
+        configure: 'تكوين',
+        noPhone: 'لا يوجد هاتف',
+        viewList: 'عرض القائمة',
+        viewGrid: 'عرض الشبكة',
         allowedDomains: 'نطاقات البريد الإلكتروني المسموح بها',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

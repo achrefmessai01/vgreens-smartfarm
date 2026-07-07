@@ -1153,6 +1153,12 @@ export const el = {
         searchPlaceholder: 'Αναζήτηση ενοίκων...',
         noTenants: 'Δεν βρέθηκαν ένοικοι',
         noTenantsDescription: 'Ξεκινήστε δημιουργώντας έναν νέο ένοικο',
+        tenant: 'Ένοικος',
+        contact: 'Επικοινωνία',
+        configure: 'Διαμόρφωση',
+        noPhone: 'Χωρίς τηλέφωνο',
+        viewList: 'Προβολή λίστας',
+        viewGrid: 'Προβολή πλέγματος',
         allowedDomains: 'Επιτρεπόμενοι τομείς email',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

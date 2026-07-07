@@ -1132,6 +1132,12 @@ export const tr = {
         searchPlaceholder: 'Kiracıları ara...',
         noTenants: 'Kiracı bulunamadı',
         noTenantsDescription: 'Yeni bir kiracı oluşturarak başlayın',
+        tenant: 'Kiracı',
+        contact: 'İletişim',
+        configure: 'Yapılandır',
+        noPhone: 'Telefon yok',
+        viewList: 'Liste görünümü',
+        viewGrid: 'Izgara görünümü',
         allowedDomains: 'İzin verilen e-posta alan adları',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

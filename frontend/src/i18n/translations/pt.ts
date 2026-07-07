@@ -1144,6 +1144,12 @@ export const pt = {
         searchPlaceholder: 'Buscar inquilinos...',
         noTenants: 'Nenhum inquilino encontrado',
         noTenantsDescription: 'Comece criando um novo inquilino',
+        tenant: 'Inquilino',
+        contact: 'Contacto',
+        configure: 'Configurar',
+        noPhone: 'Sem telefone',
+        viewList: 'Vista de lista',
+        viewGrid: 'Vista de grelha',
         allowedDomains: 'Domínios de e-mail permitidos',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

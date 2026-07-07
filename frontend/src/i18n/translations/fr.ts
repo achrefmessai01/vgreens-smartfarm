@@ -1128,6 +1128,12 @@ export const fr = {
         searchPlaceholder: 'Rechercher des locataires...',
         noTenants: 'Aucun locataire trouvé',
         noTenantsDescription: 'Commencez par créer un nouveau locataire',
+        tenant: 'Locataire',
+        contact: 'Contact',
+        configure: 'Configurer',
+        noPhone: 'Aucun téléphone',
+        viewList: 'Vue liste',
+        viewGrid: 'Vue grille',
         allowedDomains: 'Domaines e-mail autorisés',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

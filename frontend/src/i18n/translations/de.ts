@@ -1227,6 +1227,12 @@ export const de = {
         noTenants: 'Keine Tenants gefunden',
         noTenantsDescription:
           'Legen Sie einen neuen Tenant an, um zu starten',
+        tenant: 'Tenant',
+        contact: 'Kontakt',
+        configure: 'Konfigurieren',
+        noPhone: 'Keine Telefonnummer',
+        viewList: 'Listenansicht',
+        viewGrid: 'Rasteransicht',
         allowedDomains: 'Zugelassene E-Mail-Domains',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

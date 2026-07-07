@@ -16,24 +16,34 @@ const STATUS_VALUES = {
   inactive: 'inactive',
 } as const;
 
+export type TenantSortDirection = 'asc' | 'desc';
+
 interface UseTenantTableFiltersArgs {
   tenants: TenantData[];
 }
 
 /**
- * Local search + filter state for the Tenant Management table. Returns the
- * filtered slice of `tenants` plus the `FilterConfigOption`s the `DataTable`
- * needs to render its status filter dropdown and chips.
+ * Local search + filter + sort state for the Tenant Management table.
+ * Returns the transformed slice of `tenants` plus the `FilterConfigOption`s
+ * the `DataTable` needs to render its status filter dropdown and chips.
  *
- * All filtering is client-side — the tenants query already returns a
- * fully-scoped list for the current admin view, so an in-memory filter is the
- * cheapest path and avoids one network round-trip per keystroke. Mirrors
- * `useUserTableFilters` so the two admin tables behave identically.
+ * All filtering + sorting is client-side — the tenants query already returns
+ * a fully-scoped list for the current admin view, so an in-memory pass is
+ * the cheapest path and avoids one network round-trip per keystroke. Mirrors
+ * `useUserTableFilters` so the two admin tables behave identically; the
+ * only extension here is a name-based sort direction driven by the
+ * clickable TENANT column header in the redesign.
  */
 export function useTenantTableFilters({ tenants }: UseTenantTableFiltersArgs) {
   const { t } = useI18n();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('');
+  const [sortDirection, setSortDirection] =
+    React.useState<TenantSortDirection>('asc');
+
+  const toggleSort = React.useCallback(() => {
+    setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  }, []);
 
   const filteredTenants = React.useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -41,7 +51,7 @@ export function useTenantTableFilters({ tenants }: UseTenantTableFiltersArgs) {
       ? statusFilter.split(',').filter(Boolean)
       : [];
 
-    return tenants.filter((tenant) => {
+    const filtered = tenants.filter((tenant) => {
       if (query) {
         // Match against every field the row surfaces — name, company, email,
         // phone — so a user typing part of any visible cell finds the row.
@@ -69,7 +79,17 @@ export function useTenantTableFilters({ tenants }: UseTenantTableFiltersArgs) {
       }
       return true;
     });
-  }, [tenants, searchQuery, statusFilter]);
+
+    // Sort last so search + filter both narrow the set before we pay for
+    // the collator. Copy first — `filter` returns a new array but we
+    // shouldn't rely on that as a mutation surface.
+    return [...filtered].sort((a, b) => {
+      const av = (a.name ?? '').toLowerCase();
+      const bv = (b.name ?? '').toLowerCase();
+      const cmp = av.localeCompare(bv);
+      return sortDirection === 'asc' ? cmp : -cmp;
+    });
+  }, [tenants, searchQuery, statusFilter, sortDirection]);
 
   const filterConfigs: FilterConfigOption[] = React.useMemo(
     () => [
@@ -103,5 +123,7 @@ export function useTenantTableFilters({ tenants }: UseTenantTableFiltersArgs) {
     searchQuery,
     setSearchQuery,
     filterConfigs,
+    sortDirection,
+    toggleSort,
   };
 }

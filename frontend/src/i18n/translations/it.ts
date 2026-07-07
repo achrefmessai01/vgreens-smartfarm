@@ -1147,6 +1147,12 @@ export const it = {
         searchPlaceholder: 'Cerca tenant...',
         noTenants: 'Nessun tenant trovato',
         noTenantsDescription: 'Inizia creando un nuovo tenant',
+        tenant: 'Tenant',
+        contact: 'Contatto',
+        configure: 'Configura',
+        noPhone: 'Nessun telefono',
+        viewList: 'Vista elenco',
+        viewGrid: 'Vista griglia',
         allowedDomains: 'Domini email consentiti',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

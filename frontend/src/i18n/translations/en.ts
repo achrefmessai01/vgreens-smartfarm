@@ -1149,6 +1149,12 @@ export const en = {
         searchPlaceholder: 'Search tenants...',
         noTenants: 'No tenants found',
         noTenantsDescription: 'Get started by creating a new tenant',
+        tenant: 'Tenant',
+        contact: 'Contact',
+        configure: 'Configure',
+        noPhone: 'No phone',
+        viewList: 'List view',
+        viewGrid: 'Grid view',
         allowedDomains: 'Allowed Email Domains',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

@@ -1139,6 +1139,12 @@ export const pl = {
         searchPlaceholder: 'Szukaj najemców...',
         noTenants: 'Nie znaleziono najemców',
         noTenantsDescription: 'Zacznij od utworzenia nowego najemcy',
+        tenant: 'Najemca',
+        contact: 'Kontakt',
+        configure: 'Konfiguruj',
+        noPhone: 'Brak telefonu',
+        viewList: 'Widok listy',
+        viewGrid: 'Widok siatki',
         allowedDomains: 'Dozwolone domeny e-mail',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

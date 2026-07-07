@@ -1147,6 +1147,12 @@ export const ro = {
         searchPlaceholder: 'Caută chiriași...',
         noTenants: 'Nu s-au găsit chiriași',
         noTenantsDescription: 'Începe prin a crea un chiriaș nou',
+        tenant: 'Chiriaș',
+        contact: 'Contact',
+        configure: 'Configurează',
+        noPhone: 'Fără telefon',
+        viewList: 'Vizualizare listă',
+        viewGrid: 'Vizualizare grilă',
         allowedDomains: 'Domenii de e-mail permise',
         allowedDomainsPlaceholder: 'example.com',
         allowedDomainsHint:

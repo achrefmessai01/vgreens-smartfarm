@@ -133,3 +133,18 @@
 .animate-spin-slow {
   animation: spin-slow 8s linear infinite;
 }
+
+/*
+ * Utility to hide the visual scrollbar while keeping scroll functionality.
+ * Used on the tenants grid / list surfaces where the scrollbar clutters the
+ * layout but content can still overflow the viewport height.
+ */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+  width: 0;
+  height: 0;
+}
