@@ -63,7 +63,7 @@ export function ChartTitle({
   className = 'mb-4',
 }: ChartTitleProps) {
   return (
-    <div className={className}>
+    <div data-dashboard-card-header className={className}>
       <h3 className="text-lg font-semibold">{title}</h3>
       {subtitle && (
         <p className="text-muted-foreground mt-0.5 text-xs">{subtitle}</p>

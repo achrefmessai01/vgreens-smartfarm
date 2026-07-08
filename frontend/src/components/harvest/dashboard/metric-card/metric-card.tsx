@@ -34,7 +34,10 @@ export function MetricCard({
       )}
     >
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        <div
+          data-dashboard-card-header
+          className="flex items-center justify-between"
+        >
           <p className="text-muted-foreground text-sm font-medium">{title}</p>
           {icon && <div className="text-muted-foreground">{icon}</div>}
         </div>

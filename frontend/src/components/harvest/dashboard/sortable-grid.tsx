@@ -19,6 +19,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 
 export interface SortableGridItem {
@@ -27,55 +28,214 @@ export interface SortableGridItem {
 }
 
 interface SortableGridProps {
-  /** Items to render, already ordered and filtered to the visible set. */
+  /** Items to render, already ordered and filtered. */
   items: SortableGridItem[];
-  /** Tailwind grid classes for the container (same in view and edit mode). */
+
+  /** Tailwind classes for the grid container. */
   className: string;
-  /** When true, items become draggable to reorder. */
+
+  /** Enables drag-and-drop reordering. */
   editMode?: boolean;
-  /** Called with the new order of the *visible* ids after a drag. */
+
+  /** Called with the reordered IDs of the visible cards. */
   onReorder?: (orderedVisibleIds: string[]) => void;
 }
 
-function SortableCell({ id, children }: { id: string; children: React.ReactNode }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id });
+interface SortableCellProps {
+  id: string;
+  children: React.ReactNode;
+  disabled: boolean;
+}
+
+function SortableCell({ id, children, disabled }: SortableCellProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id,
+    disabled,
+  });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
+    willChange: transform ? 'transform' : undefined,
   };
+
+  if (disabled) {
+    return <div>{children}</div>;
+  }
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        // `touch-none` stops the browser hijacking the drag as a scroll on
-        // touch devices. The whole cell is the drag handle in edit mode.
-        'relative cursor-grab touch-none rounded-xl outline-dashed outline-1 outline-transparent active:cursor-grabbing',
-        'ring-primary/40 hover:outline-border',
-        isDragging && 'z-10 opacity-80 shadow-lg ring-2',
+        /**
+         * `group` allows the drag indicator to react when the user
+         * hovers anywhere over the entire card.
+         */
+        'group relative rounded-2xl',
+
+        /**
+         * Keep the title close to the drag indicator.
+         */
+        '[&_[data-dashboard-card-header]]:pl-10',
+        'sm:[&_[data-dashboard-card-header]]:pl-11',
+
+        /**
+         * Subtle feedback for the whole card.
+         * No scaling is used here because that could conflict with
+         * the transform supplied by dnd-kit.
+         */
+        'ring-1 ring-transparent',
+        'transition-[filter,box-shadow] duration-200 ease-out',
+        'hover:ring-border/40 hover:drop-shadow-md',
+
+        /**
+         * Appearance while dragging.
+         */
+        isDragging && [
+          'z-50',
+          'opacity-90',
+          'ring-border/60',
+          'drop-shadow-xl',
+        ],
       )}
-      {...attributes}
-      {...listeners}
     >
-      <span
-        aria-hidden
-        className="bg-background/90 text-muted-foreground pointer-events-none absolute top-2 right-2 z-10 rounded-md border p-1 shadow-sm"
+      <button
+        type="button"
+        aria-label="Drag card to reorder"
+        title="Drag to reorder"
+        {...attributes}
+        {...listeners}
+        className={cn(
+          /**
+           * Named group for stronger animation when the user hovers
+           * directly over the drag indicator.
+           */
+          'group/drag absolute top-4 left-3 z-20',
+          'sm:top-5 sm:left-4',
+
+          /**
+           * Comfortable interaction area without making the control
+           * look like a normal button.
+           */
+          'inline-flex h-7 w-7 shrink-0 items-center justify-center',
+          'appearance-none border-0 bg-transparent p-0 shadow-none',
+
+          /**
+           * Drag behavior.
+           */
+          'cursor-grab touch-none select-none',
+          'active:cursor-grabbing',
+
+          /**
+           * Default appearance.
+           */
+          'text-muted-foreground/45',
+
+          /**
+           * Hovering anywhere over the card brightens the indicator.
+           */
+          'transition-colors duration-200 ease-out',
+          'group-hover:text-primary/80',
+
+          /**
+           * Directly hovering over the indicator makes it stronger.
+           */
+          'hover:text-primary',
+
+          /**
+           * Keyboard interaction.
+           */
+          'focus-visible:text-primary',
+          'focus-visible:outline-none',
+
+          /**
+           * Dragging state.
+           */
+          isDragging && ['cursor-grabbing', 'text-primary'],
+        )}
       >
-        <GripVertical className="h-3.5 w-3.5" />
-      </span>
+        {/* Animated glow behind the drag icon */}
+        <span
+          aria-hidden="true"
+          className={cn(
+            'pointer-events-none absolute inset-1 rounded-full',
+            'bg-primary/25 scale-75 opacity-0 blur-md',
+            'transition-[transform,opacity] duration-300 ease-out',
+
+            /**
+             * Soft glow when hovering anywhere over the card.
+             */
+            'group-hover:scale-125',
+            'group-hover:opacity-50',
+
+            /**
+             * Stronger glow when directly hovering over the indicator.
+             */
+            'group-hover/drag:scale-150',
+            'group-hover/drag:opacity-100',
+
+            /**
+             * Keyboard focus gets the stronger animation.
+             */
+            'group-focus-visible/drag:scale-150',
+            'group-focus-visible/drag:opacity-100',
+
+            isDragging && ['scale-150', 'opacity-100'],
+          )}
+        />
+
+        <GripVertical
+          aria-hidden="true"
+          strokeWidth={2.25}
+          className={cn(
+            'relative z-10 h-4 w-4 origin-center',
+            'transition-[transform,filter] duration-200 ease-out',
+
+            /**
+             * Animation when hovering anywhere over the card.
+             */
+            'group-hover:scale-110',
+            'group-hover:drop-shadow-[0_0_3px_currentColor]',
+
+            /**
+             * Stronger animation when hovering directly over the grip.
+             */
+            'group-hover/drag:-translate-y-px',
+            'group-hover/drag:scale-125',
+            'group-hover/drag:drop-shadow-[0_0_5px_currentColor]',
+
+            /**
+             * Keyboard focus.
+             */
+            'group-focus-visible/drag:-translate-y-px',
+            'group-focus-visible/drag:scale-125',
+            'group-focus-visible/drag:drop-shadow-[0_0_5px_currentColor]',
+
+            /**
+             * Keep the animation active while dragging.
+             */
+            isDragging && [
+              '-translate-y-px',
+              'scale-125',
+              'drop-shadow-[0_0_5px_currentColor]',
+            ],
+          )}
+        />
+      </button>
+
       {children}
     </div>
   );
 }
 
-/**
- * Grid that renders `items` in the given layout. In edit mode it wraps them in
- * a dnd-kit sortable context so each cell can be dragged to reorder; otherwise
- * it renders the exact same markup as the plain grid it replaces.
- */
 export function SortableGrid({
   items,
   className,
@@ -83,32 +243,35 @@ export function SortableGrid({
   onReorder,
 }: SortableGridProps) {
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
+
+  const itemIds = React.useMemo(() => items.map((item) => item.id), [items]);
 
   const handleDragEnd = React.useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over || active.id === over.id) return;
-      const ids = items.map((item) => item.id);
-      const oldIndex = ids.indexOf(String(active.id));
-      const newIndex = ids.indexOf(String(over.id));
-      if (oldIndex === -1 || newIndex === -1) return;
-      onReorder?.(arrayMove(ids, oldIndex, newIndex));
-    },
-    [items, onReorder],
-  );
+    ({ active, over }: DragEndEvent) => {
+      if (!over || active.id === over.id) {
+        return;
+      }
 
-  if (!editMode) {
-    return (
-      <div className={className}>
-        {items.map((item) => (
-          <div key={item.id}>{item.node}</div>
-        ))}
-      </div>
-    );
-  }
+      const oldIndex = itemIds.indexOf(String(active.id));
+      const newIndex = itemIds.indexOf(String(over.id));
+
+      if (oldIndex === -1 || newIndex === -1) {
+        return;
+      }
+
+      onReorder?.(arrayMove(itemIds, oldIndex, newIndex));
+    },
+    [itemIds, onReorder],
+  );
 
   return (
     <DndContext
@@ -116,13 +279,10 @@ export function SortableGrid({
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext
-        items={items.map((item) => item.id)}
-        strategy={rectSortingStrategy}
-      >
+      <SortableContext items={itemIds} strategy={rectSortingStrategy}>
         <div className={className}>
           {items.map((item) => (
-            <SortableCell key={item.id} id={item.id}>
+            <SortableCell key={item.id} id={item.id} disabled={!editMode}>
               {item.node}
             </SortableCell>
           ))}

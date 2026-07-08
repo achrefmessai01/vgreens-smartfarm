@@ -15,13 +15,7 @@ import { useHarvestDashboardOrder } from '@/lib/hooks/use-harvest-dashboard-orde
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useSetTenantHarvestDashboardOrderMutation } from '@/generated/graphql';
 import { harvestsLoggedForLabel } from '@/lib/harvest-utils';
-import {
-  AlertTriangle,
-  Check,
-  LayoutDashboard,
-  Move,
-  Package,
-} from 'lucide-react';
+import { AlertTriangle, LayoutDashboard, Package } from 'lucide-react';
 import { DashboardChartsGrid } from './dashboard-charts-grid';
 import { DashboardConfigMenu } from './dashboard-config-menu';
 import { DashboardMetricsGrid } from './dashboard-metrics-grid';
@@ -69,13 +63,13 @@ export function HarvestDashboard({
   const { batches, loading: batchesLoading } = useHarvestBatches();
 
   const { toast } = useToast();
-  const { isTenantAdmin } = useCurrentUser();
+  const { isTenantAdmin, isVGreensAdmin } = useCurrentUser();
   const { isVisible, allHidden, tenantId, hiddenSet } =
     useHarvestDashboardVisibility();
   const { order, applyOrder } = useHarvestDashboardOrder();
-  const canEditDashboard = isTenantAdmin && Boolean(tenantId);
+  const canEditDashboard =
+    (isTenantAdmin || isVGreensAdmin) && Boolean(tenantId);
 
-  const [editLayout, setEditLayout] = React.useState(false);
   const [setOrderMutation] = useSetTenantHarvestDashboardOrderMutation();
 
   // Persist a full ordered id list (metrics + charts). Optimistic cache update
@@ -166,8 +160,7 @@ export function HarvestDashboard({
       const key =
         compareBatchIds.length === 1
           ? (h?.comparing ?? 'Comparing {count} batch for {filter}')
-          : (h?.comparingPlural ??
-            'Comparing {count} batches for {filter}');
+          : (h?.comparingPlural ?? 'Comparing {count} batches for {filter}');
       return key
         .replace('{count}', String(compareBatchIds.length))
         .replace('{filter}', filterLabel);
@@ -178,7 +171,11 @@ export function HarvestDashboard({
     return selectedBatch ? `${selectedBatch.name} · ${phrase}` : phrase;
   })();
 
-  const noData = !compareMode && !showingSkeleton && !error && (!data || data.harvestCount === 0);
+  const noData =
+    !compareMode &&
+    !showingSkeleton &&
+    !error &&
+    (!data || data.harvestCount === 0);
 
   const body = (() => {
     if (compareMode) {
@@ -256,7 +253,7 @@ export function HarvestDashboard({
           data={data}
           isVisible={isVisible}
           applyOrder={applyOrder}
-          editMode={editLayout}
+          editMode={canEditDashboard}
           onReorder={handleReorderMetrics}
         />
         <YieldPredictionCard />
@@ -264,14 +261,12 @@ export function HarvestDashboard({
           data={data}
           isVisible={isVisible}
           applyOrder={applyOrder}
-          editMode={editLayout}
+          editMode={canEditDashboard}
           onReorder={handleReorderCharts}
         />
       </>
     );
   })();
-
-  const showEditControls = !compareMode && canEditDashboard && tenantId;
 
   return (
     <div className={className}>
@@ -300,31 +295,8 @@ export function HarvestDashboard({
               compareBatchIds={compareBatchIds}
               onCompareBatchesChange={setCompareBatchIds}
             />
-            {showEditControls && (
-              <>
-                <DashboardConfigMenu
-                  tenantId={tenantId}
-                  hiddenSet={hiddenSet}
-                />
-                <Button
-                  variant={editLayout ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-9 gap-2"
-                  onClick={() => setEditLayout((prev) => !prev)}
-                  aria-pressed={editLayout}
-                >
-                  {editLayout ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Move className="h-4 w-4" />
-                  )}
-                  <span className="text-xs font-medium">
-                    {editLayout
-                      ? (h?.configDoneLayout ?? 'Done')
-                      : (h?.configEditLayout ?? 'Edit layout')}
-                  </span>
-                </Button>
-              </>
+            {canEditDashboard && !compareMode && (
+              <DashboardConfigMenu tenantId={tenantId!} hiddenSet={hiddenSet} />
             )}
           </div>
         </div>
