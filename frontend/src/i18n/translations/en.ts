@@ -158,8 +158,6 @@ export const en = {
     deviceStatus: {
       title: 'Device Status',
       subtitle: 'Live health of every sensor and edge device',
-      selectTenant: 'Tenant',
-      selectTenantPlaceholder: 'Select tenant',
       period: {
         oneDay: '1 Day',
         sevenDays: '7 Days',

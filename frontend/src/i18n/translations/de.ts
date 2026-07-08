@@ -158,8 +158,6 @@ export const de = {
     deviceStatus: {
       title: 'Gerätestatus',
       subtitle: 'Live-Zustand aller Sensoren und Edge-Geräte',
-      selectTenant: 'Mandant',
-      selectTenantPlaceholder: 'Mandant auswählen',
       period: {
         oneDay: '1 Tag',
         sevenDays: '7 Tage',

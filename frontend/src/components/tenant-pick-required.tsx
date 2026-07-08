@@ -38,7 +38,7 @@ function TenantPickRequiredEmptyState() {
           Select a tenant to continue
         </h2>
         <p className="text-muted-foreground text-sm">
-          Use the tenant selector in the top navigation to choose which
+          Use the tenant selector in the sidebar to choose which
           tenant&apos;s data you want to view.
         </p>
       </div>

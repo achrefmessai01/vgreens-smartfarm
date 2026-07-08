@@ -163,8 +163,6 @@ export const ar = {
     deviceStatus: {
       title: 'حالة الأجهزة',
       subtitle: 'الحالة المباشرة لكل مستشعر وجهاز طرفي',
-      selectTenant: 'المستأجر',
-      selectTenantPlaceholder: 'اختر المستأجر',
       period: {
         oneDay: '1 يوم',
         sevenDays: '7 أيام',

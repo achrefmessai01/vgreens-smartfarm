@@ -150,8 +150,6 @@ export const es = {
     deviceStatus: {
       title: 'Estado de dispositivos',
       subtitle: 'Estado en vivo de cada sensor y dispositivo edge',
-      selectTenant: 'Inquilino',
-      selectTenantPlaceholder: 'Seleccionar inquilino',
       period: {
         oneDay: '1 día',
         sevenDays: '7 días',

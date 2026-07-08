@@ -164,8 +164,6 @@ export const ro = {
     deviceStatus: {
       title: 'Starea dispozitivelor',
       subtitle: 'Starea în timp real a fiecărui senzor și dispozitiv edge',
-      selectTenant: 'Chiriaș',
-      selectTenantPlaceholder: 'Selectează chiriașul',
       period: {
         oneDay: '1 zi',
         sevenDays: '7 zile',
