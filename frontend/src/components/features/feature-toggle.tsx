@@ -8,6 +8,20 @@ import { cn } from '@/lib/utils';
 import type { FeatureWithTenantStatus } from '@/generated/graphql';
 import { FeatureIcon } from './feature-icon';
 
+/**
+ * Optional secondary switch rendered inside a feature card, for per-feature
+ * sub-settings that don't live in the feature-flag table (e.g. "device
+ * status for tenant admins" in tenant.settings). Only shown while the
+ * feature itself is enabled — a sub-permission is meaningless without it.
+ */
+export interface FeatureSubToggle {
+  title: string;
+  description?: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  loading?: boolean;
+}
+
 interface FeatureToggleProps {
   feature: FeatureWithTenantStatus;
   tenantId: string;
@@ -22,6 +36,7 @@ interface FeatureToggleProps {
   // don't even see the affordance. The backend enforces the same
   // VGREENS_ADMIN gate on the mutation.
   onEdit?: (feature: FeatureWithTenantStatus) => void;
+  subToggle?: FeatureSubToggle;
 }
 
 // Card-shaped feature toggle. Enabled cards get a subtle emerald tint on the
@@ -35,6 +50,7 @@ export function FeatureToggle({
   isLoading = false,
   readOnly = false,
   onEdit,
+  subToggle,
 }: FeatureToggleProps) {
   const { t } = useI18n();
   const f = t.pages.admin.features;
@@ -132,6 +148,32 @@ export function FeatureToggle({
           </p>
         )}
       </div>
+
+      {/* Optional sub-setting row (e.g. tenant-admin access). Only rendered
+          while the feature is on — the sub-permission has no effect when the
+          tenant lacks the feature itself. */}
+      {subToggle && enabled && (
+        <div className="bg-muted/40 mt-4 flex items-center justify-between gap-3 rounded-lg p-3">
+          <div className="min-w-0">
+            <div className="text-sm font-medium">{subToggle.title}</div>
+            {subToggle.description && (
+              <p className="text-muted-foreground mt-0.5 text-xs">
+                {subToggle.description}
+              </p>
+            )}
+          </div>
+          <Switch
+            checked={subToggle.checked}
+            onCheckedChange={subToggle.onChange}
+            disabled={readOnly || subToggle.loading}
+            className={cn(
+              'transition-opacity',
+              (readOnly || subToggle.loading) && 'opacity-40',
+            )}
+            aria-label={subToggle.title}
+          />
+        </div>
+      )}
 
       {/* Footer: horizontal divider then key pill (left) + status label
           (right). The divider stays neutral even on enabled cards so it

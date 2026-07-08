@@ -7,13 +7,10 @@ import {
   useFeaturesWithTenantStatusQuery,
 } from '@/generated/graphql';
 import * as React from 'react';
-import { MonitorCog } from 'lucide-react';
 import { FeatureList } from '@/components/features';
 import { FeatureFormSheet } from '@/components/features/feature-form-sheet';
-import { Switch } from '@/components/ui/switch';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { useToast } from '@/components/ui/toast-provider';
-import { cn } from '@/lib/utils';
 import { useI18n } from '@/i18n';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useFeatureEditSheet } from '@/lib/hooks/use-feature-edit-sheet';
@@ -127,13 +124,6 @@ export function TenantFeaturesTab({
 
   const features = featuresData?.featuresWithTenantStatus || [];
 
-  // Keys live in en.ts only for now — other locales fall back to English via
-  // the i18n deepFallback merge.
-  const deviceStatusToggleTitle =
-    t.pages.admin.features.deviceStatusForTenantAdminsTitle;
-  const deviceStatusToggleDescription =
-    t.pages.admin.features.deviceStatusForTenantAdminsDescription;
-
   return (
     <>
       <FeatureList
@@ -143,50 +133,25 @@ export function TenantFeaturesTab({
         isLoading={isLoading}
         readOnly={readOnly}
         onEdit={readOnly ? undefined : editFeature.openEdit}
+        // Role-scoped access sub-toggle inside the device_status card: the
+        // flag decides whether the tenant HAS device status, this decides
+        // whether the tenant's own admins may open it. Title/description keys
+        // live in en.ts only for now — other locales fall back to English via
+        // the i18n deepFallback merge.
+        getSubToggle={(feature) =>
+          feature.key === 'device_status'
+            ? {
+                title: t.pages.admin.features.deviceStatusForTenantAdminsTitle,
+                description:
+                  t.pages.admin.features
+                    .deviceStatusForTenantAdminsDescription,
+                checked: deviceStatusForTenantAdmins,
+                onChange: handleDeviceStatusToggle,
+                loading: settingSaving,
+              }
+            : undefined
+        }
       />
-
-      {/* Role-scoped access toggle, separate from the feature flags above:
-          the flag decides whether the tenant HAS device status, this decides
-          whether the tenant's own admins may open it. */}
-      <div
-        className={cn(
-          'bg-card mt-6 flex items-center justify-between gap-4 rounded-2xl border p-5 sm:p-6',
-          deviceStatusForTenantAdmins
-            ? 'border-emerald-500 bg-emerald-500/[0.03] shadow-[0_0_0_1px_theme(colors.emerald.500/0.35)]'
-            : 'border-border/60',
-        )}
-      >
-        <div className="flex min-w-0 items-start gap-3">
-          <div
-            className={cn(
-              'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-              deviceStatusForTenantAdmins
-                ? 'bg-emerald-500/10 text-emerald-500'
-                : 'bg-muted text-muted-foreground',
-            )}
-          >
-            <MonitorCog className="h-5 w-5" aria-hidden />
-          </div>
-          <div className="min-w-0">
-            <div className="text-base font-semibold">
-              {deviceStatusToggleTitle}
-            </div>
-            <p className="text-muted-foreground mt-1 text-sm">
-              {deviceStatusToggleDescription}
-            </p>
-          </div>
-        </div>
-        <Switch
-          checked={deviceStatusForTenantAdmins}
-          onCheckedChange={handleDeviceStatusToggle}
-          disabled={settingSaving || readOnly}
-          className={cn(
-            'transition-opacity',
-            (settingSaving || readOnly) && 'opacity-40',
-          )}
-          aria-label={deviceStatusToggleTitle}
-        />
-      </div>
       {!readOnly && (
         <FeatureFormSheet
           open={editFeature.isSheetOpen}
