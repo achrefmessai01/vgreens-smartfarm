@@ -206,6 +206,10 @@ export function BatchSidebar({
                     <input
                       ref={dateInputRef}
                       id="harvestDate"
+                      // Remount on selection: Safari keeps the showPicker()
+                      // popover open after a pick (blur/disable don't dismiss
+                      // it); removing the input from the DOM always does.
+                      key={harvestDate}
                       type="date"
                       value={harvestDate}
                       max={todayIso}
