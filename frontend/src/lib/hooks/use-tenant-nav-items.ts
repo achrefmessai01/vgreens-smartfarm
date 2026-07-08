@@ -67,9 +67,14 @@ export function useTenantNavItems(
   tenantIdOverride?: string,
 ): TenantNavItem[] {
   const { t } = useI18n();
-  const { role, isVGreensInternal } = useCurrentUser();
+  const { role, isVGreensInternal, user } = useCurrentUser();
   const { hasFeature } = useTenantFeatures(tenantIdOverride);
   const isViewingSpecificTenant = Boolean(tenantIdOverride);
+  // Device status is vGreens-internal by default; a tenant's TENANT_ADMINs
+  // only get the item when the tenant is opted in via settings (toggled by a
+  // vGreens admin on the tenant's features tab).
+  const deviceStatusForTenantAdmins =
+    user?.tenant?.settings?.deviceStatusForTenantAdmins ?? false;
 
   const allItems: TenantNavItem[] = [
     {
@@ -111,7 +116,9 @@ export function useTenantNavItems(
       href: '/tenant/devices',
       icon: Cpu,
       featureKey: 'device_status',
-      allowedRoles: [UserRole.VgreensAdmin, UserRole.TenantAdmin],
+      allowedRoles: deviceStatusForTenantAdmins
+        ? [UserRole.VgreensAdmin, UserRole.TenantAdmin]
+        : [UserRole.VgreensAdmin],
       group: 'monitoring',
     },
     {

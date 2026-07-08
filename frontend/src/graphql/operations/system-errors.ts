@@ -46,6 +46,7 @@ export const GET_RECENT_SYSTEM_ERRORS = gql`
           disabledSensorFields
           hiddenHarvestDashboardItems
           harvestDashboardOrder
+          deviceStatusForTenantAdmins
         }
         allowedDomains
       }

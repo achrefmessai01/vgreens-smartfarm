@@ -10,6 +10,7 @@ import {
 } from '@nestjs/graphql';
 import {
   BadRequestException,
+  ForbiddenException,
   NotFoundException,
   UseGuards,
 } from '@nestjs/common';
@@ -40,6 +41,7 @@ import {
   windowForDurationMs,
 } from '@modules/influxdb/dto';
 import { TenantsService } from '@modules/tenants/tenants.service';
+import { composeTenantSettings } from '@modules/tenants/entities/tenant-settings';
 import { GreenhouseService } from '@modules/greenhouse/greenhouse.service';
 
 @UseGuards(ClerkAuthGuard, RolesGuard)
@@ -198,6 +200,11 @@ export class SensorConfigResolver {
     );
   }
 
+  // Device-status dashboard only. The dashboard is a vGreens-internal
+  // feature; tenant admins get it only when their tenant is opted in via
+  // settings.deviceStatusForTenantAdmins (mirrors the frontend nav/page
+  // gate). `deviceStatuses` above stays open to all roles because it also
+  // powers the farm-overview sensor map's liveness dots.
   @Query(() => [DeviceActivityPoint], { name: 'deviceActivitySeries' })
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
   async deviceActivitySeries(
@@ -210,6 +217,14 @@ export class SensorConfigResolver {
     );
     const tenant = await this.tenantsService.findOne(targetTenantId);
     if (!tenant?.influxBucketName) return [];
+    if (
+      currentUser.role === UserRole.TENANT_ADMIN &&
+      !composeTenantSettings(tenant).deviceStatusForTenantAdmins
+    ) {
+      throw new ForbiddenException(
+        'Device status is not enabled for tenant admins of this tenant',
+      );
+    }
 
     const { start, stop, windowEvery } = this.resolveDeviceRange(input);
     return this.influxDBService.getDeviceActivitySeries(

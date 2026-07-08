@@ -1320,6 +1320,9 @@ export const en = {
           'This feature is not enabled for your tenant. Please contact your administrator to enable this feature.',
         notAvailableBadge: 'Not Available',
         goToDashboard: 'Go to Dashboard',
+        deviceStatusForTenantAdminsTitle: 'Device status for tenant admins',
+        deviceStatusForTenantAdminsDescription:
+          "Allow this tenant's admins to open the device-status dashboard. It is vGreens-internal by default.",
       },
       reports: {
         title: 'Error Reports Management',

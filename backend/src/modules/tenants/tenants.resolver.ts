@@ -110,6 +110,23 @@ export class TenantsResolver {
     return this.tenantsService.delete(id);
   }
 
+  /**
+   * vGreens-admin-only: grant/revoke device-status dashboard access for the
+   * tenant's TENANT_ADMIN users. Deliberately not self-serve — the feature is
+   * internal by default and availability is decided per tenant by vGreens.
+   */
+  @Mutation(() => Tenant)
+  @Roles(UserRole.VGREENS_ADMIN)
+  async setTenantDeviceStatusForTenantAdmins(
+    @Args('tenantId', { type: () => ID }) tenantId: string,
+    @Args('enabled') enabled: boolean,
+  ): Promise<Tenant> {
+    return this.tenantsService.setDeviceStatusForTenantAdmins(
+      tenantId,
+      enabled,
+    );
+  }
+
   @Mutation(() => Tenant)
   @Roles(UserRole.VGREENS_ADMIN, UserRole.TENANT_ADMIN)
   async setTenantDisabledSensorFields(

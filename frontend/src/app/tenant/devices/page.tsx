@@ -11,11 +11,17 @@ import { DeviceDashboard } from '@/components/devices';
 
 export default function DeviceStatusPage() {
   const router = useRouter();
-  const { role, loading } = useCurrentUser();
+  const { role, user, loading } = useCurrentUser();
 
-  // Device fleet health is for tenant admins (and vGreens admins) only.
+  // Device fleet health is a vGreens-internal feature. Tenant admins only get
+  // it when their tenant is opted in via settings.deviceStatusForTenantAdmins
+  // (toggled by a vGreens admin; the deviceActivitySeries resolver enforces
+  // the same rule server-side).
+  const deviceStatusForTenantAdmins =
+    user?.tenant?.settings?.deviceStatusForTenantAdmins ?? false;
   const allowed =
-    role === UserRole.TenantAdmin || role === UserRole.VgreensAdmin;
+    role === UserRole.VgreensAdmin ||
+    (role === UserRole.TenantAdmin && deviceStatusForTenantAdmins);
 
   useEffect(() => {
     if (!loading && role && !allowed) {
