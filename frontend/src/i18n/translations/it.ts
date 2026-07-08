@@ -109,6 +109,9 @@ export const it = {
     tenantSelector: {
       allTenants: 'Tutti i tenant',
       placeholder: 'Seleziona tenant',
+      pickRequiredTitle: 'Seleziona un tenant per continuare',
+      pickRequiredDescription:
+        'Usa il selettore tenant nella barra laterale per scegliere i dati del tenant da visualizzare.',
     },
     viewOnlyTooltip: 'Account in sola lettura — questa azione è disattivata.',
     sidebar: {
@@ -1316,6 +1319,10 @@ export const it = {
           'Questa funzionalità non è abilitata per il tuo tenant. Contatta l’amministratore per abilitarla.',
         notAvailableBadge: 'Non disponibile',
         goToDashboard: 'Vai alla dashboard',
+        deviceStatusForTenantAdminsTitle:
+          'Stato dispositivi per gli admin del tenant',
+        deviceStatusForTenantAdminsDescription:
+          'Consente agli admin di questo tenant di aprire la dashboard dello stato dispositivi. Per impostazione predefinita è interna a vGreens.',
       },
       reports: {
         title: 'Gestione segnalazioni di errore',

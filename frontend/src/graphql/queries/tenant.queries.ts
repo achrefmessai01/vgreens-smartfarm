@@ -13,6 +13,7 @@ export const TENANTS_QUERY = gql`
         disabledSensorFields
         hiddenHarvestDashboardItems
         harvestDashboardOrder
+        deviceStatusForTenantAdmins
       }
       allowedDomains
       greenhouses {
@@ -43,6 +44,7 @@ export const TENANT_QUERY = gql`
         disabledSensorFields
         hiddenHarvestDashboardItems
         harvestDashboardOrder
+        deviceStatusForTenantAdmins
       }
       allowedDomains
       greenhouses {

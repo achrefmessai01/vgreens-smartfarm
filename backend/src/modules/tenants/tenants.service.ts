@@ -11,6 +11,7 @@ import { InfluxDBService } from '@modules/influxdb/influxdb.service';
 import { OrderDirection } from '@/common/enums/order-direction.enum';
 import {
   composeTenantSettings,
+  MirroredTenantSettingKey,
   TenantSettings,
 } from './entities/tenant-settings';
 import { isAllowedSensorField } from './sensor-fields.constants';
@@ -49,7 +50,7 @@ export class TenantsService {
    * blob-only state — e.g. legacy ids normalized by the backfill — instead of
    * resurrecting stale flat-column values.
    */
-  private applySetting<K extends keyof TenantSettings>(
+  private applySetting<K extends MirroredTenantSettingKey>(
     tenant: Tenant,
     key: K,
     value: TenantSettings[K],
@@ -156,7 +157,29 @@ export class TenantsService {
     }
     // De-dupe while preserving first-seen order — the array is the ordering, so
     // a duplicated id would otherwise pin the item to its earlier slot.
-    this.applySetting(tenant, 'harvestDashboardOrder', [...new Set(orderedIds)]);
+    this.applySetting(tenant, 'harvestDashboardOrder', [
+      ...new Set(orderedIds),
+    ]);
+    return this.tenantRepository.save(tenant);
+  }
+
+  /**
+   * Opt a tenant's TENANT_ADMIN users in/out of the device-status dashboard.
+   * Blob-only write — this key post-dates the VSL-279 flat columns, so there
+   * is nothing to dual-write.
+   */
+  async setDeviceStatusForTenantAdmins(
+    id: string,
+    enabled: boolean,
+  ): Promise<Tenant> {
+    const tenant = await this.findOne(id);
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with id ${id} not found`);
+    }
+    tenant.settings = {
+      ...composeTenantSettings(tenant),
+      deviceStatusForTenantAdmins: enabled,
+    };
     return this.tenantRepository.save(tenant);
   }
 

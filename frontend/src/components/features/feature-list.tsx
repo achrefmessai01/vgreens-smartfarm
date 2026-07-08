@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Search } from 'lucide-react';
-import { FeatureToggle } from './feature-toggle';
+import { FeatureToggle, type FeatureSubToggle } from './feature-toggle';
 import { Input } from '@/components/ui/input';
 import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,11 @@ interface FeatureListProps {
   // is only rendered when this callback is provided and `readOnly` is
   // false (VGREENS_ADMIN only in practice).
   onEdit?: (feature: FeatureWithTenantStatus) => void;
+  // Per-feature secondary switch (e.g. tenant-admin access for
+  // device_status). Return undefined for features without one.
+  getSubToggle?: (
+    feature: FeatureWithTenantStatus,
+  ) => FeatureSubToggle | undefined;
 }
 
 type StatusFilter = 'all' | 'on' | 'off';
@@ -47,6 +52,7 @@ export function FeatureList({
   isLoading = false,
   readOnly = false,
   onEdit,
+  getSubToggle,
 }: FeatureListProps) {
   const { t } = useI18n();
   const f = t.pages.admin.features;
@@ -173,6 +179,7 @@ export function FeatureList({
               isLoading={isLoading}
               readOnly={readOnly}
               onEdit={onEdit}
+              subToggle={getSubToggle?.(feature)}
             />
           ))}
         </div>

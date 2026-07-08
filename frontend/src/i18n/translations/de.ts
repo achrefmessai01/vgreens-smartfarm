@@ -104,6 +104,9 @@ export const de = {
     tenantSelector: {
       allTenants: 'Alle Mandanten',
       placeholder: 'Mandant auswählen',
+      pickRequiredTitle: 'Mandant auswählen, um fortzufahren',
+      pickRequiredDescription:
+        'Verwenden Sie die Mandantenauswahl in der Seitenleiste, um zu wählen, welche Mandantendaten Sie sehen möchten.',
     },
     viewOnlyTooltip: 'Nur-Lese-Konto – diese Aktion ist deaktiviert.',
     sidebar: {
@@ -1395,6 +1398,10 @@ export const de = {
           'Diese Funktion ist für Ihren Mandanten nicht aktiviert. Bitte wenden Sie sich an Ihren Administrator, um diese Funktion zu aktivieren.',
         notAvailableBadge: 'Nicht verfügbar',
         goToDashboard: 'Zum Dashboard',
+        deviceStatusForTenantAdminsTitle:
+          'Gerätestatus für Mandanten-Admins',
+        deviceStatusForTenantAdminsDescription:
+          'Erlaubt den Admins dieses Mandanten, das Gerätestatus-Dashboard zu öffnen. Standardmäßig nur vGreens-intern.',
       },
     },
     tenant: {

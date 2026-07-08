@@ -109,6 +109,9 @@ export const tr = {
     tenantSelector: {
       allTenants: 'Tüm kiracılar',
       placeholder: 'Kiracı seç',
+      pickRequiredTitle: 'Devam etmek için bir kiracı seçin',
+      pickRequiredDescription:
+        'Hangi kiracının verilerini görüntülemek istediğinizi seçmek için kenar çubuğundaki kiracı seçiciyi kullanın.',
     },
     viewOnlyTooltip: 'Yalnızca okuma hesabı — bu eylem devre dışı.',
     sidebar: {
@@ -1297,6 +1300,10 @@ export const tr = {
           'Bu özellik kiracınız için etkin değil. Bu özelliği etkinleştirmek için lütfen yöneticinizle iletişime geçin.',
         notAvailableBadge: 'Kullanılamıyor',
         goToDashboard: 'Panoya git',
+        deviceStatusForTenantAdminsTitle:
+          'Kiracı adminleri için cihaz durumu',
+        deviceStatusForTenantAdminsDescription:
+          'Bu kiracının adminlerinin cihaz durumu panosunu açmasına izin verir. Varsayılan olarak yalnızca vGreens içindir.',
       },
       reports: {
         title: 'Hata raporu yönetimi',

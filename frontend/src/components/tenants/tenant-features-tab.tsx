@@ -1,6 +1,8 @@
 'use client';
 
 import {
+  useSetTenantDeviceStatusForTenantAdminsMutation,
+  useTenantQuery,
   useToggleTenantFeatureMutation,
   useFeaturesWithTenantStatusQuery,
 } from '@/generated/graphql';
@@ -47,6 +49,35 @@ export function TenantFeaturesTab({
 
   const [toggleFeature] = useToggleTenantFeatureMutation();
   const [isLoading, setIsLoading] = React.useState(false);
+
+  // Device-status availability for the tenant's TENANT_ADMINs. Lives in
+  // tenant.settings (not the feature-flag table) because it scopes WHO within
+  // the tenant sees the dashboard, not whether the tenant has the feature.
+  const { data: tenantData } = useTenantQuery({
+    variables: { id: tenantId },
+    skip: !tenantId || !active,
+    fetchPolicy: 'cache-and-network',
+  });
+  const deviceStatusForTenantAdmins =
+    tenantData?.tenant?.settings?.deviceStatusForTenantAdmins ?? false;
+  const [setDeviceStatusForTenantAdmins, { loading: settingSaving }] =
+    useSetTenantDeviceStatusForTenantAdminsMutation();
+
+  const handleDeviceStatusToggle = async (enabled: boolean) => {
+    try {
+      // Mutation payload returns tenant.id + settings, so the Apollo cache
+      // entry behind useTenantQuery updates without a refetch.
+      await setDeviceStatusForTenantAdmins({
+        variables: { tenantId, enabled },
+      });
+    } catch (error) {
+      toast({
+        title: t.pages.admin.features.featureAccess ?? 'Feature access',
+        description: extractErrorMessage(error),
+        variant: 'destructive',
+      });
+    }
+  };
 
   // Pencil-icon "edit feature" flow — surfaces the same
   // FeatureFormSheet used on the standalone feature-flags admin page. The
@@ -102,6 +133,22 @@ export function TenantFeaturesTab({
         isLoading={isLoading}
         readOnly={readOnly}
         onEdit={readOnly ? undefined : editFeature.openEdit}
+        // Role-scoped access sub-toggle inside the device_status card: the
+        // flag decides whether the tenant HAS device status, this decides
+        // whether the tenant's own admins may open it.
+        getSubToggle={(feature) =>
+          feature.key === 'device_status'
+            ? {
+                title: t.pages.admin.features.deviceStatusForTenantAdminsTitle,
+                description:
+                  t.pages.admin.features
+                    .deviceStatusForTenantAdminsDescription,
+                checked: deviceStatusForTenantAdmins,
+                onChange: handleDeviceStatusToggle,
+                loading: settingSaving,
+              }
+            : undefined
+        }
       />
       {!readOnly && (
         <FeatureFormSheet

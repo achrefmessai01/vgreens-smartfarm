@@ -109,6 +109,9 @@ export const ro = {
     tenantSelector: {
       allTenants: 'Toți chiriașii',
       placeholder: 'Selectează chiriaș',
+      pickRequiredTitle: 'Selectează un chiriaș pentru a continua',
+      pickRequiredDescription:
+        'Folosește selectorul de chiriași din bara laterală pentru a alege datele cărui chiriaș vrei să le vezi.',
     },
     viewOnlyTooltip:
       'Cont doar pentru citire — această acțiune este dezactivată.',
@@ -1317,6 +1320,10 @@ export const ro = {
           'Această funcționalitate nu este activată pentru chiriașul tău. Contactează administratorul pentru a activa această funcționalitate.',
         notAvailableBadge: 'Indisponibilă',
         goToDashboard: 'Mergi la tabloul de bord',
+        deviceStatusForTenantAdminsTitle:
+          'Starea dispozitivelor pentru adminii chiriașului',
+        deviceStatusForTenantAdminsDescription:
+          'Permite adminilor acestui chiriaș să deschidă panoul de stare a dispozitivelor. Implicit este intern vGreens.',
       },
       reports: {
         title: 'Gestionarea rapoartelor de erori',

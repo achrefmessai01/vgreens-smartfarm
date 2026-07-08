@@ -109,6 +109,9 @@ export const pl = {
     tenantSelector: {
       allTenants: 'Wszyscy najemcy',
       placeholder: 'Wybierz najemcę',
+      pickRequiredTitle: 'Wybierz najemcę, aby kontynuować',
+      pickRequiredDescription:
+        'Użyj selektora najemcy na pasku bocznym, aby wybrać, którego najemcy dane chcesz zobaczyć.',
     },
     viewOnlyTooltip: 'Konto tylko do odczytu — ta akcja jest wyłączona.',
     sidebar: {
@@ -1303,6 +1306,10 @@ export const pl = {
           'Ta funkcja nie jest włączona dla Twojego najemcy. Skontaktuj się z administratorem, aby włączyć tę funkcję.',
         notAvailableBadge: 'Niedostępna',
         goToDashboard: 'Przejdź do panelu',
+        deviceStatusForTenantAdminsTitle:
+          'Status urządzeń dla adminów najemcy',
+        deviceStatusForTenantAdminsDescription:
+          'Pozwala adminom tego najemcy otwierać panel statusu urządzeń. Domyślnie tylko wewnętrzne dla vGreens.',
       },
       reports: {
         title: 'Zarządzanie zgłoszeniami błędów',

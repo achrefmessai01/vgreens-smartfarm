@@ -104,6 +104,9 @@ export const en = {
     tenantSelector: {
       allTenants: 'All tenants',
       placeholder: 'Select tenant',
+      pickRequiredTitle: 'Select a tenant to continue',
+      pickRequiredDescription:
+        'Use the tenant selector in the sidebar to choose which tenant\'s data you want to view.',
     },
     viewOnlyTooltip: 'Read-only account — this action is disabled.',
     sidebar: {
@@ -1320,6 +1323,9 @@ export const en = {
           'This feature is not enabled for your tenant. Please contact your administrator to enable this feature.',
         notAvailableBadge: 'Not Available',
         goToDashboard: 'Go to Dashboard',
+        deviceStatusForTenantAdminsTitle: 'Device status for tenant admins',
+        deviceStatusForTenantAdminsDescription:
+          "Allow this tenant's admins to open the device-status dashboard. It is vGreens-internal by default.",
       },
       reports: {
         title: 'Error Reports Management',
