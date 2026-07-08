@@ -1,9 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Building2 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
-import { StyledSelect } from '@/components/ui/styled-select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FeatureNotAvailableCard } from '@/components/ui/feature-not-available-card';
 import { useI18n } from '@/i18n';
@@ -28,9 +26,7 @@ export function DeviceDashboard() {
     totalRealDataPoints,
     activitySeries,
     isVGreensAdmin,
-    tenants,
     selectedTenantId,
-    setSelectedTenantId,
     deviceGroups,
     groupFilter,
     setGroupFilter,
@@ -58,24 +54,10 @@ export function DeviceDashboard() {
         className="mb-0"
         actions={
           <div className="flex flex-wrap items-end justify-end gap-2">
-            {isVGreensAdmin && tenants.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <span className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
-                  <Building2 className="h-3 w-3" />
-                  {ds.selectTenant}
-                </span>
-                <StyledSelect
-                  value={selectedTenantId}
-                  onValueChange={setSelectedTenantId}
-                  options={tenants.map((t) => ({
-                    label: t.name,
-                    value: t.id,
-                  }))}
-                  triggerClassName="h-9 w-[200px] font-medium"
-                  placeholder={ds.selectTenantPlaceholder}
-                />
-              </div>
-            )}
+            {/* Tenant switching lives exclusively in the sidebar
+                (`SidebarTenantCard`); the page-level dropdown that used to
+                sit here was removed in favor of the shared
+                `SelectedTenantProvider` context. */}
             {!featureUnavailable && deviceGroups.length > 0 && (
               <DeviceGroupFilter
                 groups={deviceGroups}

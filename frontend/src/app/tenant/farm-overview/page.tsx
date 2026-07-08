@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { Settings } from 'lucide-react';
 import {
   CalibrationDropdown,
   CombinedGreenhouseView,
@@ -12,9 +14,10 @@ import {
 import { TimeRangeSelector } from '@/components/farm-overview/time-range-selector';
 import { FeatureGuard } from '@/components/features/feature-guard';
 import { PageHeader } from '@/components/layout/page-header';
-import { TenantSelector } from '@/components/tenants';
+import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import { useFarmOverviewPage } from '@/lib/hooks/use-farm-overview-page';
+import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { ParameterType } from '@/types/farm.types';
 
@@ -25,11 +28,26 @@ export default function FarmOverviewPage() {
     typeof useFarmOverviewPage
   >[0];
   const state = useFarmOverviewPage(farmOverviewT);
+  // vGreens-internal users (admin + read-only member) get a shortcut into the
+  // tenant's farm-overview config tab. Tenant users don't see it — they
+  // shouldn't be routed into the admin area at all. Hidden if no tenant is
+  // in scope yet (member without a selected tenant) so we never link to
+  // `/admin/tenants/?tab=farm-overview`.
+  const { isVGreensAdmin, isVGreensMember } = useCurrentUser();
+  const canAccessFarmConfig = isVGreensAdmin || isVGreensMember;
+  const configTenantId = state.selectedTenantId || '';
+  const farmOverviewH = t.pages.farmOverview as Record<
+    string,
+    string | undefined
+  > &
+    typeof t.pages.farmOverview;
+  const openConfigLabel =
+    farmOverviewH?.openConfigSettings ?? 'Open configuration settings';
 
   if (state.loading) {
     return (
       <FeatureGuard featureKey="farm_overview">
-        <FarmOverviewPageSkeleton showTenantSelector={state.isVGreensAdmin} />
+        <FarmOverviewPageSkeleton />
       </FeatureGuard>
     );
   }
@@ -78,14 +96,29 @@ export default function FarmOverviewPage() {
                 }}
               />
             )}
-            {state.isVGreensAdmin && (
-              <TenantSelector
-                tenants={state.tenants}
-                selectedTenantId={state.tenantSelectorValue}
-                onTenantChange={state.handleTenantChange}
-                label={t.pages.admin.users.selectTenant || 'Select tenant'}
-                placeholder={t.pages.admin.users.selectTenant}
-              />
+            {/* Tenant switching lives exclusively in the sidebar
+                (`SidebarTenantCard`) now; the page-level dropdown that used
+                to sit here was removed in favor of the shared
+                `SelectedTenantProvider` context. */}
+            {/* vGreens-internal shortcut into the tenant's farm-overview
+                config tab (SensorVisibility + FarmLayout + SensorConfig).
+                The deep link uses `?tab=farm-overview` which TenantDetailsTabs
+                reads to preselect the tab. */}
+            {canAccessFarmConfig && configTenantId && (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="h-9 gap-2 rounded-lg"
+                aria-label={openConfigLabel}
+                title={openConfigLabel}
+              >
+                <Link
+                  href={`/admin/tenants/${configTenantId}?tab=farm-overview`}
+                >
+                  <Settings className="h-4 w-4" />
+                </Link>
+              </Button>
             )}
           </div>
         </div>

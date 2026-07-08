@@ -16,6 +16,19 @@ import {
 import * as React from 'react';
 
 /**
+ * Which sidebar section a nav item belongs to. The redesigned sidebar renders
+ * items grouped by these buckets with an uppercase section header above each
+ * group; the in-header `TenantNavbar` ignores the field and renders a flat
+ * list.
+ */
+export type NavGroup =
+  | 'overview'
+  | 'management'
+  | 'system'
+  | 'farm'
+  | 'monitoring';
+
+/**
  * Shape of a sidebar / header nav item. Mirrors the sidebar's local NavItem so
  * the sidebar can keep accepting these without a type change.
  */
@@ -27,6 +40,9 @@ export interface TenantNavItem {
   featureKey?: string;
   /** When set, only users whose role is in this list can see the item. */
   allowedRoles?: UserRole[];
+  /** Which sidebar section this item lives in. Optional so consumers that
+   *  render a flat list (like the in-header nav) can ignore it. */
+  group?: NavGroup;
 }
 
 /**
@@ -51,9 +67,14 @@ export function useTenantNavItems(
   tenantIdOverride?: string,
 ): TenantNavItem[] {
   const { t } = useI18n();
-  const { role, isVGreensInternal } = useCurrentUser();
+  const { role, isVGreensInternal, user } = useCurrentUser();
   const { hasFeature } = useTenantFeatures(tenantIdOverride);
   const isViewingSpecificTenant = Boolean(tenantIdOverride);
+  // Device status is vGreens-internal by default; a tenant's TENANT_ADMINs
+  // only get the item when the tenant is opted in via settings (toggled by a
+  // vGreens admin on the tenant's features tab).
+  const deviceStatusForTenantAdmins =
+    user?.tenant?.settings?.deviceStatusForTenantAdmins ?? false;
 
   const allItems: TenantNavItem[] = [
     {
@@ -61,11 +82,44 @@ export function useTenantNavItems(
       href: '/tenant/farm-overview',
       icon: Sprout,
       featureKey: 'farm_overview',
+      group: 'farm',
     },
     {
       label: t.navigation.harvest || 'Harvest',
       href: '/tenant/harvest',
       icon: Apple,
+      group: 'farm',
+    },
+    {
+      label: t.navigation.history,
+      href: '/tenant/history',
+      icon: Clock,
+      featureKey: 'data_analytics',
+      group: 'farm',
+    },
+    {
+      label: t.navigation.alerts,
+      href: '/tenant/alerts',
+      icon: AlertTriangle,
+      featureKey: 'sensor_alerts',
+      group: 'monitoring',
+    },
+    {
+      label: t.navigation.cameraLivestream,
+      href: '/tenant/camera-livestream',
+      icon: Video,
+      featureKey: 'camera_livestream',
+      group: 'monitoring',
+    },
+    {
+      label: t.navigation.deviceStatus,
+      href: '/tenant/devices',
+      icon: Cpu,
+      featureKey: 'device_status',
+      allowedRoles: deviceStatusForTenantAdmins
+        ? [UserRole.VgreensAdmin, UserRole.TenantAdmin]
+        : [UserRole.VgreensAdmin],
+      group: 'monitoring',
     },
     {
       label: t.navigation.users,
@@ -77,31 +131,7 @@ export function useTenantNavItems(
         UserRole.VgreensMember,
         UserRole.TenantAdmin,
       ],
-    },
-    {
-      label: t.navigation.alerts,
-      href: '/tenant/alerts',
-      icon: AlertTriangle,
-      featureKey: 'sensor_alerts',
-    },
-    {
-      label: t.navigation.cameraLivestream,
-      href: '/tenant/camera-livestream',
-      icon: Video,
-      featureKey: 'camera_livestream',
-    },
-    {
-      label: t.navigation.history,
-      href: '/tenant/history',
-      icon: Clock,
-      featureKey: 'data_analytics',
-    },
-    {
-      label: t.navigation.deviceStatus,
-      href: '/tenant/devices',
-      icon: Cpu,
-      featureKey: 'device_status',
-      allowedRoles: [UserRole.VgreensAdmin, UserRole.TenantAdmin],
+      group: 'management',
     },
   ];
 

@@ -64,6 +64,7 @@ export const SET_TENANT_DISABLED_SENSOR_FIELDS_MUTATION = gql`
         disabledSensorFields
         hiddenHarvestDashboardItems
         harvestDashboardOrder
+        deviceStatusForTenantAdmins
       }
     }
   }
@@ -83,6 +84,27 @@ export const SET_TENANT_HARVEST_DASHBOARD_ITEMS_MUTATION = gql`
         disabledSensorFields
         hiddenHarvestDashboardItems
         harvestDashboardOrder
+        deviceStatusForTenantAdmins
+      }
+    }
+  }
+`;
+
+export const SET_TENANT_DEVICE_STATUS_FOR_TENANT_ADMINS_MUTATION = gql`
+  mutation SetTenantDeviceStatusForTenantAdmins(
+    $tenantId: ID!
+    $enabled: Boolean!
+  ) {
+    setTenantDeviceStatusForTenantAdmins(
+      tenantId: $tenantId
+      enabled: $enabled
+    ) {
+      id
+      settings {
+        disabledSensorFields
+        hiddenHarvestDashboardItems
+        harvestDashboardOrder
+        deviceStatusForTenantAdmins
       }
     }
   }
@@ -102,6 +124,7 @@ export const SET_TENANT_HARVEST_DASHBOARD_ORDER_MUTATION = gql`
         disabledSensorFields
         hiddenHarvestDashboardItems
         harvestDashboardOrder
+        deviceStatusForTenantAdmins
       }
     }
   }

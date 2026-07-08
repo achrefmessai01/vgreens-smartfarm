@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Building2 } from 'lucide-react';
+import { useI18n } from '@/i18n';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useSelectedTenantId } from '@/lib/contexts/selected-tenant-context';
 
@@ -28,6 +29,8 @@ export function TenantPickRequired({ children }: { children: React.ReactNode }) 
 }
 
 function TenantPickRequiredEmptyState() {
+  const { t } = useI18n();
+  const labels = t.common.tenantSelector;
   return (
     <div className="flex min-h-[60vh] w-full items-center justify-center p-6">
       <div className="bg-card text-card-foreground border-border max-w-md rounded-2xl border p-8 text-center shadow-sm">
@@ -35,11 +38,10 @@ function TenantPickRequiredEmptyState() {
           <Building2 className="h-6 w-6" aria-hidden="true" />
         </div>
         <h2 className="text-foreground mb-2 text-lg font-semibold">
-          Select a tenant to continue
+          {labels.pickRequiredTitle}
         </h2>
         <p className="text-muted-foreground text-sm">
-          Use the tenant selector in the top navigation to choose which
-          tenant&apos;s data you want to view.
+          {labels.pickRequiredDescription}
         </p>
       </div>
     </div>

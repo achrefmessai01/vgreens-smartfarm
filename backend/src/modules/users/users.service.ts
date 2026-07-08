@@ -269,11 +269,29 @@ export class UsersService extends BaseService<User> {
       }
     }
 
-    if (
-      (user.role === UserRole.VGREENS_ADMIN ||
-        user.role === UserRole.VGREENS_MEMBER) &&
-      updateUserInput.tenantId
-    ) {
+    // Compute the resulting user state up front so every downstream check
+    // reasons about what the row will look like *after* this update, not
+    // what it looks like today. In particular the "internal role can't have
+    // a tenant" invariant needs to fire against `nextRole` — checking
+    // `user.role` here rejects legitimate demotions like
+    // VGREENS_MEMBER → TENANT_ADMIN + tenantId in the same request.
+    const nextRole = updateUserInput.role ?? user.role;
+    const nextTenantId =
+      updateUserInput.tenantId !== undefined
+        ? updateUserInput.tenantId
+        : user.tenantId;
+    const nextEmail =
+      updateUserInput.email !== undefined ? updateUserInput.email : user.email;
+    const isNextInternalRoleForInvariant =
+      nextRole === UserRole.VGREENS_ADMIN ||
+      nextRole === UserRole.VGREENS_MEMBER;
+
+    if (isNextInternalRoleForInvariant && updateUserInput.tenantId) {
+      // Note: when the role is being changed *into* an internal role the
+      // block above already clears `updateUserInput.tenantId`, so this
+      // branch only fires when the caller is trying to assign a tenant to a
+      // user who is (and will remain) internal — the case we actually want
+      // to reject.
       throw new ForbiddenException(
         'Internal vGreens users cannot be assigned to a tenant',
       );
@@ -283,13 +301,6 @@ export class UsersService extends BaseService<User> {
     // user is being moved to a different tenant or their email is being
     // changed (the existing tenant might restrict the new address). Skipped
     // when the user is — or is becoming — a VGREENS_ADMIN (no tenant scope).
-    const nextRole = updateUserInput.role ?? user.role;
-    const nextTenantId =
-      updateUserInput.tenantId !== undefined
-        ? updateUserInput.tenantId
-        : user.tenantId;
-    const nextEmail =
-      updateUserInput.email !== undefined ? updateUserInput.email : user.email;
     const tenantChanging =
       updateUserInput.tenantId !== undefined &&
       updateUserInput.tenantId !== user.tenantId;

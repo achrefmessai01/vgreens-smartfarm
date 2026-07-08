@@ -1,14 +1,19 @@
 'use client';
 
-import { DataTable, type Column } from '@/components/ui/data-table/data-table';
-import { WriteActionButton } from '@/components/ui/write-action-button';
-import { User, UserRole, type Tenant } from '@/generated/graphql';
+import { DataTable } from '@/components/ui/data-table/data-table';
+import { User, type Tenant } from '@/generated/graphql';
 import { useI18n } from '@/i18n';
 import { usePaginationConfig } from '@/lib/hooks/use-pagination-config';
 import { useResponsiveBreakpoint } from '@/lib/hooks/use-responsive-breakpoint';
 import { useUserTableFilters } from '@/lib/hooks/use-user-table-filters';
-import { Plus } from 'lucide-react';
+import { useUserTableTranslations } from '@/lib/hooks/use-user-table-translations';
+import { useUsersViewMode } from '@/lib/hooks/use-users-view-mode';
+import { cn } from '@/lib/utils';
+import { UserGridView } from './user-grid-view';
+import { useUserManagementColumns } from './user-management-table-columns';
 import { useUserManagementRow } from './user-management-table-rows';
+import { UsersHeaderActions } from './users-header-actions';
+import { UsersToolbar } from './users-toolbar';
 
 interface UserManagementTableProps {
   users: User[];
@@ -16,14 +21,20 @@ interface UserManagementTableProps {
   onDelete: (user: User) => void;
   onCreate?: () => void;
   isLoading?: boolean;
-  hideTenantColumn?: boolean; // Hide tenant column for tenant users
-  /**
-   * Optional tenants list. When provided alongside a visible tenant column,
-   * the toolbar exposes a Tenant filter dropdown (admin surface only).
-   */
+  /** Hide the tenant column when scoped to a single tenant (tenant surface). */
+  hideTenantColumn?: boolean;
+  /** Optional tenants list; enables the Tenant filter dropdown on admin. */
   tenants?: Tenant[];
 }
 
+/**
+ * Users surface orchestrator. Owns the view-mode toggle (list ↔ grid) and
+ * renders a single shared toolbar (search + filters + view toggle +
+ * optional Create button) above the active surface, then delegates to
+ * either `DataTable` (list) or `UserGridView` (grid). All state lives in
+ * hooks so this component stays purely compositional. Mirrors
+ * `TenantTable`.
+ */
 export function UserManagementTable({
   users,
   onEdit,
@@ -36,95 +47,88 @@ export function UserManagementTable({
   const { t } = useI18n();
   const paginationConfig = usePaginationConfig();
   const { isMobile } = useResponsiveBreakpoint('lg');
-  const { filteredUsers, searchQuery, setSearchQuery, filterConfigs } =
-    useUserTableFilters({ users, tenants, hideTenantColumn });
+  const { viewMode, setViewMode } = useUsersViewMode();
+  const {
+    filteredUsers,
+    searchQuery,
+    setSearchQuery,
+    filterConfigs,
+    sortDirection,
+    toggleSort,
+  } = useUserTableFilters({ users, tenants, hideTenantColumn });
+  const { roleLabels, rowTranslations, gridTranslations } =
+    useUserTableTranslations();
 
-  const roleLabels: Record<UserRole, string> = {
-    VGREENS_ADMIN: t.pages.admin.users.roleVgreensAdmin,
-    VGREENS_MEMBER: t.pages.admin.users.roleVgreensMember,
-    TENANT_ADMIN: t.pages.admin.users.roleTenantAdmin,
-    TENANT_USER: t.pages.admin.users.roleTenantUser,
-  };
-
-  // Get row and card renderers from dedicated modules
   const { renderRow, renderCard } = useUserManagementRow({
     onEdit,
     onDelete,
     isLoading,
     hideTenantColumn,
     roleLabels,
+    translations: rowTranslations,
   });
 
-  const columns: Column<User>[] = [
-    {
-      key: 'name',
-      header: t.pages.admin.users.name,
-    },
-    {
-      key: 'email',
-      header: t.pages.admin.users.email,
-    },
-    {
-      key: 'role',
-      header: t.pages.admin.users.role,
-    },
-    ...(hideTenantColumn
-      ? []
-      : [
-          {
-            key: 'tenant',
-            header: t.pages.admin.users.tenant,
-          },
-        ]),
-    {
-      key: 'isActive',
-      header: t.pages.admin.users.status,
-    },
-    {
-      key: 'actions',
-      header: t.pages.admin.users.actions,
-      headerClassName: 'text-right',
-    },
-  ];
-
-  // Render the Create button inside the table toolbar (right-aligned via
-  // `headerActions`) so it sits on the same row as the search + filter
-  // controls instead of consuming a separate row above the table.
-  const headerActions = onCreate ? (
-    <WriteActionButton onClick={onCreate} disabled={isLoading}>
-      <Plus className="h-4 w-4" />
-      {t.pages.admin.users.createUser}
-    </WriteActionButton>
-  ) : undefined;
+  const columns = useUserManagementColumns({
+    sortDirection,
+    toggleSort,
+    hideTenantColumn,
+  });
 
   return (
     <div
-      className={
-        isMobile ? 'flex flex-col gap-4' : 'flex h-full min-h-0 flex-col gap-4'
-      }
+      className={cn(
+        isMobile ? 'flex flex-col gap-2' : 'flex h-full min-h-0 flex-col gap-2',
+      )}
     >
-      <div className={isMobile ? '' : 'min-h-0 flex-1'}>
-        <DataTable
-          data={filteredUsers}
-          columns={columns}
-          renderRow={renderRow}
-          renderCard={renderCard}
-          searchConfig={{ placeholder: t.pages.users.searchPlaceholder }}
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
-          filterConfigs={filterConfigs}
-          headerActions={headerActions}
-          emptyState={{
-            title: t.pages.users.noUsers,
-            description: t.pages.users.noUsersDescription,
-          }}
-          paginationVariant="compact"
-          defaultPageSize={paginationConfig.defaultPageSize}
-          pageSizeOptions={paginationConfig.pageSizeOptions}
-          paginationLabels={paginationConfig.paginationLabels}
-          responsiveBreakpoint="xl"
-        />
-      </div>
+      <UsersToolbar
+        searchPlaceholder={t.pages.users.searchPlaceholder}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterConfigs={filterConfigs}
+        headerActions={
+          <UsersHeaderActions
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onCreate={onCreate}
+            isLoading={isLoading}
+          />
+        }
+      />
+      {viewMode === 'grid' ? (
+        <div
+          className={
+            isMobile ? '' : 'scrollbar-hide min-h-0 flex-1 overflow-y-auto pr-1'
+          }
+        >
+          <UserGridView
+            users={filteredUsers}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            isLoading={isLoading}
+            hideTenantColumn={hideTenantColumn}
+            roleLabels={roleLabels}
+            translations={gridTranslations}
+          />
+        </div>
+      ) : (
+        <div className={isMobile ? '' : 'min-h-0 flex-1'}>
+          <DataTable
+            data={filteredUsers}
+            columns={columns}
+            renderRow={renderRow}
+            renderCard={renderCard}
+            emptyState={{
+              title: t.pages.users.noUsers,
+              description: t.pages.users.noUsersDescription,
+            }}
+            paginationVariant="compact"
+            defaultPageSize={paginationConfig.defaultPageSize}
+            pageSizeOptions={paginationConfig.pageSizeOptions}
+            paginationLabels={paginationConfig.paginationLabels}
+            responsiveBreakpoint="xl"
+          />
+        </div>
+      )}
     </div>
   );
 }

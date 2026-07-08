@@ -94,7 +94,7 @@ export function SensorVisibilityDropdown({
           variant="outline"
           size="sm"
           className={cn(
-            'group relative h-9 gap-2 overflow-hidden rounded-full border px-1 pr-1 pl-3 shadow-sm backdrop-blur-sm transition-all duration-200',
+            'group relative h-9 gap-2 overflow-hidden rounded-lg border px-1 pr-1 pl-3 shadow-sm backdrop-blur-sm transition-all duration-200',
             'hover:-translate-y-px hover:shadow-md',
             'data-[state=open]:shadow-md data-[state=open]:ring-2 data-[state=open]:ring-emerald-400/30',
             someDisabled

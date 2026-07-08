@@ -1,27 +1,32 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import '@/components/ui/logo-spin.css';
-import { LogoSVG } from '@/components/ui/logo-svg';
-import { Separator } from '@/components/ui/separator';
-import { useI18n } from '@/i18n';
-import { cn } from '@/lib/utils';
-import { ChevronRight, LogOut, Moon, Sun } from 'lucide-react';
-import Link from 'next/link';
-import * as React from 'react';
+'use client';
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
+import { useI18n } from '@/i18n';
+import * as React from 'react';
+import { SidebarBrand } from './sidebar/sidebar-brand';
+import { SidebarDarkModeRow } from './sidebar/sidebar-dark-mode-row';
+import { SidebarNavGroup } from './sidebar/sidebar-nav-group';
+import {
+  bucketByGroup,
+  getGroupLabels,
+  GROUP_ORDER,
+} from './sidebar/sidebar-nav-groups';
+import type { SidebarNavItem } from './sidebar/sidebar-nav-groups';
+import { SidebarSearch } from './sidebar/sidebar-search';
+import { SidebarTenantCard } from './sidebar/sidebar-tenant-card';
+import { SidebarUserCard } from './sidebar/sidebar-user-card';
+
+// Re-export so `sidebar.tsx` can consume the type from one place.
+export type { SidebarNavItem } from './sidebar/sidebar-nav-groups';
 
 interface SidebarContentProps {
   mobile?: boolean;
   isCollapsed: boolean;
   pathname: string;
-  navItems: NavItem[];
-  defaultUser: { name: string; role: string; avatar?: string };
-  t: ReturnType<typeof useI18n>['t'];
+  navItems: SidebarNavItem[];
+  /** True for internal vGreens users; controls whether the tenant card is
+   *  rendered. */
+  showTenantCard: boolean;
+  defaultUser: { name: string; roleLabel: string; avatar?: string };
   theme: string | undefined;
   setTheme: (theme: string) => void;
   onLogout?: () => void;
@@ -29,155 +34,91 @@ interface SidebarContentProps {
   onCloseMobile: () => void;
 }
 
+/**
+ * Composes the sidebar UI from the small building blocks under `./sidebar/*`.
+ * All data fetching happens in the parent `Sidebar`; this component stays
+ * purely presentational to keep the file small and easy to reason about.
+ */
 export function SidebarContent({
   mobile = false,
   isCollapsed,
   pathname,
   navItems,
+  showTenantCard,
   defaultUser,
-  t,
   theme,
   setTheme,
   onLogout,
   onToggleCollapse,
   onCloseMobile,
 }: SidebarContentProps) {
+  const { t } = useI18n();
+  const groupLabels = React.useMemo(() => getGroupLabels(t), [t]);
+  const buckets = React.useMemo(() => bucketByGroup(navItems), [navItems]);
+  const ungrouped = buckets.get('ungrouped') ?? [];
+  const onNavigate = () => mobile && onCloseMobile();
+
   return (
-    <div className="bg-muted/30 dark:bg-background text-foreground dark:text-sidebar-foreground flex h-full flex-col">
-      {/* Header */}
-      <div className="border-border dark:border-sidebar-border/70 flex h-16 items-center justify-between border-b px-4">
-        <button
-          className={cn(
-            'flex items-center gap-2 border-0 bg-transparent p-0',
-            isCollapsed &&
-              !mobile &&
-              'cursor-pointer transition-opacity hover:opacity-80',
-          )}
-          onClick={isCollapsed && !mobile ? onToggleCollapse : undefined}
-          disabled={!isCollapsed || mobile}
-        >
-          <div className="sidebar-logo-spin h-8 w-8 shrink-0" aria-hidden>
-            <div className="sidebar-spin-3d">
-              <div className="sidebar-face sidebar-front">
-                <LogoSVG color="#016F7C" className="object-contain" />
-              </div>
-              <div className="sidebar-face sidebar-back">
-                <LogoSVG color="#004D56" className="object-contain" />
-              </div>
-            </div>
-          </div>
-          {(!isCollapsed || mobile) && (
-            <span className="text-foreground dark:text-sidebar-foreground font-semibold">
-              vGreens Lab
-            </span>
-          )}
-        </button>
-        {!mobile && !isCollapsed && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-foreground dark:text-sidebar-foregroundent h-8 w-8"
-            onClick={onToggleCollapse}
-          >
-            <ChevronRight className="h-4 w-4 transition-transform" />
-          </Button>
-        )}
-      </div>
+    <div className="bg-muted/20 dark:bg-background text-foreground dark:text-sidebar-foreground flex h-full flex-col">
+      <SidebarBrand
+        isCollapsed={isCollapsed}
+        mobile={mobile}
+        onToggleCollapse={onToggleCollapse}
+      />
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => mobile && onCloseMobile()}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-primary text-primary-foreground dark:bg-sidebar-accent dark:text-sidebar-accent-foreground dark:shadow-sm'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:text-sidebar-foreground/90 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground',
-                isCollapsed && !mobile && 'justify-center px-2',
-              )}
-            >
-              <Icon className="h-5 w-5 shrink-0" />
-              {(!isCollapsed || mobile) && (
-                <span className="truncate">{item.label}</span>
-              )}
-              {isActive && !isCollapsed && !mobile && (
-                <div className="bg-primary-foreground/90 dark:bg-primary ml-auto h-6 w-1 rounded-full shadow-sm" />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Other Menu */}
-      {(!isCollapsed || mobile) && (
-        <>
-          <Separator className="bg-border dark:bg-sidebar-border/70" />
-          <div className="px-4 py-2">
-            <p className="text-muted-foreground dark:text-sidebar-foreground/70 px-3 py-1.5 text-xs font-semibold tracking-wider uppercase">
-              {t.common.otherMenu}
-            </p>
-            <div className="space-y-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:text-sidebar-foreground/90 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground relative w-full justify-start gap-3"
-                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              >
-                <Moon className="h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-                <Sun className="absolute h-4 w-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-                <span>
-                  {theme === 'dark' ? t.common.darkMode : t.common.lightMode}
-                </span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:bg-destructive/10 dark:text-sidebar-foreground/90 dark:hover:bg-destructive/25 dark:hover:text-sidebar-foreground w-full justify-start gap-3"
-                onClick={onLogout}
-              >
-                <LogOut className="h-4 w-4" />
-                <span>{t.common.logout}</span>
-              </Button>
-            </div>
-          </div>
-        </>
+      {showTenantCard && (
+        <SidebarTenantCard isCollapsed={isCollapsed} mobile={mobile} />
       )}
 
-      {/* User Profile */}
-      <div className="border-border dark:border-sidebar-border/70 border-t p-4">
-        <div
-          className={cn(
-            'flex items-center gap-3',
-            isCollapsed && !mobile && 'justify-center',
-          )}
-        >
-          <Avatar className="h-10 w-10">
-            {defaultUser.avatar ? (
-              <AvatarImage src={defaultUser.avatar} alt={defaultUser.name} />
-            ) : (
-              <AvatarFallback className="bg-primary text-primary-foreground dark:bg-sidebar-accent dark:text-sidebar-accent-foreground dark:border-sidebar-border/70 dark:border">
-                {defaultUser.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            )}
-          </Avatar>
-          {(!isCollapsed || mobile) && (
-            <div className="flex-1 overflow-hidden">
-              <p className="text-foreground dark:text-sidebar-foreground truncate text-sm font-medium">
-                {defaultUser.name}
-              </p>
-              <p className="text-muted-foreground dark:text-sidebar-foreground/70 truncate text-xs">
-                {defaultUser.role}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      <SidebarSearch isCollapsed={isCollapsed} mobile={mobile} />
+
+      {/* Divider between the pinned header block (brand/tenant/search) and
+          the scroll region, matching the mockup's subtle rule. */}
+      <div className="border-border/60 dark:border-sidebar-border/60 mx-4 mt-4 border-t" />
+
+      <nav className="flex-1 space-y-3 overflow-y-auto px-2 py-4">
+        {ungrouped.length > 0 && (
+          <SidebarNavGroup
+            label=""
+            items={ungrouped}
+            pathname={pathname}
+            isCollapsed={isCollapsed}
+            mobile={mobile}
+            onNavigate={onNavigate}
+          />
+        )}
+        {GROUP_ORDER.map((group) => (
+          <SidebarNavGroup
+            key={group}
+            label={groupLabels[group]}
+            items={buckets.get(group) ?? []}
+            pathname={pathname}
+            isCollapsed={isCollapsed}
+            mobile={mobile}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </nav>
+
+      {/* Divider between the scroll region and the pinned footer block
+          (dark-mode row + user card). */}
+      <div className="border-border/60 dark:border-sidebar-border/60 mx-4 border-t" />
+
+      <SidebarDarkModeRow
+        isCollapsed={isCollapsed}
+        mobile={mobile}
+        theme={theme}
+        setTheme={setTheme}
+      />
+
+      <SidebarUserCard
+        name={defaultUser.name}
+        roleLabel={defaultUser.roleLabel}
+        avatarUrl={defaultUser.avatar}
+        isCollapsed={isCollapsed}
+        mobile={mobile}
+        onLogout={onLogout}
+      />
     </div>
   );
 }

@@ -3,41 +3,23 @@
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { SidebarSkeleton } from '@/components/ui/sidebar-skeleton';
-import { UserRole } from '@/generated/graphql';
 import type { UserData } from '@/lib/graphql-compat';
 import { useI18n } from '@/i18n';
+import { useAdminNavItems } from '@/lib/hooks/use-admin-nav-items';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { useLogout } from '@/lib/hooks/use-logout';
+import { useSidebarCollapse } from '@/lib/hooks/use-sidebar-collapse';
 import { useTenantFeatures } from '@/lib/hooks/use-tenant-features';
 import { useTenantNavItems } from '@/lib/hooks/use-tenant-nav-items';
+import { useUnresolvedSystemErrorsCount } from '@/lib/hooks/use-unresolved-system-errors-count';
 import { cn } from '@/lib/utils';
-import {
-  Building2,
-  ClipboardList,
-  Flag,
-  Menu,
-  Settings,
-  Trash2,
-  Users,
-  Zap,
-} from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
 import { SidebarContent } from './sidebar-content';
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  featureKey?: string; // Optional feature key to check if item should be shown
-  /**
-   * Optional list of allowed roles. When set, the nav item is only rendered
-   * if the current user's role is in this list. Used to hide pages like
-   * "User management" from regular tenant users.
-   */
-  allowedRoles?: UserRole[];
-}
+import type { SidebarNavItem } from './sidebar-content';
+import { getRoleLabel } from './sidebar/sidebar-role-label';
 
 interface SidebarProps {
   user?: UserData | null;
@@ -46,6 +28,11 @@ interface SidebarProps {
   onToggleCollapse?: (collapsed: boolean) => void;
 }
 
+/**
+ * Top-level sidebar container. Owns collapse state (with an optional
+ * externally-controlled override), coordinates data hooks, and hands a
+ * flattened `SidebarNavItem[]` down to the presentational `SidebarContent`.
+ */
 export function Sidebar({
   user: propUser,
   onLogout,
@@ -55,182 +42,98 @@ export function Sidebar({
   const { t } = useI18n();
   const pathname = usePathname();
   const logout = useLogout();
-  const [internalIsCollapsed, setInternalIsCollapsed] = React.useState(false);
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const { theme, setTheme } = useTheme();
 
-  // Always fetch current user to confirm role
   const {
     user: currentUser,
     role,
     isVGreensInternal,
     loading: userLoading,
   } = useCurrentUser();
-  // Tenant features are still consulted by `useTenantNavItems` below; we only
-  // need the loading flag here to gate the sidebar skeleton.
   const { loading: featuresLoading } = useTenantFeatures();
-  // Filtered tenant nav items (role + feature gates applied). Shared with the
-  // in-header `TenantNavbar` so both render the same set in lock-step. Only
-  // surfaces in the sidebar for non-admin users; VGREENS_ADMIN keeps the
-  // admin nav and uses the header `TenantNavbar` to jump into tenant pages.
   const tenantNavItems = useTenantNavItems();
+  const adminNavItems = useAdminNavItems();
+  const unresolvedErrors = useUnresolvedSystemErrorsCount();
+  const { isCollapsed, toggleCollapse } = useSidebarCollapse({
+    externalIsCollapsed,
+    externalOnToggleCollapse,
+  });
 
   const handleLogout = React.useCallback(async () => {
     await logout();
-    if (onLogout) {
-      onLogout();
-    }
+    if (onLogout) onLogout();
   }, [logout, onLogout]);
 
-  // Use current user if available, otherwise fall back to prop
+  // Fold admin vs tenant items into the single shape SidebarContent expects
+  // and layer the live unresolved system-errors count onto the badge here so
+  // the child stays presentation-only.
+  const sidebarNavItems: SidebarNavItem[] = React.useMemo(() => {
+    const source = isVGreensInternal ? adminNavItems : tenantNavItems;
+    return source.map((item) => ({
+      label: item.label,
+      href: item.href,
+      icon: item.icon,
+      group: item.group,
+      badge:
+        item.href === '/admin/system-errors' ? unresolvedErrors : undefined,
+    }));
+  }, [adminNavItems, isVGreensInternal, tenantNavItems, unresolvedErrors]);
+
   const user = currentUser || propUser;
-  const isVGreensAdmin = role === UserRole.VgreensAdmin;
-  // VGREENS_MEMBER shares every navigation surface with VGREENS_ADMIN; we key
-  // most of the layout decisions off `isVGreensInternal` from here on down.
+  const defaultUser = React.useMemo(
+    () => ({
+      name: user?.firstName
+        ? `${user.firstName} ${user.lastName}`
+        : t.common.unknownUser,
+      roleLabel: getRoleLabel(role, t),
+      avatar: user?.imageUrl || '',
+    }),
+    [user, role, t],
+  );
 
-  // Use external state if provided, otherwise use internal state
-  const isCollapsed =
-    externalIsCollapsed !== undefined
-      ? externalIsCollapsed
-      : internalIsCollapsed;
-
-  React.useEffect(() => {
-    // Only manage localStorage if we're using internal state
-    if (externalIsCollapsed === undefined) {
-      const saved = localStorage.getItem('sidebarCollapsed');
-      if (saved !== null) {
-        setInternalIsCollapsed(JSON.parse(saved));
-      }
-    }
-  }, [externalIsCollapsed]);
-
-  const toggleCollapse = () => {
-    const newState = !isCollapsed;
-    if (externalOnToggleCollapse) {
-      externalOnToggleCollapse(newState);
-      localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
-    } else {
-      setInternalIsCollapsed(newState);
-      localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
-    }
-  };
-
-  // Admin navigation items
-  const adminNavItems: NavItem[] = [
-    {
-      label: t.navigation.tenants,
-      href: '/admin/tenants',
-      icon: Building2,
-    },
-    {
-      label: t.navigation.adminUsers,
-      href: '/admin/users',
-      icon: Users,
-    },
-    {
-      label: t.navigation.featureFlags,
-      href: '/admin/feature-flags',
-      icon: Flag,
-    },
-    {
-      label: t.navigation.reports,
-      href: '/admin/reports',
-      icon: ClipboardList,
-    },
-    {
-      label: t.navigation.systemErrors,
-      href: '/admin/system-errors',
-      icon: Zap,
-    },
-    {
-      label: t.navigation.adminHistory ?? 'History',
-      href: '/admin/history',
-      icon: Trash2,
-    },
-    {
-      label: t.navigation.settings,
-      href: '/admin/settings',
-      icon: Settings,
-    },
-  ];
-
-  // Tenant nav items now come from `useTenantNavItems` (above) — single source
-  // of truth shared with the in-header `TenantNavbar`.
-
-  // Select nav items based on role:
-  // - Internal vGreens users (VGREENS_ADMIN + VGREENS_MEMBER) always see the
-  //   admin nav in the sidebar, so they never lose access to /admin/tenants,
-  //   /admin/users, etc., even after picking a tenant. The in-header
-  //   `TenantNavbar` provides the tenant-page links when a tenant is selected.
-  // - Everyone else sees the filtered tenant nav.
-  const navItems = isVGreensInternal ? adminNavItems : tenantNavItems;
-
-  const defaultUser = {
-    name: user?.firstName
-      ? `${user.firstName} ${user.lastName}`
-      : t.common.unknownUser,
-    role: user?.role || (isVGreensAdmin ? 'VGREENS_ADMIN' : 'TENANT_USER'),
-    avatar: user?.imageUrl || '',
-  };
-
-  // Show loading state while fetching user or features. Internal users don't
-  // depend on tenant feature flags for their nav (they get the admin nav),
-  // so we skip the features-loading gate for them.
   if (userLoading || (!isVGreensInternal && featuresLoading)) {
     return <SidebarSkeleton />;
   }
 
+  const contentProps = {
+    pathname,
+    navItems: sidebarNavItems,
+    showTenantCard: isVGreensInternal,
+    defaultUser,
+    theme,
+    setTheme,
+    onLogout: handleLogout,
+    onToggleCollapse: toggleCollapse,
+    onCloseMobile: () => setIsMobileOpen(false),
+  } as const;
+
   return (
     <>
-      {/* Mobile Trigger */}
       <Button
         variant="ghost"
         size="icon"
         className="fixed top-4 left-4 z-50 lg:hidden"
         onClick={() => setIsMobileOpen(true)}
+        aria-label={t.common.navigationMenu}
       >
         <Menu className="h-5 w-5" />
       </Button>
 
-      {/* Mobile Sidebar */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="w-[280px] p-0">
           <SheetTitle className="sr-only">{t.common.navigationMenu}</SheetTitle>
-          <SidebarContent
-            mobile
-            isCollapsed={false}
-            pathname={pathname}
-            navItems={navItems}
-            defaultUser={defaultUser}
-            t={t}
-            theme={theme}
-            setTheme={setTheme}
-            onLogout={handleLogout}
-            onToggleCollapse={toggleCollapse}
-            onCloseMobile={() => setIsMobileOpen(false)}
-          />
+          <SidebarContent mobile isCollapsed={false} {...contentProps} />
         </SheetContent>
       </Sheet>
 
-      {/* Desktop Sidebar */}
       <aside
         className={cn(
           'dark:border-sidebar-border/70 fixed top-0 left-0 z-40 hidden h-screen flex-col border-r transition-all duration-300 lg:flex',
           isCollapsed ? 'w-16' : 'w-64',
         )}
       >
-        <SidebarContent
-          isCollapsed={isCollapsed}
-          pathname={pathname}
-          navItems={navItems}
-          defaultUser={defaultUser}
-          t={t}
-          theme={theme}
-          setTheme={setTheme}
-          onLogout={handleLogout}
-          onToggleCollapse={toggleCollapse}
-          onCloseMobile={() => setIsMobileOpen(false)}
-        />
+        <SidebarContent isCollapsed={isCollapsed} {...contentProps} />
       </aside>
     </>
   );

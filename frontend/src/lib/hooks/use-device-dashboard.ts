@@ -6,10 +6,10 @@ import {
   useDeviceActivitySeriesQuery,
   useDeviceStatusesQuery,
   useTenantFeaturesQuery,
-  useTenantsQuery,
   type DeviceStatus,
 } from '@/generated/graphql';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
+import { useSelectedTenantId } from '@/lib/contexts/selected-tenant-context';
 import {
   STATE_ORDER,
   stateSortRank,
@@ -58,11 +58,10 @@ export interface DeviceDashboardData {
   groupFilter: string;
   setGroupFilter: (group: string) => void;
 
-  // vGreens-admin tenant picker (empty for tenant admins).
+  // vGreens-admin tenant scope, read from the global sidebar selector
+  // (empty for tenant admins, who are scoped by their session).
   isVGreensAdmin: boolean;
-  tenants: { id: string; name: string }[];
   selectedTenantId: string;
-  setSelectedTenantId: (id: string) => void;
 
   /**
    * Whether `device_status` is enabled for the active tenant. Tenant admins are
@@ -91,27 +90,16 @@ export function useDeviceDashboard(): DeviceDashboardData {
   const [customRange, setCustomRange] = React.useState<CustomRange | null>(
     null,
   );
-  const [selectedTenantId, setSelectedTenantId] = React.useState('');
+  // Tenant scope comes from the global sidebar selector (SelectedTenantProvider).
+  // `null` (cross-tenant view) is handled by the page-level TenantPickRequired
+  // guard for admins; tenant admins are scoped by their session on the backend.
+  const selectedTenantId = useSelectedTenantId() ?? '';
 
   // Selecting a preset clears any custom range and vice-versa.
   const setRange = React.useCallback((r: DeviceStatusRange) => {
     setCustomRange(null);
     setRangeState(r);
   }, []);
-
-  // Only vGreens admins need the tenant list (to scope the InfluxDB bucket).
-  const { data: tenantsData } = useTenantsQuery({ skip: !isVGreensAdmin });
-  const tenants = React.useMemo(
-    () => (tenantsData?.tenants ?? []).map((t) => ({ id: t.id, name: t.name })),
-    [tenantsData],
-  );
-
-  // Default the admin picker to the first tenant once loaded.
-  React.useEffect(() => {
-    if (isVGreensAdmin && !selectedTenantId && tenants.length > 0) {
-      setSelectedTenantId(tenants[0].id);
-    }
-  }, [isVGreensAdmin, selectedTenantId, tenants]);
 
   const tenantId = isVGreensAdmin ? selectedTenantId || undefined : undefined;
   const skip = isVGreensAdmin && !selectedTenantId;
@@ -233,9 +221,7 @@ export function useDeviceDashboard(): DeviceDashboardData {
     groupFilter,
     setGroupFilter,
     isVGreensAdmin,
-    tenants,
     selectedTenantId,
-    setSelectedTenantId,
     featureEnabled,
     featureChecked,
     refreshIntervalMs,

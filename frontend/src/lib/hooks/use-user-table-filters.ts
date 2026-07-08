@@ -15,6 +15,8 @@ const STATUS_VALUES = {
   inactive: 'inactive',
 } as const;
 
+export type UserSortDirection = 'asc' | 'desc';
+
 interface UseUserTableFiltersArgs {
   users: User[];
   /** When provided, exposes a Tenant filter dropdown (admin surface only). */
@@ -24,14 +26,18 @@ interface UseUserTableFiltersArgs {
 }
 
 /**
- * Local search + filter state for the User Management table. Returns the
- * filtered slice of `users` plus the `FilterConfigOption`s the `DataTable`
- * needs to render filter dropdowns and chips.
+ * Local search + filter + sort state for the User Management table.
+ * Returns the transformed slice of `users` plus the `FilterConfigOption`s
+ * the `DataTable` needs to render filter dropdowns and chips.
  *
- * All filtering is client-side — the underlying `users` query already
- * returns a fully-scoped list for the current view (own tenant for tenant
- * admin, picked tenant for vGreens admin), so an in-memory filter is the
- * cheapest path and avoids one network round-trip per keystroke.
+ * All filtering + sorting is client-side — the underlying `users` query
+ * already returns a fully-scoped list for the current view (own tenant
+ * for tenant admin, picked tenant for vGreens admin), so an in-memory pass
+ * is the cheapest path and avoids one network round-trip per keystroke.
+ *
+ * Mirrors `useTenantTableFilters` so the two admin tables behave
+ * identically; the name-based sort direction is driven by the clickable
+ * USER column header in the redesign.
  */
 export function useUserTableFilters({
   users,
@@ -43,6 +49,12 @@ export function useUserTableFilters({
   const [roleFilter, setRoleFilter] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState('');
   const [tenantFilter, setTenantFilter] = React.useState('');
+  const [sortDirection, setSortDirection] =
+    React.useState<UserSortDirection>('asc');
+
+  const toggleSort = React.useCallback(() => {
+    setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  }, []);
 
   // Tenants are only relevant when the table renders the Tenant column.
   const showTenantFilter = !hideTenantColumn && (tenants?.length ?? 0) > 0;
@@ -57,7 +69,7 @@ export function useUserTableFilters({
       ? tenantFilter.split(',').filter(Boolean)
       : [];
 
-    return users.filter((user) => {
+    const filtered = users.filter((user) => {
       if (query) {
         const fullName =
           `${user.firstName ?? ''} ${user.lastName ?? ''}`.toLowerCase();
@@ -78,7 +90,19 @@ export function useUserTableFilters({
       }
       return true;
     });
-  }, [users, searchQuery, roleFilter, statusFilter, tenantFilter]);
+
+    // Sort after filtering so we pay for the collator on the smallest set.
+    return [...filtered].sort((a, b) => {
+      const av = `${a.firstName ?? ''} ${a.lastName ?? ''}`
+        .trim()
+        .toLowerCase();
+      const bv = `${b.firstName ?? ''} ${b.lastName ?? ''}`
+        .trim()
+        .toLowerCase();
+      const cmp = av.localeCompare(bv);
+      return sortDirection === 'asc' ? cmp : -cmp;
+    });
+  }, [users, searchQuery, roleFilter, statusFilter, tenantFilter, sortDirection]);
 
   const filterConfigs: FilterConfigOption[] = React.useMemo(() => {
     const configs: FilterConfigOption[] = [
@@ -147,5 +171,7 @@ export function useUserTableFilters({
     searchQuery,
     setSearchQuery,
     filterConfigs,
+    sortDirection,
+    toggleSort,
   };
 }

@@ -22,7 +22,26 @@ export class TenantSettings {
 
   @Field(() => [String])
   harvestDashboardOrder: string[];
+
+  /**
+   * Whether TENANT_ADMIN users of this tenant may access the device-status
+   * dashboard. The feature is vGreens-internal by default; a vGreens admin
+   * can opt a tenant's admins in via this toggle. Blob-only — no deprecated
+   * flat column to mirror (the key post-dates the VSL-279 consolidation).
+   */
+  @Field(() => Boolean)
+  deviceStatusForTenantAdmins: boolean;
 }
+
+/**
+ * The settings keys that still have a deprecated flat column on `tenants`
+ * (expand phase of VSL-279). Only these are dual-written; newer keys live in
+ * the blob alone.
+ */
+export type MirroredTenantSettingKey =
+  | 'disabledSensorFields'
+  | 'hiddenHarvestDashboardItems'
+  | 'harvestDashboardOrder';
 
 /** The subset of Tenant the composer needs (avoids a circular entity import). */
 export interface TenantSettingsSource {
@@ -51,5 +70,6 @@ export function composeTenantSettings(
       [],
     harvestDashboardOrder:
       blob.harvestDashboardOrder ?? source.harvestDashboardOrder ?? [],
+    deviceStatusForTenantAdmins: blob.deviceStatusForTenantAdmins ?? false,
   };
 }

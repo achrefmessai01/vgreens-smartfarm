@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface FarmOverviewPageSkeletonProps {
-  showTenantSelector?: boolean;
   className?: string;
 }
 
@@ -70,7 +69,6 @@ function ParGraphSkeleton() {
 }
 
 export function FarmOverviewPageSkeleton({
-  showTenantSelector = false,
   className,
 }: FarmOverviewPageSkeletonProps) {
   return (
@@ -85,14 +83,6 @@ export function FarmOverviewPageSkeleton({
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-72 max-w-full" />
       </div>
-
-      {/* Tenant selector (admin only) */}
-      {showTenantSelector && (
-        <div className="bg-muted/30 border-border/40 flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center">
-          <Skeleton className="h-4 w-24 shrink-0" />
-          <Skeleton className="h-10 w-full rounded-md sm:w-[280px]" />
-        </div>
-      )}
 
       {/* Greenhouse tab selector — mirrors GreenhouseSelector */}
       <div className="border-border/40 bg-muted/10 grid w-full grid-cols-3 border-b sm:flex">
