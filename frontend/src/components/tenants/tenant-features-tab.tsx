@@ -135,9 +135,7 @@ export function TenantFeaturesTab({
         onEdit={readOnly ? undefined : editFeature.openEdit}
         // Role-scoped access sub-toggle inside the device_status card: the
         // flag decides whether the tenant HAS device status, this decides
-        // whether the tenant's own admins may open it. Title/description keys
-        // live in en.ts only for now — other locales fall back to English via
-        // the i18n deepFallback merge.
+        // whether the tenant's own admins may open it.
         getSubToggle={(feature) =>
           feature.key === 'device_status'
             ? {

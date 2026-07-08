@@ -104,6 +104,9 @@ export const en = {
     tenantSelector: {
       allTenants: 'All tenants',
       placeholder: 'Select tenant',
+      pickRequiredTitle: 'Select a tenant to continue',
+      pickRequiredDescription:
+        'Use the tenant selector in the sidebar to choose which tenant\'s data you want to view.',
     },
     viewOnlyTooltip: 'Read-only account — this action is disabled.',
     sidebar: {

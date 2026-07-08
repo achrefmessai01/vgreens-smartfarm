@@ -109,6 +109,9 @@ export const ar = {
     tenantSelector: {
       allTenants: 'جميع المستأجرين',
       placeholder: 'اختر مستأجرًا',
+      pickRequiredTitle: 'اختر مستأجرًا للمتابعة',
+      pickRequiredDescription:
+        'استخدم أداة اختيار المستأجر في الشريط الجانبي لاختيار بيانات المستأجر التي تريد عرضها.',
     },
     viewOnlyTooltip: 'حساب للقراءة فقط — هذا الإجراء معطّل.',
     sidebar: {
@@ -1284,6 +1287,10 @@ export const ar = {
           'هذه الميزة غير مفعّلة لمستأجرك. يرجى التواصل مع المسؤول لتفعيل هذه الميزة.',
         notAvailableBadge: 'غير متاح',
         goToDashboard: 'الانتقال إلى لوحة التحكم',
+        deviceStatusForTenantAdminsTitle:
+          'حالة الأجهزة لمسؤولي المستأجر',
+        deviceStatusForTenantAdminsDescription:
+          'يسمح لمسؤولي هذا المستأجر بفتح لوحة حالة الأجهزة. وهي داخلية لـ vGreens افتراضيًا.',
       },
       reports: {
         title: 'إدارة تقارير الأخطاء',

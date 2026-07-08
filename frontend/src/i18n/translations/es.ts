@@ -96,6 +96,9 @@ export const es = {
     tenantSelector: {
       allTenants: 'Todos los inquilinos',
       placeholder: 'Seleccionar inquilino',
+      pickRequiredTitle: 'Selecciona un inquilino para continuar',
+      pickRequiredDescription:
+        'Usa el selector de inquilinos en la barra lateral para elegir los datos del inquilino que quieres ver.',
     },
     viewOnlyTooltip: 'Cuenta de solo lectura — esta acción está desactivada.',
     sidebar: {
@@ -1308,6 +1311,10 @@ export const es = {
           'Esta función no está habilitada para tu inquilino. Por favor, contacta con tu administrador para habilitar esta función.',
         notAvailableBadge: 'No disponible',
         goToDashboard: 'Ir al panel',
+        deviceStatusForTenantAdminsTitle:
+          'Estado de dispositivos para admins del inquilino',
+        deviceStatusForTenantAdminsDescription:
+          'Permite a los admins de este inquilino abrir el panel de estado de dispositivos. Por defecto es interno de vGreens.',
       },
       reports: {
         title: 'Gestión de informes de errores',

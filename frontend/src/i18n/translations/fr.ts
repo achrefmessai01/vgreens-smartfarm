@@ -104,6 +104,9 @@ export const fr = {
     tenantSelector: {
       allTenants: 'Tous les locataires',
       placeholder: 'Choisir un locataire',
+      pickRequiredTitle: 'Sélectionnez un locataire pour continuer',
+      pickRequiredDescription:
+        'Utilisez le sélecteur de locataire dans la barre latérale pour choisir les données du locataire à afficher.',
     },
     viewOnlyTooltip: 'Compte en lecture seule — cette action est désactivée.',
     sidebar: {
@@ -1289,6 +1292,10 @@ export const fr = {
           'Cette fonctionnalité n’est pas activée pour votre locataire. Veuillez contacter votre administrateur pour activer cette fonctionnalité.',
         notAvailableBadge: 'Non disponible',
         goToDashboard: 'Aller au tableau de bord',
+        deviceStatusForTenantAdminsTitle:
+          'Statut des appareils pour les admins du locataire',
+        deviceStatusForTenantAdminsDescription:
+          'Permet aux admins de ce locataire d\'ouvrir le tableau de bord du statut des appareils. Réservé à vGreens par défaut.',
       },
       reports: {
         title: 'Rapports d’erreur',
