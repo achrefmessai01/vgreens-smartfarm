@@ -164,8 +164,6 @@ export const el = {
     deviceStatus: {
       title: 'Κατάσταση συσκευών',
       subtitle: 'Ζωντανή κατάσταση κάθε αισθητήρα και συσκευής edge',
-      selectTenant: 'Μισθωτής',
-      selectTenantPlaceholder: 'Επιλογή μισθωτή',
       period: {
         oneDay: '1 ημέρα',
         sevenDays: '7 ημέρες',

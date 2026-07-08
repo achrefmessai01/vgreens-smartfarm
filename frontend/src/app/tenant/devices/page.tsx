@@ -6,6 +6,7 @@ import { UserRole } from '@/generated/graphql';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { useCurrentUser } from '@/lib/hooks/use-current-user';
 import { FeatureGuard } from '@/components/features/feature-guard';
+import { TenantPickRequired } from '@/components/tenant-pick-required';
 import { DeviceDashboard } from '@/components/devices';
 
 export default function DeviceStatusPage() {
@@ -32,7 +33,9 @@ export default function DeviceStatusPage() {
 
   return (
     <FeatureGuard featureKey="device_status">
-      <DeviceDashboard />
+      <TenantPickRequired>
+        <DeviceDashboard />
+      </TenantPickRequired>
     </FeatureGuard>
   );
 }

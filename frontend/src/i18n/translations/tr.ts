@@ -163,8 +163,6 @@ export const tr = {
     deviceStatus: {
       title: 'Cihaz durumu',
       subtitle: 'Her sensör ve uç cihazın canlı durumu',
-      selectTenant: 'Kiracı',
-      selectTenantPlaceholder: 'Kiracı seçin',
       period: {
         oneDay: '1 Gün',
         sevenDays: '7 Gün',

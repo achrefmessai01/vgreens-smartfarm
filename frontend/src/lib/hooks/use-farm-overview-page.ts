@@ -109,13 +109,6 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     setGlobalSelectedTenantId,
   ]);
 
-  const handleTenantChange = React.useCallback(
-    (tenantId: string) => {
-      setGlobalSelectedTenantId(tenantId || null);
-    },
-    [setGlobalSelectedTenantId],
-  );
-
   const { bucketName: selectedTenantBucketName, loading: tenantBucketLoading } =
     useTenantBucketName(isVGreensAdmin ? selectedTenantId : undefined);
   const tenantBucketNameOverride = isVGreensAdmin
@@ -818,11 +811,6 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     [],
   );
 
-  const tenantSelectorValue =
-    selectedTenantId && tenants.some((tn) => tn.id === selectedTenantId)
-      ? selectedTenantId
-      : (tenants[0]?.id ?? '');
-
   return {
     isVGreensAdmin,
     canEditSensorPositions,
@@ -831,10 +819,7 @@ export function useFarmOverviewPage(t: FarmOverviewTranslations) {
     irrigationCycles,
     refetchIrrigationCycles,
     calibrationTenantId: configQueryTenantId,
-    tenants,
     selectedTenantId,
-    handleTenantChange,
-    tenantSelectorValue,
     loading:
       loading ||
       currentUserLoading ||

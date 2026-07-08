@@ -158,8 +158,6 @@ export const fr = {
     deviceStatus: {
       title: 'État des appareils',
       subtitle: 'État en direct de chaque capteur et appareil edge',
-      selectTenant: 'Locataire',
-      selectTenantPlaceholder: 'Sélectionner un locataire',
       period: {
         oneDay: '1 jour',
         sevenDays: '7 jours',

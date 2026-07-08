@@ -163,8 +163,6 @@ export const pl = {
     deviceStatus: {
       title: 'Stan urządzeń',
       subtitle: 'Stan na żywo każdego czujnika i urządzenia brzegowego',
-      selectTenant: 'Najemca',
-      selectTenantPlaceholder: 'Wybierz najemcę',
       period: {
         oneDay: '1 dzień',
         sevenDays: '7 dni',
