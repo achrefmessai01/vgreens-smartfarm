@@ -2,6 +2,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { ErrorMonitoringInitializer } from '@/components/error-monitoring-initializer';
 import { NetworkStatusMonitor } from '@/components/network-status-monitor';
 import { RegisterSW } from '@/components/register-sw';
+import { SafariPickerAutoClose } from '@/components/safari-picker-auto-close';
 import { ToastProvider } from '@/components/ui/toast-provider';
 import { I18nProvider } from '@/i18n';
 import { I18nUserSync } from '@/i18n/i18n-user-sync';
@@ -87,6 +88,7 @@ export default function RootLayout({
                     <ToastProvider>
                       <NetworkStatusMonitor />
                       <RegisterSW />
+                      <SafariPickerAutoClose />
                       {children}
                     </ToastProvider>
                   </ThemeProvider>
