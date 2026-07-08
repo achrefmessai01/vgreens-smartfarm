@@ -210,7 +210,7 @@ export function HarvestDashboardCompare({
           const averageBrix = data?.averageBrix ?? 0;
           const averageFruitWeight = data?.averageFruitWeight ?? 0;
           const yieldPerPlant = data?.yieldPerPlant ?? null;
-          const criticalAlerts = data?.criticalAlerts ?? 0;
+          const yieldPerRunningMeter = data?.yieldPerRunningMeter ?? null;
           const daysActive = data?.daysActive ?? 0;
           const harvestCount = data?.harvestCount ?? 0;
           return (
@@ -286,10 +286,14 @@ export function HarvestDashboardCompare({
                 </div>
                 <div>
                   <p className="text-muted-foreground">
-                    {h?.criticalAlerts ?? 'Critical Alerts'}
+                    {h?.yieldPerRunningMeterShort ?? 'Yield/Running Meter'}
                   </p>
-                  <p className="text-sm font-semibold text-amber-600">
-                    {isLoading ? '–' : criticalAlerts}
+                  <p className="text-sm font-semibold">
+                    {isLoading
+                      ? '–'
+                      : yieldPerRunningMeter == null
+                        ? '—'
+                        : `${formatNum(yieldPerRunningMeter, 3)} kg/m`}
                   </p>
                 </div>
                 <div>

@@ -64,7 +64,7 @@ export function HarvestBatchEntriesTable({
           <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
           <TableHead>{h?.avgFruitWeight ?? 'Avg Fruit Weight'}</TableHead>
           <TableHead>{h?.yieldPerPlantShort ?? 'Yield/Plant'}</TableHead>
-          <TableHead>{h?.yieldPerRunningMeterShort ?? 'Yield/m'}</TableHead>
+          <TableHead>{h?.yieldPerRunningMeterShort ?? 'Yield/Running Meter'}</TableHead>
           <TableHead>{h?.createdBy ?? 'Created By'}</TableHead>
           <TableHead className="text-right">
             {h?.actions ?? 'Actions'}

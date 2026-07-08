@@ -16,7 +16,6 @@ export const GET_HARVEST_DASHBOARD = gql`
       wastePercent
       wasteTotal
       classTotals
-      criticalAlerts
       daysActive
       yieldOverTime {
         date
@@ -83,7 +82,6 @@ export const GET_HARVEST_DASHBOARD_WITH_VARIABLES = gql`
       wastePercent
       wasteTotal
       classTotals
-      criticalAlerts
       daysActive
       yieldOverTime {
         date

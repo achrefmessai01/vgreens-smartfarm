@@ -542,8 +542,6 @@ export const pt = {
       marketableYield: 'Produção comercializável',
       wastePercent: 'Desperdício %',
       kgTotal: 'kg total',
-      criticalAlerts: 'Alertas críticos',
-      requiresAttention: 'Requer atenção',
       daysActive: 'Dias ativos',
       sincePlanting: 'Desde a plantação',
       yieldOverTime: 'Produção ao longo do tempo',
@@ -552,7 +550,7 @@ export const pt = {
       yieldPerRunningMeterUnit: 'Produção (kg/m linear)',
       yieldPerPlant: 'Produção por planta',
       yieldPerPlantShort: 'Produção/Planta',
-      yieldPerRunningMeterShort: 'Produção/m',
+      yieldPerRunningMeterShort: 'Produção/metro linear',
       yieldPerRunningMeter: 'Produção por metro linear',
       yieldPerRunningMeterSubtitle: 'kg vendáveis por metro linear',
       yieldPerRunningMeterNoData:

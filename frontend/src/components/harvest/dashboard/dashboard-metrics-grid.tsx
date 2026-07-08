@@ -3,7 +3,6 @@ import { useLocaleFormatters } from '@/i18n/use-locale-formatters';
 import type { HarvestDashboardData } from '@/lib/hooks/use-harvest-dashboard';
 import {
   Activity,
-  AlertTriangle,
   Grid2x2,
   Package,
   Ruler,
@@ -182,18 +181,6 @@ export function DashboardMetricsGrid({
           }
           icon={<Grid2x2 className="h-4 w-4" />}
           color="default"
-        />
-      ),
-    },
-    {
-      id: DASHBOARD_METRIC_IDS.criticalAlerts,
-      node: (
-        <MetricCard
-          title={h?.criticalAlerts ?? 'Critical Alerts'}
-          value={data.criticalAlerts ?? 0}
-          subtitle={h?.requiresAttention ?? 'Requires attention'}
-          icon={<AlertTriangle className="h-4 w-4" />}
-          color="warning"
         />
       ),
     },

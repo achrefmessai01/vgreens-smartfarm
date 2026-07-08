@@ -536,8 +536,6 @@ export const en = {
       marketableYield: 'Marketable yield',
       wastePercent: 'Waste %',
       kgTotal: 'kg total',
-      criticalAlerts: 'Critical Alerts',
-      requiresAttention: 'Requires attention',
       daysActive: 'Days Active',
       sincePlanting: 'Since planting',
       yieldOverTime: 'Yield Over Time',
@@ -886,7 +884,7 @@ export const en = {
       avgWeightPerFruit: 'Average weight per fruit (g)',
       yieldPerPlant: 'Yield per Plant',
       yieldPerPlantShort: 'Yield/Plant',
-      yieldPerRunningMeterShort: 'Yield/m',
+      yieldPerRunningMeterShort: 'Yield/Running Meter',
       yieldPerRunningMeter: 'Yield per Running Meter',
       yieldPerRunningMeterSubtitle: 'Sellable kg per running metre',
       yieldPerRunningMeterNoData:

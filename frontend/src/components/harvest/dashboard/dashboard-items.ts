@@ -31,7 +31,6 @@ export const DASHBOARD_METRIC_IDS = {
   yieldPerSquareMeter: 'yieldPerSquareMeter',
   qualityPrimary: 'qualityPrimary',
   qualitySecondary: 'qualitySecondary',
-  criticalAlerts: 'criticalAlerts',
   daysActive: 'daysActive',
 } as const;
 
@@ -96,12 +95,6 @@ export const HARVEST_DASHBOARD_ITEMS: readonly DashboardItem[] = [
     id: DASHBOARD_METRIC_IDS.qualitySecondary,
     labelKey: 'configQualitySecondary',
     fallback: 'Secondary quality %',
-    category: 'metrics',
-  },
-  {
-    id: DASHBOARD_METRIC_IDS.criticalAlerts,
-    labelKey: 'criticalAlerts',
-    fallback: 'Critical Alerts',
     category: 'metrics',
   },
   {
