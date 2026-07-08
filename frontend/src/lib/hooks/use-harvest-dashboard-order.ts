@@ -52,7 +52,7 @@ export function mergeVisibleOrder(
  * flat list of item ids (metrics + charts share one list); each grid filters to
  * its own ids, so cross-category interleaving is irrelevant. Empty = no custom
  * order, so grids fall back to their registry order.
- * 
+ *
  * For VGreens admins, uses the selected tenant from navbar context.
  * For tenant users, uses their own tenant.
  */
@@ -77,11 +77,11 @@ export function useHarvestDashboardOrder() {
 
   const tenant = React.useMemo(() => {
     if (!tenantId) return undefined;
-    
+
     if (isVGreensAdmin) {
       return tenantsData?.tenants?.find((t) => t.id === tenantId);
     }
-    
+
     return meData?.me?.tenant ?? undefined;
   }, [tenantId, isVGreensAdmin, tenantsData?.tenants, meData?.me?.tenant]);
 

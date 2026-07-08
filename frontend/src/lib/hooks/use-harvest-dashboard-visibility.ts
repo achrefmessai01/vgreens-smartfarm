@@ -11,7 +11,7 @@ import { ALL_DASHBOARD_ITEM_IDS } from '@/components/harvest/dashboard/dashboard
  * `isVisible(id)` predicate. Visibility is stored as the *hidden* set, so any
  * item not explicitly hidden is visible — meaning newly added plots default to
  * visible for tenants that configured their dashboard earlier.
- * 
+ *
  * For VGreens admins, uses the selected tenant from navbar context.
  * For tenant users, uses their own tenant.
  */
@@ -36,11 +36,11 @@ export function useHarvestDashboardVisibility() {
 
   const tenant = React.useMemo(() => {
     if (!tenantId) return undefined;
-    
+
     if (isVGreensAdmin) {
       return tenantsData?.tenants?.find((t) => t.id === tenantId);
     }
-    
+
     return meData?.me?.tenant ?? undefined;
   }, [tenantId, isVGreensAdmin, tenantsData?.tenants, meData?.me?.tenant]);
 
