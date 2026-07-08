@@ -536,8 +536,6 @@ export const tr = {
       marketableYield: 'Pazarlanabilir verim',
       wastePercent: 'Atık %',
       kgTotal: 'kg toplam',
-      criticalAlerts: 'Kritik alarmlar',
-      requiresAttention: 'Dikkat gerektirir',
       daysActive: 'Etkin gün sayısı',
       sincePlanting: 'Dikimden bu yana',
       yieldOverTime: 'Zamana göre verim',
@@ -545,7 +543,7 @@ export const tr = {
       yieldPerRunningMeterUnit: 'Verim (kg/tul m)',
       yieldPerPlant: 'Bitki başına verim',
       yieldPerPlantShort: 'Verim/Bitki',
-      yieldPerRunningMeterShort: 'Verim/m',
+      yieldPerRunningMeterShort: 'Verim/tul metre',
       yieldPerRunningMeter: 'Tul metre başına verim',
       yieldPerRunningMeterSubtitle: 'Tul metre başına satılabilir kg',
       yieldPerRunningMeterNoData:

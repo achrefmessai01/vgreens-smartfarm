@@ -544,8 +544,6 @@ export const it = {
       marketableYield: 'Resa commerciabile',
       wastePercent: 'Scarto %',
       kgTotal: 'kg totali',
-      criticalAlerts: 'Allarmi critici',
-      requiresAttention: 'Richiede attenzione',
       daysActive: 'Giorni attivi',
       sincePlanting: 'Dalla semina',
       yieldOverTime: 'Resa nel tempo',
@@ -553,7 +551,7 @@ export const it = {
       yieldPerRunningMeterUnit: 'Resa (kg/m lineare)',
       yieldPerPlant: 'Resa per pianta',
       yieldPerPlantShort: 'Resa/Pianta',
-      yieldPerRunningMeterShort: 'Resa/m',
+      yieldPerRunningMeterShort: 'Resa/metro lineare',
       yieldPerRunningMeter: 'Resa per metro lineare',
       yieldPerRunningMeterSubtitle: 'kg vendibili per metro lineare',
       yieldPerRunningMeterNoData:

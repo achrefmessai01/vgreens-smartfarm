@@ -53,6 +53,23 @@ function BatchDataLoader({ batch, color, period, onLoaded }: BatchLoaderProps) {
   return null;
 }
 
+interface MetricRowProps {
+  label: string;
+  value: string;
+  valueClassName?: string;
+}
+
+function MetricRow({ label, value, valueClassName }: MetricRowProps) {
+  return (
+    <div className="flex items-baseline justify-between gap-2">
+      <p className="text-muted-foreground truncate">{label}</p>
+      <p className={`shrink-0 font-semibold ${valueClassName ?? ''}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
 export function HarvestDashboardCompare({
   batches,
   compareBatchIds,
@@ -210,99 +227,88 @@ export function HarvestDashboardCompare({
           const averageBrix = data?.averageBrix ?? 0;
           const averageFruitWeight = data?.averageFruitWeight ?? 0;
           const yieldPerPlant = data?.yieldPerPlant ?? null;
-          const criticalAlerts = data?.criticalAlerts ?? 0;
+          const yieldPerRunningMeter = data?.yieldPerRunningMeter ?? null;
           const daysActive = data?.daysActive ?? 0;
           const harvestCount = data?.harvestCount ?? 0;
+          const acrossHarvests =
+            h?.acrossHarvests?.replace('{count}', harvestCount.toString()) ??
+            `Across ${harvestCount} harvests`;
+          const fmt = (value: string | null) =>
+            isLoading ? '–' : value == null ? '—' : value;
           return (
             <Card
               key={batch.id}
-              className="border-l-4 p-4"
-              style={{ borderLeftColor: color }}
+              className="gap-0 p-3"
+              // Tint the card in the batch's series color so it still reads as
+              // the legend key for the charts below, without a loud border.
+              style={{ backgroundColor: `${color}14` }}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{label}</p>
-                  <p className="text-muted-foreground truncate text-xs">
-                    {batch.species}
-                  </p>
-                </div>
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: color }}
+              <p className="truncate text-base font-semibold">{label}</p>
+
+              {/* Yields */}
+              <div className="mt-3 space-y-1 text-xs">
+                <MetricRow
+                  label={h?.totalYield ?? 'Total Yield'}
+                  value={fmt(`${formatNum(totalYield, 1)} kg`)}
+                />
+                <MetricRow
+                  label={h?.yieldPerRunningMeterShort ?? 'Yield/Running Meter'}
+                  value={fmt(
+                    yieldPerRunningMeter == null
+                      ? null
+                      : `${formatNum(yieldPerRunningMeter, 3)} kg/m`,
+                  )}
+                />
+                <MetricRow
+                  label={h?.yieldPerPlantShort ?? 'Yield/Plant'}
+                  value={fmt(
+                    yieldPerPlant == null
+                      ? null
+                      : `${formatNum(yieldPerPlant * 1000, 1)} g`,
+                  )}
                 />
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-                <div>
-                  <p className="text-muted-foreground">
-                    {h?.totalYield ?? 'Total Yield'}
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {isLoading ? '–' : `${formatNum(totalYield, 1)} kg`}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">
-                    {h?.averageBrix ?? 'Avg Brix'}
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {isLoading ? '–' : `${formatNum(averageBrix, 1)}°Bx`}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">
-                    {h?.averageFruitWeight ?? 'Avg Fruit Weight'}
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {isLoading ? '–' : `${formatNum(averageFruitWeight, 1)} g`}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">
-                    {h?.yieldPerPlantShort ?? 'Yield/Plant'}
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {isLoading
-                      ? '–'
-                      : yieldPerPlant == null
-                        ? '—'
-                        : `${formatNum(yieldPerPlant * 1000, 1)} g`}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">
-                    {h?.marketablePercent ?? 'Marketable %'}
-                  </p>
-                  <p className="text-sm font-semibold text-emerald-600">
-                    {isLoading ? '–' : `${formatNum(marketablePercent, 1)}%`}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">
-                    {h?.wastePercent ?? 'Waste %'}
-                  </p>
-                  <p className="text-sm font-semibold text-red-600">
-                    {isLoading ? '–' : `${formatNum(wastePercent, 1)}%`}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">
-                    {h?.criticalAlerts ?? 'Critical Alerts'}
-                  </p>
-                  <p className="text-sm font-semibold text-amber-600">
-                    {isLoading ? '–' : criticalAlerts}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">
-                    {h?.daysActive ?? 'Days Active'}
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {isLoading ? '–' : daysActive}
-                  </p>
-                </div>
+
+              {/* Marketable vs waste */}
+              <div className="mt-2 space-y-1 border-t pt-2 text-xs">
+                <MetricRow
+                  label={h?.marketablePercent ?? 'Marketable %'}
+                  value={fmt(`${formatNum(marketablePercent, 1)}%`)}
+                  valueClassName="text-emerald-600"
+                />
+                <MetricRow
+                  label={h?.wastePercent ?? 'Waste %'}
+                  value={fmt(`${formatNum(wastePercent, 1)}%`)}
+                  valueClassName="text-red-600"
+                />
               </div>
+
+              {/* Averages */}
+              <div className="mt-2 space-y-1 border-t pt-2 text-xs">
+                <MetricRow
+                  label={h?.averageBrix ?? 'Avg Brix'}
+                  value={fmt(`${formatNum(averageBrix, 1)}°Bx`)}
+                />
+                <MetricRow
+                  label={h?.averageFruitWeight ?? 'Avg Fruit Weight'}
+                  value={fmt(`${formatNum(averageFruitWeight, 1)} g`)}
+                />
+              </div>
+
+              {/* Batch metadata: harvest amount, crop, days active */}
+              <p className="text-muted-foreground mt-2 border-t pt-2 text-xs">
+                {isLoading
+                  ? '–'
+                  : [
+                      acrossHarvests,
+                      batch.species?.trim(),
+                      `${daysActive} ${h?.daysActive ?? 'Days Active'}`,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+              </p>
               {!isLoading && harvestCount === 0 && (
-                <p className="text-muted-foreground mt-3 text-xs italic">
+                <p className="text-muted-foreground mt-1 text-xs italic">
                   {h?.noHarvestsInPeriod ?? 'No harvests in this period'}
                 </p>
               )}

@@ -56,7 +56,7 @@ export function HarvestBatchCollapsedTable({
           <TableHead>{h?.avgBrix ?? 'Avg Brix'}</TableHead>
           <TableHead>{h?.avgFruitWeight ?? 'Avg Fruit Weight'}</TableHead>
           <TableHead>{h?.yieldPerPlantShort ?? 'Yield/Plant'}</TableHead>
-          <TableHead>{h?.yieldPerRunningMeterShort ?? 'Yield/m'}</TableHead>
+          <TableHead>{h?.yieldPerRunningMeterShort ?? 'Yield/Running Meter'}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

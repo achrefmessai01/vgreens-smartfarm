@@ -545,8 +545,6 @@ export const ro = {
       marketableYield: 'Producție comercializabilă',
       wastePercent: 'Deșeuri %',
       kgTotal: 'kg total',
-      criticalAlerts: 'Alerte critice',
-      requiresAttention: 'Necesită atenție',
       daysActive: 'Zile active',
       sincePlanting: 'De la plantare',
       yieldOverTime: 'Producție în timp',
@@ -554,7 +552,7 @@ export const ro = {
       yieldPerRunningMeterUnit: 'Producție (kg/m liniar)',
       yieldPerPlant: 'Producție pe plantă',
       yieldPerPlantShort: 'Producție/Plantă',
-      yieldPerRunningMeterShort: 'Producție/m',
+      yieldPerRunningMeterShort: 'Producție/metru liniar',
       yieldPerRunningMeter: 'Producție pe metru liniar',
       yieldPerRunningMeterSubtitle: 'kg vandabile pe metru liniar',
       yieldPerRunningMeterNoData:

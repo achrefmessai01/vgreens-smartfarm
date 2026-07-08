@@ -547,8 +547,6 @@ export const el = {
       marketableYield: 'Εμπορεύσιμη απόδοση',
       wastePercent: 'Απόβλητα %',
       kgTotal: 'kg σύνολο',
-      criticalAlerts: 'Κρίσιμοι συναγερμοί',
-      requiresAttention: 'Απαιτεί προσοχή',
       daysActive: 'Ενεργές ημέρες',
       sincePlanting: 'Από τη φύτευση',
       yieldOverTime: 'Απόδοση στον χρόνο',
@@ -556,7 +554,7 @@ export const el = {
       yieldPerRunningMeterUnit: 'Απόδοση (kg/τρέχον m)',
       yieldPerPlant: 'Απόδοση ανά φυτό',
       yieldPerPlantShort: 'Απόδοση/Φυτό',
-      yieldPerRunningMeterShort: 'Απόδοση/m',
+      yieldPerRunningMeterShort: 'Απόδοση/τρέχον μέτρο',
       yieldPerRunningMeter: 'Απόδοση ανά τρέχον μέτρο',
       yieldPerRunningMeterSubtitle: 'Εμπορεύσιμα kg ανά τρέχον μέτρο',
       yieldPerRunningMeterNoData:

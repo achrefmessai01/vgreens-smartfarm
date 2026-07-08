@@ -540,8 +540,6 @@ export const pl = {
       marketableYield: 'Plon handlowy',
       wastePercent: 'Odpady %',
       kgTotal: 'kg łącznie',
-      criticalAlerts: 'Krytyczne alarmy',
-      requiresAttention: 'Wymaga uwagi',
       daysActive: 'Dni aktywności',
       sincePlanting: 'Od posadzenia',
       yieldOverTime: 'Plon w czasie',
@@ -549,7 +547,7 @@ export const pl = {
       yieldPerRunningMeterUnit: 'Plon (kg/mb)',
       yieldPerPlant: 'Plon na roślinę',
       yieldPerPlantShort: 'Plon/Roślina',
-      yieldPerRunningMeterShort: 'Plon/m',
+      yieldPerRunningMeterShort: 'Plon/metr bieżący',
       yieldPerRunningMeter: 'Plon na metr bieżący',
       yieldPerRunningMeterSubtitle: 'Sprzedażne kg na metr bieżący',
       yieldPerRunningMeterNoData:
