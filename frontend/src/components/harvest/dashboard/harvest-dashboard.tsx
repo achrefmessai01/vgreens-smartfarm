@@ -17,9 +17,7 @@ import { useSetTenantHarvestDashboardOrderMutation } from '@/generated/graphql';
 import { harvestsLoggedForLabel } from '@/lib/harvest-utils';
 import {
   AlertTriangle,
-  Check,
   LayoutDashboard,
-  Move,
   Package,
 } from 'lucide-react';
 import { DashboardChartsGrid } from './dashboard-charts-grid';
@@ -69,13 +67,12 @@ export function HarvestDashboard({
   const { batches, loading: batchesLoading } = useHarvestBatches();
 
   const { toast } = useToast();
-  const { isTenantAdmin } = useCurrentUser();
+  const { isTenantAdmin, isVGreensAdmin } = useCurrentUser();
   const { isVisible, allHidden, tenantId, hiddenSet } =
     useHarvestDashboardVisibility();
   const { order, applyOrder } = useHarvestDashboardOrder();
-  const canEditDashboard = isTenantAdmin && Boolean(tenantId);
+  const canEditDashboard = (isTenantAdmin || isVGreensAdmin) && Boolean(tenantId);
 
-  const [editLayout, setEditLayout] = React.useState(false);
   const [setOrderMutation] = useSetTenantHarvestDashboardOrderMutation();
 
   // Persist a full ordered id list (metrics + charts). Optimistic cache update
@@ -256,7 +253,7 @@ export function HarvestDashboard({
           data={data}
           isVisible={isVisible}
           applyOrder={applyOrder}
-          editMode={editLayout}
+          editMode={canEditDashboard}
           onReorder={handleReorderMetrics}
         />
         <YieldPredictionCard />
@@ -264,14 +261,12 @@ export function HarvestDashboard({
           data={data}
           isVisible={isVisible}
           applyOrder={applyOrder}
-          editMode={editLayout}
+          editMode={canEditDashboard}
           onReorder={handleReorderCharts}
         />
       </>
     );
   })();
-
-  const showEditControls = !compareMode && canEditDashboard && tenantId;
 
   return (
     <div className={className}>
@@ -300,31 +295,11 @@ export function HarvestDashboard({
               compareBatchIds={compareBatchIds}
               onCompareBatchesChange={setCompareBatchIds}
             />
-            {showEditControls && (
-              <>
-                <DashboardConfigMenu
-                  tenantId={tenantId}
-                  hiddenSet={hiddenSet}
-                />
-                <Button
-                  variant={editLayout ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-9 gap-2"
-                  onClick={() => setEditLayout((prev) => !prev)}
-                  aria-pressed={editLayout}
-                >
-                  {editLayout ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Move className="h-4 w-4" />
-                  )}
-                  <span className="text-xs font-medium">
-                    {editLayout
-                      ? (h?.configDoneLayout ?? 'Done')
-                      : (h?.configEditLayout ?? 'Edit layout')}
-                  </span>
-                </Button>
-              </>
+            {canEditDashboard && !compareMode && (
+              <DashboardConfigMenu
+                tenantId={tenantId!}
+                hiddenSet={hiddenSet}
+              />
             )}
           </div>
         </div>

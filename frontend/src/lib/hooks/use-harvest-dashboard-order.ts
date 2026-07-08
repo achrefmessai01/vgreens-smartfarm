@@ -1,8 +1,9 @@
 'use client';
 
 import * as React from 'react';
-import { useMeQuery } from '@/generated/graphql';
+import { useMeQuery, useTenantsQuery, UserRole } from '@/generated/graphql';
 import { useAuth } from '@clerk/nextjs';
+import { useTenantIdVariable } from '@/lib/contexts/selected-tenant-context';
 
 /**
  * Reorders an `{ id }`-keyed list to match a saved order. Items whose id is not
@@ -51,16 +52,38 @@ export function mergeVisibleOrder(
  * flat list of item ids (metrics + charts share one list); each grid filters to
  * its own ids, so cross-category interleaving is irrelevant. Empty = no custom
  * order, so grids fall back to their registry order.
+ * 
+ * For VGreens admins, uses the selected tenant from navbar context.
+ * For tenant users, uses their own tenant.
  */
 export function useHarvestDashboardOrder() {
   const { isSignedIn } = useAuth();
-  const { data, loading } = useMeQuery({
+  const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
     skip: !isSignedIn,
   });
 
-  const tenant = data?.me?.tenant ?? undefined;
-  const tenantId = tenant?.id;
+  const role = meData?.me?.role as UserRole | undefined;
+  const isVGreensAdmin = role === UserRole.VgreensAdmin;
+
+  const { data: tenantsData, loading: tenantsLoading } = useTenantsQuery({
+    fetchPolicy: 'cache-and-network',
+    skip: !isVGreensAdmin,
+  });
+
+  const selectedTenantId = useTenantIdVariable();
+  const userTenantId = meData?.me?.tenant?.id;
+  const tenantId = selectedTenantId ?? userTenantId;
+
+  const tenant = React.useMemo(() => {
+    if (!tenantId) return undefined;
+    
+    if (isVGreensAdmin) {
+      return tenantsData?.tenants?.find((t) => t.id === tenantId);
+    }
+    
+    return meData?.me?.tenant ?? undefined;
+  }, [tenantId, isVGreensAdmin, tenantsData?.tenants, meData?.me?.tenant]);
 
   const order = React.useMemo<string[]>(
     () => tenant?.settings?.harvestDashboardOrder ?? [],
@@ -72,5 +95,10 @@ export function useHarvestDashboardOrder() {
     [order],
   );
 
-  return { tenantId, order, applyOrder, loading };
+  return {
+    tenantId,
+    order,
+    applyOrder,
+    loading: meLoading || (isVGreensAdmin && tenantsLoading),
+  };
 }
