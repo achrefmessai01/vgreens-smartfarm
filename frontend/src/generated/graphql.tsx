@@ -974,6 +974,8 @@ export type Mutation = {
   resolveAlert: Alert;
   resolveErrorReport: ErrorReport;
   resolveSystemError: SystemError;
+  restoreBatch: Batch;
+  restoreHarvest: Harvest;
   runThresholdCheck: Scalars['Boolean']['output'];
   setMyFarmOverviewTimeRange: User;
   setMyLanguage: User;
@@ -1220,6 +1222,18 @@ export type MutationResolveSystemErrorArgs = {
 };
 
 
+export type MutationRestoreBatchArgs = {
+  id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationRestoreHarvestArgs = {
+  id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type MutationRunThresholdCheckArgs = {
   bucketName: Scalars['String']['input'];
   tenantId: Scalars['ID']['input'];
@@ -1408,6 +1422,8 @@ export type Query = {
   cameraLivestreamStreamUrl: CameraLivestreamStream;
   crates: Array<Crate>;
   crops: Array<Crop>;
+  deletedBatches: Array<Batch>;
+  deletedHarvests: Array<Harvest>;
   deviceActivitySeries: Array<DeviceActivityPoint>;
   deviceStatuses: Array<DeviceStatus>;
   errorReport?: Maybe<ErrorReport>;
@@ -1504,6 +1520,16 @@ export type QueryCratesArgs = {
 
 export type QueryCropsArgs = {
   greenhouseId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryDeletedBatchesArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryDeletedHarvestsArgs = {
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2134,6 +2160,22 @@ export type GetUnresolvedErrorReportsCountQueryVariables = Exact<{ [key: string]
 
 export type GetUnresolvedErrorReportsCountQuery = { __typename?: 'Query', unresolvedErrorReportsCount: number };
 
+export type RestoreBatchMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type RestoreBatchMutation = { __typename?: 'Mutation', restoreBatch: { __typename?: 'Batch', id: string, tenantId: string, name?: string | null, batchNumber?: string | null, deletedAt?: any | null } };
+
+export type RestoreHarvestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type RestoreHarvestMutation = { __typename?: 'Mutation', restoreHarvest: { __typename?: 'Harvest', id: string, tenantId: string, batchId: string, date: any, deletedAt?: any | null } };
+
 export type BatchMutationFieldsFragment = { __typename?: 'Batch', id: string, tenantId: string, greenhouseId?: string | null, cropId: string, varietyId?: string | null, name?: string | null, batchNumber?: string | null, status: BatchStatus, plantingDate: any, numberOfRows: number, rowLength: number, runningMeter: number, rowSpacing: number, startRow?: number | null, endRow?: number | null, plantsPerMeter: number, lostPlants: number, cultivationArea: number, totalPlants: number, avgHeadsPerPlant?: number | null, slabLength?: number | null, headsPerSlab?: number | null, crateWeight?: number | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null };
 
 export type CreateBatchMutationVariables = Exact<{
@@ -2519,6 +2561,24 @@ export type ResolveSystemErrorMutationVariables = Exact<{
 
 
 export type ResolveSystemErrorMutation = { __typename?: 'Mutation', resolveSystemError: { __typename?: 'SystemError', id: string, isResolved: boolean, resolvedAt?: any | null } };
+
+export type DeletedBatchFieldsFragment = { __typename?: 'Batch', id: string, tenantId: string, name?: string | null, batchNumber?: string | null, plantingDate: any, deletedAt?: any | null, deletedById?: string | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, deletedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null };
+
+export type DeletedHarvestFieldsFragment = { __typename?: 'Harvest', id: string, tenantId: string, batchId: string, date: any, deletedAt?: any | null, deletedById?: string | null, batch?: { __typename?: 'Batch', id: string, name?: string | null, batchNumber?: string | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null } | null, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, deletedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null };
+
+export type DeletedBatchesQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DeletedBatchesQuery = { __typename?: 'Query', deletedBatches: Array<{ __typename?: 'Batch', id: string, tenantId: string, name?: string | null, batchNumber?: string | null, plantingDate: any, deletedAt?: any | null, deletedById?: string | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null, variety?: { __typename?: 'Variety', id: string, name: string } | null, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, deletedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
+
+export type DeletedHarvestsQueryVariables = Exact<{
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DeletedHarvestsQuery = { __typename?: 'Query', deletedHarvests: Array<{ __typename?: 'Harvest', id: string, tenantId: string, batchId: string, date: any, deletedAt?: any | null, deletedById?: string | null, batch?: { __typename?: 'Batch', id: string, name?: string | null, batchNumber?: string | null, greenhouse?: { __typename?: 'Greenhouse', id: string, name: string } | null, crop?: { __typename?: 'Crop', id: string, name: string } | null } | null, tenant?: { __typename?: 'Tenant', id: string, name: string } | null, deletedBy?: { __typename?: 'User', id: string, firstName?: string | null, lastName?: string | null, email?: string | null } | null }> };
 
 export type AlertsQueryVariables = Exact<{
   filter?: InputMaybe<AlertsFilterInput>;
@@ -3149,6 +3209,72 @@ export const HarvestMutationFieldsFragmentDoc = gql`
   }
 }
     `;
+export const DeletedBatchFieldsFragmentDoc = gql`
+    fragment DeletedBatchFields on Batch {
+  id
+  tenantId
+  name
+  batchNumber
+  plantingDate
+  deletedAt
+  deletedById
+  greenhouse {
+    id
+    name
+  }
+  crop {
+    id
+    name
+  }
+  variety {
+    id
+    name
+  }
+  tenant {
+    id
+    name
+  }
+  deletedBy {
+    id
+    firstName
+    lastName
+    email
+  }
+}
+    `;
+export const DeletedHarvestFieldsFragmentDoc = gql`
+    fragment DeletedHarvestFields on Harvest {
+  id
+  tenantId
+  batchId
+  date
+  deletedAt
+  deletedById
+  batch {
+    id
+    name
+    batchNumber
+    greenhouse {
+      id
+      name
+    }
+    crop {
+      id
+      name
+    }
+  }
+  tenant {
+    id
+    name
+  }
+  deletedBy {
+    id
+    firstName
+    lastName
+    email
+  }
+}
+    `;
 export const BatchFieldsFragmentDoc = gql`
     fragment BatchFields on Batch {
   id
@@ -3590,6 +3716,82 @@ export type GetUnresolvedErrorReportsCountQueryHookResult = ReturnType<typeof us
 export type GetUnresolvedErrorReportsCountLazyQueryHookResult = ReturnType<typeof useGetUnresolvedErrorReportsCountLazyQuery>;
 export type GetUnresolvedErrorReportsCountSuspenseQueryHookResult = ReturnType<typeof useGetUnresolvedErrorReportsCountSuspenseQuery>;
 export type GetUnresolvedErrorReportsCountQueryResult = Apollo.QueryResult<GetUnresolvedErrorReportsCountQuery, GetUnresolvedErrorReportsCountQueryVariables>;
+export const RestoreBatchDocument = gql`
+    mutation RestoreBatch($id: ID!, $tenantId: ID) {
+  restoreBatch(id: $id, tenantId: $tenantId) {
+    id
+    tenantId
+    name
+    batchNumber
+    deletedAt
+  }
+}
+    `;
+export type RestoreBatchMutationFn = Apollo.MutationFunction<RestoreBatchMutation, RestoreBatchMutationVariables>;
+
+/**
+ * __useRestoreBatchMutation__
+ *
+ * To run a mutation, you first call `useRestoreBatchMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRestoreBatchMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [restoreBatchMutation, { data, loading, error }] = useRestoreBatchMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useRestoreBatchMutation(baseOptions?: Apollo.MutationHookOptions<RestoreBatchMutation, RestoreBatchMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RestoreBatchMutation, RestoreBatchMutationVariables>(RestoreBatchDocument, options);
+      }
+export type RestoreBatchMutationHookResult = ReturnType<typeof useRestoreBatchMutation>;
+export type RestoreBatchMutationResult = Apollo.MutationResult<RestoreBatchMutation>;
+export type RestoreBatchMutationOptions = Apollo.BaseMutationOptions<RestoreBatchMutation, RestoreBatchMutationVariables>;
+export const RestoreHarvestDocument = gql`
+    mutation RestoreHarvest($id: ID!, $tenantId: ID) {
+  restoreHarvest(id: $id, tenantId: $tenantId) {
+    id
+    tenantId
+    batchId
+    date
+    deletedAt
+  }
+}
+    `;
+export type RestoreHarvestMutationFn = Apollo.MutationFunction<RestoreHarvestMutation, RestoreHarvestMutationVariables>;
+
+/**
+ * __useRestoreHarvestMutation__
+ *
+ * To run a mutation, you first call `useRestoreHarvestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRestoreHarvestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [restoreHarvestMutation, { data, loading, error }] = useRestoreHarvestMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useRestoreHarvestMutation(baseOptions?: Apollo.MutationHookOptions<RestoreHarvestMutation, RestoreHarvestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RestoreHarvestMutation, RestoreHarvestMutationVariables>(RestoreHarvestDocument, options);
+      }
+export type RestoreHarvestMutationHookResult = ReturnType<typeof useRestoreHarvestMutation>;
+export type RestoreHarvestMutationResult = Apollo.MutationResult<RestoreHarvestMutation>;
+export type RestoreHarvestMutationOptions = Apollo.BaseMutationOptions<RestoreHarvestMutation, RestoreHarvestMutationVariables>;
 export const CreateBatchDocument = gql`
     mutation CreateBatch($input: CreateBatchInput!) {
   createBatch(input: $input) {
@@ -5483,6 +5685,92 @@ export function useResolveSystemErrorMutation(baseOptions?: Apollo.MutationHookO
 export type ResolveSystemErrorMutationHookResult = ReturnType<typeof useResolveSystemErrorMutation>;
 export type ResolveSystemErrorMutationResult = Apollo.MutationResult<ResolveSystemErrorMutation>;
 export type ResolveSystemErrorMutationOptions = Apollo.BaseMutationOptions<ResolveSystemErrorMutation, ResolveSystemErrorMutationVariables>;
+export const DeletedBatchesDocument = gql`
+    query DeletedBatches($tenantId: ID) {
+  deletedBatches(tenantId: $tenantId) {
+    ...DeletedBatchFields
+  }
+}
+    ${DeletedBatchFieldsFragmentDoc}`;
+
+/**
+ * __useDeletedBatchesQuery__
+ *
+ * To run a query within a React component, call `useDeletedBatchesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeletedBatchesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeletedBatchesQuery({
+ *   variables: {
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useDeletedBatchesQuery(baseOptions?: Apollo.QueryHookOptions<DeletedBatchesQuery, DeletedBatchesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeletedBatchesQuery, DeletedBatchesQueryVariables>(DeletedBatchesDocument, options);
+      }
+export function useDeletedBatchesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeletedBatchesQuery, DeletedBatchesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeletedBatchesQuery, DeletedBatchesQueryVariables>(DeletedBatchesDocument, options);
+        }
+// @ts-ignore
+export function useDeletedBatchesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeletedBatchesQuery, DeletedBatchesQueryVariables>): Apollo.UseSuspenseQueryResult<DeletedBatchesQuery, DeletedBatchesQueryVariables>;
+export function useDeletedBatchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DeletedBatchesQuery, DeletedBatchesQueryVariables>): Apollo.UseSuspenseQueryResult<DeletedBatchesQuery | undefined, DeletedBatchesQueryVariables>;
+export function useDeletedBatchesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DeletedBatchesQuery, DeletedBatchesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeletedBatchesQuery, DeletedBatchesQueryVariables>(DeletedBatchesDocument, options);
+        }
+export type DeletedBatchesQueryHookResult = ReturnType<typeof useDeletedBatchesQuery>;
+export type DeletedBatchesLazyQueryHookResult = ReturnType<typeof useDeletedBatchesLazyQuery>;
+export type DeletedBatchesSuspenseQueryHookResult = ReturnType<typeof useDeletedBatchesSuspenseQuery>;
+export type DeletedBatchesQueryResult = Apollo.QueryResult<DeletedBatchesQuery, DeletedBatchesQueryVariables>;
+export const DeletedHarvestsDocument = gql`
+    query DeletedHarvests($tenantId: ID) {
+  deletedHarvests(tenantId: $tenantId) {
+    ...DeletedHarvestFields
+  }
+}
+    ${DeletedHarvestFieldsFragmentDoc}`;
+
+/**
+ * __useDeletedHarvestsQuery__
+ *
+ * To run a query within a React component, call `useDeletedHarvestsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDeletedHarvestsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDeletedHarvestsQuery({
+ *   variables: {
+ *      tenantId: // value for 'tenantId'
+ *   },
+ * });
+ */
+export function useDeletedHarvestsQuery(baseOptions?: Apollo.QueryHookOptions<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>(DeletedHarvestsDocument, options);
+      }
+export function useDeletedHarvestsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>(DeletedHarvestsDocument, options);
+        }
+// @ts-ignore
+export function useDeletedHarvestsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>): Apollo.UseSuspenseQueryResult<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>;
+export function useDeletedHarvestsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>): Apollo.UseSuspenseQueryResult<DeletedHarvestsQuery | undefined, DeletedHarvestsQueryVariables>;
+export function useDeletedHarvestsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>(DeletedHarvestsDocument, options);
+        }
+export type DeletedHarvestsQueryHookResult = ReturnType<typeof useDeletedHarvestsQuery>;
+export type DeletedHarvestsLazyQueryHookResult = ReturnType<typeof useDeletedHarvestsLazyQuery>;
+export type DeletedHarvestsSuspenseQueryHookResult = ReturnType<typeof useDeletedHarvestsSuspenseQuery>;
+export type DeletedHarvestsQueryResult = Apollo.QueryResult<DeletedHarvestsQuery, DeletedHarvestsQueryVariables>;
 export const AlertsDocument = gql`
     query Alerts($filter: AlertsFilterInput, $tenantId: ID) {
   alerts(filter: $filter, tenantId: $tenantId) {
