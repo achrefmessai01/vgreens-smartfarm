@@ -9,6 +9,7 @@ import {
   Flag,
   Settings,
   Sprout,
+  Trash2,
   Users,
   Video,
   Zap,
@@ -48,6 +49,11 @@ export const getAdminNavItems = (t: Translations): NavItem[] => [
     label: t.navigation.systemErrors,
     href: '/admin/system-errors',
     icon: Zap,
+  },
+  {
+    label: t.navigation.adminHistory ?? 'History',
+    href: '/admin/history',
+    icon: Trash2,
   },
   {
     label: t.navigation.settings,

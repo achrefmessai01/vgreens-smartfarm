@@ -6,7 +6,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { BaseService } from '@common/services';
 import { Crop } from '@modules/crop/entities/crop.entity';
 import { Variety } from '@modules/variety/entities/variety.entity';
@@ -416,5 +416,44 @@ export class BatchService extends BaseService<Batch> {
     batch.deletedById = deletedById;
     await this.batchRepository.save(batch);
     await this.batchRepository.softDelete(id);
+  }
+
+  async findDeletedBatches(tenantId?: string): Promise<Batch[]> {
+    const qb = this.batchRepository
+      .createQueryBuilder('batch')
+      .withDeleted()
+      .leftJoinAndSelect('batch.tenant', 'tenant')
+      .leftJoinAndSelect('batch.greenhouse', 'greenhouse')
+      .leftJoinAndSelect('batch.crop', 'crop')
+      .leftJoinAndSelect('batch.variety', 'variety')
+      .leftJoinAndSelect('batch.deletedBy', 'deletedBy')
+      .where('batch.deletedAt IS NOT NULL');
+
+    if (tenantId !== undefined) {
+      qb.andWhere('batch.tenantId = :tenantId', { tenantId });
+    }
+
+    return qb.orderBy('batch.deletedAt', 'DESC').getMany();
+  }
+
+  // Restoring a batch also restores its cascade-deleted harvests.
+  async restoreBatch(id: string, tenantId?: string): Promise<Batch> {
+    const qb = this.batchRepository
+      .createQueryBuilder('batch')
+      .withDeleted()
+      .where('batch.id = :id', { id })
+      .andWhere('batch.deletedAt IS NOT NULL');
+    if (tenantId !== undefined) {
+      qb.andWhere('batch.tenantId = :tenantId', { tenantId });
+    }
+    const batch = await qb.getOne();
+    if (!batch) {
+      throw new NotFoundException(`Deleted batch with ID ${id} not found`);
+    }
+
+    await this.harvestRepository.restore({ batchId: id, deletedAt: Not(IsNull()) });
+    await this.batchRepository.restore(id);
+
+    return this.findOneById(id, tenantId);
   }
 }

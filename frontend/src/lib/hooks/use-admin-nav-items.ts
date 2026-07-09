@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Flag,
   Settings,
+  Trash2,
   Users,
   Zap,
 } from 'lucide-react';
@@ -66,6 +67,12 @@ export function useAdminNavItems(): AdminNavItem[] {
         label: t.navigation.systemErrors,
         href: '/admin/system-errors',
         icon: Zap,
+        group: 'system',
+      },
+      {
+        label: t.navigation.adminHistory ?? 'History',
+        href: '/admin/history',
+        icon: Trash2,
         group: 'system',
       },
       {
